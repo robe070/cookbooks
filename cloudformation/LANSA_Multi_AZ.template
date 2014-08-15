@@ -340,8 +340,7 @@
                                  "Password      = ", { "Ref" : "DBPassword" }, "\n",
                                  "Database      = ", { "Ref" : "DBName" }, "\n",
                                  "OPTION        =\n",
-                                 "SOCKET        =\n",
-                                 "EOF\n"
+                                 "SOCKET        =\n"
                               ]]},
                             "mode"  : "000644",
                             "owner" : "root",
