@@ -1,0 +1,2 @@
+# CloudFormation templates must use LF
+*.template text eol=lf
