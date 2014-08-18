@@ -18,13 +18,40 @@ if ( !$Initialised )
     $Initialised = 1;
 }
 
-`adduser $option{u} -g lansa` or `/opt/aws/bin/cfn-signal -e 1 '$option{w}'` and die "Error adding user\n";
-#"echo ", { "Ref" : "DBPassword" }, " | passwd --stdin ", { "Ref" : "DBUsername" },"\n",
+#`adduser $option{u} -g lansa` or `/opt/aws/bin/cfn-signal -e 1 -r "Error adding user\n" '$option{w}'` and die "Error adding user\n";
+#`echo $option{p} | passwd --stdin $option{u}` or `/opt/aws/bin/cfn-signal -e 1 -r "Error changing password\n"'$option{w}'` and die "Error changing password\n";
 #"# Clone the LANSA repository\n",
 #"git clone git://github.com/robe070/lansalinux /opt/lansa\n",
 #"# Clone the Auto Pull script\n",
 #"git clone git://github.com/lansalpc/github-auto-pull.git /var/www/cgi-bin\n",
+#"/opt/aws/bin/cfn-signal -e $? '", { "Ref" : "WaitHandle" }, "'\n"
+signal( 0, "Successfully ran script\n");
 
+sub signal
+# Parm 0 - error code
+# Parm 1 - message text to send
+{
+    my( $errno, $message ) = @_;
+    if ( !defined $errno) {
+        $errno = 0;
+    }
+    
+    if (!defined $message)
+    {
+        $message = "Success\n";
+        if ($errno > 0 ) {
+            $message = "Failed\n";
+        }
+    }
+    
+    my( $errstate) = "true";
+    if ( $errno > 0 ) {
+        $errstate = "false";
+    }
+    
+    print $message;
+    `/opt/aws/bin/cfn-signal -e $errstate -r $message "$option{w}"`;
+}
 
 sub Init
 {
@@ -33,7 +60,7 @@ sub Init
     if (!getopts("d:p:r:s:u:w:", \%option))
     {
        Usage();
-       `/opt/aws/bin/cfn-signal -e 1 '$option{w}'`;
+       signal();
        exit;
     }
     
