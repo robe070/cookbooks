@@ -2,6 +2,9 @@
 use strict;
 use Getopt::Std;
 use File::Path;
+# use Devel::Trace;
+
+$Devel::Trace::TRACE = 0;
 
 # -----------------------------------------------------------------------------
 # Simple subs to make it clear when we're testing for BOOL values
@@ -18,13 +21,31 @@ if ( !$Initialised )
     $Initialised = 1;
 }
 
-#`adduser $option{u} -g lansa` or `/opt/aws/bin/cfn-signal -e 1 -r "Error adding user\n" '$option{w}'` and die "Error adding user\n";
-#`echo $option{p} | passwd --stdin $option{u}` or `/opt/aws/bin/cfn-signal -e 1 -r "Error changing password\n"'$option{w}'` and die "Error changing password\n";
-#"# Clone the LANSA repository\n",
-#"git clone git://github.com/robe070/lansalinux /opt/lansa\n",
-#"# Clone the Auto Pull script\n",
-#"git clone git://github.com/lansalpc/github-auto-pull.git /var/www/cgi-bin\n",
-#"/opt/aws/bin/cfn-signal -e $? '", { "Ref" : "WaitHandle" }, "'\n"
+$Devel::Trace::TRACE = 1;
+
+`adduser $option{u} -g lansa`;
+if ( $? ){ signal( $?, "Error adding user\n"); }
+
+`echo $option{p} | passwd --stdin $option{u}`;
+if ( $? ){ signal( $?, "Error changing password\n"); }
+
+if ( $option{t} eq "WebServer") {
+    print "Cloning the LANSA Application repository...";
+    `git clone -q git://github.com/robe070/lansalinux /opt/lansa`;
+    if ( $? ){ signal( $?, "Error cloning LANSA repository\n"); }
+    print "done\n";
+    
+    print "Cloning the auto pull script...";
+    `git clone -q git://github.com/lansalpc/github-auto-pull.git /var/www/cgi-bin\n`;
+    if ( $? ){ signal( $?, "Error cloning Auto Pull script\n"); }
+    print "done\n";
+} else {
+    print "Cloning the LANSA repository...";
+    `git clone -q git://github.com/lansalinux/lansalinux /opt/lansa`;
+    if ( $? ){ signal( $?, "Error cloning LANSA repository\n"); }
+    print "done\n";
+}
+
 signal( 0, "Successfully ran script\n");
 
 sub signal
@@ -44,20 +65,16 @@ sub signal
         }
     }
     
-    my( $errstate) = "true";
-    if ( $errno > 0 ) {
-        $errstate = "false";
-    }
-    
-    print $message;
-    `/opt/aws/bin/cfn-signal -e $errstate -r $message "$option{w}"`;
+    print "Error = $errno, $message";
+    `/opt/aws/bin/cfn-signal -e $errno -r \"$message\" -d \"$message\" \"$option{w}\"`;
+    die if ( $errno );
 }
 
 sub Init
 {
     # Allow -d, -p, etc. If any other switches, display usage and exit.
     
-    if (!getopts("d:p:r:s:u:w:", \%option))
+    if (!getopts("d:p:r:s:t:u:w:", \%option))
     {
        Usage();
        signal();
@@ -68,11 +85,12 @@ sub Init
     print "-p = $option{p}\n" if defined $option{p};
     print "-r = $option{r}\n" if defined $option{r};
     print "-s = $option{s}\n" if defined $option{s};
+    print "-t = $option{t}\n" if defined $option{t};
     print "-u = $option{u}\n" if defined $option{u};
-    print "-w = $option{w}\n" if defined $option{w};
+    print "-w = \"$option{w}\"\n" if defined $option{w};
     
     # Mandatory Parms
-    if (!(defined $option{d} && defined $option{p} && defined $option{s} && defined $option{s} && defined $option{u} && defined $option{w})) {
+    if (!(defined $option{d} && defined $option{p} && defined $option{s} && defined $option{s} && defined $option{t} && defined $option{u} && defined $option{w})) {
        Usage();
        exit;        
     }
@@ -104,6 +122,7 @@ Database Name       -d      Mandatory
 Password            -p      Mandatory
 Region              -r      Mandatory
 Stack Id            -s      Mandatory
+Type                -t      Mandatory
 User Name           -u      Mandatory
 Wait Handle         -w      Mandatory.
 
