@@ -41,7 +41,7 @@ if ( $option{t} eq "WebServer") {
     print "done\n";
 } else {
     print "Cloning the LANSA repository...";
-    `git clone -q git://github.com/lansalinux/lansalinux /opt/lansa`;
+    `git clone -q git://github.com/lansalpc/lansalinux /opt/lansa`;
     if ( $? ){ signal( $?, "Error cloning LANSA repository\n"); }
     print "done\n";
 }
@@ -66,7 +66,7 @@ sub signal
     }
     
     print "Error = $errno, $message";
-    `/opt/aws/bin/cfn-signal -e $errno -r \"$message\" -d \"$message\" \"$option{w}\"`;
+    `/opt/aws/bin/cfn-signal -e $errno -r \"$message\" -d \"$option{t}: $message\" \"$option{w}\"`;
     die if ( $errno );
 }
 

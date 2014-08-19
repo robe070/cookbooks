@@ -7,7 +7,54 @@
             "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances (case sensitive)",
             "Type"        : "String"
         },
-        "InstanceType" : {
+        "CompileInstanceType" : {
+            "Description" : "Compiler EC2 instance type",
+            "Type"        : "String",
+            "Default"     : "m3.medium",
+            "AllowedValues" : [
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "hs1.8xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "cc1.4xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge",
+                "t1.micro"
+            ],
+            "ConstraintDescription" : "Must be a valid EC2 instance type."
+        },
+        "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type",
             "Type"        : "String",
             "Default"     : "m3.medium",
@@ -218,7 +265,7 @@
             },
             "ap-southeast-2" : {
                 "PV64" : "ami-bd990e87",
-                "HVM64" : "NOT_YET_SUPPORTED"
+                "HVM64" : "ami-b5990e8f"
             },
             "ap-northeast-1" : {
                 "PV64" : "ami-0a44f00b",
@@ -256,7 +303,8 @@
              "UserName" : {"Ref": "CfnUser"}
            }
          },
-         "ElasticLoadBalancer" : {
+
+         "CompileELB"          : {
             "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
             "Metadata" : {
                 "Comment1" : "Configure the Load Balancer with a simple health check and cookie-based stickiness",
@@ -293,6 +341,193 @@
                 }
             }
         },
+         "CompileGroup"        : {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+            "Properties" : {
+                "AvailabilityZones" : {
+                    "Fn::GetAZs" : ""
+                },
+                "LaunchConfigurationName" : {
+                    "Ref" : "LaunchCompile"
+                },
+                "MinSize"                 : "1",
+                "MaxSize"                 : "1",
+                "DesiredCapacity"         : "1",
+                "LoadBalancerNames"       : [ { "Ref" : "CompileELB" } ],
+                "Tags" : [ {
+                        "Key" : "Name",
+                        "Value" : "Compile Instance",
+                        "PropagateAtLaunch" : "true"
+                     } ]
+            }
+         },
+         "LaunchCompile"       : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata" : {
+                "AWS::CloudFormation::Init" : {
+                    "config" : {
+                        "packages" : {
+                            "yum" : {
+                                "httpd" : [],
+                                "git"   : [],
+                                "php"   : [],
+                                "mysql-connector-odbc.x86_64" : []
+                            }
+                        },
+                        "groups"  : {
+                           "lansa" : {}
+                        },
+
+                        "sources"  : {
+                        },
+
+                        "files"    : {
+                          "/etc/odbc.ini" : {
+                            "content" : { "Fn::Join" : ["", [
+                                 "[myodbc]\n",
+                                 "Driver         = MySQL\n",
+                                 "Description  = Connector/ODBC 3.51 Driver DSN\n",
+                                 "SERVER      = ", { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] }, "\n",
+                                 "PORT          = 3306\n",
+                                 "USER          = ", { "Ref" : "DBUsername" }, "\n",
+                                 "Password      = ", { "Ref" : "DBPassword" }, "\n",
+                                 "Database      = ", { "Ref" : "DBName" }, "\n",
+                                 "OPTION        =\n",
+                                 "SOCKET        =\n"
+                              ]]},
+                            "mode"  : "000644",
+                            "owner" : "root",
+                            "group" : "root"
+                          },
+		                    "/etc/lansa/userdata.pl" : { 
+		                     "source" : { "Fn::Join" : ["", ["https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/userdata.pl"]]},
+                            "mode"   : "000777", 
+		                      "owner"  : "root",
+		                      "group"  : "root",
+	                         "authentication" : "S3AccessCreds"		                    
+                          }
+                        },
+                        "commands"  : {
+                        },
+                        "services" : {
+                            "sysvinit" : {
+                                "httpd"    : { "enabled" : "true",  "ensureRunning" : "true" },
+                                "sendmail" : { "enabled" : "false", "ensureRunning" : "false" }
+                            }
+                        }
+                    }
+                },
+
+               "AWS::CloudFormation::Authentication" : {
+                    "S3AccessCreds" : {
+		               "type" : "S3",
+		               "accessKeyId" : { "Ref" : "HostKeys" },
+		               "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
+		               "buckets" : [ "lansa" ]
+                     }
+               }
+            },
+            "Properties" : {
+                "ImageId" : {
+                    "Fn::FindInMap" : [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref" : "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap" : [
+                                "AWSInstanceType2Arch",
+                                {
+                                    "Ref" : "CompileInstanceType"
+                                },
+                                "Arch"
+                            ]
+                        }
+                    ]
+                },
+                "InstanceType" : {
+                    "Ref" : "CompileInstanceType"
+                },
+                "SecurityGroups" : [
+                    {
+                        "Ref" : "CompileSecurityGroup"
+                    }
+                ],
+                "KeyName"        : {
+                    "Ref" : "KeyName"
+                },
+                "UserData"       : {
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                "#!/bin/bash -v\n",
+                                "yum update -y aws-cfn-bootstrap\n",
+                                "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" },
+                                " -r LaunchCompile ",
+                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                                "perl /etc/lansa/userdata.pl",
+                                    " -d ", { "Ref" : "DBName" },
+                                    " -p ", { "Ref" : "DBPassword" },
+                                    " -r ", { "Ref" : "AWS::Region" },
+                                    " -s ", { "Ref" : "AWS::StackId" },
+                                    " -t ", "Compile",
+                                    " -u ", { "Ref" : "DBUsername" },
+                                    " -w \"", { "Ref" : "CompileWaitHandle" }, "\"\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+         "CompileWaitHandle"          : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle"
+        },
+         "CompileWaitCondition"       : {
+            "Type" : "AWS::CloudFormation::WaitCondition",
+            "DependsOn" : "CompileGroup",
+            "Properties" : {
+                "Handle"   : { "Ref" : "CompileWaitHandle" },
+                "Timeout"  : "3000",
+                "Count"    : 1
+            }
+        },
+
+         "WebServerELB"        : {
+            "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Metadata" : {
+                "Comment1" : "Configure the Load Balancer with a simple health check and cookie-based stickiness",
+                "Comment2" : "Use install path for healthcheck to avoid redirects. Refer to LANSA report to place the right tag here for health check - ELB healthcheck does not handle 302 return codes"
+            },
+            "Properties" : {
+                "AvailabilityZones" : {
+                    "Fn::GetAZs" : ""
+                },
+                "LBCookieStickinessPolicy" : [
+                    {
+                        "PolicyName" : "CookieBasedPolicy",
+                        "CookieExpirationPeriod" : "600"
+                    }
+                ],
+                "Listeners"                : [
+                    {
+                        "LoadBalancerPort" : "80",
+                        "InstancePort"     : "80",
+                        "Protocol"         : "HTTP",
+                        "PolicyNames"      : [ "CookieBasedPolicy" ]
+                    }
+                ],
+                "HealthCheck"              : {
+                    "Target" : "HTTP:80/cgi-bin/lansaweb?about",
+                    "HealthyThreshold" : "3",
+                    "UnhealthyThreshold" : "5",
+                    "Interval"           : "90",
+                    "Timeout"            : {
+                        "Ref" : "ELBTimeout"
+                    }
+                }
+            }
+         },
          "WebServerGroup"      : {
             "Type" : "AWS::AutoScaling::AutoScalingGroup",
             "Properties" : {
@@ -300,21 +535,23 @@
                     "Fn::GetAZs" : ""
                 },
                 "LaunchConfigurationName" : {
-                    "Ref" : "LaunchConfig"
+                    "Ref" : "LaunchWebServer"
                 },
                 "MinSize"                 : "1",
                 "MaxSize"                 : "50",
                 "DesiredCapacity"         : {
                     "Ref" : "WebServerCapacity"
                 },
-                "LoadBalancerNames"       : [
-                    {
-                        "Ref" : "ElasticLoadBalancer"
-                    }
-                ]
+                "LoadBalancerNames"       : [ { "Ref" : "WebServerELB" } ],
+                "Tags" : [ {
+                        "Key" : "Name",
+                        "Value" : "Web Server Instance",
+                        "PropagateAtLaunch" : "true"
+                     } ]
+
             }
         },
-         "LaunchConfig"        : {
+         "LaunchWebServer"     : {
             "Type" : "AWS::AutoScaling::LaunchConfiguration",
             "Metadata" : {
                 "AWS::CloudFormation::Init" : {
@@ -400,7 +637,7 @@
                             "Fn::FindInMap" : [
                                 "AWSInstanceType2Arch",
                                 {
-                                    "Ref" : "InstanceType"
+                                    "Ref" : "WebServerInstanceType"
                                 },
                                 "Arch"
                             ]
@@ -408,7 +645,7 @@
                     ]
                 },
                 "InstanceType" : {
-                    "Ref" : "InstanceType"
+                    "Ref" : "WebServerInstanceType"
                 },
                 "SecurityGroups" : [
                     {
@@ -426,7 +663,7 @@
                                 "#!/bin/bash -v\n",
                                 "yum update -y aws-cfn-bootstrap\n",
                                 "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" },
-                                " -r LaunchConfig ",
+                                " -r LaunchWebServer ",
                                 "         --region ", { "Ref" : "AWS::Region" }, "\n",
                                 "perl /etc/lansa/userdata.pl",
                                     " -d ", { "Ref" : "DBName" },
@@ -441,7 +678,7 @@
                     }
                 }
             }
-        },
+         },
          "WaitHandle"          : {
             "Type" : "AWS::CloudFormation::WaitConditionHandle"
         },
@@ -449,12 +686,12 @@
             "Type" : "AWS::CloudFormation::WaitCondition",
             "DependsOn" : "WebServerGroup",
             "Properties" : {
-                "Handle" : {
-                    "Ref" : "WaitHandle"
-                },
-                "Timeout" : "3000"
+                "Handle"   : { "Ref" : "WaitHandle" },
+                "Timeout"  : "3000",
+                "Count"    : { "Ref" : "WebServerCapacity" }
             }
         },
+
          "DBInstance"          : {
             "Type" : "AWS::RDS::DBInstance",
             "Properties" : {
@@ -501,6 +738,39 @@
                 "GroupDescription"       : "Frontend Access"
             }
         },
+         "CompileSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Enable HTTP access via port 80 locked down to the load balancer + SSH access",
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "80",
+                        "ToPort"     : "80",
+                        "SourceSecurityGroupOwnerId" : {
+                            "Fn::GetAtt" : [
+                                "CompileELB",
+                                "SourceSecurityGroup.OwnerAlias"
+                            ]
+                        },
+                        "SourceSecurityGroupName"    : {
+                            "Fn::GetAtt" : [
+                                "CompileELB",
+                                "SourceSecurityGroup.GroupName"
+                            ]
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "22",
+                        "ToPort"     : "22",
+                        "CidrIp"     : {
+                            "Ref" : "SSHLocation"
+                        }
+                    }
+                ]
+            }
+        },
          "WebServerSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
@@ -512,13 +782,13 @@
                         "ToPort"     : "80",
                         "SourceSecurityGroupOwnerId" : {
                             "Fn::GetAtt" : [
-                                "ElasticLoadBalancer",
+                                "WebServerELB",
                                 "SourceSecurityGroup.OwnerAlias"
                             ]
                         },
                         "SourceSecurityGroupName"    : {
                             "Fn::GetAtt" : [
-                                "ElasticLoadBalancer",
+                                "WebServerELB",
                                 "SourceSecurityGroup.GroupName"
                             ]
                         }
@@ -537,11 +807,19 @@
     },
     "Outputs"                  : {
          "WebsiteURL" : {
-            "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]  } ] ] },
-            "Description" : "LANSA Website"
+            "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },
+            "Description" : "LANSA App Website"
         },
-         "ApplicationData" : {
+         "CompileWebsiteURL" : {
+            "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "CompileELB", "DNSName" ]  } ] ] },
+            "Description" : "LANSA Compile Website"
+        },
+         "WebServerResult" : {
             "Value" : { "Fn::GetAtt" : [ "WaitCondition", "Data" ]},
+            "Description" : "The data passed back as part of signalling the WaitCondition."
+        },
+         "CompileResult" : {
+            "Value" : { "Fn::GetAtt" : [ "CompileWaitCondition", "Data" ]},
             "Description" : "The data passed back as part of signalling the WaitCondition."
         }
     }
