@@ -66,6 +66,9 @@ sub signal
     }
     
     print "Error = $errno, $message";
+    
+    # -r - displays errors in CloudFormation event log
+    # -d - displays final status in CloudFormation 'Outputs' tab
     `/opt/aws/bin/cfn-signal -e $errno -r \"$message\" -d \"$option{t}: $message\" \"$option{w}\"`;
     die if ( $errno );
 }

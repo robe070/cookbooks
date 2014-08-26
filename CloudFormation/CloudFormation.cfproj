@@ -19,7 +19,16 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="compile.cfn.template">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lansa-master.cfn.template">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="LANSA_Multi_AZ.template">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="webserver.cfn.template">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
