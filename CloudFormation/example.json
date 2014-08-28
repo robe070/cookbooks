@@ -1,28 +1,22 @@
 {
   "variables": {
     "aws_access_key": "{{env `aws_access_key_id`}}",
-    "aws_secret_key": "{{env `aws_secret_access_key`}}"
+    "aws_secret_key": "{{env `aws_secret_access_key`}}",
+    "aws_region": "ap-southeast-2",
+    "aws_instance_type": "t1.micro"
   },
   "builders": [
     {
+      "name": "amazon-ami",
       "type": "amazon-ebs",
-      "access_key": "{{user `aws_access_key`}}",
-      "secret_key": "{{user `aws_secret_key`}}",
-      "region": "us-east-1",
-      "source_ami": "ami-de0d9eb7",
-      "instance_type": "t1.micro",
-      "ssh_username": "ubuntu",
-      "ami_name": "packer-example {{timestamp}}"
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "shell",
-      "inline": [
-        "sleep 30",
-        "sudo apt-get update",
-        "sudo apt-get install -y redis-server"
-      ]
+      "access_key":  "{{user `aws_access_key`}}",
+      "secret_key":  "{{user `aws_secret_key`}}",
+      "region":      "{{user `aws_region`}}",
+      "ami_regions": [  ],
+      "instance_type": "{{user `aws_instance_type`}}",
+      "source_ami": "ami-bd990e87",
+      "ssh_username": "ec2-user",
+      "ami_name": "packer-amazon {{timestamp}}"
     }
   ]
 }
