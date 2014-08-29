@@ -9,14 +9,27 @@
     {
       "name": "amazon-ami",
       "type": "amazon-ebs",
-      "access_key":  "{{user `aws_access_key`}}",
-      "secret_key":  "{{user `aws_secret_key`}}",
-      "region":      "{{user `aws_region`}}",
-      "ami_regions": [  ],
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `aws_region`}}",
+      "ami_regions": [],
       "instance_type": "{{user `aws_instance_type`}}",
       "source_ami": "ami-bd990e87",
       "ssh_username": "ec2-user",
       "ami_name": "packer-amazon {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30",
+        "sudo yum update -y",
+        "sudo yum install httpd -y",
+        "sudo yum install git -y",
+        "sudo yum install php -y",
+        "sudo yum install mysql-connector-odbc.x86_64 -y"
+      ]
     }
   ]
 }
