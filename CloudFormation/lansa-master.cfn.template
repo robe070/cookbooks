@@ -330,6 +330,10 @@
                         ]
                     }
                 ],
+                "ConnectionDrainingPolicy" : {
+                    "Enabled" : "true",
+                    "Timeout" : "300"
+                },
                 "HealthCheck"              : {
                     "Target" : "HTTP:80/cgi-bin/lansaweb?about",
                     "HealthyThreshold" : "3",
@@ -365,6 +369,10 @@
                         "PolicyNames"      : [ "CookieBasedPolicy" ]
                     }
                 ],
+                "ConnectionDrainingPolicy" : {
+                    "Enabled" : "true",
+                    "Timeout" : "300"
+                },
                 "HealthCheck"              : {
                     "Target" : "HTTP:80/cgi-bin/lansaweb?about",
                     "HealthyThreshold" : "3",
