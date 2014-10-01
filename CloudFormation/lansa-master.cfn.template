@@ -1,10 +1,15 @@
 {
     "AWSTemplateFormatVersion" : "2010-09-09",
-    "Description"              : "Template LANSA_Multi_AZ: This template installs a highly-available, scalable LANSA deployment using a multi-AZ Amazon RDS database instance for storage.  **WARNING** This template creates an Amazon EC2 instance, an Elastic Load Balancer and an Amazon RDS database instance. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Description"              : "LANSA template: This template installs a highly-available, scalable LANSA deployment using a multi-AZ Amazon RDS database instance for storage.  **WARNING** This template creates an Amazon EC2 instance, an Elastic Load Balancer and an Amazon RDS database instance. You will be billed for the AWS resources used if you create a stack from this template.",
     "Parameters"               : {
         "KeyName" : {
             "Default" : "Linux-keypair",
             "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances (case sensitive)",
+            "Type"        : "String"
+        },
+        "AMI" : {
+            "Default" : "ami-abd6b791",
+            "Description" : "Name of an existing AMI in the current region",
             "Type"        : "String"
         },
         "CompileInstanceType" : {
@@ -497,22 +502,7 @@
                     "WebServerCapacity"   : "1",
                     "SSHLocation"         : { "Ref" : "SSHLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
-                    "AMI"                 : { 
-                        "Fn::FindInMap" : [
-                           "AWSRegionArch2AMI",
-                           {
-                               "Ref" : "AWS::Region"
-                           },
-                           {
-                               "Fn::FindInMap" : [
-                                   "AWSInstanceType2Arch",
-                                   {
-                                       "Ref" : "CompileInstanceType"
-                                   },
-                                   "Arch"
-                               ]
-                           }
-                       ] },
+                    "AMI"                 : { "Ref" : "AMI" },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "CompileELB" },
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
@@ -536,22 +526,7 @@
                     "WebServerCapacity"   : { "Ref" : "WebServerCapacity" },
                     "SSHLocation"         : { "Ref" : "SSHLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
-                    "AMI"                 : { 
-                        "Fn::FindInMap" : [
-                           "AWSRegionArch2AMI",
-                           {
-                               "Ref" : "AWS::Region"
-                           },
-                           {
-                               "Fn::FindInMap" : [
-                                   "AWSInstanceType2Arch",
-                                   {
-                                       "Ref" : "WebServerInstanceType"
-                                   },
-                                   "Arch"
-                               ]
-                           }
-                       ] },
+                    "AMI"                 : { "Ref" : "AMI" },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
@@ -560,6 +535,7 @@
             }
          }
     },
+      
     "Outputs"                  : {
          "WebsiteURL" : {
             "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },
