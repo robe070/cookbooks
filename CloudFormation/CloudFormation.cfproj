@@ -30,7 +30,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="example.json">
+    <Content Include="packer.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="stack-policy.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="test.py">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
