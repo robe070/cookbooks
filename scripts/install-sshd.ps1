@@ -1,5 +1,5 @@
+<powershell>
 <#
-
 .SYNOPSIS
 
 Install sshd in an AWS instance without requiring a password that may be used to break into server
@@ -17,11 +17,13 @@ Fix up install
     Enable LSA so that LocalSystem can start a process as another user.
     Reboot machine to finish LSA configuration
 
+N.B. Must use LF for line endings, not CRLF
+Reboot is definitely required
+
 .EXAMPLE
 
-Add contents of this file to the AWS UserData when launching an instance. Surround the script with
-<powershell>
-</powershell>
+Add contents of this file to the AWS UserData when launching an instance.
+Or reference it as a file in UserData when launching an instance
 
 #>
 
@@ -117,3 +119,4 @@ bash.exe -c "auto_answer=yes;export auto_answer;cyglsa-config"
 
 # reboot machine
 shutdown -r
+</powershell>
