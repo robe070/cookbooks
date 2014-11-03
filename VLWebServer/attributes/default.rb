@@ -1,1 +1,1 @@
-default['aaa']['bbb'] = "ccc"
+default['aaa']['bbb'] = node['fqdn']

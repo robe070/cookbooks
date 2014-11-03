@@ -17,6 +17,6 @@ template 'c:\inetpub\wwwroot\Default.htm' do
   source 'index.html.erb'
 end
 
-var1 = node['platform']
-log "Hi #{var1} !!!!!!!!!!!!"
-log "Hi #{node['platform']} !!!!!!!!!!!!"
+# var1 = node['platform']
+# log "Hi #{var1} !!!!!!!!!!!!"
+# log "Hi #{node['platform']} !!!!!!!!!!!!"
