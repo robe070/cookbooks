@@ -1,0 +1,62 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `aws_access_key_id`}}",
+    "aws_secret_key": "{{env `aws_secret_access_key`}}",
+    "aws_region": "ap-southeast-2",
+    "aws_instance_type": "t2.micro"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "{{user `aws_region`}}",
+    "source_ami": "ami-6d9cf057",
+    "instance_type": "{{user `aws_instance_type`}}",
+    "ssh_username": "Administrator",
+    "ssh_timeout": "10m",
+    "ssh_private_key_file": "C:/Users/Anthony.SYD/.ssh/Linux-keypair.pem",
+    "ami_name": "AU packer test {{isotime | clean_ami_name}}",
+    "ami_virtualization_type": "hvm"
+  }],
+  
+  "provisioners": [
+  {
+    "type": "shell",
+    "inline": [ "cmd /c \"md c:\\packerTemp\"" ]
+  },
+  {
+    "type": "file",
+    "source": "chef-windows-11.16.4-1.windows.msi",
+    "destination": "c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi"
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi\"",
+      "mkdir -p chef-repo/cookbooks" ]
+  },
+  {
+    "type": "file",
+    "source": "..\\cookbooks\\VLWebServer",
+    "destination": "chef-repo/cookbooks/VLWebServer"
+  },
+  {
+    "type": "file",
+    "source": "..\\cookbooks\\windows",
+    "destination": "chef-repo/cookbooks/windows"
+  },
+  {
+    "type": "file",
+    "source": "..\\cookbooks\\chef_handler",
+    "destination": "chef-repo/cookbooks/chef_handler"
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "export PATH=$PATH:/cygdrive/c/opscode/chef/bin:/cygdrive/c/opscode/chef/embedded/bin",
+      "cmd /c \"gem install win32-open3 ruby-wmi windows-api windows-pr --no-rdoc --no-ri\"",
+      "cmd /c \"gem install rdp-ruby-wmi\"",
+      "cd /home/Administrator/chef-repo/cookbooks",
+      "cmd /c \"chef-client -z -o VLWebServer\"" ]
+  }]
+}
