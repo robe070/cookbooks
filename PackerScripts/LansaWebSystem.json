@@ -85,6 +85,12 @@
   {
     "type": "shell",
     "inline": [
+      "cmd /c \"rd /S/Q c:\\PackerTemp\"",
+      "cmd /c \"del /F c:\\Progra~1\\Amazon\\Ec2ConfigService\\Logs\\*.txt\"" ]
+  },
+  {
+    "type": "shell",
+    "inline": [
       "cmd /c \"c:\\Progra~1\\Amazon\\Ec2ConfigService\\ec2config.exe -sysprep\"" ]
   }]
 }

@@ -17,14 +17,59 @@
     "ssh_timeout": "10m",
     "ssh_private_key_file": "C:/Users/Anthony.SYD/.ssh/Linux-keypair.pem",
     "ami_name": "AU packer test {{isotime | clean_ami_name}}",
-    "ami_virtualization_type": "hvm",
-    "user_data_file": "C:\\work\\Cloud\\cookbooks\\scripts\\test64.ps1"
+    "ami_virtualization_type": "hvm"
   }],
   
   "provisioners": [
   {
     "type": "shell",
     "inline": [ "cmd /c \"md c:\\packerTemp\"" ]
+  },
+  {
+    "type": "file",
+    "source": "chef-windows-11.16.4-1.windows.msi",
+    "destination": "c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi"
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi\"",
+      "mkdir -p chef-repo/cookbooks" ]
+  },
+  {
+    "type": "file",
+    "source": "{{user `chef_recipe_location`}}VLWebServer",
+    "destination": "chef-repo/cookbooks/VLWebServer"
+  },
+  {
+    "type": "file",
+    "source": "{{user `chef_recipe_location`}}windows",
+    "destination": "chef-repo/cookbooks/windows"
+  },
+  {
+    "type": "file",
+    "source": "{{user `chef_recipe_location`}}chef_handler",
+    "destination": "chef-repo/cookbooks/chef_handler"
+  },
+  {
+    "type": "file",
+    "source": "{{user `chef_recipe_location`}}chocolatey",
+    "destination": "chef-repo/cookbooks/chocolatey"
+  },
+  {
+    "type": "file",
+    "source": "{{user `chef_recipe_location`}}iis",
+    "destination": "chef-repo/cookbooks/iis"
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "export PATH=$PATH:/cygdrive/c/opscode/chef/bin:/cygdrive/c/opscode/chef/embedded/bin",
+      "export TEMP=/cygdrive/c/packerTemp",
+      "cmd /c \"gem install ruby-wmi windows-api windows-pr --no-rdoc --no-ri\"",
+      "cmd /c \"gem install rdp-ruby-wmi\"",
+      "cd /home/Administrator/chef-repo/cookbooks",
+      "cmd /c \"chef-client -z -o VLWebServer\"" ]
   },
   {
     "type": "file",
@@ -36,5 +81,16 @@
     "inline": [
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1\"" ]
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "cmd /c \"rd /S/Q c:\\PackerTemp\"",
+      "cmd /c \"del /F c:\\Progra~1\\Amazon\\Ec2ConfigService\\Logs\\*.txt\"" ]
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "cmd /c \"c:\\Progra~1\\Amazon\\Ec2ConfigService\\ec2config.exe -sysprep\"" ]
   }]
 }
