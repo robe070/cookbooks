@@ -13,5 +13,4 @@ include_recipe "VLWebServer::iisSetup2"
 include_recipe "chocolatey"
 
 chocolatey "SQL2012.NativeClient"
-
-include_recipe "VLWebServer::windowsUpdate"
+chocolatey "SQL2012.PowerShell"
