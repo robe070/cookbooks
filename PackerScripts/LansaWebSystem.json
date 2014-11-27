@@ -74,8 +74,6 @@
     "inline": [
       "export PATH=$PATH:/cygdrive/c/opscode/chef/bin:/cygdrive/c/opscode/chef/embedded/bin",
       "export TEMP=/cygdrive/c/packerTemp",
-      "cmd /c \"gem install ruby-wmi windows-api windows-pr --no-rdoc --no-ri\"",
-      "cmd /c \"gem install rdp-ruby-wmi\"",
       "cd /home/Administrator/chef-repo/cookbooks",
       "cmd /c \"chef-client -z -o VLWebServer\"" ]
   },
@@ -112,7 +110,6 @@
     "type": "shell",
     "pause_before": "8m",
     "inline": [
-      "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1\"",
       "powershell \"Set-ExecutionPolicy Restricted -Scope CurrentUser\"" ]
   },
