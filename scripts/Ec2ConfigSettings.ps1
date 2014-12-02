@@ -17,5 +17,9 @@ foreach ($element in $xmlElementToModify.Plugin)
     {
         $element.State="Enabled"
     }
+    elseif ($element.name -eq "Ec2WindowsActivate")
+    {
+        $element.State="Enabled"
+    }
 }
 $xml.Save($EC2SettingsFile)
