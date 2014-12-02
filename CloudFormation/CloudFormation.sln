@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{22325025-CDA3-4736-83CB-2D32D2FCC215}") = "CloudFormation", "CloudFormation.cfproj", "{99999999-9999-9999-9999-999999999999}"
 EndProject
+Project("{22325025-CDA3-4736-83CB-2D32D2FCC215}") = "CloudFormationWindows", "..\CloudFormationWindows\CloudFormationWindows.cfproj", "{4DD7B654-513F-48F4-894C-554014C2EBC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{99999999-9999-9999-9999-999999999999}.Debug|x86.Build.0 = Debug|x86
 		{99999999-9999-9999-9999-999999999999}.Release|x86.ActiveCfg = Release|x86
 		{99999999-9999-9999-9999-999999999999}.Release|x86.Build.0 = Release|x86
+		{4DD7B654-513F-48F4-894C-554014C2EBC9}.Debug|x86.ActiveCfg = Debug|x86
+		{4DD7B654-513F-48F4-894C-554014C2EBC9}.Debug|x86.Build.0 = Debug|x86
+		{4DD7B654-513F-48F4-894C-554014C2EBC9}.Release|x86.ActiveCfg = Release|x86
+		{4DD7B654-513F-48F4-894C-554014C2EBC9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
