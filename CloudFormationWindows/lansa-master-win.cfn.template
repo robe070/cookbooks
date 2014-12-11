@@ -195,17 +195,27 @@
             "Default" : "PCXUSER@122",
             "Description" : "Password for WebUser.This password must conform to Account Policy rules"
         },
-        "CakeUpdateNumber" : {
+        "TriggerCakeUpdate" : {
             "Type"    : "String",
             "Default" : "1",
-            "Description" : "Update Stack: Increment this by one to trigger a Cake update. Mainly to ensure that Windows Updates have been applied. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
+            "Description" : "Update Stack: Increment this by one to trigger a Cake update. This is the sdame as triggerring both a ChefUpdate and a WindowsUpdate. Mainly to ensure that Windows Updates have been applied. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
         },
-        "IcingUpdateNumber" : {
+        "TriggerChefUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to run a Chef update. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
+        },
+        "TriggerWindowsUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger a Windows Update. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
+        },
+        "TriggerIcingUpdate" : {
             "Type"    : "String",
             "Default" : "1",
             "Description" : "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly."
         },
-        "PatchNumber" : {
+        "TriggerPatchInstall" : {
             "Type"    : "String",
             "Default" : "1",
             "Description" : "Update Stack: Increment this by one to trigger patches to be installed. Obtains all MSPs and applies those not already applied."
@@ -426,7 +436,12 @@
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "WebUser"             : { "Ref" : "WebUser" },
                     "WebPassword"         : { "Ref" : "WebPassword" },
-                    "DummyRef"            : { "Ref" : "DBWebServerApp" }
+                    "DummyRef"            : { "Ref" : "DBWebServerApp" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"}
                }
             }
          },
@@ -453,7 +468,12 @@
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "WebUser"             : { "Ref" : "WebUser" },
-                    "WebPassword"         : { "Ref" : "WebPassword" }
+                    "WebPassword"         : { "Ref" : "WebPassword" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"}
                }
             }
          }
