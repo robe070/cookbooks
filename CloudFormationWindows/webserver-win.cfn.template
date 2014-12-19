@@ -123,6 +123,19 @@
             "Type"    : "String",
             "Default" : "1",
             "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive)"
+        },
+        "SetConnectTrace" : {
+            "Type"    : "String",
+            "Default" : "N"
+        },
+        "SetIISTrace" : {
+            "Type"    : "String",
+            "Default" : "N"
+        },
+        "SetX_RUNEnvVar" : {
+            "Type"    : "String",
+            "Default" : "ITRO=N ITRL=4 ITRM=999999999",
+            "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
         }
     },
     "Conditions" : {
@@ -158,6 +171,9 @@
                "TriggerWindowsUpdate" : { "Ref" : "TriggerWindowsUpdate" },
                "TriggerIcingUpdate"   : { "Ref" : "TriggerIcingUpdate" },
                "TriggerPatchInstall"  : { "Ref" : "TriggerPatchInstall" },
+               "SetConnectTrace"      : { "Ref" : "SetConnectTrace"},
+               "SetIISTrace"          : { "Ref" : "SetIISTrace"},
+               "SetX_RUNEnvVar"       : { "Ref" : "SetX_RUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
                      "icing-install" : ["install-cfn", "install-msi", "setup-symlink"],
@@ -166,7 +182,8 @@
                      "chef-update" : ["run-chef"],
                      "windows-update" : ["run-windows-update"],
                      "icing-update" : ["install-cfn", "upgrade-msi"],
-                     "apply-patches" : ["install-patches"]
+                     "apply-patches" : ["install-patches"],
+                     "SetX_RUNEnvVar" : ["SetX_RUNEnvVar"]
                    },
                   "install-cfn" : {
                      "files"    : {
@@ -244,6 +261,17 @@
                                                             " --configsets apply-patches ",
                                                             " --region ", { "Ref" : "AWS::Region" }, "\n"
                            ]]}
+                        },
+                        "c:\\cfn\\hooks.d\\cfn-SetX_RUNEnvVar.conf" : {
+                           "content": { "Fn::Join" : ["", [
+                              "[cfn-patch-hook]\n",
+                              "triggers=post.update\n",
+                              "path=Resources.LaunchWebServer.Metadata.SetX_RUNEnvVar\n",
+                              "action=cfn-init.exe -v -s ", { "Ref" : "AWS::StackId" },
+                                                            " -r LaunchWebServer",
+                                                            " --configsets SetX_RUNEnvVar ",
+                                                            " --region ", { "Ref" : "AWS::Region" }, "\n"
+                           ]]}
                         }
                      },
                      "services" : {
@@ -259,6 +287,7 @@
                                  "c:\\cfn\\hooks.d\\cfn-windows.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-icing.conf",
                                  "c:\\cfn\\hooks.d\\cfn-patch.conf", 
+                                 "c:\\cfn\\hooks.d\\cfn-SetX_RUNEnvVar.conf",
                                  "C:\\LANSA\\MyApp.msi"]
                            }
                         }
@@ -323,7 +352,7 @@
 
                   "install-patches" : {
                      "files"    : {
-                        "C:\\LANSA\\install-lansa-msi.ps1" : {
+                        "C:\\LANSA\\copy-s3-install-patches.ps1" : {
                            "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/copy-s3-install-patches.ps1"
                         }
                      },
@@ -372,6 +401,20 @@
                      "commands" : {
                         "01_windows_updates" : {
                            "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\recipes\\win-updates.ps1",
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
+
+                  "SetX_RUNEnvVar" : {
+                     "files"    : {
+                        "C:\\LANSA\\SetX_RUNEnvVar.ps1" : {
+                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/SetX_RUNEnvVar.ps1"
+                        }
+                     },
+                     "commands" : {
+                        "01_SetX_RUNEnvVar" : {
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\SetX_RUNEnvVar.ps1",
                            "waitAfterCompletion" : "0"
                         }
                      }
