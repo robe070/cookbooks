@@ -80,11 +80,21 @@ int _tmain(int argc, _TCHAR* argv[])
    fprintf(stderr,"The store name is %S.\n",pwszStoreName);
 
    //-------------------------------------------------------------------
-   // Open a system certificate store.
 
+#if(0)
+   // Open a system certificate store in CURRENT_USER.
    if ( hCertStore = CertOpenSystemStore(
       NULL,
       pwszStoreName))
+#endif
+   // Open a system certificate store in LOCAL_MACHINE.
+   if(hCertStore = CertOpenStore(
+      CERT_STORE_PROV_SYSTEM,          // The store provider type
+      0,                               // The encoding type is not needed
+      NULL,                            // Use the default HCRYPTPROV
+      CERT_SYSTEM_STORE_LOCAL_MACHINE, // Set the store location in a registry location
+      pwszStoreName                    // The store name as a Unicode string
+      ))
    {
       fprintf(stderr,"The %S store has been opened. \n", 
          pwszStoreName);
@@ -160,7 +170,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
          //-------------------------------------------------------------------
          // Indicate the kind of property found.
-
+         DWORD dwOffset = 0;
          switch(dwPropId)
          {
          case CERT_FRIENDLY_NAME_PROP_ID:
@@ -181,6 +191,8 @@ int _tmain(int argc, _TCHAR* argv[])
          case CERT_KEY_PROV_INFO_PROP_ID:
             {
                printf("KEY PROV INFO PROP ID ");
+               // The printable text is at an offset into the property
+               dwOffset = 14;
                break;
             }
          case CERT_SHA1_HASH_PROP_ID:
@@ -316,9 +328,14 @@ int _tmain(int argc, _TCHAR* argv[])
          {
             LPCWSTR pwszData = (LPCWSTR) pvData;
             CHAR *pchData = (CHAR *) pvData;
-            if ( pwszData[cbData/2-1] == 0)
+
+            if ( dwOffset )
             {
-               printf("The Property Content is %d bytes long. Wide String: '%S'", cbData, pvData);
+               pwszData = pwszData + dwOffset;
+            }
+            if ( dwOffset || pwszData[cbData/2-1] == 0)
+            {
+               printf("The Property Content is %d bytes long. Wide String: '%S'", cbData, pwszData);
             }
             else
             {
