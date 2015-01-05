@@ -7,10 +7,15 @@
 #include <stdio.h>
 #include <Wincrypt.h>
 #include <Cryptuiapi.h>
+#include <ncrypt.h>
+#include <stdint.h>
 
 #define MY_ENCODING_TYPE  (PKCS_7_ASN_ENCODING | X509_ASN_ENCODING)
 
 void MyHandleError(char *s);
+uint8_t hextobin(const char * str, uint8_t * bytes, size_t blen);
+void findPrivateKey();
+void EnumAllCerts();
 
 typedef struct _ENUM_ARG {
    BOOL        fAll;
@@ -41,6 +46,14 @@ static BOOL WINAPI EnumLocCallback(
    void *pvReserved,
    void *pvArg);
 
+HCERTSTORE       hCertStore;        
+PCCERT_CONTEXT   pCertContext=NULL;      
+WCHAR pwszNameString[256];
+WCHAR pwszStoreName[256];
+void*            pvData;
+DWORD            cbData;
+DWORD            dwPropId = 0; 
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 
@@ -58,13 +71,6 @@ int _tmain(int argc, _TCHAR* argv[])
    //-------------------------------------------------------------------
    // Declare and initialize variables.
 
-   HCERTSTORE       hCertStore;        
-   PCCERT_CONTEXT   pCertContext=NULL;      
-   WCHAR pwszNameString[256];
-   WCHAR pwszStoreName[256];
-   void*            pvData;
-   DWORD            cbData;
-   DWORD            dwPropId = 0; 
    // Zero must be used on the first
    // call to the function. After that,
    // the last returned property identifier is passed.
@@ -76,7 +82,7 @@ int _tmain(int argc, _TCHAR* argv[])
    //  to a file.
 
    fprintf(stderr,"Please enter the store name:");
-   _getws_s( pwszStoreName, sizeof(pwszStoreName-1));
+   _getws_s( pwszStoreName, sizeof(pwszStoreName));
    fprintf(stderr,"The store name is %S.\n",pwszStoreName);
 
    //-------------------------------------------------------------------
@@ -105,6 +111,34 @@ int _tmain(int argc, _TCHAR* argv[])
       MyHandleError("The store was not opened.");
    }
 
+   if ( argc > 1 )
+   {
+      if ( argv[1][0] == L'p') findPrivateKey( );
+      else  MyHandleError("Invalid option");
+   }
+   else
+   {
+      EnumAllCerts();
+   }
+
+
+   fprintf(stderr,"Press enter to end: \n");
+   _getws_s( pwszStoreName, sizeof(pwszStoreName-1));
+
+   //-------------------------------------------------------------------
+   // Clean up.
+
+   CertFreeCertificateContext(pCertContext);
+   CertCloseStore(hCertStore,0);
+   printf("The function completed successfully. \n");
+
+   exit(0);
+
+
+} // End of main.
+
+void EnumAllCerts()
+{
    //-------------------------------------------------------------------
    // Use CertEnumCertificatesInStore to get the certificates 
    // from the open store. pCertContext must be reset to
@@ -332,8 +366,10 @@ int _tmain(int argc, _TCHAR* argv[])
             if ( dwOffset )
             {
                pwszData = pwszData + dwOffset;
+
+               printf("The Property Content is %d bytes long. Wide String at offset %d: '%S'", cbData, dwOffset, pwszData);
             }
-            if ( dwOffset || pwszData[cbData/2-1] == 0)
+            else if ( pwszData[cbData/2-1] == 0)
             {
                printf("The Property Content is %d bytes long. Wide String: '%S'", cbData, pwszData);
             }
@@ -374,18 +410,86 @@ int _tmain(int argc, _TCHAR* argv[])
       MyHandleError("Select UI failed." );
    }
 #endif
+}
 
-   fprintf(stderr,"Press enter to end:");
-   _getws_s( pwszStoreName, sizeof(pwszStoreName-1));
-
+// Finds a certificate matching a SHA1 Hash and then checks if it has a private key or not
+void findPrivateKey( )
+{
    //-------------------------------------------------------------------
-   // Clean up.
+   // Get a particular certificate using CertFindCertificateInStore.
+   CHAR Sha1HashData[101];
+   BOOL fEntered = FALSE;
 
-   CertFreeCertificateContext(pCertContext);
-   CertCloseStore(hCertStore,0);
-   printf("The function completed successfully. \n");
-} // End of main.
+   while ( !fEntered )
+   {
+      fprintf(stderr,"Please enter the SHA1 Hash to find:");
+      gets_s( Sha1HashData, sizeof(Sha1HashData));
 
+      if ( strlen( Sha1HashData ) > 40)
+      {
+         fprintf( stderr, "Hash is too long\n");
+      }
+      else
+      {
+         fEntered = TRUE;
+      }
+   }
+
+   // CHAR  * Sha1HashData = "244D8DFFE7DB4263B45102A277C9C362B009D8AF"; // Private key exists in MY store
+   // D559A586669B08F46A30A133F8A9ED3D038E2EA8 // Private key DOES NOT EXIST in CA
+   
+   BYTE  ByteData[20];
+   CRYPT_INTEGER_BLOB Sha1Hash;
+   Sha1Hash.cbData = 20;
+   Sha1Hash.pbData = ByteData;
+   hextobin( Sha1HashData, ByteData, 20 );
+
+   if(pCertContext = CertFindCertificateInStore(
+      hCertStore,             // Store handle.
+      MY_ENCODING_TYPE,       // Encoding type.
+      0,                      // Not used.
+      CERT_FIND_SHA1_HASH,    // Find type. Find SHA1 Hash in Certificate. Presumed unique
+      &Sha1Hash,              // The SHA1 Hash to be searched for.
+      pCertContext ))         // Previous context.
+   {
+      printf("Found the certificate. \n");
+   }
+   else
+   {
+      MyHandleError("Could not find the required certificate");
+   }
+
+   HCRYPTPROV hCryptProv;
+   DWORD dwKeySpec;
+   BOOL  fCallerFree = FALSE;
+
+   if(!( CryptAcquireCertificatePrivateKey(
+      pCertContext,
+      0,
+      NULL,
+      &hCryptProv,
+      &dwKeySpec,
+      &fCallerFree )))
+   {
+      printf( "A private key does not exist\n");
+   }
+   else
+   {
+      printf( "A private key exists\n");
+
+      if (fCallerFree)
+      {
+         if ( dwKeySpec == CERT_NCRYPT_KEY_SPEC)
+         {
+            NCryptFreeObject( hCryptProv );
+         }
+         else
+         {
+            CryptReleaseContext( hCryptProv, 0 );
+         }
+      }
+   }
+}
 
 #if(0)
 int OpenStore( void )
@@ -713,3 +817,59 @@ void MyHandleError(char *s)
    fprintf(stderr, "Program terminating. \n");
    exit(1);
 } // End of MyHandleError
+
+
+uint8_t hextobin(const char * str, uint8_t * bytes, size_t blen)
+{
+   uint8_t  pos;
+   uint8_t  idx0;
+   uint8_t  idx1;
+
+   // mapping of ASCII characters to hex values
+   const uint8_t hashmap[] =
+   {
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  !"#$%&'
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ()*+,-./
+      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 01234567
+      0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 89:;<=>?
+      0x00, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00, // @ABCDEFG
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // HIJKLMNO
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // PQRSTUVW
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // XYZ[\]^_
+      0x00, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00, // `abcdefg
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // hijklmno
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // pqrstuvw
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // xyz{|}~.
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ........
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  // ........
+   };
+
+   memset(bytes, '\0', blen);
+   for (pos = 0; ((pos < (blen*2)) && (pos < strlen(str))); pos += 2)
+   {
+      idx0 = (uint8_t)str[pos+0];
+      idx1 = (uint8_t)str[pos+1];
+      bytes[pos/2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+   };
+
+   return(0);
+}
+
