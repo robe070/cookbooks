@@ -16,6 +16,7 @@ void MyHandleError(char *s);
 uint8_t hextobin(const char * str, uint8_t * bytes, size_t blen);
 void findPrivateKey();
 void EnumAllCerts();
+BOOL fCheckCertAttribute( DWORD dwPropId, BYTE *pvMatchData, SHORT sMatchLen, DWORD dwOffset );
 
 typedef struct _ENUM_ARG {
    BOOL        fAll;
@@ -47,12 +48,12 @@ static BOOL WINAPI EnumLocCallback(
    void *pvArg);
 
 HCERTSTORE       hCertStore;        
-PCCERT_CONTEXT   pCertContext=NULL;      
+PCCERT_CONTEXT   pCertContext;      
 WCHAR pwszNameString[256];
 WCHAR pwszStoreName[256];
 void*            pvData;
 DWORD            cbData;
-DWORD            dwPropId = 0; 
+DWORD            dwPropId; 
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -80,6 +81,7 @@ int _tmain(int argc, _TCHAR* argv[])
    //  to be enumerated. Output here is to stderr so that the program  
    //  can be run from the command line and stdout can be redirected  
    //  to a file.
+   pCertContext=NULL;
 
    fprintf(stderr,"Please enter the store name:");
    _getws_s( pwszStoreName, sizeof(pwszStoreName));
@@ -190,6 +192,7 @@ void EnumAllCerts()
       // certificate. The loop continues until 
       // CertEnumCertificateContextProperties returns zero.
 
+      dwPropId = 0;
       while(dwPropId = CertEnumCertificateContextProperties(
          pCertContext, // The context whose properties are to be listed.
          dwPropId))    // Number of the last property found.  
@@ -200,7 +203,7 @@ void EnumAllCerts()
          // When the loop is executed, a property identifier has been found.
          // Print the property number.
 
-         printf("Property # %d found->", dwPropId);
+         printf("Property # %*d ", 2, dwPropId);
 
          //-------------------------------------------------------------------
          // Indicate the kind of property found.
@@ -209,99 +212,114 @@ void EnumAllCerts()
          {
          case CERT_FRIENDLY_NAME_PROP_ID:
             {
-               printf("Display name: ");
+               printf("%-*s", 29, "Display name. ");
                break;
             }
          case CERT_SIGNATURE_HASH_PROP_ID:
             {
-               printf("Signature hash identifier ");
+               printf("%-*s", 29, "Signature hash. ");
                break;
             }
          case CERT_KEY_PROV_HANDLE_PROP_ID:
             {
-               printf("KEY PROVE HANDLE");
+               printf("%-*s", 29, "KEY PROVIDER HANDLE. ");
                break;
             }
          case CERT_KEY_PROV_INFO_PROP_ID:
             {
-               printf("KEY PROV INFO PROP ID ");
+               printf("%-*s", 29, "KEY PROVIDER INFO. ");
                // The printable text is at an offset into the property
                dwOffset = 14;
                break;
             }
          case CERT_SHA1_HASH_PROP_ID:
             {
-               printf("SHA1 HASH identifier");
+               printf("%-*s", 29, "SHA1 HASH. ");
                break;
             }
          case CERT_MD5_HASH_PROP_ID:
             {
-               printf("md5 hash identifier ");
+               printf("%-*s", 29, "MD5 hash. ");
+               break;
+            }
+         case CERT_SUBJECT_PUBLIC_KEY_MD5_HASH_PROP_ID:
+            {
+               printf("%-*s", 29, "SUBJECT PUBLIC KEY MD5 HASH. ");
                break;
             }
          case CERT_KEY_CONTEXT_PROP_ID:
             {
-               printf("KEY CONTEXT PROP identifier");
+               printf("%-*s", 29, "KEY CONTEXT. ");
                break;
             }
          case CERT_KEY_SPEC_PROP_ID:
             {
-               printf("KEY SPEC PROP identifier");
+               printf("%-*s", 29, "KEY SPEC. ");
                break;
             }
          case CERT_ENHKEY_USAGE_PROP_ID:
             {
-               printf("ENHKEY USAGE PROP identifier");
+               printf("%-*s", 29, "ENHKEY USAGE. ");
                break;
             }
          case CERT_NEXT_UPDATE_LOCATION_PROP_ID:
             {
-               printf("NEXT UPDATE LOCATION PROP identifier");
+               printf("%-*s", 29, "NEXT UPDATE LOCATION. ");
                break;
             }
          case CERT_PVK_FILE_PROP_ID:
             {
-               printf("PVK FILE PROP identifier ");
+               printf("%-*s", 29, "PVK FILE. ");
                break;
             }
          case CERT_DESCRIPTION_PROP_ID:
             {
-               printf("DESCRIPTION PROP identifier ");
+               printf("%-*s", 29, "DESCRIPTION. ");
                break;
             }
          case CERT_ACCESS_STATE_PROP_ID:
             {
-               printf("ACCESS STATE PROP identifier ");
+               printf("%-*s", 29, "ACCESS STATE. ");
                break;
             }
          case CERT_SMART_CARD_DATA_PROP_ID:
             {
-               printf("SMART_CARD DATA PROP identifier ");
+               printf("%-*s", 29, "SMART_CARD DATA. ");
                break;
             }
          case CERT_EFS_PROP_ID:
             {
-               printf("EFS PROP identifier ");
+               printf("%-*s", 29, "EFS. ");
                break;
             }
          case CERT_FORTEZZA_DATA_PROP_ID:
             {
-               printf("FORTEZZA DATA PROP identifier ");
+               printf("%-*s", 29, "FORTEZZA DATA. ");
                break;
             }
          case CERT_ARCHIVED_PROP_ID:
             {
-               printf("ARCHIVED PROP identifier ");
+               printf("%-*s", 29, "ARCHIVED. ");
                break;
             }
          case CERT_KEY_IDENTIFIER_PROP_ID:
             {
-               printf("KEY IDENTIFIER PROP identifier ");
+               printf("%-*s", 29, "KEY IDENTIFIER. ");
                break;
             }
          case CERT_AUTO_ENROLL_PROP_ID:
             {
-               printf("AUTO ENROLL identifier. ");
+               printf("%-*s", 29, "AUTO ENROL. ");
+               break;
+            }
+         case CERT_SIGN_HASH_CNG_ALG_PROP_ID:
+            {
+               printf("%-*s", 29, "SIGN HASH CNG ALG. ");
+               break;
+            }
+         case CERT_SUBJECT_PUB_KEY_BIT_LENGTH_PROP_ID:
+            {
+               printf("%-*s", 29, "SUBJECT PUB KEY BIT LENGTH. ");
                break;
             }
          } // End switch.
@@ -367,15 +385,15 @@ void EnumAllCerts()
             {
                pwszData = pwszData + dwOffset;
 
-               printf("The Property Content is %d bytes long. Wide String at offset %d: '%S'", cbData, dwOffset, pwszData);
+               printf("Content is %*d bytes long. Wide String at offset %d: '%S'", 3, cbData, dwOffset, pwszData);
             }
-            else if ( pwszData[cbData/2-1] == 0)
+            else if ( cbData > 4 && pwszData[cbData/2-1] == 0) // If its 4 bytes or less its presumed to be numeric. e.g. a 64 bit integer
             {
-               printf("The Property Content is %d bytes long. Wide String: '%S'", cbData, pwszData);
+               printf("Content is %*d bytes long. Wide String: '%S'", 3, cbData, pwszData);
             }
             else
             {
-               printf("The Property Content is %d bytes long. Hex: ", cbData );
+               printf("Content is %*d bytes long. Hex: ", 3, cbData );
                for (int i = 0; i < cbData; i++ ) {
                   printf("%02X", (unsigned char) pchData[i] );
                }
@@ -412,18 +430,24 @@ void EnumAllCerts()
 #endif
 }
 
-// Finds a certificate matching a SHA1 Hash and then checks if it has a private key or not
+// Finds a certificate matching a SHA1 Hash, and then checks if it has a matching GUID and Key Identifier Prop and is a private key or not
+#define SHA1_LEN  20
+#define GUID_LEN  36
+#define KEY_ID_LEN 20
+
 void findPrivateKey( )
 {
    //-------------------------------------------------------------------
    // Get a particular certificate using CertFindCertificateInStore.
    CHAR Sha1HashData[101];
+   WCHAR GUID[101];
+   CHAR KeyID[101];
    BOOL fEntered = FALSE;
 
    while ( !fEntered )
    {
       fprintf(stderr,"Please enter the SHA1 Hash to find:");
-      gets_s( Sha1HashData, sizeof(Sha1HashData));
+      gets_s( Sha1HashData, 101);
 
       if ( strlen( Sha1HashData ) > 40)
       {
@@ -435,14 +459,24 @@ void findPrivateKey( )
       }
    }
 
+   fprintf(stderr,"Please enter the GUID to match:");
+   _getws_s( GUID, 50);
+
+   fprintf(stderr,"Please enter the Key Identifier to match:");
+   gets_s( KeyID, 101);
+
+
    // CHAR  * Sha1HashData = "244D8DFFE7DB4263B45102A277C9C362B009D8AF"; // Private key exists in MY store
    // D559A586669B08F46A30A133F8A9ED3D038E2EA8 // Private key DOES NOT EXIST in CA
    
-   BYTE  ByteData[20];
+   BYTE  ByteData[SHA1_LEN];
    CRYPT_INTEGER_BLOB Sha1Hash;
-   Sha1Hash.cbData = 20;
+   Sha1Hash.cbData = sizeof( ByteData);
    Sha1Hash.pbData = ByteData;
-   hextobin( Sha1HashData, ByteData, 20 );
+   hextobin( Sha1HashData, ByteData, sizeof( ByteData) );
+
+   BYTE  KeyIDData[KEY_ID_LEN];
+   hextobin( KeyID, KeyIDData, sizeof( KeyIDData) );
 
    if(pCertContext = CertFindCertificateInStore(
       hCertStore,             // Store handle.
@@ -458,6 +492,22 @@ void findPrivateKey( )
    {
       MyHandleError("Could not find the required certificate");
    }
+
+   // Check the GUID matches
+   if ( !fCheckCertAttribute(  CERT_KEY_PROV_INFO_PROP_ID, (BYTE *)GUID, 36, 28 ) )
+   {
+      MyHandleError("GUID does not match");
+   }
+
+   // Check the Key Identifier matches
+   if ( !fCheckCertAttribute(  CERT_KEY_IDENTIFIER_PROP_ID, (BYTE *)KeyIDData, 20, 0 ) )
+   {
+      MyHandleError("Key Identifier does not match");
+   }
+
+   printf("Certificate matches GUID and Key Identifier attributes. \n");
+
+   // Check the certificate has a Private Key
 
    HCRYPTPROV hCryptProv;
    DWORD dwKeySpec;
@@ -489,6 +539,68 @@ void findPrivateKey( )
          }
       }
    }
+}
+
+// Check Attribute
+BOOL fCheckCertAttribute( DWORD dwPropId, BYTE *pvMatchData, SHORT sMatchLen, DWORD dwOffset )
+{
+   BYTE *pCertData = NULL;
+
+   if (CertGetCertificateContextProperty(
+      pCertContext, 
+      dwPropId , 
+      NULL, 
+      &cbData))
+   {
+      //  Continue.
+   }
+   else
+   {  
+      // If the first call to the function failed,
+      // exit to an error routine.
+      MyHandleError("Call #1 to CertGetCertificateContextProperty failed.");
+   }
+   //-------------------------------------------------------------------
+   // The call succeeded. Use the size to allocate memory 
+   // for the property.
+
+   if(pCertData = (BYTE*)malloc(cbData))
+   {
+      // Memory is allocated. Continue.
+   }
+   else
+   {
+      // If memory allocation failed, exit to an error routine.
+      MyHandleError("Memory allocation failed.");
+   }
+   //----------------------------------------------------------------
+   // Allocation succeeded. Retrieve the property data.
+
+   if(CertGetCertificateContextProperty(
+      pCertContext,
+      dwPropId,
+      pCertData, 
+      &cbData))
+   {
+      // The data has been retrieved. Continue.
+   }
+   else
+   {
+      // If an error occurred in the second call, 
+      // exit to an error routine.
+      MyHandleError("Call #2 failed.");
+   }
+
+   if ( cbData )
+   {
+      return (memcmp(pvMatchData, pCertData + dwOffset, sMatchLen) == 0);
+   }
+   else
+   {
+      return FALSE;
+   }
+
+   // ** Need to free pCertData
 }
 
 #if(0)
