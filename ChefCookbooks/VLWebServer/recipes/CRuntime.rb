@@ -1,14 +1,42 @@
 # C++ Redistributable
 
 windows_package "C Redistributable" do
-   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/vcredist_x86.exe'
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2010/vcredist_x86.exe'
    options '/q'
    installer_type :custom
    action :install
 end
 
 windows_package "C Redistributable" do
-   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/vcredist_x64.exe'
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2010/vcredist_x64.exe'
+   options '/q'
+   installer_type :custom
+   action :install
+end
+
+windows_package "C Redistributable" do
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2012/vcredist_x86.exe'
+   options '/q'
+   installer_type :custom
+   action :install
+end
+
+windows_package "C Redistributable" do
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2012/vcredist_x64.exe'
+   options '/q'
+   installer_type :custom
+   action :install
+end
+
+windows_package "C Redistributable" do
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2013/vcredist_x86.exe'
+   options '/q'
+   installer_type :custom
+   action :install
+end
+
+windows_package "C Redistributable" do
+   source 'https://s3-ap-southeast-2.amazonaws.com/lansa/uploads/CRuntime2013/vcredist_x64.exe'
    options '/q'
    installer_type :custom
    action :install
