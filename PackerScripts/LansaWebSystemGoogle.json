@@ -9,17 +9,15 @@
     "user_directory": "{{env `userprofile`}}"
   },
   "builders": [{
-    "type": "amazon-ebs",
-    "access_key": "{{user `aws_access_key`}}",
-    "secret_key": "{{user `aws_secret_key`}}",
-    "region": "{{user `aws_region`}}",
-    "source_ami": "ami-9d0d64a7",
-    "instance_type": "{{user `aws_instance_type`}}",
+    "type": "googlecompute",
+    "account_file": "GoogleLansaProject1acctFile.json",
+    "project_id": "lansa-project-1",
+    "source_image": "auimage8",
+    "zone": "asia-east1-a",
+    "ssh_timeout": "15m",
+    "state_timeout": "15m",
     "ssh_username": "Administrator",
-    "ssh_timeout": "10m",
-    "ssh_private_key_file": "{{user `user_directory`}}/.ssh/Linux-keypair.pem",
-    "ami_name": "LANSA Web Server {{isotime \"20060102-1504\"}}",
-    "ami_virtualization_type": "hvm"
+    "disk_size": "100"
   }],
   
   "provisioners": [
@@ -85,16 +83,6 @@
     "destination": "c:\\recipes\\win-updates.ps1"
   },
   {
-    "type": "file",
-    "source": "LANSAScalableLicense.pfx",
-    "destination": "c:\\packerTemp\\LANSAScalableLicense.pfx"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}setlic.ps1",
-    "destination": "c:\\packerTemp\\setlic.ps1"
-  },
-  {
     "type": "shell",
     "start_retry_timeout": "5m",
     "inline": [
@@ -105,7 +93,6 @@
     "pause_before": "5m",
     "inline": [
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
-      "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
       "powershell \"c:\\recipes\\win-updates.ps1\"" ]
   },
   {
