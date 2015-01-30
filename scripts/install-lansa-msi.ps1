@@ -142,5 +142,8 @@ else
     Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
 }
 
+# Set permissions on private key
+icacls.exe "C:\Documents and Settings\All Users\Application Data\Microsoft\Crypto\RSA\MachineKeys\*" /grant "$webuser":R
+
 Write-Output ( "Installation completed")
 Write-Output ("See $install_log and other files in $ENV:TEMP for more details")
