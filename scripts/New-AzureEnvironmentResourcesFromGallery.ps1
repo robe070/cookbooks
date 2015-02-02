@@ -91,7 +91,7 @@ workflow New-AzureEnvironmentResourcesFromGallery
         [string]$StorageAccountName
     )
 
-    # Note that Verbose and Debug preference setting does not effect the Runbook History 
+    # Note that Verbose and Debug preference settings do not effect the Runbook History 
     # configuration settings. These settings effect the Test Console only
     $MyVerbosePreference = "Continue"
     $VerbosePreference = $MyVerbosePreference
@@ -99,11 +99,11 @@ workflow New-AzureEnvironmentResourcesFromGallery
     $OnCloud = $FALSE
     if ($OnCloud)
     {
-        Write-Verbose "On Cloud"
+        Write-Verbose "Configured for running On Cloud"
     }
     else
     {
-        Write-Verbose "On Premises"
+        Write-Verbose "Configured for running On Premises"
     }    
 
     ####################################################################################################
