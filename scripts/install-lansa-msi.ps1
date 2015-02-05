@@ -111,11 +111,6 @@ if ( -not $UPGD_bool )
     Start-WebAppPool -Name "DefaultAppPool"
 }
 
-Write-Output ("Disabling compatibility checker which consumes 1 whole CPU after MSI is installed due to something in the Chef SDK")
-
-[String[]] $Arguments = @(" /change", '/TN "\Microsoft\windows\application Experience\ProgramDataUpdater"', "/DISABLE")
-Start-Process -FilePath "schtasks.exe" -ArgumentList $Arguments -Wait
-
 Write-Output ("Installing the application")
 
 $installer = "MyApp.msi"
