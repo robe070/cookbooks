@@ -4,6 +4,7 @@
     "script_location": "..\\scripts\\",
     "user_directory": "{{env `userprofile`}}"
   },
+
   "builders": [{
     "type": "azure",
     "publish_settings_path" : "C:\\work\\Cloud\\cookbooks\\PackerScripts\\FreeTrial-1-27-2015-credentials.publishsettings",
@@ -15,15 +16,12 @@
     "instance_size" : "Medium",
     "user_image_label" : "lansaPacker3"
   }],
+
   "provisioners": [
   {
-    "type": "file",
-    "source": "{{user `chef_recipe_location`}}VLWebServer",
-    "destination": "/cygdrive/c/recipes/chef-repo/cookbooks/VLWebServer"
-  },
-  {
-    "type": "shell",
-    "inline": [
-      "cmd /c \"c:\\Windows\\system32\\sysprep\\sysprep.exe /oobe /shutdown\"" ]
+    "type": "azure-custom-script-extension",
+    "inline": [ 
+      "cmd /c \"md c:\\packerTemp\"",
+      "powershell \"(New-Object System.Net.Webclient).downloadfile( \"c:\\packerTemp\\script.cmd\", \"c:\\packerTemp\\script.cmd\" )\"" ]
   }]
 }
