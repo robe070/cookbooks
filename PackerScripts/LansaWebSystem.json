@@ -27,7 +27,8 @@
     "type": "shell",
     "inline": [ 
       "cmd /c \"md c:\\packerTemp\"",
-      "cmd /c \"md c:\\recipes\\chef-repo\\cookbooks\"" ]
+      "cmd /c \"md c:\\recipes\\chef-repo\\cookbooks\"",
+      "cmd /c schtasks /change /TN \"\\Microsoft\\windows\\application Experience\\ProgramDataUpdater\" /DISABLE" ]
   },
   {
     "type": "file",
@@ -118,6 +119,8 @@
     "type": "shell",
     "pause_before": "8m",
     "inline": [
+      "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\Ngen executequeueditems\"",
+      "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\Ngen executequeueditems\"",
       "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1\"",
       "powershell \"Set-ExecutionPolicy Restricted -Scope CurrentUser\"" ]
   },

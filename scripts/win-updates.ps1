@@ -9,7 +9,7 @@ function LogWrite {
    Param ([string]$logstring)
    $now = Get-Date -format s
    Add-Content $Logfile -value "$now $logstring"
-   Write-Host $logstring
+   Write-Output $logstring
 }
 
 function Check-ContinueRestartOrEnd() {
