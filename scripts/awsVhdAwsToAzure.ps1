@@ -38,8 +38,8 @@ $diskNum = (Mount-VHD -Path $vhdConvertedPath -PassThru).DiskNumber
 (Get-Disk $diskNum).OperationalStatus
 $vhdDriveLetter = (Get-Disk $diskNum | Get-Partition | Get-Volume).DriveLetter
 Set-Disk $diskNum -IsReadOnly $False
-#Add-WindowsPackage -PackagePath $cabPath -Path ($vhdDriveLetter+":\")
-Add-WindowsPackage -PackagePath $cabPath -Path ("g:\")
+Add-WindowsPackage -PackagePath $cabPath -Path ($vhdDriveLetter+":\")
+#Add-WindowsPackage -PackagePath $cabPath -Path ("g:\")
 Dismount-VHD -Path $vhdConvertedPath
 
 #endregion
