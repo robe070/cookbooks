@@ -14,3 +14,4 @@ include_recipe "chocolatey"
 
 chocolatey "SQL2012.NativeClient"
 chocolatey "SQL2012.PowerShell"
+chocolatey "jre8"
