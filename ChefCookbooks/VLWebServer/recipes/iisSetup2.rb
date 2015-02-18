@@ -13,9 +13,9 @@ service 'w3svc' do
   action [:start, :enable]
 end
 
-template 'c:\inetpub\wwwroot\Default.htm' do
-  source 'index.html.erb'
-end
+#template 'c:\inetpub\wwwroot\Default.htm' do
+#  source 'index.html.erb'
+#end
 
 # var1 = node['platform']
 # log "Hi #{var1} !!!!!!!!!!!!"
