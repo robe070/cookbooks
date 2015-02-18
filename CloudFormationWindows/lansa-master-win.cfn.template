@@ -4,17 +4,22 @@
     "Parameters"               : {
         "KeyName" : {
             "Default" : "Linux-keypair",
-            "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances (case sensitive)",
-            "Type"        : "String"
+            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
         },
         "LansaMSI" : {
             "Type"        : "String",
-            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
-            "Description" : "URL of the LANSA MSI to install. Typically an S3 URL"
+            "Default"     : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
+            "Description" : "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
+        },
+        "UserScriptHook" : {
+            "Type"    : "String",
+            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1",
+            "Description" : "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "LansaMSIBitness" : {
             "Default" : "1",
-            "Description" : "Set to 1 if the MSI is a 32-bit app, otherwise set it to 0",
+            "Description" : "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
             "Type"        : "String",
             "AllowedValues" : [
                 "1",
@@ -22,13 +27,8 @@
             ],
             "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
         },
-        "AMI" : {
-            "Default" : "ami-0b036c31",
-            "Description" : "IGNORED! TODO Name of an existing Windows AMI in the current region. Default is Microsoft Windows Server 2012 R2 Base",
-            "Type"        : "String"
-        },
         "WebServerInstanceType" : {
-            "Description" : "WebServer EC2 instance type",
+            "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
             "Default"     : "m3.medium",
             "AllowedValues" : [
@@ -71,12 +71,11 @@
                 "cc2.8xlarge",
                 "cg1.4xlarge",
                 "t1.micro"
-            ],
-            "ConstraintDescription" : "Must be a valid EC2 instance type."
+            ]
         },
-        "DBClass"      : {
+        "DBInstanceClass"      : {
             "Default" : "db.m3.medium",
-            "Description" : "Database instance class",
+            "Description" : "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
             "Type"        : "String",
             "AllowedValues" : [
                 "db.t2.micro",
@@ -99,132 +98,133 @@
                 "db.m1.large",
                 "db.m1.xlarge",
                 "db.t1.micro"
-            ],
-            "ConstraintDescription" : "Must select a valid database instance type."
+            ]
         },
         "DBName"       : {
             "Default" : "lansa",
-            "Description" : "LANSA database name",
+            "Description" : "LANSA database name. Must begin with a letter and contain only alphanumeric characters. Maximum length 64.",
             "Type"        : "String",
             "MinLength"   : "1",
             "MaxLength"   : "64",
-            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
-            "ConstraintDescription" : "Must begin with a letter and contain only alphanumeric characters. Max length 64"
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
         "DBEngine" : {
-            "Description" : "Database engine type",
+            "Description" : "Database engine type. Must be a valid SQL Server engine type. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-ex' or 'sqlserver-web'.",
             "Type"        : "String",
             "Default"     : "sqlserver-web",
             "AllowedValues" : [
                 "sqlserver-ex",
-                "sqlserver-ee",
+                "sqlserver-web",
                 "sqlserver-se",
-                "sqlserver-web"
-            ],
-            "ConstraintDescription" : "Must be a valid SQL Server engine type. Note that to support Multi-Az you need to choose sqlserver-ee or sqlserver-se"
+                "sqlserver-ee"
+            ]
         },
         "DBUsername"   : {
             "Default" : "admin",
-            "Description" : "The LANSA database admin account username",
+            "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
             "Type"        : "String",
             "MinLength"   : "1",
             "MaxLength"   : "16",
-            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*",
-            "ConstraintDescription" : "Must begin with a letter and contain only alphanumeric characters. Max length 16"
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
         "DBPassword"   : {
             "Default" : "password",
             "NoEcho"  : "true",
-            "Description" : "LANSA database admin account password. This password must conform to Account Policy rules",
+            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
             "Type"        : "String",
             "MinLength"   : "8",
-            "MaxLength"   : "41",
-            "ConstraintDescription" : "Min length 8, max length 41"
+            "MaxLength"   : "41"
         },
         "MultiAZDatabase" : {
             "Default" : "false",
-            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. This is limited to particular regions and particular engine types",
+            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
             "Type"        : "String",
             "AllowedValues" : [
                 "true",
                 "false"
-            ],
-            "ConstraintDescription" : "Must be either true or false."
+            ]
         },
         "WebServerCapacity" : {
             "Default" : "0",
-            "Description" : "The initial number of EXTRA WebServer instances",
+            "Description" : "The initial number of EXTRA WebServer EC2 instances. Must be between 0 and 50.",
             "Type"        : "Number",
             "MinValue"    : "0",
-            "MaxValue"    : "50",
-            "ConstraintDescription" : "Must be between 0 and 50 EC2 instances."
+            "MaxValue"    : "50"
         },
         "DBAllocatedStorage" : {
             "Default" : "50",
-            "Description" : "The size of the database (GB)",
+            "Description" : "The maximum size of the database. Must be between 20 and 1024 GB. Maximum 20 for 'sqlserver-ex'. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
             "Type"        : "Number",
             "MinValue"    : "20",
-            "MaxValue"    : "1024",
-            "ConstraintDescription" : "Must be between 20 and 1024 GB. Minimum 200 for sqlserver-ee and sqlserver-se"
+            "MaxValue"    : "1024"
         },
-        "SSHLocation"        : {
-            "Description" : "The IP address range that can be used to SSH/RDP to the EC2 instances",
+        "RemoteAccessLocation"        : {
+            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
             "Type"        : "String",
             "MinLength"   : "9",
             "MaxLength"   : "18",
             "Default"     : "103.231.159.65/32",
-            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription" : "Must be a valid IP CIDR range of the form x.x.x.x/x."
+            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
         "ELBTimeout"         : {
-            "Description" : "Time to wait for a response from the application. Health check interval and IIS timeouts are based on this time too.",
+            "Description" : "Time to wait for a response from the application. Must be between 2 and 60. Health check interval and IIS timeouts are based on this time too.",
             "Type"        : "Number",
             "MinValue"    : "2",
             "MaxValue"    : "60",
-            "Default"     : "30",
-            "ConstraintDescription" : "Must be between 2 and 60"
+            "Default"     : "30"
         },
         "WebUser"   : {
             "Type"    : "String",
             "Default" : "PCXUSER2",
-            "Description" : "User to use for running web jobs"
+            "Description" : "User to use for running web jobs."
         },
         "WebPassword"   : {
             "NoEcho"  : "true",
             "Type"    : "String",
             "Default" : "PCXUSER@122",
-            "Description" : "Password for WebUser.This password must conform to Account Policy rules"
+            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
         },
-        "CakeUpdateNumber" : {
+        "TriggerCakeUpdate" : {
             "Type"    : "String",
             "Default" : "1",
-            "Description" : "Update Stack: Increment this by one to trigger a Cake update. Mainly to ensure that Windows Updates have been applied. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
+            "Description" : "Update Stack: Increment this by one to update the supporting software and trigger a Windows Update. This is the same as triggerring both a ChefUpdate and a WindowsUpdate. Mainly to ensure that Windows Updates have been applied."
         },
-        "IcingUpdateNumber" : {
+        "TriggerChefUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to update the supporting software."
+        },
+        "TriggerWindowsUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger a Windows Update."
+        },
+        "TriggerIcingUpdate" : {
             "Type"    : "String",
             "Default" : "1",
             "Description" : "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly."
         },
-        "PatchNumber" : {
+        "TriggerPatchInstall" : {
             "Type"    : "String",
             "Default" : "1",
-            "Description" : "Update Stack: Increment this by one to trigger patches to be installed. Obtains all MSPs and applies those not already applied."
+            "Description" : "Update Stack: Increment this by one to trigger patches to be installed. Obtains all MSPs from the PatchBucket and PatchFolder and applies those not already applied."
         },
         "PatchBucketName" : {
             "Type"    : "String",
             "Default" : "lansa",
-            "Description" : "Update Stack: S3 Bucket which will contain the patches. (case sensitive)"
+            "Description" : "Update Stack: S3 Bucket which will contain the patches. (case sensitive)."
         },
         "PatchFolderName" : {
             "Type"    : "String",
             "Default" : "app/Test",
-            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive)"
+            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive)."
         }
     },
     "Mappings"                 : {
          "AWSRegionArch2AMI"    : {
             "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
-            "ap-southeast-2" : { "64" : "ami-f77a13cd" }
+            "ap-southeast-2"  : { "64" : "ami-992452a3" },
+            "us-east-1"       : { "64" : "ami-801e54e8" }
         }
     },
     "Resources"                : {
@@ -307,7 +307,7 @@
                     "Ref" : "DBUsername"
                 },
                 "DBInstanceClass" : {
-                    "Ref" : "DBClass"
+                    "Ref" : "DBInstanceClass"
                 },
                 "DBSecurityGroups" : [
                     {
@@ -370,7 +370,7 @@
                         "FromPort"   : "22",
                         "ToPort"     : "22",
                         "CidrIp"     : {
-                            "Ref" : "SSHLocation"
+                            "Ref" : "RemoteAccessLocation"
                         }
                     },
                     {
@@ -378,7 +378,7 @@
                         "FromPort"   : "3389",
                         "ToPort"     : "3389",
                         "CidrIp"     : {
-                            "Ref" : "SSHLocation"
+                            "Ref" : "RemoteAccessLocation"
                         }
                     },
                     {
@@ -386,7 +386,7 @@
                         "FromPort"   : "1433",
                         "ToPort"     : "1433",
                         "CidrIp"     : {
-                            "Ref" : "SSHLocation"
+                            "Ref" : "RemoteAccessLocation"
                         }
                     }
                 ]
@@ -417,7 +417,7 @@
                     "DBUsername"          : { "Ref" : "DBUsername" },
                     "DBPassword"          : { "Ref" : "DBPassword" },
                     "WebServerCapacity"   : { "Ref" : "WebServerCapacity" },
-                    "SSHLocation"         : { "Ref" : "SSHLocation" },
+                    "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
@@ -426,7 +426,13 @@
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "WebUser"             : { "Ref" : "WebUser" },
                     "WebPassword"         : { "Ref" : "WebPassword" },
-                    "DummyRef"            : { "Ref" : "DBWebServerApp" }
+                    "DummyRef"            : { "Ref" : "DBWebServerApp" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" }
                }
             }
          },
@@ -445,7 +451,7 @@
                     "DBUsername"          : { "Ref" : "DBUsername" },
                     "DBPassword"          : { "Ref" : "DBPassword" },
                     "WebServerCapacity"   : 1,
-                    "SSHLocation"         : { "Ref" : "SSHLocation" },
+                    "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
@@ -453,7 +459,13 @@
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "WebUser"             : { "Ref" : "WebUser" },
-                    "WebPassword"         : { "Ref" : "WebPassword" }
+                    "WebPassword"         : { "Ref" : "WebPassword" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" }
                }
             }
          }

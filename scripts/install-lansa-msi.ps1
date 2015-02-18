@@ -23,7 +23,8 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$32bit = 'true',
 [String]$SUDB = '1',
-[String]$UPGD = 'false'
+[String]$UPGD = 'false',
+[String]$userscripthook
 )
 
 # Put first output on a new line in cfn_init log file
@@ -31,7 +32,8 @@ Write-Output ("`r`n")
 
 $trusted="NO"
 
-# $DebugPreference = "Continue"
+$DebugPreference = "Continue"
+$VerbosePreference = "Continue"
 
 Write-Debug ("Server_name = $server_name")
 Write-Debug ("dbname = $dbname")
@@ -99,7 +101,8 @@ if ( $SUDB -eq '1' -and -not $UPGD_bool)
     }
     Catch
     {
-        # Its expected to fail on 2nd and subsequent EC2 instances or iterations
+        $_
+        Write-Output ("Database creation failed. Its expected to fail on 2nd and subsequent EC2 instances or iterations")
     }
     Write-Output ($db.CreateDate)
 }
@@ -109,7 +112,7 @@ if ( -not $UPGD_bool )
     Start-WebAppPool -Name "DefaultAppPool"
 }
 
-# Install the application
+Write-Output ("Installing the application")
 
 $installer = "MyApp.msi"
 $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
@@ -142,5 +145,97 @@ else
     Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
 }
 
-Write-Output ( "Installation completed")
-Write-Output ("See $install_log and other files in $ENV:TEMP for more details")
+#####################################################################################
+# Create new private key filename for new machine GUID
+# New key is just a copy of the old one with a change of name to replace the old Machine GUID with the new Machine GUID
+# Value for the old private key is stored in the registry key HKLM:\Software\LANSA\ScalableLicensePrivateKey
+# Value for the old Machine GUID is stored in the registry key HKLM:\Software\LANSA\PriorMachineGuid
+# Format of private key file name is <Unique for certificate no matter where it is imported to>_<Machine GUID>
+#####################################################################################
+$getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName "LANSA Scalable License"
+
+$Thumbprint = $getCert.Thumbprint
+
+$keyName=(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
+
+if ( -not $keyname )
+{
+    Write-Verbose "No key"
+
+    $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name ScalableLicensePrivateKey
+    $PriorMachineGuid          = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid
+    $MachineGuid               = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
+
+    if ( -not $ScalableLicensePrivateKey -or -not $PriorMachineGuid -or -not $MachineGuid)
+    {
+        throw ("One of the following registry keys is invalid: HKLM:\Software\LANSA\ScalableLicensePrivateKey, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
+    }
+
+    Write-Verbose ("Replace Old Machine Guid with new Machine Guid")
+
+    if ( ($ScalableLicensePrivateKey.ScalableLicensePrivateKey -match $PriorMachineGuid.PriorMachineGuid) -eq $true )
+    {
+        Write-Verbose "Guid found in Private Key"
+        $NewScalableLicensePrivateKey = $ScalableLicensePrivateKey.ScalableLicensePrivateKey -replace 
+                                            $($PriorMachineGuid.PriorMachineGuid + "$"), $MachineGuid.MachineGuid
+        if ($ScalableLicensePrivateKey.ScalableLicensePrivateKey -eq $NewScalableLicensePrivateKey)
+        {
+            throw ("Prior Machine GUID {0} not found at end of Scalable License Private Key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
+        }
+
+        Write-Verbose ("New private key is {0}" -f $NewScalableLicensePrivateKey)
+    }
+    else
+    {
+        throw ( "PriorMachine GUID {0} is not in current LANSA Scalable License Private key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
+    }
+
+    Write-Verbose ("Copy old key to new key")
+
+    $keyPath = "C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\"
+    $fullPath=$keyPath+$keyName
+    Copy-Item $($KeyPath + $ScalableLicensePrivateKey.ScalableLicensePrivateKey) $($KeyPath + $NewScalableLicensePrivateKey)
+
+    Write-Verbose ("Set ACLs on new key so that $webuser may access it")
+
+    $pkFile = $($KeyPath + $NewScalableLicensePrivateKey)
+    $acl=Get-Acl -Path $pkFile
+    $permission= $webuser,"Read","Allow"
+    $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
+    $acl.AddAccessRule($accessRule)
+    Set-Acl $pkFile $acl
+}
+else
+{
+    Write-Verbose ("Private key $keyname already exists")
+}
+
+Write-Output ("Execute the user script if one has been passed")
+
+if ($userscripthook)
+{
+    Write-Output ("It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
+
+    $UserScriptFile = "C:\LANSA\UserScript.ps1"
+    Write-Output ("Downloading $userscripthook to $UserScriptFile")
+    ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile)
+
+    if ( Test-Path $UserScriptFile )
+    {
+        Write-Output ("Executing $UserScriptFile")
+
+        Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -32bit $32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook"
+    }
+    else
+    {
+        Write-Verbose ("$UserScriptFile does not exist")
+    }
+}
+else
+{
+    Write-Verbose ("User Script not passed")
+}
+
+Write-Output ("Installation completed")
+Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
+Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
