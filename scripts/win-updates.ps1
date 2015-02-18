@@ -9,7 +9,7 @@ function LogWrite {
    Param ([string]$logstring)
    $now = Get-Date -format s
    Add-Content $Logfile -value "$now $logstring"
-   Write-Host $logstring
+   Write-Output $logstring
 }
 
 function Check-ContinueRestartOrEnd() {
@@ -58,7 +58,7 @@ function Install-WindowsUpdates() {
     LogWrite "Evaluating Available Updates with limit of $($MaxUpdatesPerCycle):"
     $UpdatesToDownload = New-Object -ComObject 'Microsoft.Update.UpdateColl'
     $script:i = 0;
-    $CurrentUpdates = $SearchResult.Updates | Select-Object
+    $CurrentUpdates = @($SearchResult.Updates | Select-Object)
     while($script:i -lt $CurrentUpdates.Count -and $script:CycleUpdateCount -lt $MaxUpdatesPerCycle) {
         $Update = $CurrentUpdates[$script:i]
         if (($Update -ne $null) -and (!$Update.IsDownloaded)) {

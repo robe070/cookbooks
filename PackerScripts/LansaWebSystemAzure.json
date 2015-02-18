@@ -1,0 +1,27 @@
+{
+  "variables": {
+    "chef_recipe_location": "..\\ChefCookbooks\\",
+    "script_location": "..\\scripts\\",
+    "user_directory": "{{env `userprofile`}}"
+  },
+
+  "builders": [{
+    "type": "azure",
+    "publish_settings_path" : "C:\\work\\Cloud\\cookbooks\\PackerScripts\\FreeTrial-1-27-2015-credentials.publishsettings",
+    "subscription_name" : "Free Trial",
+    "storage_account" : "portalvhds466j4jtfwwzxh",
+	 "os_type"	: "Windows",
+    "os_image_label"	: "Windows Server 2012 R2 Datacenter",
+    "location"	: "Australia Southeast",
+    "instance_size" : "Medium",
+    "user_image_label" : "lansaPacker3"
+  }],
+
+  "provisioners": [
+  {
+    "type": "azure-custom-script-extension",
+    "inline": [ 
+      "cmd /c \"md c:\\packerTemp\"",
+      "powershell \"(New-Object System.Net.Webclient).downloadfile( \"c:\\packerTemp\\script.cmd\", \"c:\\packerTemp\\script.cmd\" )\"" ]
+  }]
+}
