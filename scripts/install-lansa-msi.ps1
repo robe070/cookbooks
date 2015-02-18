@@ -23,7 +23,8 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$32bit = 'true',
 [String]$SUDB = '1',
-[String]$UPGD = 'false'
+[String]$UPGD = 'false',
+[String]$userscripthook
 )
 
 # Put first output on a new line in cfn_init log file
@@ -208,5 +209,33 @@ else
 {
     Write-Verbose ("Private key $keyname already exists")
 }
-Write-Output ( "Installation completed")
-Write-Output ("See $install_log and other files in $ENV:TEMP for more details")
+
+Write-Output ("Execute the user script if one has been passed")
+
+if ($userscripthook)
+{
+    Write-Output ("It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
+
+    $UserScriptFile = "C:\LANSA\UserScript.ps1"
+    Write-Output ("Downloading $userscripthook to $UserScriptFile")
+    ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile)
+
+    if ( Test-Path $UserScriptFile )
+    {
+        Write-Output ("Executing $UserScriptFile")
+
+        Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -32bit $32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook"
+    }
+    else
+    {
+        Write-Verbose ("$UserScriptFile does not exist")
+    }
+}
+else
+{
+    Write-Verbose ("User Script not passed")
+}
+
+Write-Output ("Installation completed")
+Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
+Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
