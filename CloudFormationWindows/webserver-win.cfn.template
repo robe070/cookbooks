@@ -161,7 +161,8 @@
                 "MinSize"                 : { "Fn::If" : [ "IsWebServer", {"Ref" : "WebServerCapacity"}, "1" ]},
                 "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "50", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
-                "HealthCheckGracePeriod"  : 300,
+                "HealthCheckType"         : "ELB",
+                "HealthCheckGracePeriod"  : 1800,
                 "LoadBalancerNames"       : [ { "Ref" : "LoadBalancer" } ],
                 "Tags" : [ {
                         "Key" : "Name",
@@ -272,7 +273,7 @@
                         },
                         "c:\\cfn\\hooks.d\\cfn-SetXRUNEnvVar.conf" : {
                            "content": { "Fn::Join" : ["", [
-                              "[cfn-patch-hook]\n",
+                              "[cfn-setxrunenvvar-hook]\n",
                               "triggers=post.update\n",
                               "path=Resources.LaunchWebServer.Metadata.SetXRUNEnvVar\n",
                               "action=cfn-init.exe -v -s ", { "Ref" : "AWS::StackId" },
@@ -521,7 +522,7 @@
                "MetricName": "CPUUtilization",
                "EvaluationPeriods": "1",
                "Statistic": "Average",
-               "Period": "60",
+               "Period": "900",
                "Unit" : "Percent",
                "Threshold": "70",
                "ComparisonOperator": "GreaterThanThreshold",
@@ -540,7 +541,7 @@
                "MetricName": "CPUUtilization",
                "EvaluationPeriods": "1",
                "Statistic": "Average",
-               "Period": "60",
+               "Period": "900",
                "Unit" : "Percent",
                "Threshold": "30",
                "ComparisonOperator": "LessThanThreshold",

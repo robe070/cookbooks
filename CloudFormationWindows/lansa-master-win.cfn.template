@@ -432,6 +432,8 @@
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "PatchBucketName"     : { "Ref" : "PatchBucketName"},
+                    "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" }
                }
             }
@@ -465,6 +467,8 @@
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "PatchBucketName"     : { "Ref" : "PatchBucketName"},
+                    "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" }
                }
             }
