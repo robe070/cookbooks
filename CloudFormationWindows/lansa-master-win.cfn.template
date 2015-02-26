@@ -73,6 +73,11 @@
                 "t1.micro"
             ]
         },
+        "WebServerMaxConnect" : {
+            "Description" : "The maximum number of LANSA jobs to run on each Web Server. Setting TriggerWebConfig will cause this value to be updated.",
+            "Type"        : "Number",
+            "Default" : 20
+        },        
         "DBInstanceClass"      : {
             "Default" : "db.m3.medium",
             "Description" : "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
@@ -199,6 +204,11 @@
             "Default" : "1",
             "Description" : "Update Stack: Increment this by one to trigger a Windows Update."
         },
+        "TriggerWebConfig" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger an update to the web configuration"
+        },
         "TriggerIcingUpdate" : {
             "Type"    : "String",
             "Default" : "1",
@@ -264,6 +274,7 @@
                 "AvailabilityZones" : {
                     "Fn::GetAZs" : ""
                 },
+                "CrossZone" : "true",
                 "LBCookieStickinessPolicy" : [
                     {
                         "PolicyName" : "CookieBasedPolicy",
@@ -417,6 +428,7 @@
                     "DBUsername"          : { "Ref" : "DBUsername" },
                     "DBPassword"          : { "Ref" : "DBPassword" },
                     "WebServerCapacity"   : { "Ref" : "WebServerCapacity" },
+                    "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
                     "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
@@ -430,6 +442,7 @@
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
                     "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerWebConfig"     : { "Ref" : "TriggerWebConfig" },
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
@@ -453,6 +466,7 @@
                     "DBUsername"          : { "Ref" : "DBUsername" },
                     "DBPassword"          : { "Ref" : "DBPassword" },
                     "WebServerCapacity"   : 1,
+                    "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
                     "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
@@ -465,6 +479,7 @@
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
                     "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerWebConfig"     : { "Ref" : "TriggerWebConfig" },
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},

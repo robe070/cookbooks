@@ -8,7 +8,7 @@ Requires the environment that a LANSA Cake provides, particularly an AMI license
 
 # N.B. It is vital that the user id and password supplied pass the password rules. 
 E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
-i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER"
+i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
 
@@ -24,6 +24,7 @@ param(
 [String]$32bit = 'true',
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
+[String]$maxconnections = '20',
 [String]$userscripthook
 )
 
@@ -228,7 +229,7 @@ if ($userscripthook)
     }
     else
     {
-        Write-Verbose ("$UserScriptFile does not exist")
+       throw ("$UserScriptFile does not exist")
     }
 }
 else
@@ -236,6 +237,6 @@ else
     Write-Verbose ("User Script not passed")
 }
 
-Write-Output ("Installation completed")
 Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
 Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+Write-Output ("Installation completed")
