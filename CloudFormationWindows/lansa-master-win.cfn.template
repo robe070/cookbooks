@@ -235,26 +235,50 @@
             "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
             "ap-southeast-2"  : { "64" : "ami-992452a3" },
             "us-east-1"       : { "64" : "ami-801e54e8" }
-        }
+        },
+       "Region2Principal" : {
+         "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "us-west-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "us-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "eu-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-southeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-northeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-southeast-2" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "sa-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "cn-north-1"     : { "EC2Principal" : "ec2.amazonaws.com.cn", "OpsWorksPrincipal" : "opsworks.amazonaws.com.cn" },
+         "eu-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" }
+       }
+   ,
+       "Region2ARNPrefix": {
+         "us-east-1"      : { "ARNPrefix": "arn:aws:" },
+         "us-west-1"      : { "ARNPrefix": "arn:aws:" },
+         "us-west-2"      : { "ARNPrefix": "arn:aws:" },
+         "eu-west-1"      : { "ARNPrefix": "arn:aws:" },
+         "ap-northeast-1" : { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-1" : { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-2" : { "ARNPrefix": "arn:aws:" },
+         "sa-east-1"      : { "ARNPrefix": "arn:aws:" },
+         "cn-north-1"     : { "ARNPrefix": "arn:aws-cn:" },
+         "eu-central-1"   : { "ARNPrefix": "arn:aws:" }
+       }
+
     },
     "Resources"                : {
          "CfnUser"             : {
            "Type" : "AWS::IAM::User",
            "Properties" : {
              "Path": "/",
-             "Policies": [
-         {
-            "PolicyName": "Admin",
-            "PolicyDocument": 
-	         { "Statement": [
-	           {
-        	           "Effect":"Allow",
-                       "Action":"*",
-                       "Resource":"*"
-									         }
-								         ]}			
-               }
-							         ]
+             "Policies": [ {
+                  "PolicyName": "Admin",
+                  "PolicyDocument": 
+	               { "Statement": [
+	                  {
+        	                 "Effect":"Allow",
+                             "Action":"*",
+                             "Resource":"*"
+						   }
+					   ]}			
+              }]
            }
          },
          "HostKeys"            : {
@@ -263,7 +287,45 @@
              "UserName" : {"Ref": "CfnUser"}
            }
          },
-
+         "LogRole"             : {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": { "Service": [{ "Fn::FindInMap" : ["Region2Principal", {"Ref" : "AWS::Region"}, "EC2Principal"]}] },
+                  "Action": [ "sts:AssumeRole" ]
+              } ] },
+              "Path": "/",
+              "Policies": [ {
+                "PolicyName": "LogRolePolicy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [ 
+                     {
+                        "Resource": [ { "Fn::Join" : ["", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] }, 
+                                     "logs:*:*:*" ]]}],
+                        "Action": [ "logs:*" ],
+                        "Effect": "Allow"
+                     },
+                     {
+                        "Resource":["*"],
+                        "Action":["cloudwatch:PutMetricData"],
+                        "Effect":"Allow"
+                     }
+                  ] 
+                }
+              } ]
+            }
+          },
+         "LogRoleInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+              "Path": "/",
+              "Roles": [ { "Ref": "LogRole" } ]
+            }
+          },
          "WebServerELB"        : {
             "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
             "Metadata" : {
@@ -304,7 +366,6 @@
                 }
             }
          },
-         
          "DBInstance"          : {
             "Type" : "AWS::RDS::DBInstance",
             "Properties" : {
@@ -447,7 +508,8 @@
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
-                    "UserScriptHook"      : { "Ref" : "UserScriptHook" }
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" },
+                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
                }
             }
          },
@@ -484,7 +546,8 @@
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
-                    "UserScriptHook"      : { "Ref" : "UserScriptHook" }
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" },
+                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
                }
             }
          }

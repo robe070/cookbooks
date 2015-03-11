@@ -28,7 +28,7 @@
         },
         "DBEndPoint"       : {
             "Type"        : "String",
-            "Default" : "tdgxg1ddiuto85.cemy5sqefsvw.ap-southeast-2.rds.amazonaws.com:1433"
+            "Default" : "tdgxg1ddiuto85.cemy5sqefsvw.ap-southeast-2.rds.amazonaws.com"
         },
         "DBName"       : {
             "Type"        : "String",
@@ -150,7 +150,11 @@
             "Type"    : "String",
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
-        }
+        },
+       "LogRoleInstanceProfile" : {
+            "Type"    : "String",
+            "Description" : "IAM Instance Role"
+       }
     },
     "Conditions" : {
        "IsWebServer" : {"Fn::Equals" : [{"Ref" : "LansaType"}, "WebServer"]},
@@ -215,6 +219,9 @@
                               "interval=1\n",
                               "verbose=true\n"
                            ]]}
+                        },
+                        "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
+                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json"
                         },
                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf" : {
                            "content": { "Fn::Join" : ["", [
@@ -317,6 +324,7 @@
                                  "c:\\cfn\\hooks.d\\cfn-chef.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-windows.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-icing.conf",
+                                 "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
                                  "c:\\cfn\\hooks.d\\cfn-patch.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-SetXRUNEnvVar.conf",
                                  "C:\\LANSA\\MyApp.msi"]
@@ -324,7 +332,6 @@
                         }
                      }
                   },
-
                   "install-msi" : {
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
@@ -337,24 +344,27 @@
                      "commands" : {
                         "01_install_msi" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webuser ", { "Ref" : "WebUser" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
-                                 " -32bit ", { "Ref" : "LansaMSIBitness" },
+                                 " -f32bit ", { "Ref" : "LansaMSIBitness" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -UPGD false",
                                  { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
-                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]}
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 " -Wait ", { "Fn::Base64" : { "Ref" : "WaitHandle" }},
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "upgrade-msi" : {
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
@@ -367,18 +377,21 @@
                      "commands" : {
                         "01_upgrade_msi" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webuser ", { "Ref" : "WebUser" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
-                                 " -32bit ", { "Ref" : "LansaMSIBitness" },
+                                 " -f32bit ", { "Ref" : "LansaMSIBitness" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -UPGD true",
                                  { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
-                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]}
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
@@ -394,7 +407,8 @@
                      "commands" : {
                         "01_install_patches" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\copy-s3-install-patches.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {", 
+                                 "C:\\LANSA\\copy-s3-install-patches.ps1", 
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
@@ -402,13 +416,14 @@
                                  " -region ",      { "Ref" : "AWS::Region" },
                                  " -access_key ",  { "Ref" : "AccessKeyId" },
                                  " -secret_key ",  { "Ref" : "SecretKey"},
-                                 " -folder ",      { "Ref" : "PatchFolderName" }
+                                 " -folder ",      { "Ref" : "PatchFolderName" },
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "setup-symlink" : {
                      "files"    : {
                         "C:\\LANSA\\regsymlink.exe" : {
@@ -422,7 +437,32 @@
                         }
                      }
                   },
-
+                  "cloud-watch-config" : {
+                     "files"    : {
+                        "C:\\LANSA\\cloud-watch-config.ps1" : {
+                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/cloud-watch-config.ps1"
+                        }
+                     },
+                     "commands" : {
+                        "01_cloud_watch_config" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\cloud-watch-config.ps1", 
+                                 " -dbpassword ", { "Ref" : "DBPassword" },
+                                 " -webpassword ", { "Ref" : "WebPassword" },
+                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
+                                 " -bucket_name ", { "Ref" : "PatchBucketName" },
+                                 " -region ",      { "Ref" : "AWS::Region" },
+                                 " -access_key ",  { "Ref" : "AccessKeyId" },
+                                 " -secret_key ",  { "Ref" : "SecretKey"},
+                                 " -folder ",      { "Ref" : "PatchFolderName" },
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
                   "jit" : {
                      "commands" : {
                         "01_jit" : {
@@ -431,16 +471,14 @@
                         }
                      }
                   },
-
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\recipes\\win-updates.ps1",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "run-webconfig" : {
                      "files"    : {
                         "C:\\LANSA\\webconfig.ps1" : {
@@ -450,25 +488,27 @@
                      "commands" : {
                         "01_webconfig" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\webconfig.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\webconfig.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webuser ", { "Ref" : "WebUser" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
-                                 " -32bit ", { "Ref" : "LansaMSIBitness" },
+                                 " -f32bit ", { "Ref" : "LansaMSIBitness" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -UPGD true",
                                  " -maxconnections ", { "Ref" : "WebServerMaxConnect"},
                                  { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
-                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]}
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "SetXRUNEnvVar" : {
                      "files"    : {
                         "C:\\LANSA\\SetXRUNEnvVar.ps1" : {
@@ -477,12 +517,11 @@
                      },
                      "commands" : {
                         "01_SetXRUNEnvVar" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\SetXRUNEnvVar.ps1",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\LANSA\\SetXRUNEnvVar.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "run-chef" : {
                      "files"    : {
                         "C:\\LANSA\\run-chef.ps1" : {
@@ -516,6 +555,7 @@
             "Properties" : {
                "ImageId" : { "Ref" : "AMI" },
                "InstanceType" : { "Ref" : "InstanceType" },
+               "IamInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" },
                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
                "KeyName"        : { "Ref" : "KeyName" },
                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -529,7 +569,22 @@
 
                               "cfn-signal.exe -e %ERRORLEVEL% ", { "Fn::Base64" : { "Ref" : "WaitHandle" }}, "\n",
           
-                              "</script>"
+                              "</script>\n",
+                              "<powershell>\n",
+                              "$EC2SettingsFile=\"C:\\Program Files\\Amazon\\Ec2ConfigService\\Settings\\Config.xml\"\n",
+                              "$xml = [xml](get-content $EC2SettingsFile)\n",
+                              "$xmlElement = $xml.get_DocumentElement()\n",
+                              "$xmlElementToModify = $xmlElement.Plugins\n",
+
+                              "foreach ($element in $xmlElementToModify.Plugin)\n",
+                              "{\n",
+                              "    if ($element.name -eq \"AWS.EC2.Windows.CloudWatch.PlugIn\")\n",
+                              "    {\n",
+                              "        $element.State=\"Enabled\"\n",
+                              "    }\n",
+                              "}\n",
+                              "$xml.Save($EC2SettingsFile)\n",
+                              "</powershell>"
                ]]}}
             }
          },

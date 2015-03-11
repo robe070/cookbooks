@@ -25,6 +25,11 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="AWS.EC2.Windows.CloudWatch.json">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

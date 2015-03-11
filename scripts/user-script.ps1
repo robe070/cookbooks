@@ -4,6 +4,8 @@
 Example user script executed at end of LANSA MSI Install
 
 The same parameters are passed to this script as are passed to the caller, install-lansa-msi.ps1
+
+Git Test 2
 .EXAMPLE
 
 
@@ -15,7 +17,7 @@ param(
 [String]$dbpassword = 'password',
 [String]$webuser = 'PCXUSER2',
 [String]$webpassword = 'PCXUSER@122',
-[String]$32bit = 'true',
+[String]$f32bit = 'true',
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
 [String]$userscripthook
@@ -37,7 +39,7 @@ Write-Debug ("Server_name = $server_name")
 Write-Debug ("dbname = $dbname")
 Write-Debug ("dbuser = $dbuser")
 Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $32bit")
+Write-Debug ("32bit = $f32bit")
 Write-Debug ("SUDB = $SUDB")
 Write-Debug ("UPGD = $UPGD")
 
