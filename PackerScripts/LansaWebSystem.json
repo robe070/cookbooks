@@ -39,7 +39,7 @@
     "type": "shell",
     "pause_before": "30s",
     "inline": [
-      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi\"" ]
+      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-client-12.1.0-1.msi\"" ]
   },
   {
     "type": "file",
@@ -108,12 +108,6 @@
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
       "powershell \"c:\\recipes\\win-updates.ps1\"" ]
-  },
-  {
-    "type": "shell",
-    "start_retry_timeout": "8m",
-    "inline": [
-      "shutdown /r /f /d p:4:1 /c \"Packer Reboot\"" ]
   },
   {
     "type": "shell",
