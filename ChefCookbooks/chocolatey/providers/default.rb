@@ -101,6 +101,8 @@ def package_exists?(name, version)
 end
 
 def upgradeable?(name)
+# AU - Always return False as we never want to upgrade.
+  return false
   return false unless @current_resource.exists
   unless package_installed?(name)
     Chef::Log.debug("Package isn't installed... we can upgrade it!")

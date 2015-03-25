@@ -13,7 +13,7 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "{{user `aws_region`}}",
-    "source_ami": "ami-9d0d64a7",
+    "source_ami": "ami-c5aadaff",
     "instance_type": "{{user `aws_instance_type`}}",
     "ssh_username": "Administrator",
     "ssh_timeout": "10m",
@@ -39,7 +39,7 @@
     "type": "shell",
     "pause_before": "30s",
     "inline": [
-      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-client-12.1.0-1.msi\"" ]
+      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi\"" ]
   },
   {
     "type": "file",
@@ -65,6 +65,11 @@
     "type": "file",
     "source": "{{user `chef_recipe_location`}}iis",
     "destination": "/cygdrive/c/recipes/chef-repo/cookbooks/iis"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}getchoco.ps1",
+    "destination": "c:\\packerTemp\\getchoco.ps1"
   },
   {
     "type": "shell",
@@ -96,6 +101,16 @@
     "destination": "c:\\packerTemp\\setlic.ps1"
   },
   {
+    "type": "file",
+    "source": "{{user `script_location`}}installAwsSdk.ps1",
+    "destination": "c:\\packerTemp\\installAwsSdk.ps1"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}scheduleTask.ps1",
+    "destination": "c:\\packerTemp\\scheduleTask.ps1"
+  },
+  {
     "type": "shell",
     "start_retry_timeout": "5m",
     "inline": [
@@ -107,15 +122,24 @@
     "inline": [
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
+      "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
+      "powershell \"c:\\packerTemp\\scheduleTask.ps1\"",
       "powershell \"c:\\recipes\\win-updates.ps1\"" ]
   },
   {
     "type": "shell",
     "pause_before": "8m",
     "inline": [
+      "powershell \"c:\\recipes\\win-updates.ps1\"" ]
+  },
+  {
+    "type": "shell",
+    "pause_before": "8m",
+    "inline": [
+      "cmd /c \"sc triggerinfo w32time start/networkon stop/networkoff\"",
       "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\Ngen executequeueditems\"",
       "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\Ngen executequeueditems\"",
-      "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1\"",
+      "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1 c:\\packerTemp\"",
       "powershell \"Set-ExecutionPolicy Restricted -Scope CurrentUser\"" ]
   },
   {

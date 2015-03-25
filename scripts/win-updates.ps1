@@ -13,6 +13,10 @@ function LogWrite {
 }
 
 function Check-ContinueRestartOrEnd() {
+# We don't want to run Windows update again. It seems "Run" doesn't automatically run after a login.
+# We saw evidence of it running 20 minutes after a login and that wasn't even the first login after the
+# instance was created.
+<#
     $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
     $RegistryEntry = "InstallWindowsUpdates"
     switch ($global:RestartRequired) {
@@ -51,6 +55,7 @@ function Check-ContinueRestartOrEnd() {
             break
         }
     }
+#>
 }
 
 function Install-WindowsUpdates() {
