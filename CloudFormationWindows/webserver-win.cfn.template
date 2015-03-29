@@ -60,7 +60,7 @@
             "Type"        : "Number"
         },
         "AMI"  : {
-            "Default"     : "ami-ffdeb0c5",
+            "Default"     : "ami-bb6b1881",
             "Type"        : "String"
         },
         "SecurityGroup": {
@@ -172,7 +172,7 @@
                     "Ref" : "LaunchWebServer"
                 },
                 "MinSize"                 : { "Fn::If" : [ "IsWebServer", {"Ref" : "WebServerCapacity"}, "1" ]},
-                "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "50", "1" ]},
+                "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "150", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
                 "HealthCheckType"         : "ELB",
                 "HealthCheckGracePeriod"  : 1800,
@@ -199,7 +199,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install" : ["install-cfn", "install-logging","install-msi", "setup-symlink","run-webconfig"],
                      "cfn-update" : ["install-cfn"],
                      "cake-update" : ["run-chef", "run-windows-update"],
                      "chef-update" : ["run-chef"],
@@ -219,9 +219,6 @@
                               "interval=1\n",
                               "verbose=true\n"
                            ]]}
-                        },
-                        "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json"
                         },
                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf" : {
                            "content": { "Fn::Join" : ["", [
@@ -332,6 +329,31 @@
                         }
                      }
                   },
+                  "install-logging" : {
+                     "files"    : {
+                        "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
+                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json"
+                        },
+                        "c:\\lansa\\install-logging.ps1" : {
+                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-logging.ps1"
+                        }
+                     },
+                     "commands" : {
+                        "01_install_logging" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\install-logging.ps1", 
+                                 " -stack ", { "Ref" : "AWS::StackName" },
+                                 " -region ", { "Ref" : "AWS::Region" },
+                                 " - ", 
+                                 " -f32bit ", { "Ref" : "LansaMSIBitness" },
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "forever"
+                        }
+                     }
+                  },
                   "install-msi" : {
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
@@ -397,7 +419,6 @@
                         }
                      }
                   },
-
                   "install-patches" : {
                      "files"    : {
                         "C:\\LANSA\\copy-s3-install-patches.ps1" : {
@@ -475,7 +496,7 @@
                      "commands" : {
                         "01_windows_updates" : {
                            "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "60"
                         }
                      }
                   },
@@ -533,7 +554,7 @@
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                  "C:\\LANSA\\run-chef.ps1 ",
-                                 "-cookbook VLWebServer ",
+                                 "-cookbook VLWebServer::MainRecipe ",
                                  "-WorkingDirectory C:\\recipes\\chef-repo\\cookbooks",
                                  ";exit $LastExitCode",
                                  "}\""
@@ -569,22 +590,7 @@
 
                               "cfn-signal.exe -e %ERRORLEVEL% ", { "Fn::Base64" : { "Ref" : "WaitHandle" }}, "\n",
           
-                              "</script>\n",
-                              "<powershell>\n",
-                              "$EC2SettingsFile=\"C:\\Program Files\\Amazon\\Ec2ConfigService\\Settings\\Config.xml\"\n",
-                              "$xml = [xml](get-content $EC2SettingsFile)\n",
-                              "$xmlElement = $xml.get_DocumentElement()\n",
-                              "$xmlElementToModify = $xmlElement.Plugins\n",
-
-                              "foreach ($element in $xmlElementToModify.Plugin)\n",
-                              "{\n",
-                              "    if ($element.name -eq \"AWS.EC2.Windows.CloudWatch.PlugIn\")\n",
-                              "    {\n",
-                              "        $element.State=\"Enabled\"\n",
-                              "    }\n",
-                              "}\n",
-                              "$xml.Save($EC2SettingsFile)\n",
-                              "</powershell>"
+                              "</script>\n"
                ]]}}
             }
          },

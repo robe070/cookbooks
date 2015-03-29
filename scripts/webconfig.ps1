@@ -199,6 +199,6 @@ try
 }
 catch
 {
-    Write-Output ("Webconfig failed")
+    Write-Error ("Webconfig failed")
     exit 2
 }
