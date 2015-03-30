@@ -19,6 +19,16 @@
             ],
             "ConstraintDescription" : "Must be either true or false."
         },        
+        "LansaTemplateLevel" : {
+            "Default" : "R",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "R",
+                "B"
+            ],
+            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+        },
         "KeyName" : {
             "Type"        : "String",
             "Default" : "Linux-keypair"
@@ -157,6 +167,7 @@
        }
     },
     "Conditions" : {
+       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "LansaTemplateLevel"}, "R"]},
        "IsWebServer" : {"Fn::Equals" : [{"Ref" : "LansaType"}, "WebServer"]},
        "DoesNotHaveUserScript" : {"Fn::Equals" : [{"Ref" : "UserScriptHook"}, ""]},
        "HasUserScript" : {"Fn::Not" : [{"Condition" : "DoesNotHaveUserScript"}]}
@@ -332,7 +343,9 @@
                   "install-logging" : {
                      "files"    : {
                         "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json"
+                           "source" : { "Fn::If" : [ "IsReleaseLevel", 
+                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json", 
+                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/AWS.EC2.Windows.CloudWatch.json" ]}
                         },
                         "c:\\lansa\\install-logging.ps1" : {
                            "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-logging.ps1"

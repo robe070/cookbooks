@@ -27,6 +27,16 @@
             ],
             "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
         },
+        "LansaTemplateLevel" : {
+            "Default" : "R",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "R",
+                "B"
+            ],
+            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+        },        
         "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
@@ -264,6 +274,9 @@
        }
 
     },
+    "Conditions" : {
+       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "LansaTemplateLevel"}, "R"]}
+     },
     "Resources"                : {
          "CfnUser"             : {
            "Type" : "AWS::IAM::User",
@@ -478,11 +491,14 @@
          "WebServerApp" : {
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
-               "TemplateURL" :  "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template",
+               "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
                "Parameters" : {
                     "LansaType"           :  "WebServer",
                     "LansaMSI"            : { "Ref" : "LansaMSI" },
                     "LansaMSIBitness"     : { "Ref" : "LansaMSIBitness"},
+                    "LansaTemplateLevel"  : { "Ref" : "LansaTemplateLevel"},
                     "KeyName"             : { "Ref" : "KeyName" },
                     "InstanceType"        : { "Ref" : "WebServerInstanceType" },
                     "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
@@ -517,7 +533,9 @@
          "DBWebServerApp" : {
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
-               "TemplateURL" :  "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template",
+               "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
                "Parameters" : {
                     "LansaType"           :  "DBWebServer",
                     "LansaMSI"            : { "Ref" : "LansaMSI" },
