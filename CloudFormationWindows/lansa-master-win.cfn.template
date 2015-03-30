@@ -37,6 +37,11 @@
             ],
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },        
+        "LansaGitRepoBranch" : {
+            "Default" : "master",
+            "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
+            "Type"        : "String"
+        },
         "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
@@ -499,6 +504,7 @@
                     "LansaMSI"            : { "Ref" : "LansaMSI" },
                     "LansaMSIBitness"     : { "Ref" : "LansaMSIBitness"},
                     "LansaTemplateLevel"  : { "Ref" : "LansaTemplateLevel"},
+                    "LansaGitRepoBranch"  : { "Ref" : "LansaGitRepoBranch" },
                     "KeyName"             : { "Ref" : "KeyName" },
                     "InstanceType"        : { "Ref" : "WebServerInstanceType" },
                     "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
@@ -540,6 +546,8 @@
                     "LansaType"           :  "DBWebServer",
                     "LansaMSI"            : { "Ref" : "LansaMSI" },
                     "LansaMSIBitness"     : { "Ref" : "LansaMSIBitness"},
+                    "LansaTemplateLevel"  : { "Ref" : "LansaTemplateLevel"},
+                    "LansaGitRepoBranch"  : { "Ref" : "LansaGitRepoBranch" },
                     "KeyName"             : { "Ref" : "KeyName" },
                     "InstanceType"        : { "Ref" : "WebServerInstanceType" },
                     "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },

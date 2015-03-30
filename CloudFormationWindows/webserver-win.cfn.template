@@ -29,6 +29,11 @@
             ],
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },
+        "LansaGitRepoBranch" : {
+            "Default" : "master",
+            "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
+            "Type"        : "String"
+        },
         "KeyName" : {
             "Type"        : "String",
             "Default" : "Linux-keypair"
@@ -210,15 +215,15 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "install-logging","install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging","install-msi", "setup-symlink","run-webconfig"],
                      "cfn-update" : ["install-cfn"],
-                     "cake-update" : ["run-chef", "run-windows-update"],
-                     "chef-update" : ["run-chef"],
-                     "windows-update" : ["run-windows-update"],
-                     "webconfig" : ["run-webconfig"],
-                     "icing-update" : ["install-cfn", "upgrade-msi"],
-                     "apply-patches" : ["install-patches"],
-                     "SetXRUNEnvVar" : ["SetXRUNEnvVar"]
+                     "cake-update" : ["git-pull", "run-chef", "run-windows-update"],
+                     "chef-update" : ["git-pull", "run-chef"],
+                     "windows-update" : ["git-pull", "run-windows-update"],
+                     "webconfig" : ["git-pull", "run-webconfig"],
+                     "icing-update" : ["git-pull", "install-cfn", "upgrade-msi"],
+                     "apply-patches" : ["git-pull", "install-patches"],
+                     "SetXRUNEnvVar" : ["git-pull", "SetXRUNEnvVar"]
                      },
                   "install-cfn" : {
                      "files"    : {
@@ -340,22 +345,45 @@
                         }
                      }
                   },
+                  "git-install" : {
+                     "commands" : {
+                        "01_git_install" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "choco install git.install -version 1.9.4.20140929",  "\n",
+                                 "cd \\ ", "\n",
+                                 "git clone https://github.com/robe070/cookbooks.git lansa", "\n",
+                                 "git checkout ",  { "Ref" : "LansaGitRepoBranch" }, "\n"
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
+                  "git-pull" : {
+                     "commands" : {
+                        "01_git_pull" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "c:", "\n",
+                                 "cd \\lansa", "\n",
+                                 "git pull origin", "\n",
+                                 "git checkout ",  { "Ref" : "LansaGitRepoBranch" }, "\n"
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
                   "install-logging" : {
                      "files"    : {
                         "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
                            "source" : { "Fn::If" : [ "IsReleaseLevel", 
                                           "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json", 
                                           "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/AWS.EC2.Windows.CloudWatch.json" ]}
-                        },
-                        "c:\\lansa\\install-logging.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-logging.ps1"
                         }
                      },
                      "commands" : {
                         "01_install_logging" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\install-logging.ps1", 
+                                 "C:\\LANSA\\scripts\\install-logging.ps1", 
                                  " -stack ", { "Ref" : "AWS::StackName" },
                                  " -region ", { "Ref" : "AWS::Region" },
                                  " - ", 
@@ -371,16 +399,13 @@
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
                            "source" : { "Ref" : "LansaMSI" }
-                        },
-                        "C:\\LANSA\\install-lansa-msi.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-lansa-msi.ps1"
                         }
                      },
                      "commands" : {
                         "01_install_msi" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "C:\\LANSA\\scripts\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
@@ -404,16 +429,13 @@
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
                            "source" : { "Ref" : "LansaMSI" }
-                        },
-                        "C:\\LANSA\\install-lansa-msi.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-lansa-msi.ps1"
                         }
                      },
                      "commands" : {
                         "01_upgrade_msi" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "C:\\LANSA\\scripts\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
@@ -433,16 +455,11 @@
                      }
                   },
                   "install-patches" : {
-                     "files"    : {
-                        "C:\\LANSA\\copy-s3-install-patches.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/copy-s3-install-patches.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_install_patches" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {", 
-                                 "C:\\LANSA\\copy-s3-install-patches.ps1", 
+                                 "C:\\LANSA\\scripts\\copy-s3-install-patches.ps1", 
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
@@ -472,16 +489,11 @@
                      }
                   },
                   "cloud-watch-config" : {
-                     "files"    : {
-                        "C:\\LANSA\\cloud-watch-config.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/cloud-watch-config.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_cloud_watch_config" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\cloud-watch-config.ps1", 
+                                 "C:\\LANSA\\scripts\\cloud-watch-config.ps1", 
                                  " -dbpassword ", { "Ref" : "DBPassword" },
                                  " -webpassword ", { "Ref" : "WebPassword" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
@@ -514,16 +526,11 @@
                      }
                   },
                   "run-webconfig" : {
-                     "files"    : {
-                        "C:\\LANSA\\webconfig.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/webconfig.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_webconfig" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\webconfig.ps1", 
+                                 "C:\\LANSA\\scripts\\webconfig.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
                                  " -dbuser ", { "Ref" : "DBUsername" },
@@ -544,29 +551,19 @@
                      }
                   },
                   "SetXRUNEnvVar" : {
-                     "files"    : {
-                        "C:\\LANSA\\SetXRUNEnvVar.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/SetXRUNEnvVar.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_SetXRUNEnvVar" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\LANSA\\SetXRUNEnvVar.ps1;exit $LastExitCode}\"",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\LANSA\\scripts\\SetXRUNEnvVar.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
                   "run-chef" : {
-                     "files"    : {
-                        "C:\\LANSA\\run-chef.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/run-chef.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_run_chef_client" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\run-chef.ps1 ",
+                                 "C:\\LANSA\\scripts\\run-chef.ps1 ",
                                  "-cookbook VLWebServer::MainRecipe ",
                                  "-WorkingDirectory C:\\recipes\\chef-repo\\cookbooks",
                                  ";exit $LastExitCode",
