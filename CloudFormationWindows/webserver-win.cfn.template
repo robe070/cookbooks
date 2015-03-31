@@ -75,7 +75,7 @@
             "Type"        : "Number"
         },
         "AMI"  : {
-            "Default"     : "ami-bb6b1881",
+            "Default"     : "ami-e196e5db",
             "Type"        : "String"
         },
         "SecurityGroup": {
@@ -215,7 +215,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging","install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
                      "cfn-update" : ["install-cfn"],
                      "cake-update" : ["git-pull", "run-chef", "run-windows-update"],
                      "chef-update" : ["git-pull", "run-chef"],
@@ -349,9 +349,12 @@
                      "commands" : {
                         "01_git_install" : {
                            "command" : { "Fn::Join" : ["", [
+                                 "@echo on", "\n",
                                  "choco install git.install -version 1.9.4.20140929",  "\n",
                                  "cd \\ ", "\n",
+                                 "set path = %path%;\"C:\\Program Files (x86)\\Git\\cmd\"", "\n",
                                  "git clone https://github.com/robe070/cookbooks.git lansa", "\n",
+                                 "cd \\lansa",  "\n",
                                  "git checkout ",  { "Ref" : "LansaGitRepoBranch" }, "\n"
                               ]]},
                            "waitAfterCompletion" : "0"
@@ -362,6 +365,7 @@
                      "commands" : {
                         "01_git_pull" : {
                            "command" : { "Fn::Join" : ["", [
+                                 "@echo on", "\n",
                                  "c:", "\n",
                                  "cd \\lansa", "\n",
                                  "git pull origin", "\n",
@@ -388,6 +392,19 @@
                                  " -region ", { "Ref" : "AWS::Region" },
                                  " - ", 
                                  " -f32bit ", { "Ref" : "LansaMSIBitness" },
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "forever"
+                        }
+                     }
+                  },
+                  "config-windows-update" : {
+                     "commands" : {
+                        "01_config_windows_update" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\recipes\\WindowsUpdatesSettings.ps1",
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
