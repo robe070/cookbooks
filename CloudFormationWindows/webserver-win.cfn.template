@@ -215,7 +215,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging", "install-msi", "setup-symlink","run-webconfig"],
                      "cfn-update" : ["install-cfn"],
                      "cake-update" : ["git-pull", "run-chef", "run-windows-update"],
                      "chef-update" : ["git-pull", "run-chef"],
@@ -349,13 +349,16 @@
                      "commands" : {
                         "01_git_install" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@echo on", "\n",
-                                 "choco install git.install -version 1.9.4.20140929",  "\n",
-                                 "cd \\ ", "\n",
-                                 "set path = %path%;\"C:\\Program Files (x86)\\Git\\cmd\"", "\n",
-                                 "git clone https://github.com/robe070/cookbooks.git lansa", "\n",
-                                 "cd \\lansa",  "\n",
-                                 "git checkout ",  { "Ref" : "LansaGitRepoBranch" }, "\n"
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "choco -y install git.install -version 1.9.4.20140929;", 
+                                 "cd \\ ;",
+                                 "$env:Path += ';C:\\Program Files (x86)\\Git\\cmd';",
+                                 "cmd /C git clone https://github.com/robe070/cookbooks.git lansa '2>&1';", 
+                                 "if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) {Write-Error ('Git clone failed');exit $LastExitCode};",
+                                 "cd \\lansa;",
+                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "exit 0",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
@@ -365,11 +368,13 @@
                      "commands" : {
                         "01_git_pull" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@echo on", "\n",
-                                 "c:", "\n",
-                                 "cd \\lansa", "\n",
-                                 "git pull origin", "\n",
-                                 "git checkout ",  { "Ref" : "LansaGitRepoBranch" }, "\n"
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "$env:Path += ';C:\\Program Files (x86)\\Git\\cmd';",
+                                 "cd \\lansa;",
+                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "exit 0",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
