@@ -32,14 +32,14 @@
   },
   {
     "type": "file",
-    "source": "chef-windows-11.16.4-1.windows.msi",
-    "destination": "c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi"
+    "source": "chef-client-12.1.1-1.msi",
+    "destination": "c:\\packerTemp\\chef-client-12.1.1-1.msi"
   },
   {
     "type": "shell",
     "pause_before": "30s",
     "inline": [
-      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-windows-11.16.4-1.windows.msi\"" ]
+      "cmd /c \"msiexec /quiet /i c:\\packerTemp\\chef-client-12.1.1-1.msi\"" ]
   },
   {
     "type": "file",
@@ -69,7 +69,12 @@
   {
     "type": "file",
     "source": "{{user `script_location`}}getchoco.ps1",
-    "destination": "c:\\packerTemp\\getchoco.ps1"
+    "destination": "c:\\recipes\\getchoco.ps1"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}Get-StartupCmds.ps1",
+    "destination": "c:\\recipes\\Get-StartupCmds.ps1"
   },
   {
     "type": "shell",
@@ -78,7 +83,7 @@
       "export PATH=$PATH:/cygdrive/c/opscode/chef/bin:/cygdrive/c/opscode/chef/embedded/bin",
       "export TEMP=/cygdrive/c/packerTemp",
       "cd /cygdrive/c/recipes/chef-repo/cookbooks",
-      "cmd /c \"chef-client -z -o VLWebServer\"" ]
+      "cmd /c \"chef-client -z -o VLWebServer::MainRecipe\"" ]
   },
   {
     "type": "file",
@@ -107,8 +112,13 @@
   },
   {
     "type": "file",
-    "source": "{{user `script_location`}}scheduleTask.ps1",
-    "destination": "c:\\packerTemp\\scheduleTask.ps1"
+    "source": "{{user `script_location`}}scheduleTasks.ps1",
+    "destination": "c:\\packerTemp\\scheduleTasks.ps1"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}windowsUpdatesSettings.ps1",
+    "destination": "c:\\recipes\\windowsUpdatesSettings.ps1"
   },
   {
     "type": "shell",
@@ -123,13 +133,9 @@
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
       "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
-      "powershell \"c:\\packerTemp\\scheduleTask.ps1\"",
-      "powershell \"c:\\recipes\\win-updates.ps1\"" ]
-  },
-  {
-    "type": "shell",
-    "pause_before": "8m",
-    "inline": [
+      "powershell \"c:\\packerTemp\\scheduleTasks.ps1\"",
+      "powershell \"c:\\recipes\\Get-StartupCmds.ps1\"",
+      "powershell \"c:\\recipes\\windowsUpdatesSettings.ps1\"",
       "powershell \"c:\\recipes\\win-updates.ps1\"" ]
   },
   {

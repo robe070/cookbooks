@@ -101,7 +101,7 @@ def package_exists?(name, version)
 end
 
 def upgradeable?(name)
-# AU - Always return False as we never want to upgrade.
+# AU - Always return False as we never want to upgrade because we want to control the version used.
   return false
   return false unless @current_resource.exists
   unless package_installed?(name)

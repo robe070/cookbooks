@@ -26,7 +26,7 @@ include_recipe 'windows'
 
 powershell_script 'install chocolatey' do
 #  code "iex ((new-object net.webclient).DownloadString('#{node['chocolatey']['Uri']}'))"
-  code "c:\\PackerTemp\\getchoco.ps1"
+  code "c:\\recipes\\getchoco.ps1"
   convert_boolean_return true
   not_if { ChocolateyHelpers.chocolatey_installed? }
 end
