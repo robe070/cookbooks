@@ -75,7 +75,7 @@
             "Type"        : "Number"
         },
         "AMI"  : {
-            "Default"     : "ami-e196e5db",
+            "Default"     : "ami-e1c0b3db",
             "Type"        : "String"
         },
         "SecurityGroup": {
@@ -215,15 +215,15 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "git-install", "git-pull", "install-logging", "install-msi", "setup-symlink","run-webconfig"],
-                     "cfn-update" : ["install-cfn"],
-                     "cake-update" : ["git-pull", "run-chef", "run-windows-update"],
-                     "chef-update" : ["git-pull", "run-chef"],
-                     "windows-update" : ["git-pull", "run-windows-update"],
-                     "webconfig" : ["git-pull", "run-webconfig"],
-                     "icing-update" : ["git-pull", "install-cfn", "upgrade-msi"],
-                     "apply-patches" : ["git-pull", "install-patches"],
-                     "SetXRUNEnvVar" : ["git-pull", "SetXRUNEnvVar"]
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
+                     "cfn-update"      : ["install-cfn"],
+                     "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
+                     "chef-update"     : ["git-pull", "run-chef"],
+                     "windows-update"  : ["git-pull", "run-windows-update"],
+                     "webconfig"       : ["git-pull", "run-webconfig"],
+                     "icing-update"    : ["git-pull", "install-cfn", "upgrade-msi"],
+                     "apply-patches"   : ["git-pull", "install-patches"],
+                     "SetXRUNEnvVar"   : ["git-pull", "SetXRUNEnvVar"]
                      },
                   "install-cfn" : {
                      "files"    : {
@@ -369,9 +369,15 @@
                         "01_git_pull" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "$env:Path += ';C:\\Program Files (x86)\\Git\\cmd';",
+                                 "$newPath = 'C:\\Program Files (x86)\\Git\\cmd';",
+                                 "$oldPath = [Environment]::GetEnvironmentVariable('PATH', 'Machine');",
+                                 "$match = '*' + $newpath + '*';",
+                                 "$replace = $newPath + ';' + $oldPath;",
+                                 "if ( $oldpath -notlike $match )",
+                                 "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
+                                 "$env:Path;",
                                  "cd \\lansa;",
-                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};", 
                                  "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
                                  "exit 0",
                                  "}\""
@@ -413,7 +419,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "forever"
+                           "waitAfterCompletion" : "0"
                         }
                      }
                   },
