@@ -7,7 +7,7 @@ Run Chef so that we can run as administrator. Cannot directly run from the Cloud
 param(
 [String]$FullPath='c:\opscode\chef\bin\chef-client.bat',
 [String]$WorkingDirectory='C:\recipes\chef-repo\cookbooks',
-[String]$cookbook='VLWebServer',
+[String]$cookbook='VLWebServer::MainRecipe',
 [String]$Arguments="-z -o $cookbook"
 )
 

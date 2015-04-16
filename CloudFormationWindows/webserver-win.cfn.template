@@ -6,48 +6,95 @@
             "Type"        : "String",
             "Default" : "WebServer"
         },
-        "LansaMSI" : {
+        "1LansaMSI" : {
             "Type"        : "String",
-            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi"
+            "Default"     : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
+            "Description" : "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
-        "LansaMSIBitness" : {
+        "2LansaMSIBitness" : {
             "Default" : "1",
+            "Description" : "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
             "Type"        : "String",
             "AllowedValues" : [
                 "1",
                 "0"
             ],
-            "ConstraintDescription" : "Must be either true or false."
-        },        
-        "KeyName" : {
+            "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
+        },
+        "3DBUsername"   : {
+            "Default" : "admin",
+            "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
             "Type"        : "String",
-            "Default" : "Linux-keypair"
+            "MinLength"   : "1",
+            "MaxLength"   : "16",
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
+        },
+        "4DBPassword"   : {
+            "Default" : "password",
+            "NoEcho"  : "true",
+            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
+            "Type"        : "String",
+            "MinLength"   : "8",
+            "MaxLength"   : "41"
+        },
+        "5WebUser"   : {
+            "Type"    : "String",
+            "Default" : "PCXUSER2",
+            "Description" : "User to use for running web jobs."
+        },
+        "6WebPassword"   : {
+            "NoEcho"  : "true",
+            "Type"    : "String",
+            "Default" : "PCXUSER@122",
+            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
+        },
+        "7KeyName" : {
+            "Default" : "Linux-keypair",
+            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "8RemoteAccessLocation"        : {
+            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
+            "Type"        : "String",
+            "MinLength"   : "9",
+            "MaxLength"   : "18",
+            "Default"     : "103.231.159.65/32",
+            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+        },
+        "90LansaTemplateLevel" : {
+            "Default" : "R",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "R",
+                "B"
+            ],
+            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+        },        
+        "91LansaGitRepoBranch" : {
+            "Default" : "master",
+            "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
+            "Type"        : "String"
         },
         "InstanceType" : {
             "Type"        : "String"
         },
         "DBEndPoint"       : {
             "Type"        : "String",
-            "Default" : "tdgxg1ddiuto85.cemy5sqefsvw.ap-southeast-2.rds.amazonaws.com:1433"
+            "Default" : "tdgxg1ddiuto85.cemy5sqefsvw.ap-southeast-2.rds.amazonaws.com"
         },
         "DBName"       : {
             "Type"        : "String",
             "Default" : "lansadb"
         },
-        "DBUsername"   : {
-            "NoEcho"  : "true",
-            "Type"    : "String",
-            "Default" : "admin"
-        },
-        "DBPassword"   : {
-            "NoEcho"  : "true",
-            "Type"    : "String",
-            "Default" : "password"
-        },
         "WebServerCapacity" : {
             "Type"        : "Number",
             "Default" : 1
         },
+        "WebServerMaxConnect" : {
+            "Type"        : "Number",
+            "Default" : 20
+        },        
         "RemoteAccessLocation"        : {
             "Type"        : "String",
             "Default" : "103.231.159.65/32"
@@ -56,7 +103,7 @@
             "Type"        : "Number"
         },
         "AMI"  : {
-            "Default"     : "ami-ffdeb0c5",
+            "Default"     : "ami-e1c0b3db",
             "Type"        : "String"
         },
         "SecurityGroup": {
@@ -74,15 +121,6 @@
         "SecretKey": {
             "Type"        : "String",
             "Default" : "sss"
-        },
-        "WebUser"   : {
-            "Type"    : "String",
-            "Default" : "PCXUSER2"
-        },
-        "WebPassword"   : {
-            "NoEcho"  : "true",
-            "Type"    : "String",
-            "Default" : "PCXUSER@122"
         },
         "DummyRef"    : {
             "Type"    : "String",
@@ -103,6 +141,11 @@
             "Type"    : "String",
             "Default" : "1",
             "Description" : "Update Stack: Increment this by one to trigger a Windows Update. The same script is executed that baked the Cake in the first place. (The Cake is the AMI from which this instance was instantiated)"
+        },
+        "TriggerWebConfig" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger an update to the web configuration"
         },
         "TriggerIcingUpdate" : {
             "Type"    : "String",
@@ -141,9 +184,14 @@
             "Type"    : "String",
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
-        }
+        },
+       "LogRoleInstanceProfile" : {
+            "Type"    : "String",
+            "Description" : "IAM Instance Role"
+       }
     },
     "Conditions" : {
+       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "90LansaTemplateLevel"}, "R"]},
        "IsWebServer" : {"Fn::Equals" : [{"Ref" : "LansaType"}, "WebServer"]},
        "DoesNotHaveUserScript" : {"Fn::Equals" : [{"Ref" : "UserScriptHook"}, ""]},
        "HasUserScript" : {"Fn::Not" : [{"Condition" : "DoesNotHaveUserScript"}]}
@@ -159,9 +207,10 @@
                     "Ref" : "LaunchWebServer"
                 },
                 "MinSize"                 : { "Fn::If" : [ "IsWebServer", {"Ref" : "WebServerCapacity"}, "1" ]},
-                "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "50", "1" ]},
+                "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "150", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
-                "HealthCheckGracePeriod"  : 300,
+                "HealthCheckType"         : "ELB",
+                "HealthCheckGracePeriod"  : 1800,
                 "LoadBalancerNames"       : [ { "Ref" : "LoadBalancer" } ],
                 "Tags" : [ {
                         "Key" : "Name",
@@ -177,6 +226,7 @@
                "TriggerCakeUpdate"    : { "Ref" : "TriggerCakeUpdate" },
                "TriggerChefUpdate"    : { "Ref" : "TriggerChefUpdate" },
                "TriggerWindowsUpdate" : { "Ref" : "TriggerWindowsUpdate" },
+               "TriggerWebConfig"     : { "Ref" : "TriggerWebConfig" },
                "TriggerIcingUpdate"   : { "Ref" : "TriggerIcingUpdate" },
                "TriggerPatchInstall"  : { "Ref" : "TriggerPatchInstall" },
                "SetConnectTrace"      : { "Ref" : "SetConnectTrace"},
@@ -184,14 +234,15 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install" : ["install-cfn", "install-msi", "setup-symlink"],
-                     "cfn-update" : ["install-cfn"],
-                     "cake-update" : ["run-chef", "run-windows-update"],
-                     "chef-update" : ["run-chef"],
-                     "windows-update" : ["run-windows-update"],
-                     "icing-update" : ["install-cfn", "upgrade-msi"],
-                     "apply-patches" : ["install-patches"],
-                     "SetXRUNEnvVar" : ["SetXRUNEnvVar"]
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
+                     "cfn-update"      : ["install-cfn"],
+                     "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
+                     "chef-update"     : ["git-pull", "run-chef"],
+                     "windows-update"  : ["git-pull", "run-windows-update"],
+                     "webconfig"       : ["git-pull", "run-webconfig"],
+                     "icing-update"    : ["git-pull", "install-cfn", "upgrade-msi"],
+                     "apply-patches"   : ["git-pull", "install-patches"],
+                     "SetXRUNEnvVar"   : ["git-pull", "SetXRUNEnvVar"]
                      },
                   "install-cfn" : {
                      "files"    : {
@@ -248,6 +299,17 @@
                                                             " --region ", { "Ref" : "AWS::Region" }, "\n"
                            ]]}
                         },
+                        "c:\\cfn\\hooks.d\\cfn-webconfig.conf" : {
+                           "content": { "Fn::Join" : ["", [
+                              "[cfn-webconfig-hook]\n",
+                              "triggers=post.update\n",
+                              "path=Resources.LaunchWebServer.Metadata.TriggerWebConfig\n",
+                              "action=cfn-init.exe -v -s ", { "Ref" : "AWS::StackId" },
+                                                            " -r LaunchWebServer",
+                                                            " --configsets webconfig ",
+                                                            " --region ", { "Ref" : "AWS::Region" }, "\n"
+                           ]]}
+                        },
                         "c:\\cfn\\hooks.d\\cfn-icing.conf" : {
                            "content": { "Fn::Join" : ["", [
                               "[cfn-icing-hook]\n",
@@ -272,7 +334,7 @@
                         },
                         "c:\\cfn\\hooks.d\\cfn-SetXRUNEnvVar.conf" : {
                            "content": { "Fn::Join" : ["", [
-                              "[cfn-patch-hook]\n",
+                              "[cfn-setxrunenvvar-hook]\n",
                               "triggers=post.update\n",
                               "path=Resources.LaunchWebServer.Metadata.SetXRUNEnvVar\n",
                               "action=cfn-init.exe -v -s ", { "Ref" : "AWS::StackId" },
@@ -294,6 +356,7 @@
                                  "c:\\cfn\\hooks.d\\cfn-chef.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-windows.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-icing.conf",
+                                 "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
                                  "c:\\cfn\\hooks.d\\cfn-patch.conf", 
                                  "c:\\cfn\\hooks.d\\cfn-SetXRUNEnvVar.conf",
                                  "C:\\LANSA\\MyApp.msi"]
@@ -301,91 +364,164 @@
                         }
                      }
                   },
-
+                  "git-install" : {
+                     "commands" : {
+                        "01_git_install" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "choco -y install git.install -version 1.9.4.20140929;", 
+                                 "cd \\ ;",
+                                 "$env:Path += ';C:\\Program Files (x86)\\Git\\cmd';",
+                                 "cmd /C git clone https://github.com/robe070/cookbooks.git lansa '2>&1';", 
+                                 "if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) {Write-Error ('Git clone failed');exit $LastExitCode};",
+                                 "cd \\lansa;",
+                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "exit 0",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
+                  "git-pull" : {
+                     "commands" : {
+                        "01_git_pull" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "$newPath = 'C:\\Program Files (x86)\\Git\\cmd';",
+                                 "$oldPath = [Environment]::GetEnvironmentVariable('PATH', 'Machine');",
+                                 "$match = '*' + $newpath + '*';",
+                                 "$replace = $newPath + ';' + $oldPath;",
+                                 "if ( $oldpath -notlike $match )",
+                                 "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
+                                 "$env:Path;",
+                                 "cd \\lansa;",
+                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};", 
+                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "exit 0",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
+                  "install-logging" : {
+                     "files"    : {
+                        "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
+                           "source" : { "Fn::If" : [ "IsReleaseLevel", 
+                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json", 
+                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/AWS.EC2.Windows.CloudWatch.json" ]}
+                        }
+                     },
+                     "commands" : {
+                        "01_install_logging" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\install-logging.ps1", 
+                                 " -stack ", { "Ref" : "AWS::StackName" },
+                                 " -region ", { "Ref" : "AWS::Region" },
+                                 " - ", 
+                                 " -f32bit ", { "Ref" : "2LansaMSIBitness" },
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "forever"
+                        }
+                     }
+                  },
+                  "config-windows-update" : {
+                     "commands" : {
+                        "01_config_windows_update" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\recipes\\WindowsUpdatesSettings.ps1",
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
                   "install-msi" : {
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
-                           "source" : { "Ref" : "LansaMSI" }
-                        },
-                        "C:\\LANSA\\install-lansa-msi.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-lansa-msi.ps1"
+                           "source" : { "Ref" : "1LansaMSI" }
                         }
                      },
                      "commands" : {
                         "01_install_msi" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
-                                 " -dbuser ", { "Ref" : "DBUsername" },
-                                 " -dbpassword ", { "Ref" : "DBPassword" },
-                                 " -webuser ", { "Ref" : "WebUser" },
-                                 " -webpassword ", { "Ref" : "WebPassword" },
-                                 " -32bit ", { "Ref" : "LansaMSIBitness" },
+                                 " -dbuser ", { "Ref" : "3DBUsername" },
+                                 " -dbpassword ", { "Ref" : "4DBPassword" },
+                                 " -webuser ", { "Ref" : "5WebUser" },
+                                 " -webpassword ", { "Ref" : "6WebPassword" },
+                                 " -f32bit ", { "Ref" : "2LansaMSIBitness" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -UPGD false",
                                  { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
-                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]}
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 " -Wait ", { "Fn::Base64" : { "Ref" : "WaitHandle" }},
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "upgrade-msi" : {
                      "files"    : {
                         "C:\\LANSA\\MyApp.msi" : {
-                           "source" : { "Ref" : "LansaMSI" }
-                        },
-                        "C:\\LANSA\\install-lansa-msi.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/install-lansa-msi.ps1"
+                           "source" : { "Ref" : "1LansaMSI" }
                         }
                      },
                      "commands" : {
                         "01_upgrade_msi" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\install-lansa-msi.ps1", 
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\install-lansa-msi.ps1", 
                                  " -server_name ", { "Ref" : "DBEndPoint" },
                                  " -dbname ", { "Ref" : "DBName" },
-                                 " -dbuser ", { "Ref" : "DBUsername" },
-                                 " -dbpassword ", { "Ref" : "DBPassword" },
-                                 " -webuser ", { "Ref" : "WebUser" },
-                                 " -webpassword ", { "Ref" : "WebPassword" },
-                                 " -32bit ", { "Ref" : "LansaMSIBitness" },
+                                 " -dbuser ", { "Ref" : "3DBUsername" },
+                                 " -dbpassword ", { "Ref" : "4DBPassword" },
+                                 " -webuser ", { "Ref" : "5WebUser" },
+                                 " -webpassword ", { "Ref" : "6WebPassword" },
+                                 " -f32bit ", { "Ref" : "2LansaMSIBitness" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -UPGD true",
                                  { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
-                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]}
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "install-patches" : {
-                     "files"    : {
-                        "C:\\LANSA\\copy-s3-install-patches.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/copy-s3-install-patches.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_install_patches" : {
                            "command" : { "Fn::Join" : ["", [
-                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\copy-s3-install-patches.ps1", 
-                                 " -dbpassword ", { "Ref" : "DBPassword" },
-                                 " -webpassword ", { "Ref" : "WebPassword" },
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {", 
+                                 "C:\\LANSA\\scripts\\copy-s3-install-patches.ps1", 
+                                 " -dbpassword ", { "Ref" : "4DBPassword" },
+                                 " -webpassword ", { "Ref" : "6WebPassword" },
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -bucket_name ", { "Ref" : "PatchBucketName" },
                                  " -region ",      { "Ref" : "AWS::Region" },
                                  " -access_key ",  { "Ref" : "AccessKeyId" },
                                  " -secret_key ",  { "Ref" : "SecretKey"},
-                                 " -folder ",      { "Ref" : "PatchFolderName" }
+                                 " -folder ",      { "Ref" : "PatchFolderName" },
+                                 ";exit $LastExitCode",
+                                 "}\""
                               ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "setup-symlink" : {
                      "files"    : {
                         "C:\\LANSA\\regsymlink.exe" : {
@@ -399,7 +535,27 @@
                         }
                      }
                   },
-
+                  "cloud-watch-config" : {
+                     "commands" : {
+                        "01_cloud_watch_config" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\cloud-watch-config.ps1", 
+                                 " -dbpassword ", { "Ref" : "4DBPassword" },
+                                 " -webpassword ", { "Ref" : "6WebPassword" },
+                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
+                                 " -bucket_name ", { "Ref" : "PatchBucketName" },
+                                 " -region ",      { "Ref" : "AWS::Region" },
+                                 " -access_key ",  { "Ref" : "AccessKeyId" },
+                                 " -secret_key ",  { "Ref" : "SecretKey"},
+                                 " -folder ",      { "Ref" : "PatchFolderName" },
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "0"
+                        }
+                     }
+                  },
                   "jit" : {
                      "commands" : {
                         "01_jit" : {
@@ -408,42 +564,54 @@
                         }
                      }
                   },
-
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\recipes\\win-updates.ps1",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
+                           "waitAfterCompletion" : "60"
+                        }
+                     }
+                  },
+                  "run-webconfig" : {
+                     "commands" : {
+                        "01_webconfig" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\webconfig.ps1", 
+                                 " -server_name ", { "Ref" : "DBEndPoint" },
+                                 " -dbname ", { "Ref" : "DBName" },
+                                 " -dbuser ", { "Ref" : "3DBUsername" },
+                                 " -dbpassword ", { "Ref" : "4DBPassword" },
+                                 " -webuser ", { "Ref" : "5WebUser" },
+                                 " -webpassword ", { "Ref" : "6WebPassword" },
+                                 " -f32bit ", { "Ref" : "2LansaMSIBitness" },
+                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
+                                 " -UPGD true",
+                                 " -maxconnections ", { "Ref" : "WebServerMaxConnect"},
+                                 { "Fn::If" : [ "HasUserScript",  " -userscripthook ", "" ]},
+                                 { "Fn::If" : [ "HasUserScript", { "Ref" : "UserScriptHook" }, "" ]},
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "SetXRUNEnvVar" : {
-                     "files"    : {
-                        "C:\\LANSA\\SetXRUNEnvVar.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/SetXRUNEnvVar.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_SetXRUNEnvVar" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -file C:\\LANSA\\SetXRUNEnvVar.ps1",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\LANSA\\scripts\\SetXRUNEnvVar.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "0"
                         }
                      }
                   },
-
                   "run-chef" : {
-                     "files"    : {
-                        "C:\\LANSA\\run-chef.ps1" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/run-chef.ps1"
-                        }
-                     },
                      "commands" : {
                         "01_run_chef_client" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\LANSA\\run-chef.ps1 ",
-                                 "-cookbook VLWebServer ",
+                                 "C:\\LANSA\\scripts\\run-chef.ps1 ",
+                                 "-cookbook VLWebServer::MainRecipe ",
                                  "-WorkingDirectory C:\\recipes\\chef-repo\\cookbooks",
                                  ";exit $LastExitCode",
                                  "}\""
@@ -465,8 +633,9 @@
             "Properties" : {
                "ImageId" : { "Ref" : "AMI" },
                "InstanceType" : { "Ref" : "InstanceType" },
+               "IamInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" },
                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
-               "KeyName"        : { "Ref" : "KeyName" },
+               "KeyName"        : { "Ref" : "7KeyName" },
                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                               "<script>\n",
 
@@ -478,7 +647,7 @@
 
                               "cfn-signal.exe -e %ERRORLEVEL% ", { "Fn::Base64" : { "Ref" : "WaitHandle" }}, "\n",
           
-                              "</script>"
+                              "</script>\n"
                ]]}}
             }
          },
@@ -521,7 +690,7 @@
                "MetricName": "CPUUtilization",
                "EvaluationPeriods": "1",
                "Statistic": "Average",
-               "Period": "60",
+               "Period": "900",
                "Unit" : "Percent",
                "Threshold": "70",
                "ComparisonOperator": "GreaterThanThreshold",
@@ -540,7 +709,7 @@
                "MetricName": "CPUUtilization",
                "EvaluationPeriods": "1",
                "Statistic": "Average",
-               "Period": "60",
+               "Period": "900",
                "Unit" : "Percent",
                "Threshold": "30",
                "ComparisonOperator": "LessThanThreshold",
