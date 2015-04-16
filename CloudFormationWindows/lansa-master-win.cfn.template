@@ -2,22 +2,12 @@
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Description"              : "LANSA Windows template: This template installs a highly-available, scalable LANSA deployment using a multi-AZ Amazon RDS database instance for storage.  **WARNING** This template creates an Amazon Windows EC2 instance, an Elastic Load Balancer and an Amazon RDS database instance. Parameters described as Update Stack: are only modified after the stack has been created. You will be billed for the AWS resources used if you create a stack from this template.",
     "Parameters"               : {
-        "KeyName" : {
-            "Default" : "Linux-keypair",
-            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
-            "Type"        : "AWS::EC2::KeyPair::KeyName"
-        },
-        "LansaMSI" : {
+        "1LansaMSI" : {
             "Type"        : "String",
             "Default"     : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
             "Description" : "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
-        "UserScriptHook" : {
-            "Type"    : "String",
-            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1",
-            "Description" : "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
-        },
-        "LansaMSIBitness" : {
+        "2LansaMSIBitness" : {
             "Default" : "1",
             "Description" : "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
             "Type"        : "String",
@@ -27,7 +17,47 @@
             ],
             "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
         },
-        "LansaTemplateLevel" : {
+        "3DBUsername"   : {
+            "Default" : "admin",
+            "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
+            "Type"        : "String",
+            "MinLength"   : "1",
+            "MaxLength"   : "16",
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
+        },
+        "4DBPassword"   : {
+            "Default" : "password",
+            "NoEcho"  : "true",
+            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
+            "Type"        : "String",
+            "MinLength"   : "8",
+            "MaxLength"   : "41"
+        },
+        "5WebUser"   : {
+            "Type"    : "String",
+            "Default" : "PCXUSER2",
+            "Description" : "User to use for running web jobs."
+        },
+        "6WebPassword"   : {
+            "NoEcho"  : "true",
+            "Type"    : "String",
+            "Default" : "PCXUSER@122",
+            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
+        },
+        "7KeyName" : {
+            "Default" : "Linux-keypair",
+            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "8RemoteAccessLocation"        : {
+            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
+            "Type"        : "String",
+            "MinLength"   : "9",
+            "MaxLength"   : "18",
+            "Default"     : "103.231.159.65/32",
+            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+        },
+        "90LansaTemplateLevel" : {
             "Default" : "R",
             "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
             "Type"        : "String",
@@ -37,7 +67,7 @@
             ],
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },        
-        "LansaGitRepoBranch" : {
+        "91LansaGitRepoBranch" : {
             "Default" : "master",
             "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type"        : "String"
@@ -139,22 +169,6 @@
                 "sqlserver-ee"
             ]
         },
-        "DBUsername"   : {
-            "Default" : "admin",
-            "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
-            "Type"        : "String",
-            "MinLength"   : "1",
-            "MaxLength"   : "16",
-            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
-        },
-        "DBPassword"   : {
-            "Default" : "password",
-            "NoEcho"  : "true",
-            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
-            "Type"        : "String",
-            "MinLength"   : "8",
-            "MaxLength"   : "41"
-        },
         "MultiAZDatabase" : {
             "Default" : "false",
             "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
@@ -163,6 +177,11 @@
                 "true",
                 "false"
             ]
+        },
+        "UserScriptHook" : {
+            "Type"    : "String",
+            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1",
+            "Description" : "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "WebServerCapacity" : {
             "Default" : "1",
@@ -177,31 +196,12 @@
             "MinValue"    : "20",
             "MaxValue"    : "1024"
         },
-        "RemoteAccessLocation"        : {
-            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
-            "Type"        : "String",
-            "MinLength"   : "9",
-            "MaxLength"   : "18",
-            "Default"     : "103.231.159.65/32",
-            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-        },
         "ELBTimeout"         : {
             "Description" : "Time to wait for a response from the application. Must be between 2 and 60. Health check interval and IIS timeouts are based on this time too.",
             "Type"        : "Number",
             "MinValue"    : "2",
             "MaxValue"    : "60",
             "Default"     : "30"
-        },
-        "WebUser"   : {
-            "Type"    : "String",
-            "Default" : "PCXUSER2",
-            "Description" : "User to use for running web jobs."
-        },
-        "WebPassword"   : {
-            "NoEcho"  : "true",
-            "Type"    : "String",
-            "Default" : "PCXUSER@122",
-            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
         },
         "TriggerCakeUpdate" : {
             "Type"    : "String",
@@ -280,7 +280,7 @@
 
     },
     "Conditions" : {
-       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "LansaTemplateLevel"}, "R"]}
+       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "90LansaTemplateLevel"}, "R"]}
      },
     "Resources"                : {
          "CfnUser"             : {
@@ -395,7 +395,7 @@
                     "Ref" : "MultiAZDatabase"
                 },
                 "MasterUsername" : {
-                    "Ref" : "DBUsername"
+                    "Ref" : "3DBUsername"
                 },
                 "DBInstanceClass" : {
                     "Ref" : "DBInstanceClass"
@@ -409,7 +409,7 @@
                     "Ref" : "DBAllocatedStorage"
                 },
                 "MasterUserPassword" : {
-                    "Ref" : "DBPassword"
+                    "Ref" : "4DBPassword"
                 },
   	             "AllowMajorVersionUpgrade": "false",
                 "AutoMinorVersionUpgrade":  "true",
@@ -461,7 +461,7 @@
                         "FromPort"   : "22",
                         "ToPort"     : "22",
                         "CidrIp"     : {
-                            "Ref" : "RemoteAccessLocation"
+                            "Ref" : "8RemoteAccessLocation"
                         }
                     },
                     {
@@ -469,7 +469,7 @@
                         "FromPort"   : "3389",
                         "ToPort"     : "3389",
                         "CidrIp"     : {
-                            "Ref" : "RemoteAccessLocation"
+                            "Ref" : "8RemoteAccessLocation"
                         }
                     },
                     {
@@ -477,7 +477,7 @@
                         "FromPort"   : "1433",
                         "ToPort"     : "1433",
                         "CidrIp"     : {
-                            "Ref" : "RemoteAccessLocation"
+                            "Ref" : "8RemoteAccessLocation"
                         }
                     }
                 ]
@@ -501,32 +501,32 @@
                                                 "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
                "Parameters" : {
                     "LansaType"           :  "WebServer",
-                    "LansaMSI"            : { "Ref" : "LansaMSI" },
-                    "LansaMSIBitness"     : { "Ref" : "LansaMSIBitness"},
-                    "LansaTemplateLevel"  : { "Ref" : "LansaTemplateLevel"},
-                    "LansaGitRepoBranch"  : { "Ref" : "LansaGitRepoBranch" },
-                    "KeyName"             : { "Ref" : "KeyName" },
+                    "1LansaMSI"           : { "Ref" : "1LansaMSI" },
+                    "2LansaMSIBitness"    : { "Ref" : "2LansaMSIBitness"},
+                    "90LansaTemplateLevel": { "Ref" : "90LansaTemplateLevel"},
+                    "91LansaGitRepoBranch": { "Ref" : "91LansaGitRepoBranch" },
+                    "7KeyName"            : { "Ref" : "7KeyName" },
                     "InstanceType"        : { "Ref" : "WebServerInstanceType" },
                     "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
                     "DBName"              : { "Ref" : "DBName" },
-                    "DBUsername"          : { "Ref" : "DBUsername" },
-                    "DBPassword"          : { "Ref" : "DBPassword" },
+                    "3DBUsername"         : { "Ref" : "3DBUsername" },
+                    "4DBPassword"         : { "Ref" : "4DBPassword" },
                     "WebServerCapacity"   : { "Ref" : "WebServerCapacity" },
                     "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
-                    "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
+                    "8RemoteAccessLocation":{ "Ref" : "8RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
-                    "WebUser"             : { "Ref" : "WebUser" },
-                    "WebPassword"         : { "Ref" : "WebPassword" },
+                    "5WebUser"            : { "Ref" : "5WebUser" },
+                    "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "DummyRef"            : { "Ref" : "DBWebServerApp" },
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
                     "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
-                    "TriggerWebConfig"     : { "Ref" : "TriggerWebConfig" },
+                    "TriggerWebConfig"    : { "Ref" : "TriggerWebConfig" },
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
@@ -544,31 +544,31 @@
                                                 "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
                "Parameters" : {
                     "LansaType"           :  "DBWebServer",
-                    "LansaMSI"            : { "Ref" : "LansaMSI" },
-                    "LansaMSIBitness"     : { "Ref" : "LansaMSIBitness"},
-                    "LansaTemplateLevel"  : { "Ref" : "LansaTemplateLevel"},
-                    "LansaGitRepoBranch"  : { "Ref" : "LansaGitRepoBranch" },
-                    "KeyName"             : { "Ref" : "KeyName" },
+                    "1LansaMSI"           : { "Ref" : "1LansaMSI" },
+                    "2LansaMSIBitness"    : { "Ref" : "2LansaMSIBitness"},
+                    "90LansaTemplateLevel": { "Ref" : "90LansaTemplateLevel"},
+                    "91LansaGitRepoBranch": { "Ref" : "91LansaGitRepoBranch" },
+                    "7KeyName"            : { "Ref" : "7KeyName" },
                     "InstanceType"        : { "Ref" : "WebServerInstanceType" },
                     "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
                     "DBName"              : { "Ref" : "DBName" },
-                    "DBUsername"          : { "Ref" : "DBUsername" },
-                    "DBPassword"          : { "Ref" : "DBPassword" },
+                    "3DBUsername"         : { "Ref" : "3DBUsername" },
+                    "4DBPassword"         : { "Ref" : "4DBPassword" },
                     "WebServerCapacity"   : 1,
                     "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
-                    "RemoteAccessLocation": { "Ref" : "RemoteAccessLocation" },
+                    "8RemoteAccessLocation":{ "Ref" : "8RemoteAccessLocation" },
                     "ELBTimeout"          : { "Ref" : "ELBTimeout" },
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
 		              "AccessKeyId"         : { "Ref" : "HostKeys" },
 		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
-                    "WebUser"             : { "Ref" : "WebUser" },
-                    "WebPassword"         : { "Ref" : "WebPassword" },
+                    "5WebUser"            : { "Ref" : "5WebUser" },
+                    "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
                     "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
                     "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
-                    "TriggerWebConfig"     : { "Ref" : "TriggerWebConfig" },
+                    "TriggerWebConfig"    : { "Ref" : "TriggerWebConfig" },
                     "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
                     "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
