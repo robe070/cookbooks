@@ -18,7 +18,7 @@
     "ssh_username": "Administrator",
     "ssh_timeout": "10m",
     "ssh_private_key_file": "{{user `user_directory`}}/.ssh/Linux-keypair.pem",
-    "ami_name": "LANSA Web Server {{isotime \"20060102-1504\"}}",
+    "ami_name": "LANSA Scalable License {{isotime \"20060102-1504\"}}",
     "ami_virtualization_type": "hvm"
   }],
   
