@@ -1,0 +1,591 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description"              : "LANSA Windows template: This template installs a highly-available, scalable LANSA deployment using a multi-AZ Amazon RDS database instance for storage.  **WARNING** This template creates an Amazon Windows EC2 instance, an Elastic Load Balancer and an Amazon RDS database instance. Parameters described as Update Stack: are only modified after the stack has been created. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Parameters"               : {
+        "1LansaMSI" : {
+            "Type"        : "String",
+            "Default"     : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
+            "Description" : "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
+        },
+        "2LansaMSIBitness" : {
+            "Default" : "1",
+            "Description" : "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "1",
+                "0"
+            ],
+            "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
+        },
+        "3DBUsername"   : {
+            "Default" : "admin",
+            "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
+            "Type"        : "String",
+            "MinLength"   : "1",
+            "MaxLength"   : "16",
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
+        },
+        "4DBPassword"   : {
+            "Default" : "password",
+            "NoEcho"  : "true",
+            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
+            "Type"        : "String",
+            "MinLength"   : "8",
+            "MaxLength"   : "41"
+        },
+        "5WebUser"   : {
+            "Type"    : "String",
+            "Default" : "PCXUSER2",
+            "Description" : "User to use for running web jobs."
+        },
+        "6WebPassword"   : {
+            "NoEcho"  : "true",
+            "Type"    : "String",
+            "Default" : "PCXUSER@122",
+            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
+        },
+        "7KeyName" : {
+            "Default" : "Linux-keypair",
+            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "8RemoteAccessLocation"        : {
+            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
+            "Type"        : "String",
+            "MinLength"   : "9",
+            "MaxLength"   : "18",
+            "Default"     : "103.231.159.65/32",
+            "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+        },
+        "90LansaTemplateLevel" : {
+            "Default" : "R",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "R",
+                "B"
+            ],
+            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+        },        
+        "91LansaGitRepoBranch" : {
+            "Default" : "master",
+            "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
+            "Type"        : "String"
+        },
+        "WebServerInstanceType" : {
+            "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
+            "Type"        : "String",
+            "Default"     : "m3.medium",
+            "AllowedValues" : [
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "hs1.8xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "cc1.4xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge",
+                "t1.micro"
+            ]
+        },
+        "WebServerMaxConnect" : {
+            "Description" : "The maximum number of LANSA jobs to run on each Web Server. Setting TriggerWebConfig will cause this value to be updated.",
+            "Type"        : "Number",
+            "Default" : 20
+        },        
+        "DBInstanceClass"      : {
+            "Default" : "db.m3.medium",
+            "Description" : "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "db.t2.micro",
+                "db.t2.small",
+                "db.t2.medium",
+                "db.m3.medium",
+                "db.m3.large",
+                "db.m3.xlarge",
+                "db.m3.2xlarge",
+                "db.r3.large",
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge",
+                "db.m2.xlarge",
+                "db.m2.2xlarge",
+                "db.m2.4xlarge",
+                "db.m1.small",
+                "db.m1.medium",
+                "db.m1.large",
+                "db.m1.xlarge",
+                "db.t1.micro"
+            ]
+        },
+        "DBName"       : {
+            "Default" : "lansa",
+            "Description" : "LANSA database name. Must begin with a letter and contain only alphanumeric characters. Maximum length 64.",
+            "Type"        : "String",
+            "MinLength"   : "1",
+            "MaxLength"   : "64",
+            "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
+        },
+        "DBEngine" : {
+            "Description" : "Database engine type. Must be a valid SQL Server engine type. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-ex' or 'sqlserver-web'.",
+            "Type"        : "String",
+            "Default"     : "sqlserver-web",
+            "AllowedValues" : [
+                "sqlserver-ex",
+                "sqlserver-web",
+                "sqlserver-se",
+                "sqlserver-ee"
+            ]
+        },
+        "MultiAZDatabase" : {
+            "Default" : "false",
+            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
+            "Type"        : "String",
+            "AllowedValues" : [
+                "true",
+                "false"
+            ]
+        },
+        "UserScriptHook" : {
+            "Type"    : "String",
+            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1",
+            "Description" : "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
+        },
+        "WebServerCapacity" : {
+            "Default" : "1",
+            "Description" : "The initial number of EXTRA WebServer EC2 instances. Must be between at least 1. Default maximum allowed by AWS in an account is 50.",
+            "Type"        : "Number",
+            "MinValue"    : "1"
+        },
+        "DBAllocatedStorage" : {
+            "Default" : "50",
+            "Description" : "The maximum size of the database. Must be between 20 and 1024 GB. Maximum 20 for 'sqlserver-ex'. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
+            "Type"        : "Number",
+            "MinValue"    : "20",
+            "MaxValue"    : "1024"
+        },
+        "ELBTimeout"         : {
+            "Description" : "Time to wait for a response from the application. Must be between 2 and 60. Health check interval and IIS timeouts are based on this time too.",
+            "Type"        : "Number",
+            "MinValue"    : "2",
+            "MaxValue"    : "60",
+            "Default"     : "30"
+        },
+        "TriggerCakeUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to update the supporting software and trigger a Windows Update. This is the same as triggerring both a ChefUpdate and a WindowsUpdate. Mainly to ensure that Windows Updates have been applied."
+        },
+        "TriggerChefUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to update the supporting software."
+        },
+        "TriggerWindowsUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger a Windows Update."
+        },
+        "TriggerWebConfig" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger an update to the web configuration"
+        },
+        "TriggerIcingUpdate" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly."
+        },
+        "TriggerPatchInstall" : {
+            "Type"    : "String",
+            "Default" : "1",
+            "Description" : "Update Stack: Increment this by one to trigger patches to be installed. Obtains all MSPs from the PatchBucket and PatchFolder and applies those not already applied."
+        },
+        "PatchBucketName" : {
+            "Type"    : "String",
+            "Default" : "lansa",
+            "Description" : "Update Stack: S3 Bucket which will contain the patches. (case sensitive)."
+        },
+        "PatchFolderName" : {
+            "Type"    : "String",
+            "Default" : "app/Test",
+            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive)."
+        }
+    },
+    "Mappings"                 : {
+         "AWSRegionArch2AMI"    : {
+            "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
+            "ap-southeast-2"  : { "64" : "ami-e1c0b3db" },
+            "us-east-1"       : { "64" : "ami-2eb1b046" },
+            "ap-northeast-1"  : { "64" : "ami-1fd1221f" },
+            "sa-east-1"       : { "64" : "ami-4170cb5c" }
+        },
+       "Region2Principal" : {
+         "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "us-west-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "us-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "eu-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-southeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-northeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ap-southeast-2" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "sa-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "cn-north-1"     : { "EC2Principal" : "ec2.amazonaws.com.cn", "OpsWorksPrincipal" : "opsworks.amazonaws.com.cn" },
+         "eu-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" }
+       }
+   ,
+       "Region2ARNPrefix": {
+         "us-east-1"      : { "ARNPrefix": "arn:aws:" },
+         "us-west-1"      : { "ARNPrefix": "arn:aws:" },
+         "us-west-2"      : { "ARNPrefix": "arn:aws:" },
+         "eu-west-1"      : { "ARNPrefix": "arn:aws:" },
+         "ap-northeast-1" : { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-1" : { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-2" : { "ARNPrefix": "arn:aws:" },
+         "sa-east-1"      : { "ARNPrefix": "arn:aws:" },
+         "cn-north-1"     : { "ARNPrefix": "arn:aws-cn:" },
+         "eu-central-1"   : { "ARNPrefix": "arn:aws:" }
+       }
+
+    },
+    "Conditions" : {
+       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "90LansaTemplateLevel"}, "R"]}
+     },
+    "Resources"                : {
+         "CfnUser"             : {
+           "Type" : "AWS::IAM::User",
+           "Properties" : {
+             "Path": "/",
+             "Policies": [ {
+                  "PolicyName": "Admin",
+                  "PolicyDocument": 
+	               { "Statement": [
+	                  {
+        	                 "Effect":"Allow",
+                             "Action":"*",
+                             "Resource":"*"
+						   }
+					   ]}			
+              }]
+           }
+         },
+         "HostKeys"            : {
+           "Type" : "AWS::IAM::AccessKey",
+           "Properties" : {
+             "UserName" : {"Ref": "CfnUser"}
+           }
+         },
+         "LogRole"             : {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": { "Service": [{ "Fn::FindInMap" : ["Region2Principal", {"Ref" : "AWS::Region"}, "EC2Principal"]}] },
+                  "Action": [ "sts:AssumeRole" ]
+              } ] },
+              "Path": "/",
+              "Policies": [ {
+                "PolicyName": "LogRolePolicy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [ 
+                     {
+                        "Resource": [ { "Fn::Join" : ["", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] }, 
+                                     "logs:*:*:*" ]]}],
+                        "Action": [ "logs:*" ],
+                        "Effect": "Allow"
+                     },
+                     {
+                        "Resource":["*"],
+                        "Action":["cloudwatch:PutMetricData"],
+                        "Effect":"Allow"
+                     }
+                  ] 
+                }
+              } ]
+            }
+          },
+         "LogRoleInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+              "Path": "/",
+              "Roles": [ { "Ref": "LogRole" } ]
+            }
+          },
+         "WebServerELB"        : {
+            "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Metadata" : {
+                "Comment1" : "Configure the Load Balancer with a simple health check and cookie-based stickiness",
+                "Comment2" : "Use install path for healthcheck to avoid redirects. Refer to LANSA report to place the right tag here for health check - ELB healthcheck does not handle 302 return codes"
+            },
+            "Properties" : {
+                "AvailabilityZones" : {
+                    "Fn::GetAZs" : ""
+                },
+                "CrossZone" : "true",
+                "LBCookieStickinessPolicy" : [
+                    {
+                        "PolicyName" : "CookieBasedPolicy",
+                        "CookieExpirationPeriod" : "600"
+                    }
+                ],
+                "Listeners"                : [
+                    {
+                        "LoadBalancerPort" : "80",
+                        "InstancePort"     : "80",
+                        "Protocol"         : "HTTP",
+                        "PolicyNames"      : [ "CookieBasedPolicy" ]
+                    }
+                ],
+                "ConnectionDrainingPolicy" : {
+                    "Enabled" : "true",
+                    "Timeout" : "300"
+                },
+                "HealthCheck"              : {
+                    "Target" : "HTTP:80/cgi-bin/lansaweb?about",
+                    "HealthyThreshold" : "3",
+                    "UnhealthyThreshold" : "5",
+                    "Interval"           : "90",
+                    "Timeout"            : {
+                        "Ref" : "ELBTimeout"
+                    }
+                }
+            }
+         },
+         "DBInstance"          : {
+            "Type" : "AWS::RDS::DBInstance",
+            "Properties" : {
+                "Engine" : {
+                    "Ref" : "DBEngine"
+                },
+                "MultiAZ" : {
+                    "Ref" : "MultiAZDatabase"
+                },
+                "MasterUsername" : {
+                    "Ref" : "3DBUsername"
+                },
+                "DBInstanceClass" : {
+                    "Ref" : "DBInstanceClass"
+                },
+                "DBSecurityGroups" : [
+                    {
+                        "Ref" : "DBSecurityGroup"
+                    }
+                ],
+                "AllocatedStorage" : {
+                    "Ref" : "DBAllocatedStorage"
+                },
+                "MasterUserPassword" : {
+                    "Ref" : "4DBPassword"
+                },
+  	             "AllowMajorVersionUpgrade": "false",
+                "AutoMinorVersionUpgrade":  "true",
+	             "LicenseModel": "license-included",
+                   "Tags"               : [
+                    {
+                        "Key" : "Network",
+                        "Value" : "Private"
+                    }
+                ]
+            },
+	         "DeletionPolicy": "Snapshot"
+           },
+         "DBSecurityGroup"     : {
+            "Type" : "AWS::RDS::DBSecurityGroup",
+            "Properties" : {
+                "DBSecurityGroupIngress" : {
+                    "EC2SecurityGroupName" : {
+                        "Ref" : "LansaSecurityGroup"
+                    }
+                },
+                "GroupDescription"       : "Frontend Access"
+            }
+         },
+         "LansaSecurityGroup"  : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Enable HTTP access via port 80 locked down to the load balancers + SSH access + RDP access + SQL Server",
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "80",
+                        "ToPort"     : "80",
+                        "SourceSecurityGroupOwnerId" : {
+                            "Fn::GetAtt" : [
+                                "WebServerELB",
+                                "SourceSecurityGroup.OwnerAlias"
+                            ]
+                        },
+                        "SourceSecurityGroupName"    : {
+                            "Fn::GetAtt" : [
+                                "WebServerELB",
+                                "SourceSecurityGroup.GroupName"
+                            ]
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "22",
+                        "ToPort"     : "22",
+                        "CidrIp"     : {
+                            "Ref" : "8RemoteAccessLocation"
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "3389",
+                        "ToPort"     : "3389",
+                        "CidrIp"     : {
+                            "Ref" : "8RemoteAccessLocation"
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "1433",
+                        "ToPort"     : "1433",
+                        "CidrIp"     : {
+                            "Ref" : "8RemoteAccessLocation"
+                        }
+                    }
+                ]
+            }
+        },
+         "SGBaseIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupName": { "Ref": "LansaSecurityGroup" },
+                "IpProtocol": "tcp",
+                "FromPort": "1433",
+                "ToPort": "1433",
+                "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
+            }
+         },
+         "WebServerApp" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+               "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
+               "Parameters" : {
+                    "LansaType"           :  "WebServer",
+                    "1LansaMSI"           : { "Ref" : "1LansaMSI" },
+                    "2LansaMSIBitness"    : { "Ref" : "2LansaMSIBitness"},
+                    "90LansaTemplateLevel": { "Ref" : "90LansaTemplateLevel"},
+                    "91LansaGitRepoBranch": { "Ref" : "91LansaGitRepoBranch" },
+                    "7KeyName"            : { "Ref" : "7KeyName" },
+                    "InstanceType"        : { "Ref" : "WebServerInstanceType" },
+                    "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
+                    "DBName"              : { "Ref" : "DBName" },
+                    "3DBUsername"         : { "Ref" : "3DBUsername" },
+                    "4DBPassword"         : { "Ref" : "4DBPassword" },
+                    "WebServerCapacity"   : { "Ref" : "WebServerCapacity" },
+                    "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
+                    "8RemoteAccessLocation":{ "Ref" : "8RemoteAccessLocation" },
+                    "ELBTimeout"          : { "Ref" : "ELBTimeout" },
+                    "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
+                    "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
+                    "LoadBalancer"        : { "Ref" : "WebServerELB" },
+		              "AccessKeyId"         : { "Ref" : "HostKeys" },
+		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
+                    "5WebUser"            : { "Ref" : "5WebUser" },
+                    "6WebPassword"        : { "Ref" : "6WebPassword" },
+                    "DummyRef"            : { "Ref" : "DBWebServerApp" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerWebConfig"    : { "Ref" : "TriggerWebConfig" },
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "PatchBucketName"     : { "Ref" : "PatchBucketName"},
+                    "PatchFolderName"     : { "Ref" : "PatchFolderName"},
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" },
+                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+               }
+            }
+         },
+         "DBWebServerApp" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+               "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
+                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
+               "Parameters" : {
+                    "LansaType"           :  "DBWebServer",
+                    "1LansaMSI"           : { "Ref" : "1LansaMSI" },
+                    "2LansaMSIBitness"    : { "Ref" : "2LansaMSIBitness"},
+                    "90LansaTemplateLevel": { "Ref" : "90LansaTemplateLevel"},
+                    "91LansaGitRepoBranch": { "Ref" : "91LansaGitRepoBranch" },
+                    "7KeyName"            : { "Ref" : "7KeyName" },
+                    "InstanceType"        : { "Ref" : "WebServerInstanceType" },
+                    "DBEndPoint"          : { "Fn::GetAtt" : ["DBInstance", "Endpoint.Address"] },
+                    "DBName"              : { "Ref" : "DBName" },
+                    "3DBUsername"         : { "Ref" : "3DBUsername" },
+                    "4DBPassword"         : { "Ref" : "4DBPassword" },
+                    "WebServerCapacity"   : 1,
+                    "WebServerMaxConnect" : { "Ref" : "WebServerMaxConnect" },
+                    "8RemoteAccessLocation":{ "Ref" : "8RemoteAccessLocation" },
+                    "ELBTimeout"          : { "Ref" : "ELBTimeout" },
+                    "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
+                    "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
+                    "LoadBalancer"        : { "Ref" : "WebServerELB" },
+		              "AccessKeyId"         : { "Ref" : "HostKeys" },
+		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
+                    "5WebUser"            : { "Ref" : "5WebUser" },
+                    "6WebPassword"        : { "Ref" : "6WebPassword" },
+                    "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
+                    "TriggerChefUpdate"   : { "Ref" : "TriggerChefUpdate"},
+                    "TriggerWindowsUpdate": { "Ref" : "TriggerWindowsUpdate"},
+                    "TriggerWebConfig"    : { "Ref" : "TriggerWebConfig" },
+                    "TriggerIcingUpdate"  : { "Ref" : "TriggerIcingUpdate"},
+                    "TriggerPatchInstall" : { "Ref" : "TriggerPatchInstall"},
+                    "PatchBucketName"     : { "Ref" : "PatchBucketName"},
+                    "PatchFolderName"     : { "Ref" : "PatchFolderName"},
+                    "UserScriptHook"      : { "Ref" : "UserScriptHook" },
+                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+               }
+            }
+         }
+
+    },
+      
+    "Outputs"                  : {
+      "WebsiteURL" : {
+         "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },
+         "Description" : "LANSA App Website"
+      }
+   }
+}
+
