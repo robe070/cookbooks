@@ -28,6 +28,7 @@
     "inline": [ 
       "cmd /c \"md c:\\packerTemp\"",
       "cmd /c \"md c:\\recipes\\chef-repo\\cookbooks\"",
+      "cmd /c \"md c:\\lansa\"",
       "cmd /c schtasks /change /TN \"\\Microsoft\\windows\\application Experience\\ProgramDataUpdater\" /DISABLE" ]
   },
   {
@@ -112,6 +113,11 @@
   },
   {
     "type": "file",
+    "source": "{{user `script_location`}}installGit.ps1",
+    "destination": "c:\\packerTemp\\installGit.ps1"
+  },
+  {
+    "type": "file",
     "source": "{{user `script_location`}}scheduleTasks.ps1",
     "destination": "c:\\packerTemp\\scheduleTasks.ps1"
   },
@@ -130,9 +136,11 @@
     "type": "shell",
     "pause_before": "5m",
     "inline": [
+      "cmd /c \"git clone https://github.com/robe070/cookbooks.git c:\\lansa\"",
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
       "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
       "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
+      "powershell \"c:\\packerTemp\\installGit.ps1\"",
       "powershell \"c:\\packerTemp\\scheduleTasks.ps1\"",
       "powershell \"c:\\recipes\\Get-StartupCmds.ps1\"",
       "powershell \"c:\\recipes\\windowsUpdatesSettings.ps1\"",
