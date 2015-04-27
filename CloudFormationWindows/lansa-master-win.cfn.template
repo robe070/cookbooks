@@ -75,7 +75,7 @@
         "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
-            "Default"     : "m3.medium",
+            "Default"     : "t2.medium",
             "AllowedValues" : [
                 "t2.micro",
                 "t2.small",
@@ -89,6 +89,11 @@
                 "c3.2xlarge",
                 "c3.4xlarge",
                 "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
                 "g2.2xlarge",
                 "r3.large",
                 "r3.xlarge",
@@ -98,24 +103,7 @@
                 "i2.xlarge",
                 "i2.2xlarge",
                 "i2.4xlarge",
-                "i2.8xlarge",
-                "hs1.8xlarge",
-                "m2.xlarge",
-                "m2.2xlarge",
-                "m2.4xlarge",
-                "m1.small",
-                "m1.medium",
-                "m1.large",
-                "m1.xlarge",
-                "m2.xlarge",
-                "m2.2xlarge",
-                "m2.4xlarge",
-                "c1.medium",
-                "c1.xlarge",
-                "cc1.4xlarge",
-                "cc2.8xlarge",
-                "cg1.4xlarge",
-                "t1.micro"
+                "i2.8xlarge"
             ]
         },
         "WebServerMaxConnect" : {
