@@ -15,8 +15,8 @@ param(
 [String]$SUDB = '1',
 [String]$bucket_name='lansa',
 [String]$region='ap-southeast-2',
-[String]$access_key='AKIAIOO5N7ZI4D2WWCYQ',
-[String]$secret_key='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',
+[String]$access_key,
+[String]$secret_key,
 [String]$folder='app/Test',
 [String]$target_dir= 'c:\lansa\newpatches',
 [String]$old_dir= 'c:\lansa\oldpatches'
