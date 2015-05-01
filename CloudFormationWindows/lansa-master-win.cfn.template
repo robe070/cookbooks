@@ -188,7 +188,8 @@
             "Default" : "1000",
             "Description" : "Fixed bumber of I/O operations per second supported by this DB instance. This number must be 10 times the size of DBAllocatedStorage and in increments of 1000. E.g. If DBAllocatedStorage = 200 then DBIops = 2000",
             "Type"        : "Number",
-            "MinValue"    : "1000"
+            "MinValue"    : "1000",
+            "MaxValue"    : "3072"
         },
         "ELBTimeout"         : {
             "Description" : "Time to wait for a response from the application. Must be between 2 and 60. Health check interval and IIS timeouts are based on this time too.",
@@ -402,7 +403,9 @@
                 "AllocatedStorage" : {
                     "Ref" : "DBAllocatedStorage"
                 },
-                "Iops" : 2000,
+                "Iops" : {
+                     "Ref" : "DBIops"
+                },
                 "MasterUserPassword" : {
                     "Ref" : "4DBPassword"
                 },
@@ -441,13 +444,13 @@
                 "IpProtocol": "tcp",
                 "FromPort": "1433",
                 "ToPort": "1433",
-                "SourceSecurityGroupName": { "Ref": "DBSecurityGroup" }
+                "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
             }
          },
          "LansaSecurityGroup"  : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
-                "GroupDescription" : "Enable HTTP access via port 80 locked down to the load balancers + SSH access + RDP access + SQL Server",
+                "GroupDescription" : "Enable HTTP access via port 80 locked down to the load balancers + SSH access + RDP access",
                 "SecurityGroupIngress" : [
                     {
                         "IpProtocol" : "tcp",
@@ -481,26 +484,8 @@
                         "CidrIp"     : {
                             "Ref" : "8RemoteAccessLocation"
                         }
-                    },
-                    {
-                        "IpProtocol" : "tcp",
-                        "FromPort"   : "1433",
-                        "ToPort"     : "1433",
-                        "CidrIp"     : {
-                            "Ref" : "8RemoteAccessLocation"
-                        }
                     }
                 ]
-            }
-        },
-         "SGBaseIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "Properties": {
-                "GroupName": { "Ref": "LansaSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "1433",
-                "ToPort": "1433",
-                "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
             }
          },
          "WebServerApp" : {
