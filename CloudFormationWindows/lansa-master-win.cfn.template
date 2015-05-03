@@ -186,7 +186,7 @@
         },
         "DBIops" : {
             "Default" : "1000",
-            "Description" : "Fixed bumber of I/O operations per second supported by this DB instance. This number must be 10 times the size of DBAllocatedStorage and in increments of 1000. E.g. If DBAllocatedStorage = 200 then DBIops = 2000",
+            "Description" : "The fixed number of I/O operations per second supported by this DB instance. This number must be 10 times the size of DBAllocatedStorage and in increments of 1000. E.g. If DBAllocatedStorage = 200 then DBIops = 2000",
             "Type"        : "Number",
             "MinValue"    : "1000",
             "MaxValue"    : "3072"
