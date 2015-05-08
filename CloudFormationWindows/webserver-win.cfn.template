@@ -234,7 +234,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
                      "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
                      "chef-update"     : ["git-pull", "run-chef"],
@@ -397,7 +397,7 @@
                                  "$env:Path;",
                                  "cd \\lansa;",
                                  "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};", 
-                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "cmd /C git checkout ", { "Ref" : "91LansaGitRepoBranch" },"  '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
                                  "exit 0",
                                  "}\""
                               ]]},
