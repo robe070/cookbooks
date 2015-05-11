@@ -567,7 +567,7 @@
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "60"
                         }
                      }
