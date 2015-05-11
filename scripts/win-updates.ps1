@@ -49,7 +49,8 @@ function Check-ContinueRestartOrEnd() {
 #>
 
             LogWrite "Restart Required - Restarting..."
-            Restart-Computer
+            Restart-Computer -force
+			LogWrite 'Restart failed'
         }
         default {
             LogWrite "Unsure If A Restart Is Required"
@@ -201,8 +202,9 @@ function Check-WindowsUpdates() {
             $global:RestartRequired=1
             $global:MoreUpdates=0
             Check-ContinueRestartOrEnd
-            LogWrite "Show never happen to see this text!"
-            Restart-Computer
+            LogWrite "Should never see this text! Reboot should have already occurred"
+            Restart-Computer -Force
+			LogWrite 'Restart failed'
         }
     } else {
         LogWrite 'There are no applicable updates'
@@ -219,6 +221,12 @@ $script:UpdateSearcher = $script:UpdateSession.CreateUpdateSearcher()
 $script:SearchResult = New-Object -ComObject 'Microsoft.Update.UpdateColl'
 $script:Cycles = 0
 $script:CycleUpdateCount = 0
+
+
+# Force Logoff all RDP users so that reboot will work and applying updates less likely to fail 
+LogWrite 'Forcing logoff of all users'
+(gwmi win32_operatingsystem -ComputerName $env:COMPUTERNAME).Win32Shutdown(4)
+LogWrite 'Users have been logged off'
 
 Check-WindowsUpdates
 if ($global:MoreUpdates -eq 1) {

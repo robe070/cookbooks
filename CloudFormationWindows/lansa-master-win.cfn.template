@@ -235,8 +235,8 @@
         },
         "PatchFolderName" : {
             "Type"    : "String",
-            "Default" : "/",
-            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive). For the demo use app/test-patches. See TriggerPatchInstall parameter for more details."
+            "Default" : "/change me",
+            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive). Note that ALL sub-directories are searched so ensure the directory used to store the patches has no sub directories. For the demo use app/test-patches. See TriggerPatchInstall parameter for more details."
         }
     },
     "Mappings"                 : {

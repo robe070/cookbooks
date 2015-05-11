@@ -17,7 +17,7 @@ param(
 [String]$region='ap-southeast-2',
 [String]$access_key,
 [String]$secret_key,
-[String]$folder='app/Test',
+[String]$folder='/change me',
 [String]$target_dir= 'c:\lansa\newpatches',
 [String]$old_dir= 'c:\lansa\oldpatches'
 )
@@ -26,6 +26,8 @@ try
 {
     if ( -not (Test-Path $old_dir) ) { New-Item -ItemType Directory -Force -Path $old_dir}
     if ( -not (Test-Path $target_dir) ) {New-Item -ItemType Directory -Force -Path $target_dir}
+
+    [int]$InstalledPatchCount = 0
 
     Clear-AWSCredentials -StoredCredentials lansa
 
@@ -78,6 +80,8 @@ try
                     # Move target file to old
                     Write-Output ("Moving $target_file to $old_dir")
                     Move-Item -Path $target_file -Destination $old_dir -Force
+
+                    $InstalledPatchCount +=1
                 }
                 else
                 {
@@ -102,7 +106,14 @@ try
 
     Clear-AWSCredentials -StoredCredentials lansa
 
-    Write-Output ("Patches installed successfully")
+    if ( $InstalledPatchCount -gt 0 )
+    {
+        Write-Output ("Patches installed successfully")
+    }
+    else
+    {
+        Write-Output ("No patches found")
+    }
     exit 0
 }
 catch

@@ -434,7 +434,7 @@
                         "01_config_windows_update" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\recipes\\WindowsUpdatesSettings.ps1",
+                                 "C:\\lansa\\scripts\\WindowsUpdatesSettings.ps1",
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -567,7 +567,7 @@
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "60"
                         }
                      }
