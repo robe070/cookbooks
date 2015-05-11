@@ -47,6 +47,7 @@ function Check-ContinueRestartOrEnd() {
                 LogWrite "Restart Registry Entry Exists Already"
             }
 #>
+			Logoff-Allusers
 
             LogWrite "Restart Required - Restarting..."
             Restart-Computer -force
@@ -203,6 +204,9 @@ function Check-WindowsUpdates() {
             $global:MoreUpdates=0
             Check-ContinueRestartOrEnd
             LogWrite "Should never see this text! Reboot should have already occurred"
+
+			Logoff-Allusers
+
             Restart-Computer -Force
 			LogWrite 'Restart failed'
         }
@@ -211,6 +215,14 @@ function Check-WindowsUpdates() {
         $global:RestartRequired=0
         $global:MoreUpdates=0
     }
+}
+
+function Logoff-Allusers()
+{
+	# Force Logoff all RDP users so that reboot will work and applying updates less likely to fail 
+	LogWrite 'Forcing logoff of all users'
+	(gwmi win32_operatingsystem -ComputerName $env:COMPUTERNAME).Win32Shutdown(4)
+	LogWrite 'Users have been logged off'
 }
 
 $script:ScriptName = $MyInvocation.MyCommand.ToString()
@@ -222,11 +234,7 @@ $script:SearchResult = New-Object -ComObject 'Microsoft.Update.UpdateColl'
 $script:Cycles = 0
 $script:CycleUpdateCount = 0
 
-
-# Force Logoff all RDP users so that reboot will work and applying updates less likely to fail 
-LogWrite 'Forcing logoff of all users'
-(gwmi win32_operatingsystem -ComputerName $env:COMPUTERNAME).Win32Shutdown(4)
-LogWrite 'Users have been logged off'
+Logoff-Allusers
 
 Check-WindowsUpdates
 if ($global:MoreUpdates -eq 1) {
