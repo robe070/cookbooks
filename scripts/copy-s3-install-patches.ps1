@@ -29,10 +29,10 @@ try
 
     [int]$InstalledPatchCount = 0
 
-    Clear-AWSCredentials -StoredCredentials lansa
+    # Clear-AWSCredentials -StoredCredentials lansa
 
-    Set-AWSCredentials -AccessKey $access_key -SecretKey $secret_key -StoreAs lansa
-    Initialize-AWSDefaults -ProfileName lansa -Region $region
+    # Set-AWSCredentials -AccessKey $access_key -SecretKey $secret_key -StoreAs lansa
+    # Initialize-AWSDefaults -ProfileName lansa -Region $region
 
     $FileList = Get-S3Object -BucketName $bucket_name -Key $folder
     $FileList | ft -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Output

@@ -301,7 +301,7 @@
              "UserName" : {"Ref": "CfnUser"}
            }
          },
-         "LogRole"             : {
+         "IAMRole"             : {
             "Type": "AWS::IAM::Role",
             "Properties": {
               "AssumeRolePolicyDocument": {
@@ -313,19 +313,33 @@
               } ] },
               "Path": "/",
               "Policies": [ {
-                "PolicyName": "LogRolePolicy",
+                "PolicyName": "IAMRolePolicy",
                 "PolicyDocument": {
                   "Version": "2012-10-17",
                   "Statement": [ 
                      {
+                        "Sid" :     "AllowAccessToLogs",
                         "Resource": [ { "Fn::Join" : ["", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] }, 
                                      "logs:*:*:*" ]]}],
-                        "Action": [ "logs:*" ],
+                        "Action": [ 
+                           "logs:CreateLogStream",
+                           "logs:PutLogEvents"
+                        ],
                         "Effect": "Allow"
                      },
                      {
+                        "Sid" :     "PermitAddingToLogs",
                         "Resource":["*"],
                         "Action":["cloudwatch:PutMetricData"],
+                        "Effect":"Allow"
+                     },
+                     {
+                        "Sid" :     "PermitReadingS3",
+                        "Resource":["arn:aws:s3:::*"],
+                        "Action":[ 
+                           "s3:Get*",
+                           "s3:List*"
+                        ],
                         "Effect":"Allow"
                      }
                   ] 
@@ -333,11 +347,11 @@
               } ]
             }
           },
-         "LogRoleInstanceProfile": {
+         "IAMRoleInstanceProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
               "Path": "/",
-              "Roles": [ { "Ref": "LogRole" } ]
+              "Roles": [ { "Ref": "IAMRole" } ]
             }
           },
          "WebServerELB"        : {
@@ -527,7 +541,7 @@
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" },
-                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
                }
             }
          },
@@ -569,7 +583,7 @@
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" },
-                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
                }
             }
          }

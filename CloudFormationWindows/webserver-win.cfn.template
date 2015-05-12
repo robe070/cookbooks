@@ -185,7 +185,7 @@
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
         },
-       "LogRoleInstanceProfile" : {
+       "IAMRoleInstanceProfile" : {
             "Type"    : "String",
             "Description" : "IAM Instance Role"
        }
@@ -541,14 +541,6 @@
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                  "C:\\LANSA\\scripts\\cloud-watch-config.ps1", 
-                                 " -dbpassword ", { "Ref" : "4DBPassword" },
-                                 " -webpassword ", { "Ref" : "6WebPassword" },
-                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
-                                 " -bucket_name ", { "Ref" : "PatchBucketName" },
-                                 " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
-                                 " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -619,21 +611,13 @@
                            "waitAfterCompletion" : "0"
                         }
                      }
-                  },
-                  "AWS::CloudFormation::Authentication" : {
-                        "S3AccessCreds" : {
-		                  "type" : "S3",
-		                  "accessKeyId"  : { "Ref" : "AccessKeyId" },
-		                  "secretKey"    : { "Ref" : "SecretKey"},
-		                  "buckets"      : [ "lansa" ]
-                        }
                   }
                }
             },
             "Properties" : {
                "ImageId" : { "Ref" : "AMI" },
                "InstanceType" : { "Ref" : "InstanceType" },
-               "IamInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" },
+               "IamInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" },
                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
                "KeyName"        : { "Ref" : "7KeyName" },
                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
