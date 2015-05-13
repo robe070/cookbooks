@@ -217,6 +217,7 @@ function Check-WindowsUpdates() {
 
 				Logoff-Allusers
 
+				LogWrite "Restart Required - Restarting..."
 				Restart-Computer -Force
 			}
 		} else {
@@ -227,6 +228,7 @@ function Check-WindowsUpdates() {
 	}
 	catch
 	{
+		LogWrite( $_ )
 		LogWrite("Installation error: reboot failed?")
 		exit 2
 	}
@@ -236,7 +238,13 @@ function Logoff-Allusers()
 {
 	# Force Logoff all RDP users so that reboot will work and applying updates less likely to fail 
 	LogWrite 'Forcing logoff of all users'
+	
 	(gwmi win32_operatingsystem -ComputerName $env:COMPUTERNAME).Win32Shutdown(4)
+
+	LogWrite
+	# Wait to make sure the users have actually been logged off
+	Start-Sleep -s 10
+
 	LogWrite 'Users have been logged off'
 }
 
