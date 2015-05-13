@@ -295,12 +295,6 @@
               }]
            }
          },
-         "HostKeys"            : {
-           "Type" : "AWS::IAM::AccessKey",
-           "Properties" : {
-             "UserName" : {"Ref": "CfnUser"}
-           }
-         },
          "IAMRole"             : {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -323,7 +317,9 @@
                                      "logs:*:*:*" ]]}],
                         "Action": [ 
                            "logs:CreateLogStream",
-                           "logs:PutLogEvents"
+                           "logs:PutLogEvents",
+                           "logs:DescribeLogGroups",
+                           "logs:DescribeLogStreams"
                         ],
                         "Effect": "Allow"
                      },
@@ -527,8 +523,6 @@
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
-		              "AccessKeyId"         : { "Ref" : "HostKeys" },
-		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "5WebUser"            : { "Ref" : "5WebUser" },
                     "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "DummyRef"            : { "Ref" : "DBWebServerApp" },
@@ -570,8 +564,6 @@
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
-		              "AccessKeyId"         : { "Ref" : "HostKeys" },
-		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "5WebUser"            : { "Ref" : "5WebUser" },
                     "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},

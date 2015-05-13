@@ -62,6 +62,7 @@ function Check-ContinueRestartOrEnd() {
 	}
 	catch
 	{
+		LogWrite( $_ )
 		LogWrite("Installation error: reboot failed?")
 		exit 2
 	}

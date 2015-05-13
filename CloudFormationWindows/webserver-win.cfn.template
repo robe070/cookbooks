@@ -114,14 +114,6 @@
             "Type"        : "String",
             "Default" : "test-win-WebServe-1DMYEQVA42DWE"
         },
-        "AccessKeyId": {
-            "Type"        : "String",
-            "Default" : "AKI"
-        },
-        "SecretKey": {
-            "Type"        : "String",
-            "Default" : "sss"
-        },
         "DummyRef"    : {
             "Type"    : "String",
             "Default" : "DummyValue",
@@ -512,8 +504,6 @@
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -bucket_name ", { "Ref" : "PatchBucketName" },
                                  " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
                                  " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
