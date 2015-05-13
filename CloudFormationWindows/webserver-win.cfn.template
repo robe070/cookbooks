@@ -114,14 +114,6 @@
             "Type"        : "String",
             "Default" : "test-win-WebServe-1DMYEQVA42DWE"
         },
-        "AccessKeyId": {
-            "Type"        : "String",
-            "Default" : "AKI"
-        },
-        "SecretKey": {
-            "Type"        : "String",
-            "Default" : "sss"
-        },
         "DummyRef"    : {
             "Type"    : "String",
             "Default" : "DummyValue",
@@ -185,7 +177,7 @@
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
         },
-       "LogRoleInstanceProfile" : {
+       "IAMRoleInstanceProfile" : {
             "Type"    : "String",
             "Description" : "IAM Instance Role"
        }
@@ -396,8 +388,8 @@
                                  "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
                                  "$env:Path;",
                                  "cd \\lansa;",
-                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};", 
-                                 "cmd /C git checkout ", { "Ref" : "91LansaGitRepoBranch" },"  '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git pull failed');exit $LastExitCode};", 
+                                 "cmd /C git checkout -f ", { "Ref" : "91LansaGitRepoBranch" },"  '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
                                  "exit 0",
                                  "}\""
                               ]]},
@@ -434,7 +426,7 @@
                         "01_config_windows_update" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\recipes\\WindowsUpdatesSettings.ps1",
+                                 "C:\\lansa\\scripts\\WindowsUpdatesSettings.ps1",
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -512,8 +504,6 @@
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -bucket_name ", { "Ref" : "PatchBucketName" },
                                  " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
                                  " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
@@ -541,14 +531,6 @@
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                  "C:\\LANSA\\scripts\\cloud-watch-config.ps1", 
-                                 " -dbpassword ", { "Ref" : "4DBPassword" },
-                                 " -webpassword ", { "Ref" : "6WebPassword" },
-                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
-                                 " -bucket_name ", { "Ref" : "PatchBucketName" },
-                                 " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
-                                 " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -567,7 +549,7 @@
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "60"
                         }
                      }
@@ -619,21 +601,13 @@
                            "waitAfterCompletion" : "0"
                         }
                      }
-                  },
-                  "AWS::CloudFormation::Authentication" : {
-                        "S3AccessCreds" : {
-		                  "type" : "S3",
-		                  "accessKeyId"  : { "Ref" : "AccessKeyId" },
-		                  "secretKey"    : { "Ref" : "SecretKey"},
-		                  "buckets"      : [ "lansa" ]
-                        }
                   }
                }
             },
             "Properties" : {
                "ImageId" : { "Ref" : "AMI" },
                "InstanceType" : { "Ref" : "InstanceType" },
-               "IamInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" },
+               "IamInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" },
                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
                "KeyName"        : { "Ref" : "7KeyName" },
                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [

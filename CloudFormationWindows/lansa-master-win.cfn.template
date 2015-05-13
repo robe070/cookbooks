@@ -235,8 +235,8 @@
         },
         "PatchFolderName" : {
             "Type"    : "String",
-            "Default" : "/",
-            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive). For the demo use app/test-patches. See TriggerPatchInstall parameter for more details."
+            "Default" : "/change me",
+            "Description" : "Update Stack: S3 folder which will contain the patches. (case sensitive). Note that ALL sub-directories are searched so ensure the directory used to store the patches has no sub directories. For the demo use app/test-patches. See TriggerPatchInstall parameter for more details."
         }
     },
     "Mappings"                 : {
@@ -295,13 +295,7 @@
               }]
            }
          },
-         "HostKeys"            : {
-           "Type" : "AWS::IAM::AccessKey",
-           "Properties" : {
-             "UserName" : {"Ref": "CfnUser"}
-           }
-         },
-         "LogRole"             : {
+         "IAMRole"             : {
             "Type": "AWS::IAM::Role",
             "Properties": {
               "AssumeRolePolicyDocument": {
@@ -313,19 +307,35 @@
               } ] },
               "Path": "/",
               "Policies": [ {
-                "PolicyName": "LogRolePolicy",
+                "PolicyName": "IAMRolePolicy",
                 "PolicyDocument": {
                   "Version": "2012-10-17",
                   "Statement": [ 
                      {
+                        "Sid" :     "AllowAccessToLogs",
                         "Resource": [ { "Fn::Join" : ["", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] }, 
                                      "logs:*:*:*" ]]}],
-                        "Action": [ "logs:*" ],
+                        "Action": [ 
+                           "logs:CreateLogStream",
+                           "logs:PutLogEvents",
+                           "logs:DescribeLogGroups",
+                           "logs:DescribeLogStreams"
+                        ],
                         "Effect": "Allow"
                      },
                      {
+                        "Sid" :     "PermitAddingToLogs",
                         "Resource":["*"],
                         "Action":["cloudwatch:PutMetricData"],
+                        "Effect":"Allow"
+                     },
+                     {
+                        "Sid" :     "PermitReadingS3",
+                        "Resource":["arn:aws:s3:::*"],
+                        "Action":[ 
+                           "s3:Get*",
+                           "s3:List*"
+                        ],
                         "Effect":"Allow"
                      }
                   ] 
@@ -333,11 +343,11 @@
               } ]
             }
           },
-         "LogRoleInstanceProfile": {
+         "IAMRoleInstanceProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
               "Path": "/",
-              "Roles": [ { "Ref": "LogRole" } ]
+              "Roles": [ { "Ref": "IAMRole" } ]
             }
           },
          "WebServerELB"        : {
@@ -513,8 +523,6 @@
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
-		              "AccessKeyId"         : { "Ref" : "HostKeys" },
-		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "5WebUser"            : { "Ref" : "5WebUser" },
                     "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "DummyRef"            : { "Ref" : "DBWebServerApp" },
@@ -527,7 +535,7 @@
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" },
-                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
                }
             }
          },
@@ -556,8 +564,6 @@
                     "AMI"                 : {  "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64" ] },
                     "SecurityGroup"       : { "Ref" : "LansaSecurityGroup" },
                     "LoadBalancer"        : { "Ref" : "WebServerELB" },
-		              "AccessKeyId"         : { "Ref" : "HostKeys" },
-		              "SecretKey"           : { "Fn::GetAtt": ["HostKeys", "SecretAccessKey"] },
                     "5WebUser"            : { "Ref" : "5WebUser" },
                     "6WebPassword"        : { "Ref" : "6WebPassword" },
                     "TriggerCakeUpdate"   : { "Ref" : "TriggerCakeUpdate"},
@@ -569,7 +575,7 @@
                     "PatchBucketName"     : { "Ref" : "PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "UserScriptHook" },
-                    "LogRoleInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
                }
             }
          }
