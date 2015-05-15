@@ -75,7 +75,7 @@
         "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
-            "Default"     : "t2.medium",
+            "Default"     : "t2.micro",
             "AllowedValues" : [
                 "t2.micro",
                 "t2.small",
@@ -112,7 +112,7 @@
             "Default" : 20
         },        
         "DBInstanceClass"      : {
-            "Default" : "db.m3.medium",
+            "Default" : "db.t2.small",
             "Description" : "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
             "Type"        : "String",
             "AllowedValues" : [
@@ -179,7 +179,7 @@
         },
         "DBAllocatedStorage" : {
             "Default" : "100",
-            "Description" : "The maximum size of the database. Must be between 20 and 1024 GB. Maximum 20 for 'sqlserver-ex'. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
+            "Description" : "The maximum size of the database. Must be between 100 and 1024 GB. Maximum 20 for 'sqlserver-ex'. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
             "Type"        : "Number",
             "MinValue"    : "100",
             "MaxValue"    : "1024"

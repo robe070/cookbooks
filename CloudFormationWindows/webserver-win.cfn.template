@@ -460,7 +460,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "20"
                         }
                      }
                   },
@@ -489,7 +489,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "20"
                         }
                      }
                   },
@@ -508,7 +508,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "20"
                         }
                      }
                   },
@@ -550,7 +550,7 @@
                      "commands" : {
                         "01_windows_updates" : {
                            "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
-                           "waitAfterCompletion" : "60"
+                           "waitAfterCompletion" : "20"
                         }
                      }
                   },
