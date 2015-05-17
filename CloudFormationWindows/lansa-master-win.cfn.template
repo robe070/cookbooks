@@ -278,23 +278,6 @@
        "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "90LansaTemplateLevel"}, "R"]}
      },
     "Resources"                : {
-         "CfnUser"             : {
-           "Type" : "AWS::IAM::User",
-           "Properties" : {
-             "Path": "/",
-             "Policies": [ {
-                  "PolicyName": "Admin",
-                  "PolicyDocument": 
-	               { "Statement": [
-	                  {
-        	                 "Effect":"Allow",
-                             "Action":"*",
-                             "Resource":"*"
-						   }
-					   ]}			
-              }]
-           }
-         },
          "IAMRole"             : {
             "Type": "AWS::IAM::Role",
             "Properties": {
