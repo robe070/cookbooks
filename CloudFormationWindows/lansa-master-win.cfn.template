@@ -26,7 +26,6 @@
             "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
         "4DBPassword"   : {
-            "Default" : "password",
             "NoEcho"  : "true",
             "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
             "Type"        : "String",
@@ -41,20 +40,17 @@
         "6WebPassword"   : {
             "NoEcho"  : "true",
             "Type"    : "String",
-            "Default" : "PCXUSER@122",
             "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
         },
         "7KeyName" : {
-            "Default" : "Linux-keypair",
-            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive).",
+            "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive). e.g. linux-keypair",
             "Type"        : "AWS::EC2::KeyPair::KeyName"
         },
         "8RemoteAccessLocation"        : {
-            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. This is a security feature which limits remote access to your EC2 instances.",
+            "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.159.65/32 This is a security feature which limits remote access to your EC2 instances.",
             "Type"        : "String",
             "MinLength"   : "9",
             "MaxLength"   : "18",
-            "Default"     : "103.231.159.65/32",
             "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
         "90LansaTemplateLevel" : {
@@ -159,7 +155,7 @@
         },
         "MultiAZDatabase" : {
             "Default" : "false",
-            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
+            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Only available in us-west-2, us-east-1 and eu-west-1. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
             "Type"        : "String",
             "AllowedValues" : [
                 "true",
