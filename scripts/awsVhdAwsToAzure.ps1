@@ -12,7 +12,7 @@ Import-Module AWSPowershell
 # Set AWS Access Key and Secret Key credentials
 # Create and confirm at https://portal.aws.amazon.com.gp.aws/securityCredentials
 
-Set-AWSCredentials -AccessKey AKIAIERYBE7AYSHDVUGA -SecretKey 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
+Set-AWSCredentials -AccessKey xxx -SecretKey xxx
 
 #endregion Setup Powershell for AWS
 
