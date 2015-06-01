@@ -20,13 +20,13 @@ Set-AWSCredentials -AccessKey AKIAIERYBE7AYSHDVUGA -SecretKey Ee/jtUFlJtWKz/VD+u
 
 # Download VHD to local Hyper-V Host
 
-$vhdTempPath = "c:\anthony\VMTemp\au1.vhd"
+$vmName = "AUVM6"
+$vhdTempPath = "c:\anthony\VMTemp\" + $vmName + ".vhd"
+$vhdConvertedPath = "c:\anthony\VM\" + $vmName + ".vhd"
 
-Copy-S3Object -BucketName lansavhdupload -Key AU1VM1 -localfile $vhdTempPath
+Copy-S3Object -BucketName lansavhdupload -Key $vmName -localfile $vhdTempPath
 
 # Convert Dynamically Expanding VHD to Fixed Size VHD
-
-$vhdConvertedPath = "c:\anthony\VM\au1.vhd"
 
 Convert-VHD -Path $vhdTempPath -DestinationPath $vhdConvertedPath -VHDType Fixed
 
@@ -38,7 +38,7 @@ $diskNum = (Mount-VHD -Path $vhdConvertedPath -PassThru).DiskNumber
 (Get-Disk $diskNum).OperationalStatus
 $vhdDriveLetter = (Get-Disk $diskNum | Get-Partition | Get-Volume).DriveLetter
 Set-Disk $diskNum -IsReadOnly $False
-Add-WindowsPackage -PackagePath $cabPath -Path ($vhdDriveLetter+":\")
+Add-WindowsPackage -PackagePath $cabPath -Path ($vhdDriveLetter[0]+":\")
 #Add-WindowsPackage -PackagePath $cabPath -Path ("g:\")
 Dismount-VHD -Path $vhdConvertedPath
 
@@ -50,22 +50,21 @@ Dismount-VHD -Path $vhdConvertedPath
 
 # Set the Windows Azure Variable Values
 
-$myStorageAcct = "portalvhds466j4jtfwwzxh"
-$mySourceVHD = $vhdConvertedPath   # Local VHD Path to Upload From
-$myDestVHD = "http://" + $myStorageAcct + ".blob.core.windows.net/vhds/au1.vhd"  #Windows Azure Storage Path to Upload
-$myVMName = "vmFromAws"  # Windows Azure VM Name
-$myCloudService = "vmFromAws-svc"  # Windows Azure Cloud Service Name
+$azureStorageAcct = "portalvhds466j4jtfwwzxh"
+$azureSourceVHD = $vhdConvertedPath   # Local VHD Path to Upload From
+$azureDestVHD = "https://" + $azureStorageAcct + ".blob.core.windows.net/vhds/"+ $vmName +".vhd"  #Windows Azure Storage Path to Upload
+$azureVMName = $vmName + "FromAws"  # Windows Azure VM Name
 
 # Logon to Azure
 
-Import-AzurePublishSettingsFile "c:\Azure\logon.publishsettings"
+Import-AzurePublishSettingsFile "c:\Anthony\logon.publishsettings"
 
 # Upload VHD to Azure Storage Account
 
-Add-AzureVhd -LocalFilePath $mySourceVHD -Destination $myDestVHD
+Add-AzureVhd -LocalFilePath $azureSourceVHD -Destination $azureDestVHD
 
-# Assign VHD t Azure Disk
+# Assign VHD to Azure Disk
 
-Add-AzureDisk -OS Windows -MediaLocation $myDestVHD -DiskName "$myVMName-VHD"  # Add Disk for 1 VM
+Add-AzureDisk -OS Windows -MediaLocation $azureDestVHD -DiskName "$azureVMName"  # Add Disk for 1 VM
 
 #endregion
