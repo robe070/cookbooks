@@ -400,10 +400,8 @@
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                  "$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path",
-                                 ". \"$script:IncludeDir\\dot-logoff-allusers.ps1\"",
-                                 ". \"$script:IncludeDir\\dot-restart-ifneeded.ps1\"",
-                                 "Restart-IfNeeded",
-                                 "exit 0",
+                                 "C:\\LANSA\\scripts\\Restart-IfNeeded.ps1",
+                                 ";exit $LastExitCode",
                                  "}\""
                               ]]},
                            "waitAfterCompletion" : "20"

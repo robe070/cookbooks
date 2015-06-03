@@ -30,6 +30,8 @@
     <Compile Include="dot-check-restart.ps1" />
     <Compile Include="dot-logoff-allusers.ps1" />
     <Compile Include="dot-restart-ifneeded.ps1" />
+    <Compile Include="install-lansa-msi.ps1" />
+    <Compile Include="restart-ifneeded.ps1" />
     <Compile Include="win-updates.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
