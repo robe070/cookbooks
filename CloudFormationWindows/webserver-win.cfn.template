@@ -225,12 +225,12 @@
                   "configSets" : {
                      "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
-                     "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
-                     "chef-update"     : ["git-pull", "run-chef"],
-                     "windows-update"  : ["git-pull", "run-windows-update"],
+                     "cake-update"     : ["restart-ifneeded", "git-pull", "run-chef", "run-windows-update"],
+                     "chef-update"     : ["restart-ifneeded", "git-pull", "run-chef"],
+                     "windows-update"  : ["restart-ifneeded", "git-pull", "run-windows-update"],
                      "webconfig"       : ["git-pull", "run-webconfig"],
-                     "icing-update"    : ["git-pull", "install-cfn", "upgrade-msi"],
-                     "apply-patches"   : ["git-pull", "install-patches"],
+                     "icing-update"    : ["restart-ifneeded", "git-pull", "install-cfn", "upgrade-msi"],
+                     "apply-patches"   : ["restart-ifneeded", "git-pull", "install-patches"],
                      "SetXRUNEnvVar"   : ["git-pull", "SetXRUNEnvVar"]
                      },
                   "install-cfn" : {
@@ -394,6 +394,22 @@
                         }
                      }
                   },
+                  "restart-ifneeded" : {
+                     "commands" : {
+                        "01_git_pull" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path",
+                                 ". \"$script:IncludeDir\\dot-logoff-allusers.ps1\"",
+                                 ". \"$script:IncludeDir\\dot-restart-ifneeded.ps1\"",
+                                 "Restart-IfNeeded",
+                                 "exit 0",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "20"
+                        }
+                     }
+                  },
                   "install-logging" : {
                      "files"    : {
                         "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
@@ -457,7 +473,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "20"
+                           "waitAfterCompletion" : "0"
                         }
                      }
                   },
@@ -486,7 +502,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "20"
+                           "waitAfterCompletion" : "0"
                         }
                      }
                   },
@@ -505,7 +521,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "20"
+                           "waitAfterCompletion" : "0"
                         }
                      }
                   },
@@ -595,7 +611,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "20"
                         }
                      }
                   }

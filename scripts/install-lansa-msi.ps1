@@ -29,43 +29,6 @@ param(
 [String]$userscripthook
 )
 
-function Logoff-Allusers()
-{
-	# Force Logoff all RDP users so that reboot will work and applying updates less likely to fail 
-	LogWrite 'Forcing logoff of all users'
-	
-	$win32OS = get-wmiobject win32_operatingsystem -computername $ENV:COMPUTERNAME
-	$win32OS.psbase.Scope.Options.EnablePrivileges = $true
-	$win32OS.win32shutdown(4)
-
-	# Wait to make sure the users have actually been logged off
-	# Not sure if this makes a difference
-	Start-Sleep -s 10
-
-	LogWrite 'Users have been logged off'
-}
-
-# Check registry for restarting flags
-function CheckRestart([REF]$retval)
-{
-	$cn = $ENV:COMPUTERNAME
-    [bool]$PendingFile = $false
-    [bool]$AutoUpdate = $false
-
-	#Determine PendingFileRenameOperations exists or not  
-	$PendFileKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\" 
-	Invoke-Command -ComputerName $cn -ErrorAction SilentlyContinue -ScriptBlock{ 
-	Get-ItemProperty -Path $using:PendFileKeyPath -name PendingFileRenameOperations} |` 
-	Foreach{If($_.PendingFileRenameOperations){$PendingFile = $true}Else{$PendingFile = $false}} 
-  
-	#Determine RebootRequired subkey exists or not 
-	$AutoUpdateKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" 
-	Invoke-Command -ComputerName $cn -ErrorAction SilentlyContinue -ScriptBlock {Test-Path -Path "$using:AutoUpdateKeyPath\RebootRequired"} |` 
-	Foreach{If($_ -eq $true){$AutoUpdate = $true}Else{$AutoUpdate = $false}} 
-
-	$retval.Value = ($AutoUpdate -or $PendingFile)
-}
-
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
 
@@ -113,20 +76,6 @@ try
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
-
-	# Ensure a reboot is not pending as MSI install will fail if thats the case.
-
-	# Check for restart in case reboot not detected or a prior need for reboot has failed
-	# e.g. due to logged on users.
-	[bool]$restart = $false
-	CheckRestart( [REF]$restart)
-	if ( $restart )
-	{
-		Logoff-Allusers
-
-		Write-Output "Restart Required - Restarting..."
-		Restart-Computer -Force
-	}
 
     ##########################################################################
     # Disable TCP Offloading

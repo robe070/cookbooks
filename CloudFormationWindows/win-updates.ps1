@@ -229,27 +229,37 @@ $script:CycleUpdateCount = 0
 # Include directory is where this script is executing
 $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 
-# Includes
-. "$script:IncludeDir\dot-logoff-allusers.ps1"
-. "$script:IncludeDir\dot-restart-ifneeded.ps1"
-
 try
 {
-	Logoff-Allusers
+	# Includes
+	. "$script:IncludeDir\dot-logoff-allusers.ps1"
+	. "$script:IncludeDir\dot-restart-if-needed.ps1"
 
-	Check-WindowsUpdates
-	if ($global:MoreUpdates -eq 1) {
-		Install-WindowsUpdates
-	} else {
-		Check-ContinueRestartOrEnd
+	try
+	{
+		Logoff-Allusers
+
+		Check-WindowsUpdates
+		if ($global:MoreUpdates -eq 1) {
+			Install-WindowsUpdates
+		} else {
+			Check-ContinueRestartOrEnd
+		}
 	}
-}
-catch
-{
-	$_
-	LogWrite( $_ )
-	LogWrite("Installation error: logoff failed? reboot failed?")
-	exit 2
-}
+	catch
+	{
+		$_
+		LogWrite( $_ )
+		LogWrite("Installation error: logoff failed? reboot failed?")
+		exit 2
+	}
 
-Restart-IfNeeded
+	Restart-If-Needed
+}
+finally
+{
+	# Remove the dot source included functions
+	# This is so that executing in the POSH IDE has same results as when running in the POSH Cmd Line. 
+	# See http://blogs.technet.com/b/heyscriptingguy/archive/2010/08/10/how-to-reuse-windows-powershell-functions-in-scripts.aspx for details
+	Remove-Item function:\add*
+}

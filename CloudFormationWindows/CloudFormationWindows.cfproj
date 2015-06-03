@@ -29,6 +29,9 @@
     <Content Include="AWS.EC2.Windows.CloudWatch.json">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="win-updates.ps1">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
   </PropertyGroup>
