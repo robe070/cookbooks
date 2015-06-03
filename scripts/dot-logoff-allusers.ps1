@@ -3,7 +3,7 @@ function Logoff-Allusers()
     # Check if more than the current user is logged on
     $Computer = $ENV:COMPUTERNAME
     # Redirect stderr to a file otherwise the script displays an error which SilentlyContinue and capturing the exception do not trap.
-    [object[]]$sessions = Invoke-Expression ".\PsLoggedon.exe /accepteula -x 2>c:\lansa\temp.txt " |
+    [object[]]$sessions = Invoke-Expression "$script:IncludeDir\PsLoggedon.exe /accepteula -x 2>c:\lansa\temp.txt " |
         Where-Object {$_ -match '^\s{2,}(((?<domain>.*)\\(?<user>\S+))|(?<user>\S+))'} |
         Select-Object @{
             Name='Computer'
