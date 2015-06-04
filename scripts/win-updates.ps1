@@ -42,6 +42,7 @@ function Check-ContinueRestartOrEnd() {
 
 			LogWrite "Restart Required - Restarting..."
 			Restart-Computer -force
+			exit 0
 		}
 		default {
 			LogWrite "Unsure If A Restart Is Required"
@@ -199,6 +200,7 @@ function Check-WindowsUpdates() {
 
 			LogWrite "Restart Required - Restarting..."
 			Restart-Computer -Force
+			exit 0
 		}
 	} else {
 		LogWrite 'There are no applicable updates'

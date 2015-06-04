@@ -15,6 +15,7 @@ function Restart-IfNeeded()
 
 		LogWrite "Restart required - Restarting..."
 		Restart-Computer -Force
+		exit 0
 	}
 	else
 	{
