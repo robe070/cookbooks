@@ -403,7 +403,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "60"
+                           "waitAfterCompletion" : "90"
                         }
                      }
                   },
@@ -560,7 +560,7 @@
                      "commands" : {
                         "01_windows_updates" : {
                            "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
-                           "waitAfterCompletion" : "60"
+                           "waitAfterCompletion" : "90"
                         }
                      }
                   },
@@ -608,7 +608,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "60"
+                           "waitAfterCompletion" : "90"
                         }
                      }
                   }
