@@ -20,6 +20,5 @@ function Restart-IfNeeded()
 	else
 	{
 		LogWrite "Restart not required"
-		Write-Output "Restart not required (2)"
 	}
 }
