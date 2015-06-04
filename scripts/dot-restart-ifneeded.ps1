@@ -13,7 +13,12 @@ function Restart-IfNeeded()
 	{
 		Logoff-Allusers
 
-		LogWrite "Restart Required - Restarting..."
+		LogWrite "Restart required - Restarting..."
 		Restart-Computer -Force
+	}
+	else
+	{
+		LogWrite "Restart not required"
+		Write-Output "Restart not required (2)"
 	}
 }
