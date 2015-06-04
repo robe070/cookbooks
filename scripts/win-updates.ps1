@@ -3,15 +3,6 @@ param($global:RestartRequired=0,
         $global:MaxCycles=5,
         $MaxUpdatesPerCycle=500)
 
-$Logfile = "C:\Windows\Temp\win-updates.log"
-
-function LogWrite {
-   Param ([string]$logstring)
-   $now = Get-Date -format s
-   Add-Content $Logfile -value "$now $logstring"
-   Write-Output $logstring
-}
-
 function Check-ContinueRestartOrEnd() {
     $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
     $RegistryEntry = "InstallWindowsUpdates"
@@ -232,6 +223,7 @@ $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 # Includes
 . "$script:IncludeDir\dot-logoff-allusers.ps1"
 . "$script:IncludeDir\dot-restart-ifneeded.ps1"
+. "$script:IncludeDir\dot-logwrite.ps1"
 
 try
 {

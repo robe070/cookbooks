@@ -1,6 +1,7 @@
 # Includes
 . "$script:IncludeDir\dot-logoff-allusers.ps1"
 . "$script:IncludeDir\dot-check-restart.ps1"
+. "$script:IncludeDir\dot-logwrite.ps1"
 
 # Check for restart in case reboot not detected or a prior need for reboot has failed
 # e.g. due to logged on users.

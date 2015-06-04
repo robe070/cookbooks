@@ -1,3 +1,5 @@
+. "$script:IncludeDir\dot-logwrite.ps1"
+
 function Logoff-Allusers()
 {
     # Check if more than the current user is logged on
