@@ -30,7 +30,6 @@
             "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
         "4DBPassword"   : {
-            "Default" : "password",
             "NoEcho"  : "true",
             "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
             "Type"        : "String",
@@ -45,7 +44,6 @@
         "6WebPassword"   : {
             "NoEcho"  : "true",
             "Type"    : "String",
-            "Default" : "PCXUSER@122",
             "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
         },
         "7KeyName" : {
@@ -58,7 +56,6 @@
             "Type"        : "String",
             "MinLength"   : "9",
             "MaxLength"   : "18",
-            "Default"     : "103.231.159.65/32",
             "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
         "90LansaTemplateLevel" : {
@@ -113,14 +110,6 @@
         "LoadBalancer": {
             "Type"        : "String",
             "Default" : "test-win-WebServe-1DMYEQVA42DWE"
-        },
-        "AccessKeyId": {
-            "Type"        : "String",
-            "Default" : "AKI"
-        },
-        "SecretKey": {
-            "Type"        : "String",
-            "Default" : "sss"
         },
         "DummyRef"    : {
             "Type"    : "String",
@@ -185,7 +174,7 @@
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
         },
-       "LogRoleInstanceProfile" : {
+       "IAMRoleInstanceProfile" : {
             "Type"    : "String",
             "Description" : "IAM Instance Role"
        }
@@ -234,7 +223,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "setup-symlink","run-webconfig"],
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
                      "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
                      "chef-update"     : ["git-pull", "run-chef"],
@@ -396,8 +385,8 @@
                                  "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
                                  "$env:Path;",
                                  "cd \\lansa;",
-                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};", 
-                                 "cmd /C git checkout windows-stack '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
+                                 "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git pull failed');exit $LastExitCode};", 
+                                 "cmd /C git checkout -f ", { "Ref" : "91LansaGitRepoBranch" },"  '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
                                  "exit 0",
                                  "}\""
                               ]]},
@@ -434,7 +423,7 @@
                         "01_config_windows_update" : {
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                 "C:\\recipes\\WindowsUpdatesSettings.ps1",
+                                 "C:\\lansa\\scripts\\WindowsUpdatesSettings.ps1",
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -512,8 +501,6 @@
                                  " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
                                  " -bucket_name ", { "Ref" : "PatchBucketName" },
                                  " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
                                  " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
@@ -541,14 +528,6 @@
                            "command" : { "Fn::Join" : ["", [
                                  "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                  "C:\\LANSA\\scripts\\cloud-watch-config.ps1", 
-                                 " -dbpassword ", { "Ref" : "4DBPassword" },
-                                 " -webpassword ", { "Ref" : "6WebPassword" },
-                                 " -SUDB ", { "Fn::If" : [ "IsWebServer", "0", "1" ]},
-                                 " -bucket_name ", { "Ref" : "PatchBucketName" },
-                                 " -region ",      { "Ref" : "AWS::Region" },
-                                 " -access_key ",  { "Ref" : "AccessKeyId" },
-                                 " -secret_key ",  { "Ref" : "SecretKey"},
-                                 " -folder ",      { "Ref" : "PatchFolderName" },
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
@@ -567,7 +546,7 @@
                   "run-windows-update" : {
                      "commands" : {
                         "01_windows_updates" : {
-                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\recipes\\win-updates.ps1;exit $LastExitCode}\"",
+                           "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
                            "waitAfterCompletion" : "60"
                         }
                      }
@@ -619,21 +598,13 @@
                            "waitAfterCompletion" : "0"
                         }
                      }
-                  },
-                  "AWS::CloudFormation::Authentication" : {
-                        "S3AccessCreds" : {
-		                  "type" : "S3",
-		                  "accessKeyId"  : { "Ref" : "AccessKeyId" },
-		                  "secretKey"    : { "Ref" : "SecretKey"},
-		                  "buckets"      : [ "lansa" ]
-                        }
                   }
                }
             },
             "Properties" : {
                "ImageId" : { "Ref" : "AMI" },
                "InstanceType" : { "Ref" : "InstanceType" },
-               "IamInstanceProfile" : { "Ref" : "LogRoleInstanceProfile" },
+               "IamInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" },
                "SecurityGroups" : [ { "Ref" : "SecurityGroup" } ],
                "KeyName"        : { "Ref" : "7KeyName" },
                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [

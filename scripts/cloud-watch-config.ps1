@@ -7,17 +7,6 @@ Configure an EC2 Windows instance for Cloud Watch
 
 #>
 param(
-[String]$server_name='robertpc\sqlserver2012',
-[String]$dbname='test1',
-[String]$dbuser = 'admin',
-[String]$dbpassword = 'password',
-[String]$webuser = 'PCXUSER2',
-[String]$webpassword = 'PCXUSER@122',
-[String]$32bit = 'true',
-[String]$SUDB = '1',
-[String]$UPGD = 'false',
-[String]$maxconnections = '20',
-[String]$userscripthook
 )
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
