@@ -13,7 +13,7 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "{{user `aws_region`}}",
-    "source_ami": "ami-c5aadaff",
+    "source_ami": "ami-6b8df551",
     "instance_type": "{{user `aws_instance_type`}}",
     "ssh_username": "Administrator",
     "ssh_timeout": "10m",
@@ -103,6 +103,11 @@
   },
   {
     "type": "file",
+    "source": "LANSAIntegratorLicense.pfx",
+    "destination": "c:\\packerTemp\\LANSAIntegratorLicense.pfx"
+  },
+  {
+    "type": "file",
     "source": "{{user `script_location`}}setlic.ps1",
     "destination": "c:\\packerTemp\\setlic.ps1"
   },
@@ -138,7 +143,8 @@
     "inline": [
       "cmd /c \"git clone https://github.com/robe070/cookbooks.git c:\\lansa\"",
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
-      "powershell \"start-process powershell -Verb runas c:\\packerTemp\\setlic.ps1\"",
+      "powershell \"c:\\packerTemp\\setlic.ps1\" \"c:\\packerTemp\\LansaScalableLicense.pfx\" 4z^32bqzx7q5e8u \"LANSA Scalable License\" ScalableLicensePrivateKey",
+      "powershell \"c:\\packerTemp\\setlic.ps1\" \"c:\\packerTemp\\LANSAIntegratorLicense.pfx\" 4z^32bqzx7q5e8u \"LANSA Integrator License\" IntegratorLicensePrivateKey",
       "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
       "powershell \"c:\\packerTemp\\installGit.ps1\"",
       "powershell \"c:\\packerTemp\\scheduleTasks.ps1\"",

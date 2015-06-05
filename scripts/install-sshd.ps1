@@ -1,4 +1,3 @@
-<powershell>
 <#
 .SYNOPSIS
 
@@ -41,12 +40,18 @@ $cygwin_err = ( Join-Path -Path $cygwin_dir -ChildPath cygwin_install_err.log )
 # Download and install Cygwin SSH
 $installer = "setup-x86_64.exe"
 $installer_url = "https://cygwin.com/setup-x86_64.exe"
-$installer_file = ( Join-Path -Path $ENV:USERPROFILE -ChildPath $installer )
-( New-Object Net.WebClient ). DownloadFile($installer_url, $installer_file)
-Start-Process -FilePath $installer_file -ArgumentList @( "--quiet-mode" , "-s http://mirrors.163.com/cygwin", "--packages cygrunsrv,libattr1,syslog-ng,openssh", "-D", "-L", "-R $cygwin_dir" , "-l $cygwin_dir" ) -Wait -RedirectStandardOutput $cygwin_out -RedirectStandardError $cygwin_err
-#Start-Process -FilePath $installer_file -ArgumentList @( "--quiet-mode",  "--packages cygrunsrv,libattr1,syslog-ng,openssh", "-D", "-L", "-R $cygwin_dir", "-l $cygwin_dir" ) -Wait -RedirectStandardOutput $cygwin_out -RedirectStandardError $cygwin_err
-Get-Content $cygwin_out
-Get-Content $cygwin_err
+# 4/6/15: Found that the latest version of CYGWIN SSH was causing problems with the Packer script. 
+# Powershell output wasn't being displayed and sysprep (through EC2Config) was hanging.
+# $installer_file = ( Join-Path -Path $ENV:USERPROFILE -ChildPath $installer )
+# ( New-Object Net.WebClient ). DownloadFile($installer_url, $installer_file)
+# Start-Process -FilePath $installer_file -ArgumentList @( "--quiet-mode" , "-s http://mirrors.163.com/cygwin", "--packages cygrunsrv,libattr1,syslog-ng,openssh", "-D", "-L", "-R $cygwin_dir" , "-l $cygwin_dir" ) -Wait -RedirectStandardOutput $cygwin_out -RedirectStandardError $cygwin_err
+# =========================================================================================
+# MAKE SURE TO COPY setup-x86_64.exe TO c:\ AND THE INSTALL IMAGE TO C:\cygwinInstallImage
+# =========================================================================================
+$installer_file = ( Join-Path -Path "c:" -ChildPath $installer )
+Start-Process -FilePath $installer_file -ArgumentList @( "--quiet-mode" , "--packages cygrunsrv,libattr1,syslog-ng,openssh", "-L", "-R $cygwin_dir" , "-l c:\cygwinInstallImage" ) -Wait
+# Get-Content $cygwin_out
+# Get-Content $cygwin_err
 
 # Set path to cygwin utils
 $env:Path = "$cygwin_dir\bin;" + $env:Path
@@ -118,5 +123,4 @@ net user cyg_server /delete
 bash.exe -c "auto_answer=yes;export auto_answer;cyglsa-config"
 
 # reboot machine
-shutdown -r
-</powershell>
+# shutdown -r
