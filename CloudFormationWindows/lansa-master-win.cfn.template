@@ -237,7 +237,7 @@
     "Mappings"                 : {
          "AWSRegionArch2AMI"    : {
             "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
-            "ap-southeast-2"  : { "64" : "ami-03cab739" },
+            "ap-southeast-2"  : { "64" : "ami-db81f9e1" },
             "us-east-1"       : { "64" : "ami-38f5f550" },
             "ap-northeast-1"  : { "64" : "ami-1fd1221f" },
             "sa-east-1"       : { "64" : "ami-4170cb5c" }
