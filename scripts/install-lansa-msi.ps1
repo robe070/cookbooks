@@ -29,6 +29,12 @@ param(
 [String]$userscripthook
 )
 
+# Include directory is where this script is executing
+$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+
+# Includes
+. "$script:IncludeDir\dot-map-licensetouser.ps1"
+
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
 
@@ -202,73 +208,10 @@ try
         throw $ErrorMessage
     }
 
-    #####################################################################################
-    # Create new private key filename for new machine GUID
-    # New key is just a copy of the old one with a change of name to replace the old Machine GUID with the new Machine GUID
-    # Value for the old private key is stored in the registry key HKLM:\Software\LANSA\ScalableLicensePrivateKey
-    # Value for the old Machine GUID is stored in the registry key HKLM:\Software\LANSA\PriorMachineGuid
-    # Format of private key file name is <Unique for certificate no matter where it is imported to>_<Machine GUID>
-    #####################################################################################
-    $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName "LANSA Scalable License"
+	Write-output ("Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
-    $Thumbprint = $getCert.Thumbprint
-
-    $keyName=(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
-
-    if ( -not $keyname )
-    {
-        Write-Verbose "No key"
-
-        $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name ScalableLicensePrivateKey
-        $PriorMachineGuid          = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid
-        $MachineGuid               = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
-
-        if ( -not $ScalableLicensePrivateKey -or -not $PriorMachineGuid -or -not $MachineGuid)
-        {
-            Write-Error ("One of the following registry keys is invalid: HKLM:\Software\LANSA\ScalableLicensePrivateKey, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
-            throw ("One of the following registry keys is invalid: HKLM:\Software\LANSA\ScalableLicensePrivateKey, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
-        }
-
-        Write-Verbose ("Replace Old Machine Guid with new Machine Guid")
-
-        if ( ($ScalableLicensePrivateKey.ScalableLicensePrivateKey -match $PriorMachineGuid.PriorMachineGuid) -eq $true )
-        {
-            Write-Verbose "Guid found in Private Key"
-            $NewScalableLicensePrivateKey = $ScalableLicensePrivateKey.ScalableLicensePrivateKey -replace 
-                                                $($PriorMachineGuid.PriorMachineGuid + "$"), $MachineGuid.MachineGuid
-            if ($ScalableLicensePrivateKey.ScalableLicensePrivateKey -eq $NewScalableLicensePrivateKey)
-            {
-                Write-Error ("Prior Machine GUID {0} not found at end of Scalable License Private Key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
-                throw ("Prior Machine GUID {0} not found at end of Scalable License Private Key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
-            }
-
-            Write-Verbose ("New private key is {0}" -f $NewScalableLicensePrivateKey)
-        }
-        else
-        {
-            Write-Error ( "PriorMachine GUID {0} is not in current LANSA Scalable License Private key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
-            throw ( "PriorMachine GUID {0} is not in current LANSA Scalable License Private key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.ScalableLicensePrivateKey)
-        }
-
-        Write-Verbose ("Copy old key to new key")
-
-        $keyPath = "C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\"
-        $fullPath=$keyPath+$keyName
-        Copy-Item $($KeyPath + $ScalableLicensePrivateKey.ScalableLicensePrivateKey) $($KeyPath + $NewScalableLicensePrivateKey)
-
-        Write-Verbose ("Set ACLs on new key so that $webuser may access it")
-
-        $pkFile = $($KeyPath + $NewScalableLicensePrivateKey)
-        $acl=Get-Acl -Path $pkFile
-        $permission= $webuser,"Read","Allow"
-        $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
-        $acl.AddAccessRule($accessRule)
-        Set-Acl $pkFile $acl
-    }
-    else
-    {
-        Write-Verbose ("Private key $keyname already exists")
-    }
+	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
+	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
 
     Write-Output ("Execute the user script if one has been passed")
 

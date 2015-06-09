@@ -28,7 +28,7 @@ function Map-LicenseToUser {
 
     $Thumbprint = $getCert.Thumbprint
 
-    # $keyName=(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
+    $keyName=(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
 
     if ( -not $keyname )
     {
