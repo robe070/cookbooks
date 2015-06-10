@@ -71,7 +71,7 @@ function Map-LicenseToUser {
         $fullPath=$keyPath+$keyName
         Copy-Item $($KeyPath + $ScalableLicensePrivateKey.$regkeyname) $($KeyPath + $NewScalableLicensePrivateKey)
 
-        Write-Verbose ("Set ACLs on new key so that $webuser may access it")
+        Write-Verbose ("Set ACLs on new key so that $webuser may access it. If error occurs check that $webuser has been created. If not, password is probably not complex enough.")
 
         $pkFile = $($KeyPath + $NewScalableLicensePrivateKey)
         $acl=Get-Acl -Path $pkFile

@@ -245,6 +245,7 @@ try
 }
 catch
 {
+	$_
     Write-Error ("Installation error")
     exit 2
 }
