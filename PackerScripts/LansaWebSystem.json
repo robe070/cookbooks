@@ -1,11 +1,12 @@
 {
   "variables": {
-    "aws_access_key": "{{env `aws_access_key_id`}}",
-    "aws_secret_key": "{{env `aws_secret_access_key`}}",
+    "aws_access_key": "{{env `aws_id`}}",
+    "aws_secret_key": "{{env `aws_key`}}",
     "aws_region": "ap-southeast-2",
     "aws_instance_type": "m3.medium",
     "chef_recipe_location": "..\\ChefCookbooks\\",
     "script_location": "..\\scripts\\",
+    "license_key": "{{env `cloud_license_key`}}",
     "user_directory": "{{env `userprofile`}}"
   },
   "builders": [{
@@ -108,8 +109,18 @@
   },
   {
     "type": "file",
-    "source": "{{user `script_location`}}setlic.ps1",
-    "destination": "c:\\packerTemp\\setlic.ps1"
+    "source": "{{user `script_location`}}dot-createlicense.ps1",
+    "destination": "c:\\packerTemp\\dot-createlicense.ps1"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}createLansaScalableLicense.ps1",
+    "destination": "c:\\packerTemp\\createLansaScalableLicense.ps1"
+  },
+  {
+    "type": "file",
+    "source": "{{user `script_location`}}createLansaIntegratorLicense.ps1",
+    "destination": "c:\\packerTemp\\createLansaIntegratorLicense.ps1"
   },
   {
     "type": "file",
@@ -143,8 +154,8 @@
     "inline": [
       "cmd /c \"git clone https://github.com/robe070/cookbooks.git c:\\lansa\"",
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
-      "powershell \"c:\\packerTemp\\setlic.ps1\" \"c:\\packerTemp\\LansaScalableLicense.pfx\" 4z^32bqzx7q5e8u \"LANSA Scalable License\" ScalableLicensePrivateKey",
-      "powershell \"c:\\packerTemp\\setlic.ps1\" \"c:\\packerTemp\\LANSAIntegratorLicense.pfx\" 4z^32bqzx7q5e8u \"LANSA Integrator License\" IntegratorLicensePrivateKey",
+      "powershell \"c:\\packerTemp\\createLansaScalableLicense.ps1 {{user `license_key`}}\"",
+      "powershell \"c:\\packerTemp\\createLansaIntegratorLicense.ps1 {{user `license_key`}}\"",
       "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
       "powershell \"c:\\packerTemp\\installGit.ps1\"",
       "powershell \"c:\\packerTemp\\scheduleTasks.ps1\"",
