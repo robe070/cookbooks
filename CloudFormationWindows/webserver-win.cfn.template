@@ -225,12 +225,12 @@
                   "configSets" : {
                      "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
-                     "cake-update"     : ["git-pull", "run-chef", "run-windows-update"],
-                     "chef-update"     : ["git-pull", "run-chef"],
-                     "windows-update"  : ["git-pull", "run-windows-update"],
+                     "cake-update"     : ["git-pull", "restart-ifneeded", "run-chef", "run-windows-update"],
+                     "chef-update"     : ["git-pull", "restart-ifneeded", "run-chef"],
+                     "windows-update"  : ["git-pull", "restart-ifneeded", "run-windows-update"],
                      "webconfig"       : ["git-pull", "run-webconfig"],
-                     "icing-update"    : ["git-pull", "install-cfn", "upgrade-msi"],
-                     "apply-patches"   : ["git-pull", "install-patches"],
+                     "icing-update"    : ["git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi"],
+                     "apply-patches"   : ["git-pull", "restart-ifneeded", "install-patches"],
                      "SetXRUNEnvVar"   : ["git-pull", "SetXRUNEnvVar"]
                      },
                   "install-cfn" : {
@@ -394,6 +394,19 @@
                         }
                      }
                   },
+                  "restart-ifneeded" : {
+                     "commands" : {
+                        "01_restart-ifneeded" : {
+                           "command" : { "Fn::Join" : ["", [
+                                 "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                 "C:\\LANSA\\scripts\\Restart-IfNeeded.ps1",
+                                 ";exit $LastExitCode",
+                                 "}\""
+                              ]]},
+                           "waitAfterCompletion" : "90"
+                        }
+                     }
+                  },
                   "install-logging" : {
                      "files"    : {
                         "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
@@ -547,7 +560,7 @@
                      "commands" : {
                         "01_windows_updates" : {
                            "command" : "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {C:\\lansa\\scripts\\win-updates.ps1;exit $LastExitCode}\"",
-                           "waitAfterCompletion" : "60"
+                           "waitAfterCompletion" : "90"
                         }
                      }
                   },
@@ -595,7 +608,7 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
+                           "waitAfterCompletion" : "90"
                         }
                      }
                   }

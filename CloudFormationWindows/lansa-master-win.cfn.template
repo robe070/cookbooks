@@ -71,7 +71,7 @@
         "WebServerInstanceType" : {
             "Description" : "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
             "Type"        : "String",
-            "Default"     : "t2.medium",
+            "Default"     : "t2.micro",
             "AllowedValues" : [
                 "t2.micro",
                 "t2.small",
@@ -108,7 +108,7 @@
             "Default" : 20
         },        
         "DBInstanceClass"      : {
-            "Default" : "db.m3.medium",
+            "Default" : "db.t2.small",
             "Description" : "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
             "Type"        : "String",
             "AllowedValues" : [
@@ -147,7 +147,6 @@
             "Type"        : "String",
             "Default"     : "sqlserver-web",
             "AllowedValues" : [
-                "sqlserver-ex",
                 "sqlserver-web",
                 "sqlserver-se",
                 "sqlserver-ee"
@@ -175,7 +174,7 @@
         },
         "DBAllocatedStorage" : {
             "Default" : "100",
-            "Description" : "The maximum size of the database. Must be between 20 and 1024 GB. Maximum 20 for 'sqlserver-ex'. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
+            "Description" : "The maximum size of the database. Must be between 100 and 1024 GB. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
             "Type"        : "Number",
             "MinValue"    : "100",
             "MaxValue"    : "1024"
@@ -238,7 +237,7 @@
     "Mappings"                 : {
          "AWSRegionArch2AMI"    : {
             "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
-            "ap-southeast-2"  : { "64" : "ami-03cab739" },
+            "ap-southeast-2"  : { "64" : "ami-db81f9e1" },
             "us-east-1"       : { "64" : "ami-38f5f550" },
             "ap-northeast-1"  : { "64" : "ami-1fd1221f" },
             "sa-east-1"       : { "64" : "ami-4170cb5c" }
