@@ -27,10 +27,11 @@
         },
         "4DBPassword"   : {
             "NoEcho"  : "true",
-            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
+            "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. There must be at least one character from each of the following character classes: uppercase letters, lowercase letters and numeric digits. Only printable ASCII characters, not including '/', '@', '\"', and space, may be used.",
             "Type"        : "String",
             "MinLength"   : "8",
-            "MaxLength"   : "41"
+            "MaxLength"   : "41",
+            "AllowedPattern" : "(?!.*[/\"@\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,41}"
         },
         "5WebUser"   : {
             "Type"    : "String",
@@ -40,7 +41,10 @@
         "6WebPassword"   : {
             "NoEcho"  : "true",
             "Type"    : "String",
-            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information."
+            "Description" : "Password for WebUser. Minimum length 8, maximum length 41. There must be at least one character from each of the following character classes: uppercase letters, lowercase letters and numeric digits. A space must not be used. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
+            "MinLength"   : "8",
+            "MaxLength"   : "41",
+            "AllowedPattern" : "(?!.*[\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,41}"
         },
         "7KeyName" : {
             "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive). e.g. linux-keypair",
@@ -237,7 +241,7 @@
     "Mappings"                 : {
          "AWSRegionArch2AMI"    : {
             "Metadata" : { "Comment1" : "TODO This mapping needs to be dynamically populated by the LANSA Cloud Management Tool with the AMI Id for each Region supported" },
-            "ap-southeast-2"  : { "64" : "ami-db81f9e1" },
+            "ap-southeast-2"  : { "64" : "ami-736b1049" },
             "us-east-1"       : { "64" : "ami-38f5f550" },
             "ap-northeast-1"  : { "64" : "ami-1fd1221f" },
             "sa-east-1"       : { "64" : "ami-4170cb5c" }
