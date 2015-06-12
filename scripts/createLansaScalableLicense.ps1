@@ -7,4 +7,4 @@ $IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
-CreateLicence "c:\\lansa\\PackerScripts\\LansaScalableLicense.pfx" $args[0] "LANSA Scalable License" "ScalableLicensePrivateKey"
+CreateLicence "c:\\packerTemp\\LansaScalableLicense.pfx" $args[0] "LANSA Scalable License" "ScalableLicensePrivateKey"
