@@ -7,6 +7,7 @@
     "chef_recipe_location": "..\\ChefCookbooks\\",
     "script_location": "..\\scripts\\",
     "license_key": "{{env `cloud_license_key`}}",
+    "git_branch": "{{env `cloud_git_branch`}}",
     "user_directory": "{{env `userprofile`}}"
   },
   "builders": [{
@@ -74,28 +75,13 @@
     "destination": "c:\\recipes\\getchoco.ps1"
   },
   {
-    "type": "file",
-    "source": "{{user `script_location`}}Get-StartupCmds.ps1",
-    "destination": "c:\\recipes\\Get-StartupCmds.ps1"
-  },
-  {
     "type": "shell",
-    "pause_before": "30s",
+    "pause_before": "10s",
     "inline": [
       "export PATH=$PATH:/cygdrive/c/opscode/chef/bin:/cygdrive/c/opscode/chef/embedded/bin",
       "export TEMP=/cygdrive/c/packerTemp",
       "cd /cygdrive/c/recipes/chef-repo/cookbooks",
       "cmd /c \"chef-client -z -o VLWebServer::MainRecipe\"" ]
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}Ec2ConfigSettings.ps1",
-    "destination": "c:\\packerTemp\\Ec2ConfigSettings.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}win-updates.ps1",
-    "destination": "c:\\recipes\\win-updates.ps1"
   },
   {
     "type": "file",
@@ -109,38 +95,8 @@
   },
   {
     "type": "file",
-    "source": "{{user `script_location`}}dot-createlicense.ps1",
-    "destination": "c:\\packerTemp\\dot-createlicense.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}createLansaScalableLicense.ps1",
-    "destination": "c:\\packerTemp\\createLansaScalableLicense.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}createLansaIntegratorLicense.ps1",
-    "destination": "c:\\packerTemp\\createLansaIntegratorLicense.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}installAwsSdk.ps1",
-    "destination": "c:\\packerTemp\\installAwsSdk.ps1"
-  },
-  {
-    "type": "file",
     "source": "{{user `script_location`}}installGit.ps1",
     "destination": "c:\\packerTemp\\installGit.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}scheduleTasks.ps1",
-    "destination": "c:\\packerTemp\\scheduleTasks.ps1"
-  },
-  {
-    "type": "file",
-    "source": "{{user `script_location`}}windowsUpdatesSettings.ps1",
-    "destination": "c:\\recipes\\windowsUpdatesSettings.ps1"
   },
   {
     "type": "shell",
@@ -152,16 +108,15 @@
     "type": "shell",
     "pause_before": "5m",
     "inline": [
-      "cmd /c \"git clone https://github.com/robe070/cookbooks.git c:\\lansa\"",
       "powershell \"Set-ExecutionPolicy Unrestricted -Scope CurrentUser\"",
-      "powershell \"c:\\packerTemp\\createLansaScalableLicense.ps1 {{user `license_key`}}\"",
-      "powershell \"c:\\packerTemp\\createLansaIntegratorLicense.ps1 {{user `license_key`}}\"",
-      "powershell \"c:\\packerTemp\\installAwsSdk.ps1 c:\\packerTemp\"",
-      "powershell \"c:\\packerTemp\\installGit.ps1\"",
-      "powershell \"c:\\packerTemp\\scheduleTasks.ps1\"",
-      "powershell \"c:\\recipes\\Get-StartupCmds.ps1\"",
-      "powershell \"c:\\recipes\\windowsUpdatesSettings.ps1\"",
-      "powershell \"c:\\recipes\\win-updates.ps1\"" ]
+      "powershell \"c:\\packerTemp\\installGit.ps1 {{user `git_branch`}}\"",
+      "powershell \"c:\\lansa\\scripts\\createLansaScalableLicense.ps1 {{user `license_key`}}\"",
+      "powershell \"c:\\lansa\\scripts\\createLansaIntegratorLicense.ps1 {{user `license_key`}}\"",
+      "powershell \"c:\\lansa\\scripts\\installAwsSdk.ps1 c:\\packerTemp\"",
+      "powershell \"c:\\lansa\\scripts\\scheduleTasks.ps1\"",
+      "powershell \"c:\\lansa\\scripts\\Get-StartupCmds.ps1\"",
+      "powershell \"c:\\lansa\\scripts\\windowsUpdatesSettings.ps1\"",
+      "powershell \"c:\\lansa\\scripts\\win-updates.ps1\"" ]
   },
   {
     "type": "shell",
@@ -170,7 +125,7 @@
       "cmd /c \"sc triggerinfo w32time start/networkon stop/networkoff\"",
       "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\Ngen executequeueditems\"",
       "cmd /c \"C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\Ngen executequeueditems\"",
-      "powershell \"c:\\packerTemp\\Ec2ConfigSettings.ps1 c:\\packerTemp\"",
+      "powershell \"c:\\lansa\\scripts\\Ec2ConfigSettings.ps1 c:\\packerTemp\"",
       "powershell \"Set-ExecutionPolicy Restricted -Scope CurrentUser\"" ]
   },
   {
