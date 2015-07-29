@@ -34,6 +34,7 @@ $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 
 # Includes
 . "$script:IncludeDir\dot-map-licensetouser.ps1"
+. "$script:IncludeDir\dot-set-accesscontrol.ps1"
 
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
@@ -103,7 +104,7 @@ try
 
         # Display existing settings:
         Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue
-        # Set all the settings required to switch of TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
+        # Set all the settings required to switch off TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
     
         Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
 
@@ -212,6 +213,10 @@ try
 
 	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
 	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
+
+	Write-output ("Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+    
+    Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
     Write-Output ("Execute the user script if one has been passed")
 

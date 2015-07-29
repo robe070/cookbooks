@@ -1,10 +1,7 @@
-# Include directory is where this script is executing
-$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
-
-# Includes
-. "$script:IncludeDir\dot-map-licensetouser.ps1"
-
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
-
-Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" "PCXUSER2"
+﻿		$webuser = 'PCXUSER'
+        $pkFile = 'C:\windows\Temp'
+        $acl=Get-Acl -Path $pkFile
+        $permission= $webuser,"Modify","Allow"
+        $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
+        $acl.AddAccessRule($accessRule)
+        Set-Acl $pkFile $acl
