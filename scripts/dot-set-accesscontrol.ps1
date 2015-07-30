@@ -7,16 +7,16 @@ Refer To this link for parameter values: https://technet.microsoft.com/en-us/lib
 
 .EXAMPLE
 # Subfolders only
-Set-Access-Control "PCXUSER2" "C:\Windows\Temp" "Modify" "ContainerInherit" "InheritOnly"
+Set-AccessControl "PCXUSER2" "C:\Windows\Temp" "Modify" "ContainerInherit" "InheritOnly"
 
 # This folder only
-Set-Access-Control "PCXUSER2" "C:\Windows\Temp" "Modify"
+Set-AccessControl "PCXUSER2" "C:\Windows\Temp" "Modify"
 
 # This folder, Sub folders and files
-Set-Access-Control "PCXUSER2" "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
+Set-AccessControl "PCXUSER2" "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
 #>
-function Set-Access-Control {
+function Set-AccessControl {
    Param (
 	   [string]$webuser,
 	   [string]$path,
