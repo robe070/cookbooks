@@ -1,0 +1,2 @@
+set commonCFparms=--disable-rollback --capabilities CAPABILITY_IAM --template-url https://s3-ap-southeast-2.amazonaws.com/lansa/templates/lansa-master-win.cfn.template --parameters ParameterKey=4DBPassword,ParameterValue=Pcxuser122 ParameterKey=6WebPassword,ParameterValue=Pcxuser122 ParameterKey=7KeyName,ParameterValue=RobG_id_rsa ParameterKey=8RemoteAccessLocation,ParameterValue=103.231.159.65/32
+call aws --region eu-central-1   cloudformation create-stack --stack-name Frankfurt %commonCFparms%
