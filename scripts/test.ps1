@@ -1,7 +1,7 @@
-﻿		$webuser = 'PCXUSER'
-        $pkFile = 'C:\windows\Temp'
-        $acl=Get-Acl -Path $pkFile
-        $permission= $webuser,"Modify","Allow"
-        $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
-        $acl.AddAccessRule($accessRule)
-        Set-Acl $pkFile $acl
+﻿# Include directory is where this script is executing
+$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+
+# Includes
+. "$script:IncludeDir\dot-wait-EC2State.ps1"
+
+Wait-EC2State i-1e4ce220 'shutting down'
