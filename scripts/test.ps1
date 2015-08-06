@@ -1,7 +1,5 @@
-﻿# Include directory is where this script is executing
-$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
-
-# Includes
-. "$script:IncludeDir\dot-wait-EC2State.ps1"
-
-Wait-EC2State i-1e4ce220 'shutting down'
+﻿$env:Path += ';C:\\Program Files (x86)\\Git\\cmd'
+cd \lansa
+cmd /c git checkout -f master '2>&1'
+if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) {Write-Error ('Git clone failed');exit $LastExitCode};
+exit 21

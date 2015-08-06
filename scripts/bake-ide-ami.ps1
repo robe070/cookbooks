@@ -54,13 +54,8 @@ function Create-Ec2SecurityGroup
         $iprange = @("$externalip/32")
         $groupid = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
         Get-EC2SecurityGroup -GroupNames $script:SG
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1; ToPort = -1; IpRanges = $iprange }
-        $ipPermissions = New-Object Amazon.EC2.Model.IpPermission
-        $ipPermissions.IpProtocol = "tcp"
-        $ipPermissions.FromPort = 3389
-        $ipPermissions.ToPort = 3389
-        $ipPermissions.IpRanges = $iprange
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions $ipPermissions
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1; ToPort = -1; IpRanges = $iprange}
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp"; FromPort = 3389; ToPort = 3389; IpRanges = $iprange}
         Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp"; FromPort = 3389; ToPort = 3389; IpRanges = $iprange}
         Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp"; FromPort = 5985; ToPort = 5986; IpRanges = $iprange}
     }
@@ -70,21 +65,20 @@ function Create-Ec2SecurityGroup
 # Main program loigic
 ###############################################################################
 
+Set-StrictMode -Version Latest
+
 try
 {
-    # Since the EC2 instance that we are going to create is not a domain joined machine, 
-    # it has to be added to the trusted hosts. The computers in the TrustedHosts list are
-    #  not authenticated. (i.e.) There is no way for the client to know if it is talking to 
-    # the right machine. The client may send credential information to these computers. 
-    # Either add the specific DNSName or “*” to trust any machine. Since it is for the testing purpose, I chose to add “*”
-    # TODO: add the DNS name of the EC2 instance to the trusted hosts (and remove it at the end)
-    Set-Item WSMan:\localhost\Client\TrustedHosts "*" -Force
-
-    $script:SG = "bake-ide-ami"
+    $script:SG = "bake-ami"
     # $script:externalip = "103.231.159.65"
     $script:externalip = $null
     $script:keypair = "RobG_id_rsa"
-    $script:keypairfile = "$ENV:HOME\\.ssh\\id_rsa"
+    $script:keypairfile = "$ENV:USERPROFILE\\.ssh\\id_rsa"
+    $script:aminame = "LANSA IDE $(Get-Date -format s)"
+    $script:licensekeypassword = $ENV:cloud_license_key
+    $script:gitbranch = 'marketplace-and-stt'
+    $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
+    $Script:GitRepoPath = "c:\lansa"
 
     Create-Ec2SecurityGroup
 
@@ -93,42 +87,75 @@ try
 
     $a = @(Get-EC2Image -Filters @{Name = "name"; Values = "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*"})
     $ImageName = $a.Name[0]
-    $Imageid = $a.ImageId[0]
-    Write-Output "Using Base Image $ImageName $ImageId"
+    $Script:Imageid = $a.ImageId[0]
+    Write-Output "Using Base Image $ImageName $Script:ImageId"
 
-    Create-EC2Instance $Imageid $script:keypair $script:SG
+    Create-EC2Instance $Script:Imageid $script:keypair $script:SG
+
 
     # Remote PowerShell
     # The script below establishes a remote session, invokes a remote command (using Invoke-Command), then cleans up the session. The remote command executed is “Invoke-WebRequest” to obtain the userdata. Since the instance might not be fully initialized, this is tried in a loop.
 
-#     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-     $securepassword = ConvertTo-SecureString 'cy$hyJe)QaJ' -AsPlainText -Force
+     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+     # $securepassword = ConvertTo-SecureString 'cy$hyJe)QaJ' -AsPlainText -Force
 
     $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
 
     # Wait until PSSession is available
     while ($true)
     {
-        # $s = New-PSSession $Script:publicDNS -Credential $creds 2>$null
-        $s = New-PSSession $Script:publicDNS -Credential $creds
-        if ($s -ne $null)
+        "$(Get-Date) Waiting for remote PS connection"
+        $session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
+        if ($session -ne $null)
         {
             break
         }
 
-        "$(Get-Date) Waiting for remote PS connection"
         Sleep -Seconds 10
     }
 
-    Invoke-Command -Session $s {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
+    Write-Output "$Script:instanceid remote PS connection obtained"
 
-    Remove-PSSession $s
+    # Simple test of session: Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
+
+    # Example of uploading a file. Does not seem to be needed as all files are in git apart from chocolatey 
+    # which is installed from the Chocolatey web site and git which is installed using choco.
+    # $filename = "chef-client-12.1.1-1.msi"
+    # &"$script:IncludeDir\Send-RemotingFile.ps1" $Session $Script:publicDNS "$script:IncludeDir\..\PackerScripts\$filename" "C:\Program Files\Amazon\$filename"
+
+    
+    # First we need to install Chocolatey
+    Invoke-Command -Session $session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+
+    Invoke-Command -Session $session -FilePath "$script:IncludeDir\getchoco.ps1"
+    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+    
+    # Then we install git using chocolatey and pull down the rest of the files
+    Invoke-Command -Session $session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
+    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+
+    # From now on we execute files (scriptBlock) directly on the remote system, not script files uploaded from the local system
+    # The contents of the curly braces is uploaded and run as is on the remote. So variables are NOT expanded here. Hence all the 
+    # global variables need to be reflected into the remote system
+    Invoke-Command -Session $session -ScriptBlock { $Script:GitRepoPath = "c:\lansa"}
+    Invoke-Command -Session $session -ScriptBlock { $Script:GitRepoPath }
+    Invoke-Command -Session $session -ScriptBlock { "$Script:GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"}
+    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+
+
+    Invoke-Command -Session $session {Set-ExecutionPolicy restricted -Scope CurrentUser}
+    Remove-PSSession $session
 
     # Stop the Instance
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $Script:instanceid} | Stop-EC2Instance -Force
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $Script:instanceid} | Stop-EC2Instance -Force -Terminate
 
     # Wait for the instance state to be stopped.
-    Wait-EC2State $instanceid "Stopped"
+    Wait-EC2State $instanceid "terminated"
 
     # Can't remove security group whilst instance is not terminated
     return
