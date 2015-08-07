@@ -45,9 +45,11 @@ try
 {
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
+    Write-Output "Installing Chef"
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Start-Process -FilePath $installer_file -Wait 
 
+    Write-Output "Running Chef"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
     $ENV:PATH
@@ -59,11 +61,23 @@ try
             InvalidData $LASTEXITCODE -Message "Chef-Client exit code = $LASTEXITCODE."
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
+
+    Write-Output "Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+
+    Write-Output "Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
+
+    Write-Output "Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
+    
+    Write-Output "Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
+    
+    Write-Output "Running windowsUpdatesSettings.ps1"
     &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
+
+    Write-Output "Running win-updates.ps1"
     &"$Script:IncludeDir\win-updates.ps1"
 }
 catch
