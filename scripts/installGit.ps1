@@ -9,11 +9,12 @@ param (
     [boolean]
     $InstallGit = $true
     )
+
  
 # Git outputs almost all error messages to stderr. powershell interprets that as an error and 
 # displays the error text. To stop that stderr is redirected to stdout on the git commands.
 
-$env:Path += ';C:\\Program Files (x86)\\Git\\cmd'
+$env:Path += ';C:\Program Files (x86)\Git\cmd'
 
 if ( $InstallGit )
 {

@@ -1,14 +1,9 @@
 ﻿<#
 .SYNOPSIS
 
-Install a LANSA MSI.
-Creates a SQL Server Database then installs the MSI
+Bake a LANSA AMI
 
-Requires the environment that a LANSA Cake provides, particularly an AMI license.
-
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
-i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
+.DESCRIPTION
 
 .EXAMPLE
 
@@ -18,7 +13,10 @@ $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 
 # Includes
 . "$script:IncludeDir\dot-wait-EC2State.ps1"
-. "$script:IncludeDir\dot-Create-EC2Instance"
+. "$script:IncludeDir\dot-Create-EC2Instance.ps1"
+. "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
+. "$script:IncludeDir\dot-Send-RemotingFile.ps1"
+
 
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
@@ -79,6 +77,7 @@ try
     $script:gitbranch = 'marketplace-and-stt'
     $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
     $Script:GitRepoPath = "c:\lansa"
+    $Script:LicenseKeyPath = "c:\temp"
 
     Create-Ec2SecurityGroup
 
@@ -96,9 +95,7 @@ try
     # Remote PowerShell
     # The script below establishes a remote session, invokes a remote command (using Invoke-Command), then cleans up the session. The remote command executed is “Invoke-WebRequest” to obtain the userdata. Since the instance might not be fully initialized, this is tried in a loop.
 
-     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-     # $securepassword = ConvertTo-SecureString 'cy$hyJe)QaJ' -AsPlainText -Force
-
+    $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
     $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
 
     # Wait until PSSession is available
@@ -116,7 +113,8 @@ try
 
     Write-Output "$Script:instanceid remote PS connection obtained"
 
-    # Simple test of session: Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
+    # Simple test of session: 
+    # Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
 
     # Example of uploading a file. Does not seem to be needed as all files are in git apart from chocolatey 
     # which is installed from the Chocolatey web site and git which is installed using choco.
@@ -127,26 +125,23 @@ try
     # First we need to install Chocolatey
     Invoke-Command -Session $session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+    if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+        Write-Error "LastExitCode: $remotelastexitcode"
+        throw 1
+    }    
 
-    Invoke-Command -Session $session -FilePath "$script:IncludeDir\getchoco.ps1"
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+    Execute-RemoteScript -Session $session -FilePath "$script:IncludeDir\getchoco.ps1"
     
-    # Then we install git using chocolatey and pull down the rest of the files
-    Invoke-Command -Session $session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+    # Then we install git using chocolatey and pull down the rest of the files from git
+    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
 
-    # From now on we execute files (scriptBlock) directly on the remote system, not script files uploaded from the local system
-    # The contents of the curly braces is uploaded and run as is on the remote. So variables are NOT expanded here. Hence all the 
-    # global variables need to be reflected into the remote system
-    Invoke-Command -Session $session -ScriptBlock { $Script:GitRepoPath = "c:\lansa"}
-    Invoke-Command -Session $session -ScriptBlock { $Script:GitRepoPath }
-    Invoke-Command -Session $session -ScriptBlock { "$Script:GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"}
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -ne 0 ) {throw 1}    
+    # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
+    # Git is a far faster mechansim for transferring files than using RemotePS.
+    invoke-command  -Session $session -ScriptBlock { mkdir $Script:LicenseKeyPath }
+    Send-RemotingFile $Session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
 
+    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     Invoke-Command -Session $session {Set-ExecutionPolicy restricted -Scope CurrentUser}
     Remove-PSSession $session

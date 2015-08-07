@@ -27,7 +27,8 @@ try
     #Userdata has to be base64 encoded
     $userdataBase64Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($userdata))
 
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t1.micro -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded
+    # Use at least a 2 CPU instance so that multiple processes may run concurrently.
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded
     $instanceid = $a.Instances[0].InstanceId
 
     # Name our instance
@@ -58,7 +59,7 @@ try
         Sleep -Seconds 10
     }
 
-    Write-Output "$instanceid network is alive"
+    Write-Output "$instanceid network is alive - $Script:publicDNS"
 
     # RobG: altering TrustedHost does not seem to be necessary
     #Since the EC2 instance that we are going to create is not a domain joined machine, 
@@ -88,7 +89,7 @@ try
             Sleep -Seconds 10
         }
     }
-    Write-Output "$instanceid password successfully obtained"
+    Write-Output "$instanceid password successfully obtained - '$Script:password'"
 
     $script:instanceId = $instanceId
 }
