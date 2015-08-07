@@ -116,12 +116,6 @@ try
     # Simple test of session: 
     # Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
 
-    # Example of uploading a file. Does not seem to be needed as all files are in git apart from chocolatey 
-    # which is installed from the Chocolatey web site and git which is installed using choco.
-    # $filename = "chef-client-12.1.1-1.msi"
-    # &"$script:IncludeDir\Send-RemotingFile.ps1" $Session $Script:publicDNS "$script:IncludeDir\..\PackerScripts\$filename" "C:\Program Files\Amazon\$filename"
-
-    
     # First we need to install Chocolatey
     Invoke-Command -Session $session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}

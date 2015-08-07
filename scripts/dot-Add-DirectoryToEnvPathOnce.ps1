@@ -21,14 +21,17 @@ param (
 
     )
 
-    $newPath = $Directory
-
     $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
     $match = '*' + $Directory + '*'
     $replace = $oldPath + ';' + $Directory 
     if ( $oldpath -notlike $match )
     {
         [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
-        $env:Path += ';' + $newpath
+    }
+
+    # System Path may be different to remote PS starting environment, so check it separately
+    if ( $env:Path -notlike $match )
+    {
+        $env:Path += ';' + $Directory
     }
 }

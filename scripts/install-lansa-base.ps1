@@ -37,8 +37,9 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 # Includes
 . "$Script:IncludeDir\dot-createlicense.ps1"
 . "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
-# . "$script:IncludeDir\dot-wait-EC2State.ps1"
-# . "$script:IncludeDir\dot-Create-EC2Instance"
+. "$script:IncludeDir\dot-New-ErrorRecord.ps1"
+. "$script:IncludeDir\dot-Get-AvailableExceptionsList.ps1"
+
 
 try
 {
@@ -50,17 +51,20 @@ try
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
     $ENV:PATH
-    cd "$GitRepoPath\ChefCookbooks"
-    chef-client -z -o "VLWebServer::MainRecipe"
-
-    &"$script:IncludeDir\createLansaDevelopmentLicense.ps1" $TempPath
-
-    CreateLicence "c:\\packerTemp\\LANSADevelopmentLicense.pfx" LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-    &"c:\lansa\scripts\installAwsSdk.ps1" $TempPath
-    &"c:\lansa\scripts\scheduleTasks.ps1"
-    &"c:\lansa\scripts\Get-StartupCmds.ps1"
-    &"c:\lansa\scripts\windowsUpdatesSettings.ps1"
-    &"c:\lansa\scripts\win-updates.ps1"
+    cd "$GitRepoPath\Cookbooks"
+    chef-client -z -o VLWebServer::IDEBase
+    if ( $LASTEXITCODE -ne 0 )
+    {
+        $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RecipeFailure `
+            InvalidData $LASTEXITCODE -Message "Chef-Client exit code = $LASTEXITCODE."
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
+    }
+    CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+    &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
+    &"$Script:IncludeDir\scheduleTasks.ps1"
+    &"$Script:IncludeDir\Get-StartupCmds.ps1"
+    &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
+    &"$Script:IncludeDir\win-updates.ps1"
 }
 catch
 {
