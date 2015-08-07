@@ -49,6 +49,7 @@ try
 
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
+    $ENV:PATH
     cd "$GitRepoPath\ChefCookbooks"
     chef-client -z -o "VLWebServer::MainRecipe"
 

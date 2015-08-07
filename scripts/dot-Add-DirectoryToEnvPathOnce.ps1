@@ -28,7 +28,7 @@ param (
     $replace = $oldPath + ';' + $Directory 
     if ( $oldpath -notlike $match )
     {
-        [Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine')
+        [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
         $env:Path += ';' + $newpath
     }
 }
