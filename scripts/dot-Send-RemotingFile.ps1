@@ -32,6 +32,8 @@ try {
 
 function Complete-FinalChunk ($Destination) {
 @"
+Write-Output $Destination
+new-item -ItemType directory -Path $(split-path $Destination) -ErrorAction SilentlyContinue
 `$TransferPath | Move-Item -Destination '$Destination' -Force
 "@
 }
