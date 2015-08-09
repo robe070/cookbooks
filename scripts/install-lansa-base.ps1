@@ -52,7 +52,7 @@ try
     Write-Output "Running Chef"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
-    $ENV:PATH
+    Write-Debug $ENV:PATH
     cd "$GitRepoPath\Cookbooks"
     chef-client -z -o VLWebServer::IDEBase
     if ( $LASTEXITCODE -ne 0 )
