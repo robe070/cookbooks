@@ -45,11 +45,11 @@ try
 {
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
-    Write-Output "$(Get-Date) Installing Chef"
+    Write-Output "$(Get-Date -format s) Installing Chef"
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Start-Process -FilePath $installer_file -Wait 
 
-    Write-Output "$(Get-Date) Running Chef"
+    Write-Output "$(Get-Date -format s) Running Chef"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
     Write-Debug $ENV:PATH
@@ -62,16 +62,16 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
-    Write-Output "$(Get-Date) Installing License"
+    Write-Output "$(Get-Date -format s) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
 
-    Write-Output "$(Get-Date) Installing AWS SDK"
+    Write-Output "$(Get-Date -format s) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
 
-    Write-Output "$(Get-Date) Running scheduleTasks.ps1"
+    Write-Output "$(Get-Date -format s) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
     
-    Write-Output "$(Get-Date) Running Get-StartupCmds.ps1"
+    Write-Output "$(Get-Date -format s) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
     cmd /c sc triggerinfo w32time start/networkon stop/networkoff
@@ -82,14 +82,14 @@ try
     if (0)
     {
         # Windows Updates cannot be run remotely using Remote PS. Note that ssh server CAN run it!
-        Write-Output "$(Get-Date) Running windowsUpdatesSettings.ps1"
+        Write-Output "$(Get-Date -format s) Running windowsUpdatesSettings.ps1"
         &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-        Write-Output "$(Get-Date) Running win-updates.ps1"
+        Write-Output "$(Get-Date -format s) Running win-updates.ps1"
         &"$Script:IncludeDir\win-updates.ps1"
     }
 }
 catch
 {
-    Write-Error $(Get-Date) ($_ | format-list | out-string)
+    Write-Error $(Get-Date -format s) ($_ | format-list | out-string)
     throw
 }

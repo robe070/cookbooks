@@ -36,8 +36,11 @@ try
     $userdataBase64Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($userdata))
 
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled true
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true
     $instanceid = $a.Instances[0].InstanceId
+
+    #Wait for the running state
+    Wait-EC2State $instanceid "Running"
 
     # Name our instance
     $Tag = New-Object amazon.EC2.Model.Tag
@@ -47,10 +50,7 @@ try
     #apply the tag to the instance
     New-EC2Tag -ResourceID $instanceID -Tag $tag
 
-    #Wait for the running state
-    Wait-EC2State $instanceid "Running"
-
-    Write-Output "$(Get-Date) $instanceid is Running"
+    Write-Output "$(Get-Date -format s) $instanceid is Running"
 
     $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
     $Script:publicDNS = $a.Instances[0].PublicDnsName
@@ -58,7 +58,7 @@ try
     #Wait for ping to succeed
     while ($true)
     {
-        "$(Get-Date) Waiting for network to come alive"
+        "$(Get-Date -format s) Waiting for network to come alive"
         $ping = Test-Connection -ComputerName $Script:publicDNS -Count 2 -ErrorAction SilentlyContinue
         if ($ping)
         {
@@ -67,7 +67,7 @@ try
         Sleep -Seconds 10
     }
 
-    Write-Output "$(Get-Date) $instanceid network is alive - $Script:publicDNS"
+    Write-Output "$(Get-Date -format s) $instanceid network is alive - $Script:publicDNS"
 
     # RobG: altering TrustedHost does not seem to be necessary
     #Since the EC2 instance that we are going to create is not a domain joined machine, 
@@ -85,7 +85,7 @@ try
     #blindly eats all the exceptions, bad idea for a production code.
     while ($Script:password -eq $null)
     {
-        "$(Get-Date) Waiting for Password Data to be available"
+        "$(Get-Date -format s) Waiting for Password Data to be available"
         try
         {
             $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
@@ -97,7 +97,7 @@ try
             Sleep -Seconds 10
         }
     }
-    Write-Output "$(Get-Date) $instanceid password successfully obtained - '$Script:password'"
+    Write-Output "$(Get-Date -format s) $instanceid password successfully obtained - '$Script:password'"
 
     $script:instanceId = $instanceId
 }

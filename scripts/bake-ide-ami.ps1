@@ -91,7 +91,7 @@ try
     $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*"})
     $ImageName = $AmazonImage.Name[0]
     $Script:Imageid = $AmazonImage.ImageId[0]
-    Write-Output "$(Get-Date) Using Base Image $ImageName $Script:ImageId"
+    Write-Output "$(Get-Date -format s) Using Base Image $ImageName $Script:ImageId"
 
     Create-EC2Instance $Script:Imageid $script:keypair $script:SG
 
@@ -105,7 +105,7 @@ try
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Get-Date) Waiting for remote PS connection"
+        "$(Get-Date -format s) Waiting for remote PS connection"
         $session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($session -ne $null)
         {
@@ -115,7 +115,7 @@ try
         Sleep -Seconds 10
     }
 
-    Write-Output "$(Get-Date) $Script:instanceid remote PS connection obtained"
+    Write-Output "$(Get-Date -format s) $Script:instanceid remote PS connection obtained"
 
     # Simple test of session: 
     # Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
@@ -142,26 +142,26 @@ try
 
     # OK and Cancel buttons
     $output = "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required, click OK"
-    Write-Output "$(Get-Date) $Output"
+    Write-Output "$(Get-Date -format s) $Output"
     $Response = [System.Windows.Forms.MessageBox]::Show("$Output", $Script:DialogTitle, 1 ) 
     if ( $Response -eq "Cancel" )
     {
-        Write-Output "$(Get-Date) $Script:DialogTitle cancelled"
+        Write-Output "$(Get-Date -format s) $Script:DialogTitle cancelled"
         return -1
     }
 
-    Write-Output "$(Get-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
+    Write-Output "$(Get-Date -format s) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
 
     # Session has probably been lost due to a Windows Updates reboot
     if ( -not $Session -or ($Session.State -ne 'Opened') )
     {
-        Write-Output "$(Get-Date) Session lost or not open. Reconnecting..."
+        Write-Output "$(Get-Date -format s) Session lost or not open. Reconnecting..."
         if ( $Session ) { Remove-PSSession $session }
 
         # Wait until PSSession is available
         while ($true)
         {
-            "$(Get-Date) Waiting for remote PS connection"
+            "$(Get-Date -format s) Waiting for remote PS connection"
             $session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
             if ($session -ne $null)
             {
@@ -171,21 +171,21 @@ try
             Sleep -Seconds 10
         }
 
-        Write-Output "$(Get-Date) $Script:instanceid remote PS connection obtained"
+        Write-Output "$(Get-Date -format s) $Script:instanceid remote PS connection obtained"
     }
     Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\win-updates.ps1
 
-    Write-Output "$(Get-Date) Installing IDE"
+    Write-Output "$(Get-Date -format s) Installing IDE"
 
     # TODO: install IDE **********************
 
-    Write-Output "$(Get-Date) Completing installation steps, apart from sysprep"
+    Write-Output "$(Get-Date -format s) Completing installation steps, apart from sysprep"
         
     Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
     Invoke-Command -Session $session {Set-ExecutionPolicy restricted -Scope CurrentUser}
 
-    Write-Output "$(Get-Date) Sysprep"
+    Write-Output "$(Get-Date -format s) Sysprep"
     Invoke-Command -Session $session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
 
     Remove-PSSession $session
@@ -195,7 +195,7 @@ try
     # Wait for the instance state to be stopped.
     Wait-EC2State $instanceid "Stopped"
 
-    Write-Output "$(Get-Date) Creating AMI"
+    Write-Output "$(Get-Date -format s) Creating AMI"
 
     $TagDesc = "$($AmazonImage.Description[0]) created on $($AmazonImage.CreationDate[0]) with LANSA IDE installed on $(Get-Date -format s)"
     $AmiName = "$Script:DialogTitle $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
@@ -208,7 +208,7 @@ try
     
     while ( $true )
     {
-        Write-Output "$(Get-Date) Waiting for AMI to become available"
+        Write-Output "$(Get-Date -format s) Waiting for AMI to become available"
         $amiProperties = Get-EC2Image -ImageIds $amiID
 
         if ( $amiProperties.ImageState -eq "available" )
@@ -217,7 +217,7 @@ try
         }
         Sleep -Seconds 10
     }
-    Write-Output "$(Get-Date) AMI is available"
+    Write-Output "$(Get-Date -format s) AMI is available"
   
     $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
   
