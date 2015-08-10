@@ -10,7 +10,13 @@ param (
     $InstallGit = $true
     )
 
- 
+# Includes
+if ( -not $script:IncludeDir)
+{
+    $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+}
+. "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
+
 # Git outputs almost all normal messages to stderr. powershell interprets that as an error and 
 # displays the error text. To stop that stderr is redirected to stdout on the git commands.
 
