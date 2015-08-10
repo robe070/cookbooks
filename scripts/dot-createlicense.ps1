@@ -42,6 +42,6 @@ function CreateLicence {
     }
     else
     {
-        Write-Output "$LicenseFile does not exist. Presume its already installed."
+        Write-Output "$(Get-Date) $LicenseFile does not exist. Presume its already installed."
     }
 }

@@ -50,7 +50,7 @@ try
     #Wait for the running state
     Wait-EC2State $instanceid "Running"
 
-    Write-Output "$instanceid is Running"
+    Write-Output "$(Get-Date) $instanceid is Running"
 
     $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
     $Script:publicDNS = $a.Instances[0].PublicDnsName
@@ -67,7 +67,7 @@ try
         Sleep -Seconds 10
     }
 
-    Write-Output "$instanceid network is alive - $Script:publicDNS"
+    Write-Output "$(Get-Date) $instanceid network is alive - $Script:publicDNS"
 
     # RobG: altering TrustedHost does not seem to be necessary
     #Since the EC2 instance that we are going to create is not a domain joined machine, 
@@ -97,7 +97,7 @@ try
             Sleep -Seconds 10
         }
     }
-    Write-Output "$instanceid password successfully obtained - '$Script:password'"
+    Write-Output "$(Get-Date) $instanceid password successfully obtained - '$Script:password'"
 
     $script:instanceId = $instanceId
 }

@@ -15,7 +15,7 @@ if ( $autoUpdateSettings )
 }
 else
 {
-    Write-Output "Cannot adjust Windows Update Settings through Remote PS"
+    Write-Output "$(Get-Date) Cannot adjust Windows Update Settings through Remote PS"
 }
 # This sets "Give me updates for other Microsoft products when I update Windows"
 $ServiceManager = New-Object -ComObject "Microsoft.Update.ServiceManager"
