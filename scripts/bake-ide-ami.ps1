@@ -67,6 +67,7 @@ Set-StrictMode -Version Latest
 
 try
 {
+    $Script:DialogTitle = "Bake IDE AMI"
     $script:SG = "bake-ami"
     # $script:externalip = "103.231.159.65"
     $script:externalip = $null
@@ -78,6 +79,9 @@ try
     $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
     $Script:GitRepoPath = "c:\lansa"
     $Script:LicenseKeyPath = "c:\temp"
+
+    # Use Forms for a MessageBox
+    [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
     Create-Ec2SecurityGroup
 
@@ -136,6 +140,21 @@ try
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
     Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
+    # OK and Cancel buttons
+    $output = "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required, click OK"
+    Write-Output "$Output"
+    $Response = [System.Windows.Forms.MessageBox]::Show("$Output", $Script:DialogTitle, 1 ) 
+    if ( $Response -eq "Cancel" )
+    {
+        Write-Output "$Script:DialogTitle cancelled"
+        return -1
+    }
+
+    Write-Output "Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
+    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\win-updates.ps1
+
+    Write-Output "Installing IDE"
+    
     Invoke-Command -Session $session {Set-ExecutionPolicy restricted -Scope CurrentUser}
     Remove-PSSession $session
 

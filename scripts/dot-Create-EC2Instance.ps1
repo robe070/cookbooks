@@ -20,6 +20,14 @@ Param (
 )
 try
 {
+    # More to open for Remote PS?
+    # COM+ Remote Administration (DCOM-In)
+    # COM+ Network Access (DCOM-In)
+    # Win Updates Remote Access (New-NetFirewallRule -Name "Win Updates Remote Access" -LocalPort 135 -Program %windir%\system32\svchost.exe -Protocol 6 -RemotePort ALL -RemoteUser Administrator -Service rpcss)
+    # Windows Management Instrumentation (x3)
+    # Remote Service Management (x3)
+    # Routing and Remote Access (x3)
+
     # By default, Windows Firewall restricts PS remoting to local subnet only. 
     # Set-NetFirewallRule is executed via userdata section to open this up to the script-runner's external IP Address.
     $userdata = "<powershell>Set-NetFirewallRule -Name WINRM-HTTP-In-TCP-PUBLIC -RemoteAddress  $(Get-ExternalIP)</powershell>"
@@ -28,7 +36,7 @@ try
     $userdataBase64Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($userdata))
 
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled true
     $instanceid = $a.Instances[0].InstanceId
 
     # Name our instance
@@ -77,7 +85,7 @@ try
     #blindly eats all the exceptions, bad idea for a production code.
     while ($Script:password -eq $null)
     {
-        "$(Get-Date) Waiting for PasswordData to be available"
+        "$(Get-Date) Waiting for Password Data to be available"
         try
         {
             $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt

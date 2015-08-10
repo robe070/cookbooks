@@ -220,7 +220,16 @@ $script:Cycles = 0
 $script:CycleUpdateCount = 0
 
 # Include directory is where this script is executing
-$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+if ( -not $Script:MyInvocation.MyCommand.Path ) 
+{
+    $script:ScriptName = 'win-updates.ps1'
+    $script:ScriptPath = 'c:\lansa\scripts'    
+    $script:IncludeDir = 'c:\lansa\scripts'
+}
+else
+{
+    $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+}
 
 # Includes
 . "$script:IncludeDir\dot-logoff-allusers.ps1"
@@ -229,7 +238,8 @@ $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
 
 try
 {
-	Logoff-Allusers
+    # Baking an AMI remotely using Powershell needs to leave the user logged in.
+	# Logoff-Allusers
 
 	Check-WindowsUpdates
 	if ($global:MoreUpdates -eq 1) {

@@ -73,12 +73,15 @@ try
     
     Write-Output "Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
-    
-    Write-Output "Running windowsUpdatesSettings.ps1"
-    &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
 
-    Write-Output "Running win-updates.ps1"
-    &"$Script:IncludeDir\win-updates.ps1"
+    if (0)
+    {
+        # Windows Updates cannot be run remotely using Remote PS. Note that ssh server CAN run it!
+        Write-Output "Running windowsUpdatesSettings.ps1"
+        &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
+        Write-Output "Running win-updates.ps1"
+        &"$Script:IncludeDir\win-updates.ps1"
+    }
 }
 catch
 {

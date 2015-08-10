@@ -7,29 +7,53 @@ param (
     $CalledUsingRemotePS = $false,
 
     [boolean]
-    $InstallGit = $true
+    $InstallGit = $true,
+
+    [string]
+    $GitRepo = 'lansa'
     )
 
-# Includes
-if ( -not $script:IncludeDir)
-{
-    $script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+function Add-DirectoryToEnvPathOnce{
+param (
+    [string]
+    $EnvVarToSet = 'PATH',
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $Directory
+
+    )
+
+    $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
+    $match = '*' + $Directory + '*'
+    $replace = $oldPath + ';' + $Directory 
+    if ( $oldpath -notlike $match )
+    {
+        [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
+    }
+
+    # System Path may be different to remote PS starting environment, so check it separately
+    if ( $env:Path -notlike $match )
+    {
+        $env:Path += ';' + $Directory
+    }
 }
-. "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
+
+$GitRepoPath = "c:\$GitRepo"
 
 # Git outputs almost all normal messages to stderr. powershell interprets that as an error and 
 # displays the error text. To stop that stderr is redirected to stdout on the git commands.
 
 Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
 
-if ( $InstallGit )
+if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
 {
     Write-Output "Installing Git"
     choco -y install git.install -version 1.9.4.20140929
     cd \
-    cmd /C git clone https://github.com/robe070/cookbooks.git lansa '2>&1'
+    cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
 }
-cd \lansa
+cd $GitRepoPath
 cmd /c git pull origin
 Write-Output "Branch: $Branch"
 cmd /c git checkout -f $Branch  '2>&1'
@@ -41,3 +65,4 @@ if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
         exit $LastExitCode;
     }
 }
+
