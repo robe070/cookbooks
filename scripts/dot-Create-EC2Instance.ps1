@@ -10,6 +10,11 @@ Wait for an EC2 instance to reach a desired state.
 # Includes
 . "$script:IncludeDir\dot-New-ErrorRecord.ps1"
 
+function Log-Date 
+{
+    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
+}
+
 function Create-EC2Instance
 {
 Param (
@@ -65,7 +70,7 @@ try
     #apply the tag to the instance
     New-EC2Tag -ResourceID $instanceID -Tag $tag
 
-    Write-Output "$(Get-Date -format s) $instanceid is Running"
+    Write-Output "$(Log-Date) $instanceid is Running"
 
     $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
     $Script:publicDNS = $a.Instances[0].PublicDnsName
@@ -73,7 +78,7 @@ try
     #Wait for ping to succeed
     while ($true)
     {
-        "$(Get-Date -format s) Waiting for network to come alive"
+        "$(Log-Date) Waiting for network to come alive"
         $ping = Test-Connection -ComputerName $Script:publicDNS -Count 2 -ErrorAction SilentlyContinue
         if ($ping)
         {
@@ -82,7 +87,7 @@ try
         Sleep -Seconds 10
     }
 
-    Write-Output "$(Get-Date -format s) $instanceid network is alive - $Script:publicDNS"
+    Write-Output "$(Log-Date) $instanceid network is alive - $Script:publicDNS"
 
     # RobG: altering TrustedHost does not seem to be necessary
     #Since the EC2 instance that we are going to create is not a domain joined machine, 
@@ -100,7 +105,7 @@ try
     #blindly eats all the exceptions, bad idea for a production code.
     while ($Script:password -eq $null)
     {
-        "$(Get-Date -format s) Waiting for Password Data to be available"
+        "$(Log-Date) Waiting for Password Data to be available"
         try
         {
             $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
@@ -112,7 +117,7 @@ try
             Sleep -Seconds 10
         }
     }
-    Write-Output "$(Get-Date -format s) $instanceid password successfully obtained - '$Script:password'"
+    Write-Output "$(Log-Date) $instanceid password successfully obtained - '$Script:password'"
 
     $script:instanceId = $instanceId
 }

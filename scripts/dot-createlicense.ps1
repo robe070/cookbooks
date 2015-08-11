@@ -1,3 +1,8 @@
+function Log-Date 
+{
+    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
+}
+
 ########################################################################
 # PARAMETERS:
 #  0. Fully qualified path to license file
@@ -42,6 +47,6 @@ function CreateLicence {
     }
     else
     {
-        Write-Output "$(Get-Date -format s) $LicenseFile does not exist. Presume its already installed."
+        Write-Output "$(Log-Date) $LicenseFile does not exist. Presume its already installed."
     }
 }

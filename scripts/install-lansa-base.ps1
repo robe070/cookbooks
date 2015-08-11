@@ -13,6 +13,7 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
+
 param (
     [Parameter(Mandatory=$true)]
     [string]
@@ -26,6 +27,11 @@ param (
     [string]
     $LicenseKeyPassword
     )
+
+function Log-Date 
+{
+    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
+}
 
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
@@ -45,11 +51,11 @@ try
 {
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
-    Write-Output "$(Get-Date -format s) Installing Chef"
+    Write-Output "$(Log-Date) Installing Chef"
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Start-Process -FilePath $installer_file -Wait 
 
-    Write-Output "$(Get-Date -format s) Running Chef"
+    Write-Output "$(Log-Date) Running Chef"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
     Write-Debug $ENV:PATH
@@ -73,36 +79,36 @@ try
         # Ignore the expected errors
     }
 
-    Write-Output "$(Get-Date -format s) Installing License"
+    Write-Output "$(Log-Date) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
 
-    Write-Output "$(Get-Date -format s) Installing AWS SDK"
+    Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
 
-    Write-Output "$(Get-Date -format s) Installing AWS CLI"
+    Write-Output "$(Log-Date) Installing AWS CLI"
     &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
 
-    Write-Output "$(Get-Date -format s) Running scheduleTasks.ps1"
+    Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
 
-    Write-Output "$(Get-Date -format s) Pulling down latest 13.x DVD Image of Visual LANSA"
+    Write-Output "$(Log-Date) Pulling down latest 13.x DVD Image of Visual LANSA"
     cmd /c mkdir 'c:\LanDVDcut' '2>nul'
     cmd /c "c:\Program Files\Amazon\AWSCLI\aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
     
-    Write-Output "$(Get-Date -format s) Running Get-StartupCmds.ps1"
+    Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
     if (0)
     {
         # Windows Updates cannot be run remotely using Remote PS. Note that ssh server CAN run it!
-        Write-Output "$(Get-Date -format s) Running windowsUpdatesSettings.ps1"
+        Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
         &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-        Write-Output "$(Get-Date -format s) Running win-updates.ps1"
+        Write-Output "$(Log-Date) Running win-updates.ps1"
         &"$Script:IncludeDir\win-updates.ps1"
     }
 }
 catch
 {
-    Write-Error $(Get-Date -format s) ($_ | format-list | out-string)
+    Write-Error $(Log-Date) ($_ | format-list | out-string)
     throw
 }
