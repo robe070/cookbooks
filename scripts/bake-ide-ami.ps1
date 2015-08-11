@@ -79,6 +79,7 @@ try
     $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
     $Script:GitRepoPath = "c:\lansa"
     $Script:LicenseKeyPath = "c:\temp"
+    $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
 
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null

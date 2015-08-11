@@ -49,7 +49,8 @@ try
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
     $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair `
             -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true `
-            -BlockDeviceMapping $DeviceMapping
+            -BlockDeviceMapping $DeviceMapping `
+            -InstanceProfile_Arn $Script:InstanceProfileArn
 
     $instanceid = $a.Instances[0].InstanceId
 

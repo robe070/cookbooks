@@ -14,4 +14,3 @@ $wc = New-Object system.net.webclient
 $wc.downloadFile( $source, $destination )
 msiexec /quiet /i $destination
 
-aws --version
