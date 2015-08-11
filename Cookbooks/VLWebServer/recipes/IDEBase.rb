@@ -23,4 +23,6 @@ end
 include_recipe "VLWebServer::iisSetup2"
 include_recipe "chocolatey"
 
+chocolatey "gitextensions"
+
 chocolatey "jre8"

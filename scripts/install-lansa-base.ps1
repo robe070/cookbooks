@@ -43,11 +43,6 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
-    Write-Output "$(Get-Date -format s) Installing AWS CLI"
-    &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
-    Write-Output "$(Get-Date -format s) Pulling down latest 13.x DVD Image of Visual LANSA"
-    cmd /c "c:\Program Files\Amazon\AWSCLI\aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_Latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
-
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Get-Date -format s) Installing Chef"
@@ -67,7 +62,7 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
-    # Installing SQL Server Powershell tools separate to Chef because ther is an error installing it 
+    # Installing SQL Server Powershell tools separate to Chef because there is an error installing it 
     # when SQL 2014 is already installed, but it still works correctly with 2014.
     try
     {
@@ -91,7 +86,8 @@ try
     &"$Script:IncludeDir\scheduleTasks.ps1"
 
     Write-Output "$(Get-Date -format s) Pulling down latest 13.x DVD Image of Visual LANSA"
-    cmd /c aws s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_Latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
+    cmd /c mkdir 'c:\LanDVDcut' '2>nul'
+    cmd /c "c:\Program Files\Amazon\AWSCLI\aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
     
     Write-Output "$(Get-Date -format s) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
