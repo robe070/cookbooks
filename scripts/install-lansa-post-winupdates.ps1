@@ -37,13 +37,19 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
-    # Synchronise clock
+    Write-Output "$(Get-Date -format s) Synchronise clock"
+
     cmd /c sc triggerinfo w32time start/networkon stop/networkoff
-    # Ensure that Framework caching is completed
+
+    Write-Output "$(Get-Date -format s) Ensure that Framework caching is completed"
+
     cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen" executequeueditems
     cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen" executequeueditems
-    # Configure EC2
+
+    Write-Output "$(Get-Date -format s) Configure EC2 Settings"
     &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath"
+
+    Write-Output "$(Get-Date -format s) Tidy up"
 
     cmd /c rd /S/Q $TempPath
     cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt"

@@ -35,8 +35,22 @@ try
     #Userdata has to be base64 encoded
     $userdataBase64Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($userdata))
 
+    # use a 100 GB EBS Volume
+    $volume = New-Object Amazon.EC2.Model.EbsBlockDevice
+    $volume.VolumeSize = 100
+    $volume.VolumeType = 'gp2'
+    $volume.DeleteOnTermination = $true
+ 
+    #Define how the volume is going to be attached to the instance and assign the volume properties
+    $DeviceMapping = New-Object Amazon.EC2.Model.BlockDeviceMapping
+    $DeviceMapping.DeviceName = '/dev/sda1'
+    $DeviceMapping.Ebs = $volume
+
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair `
+            -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true `
+            -BlockDeviceMapping $DeviceMapping
+
     $instanceid = $a.Instances[0].InstanceId
 
     #Wait for the running state

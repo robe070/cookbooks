@@ -79,16 +79,14 @@ try
     Write-Output "$(Get-Date -format s) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
 
+    Write-Output "$(Get-Date -format s) Installing AWS CLI"
+    &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
+
     Write-Output "$(Get-Date -format s) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
     
     Write-Output "$(Get-Date -format s) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
-
-    cmd /c sc triggerinfo w32time start/networkon stop/networkoff
-    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen" executequeueditems
-    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen" executequeueditems
-    &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "c:\packerTemp\"
 
     if (0)
     {

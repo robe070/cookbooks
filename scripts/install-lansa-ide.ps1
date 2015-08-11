@@ -1,8 +1,8 @@
 ﻿<#
 .SYNOPSIS
 
-Install a LANSA MSI.
-Creates a SQL Server Database then installs the MSI
+Install the LANSA IDE.
+Creates a SQL Server Database then installs from the DVD image
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
@@ -179,7 +179,7 @@ try
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "REQUIRES_ELEVATION=1", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/lv*x $install_log", "SHOWCODES=1", "REQUIRES_ELEVATION=1", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
     Write-Output ("Arguments = $Arguments")
 
