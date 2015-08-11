@@ -141,7 +141,7 @@ try
     Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     # OK and Cancel buttons
-    $output = "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required, click OK"
+    $output = "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
     Write-Output "$(Get-Date -format s) $Output"
     $Response = [System.Windows.Forms.MessageBox]::Show("$Output", $Script:DialogTitle, 1 ) 
     if ( $Response -eq "Cancel" )

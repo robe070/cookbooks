@@ -62,6 +62,17 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
+    # Installing SQL Server Powershell tools separate to Chef because ther is an error installing it 
+    # when SQL 2014 is already installed, but it still works correctly with 2014.
+    try
+    {
+        choco install SQL2012.Powershell
+    }
+    catch
+    {
+        # Ignore the expected errors
+    }
+
     Write-Output "$(Get-Date -format s) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
 
