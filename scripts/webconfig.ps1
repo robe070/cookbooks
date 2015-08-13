@@ -26,8 +26,8 @@ Write-Output ("`r`n")
 
 $trusted="NO"
 
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+# $DebugPreference = "Continue"
+# $VerbosePreference = "Continue"
 
 Write-Debug ("Server_name = $server_name")
 Write-Debug ("dbname = $dbname")
@@ -195,10 +195,10 @@ try
     }
     
     Write-Output ("Webconfig completed successfully")
-    exit 0
+    cmd /c exit 0
 }
 catch
 {
     Write-Error ("Webconfig failed")
-    exit 2
+    cmd /c exit 2
 }

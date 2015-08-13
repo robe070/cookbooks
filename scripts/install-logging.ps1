@@ -18,8 +18,8 @@ Write-Output ("`r`n")
 
 $trusted="NO"
 
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+# $DebugPreference = "Continue"
+# $VerbosePreference = "Continue"
 
 Write-Debug ("Stack = $Stack")
 Write-Debug ("Region = $Region")
@@ -100,5 +100,5 @@ try
 catch
 {
     Write-Error ("Log configuration failed")
-    exit 2
+    cmd /c exit 2
 }

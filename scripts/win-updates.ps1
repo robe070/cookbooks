@@ -253,7 +253,7 @@ catch
 	$_
 	LogWrite( $_ )
 	LogWrite("Installation error: logoff failed? reboot failed?")
-	exit 2
+	throw
 }
 
 Restart-IfNeeded

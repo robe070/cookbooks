@@ -28,24 +28,7 @@ param (
     $LicenseKeyPassword
     )
 
-function Log-Date 
-{
-    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
-}
-
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
-
-$script:IncludeDir = "$GitRepoPath\scripts"
-
 Write-Debug "script:IncludeDir = $script:IncludeDir"
-
-# Includes
-. "$Script:IncludeDir\dot-createlicense.ps1"
-. "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
-. "$script:IncludeDir\dot-New-ErrorRecord.ps1"
-. "$script:IncludeDir\dot-Get-AvailableExceptionsList.ps1"
-
 
 try
 {
@@ -112,3 +95,5 @@ catch
     Write-Error $(Log-Date) ($_ | format-list | out-string)
     throw
 }
+# Ensure last exit code is 0. (exit by itself will terminate the remote session)
+cmd /c exit 0

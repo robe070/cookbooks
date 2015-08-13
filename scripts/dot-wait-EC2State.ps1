@@ -46,6 +46,14 @@ Param (
             $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
 
+        # Give AWS time to actually crfteate the instance before testing to see if its running yet, otherwise 
+        # an error will occur trying to locate the instance-id
+
+        if ( $desiredstate -eq 'running' -or $desiredstate -eq 'pending')
+        {
+            Sleep -Seconds 10
+        }
+
         while ($true)
         {
             $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
@@ -61,6 +69,6 @@ Param (
     catch
     {
         Write-Error ($_ | format-list | out-string)
-        exit 1
+        throw
     }
 }

@@ -1,4 +1,18 @@
-﻿<#
+﻿
+function Execute-RemoteScript {
+param (
+    [Parameter(Mandatory=$true)]
+    [System.Management.Automation.Runspaces.PSSession]
+    $Session,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $FilePath,
+
+    [Object[]]
+    $ArgumentList
+    )
+<#
 .SYNOPSIS
 
 Install base LANSA requirements
@@ -13,21 +27,26 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
-function Execute-RemoteScript {
+    Invoke-Command -Session $session -FilePath $FilePath -ArgumentList $ArgumentList
+    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+        Write-Error "LastExitCode: $remotelastexitcode"
+        throw 1
+    }      
+}
+
+function Execute-RemoteBlock {
 param (
     [Parameter(Mandatory=$true)]
     [System.Management.Automation.Runspaces.PSSession]
     $Session,
 
     [Parameter(Mandatory=$true)]
-    [string]
-    $FilePath,
-
-    [Object[]]
-    $ArgumentList
+    [scriptblock]
+    $ScriptBlock
     )
 
-    Invoke-Command -Session $session -FilePath $FilePath -ArgumentList $ArgumentList
+    Invoke-Command -Session $session -Scriptblock $ScriptBlock
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
         Write-Error "LastExitCode: $remotelastexitcode"

@@ -84,39 +84,11 @@ try
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
-    ##########################################################################
-    # Disable TCP Offloading
-    # Solve SQL Server "The semaphore timeout period has expired" issue
-    # Also see: http://www.evernote.com/l/AA2n3LnZl9BGA5wIz12ctU6aqwmvpYETQpI/
-    # http://www.evernote.com/l/AA2JZF2lGelC8oTEKDEECWA8uNt-SbtzwuQ/
-    # http://www.evernote.com/l/AA3NUlB9xtdN4qciBFoXwX_8NuWcPM0nlqY/
-    ##########################################################################
+    # On initial install disable TCP Offloading
+
     if ( -not $UPGD_bool )
     {
-        $NICName = 'Ethernet'
-        Write-Output ("Disable TCP Offloading on NIC $NICName")
-
-        # Don't need to see NetAdapter verbose messages. First call outputs 50 lines of text
-        $VerbosePreference = "SilentlyContinue"
-        # Display valid values
-        Get-NetAdapterAdvancedProperty $NICName
-        $VerbosePreference = "Continue"
-
-        # Display existing settings:
-        Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue
-        # Set all the settings required to switch off TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
-    
-        Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
-
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" -NoRestart
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"
-
-        # Check its worked
-        Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue 
-    
-        Write-Output ("TCP Offloading disabled")
+        Disable-TcpOffloading
     }
 
     ######################################
@@ -247,16 +219,18 @@ try
     }
 
     Write-Output ("Installation completed successfully")
-    exit 0
 }
 catch
 {
 	$_
     Write-Error ("Installation error")
-    exit 2
+    throw
 }
 finally
 {
     Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
     Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
 }
+
+# Successful completion so set Last Exit Code to 0
+cmd /c exit 0
