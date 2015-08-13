@@ -88,10 +88,11 @@ try
 
     # Enable Named Pipes on database
 
-    Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true
-
-    $service = get-service "MSSQLSERVER"  
-    restart-service $service.name -force #Restart SQL Services 
+    if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
+    {
+        $service = get-service "MSSQLSERVER"  
+        restart-service $service.name -force #Restart SQL Services 
+    }
 
     if ( -not $UPGD_bool )
     {

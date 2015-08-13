@@ -104,9 +104,15 @@ function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){
      
     $protocol = $singleWmi.GetSmoObject($uri) 
      
-    $protocol.IsEnabled = $enable 
+    if ( $protocol.IsEnabled -ne $enable )
+    {
+        $protocol.IsEnabled = $enable 
      
-    $protocol.Alter() 
+        $protocol.Alter() 
      
-    $protocol 
+        $protocol 
+
+        return $true
+    }
+    return $false
 } 
