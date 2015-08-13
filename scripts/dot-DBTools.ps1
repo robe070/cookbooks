@@ -45,6 +45,16 @@ function Disable-TcpOffloading
 
 function Create-SqlServerDatabase
 {
+Param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $server_name,
+
+    [Parameter(Mandatory=$true)]
+    [String]
+    $dbname
+)
+
     # Create database in SQL Server
     Write-Output ("Creating database")
 
@@ -55,7 +65,7 @@ function Create-SqlServerDatabase
     {
         # Add-Type -Path "C:\Program Files\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll"
 
-        $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$server_name")
+        $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$Server_name")
 
         $SqlServer.ConnectionContext.LoginSecure = $true
     }

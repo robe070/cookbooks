@@ -7,14 +7,6 @@ Wait for an EC2 instance to reach a desired state.
 
 #>
 
-# Includes
-. "$script:IncludeDir\dot-New-ErrorRecord.ps1"
-
-function Log-Date 
-{
-    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
-}
-
 function Create-EC2Instance
 {
 Param (

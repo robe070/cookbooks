@@ -1,8 +1,3 @@
-function Log-Date 
-{
-    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
-}
-
 ########################################################################
 # PARAMETERS:
 #  0. Fully qualified path to license file

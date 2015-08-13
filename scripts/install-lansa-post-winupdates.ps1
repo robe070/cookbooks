@@ -11,10 +11,6 @@ These tasks must all occur after Windows Updates. If they can be applied earlier
 
 
 #>
-function Log-Date 
-{
-    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
-}
 
 param (
     [Parameter(Mandatory=$true)]
@@ -25,20 +21,6 @@ param (
     [string]
     $TempPath
     )
-
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
-
-$script:IncludeDir = "$GitRepoPath\scripts"
-
-Write-Debug "script:IncludeDir = $script:IncludeDir"
-
-# Includes
-. "$Script:IncludeDir\dot-createlicense.ps1"
-. "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
-. "$script:IncludeDir\dot-New-ErrorRecord.ps1"
-. "$script:IncludeDir\dot-Get-AvailableExceptionsList.ps1"
-
 
 try
 {

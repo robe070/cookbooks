@@ -46,7 +46,8 @@ try
     $script:licensekeypassword = $ENV:cloud_license_key
     $script:gitbranch = 'marketplace-and-stt'
     $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
-    $Script:GitRepoPath = "c:\lansa"
+    $Script:GitRepo = 'lansa'
+    $Script:GitRepoPath = "c:\$Script:GitRepo"
     $Script:ScriptTempPath = "c:\temp"
     $Script:LicenseKeyPath = $Script:ScriptTempPath
     $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
@@ -106,6 +107,8 @@ try
         $VerbosePreference = $using:VerbosePreference
         $Script:ScriptTempPath = $Using:ScriptTempPath
         $Script:DVDDir = $Using:DVDDir
+        $Script:GitRepo = $Using:GitRepo
+        $Script:GitRepoPath = $using:GitRepoPath
 
         Write-Debug "script:IncludeDir = $script:IncludeDir"
         
@@ -176,9 +179,9 @@ try
 
     Write-Output "$(Log-Date) Installing IDE"
 
-    # TODO: install IDE **********************
+    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
-    Write-Output "$(Log-Date) Completing installation steps, apart from sysprep"
+    Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
     Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 

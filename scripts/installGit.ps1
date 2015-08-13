@@ -7,10 +7,7 @@ param (
     $CalledUsingRemotePS = $false,
 
     [boolean]
-    $InstallGit = $true,
-
-    [string]
-    $GitRepo = 'lansa'
+    $InstallGit = $true
     )
 
 function Add-DirectoryToEnvPathOnce{
@@ -39,7 +36,8 @@ param (
     }
 }
 
-$GitRepoPath = "c:\$GitRepo"
+Write-Debug "GitRepo = $GitRepo"
+Write-Debug "GitRepoPath = $GitRepoPath"
 
 # Git outputs almost all normal messages to stderr. powershell interprets that as an error and 
 # displays the error text. To stop that stderr is redirected to stdout on the git commands.
@@ -54,15 +52,12 @@ if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
 }
 cd $GitRepoPath
-cmd /c git pull origin
+cmd /c git pull origin '2>&1'
 Write-Output "Branch: $Branch"
 cmd /c git checkout -f $Branch  '2>&1'
 if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
 {
     Write-Error ('Git clone failed');
-    if ( -not $CalledUsingRemotePS )
-    {
-        exit $LastExitCode;
-    }
+    cmd /c exit $LastExitCode;
 }
 

@@ -25,8 +25,7 @@ param(
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
-[String]$wait,
-[String]$userscripthook
+[String]$wait
 )
 
 # Put first output on a new line in cfn_init log file
@@ -84,12 +83,12 @@ try
 
     if ( $SUDB -eq '1' -and -not $UPGD_bool)
     {
-        Create-SqlServerDatabase        
+        Create-SqlServerDatabase $server_name $dbname
     }
 
     # Enable Named Pipes on database
 
-    Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
+    Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true
 
     $service = get-service "MSSQLSERVER"  
     restart-service $service.name -force #Restart SQL Services 
