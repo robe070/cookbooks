@@ -1,6 +1,14 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]
+    $GitRepo,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitRepoPath,
+
+    [Parameter(Mandatory=$true)]
+    [string]
     $Branch,
 
     [boolean]
@@ -24,15 +32,20 @@ param (
     $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
     $match = '*' + $Directory + '*'
     $replace = $oldPath + ';' + $Directory 
+    Write-Debug "OldPath = $Oldpath"
+    Write-Debug "match = $match"
+    Write-Debug "replace = $replace"
     if ( $oldpath -notlike $match )
     {
         [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
+        Write-Debug "Machine $EnvVarToSet updated"
     }
 
     # System Path may be different to remote PS starting environment, so check it separately
     if ( $env:Path -notlike $match )
     {
         $env:Path += ';' + $Directory
+        Write-Debug "local Path updated"
     }
 }
 

@@ -62,7 +62,7 @@ try
         throw 1
     }    
 
-    # Reflect local variables into remote session
+    # Setup fundamental variables in remote session
     Execute-RemoteBlock $Script:session {  
         $script:IncludeDir = "$using:GitRepoPath\scripts"
         Write-Debug "script:IncludeDir = $script:IncludeDir"
@@ -70,8 +70,6 @@ try
         $DebugPreference = $using:DebugPreference
         $VerbosePreference = $using:VerbosePreference
 
-        . "$script:IncludeDir\Init-Baking-Vars.ps1"
-        
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
@@ -82,12 +80,15 @@ try
     
     # Then we install git using chocolatey and pull down the rest of the files from git
 
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $script:gitbranch, $true)
+
+    Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
 
     # Load utilities into Remote Session.
-    # Requires the git repo to be pulled down so the scripts are present and the script variables initialised Init-Baking-Vars.ps1.
-   
-    Execute-RemoteBlock -Session $Script:session -ScriptBlock {. "$script:IncludeDir\Init-Baking-Vars.ps1"}
+    # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
+    # Reflect local variables into remote session
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.

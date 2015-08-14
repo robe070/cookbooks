@@ -35,12 +35,17 @@ try
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Start-Process -FilePath $installer_file -Wait 
 
     Write-Output "$(Log-Date) Running Chef"
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin"
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded"
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
     Write-Debug $ENV:PATH
     cd "$GitRepoPath\Cookbooks"
     chef-client -z -o VLWebServer::IDEBase
@@ -50,6 +55,7 @@ try
             InvalidData $LASTEXITCODE -Message "Chef-Client exit code = $LASTEXITCODE."
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     # Installing SQL Server Powershell tools separate to Chef because there is an error installing it 
     # when SQL 2014 is already installed, but it still works correctly with 2014.
@@ -61,18 +67,22 @@ try
     {
         # Ignore the expected errors
     }
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     Write-Output "$(Log-Date) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
 
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     Write-Output "$(Log-Date) Installing AWS CLI"
     &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     Write-Output "$(Log-Date) Pulling down latest 13.x DVD Image of Visual LANSA"
     cmd /c mkdir 'c:\LanDVDcut' '2>nul'
