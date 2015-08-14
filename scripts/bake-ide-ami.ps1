@@ -9,25 +9,17 @@ Bake a LANSA AMI
 
 
 #>
-$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
-
-# Includes
-$Includes = {
-        . "$Script:IncludeDir\dot-createlicense.ps1"
-        . "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
-        . "$Script:IncludeDir\dot-New-ErrorRecord.ps1"
-        . "$Script:IncludeDir\dot-Send-RemotingFile.ps1"
-        . "$script:IncludeDir\dot-CommonTools.ps1"
-        . "$script:IncludeDir\dot-AWSTools.ps1"
-        . "$script:IncludeDir\dot-DBTools.ps1"
-        . "$script:IncludeDir\dot-map-licensetouser.ps1"
-        . "$script:IncludeDir\dot-set-accesscontrol.ps1"
-        . "$script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"    
-}
-&$Includes
 
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
+
+$MyInvocation.MyCommand.Path
+$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+. "$script:IncludeDir\Init-Baking-Vars.ps1"
+. "$script:IncludeDir\Init-Baking-Includes.ps1"
+
+$script:aminame = "LANSA IDE $(Log-Date)"
 
 ###############################################################################
 # Main program logic
@@ -37,22 +29,6 @@ Set-StrictMode -Version Latest
 
 try
 {
-    $Script:DialogTitle = "LANSA IDE"
-    $script:SG = "bake-ami"
-    $script:externalip = $null
-    $script:keypair = "RobG_id_rsa"
-    $script:keypairfile = "$ENV:USERPROFILE\\.ssh\\id_rsa"
-    $script:aminame = "LANSA IDE $(Log-Date)"
-    $script:licensekeypassword = $ENV:cloud_license_key
-    $script:gitbranch = 'marketplace-and-stt'
-    $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
-    $Script:GitRepo = 'lansa'
-    $Script:GitRepoPath = "c:\$Script:GitRepo"
-    $Script:ScriptTempPath = "c:\temp"
-    $Script:LicenseKeyPath = $Script:ScriptTempPath
-    $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
-    $Script:DVDDir = 'c:\LanDvdCut'
-
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
@@ -74,43 +50,27 @@ try
     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
     $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
 
-    # Wait until PSSession is available
-    while ($true)
-    {
-        "$(Log-Date) Waiting for remote PS connection"
-        $session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
-        if ($session -ne $null)
-        {
-            break
-        }
-
-        Sleep -Seconds 10
-    }
-
-    Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
+    Connect-RemoteSession
 
     # Simple test of session: 
-    # Invoke-Command -Session $session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
+    # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
 
-
-    Invoke-Command -Session $session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+    Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+    $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
         Write-Error "LastExitCode: $remotelastexitcode"
         throw 1
     }    
 
     # Reflect local variables into remote session
-    Execute-RemoteBlock $session {  
+    Execute-RemoteBlock $Script:session {  
         $script:IncludeDir = "$using:GitRepoPath\scripts"
+        Write-Debug "script:IncludeDir = $script:IncludeDir"
+
         $DebugPreference = $using:DebugPreference
         $VerbosePreference = $using:VerbosePreference
-        $Script:ScriptTempPath = $Using:ScriptTempPath
-        $Script:DVDDir = $Using:DVDDir
-        $Script:GitRepo = $Using:GitRepo
-        $Script:GitRepoPath = $using:GitRepoPath
 
-        Write-Debug "script:IncludeDir = $script:IncludeDir"
+        . "$script:IncludeDir\Init-Baking-Vars.ps1"
         
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -118,79 +78,62 @@ try
 
     # Install Chocolatey
 
-    Execute-RemoteScript -Session $session -FilePath "$script:IncludeDir\getchoco.ps1"
+    Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
     
     # Then we install git using chocolatey and pull down the rest of the files from git
 
-    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($script:gitbranch, $true)
 
     # Load utilities into Remote Session.
-    # Requires the git repo to be pulled down so the scripts are present.
+    # Requires the git repo to be pulled down so the scripts are present and the script variables initialised Init-Baking-Vars.ps1.
    
-    Execute-RemoteBlock -Session $session -ScriptBlock $Includes
+    Execute-RemoteBlock -Session $Script:session -ScriptBlock {. "$script:IncludeDir\Init-Baking-Vars.ps1"}
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
 
-    Send-RemotingFile $Session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
 
-    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     # OK and Cancel buttons
-    $output = "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
-    Write-Output "$(Log-Date) $Output"
-    $Response = [System.Windows.Forms.MessageBox]::Show("$Output", $Script:DialogTitle, 1 ) 
-    if ( $Response -eq "Cancel" )
-    {
-        Write-Output "$(Log-Date) $Script:DialogTitle cancelled"
-        return -1
-    }
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
 
     # Session has probably been lost due to a Windows Updates reboot
 
-    if ( -not $Session -or ($Session.State -ne 'Opened') )
+    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
     {
         Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-        if ( $Session ) { Remove-PSSession $session }
+        if ( $Script:session ) { Remove-PSSession $Script:session }
 
-        # Wait until PSSession is available
-        while ($true)
-        {
-            "$(Log-Date) Waiting for remote PS connection"
-            $session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
-            if ($session -ne $null)
-            {
-                break
-            }
-
-            Sleep -Seconds 10
-        }
-
-        Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
+        Connect-RemoteSession
     }
 
     # Check that Windows Updates has been completed OK
 
-    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\win-updates.ps1
+    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\win-updates.ps1
 
     Write-Output "$(Log-Date) Installing IDE"
 
-    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-lansa-ide.ps1. Now click OK on this message box"
+
+    # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
-    Execute-RemoteScript -Session $session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
-    Invoke-Command -Session $session {Set-ExecutionPolicy restricted -Scope CurrentUser}
+    Invoke-Command -Session $Script:session {Set-ExecutionPolicy restricted -Scope CurrentUser}
 
     Write-Output "$(Log-Date) Sysprep"
-    Invoke-Command -Session $session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+    Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
 
-    Remove-PSSession $session
+    Remove-PSSession $Script:session
 
     # Sysprep will stop the Instance
 

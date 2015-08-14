@@ -12,6 +12,42 @@ function Log-Date
     ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
 }
 
+function Connect-RemoteSession
+{
+    # Wait until PSSession is available
+    while ($true)
+    {
+        "$(Log-Date) Waiting for remote PS connection"
+        $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
+        if ($Script:session -ne $null)
+        {
+            break
+        }
+
+        Sleep -Seconds 10
+    }
+
+    Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
+}
+
+function MessageBox
+{
+param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $Message
+    )
+
+    # OK and Cancel buttons
+    Write-Output "$(Log-Date) $Message"
+    $Response = [System.Windows.Forms.MessageBox]::Show("$Message", $Script:DialogTitle, 1 ) 
+    if ( $Response -eq "Cancel" )
+    {
+        Write-Output "$(Log-Date) $Script:DialogTitle cancelled"
+        throw
+    }
+}
+
 function Install-VisualLansa
 {
     ######################################
