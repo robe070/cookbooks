@@ -75,10 +75,12 @@ try
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+    Propagate-EnvironmentUpdate
 
     Write-Output "$(Log-Date) Installing AWS CLI"
     &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+    Propagate-EnvironmentUpdate
 
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"

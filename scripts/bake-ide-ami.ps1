@@ -74,6 +74,9 @@ try
         cmd /c exit 0
     }
 
+    # Load up some required tools into remote environment
+    Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
+
     # Install Chocolatey
 
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"

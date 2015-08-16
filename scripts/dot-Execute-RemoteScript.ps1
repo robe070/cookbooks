@@ -27,6 +27,7 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
+    Invoke-command -Session $session -ScriptBlock { $lastexitcode = 0}
     Invoke-Command -Session $session -FilePath $FilePath -ArgumentList $ArgumentList
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
@@ -46,6 +47,7 @@ param (
     $ScriptBlock
     )
 
+    Invoke-command -Session $session -ScriptBlock { $lastexitcode = 0}
     Invoke-Command -Session $session -Scriptblock $ScriptBlock
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {

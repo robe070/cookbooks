@@ -12,6 +12,72 @@ function Log-Date
     ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
 }
 
+function Propagate-EnvironmentUpdate
+{
+    if (-not ("win32.nativemethods" -as [type])) {
+        # import sendmessagetimeout from win32
+        add-type -Namespace Win32 -Name NativeMethods -MemberDefinition @"
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+public static extern IntPtr SendMessageTimeout(
+   IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam,
+   uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
+"@
+    }
+
+    $HWND_BROADCAST = [intptr]0xffff;
+    $WM_SETTINGCHANGE = 0x1a;
+    $result = [uintptr]::zero
+
+    # notify all windows of environment block change
+    [win32.nativemethods]::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE,
+	    [uintptr]::Zero, "Environment", 2, 5000, [ref]$result);
+}
+
+<#
+.SYNOPSIS
+
+Add-DirectoryToEnvPathOnce
+Add a directory to the path if it hasn't already been added
+
+.DESCRIPTION
+
+.EXAMPLE
+
+
+#>
+function Add-DirectoryToEnvPathOnce{
+param (
+    [string]
+    $EnvVarToSet = 'PATH',
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $Directory
+
+    )
+
+    $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
+    $match = '*' + $Directory + '*'
+    $replace = $oldPath + ';' + $Directory 
+    Write-Debug "OldPath = $Oldpath"
+    Write-Debug "match = $match"
+    Write-Debug "replace = $replace"
+    if ( $oldpath -notlike $match )
+    {
+        [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
+        Write-Debug "Machine $EnvVarToSet updated"
+    }
+
+    # System Path may be different to remote PS starting environment, so check it separately
+    if ( $env:Path -notlike $match )
+    {
+        $env:Path += ';' + $Directory
+        Write-Debug "local Path updated"
+    }
+
+    Propagate-EnvironmentUpdate
+}
+
 function Connect-RemoteSession
 {
     # Wait until PSSession is available
