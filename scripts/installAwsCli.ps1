@@ -14,4 +14,4 @@ $wc = New-Object system.net.webclient
 $wc.downloadFile( $source, $destination ) | Write-Output
 msiexec /quiet /i $destination | Write-Output
 
-Write-Output "AWS CLI installed"
+Write-Output "$(Log-Date) AWS CLI installed"

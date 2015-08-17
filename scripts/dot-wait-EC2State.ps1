@@ -62,7 +62,7 @@ Param (
             {
                 break;
             }
-            "$(Get-Date) Current State = $state, Waiting for Desired State = $desiredstate"
+            "$(Log-Date) Current State = $state, Waiting for Desired State = $desiredstate"
             Sleep -Seconds 10
         }
     }

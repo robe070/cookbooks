@@ -123,7 +123,7 @@ try
 
     Write-Output "$(Log-Date) Installing IDE"
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-lansa-ide.ps1. Now click OK on this message box"
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
 
     # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1

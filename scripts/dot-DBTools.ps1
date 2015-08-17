@@ -76,7 +76,16 @@ Param (
         throw ("Error using SQL Server cmdlets")
     }
 
-    $db = New-Object Microsoft.SqlServer.Management.Smo.Database($SqlServer, $dbname)
+    Try
+    {
+        $db = New-Object Microsoft.SqlServer.Management.Smo.Database($SqlServer, $dbname)
+    }
+    Catch
+    {
+        $_
+        Write-Output ("Database connection failed. Is SQL Server running?")
+    }
+
     Try
     {
         $db.Create()

@@ -16,7 +16,6 @@ Initialise the baking environment include files
 . "$Script:IncludeDir\dot-Create-EC2Instance.ps1"
 . "$Script:IncludeDir\dot-Execute-RemoteScript.ps1"
 . "$Script:IncludeDir\dot-Wait-EC2State.ps1"
-. "$Script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"
 . "$Script:IncludeDir\dot-New-ErrorRecord.ps1"
 . "$Script:IncludeDir\dot-Send-RemotingFile.ps1"
 . "$script:IncludeDir\dot-CommonTools.ps1"

@@ -32,11 +32,9 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
-    # Make sure Git is in the path
+    # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
 
-    if (0)
-    {
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
@@ -76,7 +74,7 @@ try
 
     Write-Output "$(Log-Date) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-    }
+
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
@@ -93,7 +91,7 @@ try
 
     Write-Output "$(Log-Date) Pulling down latest 13.x DVD Image of Visual LANSA"
     cmd /c mkdir 'c:\LanDVDcut' '2>nul'
-    cmd /c "c:\Program Files\Amazon\AWSCLI\aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
+    cmd /c "aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
     
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"

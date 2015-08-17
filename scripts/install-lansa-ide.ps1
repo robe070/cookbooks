@@ -131,7 +131,7 @@ try
     }
 
     # Pull down DVD image 
-    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" -ErrorAction Stop | Write-Output
+    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -176,8 +176,7 @@ catch
 }
 finally
 {
-    Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
-    Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    Write-Output ("See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
 }
 
 # Successful completion so set Last Exit Code to 0
