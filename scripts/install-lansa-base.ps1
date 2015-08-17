@@ -32,6 +32,11 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
+    # Make sure Git is in the path
+    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
+
+    if (0)
+    {
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
@@ -71,7 +76,7 @@ try
 
     Write-Output "$(Log-Date) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-
+    }
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
@@ -80,7 +85,7 @@ try
     Write-Output "$(Log-Date) Installing AWS CLI"
     &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-    Propagate-EnvironmentUpdate
+    Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
 
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
