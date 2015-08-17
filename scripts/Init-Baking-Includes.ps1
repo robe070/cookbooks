@@ -23,6 +23,5 @@ Initialise the baking environment include files
 . "$script:IncludeDir\dot-DBTools.ps1"
 . "$script:IncludeDir\dot-map-licensetouser.ps1"
 . "$script:IncludeDir\dot-set-accesscontrol.ps1"
-. "$script:IncludeDir\dot-Add-DirectoryToEnvPathOnce.ps1"    
 Write-Debug "Include files loaded"
 
