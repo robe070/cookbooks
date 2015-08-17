@@ -19,8 +19,6 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . "$script:IncludeDir\Init-Baking-Vars.ps1"
 . "$script:IncludeDir\Init-Baking-Includes.ps1"
 
-$script:aminame = "LANSA IDE $(Log-Date)"
-
 ###############################################################################
 # Main program logic
 ###############################################################################
@@ -147,7 +145,7 @@ try
 
     Write-Output "$(Log-Date) Creating AMI"
 
-    $TagDesc = "$($AmazonImage.Description[0]) created on $($AmazonImage.CreationDate[0]) with LANSA IDE installed on $(Log-Date)"
+    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE installed on $(Log-Date)"
     $AmiName = "$Script:DialogTitle $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
     $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
     #Start-Sleep -Seconds 120 # For some reason, it can take some time for subsequent calls to Get-EC2Image to return all properties, especially for snapshots. So we wait
@@ -179,6 +177,8 @@ try
         }
     }# Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice 
     
+    [console]::beep(500,1000)
+
     # Can't remove security group whilst instance is not terminated
     # return
 

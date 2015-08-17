@@ -32,9 +32,6 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
-    # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
-
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
@@ -71,6 +68,9 @@ try
         # Ignore the expected errors
     }
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+
+    # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
+    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
 
     Write-Output "$(Log-Date) Installing License"
     CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
