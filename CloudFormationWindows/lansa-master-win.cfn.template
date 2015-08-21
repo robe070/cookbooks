@@ -2,12 +2,12 @@
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Description"              : "LANSA Windows template: This template installs a highly-available, scalable LANSA deployment using a multi-AZ Amazon RDS database instance for storage.  **WARNING** This template creates an Amazon Windows EC2 instance, an Elastic Load Balancer and an Amazon RDS database instance. Parameters described as Update Stack: are only modified after the stack has been created. You will be billed for the AWS resources used if you create a stack from this template.",
     "Parameters"               : {
-        "1LansaMSI" : {
+        "01 LansaMSI" : {
             "Type"        : "String",
             "Default"     : "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
             "Description" : "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
-        "2LansaMSIBitness" : {
+        "02 LansaMSIBitness" : {
             "Default" : "1",
             "Description" : "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
             "Type"        : "String",
@@ -17,7 +17,7 @@
             ],
             "ConstraintDescription" : "Must be either 1 (true) or 0 (false)."
         },
-        "3DBUsername"   : {
+        "03 DBUsername"   : {
             "Default" : "admin",
             "Description" : "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
             "Type"        : "String",
@@ -25,7 +25,7 @@
             "MaxLength"   : "16",
             "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
-        "4DBPassword"   : {
+        "04 DBPassword"   : {
             "NoEcho"  : "true",
             "Description" : "The LANSA database administrator account password. Minimum length 8, maximum length 41. There must be at least one character from each of the following character classes: uppercase letters, lowercase letters and numeric digits. Only printable ASCII characters, not including '/', '@', '\"', and space, may be used.",
             "Type"        : "String",
@@ -33,12 +33,12 @@
             "MaxLength"   : "41",
             "AllowedPattern" : "(?!.*[/\"@\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,41}"
         },
-        "5WebUser"   : {
+        "05 WebUser"   : {
             "Type"    : "String",
             "Default" : "PCXUSER2",
             "Description" : "User to use for running web jobs."
         },
-        "6WebPassword"   : {
+        "06 WebPassword"   : {
             "NoEcho"  : "true",
             "Type"    : "String",
             "Description" : "Password for WebUser. Minimum length 8, maximum length 41. There must be at least one character from each of the following character classes: uppercase letters, lowercase letters and numeric digits. A space must not be used. This password must conform to Account Policy rules. E.g. The whole user name must not be in the password. With user name 'lansa', 'lansa!@#$abc' will NOT be accepted as a password. With user name 'lansa2', 'lansa!123' will be accepted as a password. See https://technet.microsoft.com/en-au/library/cc786468(v=ws.10).aspx for more information.",
@@ -46,18 +46,18 @@
             "MaxLength"   : "41",
             "AllowedPattern" : "(?!.*[\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,41}"
         },
-        "7KeyName" : {
+        "07 KeyName" : {
             "Description" : "Name of an existing EC2 KeyPair to enable remote access to the instances via RDP (case sensitive). e.g. linux-keypair",
             "Type"        : "AWS::EC2::KeyPair::KeyName"
         },
-        "8RemoteAccessLocation"        : {
+        "08 RemoteAccessLocation"        : {
             "Description" : "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.159.65/32 This is a security feature which limits remote access to your EC2 instances.",
             "Type"        : "String",
             "MinLength"   : "9",
             "MaxLength"   : "18",
             "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
-        "90LansaTemplateLevel" : {
+        "09 LansaTemplateLevel" : {
             "Default" : "R",
             "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
             "Type"        : "String",
@@ -67,7 +67,7 @@
             ],
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },        
-        "91LansaGitRepoBranch" : {
+        "10 LansaGitRepoBranch" : {
             "Default" : "master",
             "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type"        : "String"
