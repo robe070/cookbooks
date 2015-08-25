@@ -168,7 +168,7 @@ DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSAHidePassword=False
 .DatabaseSAPassword=
-DatabaseVersion=0
+DatabaseVersion=5
 DatabaseTCPIPWorkaround=
 DatabaseName=LANSA
 DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
@@ -176,9 +176,9 @@ DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\M
 DSNNew=True
 DSNName=LANSA
 DSNType=2
-DSNDriverType=10
+DSNDriverType=12
 DSNDriverName=SQL Server Native Client 11.0
-DSNServerName=$env:COMPUTERNAME
+DSNServerName=(local)
 DSNDatabaseName=LANSA
 DSNUseTrustedConnections=True
 DSNUserid=sa
@@ -298,7 +298,7 @@ DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSAHidePassword=False
 .DatabaseSAPassword=
-DatabaseVersion=0
+DatabaseVersion=5
 DatabaseTCPIPWorkaround=
 DatabaseName=LANSA
 DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
@@ -306,9 +306,9 @@ DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\M
 DSNNew=True
 DSNName=LANSA
 DSNType=2
-DSNDriverType=10
+DSNDriverType=12
 DSNDriverName=SQL Server Native Client 11.0
-DSNServerName=WIN-30TDV82PPMH
+DSNServerName=(local)
 DSNDatabaseName=LANSA
 DSNUseTrustedConnections=True
 DSNUserid=sa
@@ -379,6 +379,6 @@ DatabaseSAPassword=sa+LANSA!"| out-file $SettingsFile
 
     Write-Output ("Installing Integrator")
     # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
-    # output NOT PIPED to anywhere so powershell DOES NOT wait until the process completes execution
-    &$installer_file """$SettingsPassword""" """$SettingsFile"""
+    # Piping output to anywhere causes powershell to wait until the process completes execution
+    &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
 }
