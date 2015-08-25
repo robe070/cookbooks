@@ -141,6 +141,14 @@ try
 
     Install-Integrator 
 
+    # Pull down latest Integrator updates
+    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" "$APPA\Integrator" | Write-Output
+    if ( $LastExitCode -ne 0 )
+    {
+        throw
+    }
+
+
     Write-Output "IDE Installation completed"
 
     #####################################################################################

@@ -10,7 +10,7 @@ Bake a LANSA AMI
 
 #>
 
-$DebugPreference = "Continue"
+$DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 
 $MyInvocation.MyCommand.Path
@@ -18,6 +18,8 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 . "$script:IncludeDir\Init-Baking-Vars.ps1"
 . "$script:IncludeDir\Init-Baking-Includes.ps1"
+
+$script:aminame = "LANSA IDE $(Log-Date)"
 
 ###############################################################################
 # Main program logic
@@ -101,6 +103,7 @@ try
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     # OK and Cancel buttons
+    [console]::beep(500,1000)
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
@@ -121,6 +124,7 @@ try
 
     Write-Output "$(Log-Date) Installing IDE"
 
+    [console]::beep(500,1000)
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
 
     # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session

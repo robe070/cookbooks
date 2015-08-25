@@ -37,9 +37,6 @@
     <Compile Include="test.ps1" />
     <Compile Include="win-updates.ps1" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="LansaWebSystem.json" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
 </Project>
