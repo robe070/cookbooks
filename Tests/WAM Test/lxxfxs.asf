@@ -1,0 +1,15 @@
+XXSP_I     1A   30    1    3
+XXSPLN     2A   40    4    7
+XXSWAM     3A  100    8   17
+XXSWRT     4A  200   18   37
+XXSEID     5A  100   38   47
+XXSAPP     6A  100   48   57
+XXSSET     7N   50   58   62
+XXSSEQ     8N   50   63   67
+XXSSSQ     9N   50   68   72
+XXSLEN     0N  100   73   82
+XXSDTA     0A 5000   83  582
+XXSDAT     0N  100  583  592
+XXSTIM     0N  100  593  602
+XXSSP1     0A 1000  603  702
+.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

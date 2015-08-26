@@ -174,6 +174,9 @@ try
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
+    # Shortcuts
+    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" 
+
     Write-Output ("Installation completed successfully")
 }
 catch

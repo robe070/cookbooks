@@ -45,7 +45,6 @@ try
     Create-EC2Instance $Script:Imageid $script:keypair $script:SG
 
     # Remote PowerShell
-    # The script below establishes a remote session, invokes a remote command (using Invoke-Command), then cleans up the session. The remote command executed is “Invoke-WebRequest” to obtain the userdata. Since the instance might not be fully initialized, this is tried in a loop.
 
     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
     $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
@@ -63,6 +62,7 @@ try
     }    
 
     # Setup fundamental variables in remote session
+
     Execute-RemoteBlock $Script:session {  
         $script:IncludeDir = "$using:GitRepoPath\scripts"
         Write-Debug "script:IncludeDir = $script:IncludeDir"
@@ -75,6 +75,7 @@ try
     }
 
     # Load up some required tools into remote environment
+
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
     # Install Chocolatey
@@ -100,10 +101,10 @@ try
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
 
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a Powershell ISE session (so the environment is up to date) and run windowsUpdatesSettings.ps1. You do not need to do this before Clicking OK."
+
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
-    # OK and Cancel buttons
-    [console]::beep(500,1000)
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
@@ -124,7 +125,6 @@ try
 
     Write-Output "$(Log-Date) Installing IDE"
 
-    [console]::beep(500,1000)
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
 
     # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
@@ -152,7 +152,6 @@ try
     $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE installed on $(Log-Date)"
     $AmiName = "$Script:DialogTitle $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
     $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
-    #Start-Sleep -Seconds 120 # For some reason, it can take some time for subsequent calls to Get-EC2Image to return all properties, especially for snapshots. So we wait
  
     $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
  
@@ -171,22 +170,21 @@ try
     }
     Write-Output "$(Log-Date) AMI is available"
   
+    # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
+
     $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
-  
     $amiBlockDeviceMapping.ebs | `
     ForEach-Object -Process {
         if ( $_ -and $_.SnapshotID )
         {
             New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
         }
-    }# Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice 
+    } 
     
     [console]::beep(500,1000)
 
-    # Can't remove security group whilst instance is not terminated
-    # return
+    # Delete Security Group. Should work first time, but just in case, try it in a loop
 
-    #There is a timing thing, so has to retry.
     $err = $true
     while ($err)
     {

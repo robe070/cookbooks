@@ -1,0 +1,10 @@
+XXMP_I     1A   30    1    3
+XXMWAM     2A  100    4   13
+XXMWRT     3A  200   14   33
+XXMSET     4N   50   34   38
+XXMSEQ     5N   50   39   43
+XXMSSQ     6N   50   44   48
+XXMLEN     0N  100   49   58
+XXMDTA     0A 5000   59  558
+XXMSP1     0A 1000  559  658
+.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

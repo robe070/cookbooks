@@ -1,0 +1,8 @@
+XBSP_I     1A   30    1    3
+XBSCID     2A  100    4   13
+XBSCTX     3N  100   14   23
+XBSLIN     4N  100   24   33
+XBSSEQ     5N  100   34   43
+XBSLEN     0N  100   44   53
+XBSDTA     0A20480   54 2101
+.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
