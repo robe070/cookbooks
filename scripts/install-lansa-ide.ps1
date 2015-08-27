@@ -1,17 +1,4 @@
-﻿function Add-TrustedSite
-{
-param(
-    [Parameter(Mandatory=$true)]
-    [String] 
-    $SiteName
-)
-    $TrustedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
-    $TrustedKeyPath = $TrustedKey + $SiteName
-    New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
-    New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
-}
-
-<#
+﻿<#
 .SYNOPSIS
 
 Install the LANSA IDE.
@@ -44,7 +31,9 @@ param(
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
-	Write-Output "$(Log-Date) Initialising environment - presumed not running through RemotePS"
+    # Log-Date can't be used yet as Framework has not been loaded
+
+	Write-Output "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 

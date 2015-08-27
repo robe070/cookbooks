@@ -115,7 +115,7 @@ try
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
-    Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
+    # Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
 
     # Session has probably been lost due to a Windows Updates reboot
 
@@ -191,7 +191,9 @@ try
     
     [console]::beep(500,1000)
 
-    # Delete Security Group. Should work first time, but just in case, try it in a loop
+    #####################################################################################
+    Write-Output ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
+    #####################################################################################
 
     $err = $true
     while ($err)
@@ -203,7 +205,10 @@ try
         }
         catch
         {
+            $_
             $err = $true
+            Write-Output "$(Log-Date) Waiting for Security Group to be deleted"
+            Sleep -Seconds 10
         }
     }
 }
