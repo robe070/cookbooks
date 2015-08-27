@@ -109,8 +109,6 @@ try
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a Powershell ISE session (so the environment is up to date) and run windowsUpdatesSettings.ps1. You do not need to do this before Clicking OK."
-
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"

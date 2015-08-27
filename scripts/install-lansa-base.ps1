@@ -57,18 +57,6 @@ try
     }
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
-    # Installing SQL Server Powershell tools separate to Chef because there is an error installing it 
-    # when SQL 2014 is already installed, but it still works correctly with 2014.
-    try
-    {
-        choco install SQL2012.Powershell
-    }
-    catch
-    {
-        # Ignore the expected errors
-    }
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
 

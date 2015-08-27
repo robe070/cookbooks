@@ -96,7 +96,7 @@ try
 
     Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded")
 
-    Import-Module “sqlps”
+    Import-Module “sqlps” -DisableNameChecking
 
     if ( $SUDB -eq '1' -and -not $UPGD_bool)
     {
