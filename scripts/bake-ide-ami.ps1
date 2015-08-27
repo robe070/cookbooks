@@ -32,6 +32,14 @@ try
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
+    Write-Output ("$(Log-Date) Upload any changes to current installation image")
+
+    cmd /c aws s3 sync  "Z:\v13\SPIN0330_LanDVDcut_L4W13200_4088_EPC132900" "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--grants" "read=uri=http://acs.amazonaws.com/groups/global/AllUsers" "--delete" | Write-Output
+    if ( $LastExitCode -ne 0 )
+    {
+        throw
+    }
+
     Create-Ec2SecurityGroup
 
     # First image found is presumed to be the latest image.

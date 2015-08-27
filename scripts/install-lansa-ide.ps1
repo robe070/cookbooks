@@ -31,7 +31,7 @@ param(
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
-	Write-Output "Initialising environment - presumed not running through RemotePS"
+	Write-Output "$(Log-Date) Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -40,7 +40,7 @@ if ( -not $script:IncludeDir)
 }
 else
 {
-	Write-Output "Environment already initialised - presumed running through RemotePS"
+	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
 # Put first output on a new line in cfn_init log file
@@ -92,7 +92,7 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    # Ensure SQL Server Powershell module is loaded
+    Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded")
 
     Import-Module “sqlps”
 
@@ -101,7 +101,9 @@ try
         Create-SqlServerDatabase $server_name $dbname
     }
 
-    # Enable Named Pipes on database
+    #####################################################################################
+    Write-Output ("$(Log-Date) Enable Named Pipes on database")
+    #####################################################################################
 
     if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
     {
@@ -119,7 +121,7 @@ try
 
     [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
 
-    Write-Output ("Installing the application")
+    Write-Output ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
     {
@@ -130,7 +132,10 @@ try
         $APPA = "${ENV:ProgramFiles}\LANSA"
     }
 
-    # Pull down DVD image 
+    #####################################################################################
+    Write-Output ("$(Log-Date) Pull down DVD image ")
+    #####################################################################################
+
     cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
@@ -141,7 +146,10 @@ try
 
     Install-Integrator 
 
-    # Pull down latest Integrator updates
+    #####################################################################################
+    Write-Output ("$(Log-Date) Pull down latest Integrator updates")
+    #####################################################################################
+
     cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" "$APPA\Integrator" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
@@ -149,10 +157,10 @@ try
     }
 
 
-    Write-Output "IDE Installation completed"
+    Write-Output "$(Log-Date) IDE Installation completed"
 
     #####################################################################################
-    # Test if post install x_run processing had any fatal errors
+    Write-Output ("$(Log-Date) Test if post install x_run processing had any fatal errors")
     #####################################################################################
 
     if ( (Test-Path -Path $x_err) )
@@ -160,34 +168,62 @@ try
         Write-Verbose ("Signal to caller that the installation has failed")
 
         $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
-            NotInstalled $region -Message "$x_err exists and indicates an installation error has occurred."
+            NotInstalled $region -Message "$x_err exists which indicates an installation error has occurred."
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
-	Write-output ("Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+    #####################################################################################
+    Write-Output ("$(Log-Date) Import test case")
+    #####################################################################################
 
-	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+    $import = """$script:IncludeDir\..\Tests\WAM Test"""
+    cmd /c "$APPA\x_win95\x_lansa\execute\x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=Y" "DBII=$dbname" "EXPR=$import" "LOCK=NO" | Write-Output
 
-	Write-output ("Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+    if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
+    {
+        Write-Verbose ("Signal to caller that the import has failed")
+
+        $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
+            NotInstalled $region -Message "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
+    }
+
+    #####################################################################################
+    # License mapping needs to occur once final instance is instantiated. Hence
+    # this is all commented out
+	# Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+    #####################################################################################
+
+	# Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
+	# Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
+	# Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+
+    #####################################################################################
+	Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+    #####################################################################################
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
-    # Shortcuts
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" 
+    #####################################################################################
+    Write-output ("$(Log-Date) Shortcuts")
+    #####################################################################################
 
-    Write-Output ("Installation completed successfully")
+    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" 
+    New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\LansaQuickConfig.lnk" -Description "Quick Config"
+
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
+
+    Write-Output ("$(Log-Date) Installation completed successfully")
 }
 catch
 {
 	$_
-    Write-Error ("Installation error")
+    Write-Error ("$(Log-Date) Installation error")
     throw
 }
 finally
 {
-    Write-Output ("See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
+    Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
 }
 
 # Successful completion so set Last Exit Code to 0
