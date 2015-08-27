@@ -1,4 +1,17 @@
-﻿<#
+﻿function Add-TrustedSite
+{
+param(
+    [Parameter(Mandatory=$true)]
+    [String] 
+    $SiteName
+)
+    $TrustedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
+    $TrustedKeyPath = $TrustedKey + $SiteName
+    New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
+    New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
+}
+
+<#
 .SYNOPSIS
 
 Install the LANSA IDE.
@@ -31,8 +44,7 @@ param(
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
-    # Log-Date cannot be used yet as the framework is not yet loaded
-	Write-Output "Initialising environment - presumed not running through RemotePS"
+	Write-Output "$(Log-Date) Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -112,6 +124,9 @@ try
         restart-service $service.name -force #Restart SQL Services 
     }
 
+    # Change current directory from SQLSERVER: back to the file system so that file pathing works properly
+    cd "c:"
+
     if ( -not $UPGD_bool )
     {
         Start-WebAppPool -Name "DefaultAppPool"
@@ -159,7 +174,6 @@ try
     }
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
 
-
     Write-Output "$(Log-Date) IDE Installation completed"
 
     #####################################################################################
@@ -179,8 +193,13 @@ try
     Write-Output ("$(Log-Date) Import test case")
     #####################################################################################
 
-    $import = """$script:IncludeDir\..\Tests\WAM Test"""
-    cmd /c "$APPA\x_win95\x_lansa\execute\x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=Y" "DBII=$dbname" "EXPR=$import" "LOCK=NO" | Write-Output
+    # Note: have not been able to find a way to pass a parameter with spaces in and NOT have the entire parameter surrounded by quotes by Powershell
+    # So $import path must not have spaces in it.
+
+    $import = "$script:IncludeDir\..\Tests\WAMTest"
+    $x_dir = "$APPA\x_win95\x_lansa\execute"
+    cd $x_dir
+    cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
 
     if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
     {
@@ -215,6 +234,12 @@ try
     New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\LansaQuickConfig.lnk" -Description "Quick Config"
 
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
+
+    Add-TrustedSite "lansa.com"
+    Add-TrustedSite "google-analytics.com"
+    Add-TrustedSite "googleadservices.com"
+    Add-TrustedSite "img.en25.com"
+    Add-TrustedSite "addthis.com"
 
     Write-Output ("$(Log-Date) Installation completed successfully")
 }
