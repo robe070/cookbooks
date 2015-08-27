@@ -31,7 +31,8 @@ param(
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
-	Write-Output "$(Log-Date) Initialising environment - presumed not running through RemotePS"
+    # Log-Date cannot be used yet as the framework is not yet loaded
+	Write-Output "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -150,11 +151,13 @@ try
     Write-Output ("$(Log-Date) Pull down latest Integrator updates")
     #####################################################################################
 
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop"
     cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" "$APPA\Integrator" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw
     }
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
 
 
     Write-Output "$(Log-Date) IDE Installation completed"
