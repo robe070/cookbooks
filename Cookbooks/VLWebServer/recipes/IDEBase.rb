@@ -27,3 +27,5 @@ chocolatey "gitextensions"
 chocolatey "kdiff3"
 
 chocolatey "jre8"
+
+Chocolatey "adobereader"
