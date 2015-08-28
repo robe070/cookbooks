@@ -212,12 +212,6 @@ try
 	# Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
 
     #####################################################################################
-	Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
-    #####################################################################################
-    
-    Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
-
-    #####################################################################################
     Write-output ("$(Log-Date) Shortcuts")
     #####################################################################################
 
