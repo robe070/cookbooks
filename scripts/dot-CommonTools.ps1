@@ -124,6 +124,7 @@ function Install-VisualLansa
     #    That way the lengthy VL install can get to the end.
     # 2. Integrator install stops with the Close button needing to be clicked. Its a fast install so spawn it off
     #    and continue with other parts of the installation process.
+    # 3. Users are NOT created now as they become invalid  once the system is sysprepped. LANSA Quick Config configures this.
     ######################################
 
     # Installation settings
@@ -221,7 +222,7 @@ DollarCharacter=$
 LocalDataDirectory=C:\Program Files (x86)\LANSA\LANSA
 ListenerAutomaticStartup=True
 ListenerPortNumber=4545
-UseridActionForVLWeb=1
+UseridActionForVLWeb=0
 UseridForVLWeb=PCXUSER2
 .PasswordForVLWeb=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053
 NetworkClientPrepareAutoUpgrade=True
@@ -239,7 +240,7 @@ VirtualDirectory=
 AutostartJSMAdministratorService=True
 IntegratorPortNumber=4560
 IntegratorAdminPortNumber=4561
-UseridActionForJSM=2
+UseridActionForJSM=0
 UseridForJSM=PCXUSER2
 .PasswordForJSM=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053 
 JavaVersionForIntegrator=
@@ -351,7 +352,7 @@ DollarCharacter=$
 LocalDataDirectory=C:\Program Files (x86)\LANSA\LANSA
 ListenerAutomaticStartup=True
 ListenerPortNumber=4545
-UseridActionForVLWeb=1
+UseridActionForVLWeb=0
 UseridForVLWeb=PCXUSER2
 .PasswordForVLWeb=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053
 NetworkClientPrepareAutoUpgrade=True
@@ -369,7 +370,7 @@ VirtualDirectory=
 AutostartJSMAdministratorService=True
 IntegratorPortNumber=4560
 IntegratorAdminPortNumber=4561
-UseridActionForJSM=2
+UseridActionForJSM=0
 UseridForJSM=PCXUSER2
 .PasswordForJSM=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053 
 JavaVersionForIntegrator=

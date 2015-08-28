@@ -42,7 +42,21 @@ function Map-LicenseToUser {
 
             if ( -not $ScalableLicensePrivateKey -or -not $PriorMachineGuid -or -not $MachineGuid)
             {
-                Write-Error ("One of the following registry keys is invalid: HKLM:\Software\LANSA\$regkeyname, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
+                Write-Output ("")
+                Write-Output ("ScalableLicensePrivateKey=")
+                Write-Output ("Begin")
+                Write-Output $ScalableLicensePrivateKey | fl
+                Write-Output ("End")
+                Write-Output ("PriorMachineGuid=")
+                Write-Output ("Begin")
+                Write-Output $PriorMachineGuid | fl
+                Write-Output ("End")
+                Write-Output ("MachineGuid=")
+                Write-Output ("Begin")
+                Write-Output $MachineGuid | fl
+                Write-Output ("End")
+                Write-Error ("One of the following registry keys (values listed above) is invalid: HKLM:\Software\LANSA\$regkeyname, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
+                Write-Output ("")
                 throw ("One of the following registry keys is invalid: HKLM:\Software\LANSA\$regkeyname, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
             }
 
@@ -93,5 +107,6 @@ function Map-LicenseToUser {
     {
         # Report error but don't abort as one or more licenses may be missing
         Write-Error ($_ | format-list | out-string)
+        Write-Output ("")
     }
 }

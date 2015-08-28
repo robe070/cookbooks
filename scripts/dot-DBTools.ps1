@@ -58,11 +58,10 @@ Param (
     # Create database in SQL Server
     Write-Output ("Creating database")
 
-    # This requires the Powershell SQL Server cmdlets to be installed. This should already be done
-    # choco install SQL2012.PowerShell
-    # Also presumes that its been imported too:    Import-Module “sqlps”
+    # This requires the Powershell SQL Server cmdlets to be imported. This should already be done
     Try
     {
+        # this should be unnecessary, hence commented out
         # Add-Type -Path "C:\Program Files\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll"
 
         $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$Server_name")

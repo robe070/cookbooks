@@ -94,7 +94,9 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded")
+    Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+
+    Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
     Import-Module “sqlps” -DisableNameChecking
 
@@ -113,7 +115,7 @@ try
         restart-service $service.name -force #Restart SQL Services 
     }
 
-    # Change current directory from SQLSERVER: back to the file system so that file pathing works properly
+    Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
     cd "c:"
 
     if ( -not $UPGD_bool )
