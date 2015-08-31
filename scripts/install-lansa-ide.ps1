@@ -23,7 +23,7 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$f32bit = 'true',
 [String]$SUDB = '1',
-[String]$UPGD = 'true',
+[String]$UPGD = 'false',
 [String]$maxconnections = '20',
 [String]$wait
 )
