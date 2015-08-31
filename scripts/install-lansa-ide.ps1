@@ -23,7 +23,7 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$f32bit = 'true',
 [String]$SUDB = '1',
-[String]$UPGD = 'false',
+[String]$UPGD = 'true',
 [String]$maxconnections = '20',
 [String]$wait
 )
@@ -94,41 +94,42 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
-
-    Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
-
-    Import-Module “sqlps” -DisableNameChecking
-
-    if ( $SUDB -eq '1' -and -not $UPGD_bool)
+    if ( -not $UPGD_bool )
     {
-        Create-SqlServerDatabase $server_name $dbname
+        Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+
+        Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+
+        Import-Module “sqlps” -DisableNameChecking
+
+        if ( $SUDB -eq '1' -and -not $UPGD_bool)
+        {
+            Create-SqlServerDatabase $server_name $dbname
+        }
+
+        #####################################################################################
+        Write-Output ("$(Log-Date) Enable Named Pipes on database")
+        #####################################################################################
+
+        if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
+        {
+            $service = get-service "MSSQLSERVER"  
+            restart-service $service.name -force #Restart SQL Services 
+        }
+
+        Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+        cd "c:"
     }
-
-    #####################################################################################
-    Write-Output ("$(Log-Date) Enable Named Pipes on database")
-    #####################################################################################
-
-    if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
-    {
-        $service = get-service "MSSQLSERVER"  
-        restart-service $service.name -force #Restart SQL Services 
-    }
-
-    Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
-    cd "c:"
 
     if ( -not $UPGD_bool )
     {
         Start-WebAppPool -Name "DefaultAppPool"
+
+        # Speed up the start of the VL IDE
+        # Switch off looking for software license keys
+
+        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
     }
-
-    # Speed up the start of the VL IDE
-    # Switch off looking for software license keys
-
-    [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
-
-    Write-Output ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
     {
@@ -149,9 +150,26 @@ try
         throw
     }
 
-    Install-VisualLansa
+    if ( $UPGD_bool )
+    {
+        #####################################################################################
+        Write-Output ("$(Log-Date) Installing all EPCs")
+        #####################################################################################
 
-    Install-Integrator 
+        cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Write-Output
+        if ( $LastExitCode -ne 0 )
+        {
+            throw
+        }        
+    }
+    else
+    {
+        #####################################################################################
+        Write-Output ("$(Log-Date) Installing the application")
+        #####################################################################################
+
+        Install-VisualLansa
+    }
 
     #####################################################################################
     Write-Output ("$(Log-Date) Pull down latest Integrator updates")
@@ -166,6 +184,7 @@ try
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
 
     Write-Output "$(Log-Date) IDE Installation completed"
+    Write-Output ""
 
     #####################################################################################
     Write-Output ("$(Log-Date) Test if post install x_run processing had any fatal errors")
@@ -180,53 +199,58 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
-    #####################################################################################
-    Write-Output ("$(Log-Date) Import test case")
-    #####################################################################################
 
-    # Note: have not been able to find a way to pass a parameter with spaces in and NOT have the entire parameter surrounded by quotes by Powershell
-    # So $import path must not have spaces in it.
-
-    $import = "$script:IncludeDir\..\Tests\WAMTest"
-    $x_dir = "$APPA\x_win95\x_lansa\execute"
-    cd $x_dir
-    cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
-
-    if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
+    if ( -not $UPGD_bool )
     {
-        Write-Verbose ("Signal to caller that the import has failed")
+        #####################################################################################
+        Write-Output ("$(Log-Date) Import test case")
+        #####################################################################################
 
-        $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
-            NotInstalled $region -Message "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
+        # Note: have not been able to find a way to pass a parameter with spaces in and NOT have the entire parameter surrounded by quotes by Powershell
+        # So $import path must not have spaces in it.
+
+        $import = "$script:IncludeDir\..\Tests\WAMTest"
+        $x_dir = "$APPA\x_win95\x_lansa\execute"
+        cd $x_dir
+        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
+
+        if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
+        {
+            Write-Verbose ("Signal to caller that the import has failed")
+
+            $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
+                NotInstalled $region -Message "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
+        }
+
+        #####################################################################################
+        # License mapping needs to occur once final instance is instantiated. Hence
+        # this is all commented out
+	    # Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+        #####################################################################################
+
+	    # Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
+	    # Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
+	    # Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+
+        #####################################################################################
+        Write-output ("$(Log-Date) Shortcuts")
+        #####################################################################################
+
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:DvdDir/setup/CloudStartHere.htm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\Lansa Quick Config.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\Install EPCs.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+
+        # Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
+
+        Add-TrustedSite "lansa.com"
+        Add-TrustedSite "google-analytics.com"
+        Add-TrustedSite "googleadservices.com"
+        Add-TrustedSite "img.en25.com"
+        Add-TrustedSite "addthis.com"
     }
-
-    #####################################################################################
-    # License mapping needs to occur once final instance is instantiated. Hence
-    # this is all commented out
-	# Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
-    #####################################################################################
-
-	# Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	# Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	# Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
-
-    #####################################################################################
-    Write-output ("$(Log-Date) Shortcuts")
-    #####################################################################################
-
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://c:/lansa/scripts/aws-splash-page-13.2.htm" -WindowStyle "Maximized"
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-    New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\Lansa Quick Config.lnk" -Description "Quick Config"
-
-    # Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
-
-    Add-TrustedSite "lansa.com"
-    Add-TrustedSite "google-analytics.com"
-    Add-TrustedSite "googleadservices.com"
-    Add-TrustedSite "img.en25.com"
-    Add-TrustedSite "addthis.com"
 
     Write-Output ("$(Log-Date) Installation completed successfully")
 }
@@ -239,6 +263,15 @@ catch
 finally
 {
     Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
+
+    # Wait if we are upgrading so the user can see the results
+    if ( $UPGD_bool )
+    {
+        Write-Output ""
+        Write-Output "Press any key to continue ..."
+
+        $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
 }
 
 # Successful completion so set Last Exit Code to 0
