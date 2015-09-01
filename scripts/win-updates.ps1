@@ -4,7 +4,7 @@ param($global:RestartRequired=0,
         $MaxUpdatesPerCycle=500)
 
 function Check-ContinueRestartOrEnd() {
-    $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+    $RegistryKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"
     $RegistryEntry = "InstallWindowsUpdates"
 	switch ($global:RestartRequired) {
 		0 {
@@ -26,9 +26,10 @@ function Check-ContinueRestartOrEnd() {
 			}
 		}
 		1 {
-# AU - We don't want to run Windows update again. It seems "Run" doesn't automatically run after a login.
+# AU - We don't want to run Windows update again. "Run" doesn't automatically run after a login.
 # We saw evidence of it running 20 minutes after a login and that wasn't even the first login after the
-# instance was created.
+# instance was created. It should use the RunOnce key.
+# But it all seems moot. A user still needs to login, so why doesn't that user just run the script again?
 <#
 			$prop = (Get-ItemProperty $RegistryKey).$RegistryEntry
 			if (-not $prop) {
@@ -38,7 +39,7 @@ function Check-ContinueRestartOrEnd() {
 				LogWrite "Restart Registry Entry Exists Already"
 			}
 #>
-			Logoff-Allusers
+			# Logoff-Allusers
 
 			LogWrite "Restart Required - Restarting..."
 			Restart-Computer -force
