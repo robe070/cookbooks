@@ -29,12 +29,23 @@ param(
 [String]$userscripthook
 )
 
-# Include directory is where this script is executing
-$script:IncludeDir = Split-Path -Parent $Script:MyInvocation.MyCommand.Path
+# If environment not yet set up, it should be running locally, not through Remote PS
+if ( -not $script:IncludeDir)
+{
+    # Log-Date can't be used yet as Framework has not been loaded
 
-# Includes
-. "$script:IncludeDir\dot-map-licensetouser.ps1"
-. "$script:IncludeDir\dot-set-accesscontrol.ps1"
+	Write-Output "Initialising environment - presumed not running through RemotePS"
+	$MyInvocation.MyCommand.Path
+	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+	. "$script:IncludeDir\Init-Baking-Vars.ps1"
+	. "$script:IncludeDir\Init-Baking-Includes.ps1"
+}
+else
+{
+	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+}
+
 
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
