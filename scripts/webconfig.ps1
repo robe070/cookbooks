@@ -131,11 +131,23 @@ try
         copy-item -Path $l4w3serv_default_file -Destination ( $l4w3serv_file )
     }
 
-    Write-Verbose ("Set MAXCONNECT to $maxconnections")
+    Write-Output ("Set MAXCONNECT to $maxconnections")
 
-    (Get-Content $l4w3serv_file) |
-    Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  | 
-    Set-Content ($l4w3serv_file)
+    Write-Verbose ("Check if MAXCONNECT exists in file at all")
+
+    If (Get-Content $l4w3serv_file | Select-String -Pattern "MAXCONNECT=") {
+        
+        Write-Verbose ("It exists so replace it with user setting")
+
+        (Get-Content $l4w3serv_file) |
+        Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  | 
+        Set-Content ($l4w3serv_file)
+    } else {
+        
+        Write-Verbose ("Does not exist, append it to file")
+
+        Add-Content $l4w3serv_file "`nMAXCONNECT=$maxconnections"
+    }
 
     #####################################################################################
     # Switch off "Transform XSLT on WebServer" - LANSA;XHTML;N;yes;N;0;Y;yes;Y to LANSA;XHTML;N;yes;N;0;Y;yes;N
