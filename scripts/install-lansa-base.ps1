@@ -79,7 +79,8 @@ try
 
     Write-Output "$(Log-Date) Pulling down latest 13.x DVD Image of Visual LANSA"
     cmd /c mkdir 'c:\LanDVDcut' '2>nul'
-    cmd /c "aws.exe" s3 sync "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "c:\LanDVDcut" --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
+    $S3DVDImageDirectory = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl'
+    cmd /c "aws.exe" s3 sync $S3DVDImageDirectory $Script:DVDDir --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
     
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"

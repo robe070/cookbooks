@@ -143,8 +143,9 @@ try
     #####################################################################################
     Write-Output ("$(Log-Date) Pull down DVD image ")
     #####################################################################################
+    $S3DVDImageDirectory = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl'
 
-    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw

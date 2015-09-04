@@ -13,7 +13,7 @@ Initialise the baking environment
 #>
 
 
-$Script:DialogTitle = "LANSA IDE"
+$Script:DialogTitle = "LANSA IDE "
 $script:SG = "bake-ami"
 $script:externalip = $null
 $script:keypair = "RobG_id_rsa"
@@ -27,4 +27,5 @@ $Script:ScriptTempPath = "c:\temp"
 $Script:LicenseKeyPath = $Script:ScriptTempPath
 $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
 $Script:DVDDir = 'c:\LanDvdCut'
+
 Write-Debug "Variables loaded"

@@ -10,16 +10,53 @@ Bake a LANSA AMI
 
 #>
 
-$DebugPreference = "SilentlyContinue"
-$VerbosePreference = "Continue"
+function bake-IdeMsi {
+param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $VersionText,
+    
+    [Parameter(Mandatory=$true)]
+    [int]
+    $VersionMajor,
 
+    [Parameter(Mandatory=$true)]
+    [int]
+    $VersionMinor,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $LocalDVDImageDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $S3DVDImageDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $AMIName
+
+    )
 $MyInvocation.MyCommand.Path
-$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-. "$script:IncludeDir\Init-Baking-Vars.ps1"
-. "$script:IncludeDir\Init-Baking-Includes.ps1"
+# set up environment if not yet setup
+if ( -not $script:IncludeDir)
+{
+    # Log-Date can't be used yet as Framework has not been loaded
 
-$script:aminame = "LANSA IDE $(Log-Date)"
+	Write-Output "Initialising environment - presumed not running through RemotePS"
+	$MyInvocation.MyCommand.Path
+	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+	. "$script:IncludeDir\Init-Baking-Vars.ps1"
+	. "$script:IncludeDir\Init-Baking-Includes.ps1"
+}
+else
+{
+	Write-Output "$(Log-Date) Environment already initialised"
+}
+
+$script:aminame = "LANSA IDE $VersionText $(Log-Date)"
 
 ###############################################################################
 # Main program logic
@@ -34,7 +71,7 @@ try
 
     Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-    cmd /c aws s3 sync  "Z:\v13\SPIN0330_LanDVDcut_L4W13200_4088_EPC132900" "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--grants" "read=uri=http://acs.amazonaws.com/groups/global/AllUsers" "--delete" | Write-Output
+    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--grants" "read=uri=http://acs.amazonaws.com/groups/global/AllUsers" "--delete" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -45,7 +82,7 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*"})
+    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AMIName})
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
@@ -77,6 +114,13 @@ try
 
         $DebugPreference = $using:DebugPreference
         $VerbosePreference = $using:VerbosePreference
+
+        Write-Verbose ("Save S3 DVD image url in registry")
+        $lansaKey = 'HKLM:\Software\LANSA\'
+        if (!(Test-Path -Path $lansaKey)) {
+            New-Item -Path $lansaKey
+        }
+        New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
 
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -155,8 +199,8 @@ try
 
     Write-Output "$(Log-Date) Creating AMI"
 
-    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE installed on $(Log-Date)"
-    $AmiName = "$Script:DialogTitle $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
+    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
+    $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
     $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  
     $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
@@ -213,4 +257,6 @@ try
 catch
 {
     Write-Error ($_ | format-list | out-string)
+}
+
 }
