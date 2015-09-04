@@ -106,13 +106,21 @@ try
     # trigger in that script.
     #####################################################################################
 
+    # web plugin configuration file changed name in V14
     $l4w3serv_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv.cfg')
     $l4w3serv_default_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv_factory_default.cfg')
+    if ( -not (Test-Path -Path $l4w3serv_file) )
+    {
+        $l4w3serv_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\webplugin.conf')
+        $l4w3serv_default_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\webplugin_factory_default.cfg')
+    }
+    Write-Output ("Using Web Plugin configuration file $l4w3serv_file")
+
     Write-Verbose ("Set maximum lcotp sessions to $maxconnections in $l4w3serv_file")
 
     # Either save the installed file as the default, or if the default exists, restore the installed file.
     # Thus we have a consistent starting point.
-    if ( !(Test-Path -Path $l4w3serv_default_file) )
+    if ( -not (Test-Path -Path $l4w3serv_default_file) )
     {
         Write-Verbose ("Save default config file $l4w3serv_default_file")
 
