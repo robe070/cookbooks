@@ -171,7 +171,6 @@ DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSAHidePassword=False
 .DatabaseSAPassword=
-DatabaseVersion=5
 DatabaseTCPIPWorkaround=
 DatabaseName=LANSA
 DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
@@ -250,137 +249,15 @@ LansaLanguage=0
 InstallLanguage=0
 DatabaseSAPassword=sa+LANSA!" | out-file $SettingsFile
 
+    [int]$VersionMajor = [int](Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMajor').VersionMajor
+
+    if ( $VersionMajor -lt 14 ) {
+        Add-Content $SettingsFile "DatabaseVersion=5"
+    } else {
+        Add-Content $SettingsFile "DatabaseVersion=11"
+    }
+
     Write-Output ("Installing Visual LANSA")
-    # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
-    # Piping output to anywhere causes powershell to wait until the process completes execution
-    &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
-}
-
-function Install-Integrator
-{
-    ##########################################
-    # Integrator Install
-    ##########################################
-
-    $SettingsFile = "$Script:ScriptTempPath\IntegratorSettings.txt"
-    $SettingsPassword = 'lansa'
-    $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
-
-"SetupType=1
-NewInstallType=1
-InstallLevel=2
-RootDirectory=C:\Program Files (x86)\LANSA
-AllowRootDirectoryChange=True
-VisualLansaType=6
-FeatureVL=0
-FeatureVLCore=0
-FeatureWeb=0
-FeatureWebEditor=0
-FeatureWebAdministrator=0
-FeatureWebServer=0
-FeatureIISPlugin=0
-FeatureWebImages=0
-FeatureIntegrator=1
-FeatureJSM=1
-FeatureJSMProxy=1
-FeatureUserAgent=1
-FeatureRFI=1
-FeatureIntegratorStudio=1
-FeatureOpen=0
-FeatureOpenCore=0
-FeatureOpenSamples=0
-FeatureOpenTranslationTables=0
-FeatureConnect=0
-StartFolderName=LANSA
-64bitVLSupport=False
-DatabaseAction=2
-DatabaseNewInstance=False
-DatabaseInstanceName=
-DatabaseInstanceDirectory=C:\Program Files\Microsoft SQL Server
-DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
-DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
-DatabaseSAHidePassword=False
-.DatabaseSAPassword=
-DatabaseVersion=5
-DatabaseTCPIPWorkaround=
-DatabaseName=LANSA
-DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
-DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
-DSNNew=True
-DSNName=LANSA
-DSNType=2
-DSNDriverType=12
-DSNDriverName=SQL Server Native Client 11.0
-DSNServerName=(local)
-DSNDatabaseName=LANSA
-DSNUseTrustedConnections=True
-DSNUserid=sa
-.DSNPassword=112113200245048055164115207077090084060117130184210029036142038112134034166041252163025013128246
-CompilerInstall=1
-CompilerRootDirectory=C:\Program Files (x86)\LANSA\MicrosoftCompiler2010
-HostRouteLUName=*LOCAL
-HostRouteQualifier=localhost
-HostRoutePortNumber=4545
-HostRouteIpcOptions=1
-ConnectToMaster=True
-HostConnectIntegratedLogin=False
-HostConnectUserid=pcxuser
-.HostConnectPassword=
-StopStartIIS=True
-UseComputersName=True
-NodeName=LANSA
-InitializeDatabase=True
-InitializePartitions=2
-PartitionsToInitialize=DEX
-SyncMaster=False
-ImportExamplePartition=True
-ImportExampleUserTask=False
-ImportVLF=True
-ImportDemo=True
-RunDemo=False
-ImportEnableForTheWeb=True
-ImportClientDefinitions=True
-InitializationLanguage=ENG
-CCSID=1140
-CustomCCSID=False
-ClientToServerTranslationTable=ANSEBC1140
-ServerToClientTranslationTable=EBC1140ANS
-MessageFileName=DC@M01
-HashCharacter=#
-AtCharacter=@
-DollarCharacter=$
-LocalDataDirectory=C:\Program Files (x86)\LANSA\LANSA
-ListenerAutomaticStartup=True
-ListenerPortNumber=4545
-UseridActionForVLWeb=0
-UseridForVLWeb=PCXUSER2
-.PasswordForVLWeb=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053
-NetworkClientPrepareAutoUpgrade=True
-NetworkClientServerName=
-NetworkClientServerRootDirectory=
-NetworkClientServerMapping=
-UseridActionForWebServer=2
-UseridForWebServer=PCXUSER2
-.PasswordForWebServer=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053
-WebsiteIISPlugin=016Default Web Site
-WebsiteWebImages=Default Web Site
-WebsiteJSM=Default Web Site
-VirtualDirectoryAlias=cgi-bin
-VirtualDirectory=
-AutostartJSMAdministratorService=True
-IntegratorPortNumber=4560
-IntegratorAdminPortNumber=4561
-UseridActionForJSM=0
-UseridForJSM=PCXUSER2
-.PasswordForJSM=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053 
-JavaVersionForIntegrator=
-OpenTranslationTableLansaProvided=1
-OpenTranslationTable=1140
-LansaLanguage=0
-InstallLanguage=0
-DatabaseSAPassword=sa+LANSA!"| out-file $SettingsFile
-
-    Write-Output ("Installing Integrator")
     # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
     # Piping output to anywhere causes powershell to wait until the process completes execution
     &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
