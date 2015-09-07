@@ -38,8 +38,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $AMIName
+    $AMIName,
 
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitBranch
     )
 
 # set up environment if not yet setup
@@ -74,7 +77,17 @@ try
 
     Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--grants" "read=uri=http://acs.amazonaws.com/groups/global/AllUsers" "--delete" | Write-Output
+    # Standard arguments. Tripe quote so we actually pass double quoted parameters to aws S3
+    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
+
+    # If its not a beta, allow everyone to access it
+    if ( $VersionText -ne "14beta" )
+    {
+        $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
+    }
+    $a = [string]$S3Arguments
+    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
+
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -125,6 +138,7 @@ try
         }
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
@@ -143,7 +157,7 @@ try
     
     # Then we install git using chocolatey and pull down the rest of the files from git
 
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $script:gitbranch, $true)
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
 
     Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
 

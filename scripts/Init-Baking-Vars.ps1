@@ -19,7 +19,6 @@ $script:externalip = $null
 $script:keypair = "RobG_id_rsa"
 $script:keypairfile = "$ENV:USERPROFILE\\.ssh\\id_rsa"
 $script:licensekeypassword = $ENV:cloud_license_key
-$script:gitbranch = 'marketplace-and-stt'
 $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
 $Script:GitRepo = 'lansa'
 $Script:GitRepoPath = "c:\$Script:GitRepo"
