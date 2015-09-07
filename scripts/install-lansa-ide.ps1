@@ -176,8 +176,10 @@ try
     Write-Output ("$(Log-Date) Pull down latest Integrator updates")
     #####################################################################################
 
+    $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
+
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop"
-    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" "$APPA\Integrator" | Write-Output
+    cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw

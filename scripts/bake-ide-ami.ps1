@@ -34,10 +34,13 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
+    $S3IntegratorUpdateDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
     $AMIName
 
     )
-$MyInvocation.MyCommand.Path
 
 # set up environment if not yet setup
 if ( -not $script:IncludeDir)
@@ -115,12 +118,13 @@ try
         $DebugPreference = $using:DebugPreference
         $VerbosePreference = $using:VerbosePreference
 
-        Write-Verbose ("Save S3 DVD image url in registry")
+        Write-Verbose ("Save S3 DVD image url and other global variables in registry")
         $lansaKey = 'HKLM:\Software\LANSA\'
         if (!(Test-Path -Path $lansaKey)) {
             New-Item -Path $lansaKey
         }
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
