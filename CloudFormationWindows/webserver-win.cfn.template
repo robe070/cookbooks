@@ -174,10 +174,15 @@
             "Default" : "ITRO=N ITRL=4 ITRM=9999999999",
             "Description" : "Set tracing parameters for the LANSA jobs in the x_run system environment variable. Overwrites existing value. Restarts web jobs"
         },
-       "IAMRoleInstanceProfile" : {
+        "IAMRoleInstanceProfile" : {
             "Type"    : "String",
             "Description" : "IAM Instance Role"
-       }
+        },
+        "TemplateRoot" : {
+            "Type"    : "String",
+            "Default" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/",
+            "Description" : "Root location in S3 of the templates"
+        }
     },
     "Conditions" : {
        "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "90LansaTemplateLevel"}, "R"]},
@@ -385,6 +390,7 @@
                                  "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
                                  "$env:Path;",
                                  "cd \\lansa;",
+                                 "cmd /C git fetch '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git fetch failed');exit $LastExitCode};", 
                                  "cmd /C git checkout -f ", { "Ref" : "91LansaGitRepoBranch" },"  '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git checkout failed');exit $LastExitCode};",
                                  "cmd /C git pull origin '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git pull failed');exit $LastExitCode};", 
                                  "exit 0",
@@ -411,8 +417,17 @@
                      "files"    : {
                         "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json" : {
                            "source" : { "Fn::If" : [ "IsReleaseLevel", 
-                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/AWS.EC2.Windows.CloudWatch.json", 
-                                          "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/AWS.EC2.Windows.CloudWatch.json" ]}
+                                          { "Fn::Join" : ["", [
+                                                   { "Ref" : "TemplateRoot" },
+                                                   { "Ref" : "91LansaGitRepoBranch" },
+                                                   "/AWS.EC2.Windows.CloudWatch.json"
+                                          ]]},
+                                          { "Fn::Join" : ["", [
+                                                   { "Ref" : "TemplateRoot" },
+                                                   { "Ref" : "91LansaGitRepoBranch" },
+                                                   "/beta/AWS.EC2.Windows.CloudWatch.json"
+                                          ]]}
+                                       ]}
                         }
                      },
                      "commands" : {

@@ -68,7 +68,7 @@
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },        
         "10LansaGitRepoBranch" : {
-            "Default" : "master",
+            "Default" : "L4W13200_scalable",
             "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type"        : "String"
         },
@@ -250,7 +250,7 @@
         }
     },
     "Mappings"                 : {
-         "AWSRegionArch2AMI"    : {
+       "AWSRegionArch2AMI"    : {
             "Metadata" : { "Comment1" : "This mapping is updated whenever a new AMI is submitted to Marketplace" },
                "us-east-1"       : { "64" : "ami-81d10eea" },
                "us-west-1"       : { "64" : "ami-e9f70aad" }, 
@@ -273,9 +273,8 @@
          "sa-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "cn-north-1"     : { "EC2Principal" : "ec2.amazonaws.com.cn", "OpsWorksPrincipal" : "opsworks.amazonaws.com.cn" },
          "eu-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" }
-       }
-   ,
-       "Region2ARNPrefix": {
+       },
+       "Region2ARNPrefix" : {
          "us-east-1"      : { "ARNPrefix": "arn:aws:" },
          "us-west-1"      : { "ARNPrefix": "arn:aws:" },
          "us-west-2"      : { "ARNPrefix": "arn:aws:" },
@@ -286,8 +285,11 @@
          "sa-east-1"      : { "ARNPrefix": "arn:aws:" },
          "cn-north-1"     : { "ARNPrefix": "arn:aws-cn:" },
          "eu-central-1"   : { "ARNPrefix": "arn:aws:" }
+       },
+       "CustomVariable" : {
+         "TemplateRoot"      : { "Value" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/" },
+         "WebServerTemplate" : { "Value" : "webserver-win.cfn.template"}
        }
-
     },
     "Conditions" : {
        "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "09LansaTemplateLevel"}, "R"]}
@@ -500,8 +502,19 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
-                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
-                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
+                                                { "Fn::Join" : ["", [
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] },
+                                                   { "Ref" : "10LansaGitRepoBranch" },
+                                                   "/",
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "WebServerTemplate", "Value" ] }
+                                                ]]}  ,                                              
+                                                { "Fn::Join" : ["", [
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] },
+                                                   { "Ref" : "10LansaGitRepoBranch" },
+                                                   "/beta/",
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "WebServerTemplate", "Value" ] }
+                                                ]]}
+                                             ]},
                "Parameters" : {
                     "LansaType"           :  "WebServer",
                     "1LansaMSI"           : { "Ref" : "01LansaMSI" },
@@ -533,7 +546,8 @@
                     "PatchBucketName"     : { "Ref" : "28PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "29PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "17UserScriptHook" },
-                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" },
+                    "TemplateRoot"        : { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] }
                }
             }
          },
@@ -541,8 +555,19 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                "TemplateURL"              : { "Fn::If" : [ "IsReleaseLevel", 
-                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/webserver-win.cfn.template", 
-                                                "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/beta/webserver-win.cfn.template" ]},
+                                                { "Fn::Join" : ["", [
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] },
+                                                   { "Ref" : "10LansaGitRepoBranch" },
+                                                   "/",
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "WebServerTemplate", "Value" ] }
+                                                ]]}  ,                                              
+                                                { "Fn::Join" : ["", [
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] },
+                                                   { "Ref" : "10LansaGitRepoBranch" },
+                                                   "/beta/",
+                                                   { "Fn::FindInMap" : [ "CustomVariable", "WebServerTemplate", "Value" ] }
+                                                ]]}
+                                             ]},
                "Parameters" : {
                     "LansaType"           :  "DBWebServer",
                     "1LansaMSI"           : { "Ref" : "01LansaMSI" },
@@ -573,7 +598,8 @@
                     "PatchBucketName"     : { "Ref" : "28PatchBucketName"},
                     "PatchFolderName"     : { "Ref" : "29PatchFolderName"},
                     "UserScriptHook"      : { "Ref" : "17UserScriptHook" },
-                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" }
+                    "IAMRoleInstanceProfile" : { "Ref" : "IAMRoleInstanceProfile" },
+                    "TemplateRoot"        : { "Fn::FindInMap" : [ "CustomVariable", "TemplateRoot", "Value" ] }
                }
             }
          }
