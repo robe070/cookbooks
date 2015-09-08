@@ -195,11 +195,11 @@ try
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\win-updates.ps1
 
     Write-Output "$(Log-Date) Installing IDE"
+    [console]::beep(500,1000)
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
-
-    # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+    # MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
+    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
