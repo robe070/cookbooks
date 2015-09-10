@@ -173,6 +173,18 @@ try
     }
 
     #####################################################################################
+    Write-Output ("$(Log-Date) Pull down latest Visual LANSA updates")
+    #####################################################################################
+
+    $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
+
+    cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    if ( $LastExitCode -ne 0 )
+    {
+        throw
+    }
+
+    #####################################################################################
     Write-Output ("$(Log-Date) Pull down latest Integrator updates")
     #####################################################################################
 

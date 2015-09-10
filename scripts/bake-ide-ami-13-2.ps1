@@ -32,6 +32,7 @@ Bake-IdeMsi -VersionText '13SP2' `
             -VersionMinor 2 `
             -LocalDVDImageDirectory "Z:\v13\SPIN0330_LanDVDcut_L4W13200_4088_EPC132900" `
             -S3DVDImageDirectory "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" `
+            -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v13/VisualLANSA_L4W13200_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" `
             -AMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*"`
             -GitBranch "L4W13200_ide"

@@ -34,6 +34,10 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
+    $S3VisualLANSAUpdateDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
     $S3IntegratorUpdateDirectory,
 
     [Parameter(Mandatory=$true)]
@@ -137,6 +141,7 @@ try
             New-Item -Path $lansaKey
         }
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
