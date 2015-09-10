@@ -49,6 +49,14 @@ try
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
+    #####################################################################################
+	Write-output ("$(Log-Date) Restart Integrator JSM to reload license" )
+    #####################################################################################
+
+    $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop" 
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
+
     Write-Output ("$(Log-Date) Installation completed successfully")
 }
 catch
