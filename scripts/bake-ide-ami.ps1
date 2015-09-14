@@ -34,6 +34,10 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
+    $S3VisualLANSAUpdateDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
     $S3IntegratorUpdateDirectory,
 
     [Parameter(Mandatory=$true)]
@@ -77,7 +81,15 @@ try
 
     Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-    # Standard arguments. Tripe quote so we actually pass double quoted parameters to aws S3
+    Write-Verbose ("Test if source of DVD image exists")
+    if ( !(Test-Path -Path $LocalDVDImageDirectory) )
+    {
+        $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
+            ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
+    }
+
+    # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
     [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
 
     # If its not a beta, allow everyone to access it
@@ -137,6 +149,7 @@ try
             New-Item -Path $lansaKey
         }
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
