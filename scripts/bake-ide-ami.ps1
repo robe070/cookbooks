@@ -34,10 +34,20 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $AMIName
+    $S3VisualLANSAUpdateDirectory,
 
+    [Parameter(Mandatory=$true)]
+    [string]
+    $S3IntegratorUpdateDirectory,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $AMIName,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitBranch
     )
-$MyInvocation.MyCommand.Path
 
 # set up environment if not yet setup
 if ( -not $script:IncludeDir)
@@ -71,7 +81,25 @@ try
 
     Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--grants" "read=uri=http://acs.amazonaws.com/groups/global/AllUsers" "--delete" | Write-Output
+    Write-Verbose ("Test if source of DVD image exists")
+    if ( !(Test-Path -Path $LocalDVDImageDirectory) )
+    {
+        $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
+            ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
+    }
+
+    # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
+    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
+
+    # If its not a beta, allow everyone to access it
+    if ( $VersionText -ne "14beta" )
+    {
+        $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
+    }
+    $a = [string]$S3Arguments
+    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
+
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -115,12 +143,15 @@ try
         $DebugPreference = $using:DebugPreference
         $VerbosePreference = $using:VerbosePreference
 
-        Write-Verbose ("Save S3 DVD image url in registry")
+        Write-Verbose ("Save S3 DVD image url and other global variables in registry")
         $lansaKey = 'HKLM:\Software\LANSA\'
         if (!(Test-Path -Path $lansaKey)) {
             New-Item -Path $lansaKey
         }
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
+        New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
@@ -139,7 +170,7 @@ try
     
     # Then we install git using chocolatey and pull down the rest of the files from git
 
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $script:gitbranch, $true)
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
 
     Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
 
@@ -177,10 +208,10 @@ try
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\win-updates.ps1
 
     Write-Output "$(Log-Date) Installing IDE"
+    [console]::beep(500,1000)
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
-
-    # Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"

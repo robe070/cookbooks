@@ -132,6 +132,11 @@ function Install-VisualLansa
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
 
+    if ( (Test-Path $SettingsFile) )
+    {
+        Remove-Item $SettingsFile
+    }
+
     ##########################################
     # Visual LANSA Install
     ##########################################
@@ -247,20 +252,37 @@ OpenTranslationTableLansaProvided=1
 OpenTranslationTable=1140
 LansaLanguage=0
 InstallLanguage=0
-DatabaseSAPassword=sa+LANSA!" | out-file $SettingsFile
+DatabaseSAPassword=sa+LANSA!" | Add-Content $SettingsFile
 
     [int]$VersionMajor = [int](Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMajor').VersionMajor
 
     if ( $VersionMajor -lt 14 ) {
         Add-Content $SettingsFile "DatabaseVersion=5"
     } else {
-        Add-Content $SettingsFile "DatabaseVersion=11"
+"DatabaseVersion=11
+WebsiteVLWeb=Default Web Site
+WebServerNameAny=True
+WebServerName=
+WebServerPortAny=True
+WebServerPort=0
+WebServerHostRouteSystemName=*LOCAL
+WebServerHostRouteHost=localhost
+WebServerHostRoutePortNumber=4545
+WebServerHostRouteIpcOptions=1
+WebServerWindowsCredentials=False
+DSNPort=0
+CompilerType=0
+CompilerSdkDirectory=" | Add-Content $SettingsFile
     }
 
     Write-Output ("Installing Visual LANSA")
     # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
     # Piping output to anywhere causes powershell to wait until the process completes execution
-    &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
+    if ( $VersionMajor -lt 14 ) {
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
+    } else {
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" """E""" | Write-Output
+    }
 }
 
 function New-Shortcut {

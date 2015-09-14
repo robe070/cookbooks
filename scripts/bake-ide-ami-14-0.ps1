@@ -27,12 +27,12 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '13SP2' `
-            -VersionMajor 13 `
-            -VersionMinor 2 `
-            -LocalDVDImageDirectory "Z:\v13\SPIN0330_LanDVDcut_L4W13200_4088_EPC132900" `
-            -S3DVDImageDirectory "s3://lansa/releasedbuilds/v13/LanDVDcut_L4W13200_4088_latest" `
-            -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v13/VisualLANSA_L4W13200_latest" `
-            -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" `
-            -AMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*"`
+Bake-IdeMsi -VersionText '14beta' `
+            -VersionMajor 14 `
+            -VersionMinor 0 `
+            -LocalDVDImageDirectory "\\lansabuildpc14\l4wbuild\Trunk\LanCdCut_tip_4117_150911_reg" `
+            -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
+            -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
+            -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
+            -AMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*" `
             -GitBranch "feature/add-git-repo-setup"

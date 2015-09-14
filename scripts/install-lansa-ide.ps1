@@ -173,11 +173,25 @@ try
     }
 
     #####################################################################################
+    Write-Output ("$(Log-Date) Pull down latest Visual LANSA updates")
+    #####################################################################################
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop" # Must stop JSM otherwise aws s3 sync will throw errors accessing files which are locked
+
+    $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
+
+    cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    if ( $LastExitCode -ne 0 )
+    {
+        throw
+    }
+
+    #####################################################################################
     Write-Output ("$(Log-Date) Pull down latest Integrator updates")
     #####################################################################################
 
-    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop"
-    cmd /c aws s3 sync  "s3://lansa/releasedbuilds/v13/Integrator_L4W13200_latest" "$APPA\Integrator" | Write-Output
+    $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
+
+    cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
     if ( $LastExitCode -ne 0 )
     {
         throw
