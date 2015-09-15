@@ -68,7 +68,7 @@
             "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
         },        
         "10LansaGitRepoBranch" : {
-            "Default" : "L4W14000_scalable",
+            "Default" : "release/L4W13200_scalable",
             "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type"        : "String"
         },
