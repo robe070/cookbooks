@@ -35,4 +35,4 @@ Bake-IdeMsi -VersionText '14beta' `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*" `
-            -GitBranch "feature/add-git-repo-setup"
+            -GitBranch "release/13.2_IDE"
