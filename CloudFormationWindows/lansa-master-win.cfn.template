@@ -57,16 +57,6 @@
             "MaxLength"   : "18",
             "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
-        "09LansaTemplateLevel" : {
-            "Default" : "R",
-            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
-            "Type"        : "String",
-            "AllowedValues" : [
-                "R",
-                "B"
-            ],
-            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
-        },        
         "10LansaGitRepoBranch" : {
             "Default" : "support/L4W13200_scalable",
             "Description" : "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
@@ -288,11 +278,12 @@
        },
        "CustomVariable" : {
          "TemplateRoot"      : { "Value" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/" },
-         "WebServerTemplate" : { "Value" : "webserver-win.cfn.template"}
+         "WebServerTemplate" : { "Value" : "webserver-win.cfn.template"},
+         "TemplateLevel"     : { "Value" : "R"}
        }
     },
     "Conditions" : {
-       "IsReleaseLevel" : {"Fn::Equals" : [{"Ref" : "09LansaTemplateLevel"}, "R"]}
+       "IsReleaseLevel" : {"Fn::Equals" : [{ "Fn::FindInMap" : [ "CustomVariable", "TemplateLevel", "Value" ] }, "R"]}
      },
     "Resources"                : {
          "IAMRole"             : {
@@ -519,7 +510,7 @@
                     "LansaType"           :  "WebServer",
                     "1LansaMSI"           : { "Ref" : "01LansaMSI" },
                     "2LansaMSIBitness"    : { "Ref" : "02LansaMSIBitness"},
-                    "90LansaTemplateLevel": { "Ref" : "09LansaTemplateLevel"},
+                    "90LansaTemplateLevel": { "Fn::FindInMap" : [ "CustomVariable", "TemplateLevel", "Value" ] },
                     "91LansaGitRepoBranch": { "Ref" : "10LansaGitRepoBranch" },
                     "7KeyName"            : { "Ref" : "07KeyName" },
                     "InstanceType"        : { "Ref" : "11WebServerInstanceTyp" },
@@ -572,7 +563,7 @@
                     "LansaType"           :  "DBWebServer",
                     "1LansaMSI"           : { "Ref" : "01LansaMSI" },
                     "2LansaMSIBitness"    : { "Ref" : "02LansaMSIBitness"},
-                    "90LansaTemplateLevel": { "Ref" : "09LansaTemplateLevel"},
+                    "90LansaTemplateLevel": { "Fn::FindInMap" : [ "CustomVariable", "TemplateLevel", "Value" ] },
                     "91LansaGitRepoBranch": { "Ref" : "10LansaGitRepoBranch" },
                     "7KeyName"            : { "Ref" : "07KeyName" },
                     "InstanceType"        : { "Ref" : "11WebServerInstanceTyp" },
