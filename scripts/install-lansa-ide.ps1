@@ -240,14 +240,10 @@ try
         }
 
         #####################################################################################
-        # License mapping needs to occur once final instance is instantiated. Hence
-        # this is all commented out
-	    # Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+        Write-Output "$(Log-Date) Installing License"
         #####################################################################################
 
-	    # Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	    # Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	    # Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+        CreateLicence "$Script:ScriptTempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
 
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")

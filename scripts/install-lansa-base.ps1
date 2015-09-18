@@ -60,9 +60,6 @@ try
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
 
-    Write-Output "$(Log-Date) Installing License"
-    CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
