@@ -77,11 +77,6 @@ try
     &"$Script:IncludeDir\scheduleTasks.ps1"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
-    Write-Output "$(Log-Date) Pulling down latest DVD Image of Visual LANSA"
-    cmd /c mkdir 'c:\LanDVDcut' '2>nul'
-    $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
-    cmd /c "aws.exe" s3 sync $S3DVDImageDirectory $Script:DVDDir --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
-    
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
