@@ -42,7 +42,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $AMIName,
+    $AmazonAMIName,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -65,8 +65,6 @@ else
 {
 	Write-Output "$(Log-Date) Environment already initialised"
 }
-
-$script:aminame = "LANSA IDE $VersionText $(Log-Date)"
 
 ###############################################################################
 # Main program logic
@@ -110,7 +108,7 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AMIName})
+    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName})
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
@@ -188,6 +186,8 @@ try
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 

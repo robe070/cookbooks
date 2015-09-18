@@ -143,6 +143,7 @@ try
     #####################################################################################
     Write-Output ("$(Log-Date) Pull down DVD image ")
     #####################################################################################
+    cmd /c mkdir $Script:DvdDir '2>nul'
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
     cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
