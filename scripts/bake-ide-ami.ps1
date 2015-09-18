@@ -72,6 +72,8 @@ else
 
 Set-StrictMode -Version Latest
 
+$script:instancename = "LANSA IDE $VersionText $(Log-Date)"
+
 try
 {
     # Use Forms for a MessageBox
@@ -191,10 +193,14 @@ try
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
-    # Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
+    Write-Output "$(Log-Date) Installing IDE"
+    [console]::beep(500,1000)
+
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
+    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     # Session has probably been lost due to a Windows Updates reboot
-
     if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
     {
         Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
@@ -202,17 +208,6 @@ try
 
         Connect-RemoteSession
     }
-
-    # Check that Windows Updates has been completed OK
-
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\win-updates.ps1
-
-    Write-Output "$(Log-Date) Installing IDE"
-    [console]::beep(500,1000)
-
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
-    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
