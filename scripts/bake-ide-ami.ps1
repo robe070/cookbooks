@@ -42,7 +42,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $AMIName,
+    $AmazonAMIName,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -66,13 +66,13 @@ else
 	Write-Output "$(Log-Date) Environment already initialised"
 }
 
-$script:aminame = "LANSA IDE $VersionText $(Log-Date)"
-
 ###############################################################################
 # Main program logic
 ###############################################################################
 
 Set-StrictMode -Version Latest
+
+$script:instancename = "LANSA IDE $VersionText $(Log-Date)"
 
 try
 {
@@ -91,7 +91,7 @@ try
 
     # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
     [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
-
+    
     # If its not a beta, allow everyone to access it
     if ( $VersionText -ne "14beta" )
     {
@@ -110,7 +110,7 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AMIName})
+    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName})
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
@@ -136,12 +136,9 @@ try
 
     # Setup fundamental variables in remote session
 
-    Execute-RemoteBlock $Script:session {  
-        $script:IncludeDir = "$using:GitRepoPath\scripts"
-        Write-Debug "script:IncludeDir = $script:IncludeDir"
+    Execute-RemoteInit
 
-        $DebugPreference = $using:DebugPreference
-        $VerbosePreference = $using:VerbosePreference
+    Execute-RemoteBlock $Script:session {  
 
         Write-Verbose ("Save S3 DVD image url and other global variables in registry")
         $lansaKey = 'HKLM:\Software\LANSA\'
@@ -177,8 +174,7 @@ try
     # Load utilities into Remote Session.
     # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
     # Reflect local variables into remote session
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
+    Execute-RemoteInitPostGit
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
@@ -186,26 +182,11 @@ try
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
-
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
+    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
+
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
-
-    # Write-Output "$(Log-Date) Check if Windows Updates has been completed. If it says its retrying in 30s, you still need to run Windows-Updates again using RDP. Type Ctrl-Break, apply Windows Updates and restart this script from the next line."
-
-    # Session has probably been lost due to a Windows Updates reboot
-
-    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-    {
-        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-        if ( $Script:session ) { Remove-PSSession $Script:session }
-
-        Connect-RemoteSession
-    }
-
-    # Check that Windows Updates has been completed OK
-
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\win-updates.ps1
 
     Write-Output "$(Log-Date) Installing IDE"
     [console]::beep(500,1000)
@@ -213,6 +194,17 @@ try
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
     # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+
+    # Session has probably been lost due to a Windows Updates reboot
+    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+    {
+        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+        if ( $Script:session ) { Remove-PSSession $Script:session }
+
+        Connect-RemoteSession
+        Execute-RemoteInit
+        Execute-RemoteInitPostGit
+    }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
