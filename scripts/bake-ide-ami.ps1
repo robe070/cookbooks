@@ -92,8 +92,6 @@ try
     # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
     [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
     
-    MessageBox "Debug"
-
     # If its not a beta, allow everyone to access it
     if ( $VersionText -ne "14beta" )
     {
@@ -184,7 +182,6 @@ try
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
-    MessageBox "Debug"
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
