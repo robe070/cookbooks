@@ -25,7 +25,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $LicenseKeyPassword
+    $LicenseKeyPassword,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $ChefRecipe
     )
 
 Write-Debug "script:IncludeDir = $script:IncludeDir"
