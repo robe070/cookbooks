@@ -91,6 +91,8 @@ try
 
     # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
     [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
+    
+    MessageBox "Debug"
 
     # If its not a beta, allow everyone to access it
     if ( $VersionText -ne "14beta" )
@@ -136,12 +138,9 @@ try
 
     # Setup fundamental variables in remote session
 
-    Execute-RemoteBlock $Script:session {  
-        $script:IncludeDir = "$using:GitRepoPath\scripts"
-        Write-Debug "script:IncludeDir = $script:IncludeDir"
+    Execute-RemoteInit
 
-        $DebugPreference = $using:DebugPreference
-        $VerbosePreference = $using:VerbosePreference
+    Execute-RemoteBlock $Script:session {  
 
         Write-Verbose ("Save S3 DVD image url and other global variables in registry")
         $lansaKey = 'HKLM:\Software\LANSA\'
@@ -177,8 +176,7 @@ try
     # Load utilities into Remote Session.
     # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
     # Reflect local variables into remote session
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
+    Execute-RemoteInitPostGit
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
@@ -186,7 +184,7 @@ try
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
-
+    MessageBox "Debug"
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
@@ -207,6 +205,8 @@ try
         if ( $Script:session ) { Remove-PSSession $Script:session }
 
         Connect-RemoteSession
+        Execute-RemoteInit
+        Execute-RemoteInitPostGit
     }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
