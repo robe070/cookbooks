@@ -55,3 +55,22 @@ param (
         throw 1
     }      
 }
+
+function Execute-RemoteInit {
+    Execute-RemoteBlock $Script:session {  
+        $script:IncludeDir = "$using:GitRepoPath\scripts"
+        Write-Debug "script:IncludeDir = $script:IncludeDir"
+
+        $DebugPreference = $using:DebugPreference
+        $VerbosePreference = $using:VerbosePreference
+
+        # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+        cmd /c exit 0
+    }
+}
+
+# Initialization that must wait until the git repo has been cloned so all the scripts are there.
+function Execute-RemoteInitPostGit {
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
+}
