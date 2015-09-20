@@ -10,7 +10,7 @@ Bake a LANSA AMI
 
 #>
 
-function bake-IdeMsi {
+function bake-ScalableMsi {
 param (
     [Parameter(Mandatory=$true)]
     [string]
@@ -23,22 +23,6 @@ param (
     [Parameter(Mandatory=$true)]
     [int]
     $VersionMinor,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $LocalDVDImageDirectory,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $S3DVDImageDirectory,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $S3VisualLANSAUpdateDirectory,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $S3IntegratorUpdateDirectory,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -72,45 +56,20 @@ else
 
 Set-StrictMode -Version Latest
 
-$script:instancename = "LANSA IDE $VersionText $(Log-Date)"
+$script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
+$Script:DialogTitle = "LANSA Scalable License "
 
 try
 {
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
-    Write-Output ("$(Log-Date) Upload any changes to current installation image")
-
-    Write-Verbose ("Test if source of DVD image exists")
-    if ( !(Test-Path -Path $LocalDVDImageDirectory) )
-    {
-        $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
-            ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
-    }
-
-    # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
-    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
-    
-    # If its not a beta, allow everyone to access it
-    if ( $VersionText -ne "14beta" )
-    {
-        $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
-    }
-    $a = [string]$S3Arguments
-    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
-
-    if ( $LastExitCode -ne 0 )
-    {
-        throw
-    }
-
     Create-Ec2SecurityGroup
 
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName})
+    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object CreationDate -Descending)
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
@@ -145,9 +104,6 @@ try
         if (!(Test-Path -Path $lansaKey)) {
             New-Item -Path $lansaKey
         }
-        New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
-        New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
-        New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
@@ -179,21 +135,15 @@ try
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
 
-    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx"
+    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx"
 
     # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::MainRecipe")
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
-
-    Write-Output "$(Log-Date) Installing IDE"
-    [console]::beep(500,1000)
-
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
-    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
     # Session has probably been lost due to a Windows Updates reboot
     if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
@@ -207,6 +157,8 @@ try
     }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
+
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
         
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
@@ -225,7 +177,7 @@ try
 
     Write-Output "$(Log-Date) Creating AMI"
 
-    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
+    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with $script:instancename"
     $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
     $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  

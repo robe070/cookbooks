@@ -57,7 +57,7 @@ try
     # Name our instance
     $Tag = New-Object amazon.EC2.Model.Tag
     $Tag.Key = 'Name'
-    $Tag.Value = "Bake $Script:aminame"
+    $Tag.Value = "Bake $Script:instancename"
  
     #apply the tag to the instance
     New-EC2Tag -ResourceID $instanceID -Tag $tag
