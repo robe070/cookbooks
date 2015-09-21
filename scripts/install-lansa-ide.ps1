@@ -266,6 +266,9 @@ try
         Add-TrustedSite "googleadservices.com"
         Add-TrustedSite "img.en25.com"
         Add-TrustedSite "addthis.com"
+        Add-TrustedSite "*.lansa.myabsorb.com"
+        Add-TrustedSite "*.cloudfront.com"
+
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
