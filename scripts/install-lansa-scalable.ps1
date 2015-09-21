@@ -14,6 +14,19 @@ i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with t
 
 
 #>
+param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitRepoPath,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $TempPath,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $LicenseKeyPassword
+    )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
@@ -35,6 +48,11 @@ else
 
 try
 {
+    #####################################################################################
+    Write-Output "$(Log-Date) Set SQL Server to manual"
+    #####################################################################################
+
+    Set-Service "MSSQLSERVER" -startuptype "manual"
 
     #####################################################################################
     Write-Output "$(Log-Date) Installing License"
@@ -57,6 +75,8 @@ try
     Add-TrustedSite "googleadservices.com"
     Add-TrustedSite "img.en25.com"
     Add-TrustedSite "addthis.com"
+    Add-TrustedSite "*.lansa.myabsorb.com"
+    Add-TrustedSite "*.cloudfront.com"
 
     Write-Output ("$(Log-Date) Installation completed successfully")
 }
