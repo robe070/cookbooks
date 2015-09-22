@@ -52,7 +52,9 @@ try
     Write-Output ("$(Log-Date) Enable Named Pipes on local database")
     #####################################################################################
 
-    Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true
+    Import-Module “sqlps” -DisableNameChecking
+    Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
+    cd "c:"
 
     #####################################################################################
     Write-Output "$(Log-Date) Set local SQL Server to manual"
