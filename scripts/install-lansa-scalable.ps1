@@ -49,7 +49,13 @@ else
 try
 {
     #####################################################################################
-    Write-Output "$(Log-Date) Set SQL Server to manual"
+    Write-Output ("$(Log-Date) Enable Named Pipes on local database")
+    #####################################################################################
+
+    Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true
+
+    #####################################################################################
+    Write-Output "$(Log-Date) Set local SQL Server to manual"
     #####################################################################################
 
     Set-Service "MSSQLSERVER" -startuptype "manual"
@@ -65,7 +71,7 @@ try
     Write-output ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/Marketplace/LANSA%20Scalable%20License/ScalableStartHere.htm" -WindowStyle "Maximized"
+    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments """$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm""" -WindowStyle "Maximized"
     New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
 
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
