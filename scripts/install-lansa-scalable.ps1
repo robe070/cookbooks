@@ -17,15 +17,15 @@ i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with t
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $GitRepoPath,
+    $GitRepoPath_,
 
     [Parameter(Mandatory=$true)]
     [string]
-    $TempPath,
+    $TempPath_,
 
     [Parameter(Mandatory=$true)]
     [string]
-    $LicenseKeyPassword
+    $LicenseKeyPassword_
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -65,9 +65,9 @@ try
     #####################################################################################
     Write-Output "$(Log-Date) Installing License"
     #####################################################################################
-
-    CreateLicence "$Script:ScriptTempPath\LANSAScalableLicense.pfx" $LicenseKeyPassword "LANSA Scalable License" "ScalableLicensePrivateKey"
-    CreateLicence "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" $LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+    Write-Output "Password: $licensekeypassword_"
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey"
+    CreateLicence "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" $LicenseKeyPassword_ "LANSA Integrator License" "IntegratorLicensePrivateKey"
 
     #####################################################################################
     Write-output ("$(Log-Date) Shortcuts")
@@ -76,7 +76,9 @@ try
     New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments """$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm""" -WindowStyle "Maximized"
     New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
 
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
+    $RunOnce = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    New-Item -Path $RunOnce -ErrorAction SilentlyContinue
+    New-ItemProperty -Path $RunOnce -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk" -Force
 
     Add-TrustedSite "lansa.com"
     Add-TrustedSite "google-analytics.com"
