@@ -52,7 +52,7 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
     Write-Debug $ENV:PATH
     cd "$GitRepoPath\Cookbooks"
-    chef-client -z -o VLWebServer::IDEBase
+    chef-client -z -o $ChefRecipe
     if ( $LASTEXITCODE -ne 0 )
     {
         $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RecipeFailure `
