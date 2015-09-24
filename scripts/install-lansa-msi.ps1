@@ -108,41 +108,19 @@ try
 
     if ( $SUDB -eq '1' -and -not $UPGD_bool)
     {
-        # Create database in SQL Server
-        Write-Output ("Creating database")
+        Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-        # This requires the Powershell SQL Server cmdlets to be installed. This should already be done
-        # choco install SQL2012.PowerShell
-        Try
+        Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+
+        Import-Module “sqlps” -DisableNameChecking
+
+        if ( $SUDB -eq '1' -and -not $UPGD_bool)
         {
-            Add-Type -Path "C:\Program Files\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll"
-
-            $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$server_name")
-
-            $SqlServer.ConnectionContext.LoginSecure = $false
-
-            $SqlServer.ConnectionContext.Login = $dbuser
-
-            $SqlServer.ConnectionContext.SecurePassword = convertto-securestring -string $dbpassword -AsPlainText -Force
-        }
-        Catch
-        {
-            $_
-            Write-Output ("Error using SQL Server cmdlets")
-            throw ("Error using SQL Server cmdlets")
+            Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
         }
 
-        $db = New-Object Microsoft.SqlServer.Management.Smo.Database($SqlServer, $dbname)
-        Try
-        {
-            $db.Create()
-        }
-        Catch
-        {
-            $_
-            Write-Output ("Database creation failed. Its expected to fail on 2nd and subsequent EC2 instances or iterations")
-        }
-        Write-Output ($db.CreateDate)
+        Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+        cd "c:"
     }
 
     if ( -not $UPGD_bool )
