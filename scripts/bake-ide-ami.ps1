@@ -72,7 +72,8 @@ else
 
 Set-StrictMode -Version Latest
 
-$script:instancename = "LANSA IDE $VersionText $(Log-Date)"
+$Script:DialogTitle = "LANSA IDE"
+$script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
 
 try
 {
