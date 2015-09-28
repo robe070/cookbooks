@@ -13,7 +13,8 @@ Param (
 [parameter(Mandatory=$true)]    [string]$imageid,
 [parameter(Mandatory=$true)]    [string]$keypair,
 [parameter(Mandatory=$true)]    [string]$securityGroup,
-[parameter(Mandatory=$false)]   [string]$region
+[parameter(Mandatory=$false)]   [string]$region,
+[parameter(Mandatory=$false)]   [string]$instanceType = "t2.medium"
 )
 try
 {
@@ -44,7 +45,7 @@ try
     $DeviceMapping.Ebs = $volume
 
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair `
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType $instanceType -KeyName $keypair `
             -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true `
             -BlockDeviceMapping $DeviceMapping `
             -InstanceProfile_Arn $Script:InstanceProfileArn
