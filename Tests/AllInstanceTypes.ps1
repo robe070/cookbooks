@@ -52,34 +52,37 @@ Failures are listed and stacks not removed in order that they may be checked to 
                 "i2.4xlarge",
                 "i2.8xlarge"
 
+
+$InstanceNumber = 12
 $ErrorCount = 0
 $regionlist = Get-AWSRegion
 ForEach ( $region in $regionList )
 {
     Write-Output "Region $region"
 
-    $InstanceNumber = 1
 
     ForEach ( $InstanceType in $InstanceTypes )
     {
         try
         {
+            Write-Output "$InstanceType"
             New-CFNStack -region $region `
             -StackName "InstanceType$InstanceNumber" `
             -DisableRollback $True `
             -Capability CAPABILITY_IAM `
-            -templateURL https://s3-ap-southeast-2.amazonaws.com/lansa/templates/lansa-master-win.cfn.template `
+            -templateURL https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W13200_scalable/lansa-master-win.cfn.template `
             -Parameters `
-            @{ParameterKey="4DBPassword";ParameterValue="Pcxuser122"}, `
-            @{ParameterKey="6WebPassword";ParameterValue="Pcxuser122"}, `
-            @{ParameterKey="7KeyName";ParameterValue="RobG_id_rsa"}, `
-            @{ParameterKey="8RemoteAccessLocation";ParameterValue="103.231.159.65/32"}, `
-            @{ParameterKey="WebServerInstanceType";ParameterValue=$InstanceType}
+            @{ParameterKey="04DBPassword";ParameterValue="Pcxuser122"}, `
+            @{ParameterKey="06WebPassword";ParameterValue="Pcxuser122"}, `
+            @{ParameterKey="07KeyName";ParameterValue="RobG_id_rsa"}, `
+            @{ParameterKey="08RemoteAccessLocation";ParameterValue="103.231.159.65/32"}, `
+            @{ParameterKey="11WebServerInstanceTyp";ParameterValue=$InstanceType}
 
             Remove-CFNStack -region $region -StackName "InstanceType$InstanceNumber" -Force
         }    
         catch
         {
+            $_ | Write-Error 
             $ErrorCount++
             Write-Output "Error using $InstanceType in Region $region in stack InstanceType$InstanceNumber"
         }
@@ -88,7 +91,4 @@ ForEach ( $region in $regionList )
     }
 }
 
-if ( $ErrorCount )
-{
-    Write-Output "$ErrorCount errors"
-}
+Write-Output "$ErrorCount errors"

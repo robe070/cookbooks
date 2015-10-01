@@ -179,10 +179,10 @@
         },
         "19DBAllocatedStorage" : {
             "Default" : "100",
-            "Description" : "The maximum size of the database. Must be between 100 and 4096 GB. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
+            "Description" : "The maximum size of the database. Must be between 100 and 1024 GB. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
             "Type"        : "Number",
             "MinValue"    : "100",
-            "MaxValue"    : "4096"
+            "MaxValue"    : "1024"
         },
         "20DBIops" : {
             "Default" : "1000",
@@ -386,9 +386,6 @@
             "Properties" : {
                 "Engine" : {
                     "Ref" : "15DBEngine"
-                },
-                "MultiAZ" : {
-                    "Ref" : "16MultiAZDatabase"
                 },
                 "MasterUsername" : {
                     "Ref" : "03DBUsername"

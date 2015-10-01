@@ -203,7 +203,7 @@
                 "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "150", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
                 "HealthCheckType"         : "ELB",
-                "HealthCheckGracePeriod"  : 1800,
+                "HealthCheckGracePeriod"  : 2400,
                 "LoadBalancerNames"       : [ { "Ref" : "LoadBalancer" } ],
                 "Tags" : [ {
                         "Key" : "Name",
