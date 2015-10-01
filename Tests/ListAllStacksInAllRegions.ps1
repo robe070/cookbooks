@@ -10,14 +10,14 @@ List all stacks in all regions
 $regionlist = Get-AWSRegion
 ForEach ( $region in $regionList )
 {
-    Write-Output "Region $region"
+    Write-Output "$region"
 
     $nextToken = $null
     do {
-      [Amazon.CloudFormation.Model.StackSummary[]]$stack = Get-CFNStackSummary -Region $region -StackStatusFilter @("CREATE_FAILED", "CREATE_IN_PROGRESS", "UPDATE_IN_PROGRESS", "CREATE_COMPLETE"  ) -NextToken $nextToken
-      foreach ( $stackName in $stack.StackName )
+      [Amazon.CloudFormation.Model.StackSummary[]]$stacks = Get-CFNStackSummary -Region $region -StackStatusFilter @("CREATE_FAILED", "CREATE_IN_PROGRESS", "UPDATE_IN_PROGRESS", "CREATE_COMPLETE"  ) -NextToken $nextToken
+      foreach ( $stack in $stacks )
       {
-        Write-Output "Stack Name = $stackName"
+        Write-Output "$($stack.stackName) - $($stack.StackStatus)"
       }
 
       $nextToken = $AWSHistory.LastServiceResponse.NextToken

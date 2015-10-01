@@ -387,9 +387,6 @@
                 "Engine" : {
                     "Ref" : "15DBEngine"
                 },
-                "MultiAZ" : {
-                    "Ref" : "16MultiAZDatabase"
-                },
                 "MasterUsername" : {
                     "Ref" : "03DBUsername"
                 },
