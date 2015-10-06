@@ -240,12 +240,6 @@ try
         }
 
         #####################################################################################
-        Write-Output "$(Log-Date) Installing License"
-        #####################################################################################
-
-        CreateLicence "$Script:ScriptTempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-
-        #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
 

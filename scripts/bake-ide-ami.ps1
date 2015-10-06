@@ -179,10 +179,19 @@ try
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
+    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+
+    #####################################################################################
+    Write-Output "$(Log-Date) Installing License"
+    #####################################################################################
 
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\CreateLicence.ps1 -ArgumentList  @("$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx", $LicenseKeyPassword, "LANSA Development License", "DevelopmentLicensePrivateKey")
 
-    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+    #####################################################################################
+    Write-Output "$(Log-Date) Installing base software"
+    #####################################################################################
+
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
