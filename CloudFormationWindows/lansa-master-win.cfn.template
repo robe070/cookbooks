@@ -148,22 +148,13 @@
             "AllowedPattern" : "[a-zA-Z][a-zA-Z0-9]*"
         },
         "15DBEngine" : {
-            "Description" : "Database engine type. Must be a valid SQL Server engine type. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-ex' or 'sqlserver-web'.",
+            "Description" : "Database engine type. Must be a valid SQL Server engine type. Note that to support mirroring you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-web'.",
             "Type"        : "String",
             "Default"     : "sqlserver-web",
             "AllowedValues" : [
                 "sqlserver-web",
                 "sqlserver-se",
                 "sqlserver-ee"
-            ]
-        },
-        "16MultiAZDatabase" : {
-            "Default" : "false",
-            "Description" : "Create a multi-AZ SQL Server Amazon RDS database instance. Must be either 'true' or 'false'. Only available in us-west-2, us-east-1 and eu-west-1. Note that to support Multi-Az you need to choose 'sqlserver-ee' or 'sqlserver-se' for the DBEngine parameter. See http://aws.amazon.com/rds/details/ for more information.",
-            "Type"        : "String",
-            "AllowedValues" : [
-                "true",
-                "false"
             ]
         },
         "17UserScriptHook" : {
@@ -386,9 +377,6 @@
             "Properties" : {
                 "Engine" : {
                     "Ref" : "15DBEngine"
-                },
-                "MultiAZ" : {
-                    "Ref" : "16MultiAZDatabase"
                 },
                 "MasterUsername" : {
                     "Ref" : "03DBUsername"
