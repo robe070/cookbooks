@@ -186,7 +186,7 @@ try
     #####################################################################################
 
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\CreateLicence.ps1 -ArgumentList  @("$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx", $LicenseKeyPassword, "LANSA Development License", "DevelopmentLicensePrivateKey")
+    Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
 
     #####################################################################################
     Write-Output "$(Log-Date) Installing base software"
