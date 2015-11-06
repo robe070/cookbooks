@@ -17,7 +17,7 @@ function CreateLicence {
    if ( Test-Path $licenseFile_ )
    {
        try {
-           $mypwd = ConvertTo-SecureString -String $password_ -Force –AsPlainText
+           $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
            Import-PfxCertificate –FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd
 
            #####################################################################################
