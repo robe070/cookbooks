@@ -111,6 +111,8 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
+
+    Write-Verbose ("Locate AMI Name $AmazonAMIName")    
     $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
@@ -194,8 +196,6 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run install-ec2config.ps1. Now click OK on this message box"
-
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Installing IDE"
@@ -204,6 +204,8 @@ try
     MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
     # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+
+    MessageBox "Install patches. Then click OK on this message box"
 
     # Session has probably been lost due to a Windows Updates reboot
     if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
