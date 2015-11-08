@@ -46,7 +46,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitBranch
+    $GitBranch,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AdminUserName='Administrator'
     )
 
 # set up environment if not yet setup
@@ -123,7 +127,7 @@ try
     # Remote PowerShell
 
     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-    $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
+    $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
 
     Connect-RemoteSession
 
@@ -196,12 +200,12 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Installing IDE"
     [console]::beep(500,1000)
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
+    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
     # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
