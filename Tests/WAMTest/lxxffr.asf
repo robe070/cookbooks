@@ -1,0 +1,6 @@
+XFRP_I    01A   30    1    3
+XFRFI1    02N   90    4   12
+XFRFI2    03N   50   13   17
+XFRSYS    00A   10   18   18
+XFRFSN    00A  200   19   38
+XFRFLN    00A  400   39   78

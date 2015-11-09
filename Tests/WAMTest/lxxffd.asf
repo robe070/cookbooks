@@ -1,0 +1,13 @@
+XFDP_I    01A   30    1    3
+XFDTYP    02A   10    4    4
+XFDDEF    00A   10    5    5
+XFDFIL    00A   10    6    6
+XFDDFT    00A  200    7   26
+XFDKSH    00A   10   27   27
+XFDLEN    00N  100   28   37
+XFDDEC    00N   50   38   42
+XFDEDC    00A   10   43   43
+XFDIAT    00A  400   44   83
+XFDOAT    00A  400   84  123
+XFDSP1    00A 2560  124  379
+.@@@@@@@@@@@@@@@@@@@@@@@@@@@
