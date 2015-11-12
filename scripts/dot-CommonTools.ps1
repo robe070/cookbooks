@@ -131,6 +131,7 @@ function Install-VisualLansa
     $SettingsFile = "$Script:ScriptTempPath\LansaSettings.txt"
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
+    $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
 
     if ( (Test-Path $SettingsFile) )
     {
@@ -214,7 +215,7 @@ ImportDemo=True
 RunDemo=False
 ImportEnableForTheWeb=True
 ImportClientDefinitions=True
-InitializationLanguage=ENG
+InitializationLanguage=$Language
 CCSID=1140
 CustomCCSID=False
 ClientToServerTranslationTable=ANSEBC1140

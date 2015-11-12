@@ -36,4 +36,5 @@ Bake-IdeMsi -VersionText '14betaFRA' `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-French-64Bit-Base*" `
             -GitBranch "feature/finalise-14" `
-            -AdminUserName "Administrateur"
+            -AdminUserName "Administrateur" `
+            -Language "FRA"

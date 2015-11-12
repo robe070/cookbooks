@@ -50,7 +50,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $AdminUserName='Administrator'
+    $AdminUserName='Administrator',
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Language='ENG'
     )
 
 # set up environment if not yet setup
@@ -159,6 +163,7 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
+        New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
 
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -197,6 +202,9 @@ try
     #####################################################################################
     Write-Output "$(Log-Date) Installing base software"
     #####################################################################################
+
+    # Workaround for Chef crashing when french installs IIS-NetFxExtensibility
+    Execute-RemoteBlock $Script:session {C:\Windows\system32\dism.exe /online /enable-feature /featurename:IIS-NetFxExtensibility /norestart  /All }
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
