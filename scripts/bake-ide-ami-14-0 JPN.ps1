@@ -27,10 +27,10 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14betaJPN' `
+Bake-IdeMsi -VersionText '14GAJPN' `
             -VersionMajor 14 `
             -VersionMinor 0 `
-            -LocalDVDImageDirectory "\\LANSABUILDPC14\l4wbuild\trunk\LanCdCut_tip_4119_151104" `
+            -LocalDVDImageDirectory "\\LANSABUILDPC14\l4wbuild\trunk\LanCdCut_tip_4120_151112_GA" `
             -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `

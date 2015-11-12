@@ -200,13 +200,22 @@ try
     Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
 
     #####################################################################################
+
+    if ( $Language -eq 'FRA' ) {
+        Write-Output "$(Log-Date) FRA requires a workaround which must be done before Chef is installed."
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-base-fra.ps1. Now click OK on this message box"
+    }
+
+    #####################################################################################
     Write-Output "$(Log-Date) Installing base software"
     #####################################################################################
 
-    # Workaround for Chef crashing when french installs IIS-NetFxExtensibility
-    Execute-RemoteBlock $Script:session {C:\Windows\system32\dism.exe /online /enable-feature /featurename:IIS-NetFxExtensibility /norestart  /All }
-
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
+
+    if ( $Language -eq 'FRA' ) {
+        Write-Output "$(Log-Date) FRA requires SQL Server to be manually installed as it does not come pre-installed."
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-sql-server.ps1. Now click OK on this message box"
+    }
 
     MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
