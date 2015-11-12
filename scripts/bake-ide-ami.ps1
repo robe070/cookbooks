@@ -213,8 +213,8 @@ try
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
     if ( $Language -eq 'FRA' ) {
-        Write-Output "$(Log-Date) FRA requires SQL Server to be manually installed as it does not come pre-installed."
-        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-sql-server.ps1. Now click OK on this message box"
+        Write-Output "$(Log-Date) FRA requires SQL Server to be installed as it does not come pre-installed."
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-sql-server.ps1
     }
 
     MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
