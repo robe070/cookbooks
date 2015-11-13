@@ -224,6 +224,7 @@ ImportEnableForTheWeb=True
 ImportClientDefinitions=True
 InitializationLanguage=$Language
 LansaLanguage=$LansaLanguage
+InstallLanguage=$LansaLanguage
 CCSID=1140
 CustomCCSID=False
 ClientToServerTranslationTable=ANSEBC1140
