@@ -244,20 +244,40 @@ try
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+        switch ($Language) {
+            'FRA' { 
+                $StartHereLink = "ここから開始"
+                $EducationLink = "Education"
+                $QuickConfigLink = "Lansa Quick Config"
+                $InstallEPCs = "EPC をインストール"
+            }
+            'JPN' { 
+                $StartHereLink = "ここから開始"
+                $EducationLink = "教育"
+                $QuickConfigLink = "LANSA クイック構成"
+                $InstallEPCs = "EPC をインストール"
+            }
+            default{ 
+                $StartHereLink = "Start Here"
+                $EducationLink = "Education"
+                $QuickConfigLink = "Lansa Quick Config"
+                $InstallEPCs = "Install EPCs"
+            }
+        }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/CloudStartHere$Language.htm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\Lansa Quick Config.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\Install EPCs.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/CloudStartHere$Language.htm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCs.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
         # Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
 
-        Add-TrustedSite "lansa.com"
-        Add-TrustedSite "google-analytics.com"
-        Add-TrustedSite "googleadservices.com"
-        Add-TrustedSite "img.en25.com"
-        Add-TrustedSite "addthis.com"
+        Add-TrustedSite "*.lansa.com"
+        Add-TrustedSite "*.google-analytics.com"
+        Add-TrustedSite "*.googleadservices.com"
+        Add-TrustedSite "*.img.en25.com"
+        Add-TrustedSite "*.addthis.com"
         Add-TrustedSite "*.lansa.myabsorb.com"
         Add-TrustedSite "*.cloudfront.com"
 
