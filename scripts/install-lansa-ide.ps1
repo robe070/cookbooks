@@ -83,6 +83,8 @@ try
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
+    $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
@@ -228,7 +230,7 @@ try
         $import = "$script:IncludeDir\..\Tests\WAMTest"
         $x_dir = "$APPA\x_win95\x_lansa\execute"
         cd $x_dir
-        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
+        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=$Language" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
 
         if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
         {
@@ -243,7 +245,7 @@ try
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:DvdDir/setup/CloudStartHere.htm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/CloudStartHere$Language.htm" -WindowStyle "Maximized"
         New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
         New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\Lansa Quick Config.lnk" -Description "Quick Config"
         New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\Install EPCs.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
