@@ -9,6 +9,9 @@ Required because French AMI does not come with SQL Server pre-installed
 
 #>
 
+$DebugPreference = "Continue"
+$VerbosePreference = "Continue"
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -37,14 +40,26 @@ try {
 
     if ( Test-Path $SqlServerFile )
     {
-        Write-Output ("Executing $SqlServerFile")
+    {
+        Write-Output ("$(Log-Date) Installing .Net Framework 3.5")
+
+        Install-WindowsFeature Net-Framework-Core
+        
+        Write-Output ("$(Log-Date) Executing $SqlServerFile")
 
         # Set the current directory so that the install image gets unzipped there.
         cd $Script:ScriptTempPath
 
-        Write-Output ("$(Log-Date) Installing SQL Server") 
-        cmd /c $SqlServerFile /q /HIDECONSOLE /ACTION=Install /INSTANCENAME=MSSQLSERVER /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  `
-                /TCPENABLED=1 /ADDCURRENTUSERASSQLADMIN=true | Write-Output
+        Write-Output ("$(Log-Date) Sysprep SQL Server") 
+#        cmd /c $SqlServerFile /qs /ACTION=Install /INSTANCENAME=MSSQLSERVER `
+#                /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  `
+#                /TCPENABLED=1 /ADDCURRENTUSERASSQLADMIN=true `
+#                /SQLSYSADMINACCOUNTS="AUTORITE NT\SERVICE RÉSEAU" `
+#                /SQLSVCACCOUNT="AUTORITE NT\SERVICE RÉSEAU" `
+#                /AGTSVCACCOUNT="AUTORITE NT\SERVICE RÉSEAU" | Write-Output
+
+        cmd /c $SqlServerFile /qs /ACTION=PrepareImage /INDICATEPROGRESS /INSTANCEID=MSSQLSERVER `
+                /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  | Write-Output
     }
     else
     {
@@ -58,6 +73,6 @@ try {
 catch
 {
 	$_
-    Write-Error ("$(Log-Date) French Base installation error")
+    Write-Error ("$(Log-Date) French SQL Server installation error")
     throw
 }
