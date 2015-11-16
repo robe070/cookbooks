@@ -246,10 +246,10 @@ try
         #####################################################################################
         switch ($Language) {
             'FRA' { 
-                $StartHereLink = "Start Here"
+                $StartHereLink = "Commencer ici"
                 $EducationLink = "Education"
-                $QuickConfigLink = "Lansa Quick Config"
-                $InstallEPCsLink = "Install EPCs"
+                $QuickConfigLink = "Configuration rapide de LANSA"
+                $InstallEPCsLink = "Installer les EPCs"
             }
             'JPN' { 
                 $StartHereLink = "ここから開始"
