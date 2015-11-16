@@ -249,7 +249,7 @@ try
             'FRA' { 
                 $StartHereLink = "Commencer ici"
                 $EducationLink = "Education"
-                $QuickConfigLink = "Configuration rapide de LANSA"
+                $QuickConfigLink = "LANSA configuration rapide"
                 $InstallEPCsLink = "Installer les EPCs"
             }
             'JPN' { 
