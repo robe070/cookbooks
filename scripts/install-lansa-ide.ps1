@@ -244,6 +244,7 @@ try
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+        $StartHereHtm = "CloudStartHere$Language.htm"
         switch ($Language) {
             'FRA' { 
                 $StartHereLink = "Commencer ici"
@@ -262,10 +263,11 @@ try
                 $EducationLink = "Education"
                 $QuickConfigLink = "Lansa Quick Config"
                 $InstallEPCsLink = "Install EPCs"
+                $StartHereHtm = "CloudStartHereENG.htm"
             }
         }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/CloudStartHere$Language.htm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
         New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
         New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
         New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
