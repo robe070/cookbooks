@@ -16,7 +16,17 @@ function Disable-TcpOffloading
     # http://www.evernote.com/l/AA2JZF2lGelC8oTEKDEECWA8uNt-SbtzwuQ/
     # http://www.evernote.com/l/AA3NUlB9xtdN4qciBFoXwX_8NuWcPM0nlqY/
     ##########################################################################
-    $NICName = 'Ethernet'
+    # English  'Ethernet'
+    # Japanese 'イーサネット'
+    # French   'Ethernet'
+    get-culture
+    $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
+    $IsoLang
+    switch ( $IsoLang ) {
+        'jpn' {$NICName = 'イーサネット' }
+        default {$NICName = 'Ethernet' }
+    }
+
     Write-Output ("Disable TCP Offloading on NIC $NICName")
 
     # Don't need to see NetAdapter verbose messages. First call outputs 50 lines of text
@@ -43,8 +53,7 @@ function Disable-TcpOffloading
     Write-Output ("TCP Offloading disabled")
 }
 
-function Create-SqlServerDatabase
-{
+function Create-SqlServerDatabase {
 Param (
     [Parameter(Mandatory=$true)]
     [string]
@@ -52,31 +61,44 @@ Param (
 
     [Parameter(Mandatory=$true)]
     [String]
-    $dbname
+    $dbname,
+
+    [Parameter(Mandatory=$false)]
+    [String]
+    $dbuser,
+
+    [Parameter(Mandatory=$false)]
+    [String]
+    $dbpassword
 )
 
     # Create database in SQL Server
     Write-Output ("Creating database")
 
     # This requires the Powershell SQL Server cmdlets to be imported. This should already be done
-    Try
-    {
+    Try {
         # this should be unnecessary, hence commented out
         # Add-Type -Path "C:\Program Files\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll"
 
         $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$Server_name")
 
-        $SqlServer.ConnectionContext.LoginSecure = $true
+        if ( -not $dbuser ) {
+            $SqlServer.ConnectionContext.LoginSecure = $true
+        } else {
+            $SqlServer.ConnectionContext.LoginSecure = $false
+
+            $SqlServer.ConnectionContext.Login = $dbuser
+
+            $SqlServer.ConnectionContext.SecurePassword = convertto-securestring -string $dbpassword -AsPlainText -Force
+        }
     }
-    Catch
-    {
+    Catch {
         $_
         Write-Output ("Error using SQL Server cmdlets")
         throw ("Error using SQL Server cmdlets")
     }
 
-    Try
-    {
+    Try {
         $db = New-Object Microsoft.SqlServer.Management.Smo.Database($SqlServer, $dbname)
     }
     Catch
@@ -85,12 +107,10 @@ Param (
         Write-Output ("Database connection failed. Is SQL Server running?")
     }
 
-    Try
-    {
+    Try {
         $db.Create()
     }
-    Catch
-    {
+    Catch {
         $_
         Write-Output ("Database creation failed. Its expected to fail on 2nd and subsequent EC2 instances or iterations")
     }

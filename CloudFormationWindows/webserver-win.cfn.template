@@ -60,13 +60,12 @@
         },
         "90LansaTemplateLevel" : {
             "Default" : "R",
-            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template.",
             "Type"        : "String",
             "AllowedValues" : [
-                "R",
-                "B"
+                "R"
             ],
-            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+            "ConstraintDescription" : "Must be R (Release)."
         },        
         "91LansaGitRepoBranch" : {
             "Default" : "master",
@@ -204,7 +203,7 @@
                 "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "150", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
                 "HealthCheckType"         : "ELB",
-                "HealthCheckGracePeriod"  : 1800,
+                "HealthCheckGracePeriod"  : 2400,
                 "LoadBalancerNames"       : [ { "Ref" : "LoadBalancer" } ],
                 "Tags" : [ {
                         "Key" : "Name",

@@ -25,7 +25,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $LicenseKeyPassword
+    $LicenseKeyPassword,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $ChefRecipe
     )
 
 Write-Debug "script:IncludeDir = $script:IncludeDir"
@@ -48,7 +52,7 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
     Write-Debug $ENV:PATH
     cd "$GitRepoPath\Cookbooks"
-    chef-client -z -o VLWebServer::IDEBase
+    chef-client -z -o $ChefRecipe
     if ( $LASTEXITCODE -ne 0 )
     {
         $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RecipeFailure `
@@ -58,10 +62,7 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
-
-    Write-Output "$(Log-Date) Installing License"
-    CreateLicence "$TempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
 
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
@@ -77,11 +78,6 @@ try
     &"$Script:IncludeDir\scheduleTasks.ps1"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
-    Write-Output "$(Log-Date) Pulling down latest DVD Image of Visual LANSA"
-    cmd /c mkdir 'c:\LanDVDcut' '2>nul'
-    $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
-    cmd /c "aws.exe" s3 sync $S3DVDImageDirectory $Script:DVDDir --exclude "*ibmi/*" --exclude "*AS400/*" --exclude "*linux/*" --exclude "*setup/Installs/MSSQLEXP/*" --delete
-    
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 

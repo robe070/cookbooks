@@ -13,7 +13,6 @@ Initialise the baking environment
 #>
 
 
-$Script:DialogTitle = "LANSA IDE "
 $script:SG = "bake-ami"
 $script:externalip = $null
 $script:keypair = "RobG_id_rsa"

@@ -26,14 +26,15 @@ function Map-LicenseToUser {
 
     try
     {
+        $keyPath = "C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\"
+
         $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $certname
 
         $Thumbprint = $getCert.Thumbprint
 
-        $keyName=(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
+        $NewScalableLicensePrivateKey  =(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
 
-        if ( -not $keyname )
-        {
+        if ( -not $NewScalableLicensePrivateKey ) {
             Write-Output "No key for $certname"
 
             $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $regkeyname
@@ -83,25 +84,24 @@ function Map-LicenseToUser {
 
             Write-Verbose ("Copy old key to new key")
 
-            $keyPath = "C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\"
             $fullPath=$keyPath+$keyName
             Copy-Item $($KeyPath + $ScalableLicensePrivateKey.$regkeyname) $($KeyPath + $NewScalableLicensePrivateKey)
-
-            Write-Verbose ("Set ACLs on new key so that $webuser may access it. If error occurs check that $webuser has been created. If not, password is probably not complex enough.")
-
-            $pkFile = $($KeyPath + $NewScalableLicensePrivateKey)
-            $acl=Get-Acl -Path $pkFile
-            $permission= $webuser,"Read","Allow"
-            $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
-            $acl.AddAccessRule($accessRule)
-            Set-Acl $pkFile $acl
-
-            Write-Output "User $webuser given access to license $certname"
         }
-        else
-        {
-            Write-Verbose ("Private key $keyname already exists")
+        else {
+            Write-Verbose ("Private key $NewScalableLicensePrivateKey already exists. Ensure $webuser can access it")
         }
+
+
+        Write-Verbose ("Set ACLs on new key so that $webuser may access it. If error occurs check that $webuser has been created. If not, password is probably not complex enough.")
+
+        $pkFile = $($KeyPath + $NewScalableLicensePrivateKey)
+        $acl=Get-Acl -Path $pkFile
+        $permission= $webuser,"Read","Allow"
+        $accessRule=new-object System.Security.AccessControl.FileSystemAccessRule $permission
+        $acl.AddAccessRule($accessRule)
+        Set-Acl $pkFile $acl
+
+        Write-Output "User $webuser given access to license $certname"
     }
     catch
     {

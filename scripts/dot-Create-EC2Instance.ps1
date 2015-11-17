@@ -13,7 +13,8 @@ Param (
 [parameter(Mandatory=$true)]    [string]$imageid,
 [parameter(Mandatory=$true)]    [string]$keypair,
 [parameter(Mandatory=$true)]    [string]$securityGroup,
-[parameter(Mandatory=$false)]   [string]$region
+[parameter(Mandatory=$false)]   [string]$region,
+[parameter(Mandatory=$false)]   [string]$instanceType = "t2.medium"
 )
 try
 {
@@ -44,7 +45,7 @@ try
     $DeviceMapping.Ebs = $volume
 
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
-    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType t2.medium -KeyName $keypair `
+    $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType $instanceType -KeyName $keypair `
             -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true `
             -BlockDeviceMapping $DeviceMapping `
             -InstanceProfile_Arn $Script:InstanceProfileArn
@@ -57,7 +58,7 @@ try
     # Name our instance
     $Tag = New-Object amazon.EC2.Model.Tag
     $Tag.Key = 'Name'
-    $Tag.Value = "Bake $Script:aminame"
+    $Tag.Value = "Bake $Script:instancename"
  
     #apply the tag to the instance
     New-EC2Tag -ResourceID $instanceID -Tag $tag
