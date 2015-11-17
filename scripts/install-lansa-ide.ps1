@@ -83,6 +83,8 @@ try
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
+    $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
@@ -228,7 +230,7 @@ try
         $import = "$script:IncludeDir\..\Tests\WAMTest"
         $x_dir = "$APPA\x_win95\x_lansa\execute"
         cd $x_dir
-        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=ENG" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
+        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=$Language" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
 
         if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
         {
@@ -240,28 +242,43 @@ try
         }
 
         #####################################################################################
-        Write-Output "$(Log-Date) Installing License"
-        #####################################################################################
-
-        CreateLicence "$Script:ScriptTempPath\LANSADevelopmentLicense.pfx" $LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-
-        #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+        $StartHereHtm = "CloudStartHere$Language.htm"
+        switch ($Language) {
+            'FRA' { 
+                $StartHereLink = "Commencer ici"
+                $EducationLink = "Education"
+                $QuickConfigLink = "LANSA configuration rapide"
+                $InstallEPCsLink = "Installer les EPCs"
+            }
+            'JPN' { 
+                $StartHereLink = "ここから開始"
+                $EducationLink = "教育"
+                $QuickConfigLink = "LANSA クイック    構成"
+                $InstallEPCsLink = "EPC をインストール"
+            }
+            default{ 
+                $StartHereLink = "Start Here"
+                $EducationLink = "Education"
+                $QuickConfigLink = "Lansa Quick Config"
+                $InstallEPCsLink = "Install EPCs"
+                $StartHereHtm = "CloudStartHereENG.htm"
+            }
+        }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$Script:DvdDir/setup/CloudStartHere.htm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\Lansa Quick Config.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\Install EPCs.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        # Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "QuickConfig" -Value "$Script:DvdDir\setup\LansaQuickConfig.exe"
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk"
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\$StartHereLink.lnk"
 
-        Add-TrustedSite "lansa.com"
-        Add-TrustedSite "google-analytics.com"
-        Add-TrustedSite "googleadservices.com"
-        Add-TrustedSite "img.en25.com"
-        Add-TrustedSite "addthis.com"
+        Add-TrustedSite "*.lansa.com"
+        Add-TrustedSite "*.google-analytics.com"
+        Add-TrustedSite "*.googleadservices.com"
+        Add-TrustedSite "*.img.en25.com"
+        Add-TrustedSite "*.addthis.com"
         Add-TrustedSite "*.lansa.myabsorb.com"
         Add-TrustedSite "*.cloudfront.com"
 

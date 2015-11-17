@@ -46,7 +46,15 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitBranch
+    $GitBranch,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AdminUserName='Administrator',
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Language='ENG'
     )
 
 # set up environment if not yet setup
@@ -72,7 +80,8 @@ else
 
 Set-StrictMode -Version Latest
 
-$script:instancename = "LANSA IDE $VersionText $(Log-Date)"
+$Script:DialogTitle = "LANSA IDE"
+$script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
 
 try
 {
@@ -122,7 +131,7 @@ try
     # Remote PowerShell
 
     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-    $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $securepassword)
+    $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
 
     Connect-RemoteSession
 
@@ -154,6 +163,7 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
+        New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
 
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -180,18 +190,39 @@ try
 
     # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
     # Git is a far faster mechansim for transferring files than using RemotePS.
+    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+
+    #####################################################################################
+    Write-Output "$(Log-Date) Installing License"
+    #####################################################################################
 
     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+    Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
 
-    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+    #####################################################################################
+
+    if ( $Language -eq 'FRA' ) {
+        Write-Output "$(Log-Date) FRA requires a workaround which must be done before Chef is installed."
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-base-fra.ps1. Now click OK on this message box"
+    }
+
+    #####################################################################################
+    Write-Output "$(Log-Date) Installing base software"
+    #####################################################################################
+
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    if ( $Language -eq 'FRA' ) {
+        Write-Output "$(Log-Date) FRA requires SQL Server to be manually installed as it does not come pre-installed. Remote execution does not work"
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-sql-server.ps1. Now click OK on this message box"
+    }
+
+    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     Write-Output "$(Log-Date) Installing IDE"
     [console]::beep(500,1000)
 
-    MessageBox "Please RDP into $Script:publicDNS as Administrator using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
+    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
     # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
     # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 

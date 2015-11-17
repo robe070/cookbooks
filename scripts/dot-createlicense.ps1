@@ -17,8 +17,8 @@ function CreateLicence {
    if ( Test-Path $licenseFile_ )
    {
        try {
-           $mypwd = ConvertTo-SecureString -String $password_ -Force –AsPlainText
-           Import-PfxCertificate –FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd
+           $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
+           Import-PfxCertificate -FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd
 
            #####################################################################################
            Write-Output "$(Log-Date) Save private key filename & current Machine Guid to registry"

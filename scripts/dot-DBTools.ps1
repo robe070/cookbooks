@@ -16,7 +16,17 @@ function Disable-TcpOffloading
     # http://www.evernote.com/l/AA2JZF2lGelC8oTEKDEECWA8uNt-SbtzwuQ/
     # http://www.evernote.com/l/AA3NUlB9xtdN4qciBFoXwX_8NuWcPM0nlqY/
     ##########################################################################
-    $NICName = 'Ethernet'
+    # English  'Ethernet'
+    # Japanese 'イーサネット'
+    # French   'Ethernet'
+    get-culture
+    $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
+    $IsoLang
+    switch ( $IsoLang ) {
+        'jpn' {$NICName = 'イーサネット' }
+        default {$NICName = 'Ethernet' }
+    }
+
     Write-Output ("Disable TCP Offloading on NIC $NICName")
 
     # Don't need to see NetAdapter verbose messages. First call outputs 50 lines of text

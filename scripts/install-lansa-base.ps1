@@ -62,7 +62,7 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
+    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
 
     Write-Output "$(Log-Date) Installing AWS SDK"
     &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
