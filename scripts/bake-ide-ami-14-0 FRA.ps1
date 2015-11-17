@@ -35,6 +35,6 @@ Bake-IdeMsi -VersionText '14GAFRA' `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-French-64Bit-Base*" `
-            -GitBranch "feature/finalise-14" `
+            -GitBranch "support/L4W14000_IDE" `
             -AdminUserName "Administrateur" `
             -Language "FRA"
