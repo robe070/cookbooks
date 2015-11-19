@@ -99,7 +99,8 @@ try
     }
 
     # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
-    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*""", """--delete""")
+    # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
+    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x86_*.exe""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x64_JPN.exe""", """--delete""")
     
     # If its not a beta, allow everyone to access it
     if ( $VersionText -ne "14beta" )
