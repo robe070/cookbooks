@@ -54,7 +54,15 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Language='ENG'
+    $Language='ENG',
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $SQLServerInstalled=$true,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $InstallIDE=$true
     )
 
 # set up environment if not yet setup
@@ -202,8 +210,8 @@ try
 
     #####################################################################################
 
-    if ( $Language -eq 'FRA' ) {
-        Write-Output "$(Log-Date) FRA requires a workaround which must be done before Chef is installed."
+    if ( $SQLServerInstalled -eq $false) {
+        Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed."
         MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-base-fra.ps1. Now click OK on this message box"
     }
 
@@ -213,31 +221,35 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
 
-    if ( $Language -eq 'FRA' ) {
-        Write-Output "$(Log-Date) FRA requires SQL Server to be manually installed as it does not come pre-installed. Remote execution does not work"
-        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-sql-server.ps1. Now click OK on this message box"
-    }
+    if ( $InstallIDE -eq $true ) {
+        if ( $Language -eq 'FRA' ) {
+            Write-Output "$(Log-Date) FRA requires SQL Server to be manually installed as it does not come pre-installed. Remote execution does not work"
+            MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run install-sql-server.ps1. Now click OK on this message box"
+        }
 
-    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and run Windows Updates. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
-    Write-Output "$(Log-Date) Installing IDE"
-    [console]::beep(500,1000)
+        Write-Output "$(Log-Date) Installing IDE"
+        [console]::beep(500,1000)
 
-    MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
-    # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
-    # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and create a NEW Powershell ISE session (so the environment is up to date) and run install-lansa-ide.ps1. Now click OK on this message box"
+        # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+        # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
-    MessageBox "Install patches. Then click OK on this message box"
+        MessageBox "Install patches. Then click OK on this message box"
 
-    # Session has probably been lost due to a Windows Updates reboot
-    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-    {
-        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-        if ( $Script:session ) { Remove-PSSession $Script:session }
+        # Session has probably been lost due to a Windows Updates reboot
+        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+        {
+            Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+            if ( $Script:session ) { Remove-PSSession $Script:session }
 
-        Connect-RemoteSession
-        Execute-RemoteInit
-        Execute-RemoteInitPostGit
+            Connect-RemoteSession
+            Execute-RemoteInit
+            Execute-RemoteInitPostGit
+        }
+    } else {
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\pull-dvd-image.ps1
     }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
