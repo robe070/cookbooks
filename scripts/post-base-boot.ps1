@@ -15,4 +15,4 @@ else
 }
 
 . "$script:IncludeDir\pull-dvd-image.ps1"
-. "$script:IncludeDir\post-ide-boot.ps1" "PCXUSER"
+. "$script:IncludeDir\post-ide-boot.ps1" "PCXUSER2"
