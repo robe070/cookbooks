@@ -250,6 +250,11 @@ try
         }
     } else {
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\pull-dvd-image.ps1
+
+        if ( $SQLServerInstalled -eq $true) {
+            Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
+            MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
+        }
     }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
