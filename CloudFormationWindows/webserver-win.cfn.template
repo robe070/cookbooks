@@ -227,7 +227,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
                      "cake-update"     : ["git-pull", "restart-ifneeded", "run-chef", "run-windows-update"],
                      "chef-update"     : ["git-pull", "restart-ifneeded", "run-chef"],
@@ -532,19 +532,6 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
-                        }
-                     }
-                  },
-                  "setup-symlink" : {
-                     "files"    : {
-                        "C:\\LANSA\\regsymlink.exe" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/regsymlink.exe"
-                        }
-                     },
-                     "commands" : {
-                        "01_setup_symlink" : {
-                           "command" : "c:\\lansa\\regsymlink.exe -c SOFTWARE\\LANSA \\Registry\\Machine\\Software\\Wow6432Node\\LANSA",
                            "waitAfterCompletion" : "0"
                         }
                      }
