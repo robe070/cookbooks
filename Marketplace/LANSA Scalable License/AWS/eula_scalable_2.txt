@@ -22,6 +22,7 @@ a.	LANSA undertakes to respond to URGENT PROBLEMS within twenty-four hours.  “
 b.	LANSA undertakes to respond to NON-URGENT PROBLEMS within five working days.  “NON-URGENT PROBLEMS” shall mean defects in the Software that do not cause the Software to be inoperative.
 ii.	Corrections to the Software, where applicable, but only for the current and previous versions of the Software made available via AWS. 
 LANSA shall not be obliged to remedy errors or defects due to any malfunction of the AWS environment or by a failure of the Licensee to use the Software in accordance with the provisions of this Agreement.
+All communication between the Licensee and LANSA will be  conducted via email unless otherwise agreed between the parties.
 At your request, LANSA may agree to provide additional support to Licensee at LANSA’s then-current hourly rates.
 
 7. Proprietary Rights. Licensee acknowledges that LANSA and its licensors own all right, title and interest in and to the materials and intellectual property that comprise the Software, including all intellectual property rights relating thereto. LANSA does not grant to Licensee any other right or license, either express or implied, in the Software or any of its components except as expressly stated in this Agreement, and Licensee’s use of the Software shall be subject to the restrictions set forth in this Agreement.
