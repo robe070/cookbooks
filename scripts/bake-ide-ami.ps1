@@ -251,6 +251,10 @@ try
     } else {
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\pull-dvd-image.ps1
 
+        # Speed up the start of the VL IDE
+        # Switch off looking for software license keys
+        Execute-RemoteBlock $Script:session {    [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine') }
+
         if ( $SQLServerInstalled -eq $true) {
             Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
             MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
