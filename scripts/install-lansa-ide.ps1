@@ -152,7 +152,7 @@ try
     if ( $Cloud -eq "AWS" ) {
         cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO | Write-Output
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Output
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -190,7 +190,7 @@ try
     if ( $Cloud -eq "AWS" ) {
         cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO | Write-Output
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Output
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -206,7 +206,7 @@ try
     if ( $Cloud -eq "AWS" ) {
         cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO | Write-Output
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Output
     }
     if ( $LastExitCode -ne 0 )
     {
