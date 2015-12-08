@@ -36,6 +36,8 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
@@ -64,15 +66,17 @@ try
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
 
-    Write-Output "$(Log-Date) Installing AWS SDK"
-    &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-    Propagate-EnvironmentUpdate
+    if ( $Cloud -eq "AWS" ) {
+        Write-Output "$(Log-Date) Installing AWS SDK"
+        &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+        Propagate-EnvironmentUpdate
 
-    Write-Output "$(Log-Date) Installing AWS CLI"
-    &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-    Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
+        Write-Output "$(Log-Date) Installing AWS CLI"
+        &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+        Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
+    }
 
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"

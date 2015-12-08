@@ -62,7 +62,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $InstallIDE=$true
+    $InstallIDE=$true,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Cloud='AWS'
     )
 
 # set up environment if not yet setup
@@ -106,43 +110,75 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
-    # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
-    # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
-    [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x86_*.exe""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x64_JPN.exe""", """--delete""")
+    if ( $Cloud -eq 'AWS' ) {
+        # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
+        # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
+        [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x86_*.exe""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x64_JPN.exe""", """--delete""")
     
-    # If its not a beta, allow everyone to access it
-    if ( $VersionText -ne "14beta" )
-    {
-        $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
+        # If its not a beta, allow everyone to access it
+        if ( $VersionText -ne "14beta" )
+        {
+            $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
+        }
+        $a = [string]$S3Arguments
+        cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
+        if ( $LastExitCode -ne 0 ) { throw }
+    } elseif ( $Cloud -eq 'Azure' ) {
+        $StorageAccount = 'lansalpc'
+                             
+        #Save the storage account key
+        $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory /DestKey:$StorageKey /S /XO | Write-Output
     }
-    $a = [string]$S3Arguments
-    cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
 
-    if ( $LastExitCode -ne 0 )
-    {
-        throw
-    }
-
-    Create-Ec2SecurityGroup
+    if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
 
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
+    Write-Verbose ("Locate image Name $AmazonAMIName")    
 
-    Write-Verbose ("Locate AMI Name $AmazonAMIName")    
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
-    $ImageName = $AmazonImage[0].Name
-    $Script:Imageid = $AmazonImage[0].ImageId
-    Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
+    if ( $Cloud -eq 'AWS' ) {
+        $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
+        $ImageName = $AmazonImage[0].Name
+        $Script:Imageid = $AmazonImage[0].ImageId
+        Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
-    Create-EC2Instance $Script:Imageid $script:keypair $script:SG
+        Create-EC2Instance $Script:Imageid $script:keypair $script:SG
+    } elseif ($Cloud -eq 'Azure' ) {
+        $family="SQL Server 2014 SP1 Web on Windows Server 2012 R2"
+        $image=Get-AzureVMImage | where { $_.ImageFamily -eq $family } | sort PublishedDate -Descending | select -ExpandProperty ImageName -First 1
+
+        $subscription = "Main"
+        $svcName = "baking"
+        $vmname="BakeIDE$VersionText"
+        $vmsize="Medium"
+        $Script:password = "Pcxuser@122"
+        $AdminUserName = "lansa"
+
+        Write-Verbose "$(Log-Date) Delete VM if it already exists"
+        Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
+
+        $vm1 = New-AzureQuickVM -Windows -ServiceName $svcName -Name $VMName -ImageName $image -InstanceSize `
+                    $vmsize -AdminUsername $AdminUserName -Password $Script:password -WaitForBoot -Verbose
+
+        # Install the WinRM Certificate first to access the VM via Remote PS
+        # This REQUIRES PowerShell run Elevated
+        # Also run Unblock-File .\InstallWinRMCertAzureVM.ps1 => Need to close the Powershell session before it will work.
+        .$script:IncludeDir\InstallWinRMCertAzureVM.ps1 -SubscriptionName $subscription -ServiceName $svcName -Name $VMName 
+ 
+        # Get the RemotePS/WinRM Uri to connect to
+        $uri = Get-AzureWinRMUri -ServiceName $svcName -Name $VMName 
+    }
 
     # Remote PowerShell
-
     $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
     $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
-
-    Connect-RemoteSession
+    if ( $Cloud -eq 'AWS' ) {
+        Connect-RemoteSession
+    } elseif ($Cloud -eq 'Azure' ) {
+        $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds
+    }
 
     # Simple test of session: 
     # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
@@ -165,6 +201,7 @@ try
         if (!(Test-Path -Path $lansaKey)) {
             New-Item -Path $lansaKey
         }
+        New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force
         New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
         New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
@@ -268,50 +305,65 @@ try
     Invoke-Command -Session $Script:session {Set-ExecutionPolicy restricted -Scope CurrentUser}
 
     Write-Output "$(Log-Date) Sysprep"
-    Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+    Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
+    if ( $Cloud -eq 'AWS' ) {
+        Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+    } elseif ($Cloud -eq 'Azure' ) {
+        Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
+        Invoke-Command -Session $Script:session {cmd /c sysprep /oobe /generalize /shutdown}
+    }
 
     Remove-PSSession $Script:session
 
     # Sysprep will stop the Instance
 
-    # Wait for the instance state to be stopped.
+    if ( $Cloud -eq 'Azure' ) {
+        Stop-AzureVM -ServiceName $svcName -Name $vmname -Force
 
-    Wait-EC2State $instanceid "Stopped"
+        Write-Verbose "$(Log-Date) Delete image if it already exists"
+        Get-AzureVMImage -ImageName "$($vmname)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
+        Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($vmname)image" -OSState Generalized
 
-    Write-Output "$(Log-Date) Creating AMI"
+    } elseif ($Cloud -eq 'AWS') {
+        # Wait for the instance state to be stopped.
 
-    $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
-    $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
-    $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
+        Wait-EC2State $instanceid "Stopped"
+
+        Write-Output "$(Log-Date) Creating AMI"
+
+        $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
+        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
+        $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  
-    $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
+        $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
  
-    New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} # Add tags to new AMI
+        New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} # Add tags to new AMI
     
-    while ( $true )
-    {
-        Write-Output "$(Log-Date) Waiting for AMI to become available"
-        $amiProperties = Get-EC2Image -ImageIds $amiID
-
-        if ( $amiProperties.ImageState -eq "available" )
+        while ( $true )
         {
-            break
+            Write-Output "$(Log-Date) Waiting for AMI to become available"
+            $amiProperties = Get-EC2Image -ImageIds $amiID
+
+            if ( $amiProperties.ImageState -eq "available" )
+            {
+                break
+            }
+            Sleep -Seconds 10
         }
-        Sleep -Seconds 10
-    }
-    Write-Output "$(Log-Date) AMI is available"
+        Write-Output "$(Log-Date) AMI is available"
   
-    # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
+        # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
-    $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
-    $amiBlockDeviceMapping.ebs | `
-    ForEach-Object -Process {
-        if ( $_ -and $_.SnapshotID )
-        {
-            New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
-        }
-    } 
-    
+        $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
+        $amiBlockDeviceMapping.ebs | `
+        ForEach-Object -Process {
+            if ( $_ -and $_.SnapshotID )
+            {
+                New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
+            }
+        } 
+    }    
+
     [console]::beep(500,1000)
 
     #####################################################################################

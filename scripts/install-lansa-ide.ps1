@@ -84,6 +84,7 @@ try
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
 
     # On initial install disable TCP Offloading
 
@@ -148,7 +149,11 @@ try
     cmd /c mkdir $Script:DvdDir '2>nul'
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
-    cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -182,7 +187,11 @@ try
 
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
-    cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -194,7 +203,11 @@ try
 
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
-    cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
