@@ -128,7 +128,7 @@ try
                              
         #Save the storage account key
         $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory /DestKey:$StorageKey /S /XO /Y /MT | Write-Output
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory /DestKey:$StorageKey /S /XO /Y | Write-Output
     }
 
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
@@ -256,7 +256,13 @@ try
     Write-Output "$(Log-Date) Installing base software"
     #####################################################################################
 
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, "VLWebServer::IDEBase")
+    if ( $Cloud -eq 'AWS' ) {
+        $ChefRecipe = "VLWebServer::IDEBase"
+    } elseif ($Cloud -eq 'Azure' ) {
+        $ChefRecipe = "VLWebServer::IDEBaseAzure"
+    }
+
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
     if ( $InstallIDE -eq $true ) {
         if ( $Language -eq 'FRA' ) {
