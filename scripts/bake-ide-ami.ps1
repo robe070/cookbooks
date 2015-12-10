@@ -160,11 +160,14 @@ try
         $AdminUserName = "lansa"
 
         Write-Verbose "$(Log-Date) Delete VM if it already exists"
-        Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
+        if (1) {
+            Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
 
-        $vm1 = New-AzureQuickVM -Windows -ServiceName $svcName -Name $VMName -ImageName $image -InstanceSize `
-                    $vmsize -AdminUsername $AdminUserName -Password $Script:password -WaitForBoot -Verbose
+            New-AzureQuickVM -Windows -ServiceName $svcName -Name $VMName -ImageName $image -InstanceSize `
+                        $vmsize -AdminUsername $AdminUserName -Password $Script:password -WaitForBoot -Verbose
+        }
 
+        $vm1 = Get-AzureVM -ServiceName $svcName -Name $VMName
         $Script:publicDNS = $vm1.DNSName
 
         # Install the WinRM Certificate first to access the VM via Remote PS
@@ -215,6 +218,9 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
         New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
+
+        Write-Verbose "$(Log-Date) Switch off Internet download security warning"
+        [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -313,7 +319,11 @@ try
         
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
-    Invoke-Command -Session $Script:session {Set-ExecutionPolicy restricted -Scope CurrentUser}
+    Invoke-Command -Session $Script:session {
+        Write-Verbose "$(Log-Date) Switch Internet download security warning back on"
+        [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine')
+        Set-ExecutionPolicy restricted -Scope CurrentUser
+    }
 
     Write-Output "$(Log-Date) Sysprep"
     Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
