@@ -78,6 +78,11 @@ try
         Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
     }
 
+    if ( $Cloud -eq "Azure" ) {
+        Write-Output "$(Log-Date) Installing AzCopy"
+        &"$Script:IncludeDir\installAzCopy.ps1" $TempPath
+    }
+
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
@@ -85,9 +90,9 @@ try
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
-    if (0)
+    if ( $Cloud -eq "Azure" )
     {
-        # Windows Updates cannot be run remotely using Remote PS. Note that ssh server CAN run it!
+        # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
         Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
         &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
         Write-Output "$(Log-Date) Running win-updates.ps1"
