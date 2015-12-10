@@ -128,10 +128,10 @@ try
                              
         #Save the storage account key
         $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory\3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory\Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory /Dest:$S3DVDImageDirectory\setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
     }
 
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }

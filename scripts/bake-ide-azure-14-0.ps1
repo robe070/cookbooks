@@ -27,7 +27,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14GA' `
+Bake-IdeMsi -VersionText '14GAtest' `
             -VersionMajor 14 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\LanCdCut_tip_4120_151113_GA" `
