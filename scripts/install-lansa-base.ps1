@@ -90,9 +90,10 @@ try
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
-    if ( $Cloud -eq "Azure" )
+    if ( 0 )
     {
         # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
+        # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
         Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
         &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
         Write-Output "$(Log-Date) Running win-updates.ps1"
