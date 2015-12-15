@@ -501,9 +501,13 @@ function Add-TrustedSite
 param(
     [Parameter(Mandatory=$true)]
     [String] 
-    $SiteName
+    $SiteName,
+
+    [Parameter(Mandatory=$false)]
+    [String] 
+    $Hive="HKLM"
 )
-    $TrustedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
+    $TrustedKey = "${Hive}:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
     $TrustedKeyPath = $TrustedKey + $SiteName
     New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
     New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue

@@ -280,12 +280,12 @@ try
             }
         }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "$ENV:SystemDrive\users\default\Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
+        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "$ENV:SystemDrive\users\default\Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "$ENV:SystemDrive\users\default\Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "$ENV:SystemDrive\users\default\Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\$StartHereLink.lnk"
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "$ENV:SystemDrive\users\default\Desktop\$StartHereLink.lnk"
 
         Add-TrustedSite "*.lansa.com"
         Add-TrustedSite "*.google-analytics.com"
