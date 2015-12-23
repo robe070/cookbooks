@@ -87,13 +87,6 @@ try
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
 
-    # On initial install disable TCP Offloading
-
-    if ( -not $UPGD_bool )
-    {
-        Disable-TcpOffloading
-    }
-
     ######################################
     # Require MS C runtime to be installed
     ######################################
@@ -224,6 +217,10 @@ try
     if ( -not $UPGD_bool )
     {
         # This code creates pendingfilerenameoperations so moved to after LANSA Install which otherwise will require a reboot before installing SQL Server.
+        # On initial install disable TCP Offloading
+
+        Disable-TcpOffloading
+        
         Start-WebAppPool -Name "DefaultAppPool"
 
         # Speed up the start of the VL IDE
