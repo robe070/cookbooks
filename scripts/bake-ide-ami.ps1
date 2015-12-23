@@ -57,11 +57,11 @@ param (
     $Language='ENG',
 
     [Parameter(Mandatory=$false)]
-    [string]
+    [boolean]
     $SQLServerInstalled=$true,
 
     [Parameter(Mandatory=$false)]
-    [string]
+    [boolean]
     $InstallIDE=$true,
 
     [Parameter(Mandatory=$false)]
@@ -225,7 +225,7 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
         New-ItemProperty -Path $lansaKey  -Name 'SQLServerInstalled' -PropertyType DWord -Value $using:SQLServerInstalled -Force
 
-        Write-Verbose "$(Log-Date) Switch off Internet download security warning"
+        Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)

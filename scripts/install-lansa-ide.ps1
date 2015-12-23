@@ -125,16 +125,6 @@ try
         cd "c:"
     }
 
-    if ( -not $UPGD_bool )
-    {
-        Start-WebAppPool -Name "DefaultAppPool"
-
-        # Speed up the start of the VL IDE
-        # Switch off looking for software license keys
-
-        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
-    }
-
     if ($f32bit_bool)
     {
         $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
@@ -231,6 +221,16 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
+    if ( -not $UPGD_bool )
+    {
+        # This code creates pendingfilerenameoperations so moved to after LANSA Install which otherwise will require a reboot before installing SQL Server.
+        Start-WebAppPool -Name "DefaultAppPool"
+
+        # Speed up the start of the VL IDE
+        # Switch off looking for software license keys
+
+        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
+    }
 
     if ( -not $UPGD_bool )
     {
