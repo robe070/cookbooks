@@ -1,7 +1,7 @@
 ﻿<#
 .SYNOPSIS
 
-Bake a LANSA AMI
+Bake a LANSA image for Azure
 
 .DESCRIPTION
 
@@ -10,7 +10,7 @@ Bake a LANSA AMI
 
 #>
 
-$DebugPreference = "Continue"
+# $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
 $MyInvocation.MyCommand.Path
@@ -27,12 +27,14 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14GATest' `
+Bake-IdeMsi -VersionText 'test' `
             -VersionMajor 14 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140010" `
-            -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
-            -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
-            -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_SP1_Express*" `
-            -GitBranch "feature/azure-ide"
+            -S3DVDImageDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
+            -S3VisualLANSAUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
+            -S3IntegratorUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
+            -AmazonAMIName "Windows Server 2012 R2 Datacenter" `
+            -GitBranch "feature/azure-ide" `
+            -Cloud "Azure" `
+            -SQLServerInstalled $false

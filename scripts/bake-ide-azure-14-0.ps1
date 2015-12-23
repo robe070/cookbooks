@@ -30,7 +30,7 @@ Set-StrictMode -Version Latest
 Bake-IdeMsi -VersionText '14GAtest' `
             -VersionMajor 14 `
             -VersionMinor 0 `
-            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\LanCdCut_tip_4120_151113_GA" `
+            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140010" `
             -S3DVDImageDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `

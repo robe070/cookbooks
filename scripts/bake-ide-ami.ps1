@@ -128,10 +128,16 @@ try
                              
         #Save the storage account key
         $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
+        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
+        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
+        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
+        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
+        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
+        cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC        /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
     }
 
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
@@ -149,8 +155,7 @@ try
 
         Create-EC2Instance $Script:Imageid $script:keypair $script:SG
     } elseif ($Cloud -eq 'Azure' ) {
-        $family="SQL Server 2014 SP1 Web on Windows Server 2012 R2"
-        $image=Get-AzureVMImage | where { $_.ImageFamily -eq $family } | sort PublishedDate -Descending | select -ExpandProperty ImageName -First 1
+        $image=Get-AzureVMImage | where-object { $_.ImageFamily -eq $AmazonAMIName } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
         $subscription = "Main"
         $svcName = "baking"
@@ -185,7 +190,7 @@ try
     if ( $Cloud -eq 'AWS' ) {
         Connect-RemoteSession
     } elseif ($Cloud -eq 'Azure' ) {
-        $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds
+        Connect-RemoteSessionUri
     }
 
     # Simple test of session: 
@@ -218,6 +223,7 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
         New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
+        New-ItemProperty -Path $lansaKey  -Name 'SQLServerInstalled' -PropertyType DWord -Value $using:SQLServerInstalled -Force
 
         Write-Verbose "$(Log-Date) Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
@@ -298,7 +304,12 @@ try
             Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
             if ( $Script:session ) { Remove-PSSession $Script:session }
 
-            Connect-RemoteSession
+            if ( $Cloud -eq 'AWS' ) {
+                Connect-RemoteSession
+            } elseif ($Cloud -eq 'Azure' ) {
+                Connect-RemoteSessionUri
+            }
+
             Execute-RemoteInit
             Execute-RemoteInitPostGit
         }
@@ -387,24 +398,26 @@ try
 
     [console]::beep(500,1000)
 
-    #####################################################################################
-    Write-Output ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
-    #####################################################################################
+    if ($Cloud -eq 'AWS') {
+        #####################################################################################
+        Write-Output ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
+        #####################################################################################
 
-    $err = $true
-    while ($err)
-    {
-        $err = $false
-        try
+        $err = $true
+        while ($err)
         {
-            Remove-EC2SecurityGroup -GroupName $script:SG -Force
-        }
-        catch
-        {
-            $_
-            $err = $true
-            Write-Output "$(Log-Date) Waiting for Security Group to be deleted"
-            Sleep -Seconds 10
+            $err = $false
+            try
+            {
+                Remove-EC2SecurityGroup -GroupName $script:SG -Force
+            }
+            catch
+            {
+                $_
+                $err = $true
+                Write-Output "$(Log-Date) Waiting for Security Group to be deleted"
+                Sleep -Seconds 10
+            }
         }
     }
 }
