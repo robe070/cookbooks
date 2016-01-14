@@ -124,7 +124,7 @@ try
         cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
         if ( $LastExitCode -ne 0 ) { throw }
     } elseif ( $Cloud -eq 'Azure' ) {
-        $StorageAccount = 'lansalpc'
+        $StorageAccount = 'lansalpcmsdn'
                              
         #Save the storage account key
         $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
@@ -157,8 +157,8 @@ try
     } elseif ($Cloud -eq 'Azure' ) {
         $image=Get-AzureVMImage | where-object { $_.ImageFamily -eq $AmazonAMIName } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
-        $subscription = "Main"
-        $svcName = "baking"
+        $subscription = "Visual Studio Enterprise with MSDN"
+        $svcName = "bakingMSDN"
         $vmname="BakeIDE$VersionText"
         $vmsize="Medium"
         $Script:password = "Pcxuser@122"
@@ -350,8 +350,10 @@ try
     # Sysprep will stop the Instance
 
     if ( $Cloud -eq 'Azure' ) {
-        Stop-AzureVM -ServiceName $svcName -Name $vmname -Force
+        Wait-AzureVMState $svcName $vmname "StoppedVM"
 
+        Write-Output "$(Log-Date) Creating Azure Image"
+    
         Write-Verbose "$(Log-Date) Delete image if it already exists"
         Get-AzureVMImage -ImageName "$($vmname)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
         Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($vmname)image" -OSState Generalized
@@ -426,4 +428,14 @@ catch
     Write-Error ($_ | format-list | out-string)
 }
 
+}
+
+# Setup default account details
+# This code is rarely required and is more for documentation.
+function SetUpAccount {
+    # Subscription Name was rejected by Select-AzureSubscription so Subscription Id was used instead.
+    $subscription = "edff5157-5735-4ceb-af94-526e2c235e80"
+    $Storage = "lansalpcmsdn"
+    Select-AzureSubscription -SubscriptionId $subscription
+    set-AzureSubscription -SubscriptionId $subscription -CurrentStorageAccount $Storage
 }
