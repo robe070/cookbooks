@@ -258,7 +258,16 @@ try
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+
+        # Sysprep file needs to be put in a specific place for AWS. For Azure we directly reference the sysprep file
+        # so it can be left in git
+        if ( $Cloud -eq "AWS" ) {
+            copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+        }
+
         $StartHereHtm = "CloudStartHere$Language.htm"
+        copy "$Script:GitRepoPath/scripts/$StartHereHtm" "$ENV:ProgramFiles\CloudStartHere.htm"
+
         switch ($Language) {
             'FRA' { 
                 $StartHereLink = "Commencer ici"
@@ -281,12 +290,10 @@ try
             }
         }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "$ENV:SystemDrive\users\default\Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "$ENV:SystemDrive\users\default\Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "$ENV:SystemDrive\users\default\Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "$ENV:SystemDrive\users\default\Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
-
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" file://$Script:GitRepoPath/scripts/$StartHereHtm"
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
         Add-TrustedSite "*.lansa.com"
         Add-TrustedSite "*.google-analytics.com"
