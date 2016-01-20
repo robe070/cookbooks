@@ -24,13 +24,6 @@
       <TimeZone>UTC</TimeZone>
       <RegisteredOrganization>LANSA</RegisteredOrganization>
       <RegisteredOwner>VisualLANSA</RegisteredOwner>
-        <FirstLogonCommands>
-           <SynchronousCommand wcm:action="add">
-              <CommandLine>"%ProgramFiles%\Internet Explorer\iexplore.exe"  "%ProgramFiles%\CloudStartHere.htm"</CommandLine>
-              <Description>Launch setup instructions for Visual LANSA IDE</Description>
-              <Order>1</Order>
-           </SynchronousCommand>
-        </FirstLogonCommands>      
     </component>
   </settings>
   <settings pass="specialize">
