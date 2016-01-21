@@ -294,7 +294,7 @@ try
         New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config"
         New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "$ENV:ProgramFiles\Internet Explorer\iexplore.exe"  "$ENV:ProgramFiles\CloudStartHere.htm"
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "$ENV:ProgramFiles\Internet Explorer\iexplore.exe $ENV:ProgramFiles\CloudStartHere.htm"
 
         Add-TrustedSite "*.lansa.com"
         Add-TrustedSite "*.google-analytics.com"
