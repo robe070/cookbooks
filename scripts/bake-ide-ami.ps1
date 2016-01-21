@@ -165,12 +165,12 @@ try
         $AdminUserName = "lansa"
 
         Write-Verbose "$(Log-Date) Delete VM if it already exists"
-        if (1) {
-            Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
+        Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
 
-            New-AzureQuickVM -Windows -ServiceName $svcName -Name $VMName -ImageName $image -InstanceSize `
-                        $vmsize -AdminUsername $AdminUserName -Password $Script:password -WaitForBoot -Verbose
-        }
+        Write-Verbose "$(Log-Date) Create VM"
+        $vm1 = New-AzureVMConfig -Name $vmname -InstanceSize $vmsize -ImageName $image
+        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername "lansa" -Password "Pcxuser@122"
+        new-azurevm -ServiceName $svcName -VMs $vm1 -WaitForBoot -Verbose
 
         $vm1 = Get-AzureVM -ServiceName $svcName -Name $VMName
         $Script:publicDNS = $vm1.DNSName
