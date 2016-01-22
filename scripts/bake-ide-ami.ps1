@@ -169,7 +169,7 @@ try
 
         Write-Verbose "$(Log-Date) Create VM"
         $vm1 = New-AzureVMConfig -Name $vmname -InstanceSize $vmsize -ImageName $image
-        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername "lansa" -Password "Pcxuser@122"
+        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password
         new-azurevm -ServiceName $svcName -VMs $vm1 -WaitForBoot -Verbose
 
         $vm1 = Get-AzureVM -ServiceName $svcName -Name $VMName
