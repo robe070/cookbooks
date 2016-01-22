@@ -34,12 +34,11 @@ try {
     Write-Output ("$(Log-Date) Download SQL Server") 
 
     $SqlServerFile = "$Script:ScriptTempPath\SQLServer.exe"
-    $SqlServerUrl = "https://s3-ap-southeast-2.amazonaws.com/lansa/3rd+party/SQLEXPRWT_x64_FRA.exe"
+    $SqlServerUrl = "https://s3-ap-southeast-2.amazonaws.com/lansa/3rd+party/SQLEXPRWT_x64_ENU.exe"
     Write-Output ("Downloading $SqlServerUrl to $SqlServerFile")
     ( New-Object Net.WebClient ). DownloadFile($SqlServerUrl, $SqlServerFile)
 
     if ( Test-Path $SqlServerFile )
-    {
     {
         Write-Output ("$(Log-Date) Installing .Net Framework 3.5")
 
@@ -58,7 +57,7 @@ try {
 #                /SQLSVCACCOUNT="AUTORITE NT\SERVICE RÉSEAU" `
 #                /AGTSVCACCOUNT="AUTORITE NT\SERVICE RÉSEAU" | Write-Output
 
-        cmd /c $SqlServerFile /qs /ACTION=PrepareImage /INDICATEPROGRESS /INSTANCEID=MSSQLSERVER `
+        cmd /c $SqlServerFile /QUIETSIMPLE="True" /ACTION="PrepareImage" /INDICATEPROGRESS="false" /INSTANCEID="MSSQLSERVER" `
                 /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  | Write-Output
     }
     else
