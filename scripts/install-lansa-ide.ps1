@@ -84,6 +84,8 @@ try
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
 
     # On initial install disable TCP Offloading
 
@@ -96,7 +98,7 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    if ( -not $UPGD_bool )
+    if ( $SQLServerInstalled -and (-not $UPGD_bool) )
     {
         Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
@@ -123,16 +125,6 @@ try
         cd "c:"
     }
 
-    if ( -not $UPGD_bool )
-    {
-        Start-WebAppPool -Name "DefaultAppPool"
-
-        # Speed up the start of the VL IDE
-        # Switch off looking for software license keys
-
-        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
-    }
-
     if ($f32bit_bool)
     {
         $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
@@ -148,7 +140,11 @@ try
     cmd /c mkdir $Script:DvdDir '2>nul'
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
-    cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -182,7 +178,11 @@ try
 
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
-    cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -194,7 +194,11 @@ try
 
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
-    cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -217,6 +221,16 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
+    if ( -not $UPGD_bool )
+    {
+        # This code creates pendingfilerenameoperations so moved to after LANSA Install which otherwise will require a reboot before installing SQL Server.
+        Start-WebAppPool -Name "DefaultAppPool"
+
+        # Speed up the start of the VL IDE
+        # Switch off looking for software license keys
+
+        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
+    }
 
     if ( -not $UPGD_bool )
     {
@@ -244,7 +258,15 @@ try
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+
+        # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
+        if ( $Cloud -eq "AWS" ) {
+            copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+        }
+
         $StartHereHtm = "CloudStartHere$Language.htm"
+        copy "$Script:GitRepoPath/scripts/$StartHereHtm" "$ENV:ProgramFiles\CloudStartHere.htm"
+
         switch ($Language) {
             'FRA' { 
                 $StartHereLink = "Commencer ici"
@@ -267,12 +289,12 @@ try
             }
         }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\$StartHereLink.lnk"
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
 
         Add-TrustedSite "*.lansa.com"
         Add-TrustedSite "*.google-analytics.com"
