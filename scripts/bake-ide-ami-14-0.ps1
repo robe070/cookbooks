@@ -27,12 +27,12 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14beta' `
+Bake-IdeMsi -VersionText '14GATest' `
             -VersionMajor 14 `
             -VersionMinor 0 `
-            -LocalDVDImageDirectory "\\lansabuildpc14\l4wbuild\Trunk\LanCdCut_tip_4117_150911_reg" `
+            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140010" `
             -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*" `
-            -GitBranch "release/13.2_IDE"
+            -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_SP1_Express*" `
+            -GitBranch "feature/azure-ide"

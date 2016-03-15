@@ -60,13 +60,12 @@
         },
         "90LansaTemplateLevel" : {
             "Default" : "R",
-            "Description" : "Set to 'R' to use the Release version of the Web Server template. Set to 'B' to use the Beta version of the Web Server template. This must match the version of lansa-master-win.cfn.template being used.",
+            "Description" : "Set to 'R' to use the Release version of the Web Server template.",
             "Type"        : "String",
             "AllowedValues" : [
-                "R",
-                "B"
+                "R"
             ],
-            "ConstraintDescription" : "Must be either R (Release) or B (Beta)."
+            "ConstraintDescription" : "Must be R (Release)."
         },        
         "91LansaGitRepoBranch" : {
             "Default" : "master",
@@ -204,7 +203,7 @@
                 "MaxSize"                 : { "Fn::If" : [ "IsWebServer", "150", "1" ]},
                 "DesiredCapacity"         : { "Ref" : "WebServerCapacity" },
                 "HealthCheckType"         : "ELB",
-                "HealthCheckGracePeriod"  : 1800,
+                "HealthCheckGracePeriod"  : 2400,
                 "LoadBalancerNames"       : [ { "Ref" : "LoadBalancer" } ],
                 "Tags" : [ {
                         "Key" : "Name",
@@ -228,7 +227,7 @@
                "SetXRUNEnvVar"        : { "Ref" : "SetXRUNEnvVar"},
                "AWS::CloudFormation::Init" : {
                   "configSets" : {
-                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "setup-symlink","run-webconfig"],
+                     "icing-install"   : ["install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig"],
                      "cfn-update"      : ["install-cfn"],
                      "cake-update"     : ["git-pull", "restart-ifneeded", "run-chef", "run-windows-update"],
                      "chef-update"     : ["git-pull", "restart-ifneeded", "run-chef"],
@@ -533,19 +532,6 @@
                                  ";exit $LastExitCode",
                                  "}\""
                               ]]},
-                           "waitAfterCompletion" : "0"
-                        }
-                     }
-                  },
-                  "setup-symlink" : {
-                     "files"    : {
-                        "C:\\LANSA\\regsymlink.exe" : {
-                           "source" : "https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/regsymlink.exe"
-                        }
-                     },
-                     "commands" : {
-                        "01_setup_symlink" : {
-                           "command" : "c:\\lansa\\regsymlink.exe -c SOFTWARE\\LANSA \\Registry\\Machine\\Software\\Wow6432Node\\LANSA",
                            "waitAfterCompletion" : "0"
                         }
                      }

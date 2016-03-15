@@ -96,6 +96,24 @@ function Connect-RemoteSession
     Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
 }
 
+function Connect-RemoteSessionUri
+{
+    # Wait until PSSession is available
+    while ($true)
+    {
+        "$(Log-Date) Waiting for remote PS connection"
+        $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
+        if ($Script:session -ne $null)
+        {
+            break
+        }
+
+        Sleep -Seconds 10
+    }
+
+    Write-Output "$(Log-Date) $Script:publicDNS remote PS connection obtained"
+}
+
 function MessageBox
 {
 param (
@@ -131,6 +149,20 @@ function Install-VisualLansa
     $SettingsFile = "$Script:ScriptTempPath\LansaSettings.txt"
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
+    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
+    if ( $SQLServerInstalled ) {
+        $InstanceName = "MSSQLSERVER"
+    } else {
+        $InstanceName = "SQLEXPRESS"
+    }
+    $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+    $LansaLanguage = '0';
+    switch ($Language) {
+        'ENG' { $LansaLanguage = '0'; }
+        'FRA' { $LansaLanguage = '1'; }
+        'JPN' { $LansaLanguage = '2'; }
+        default { $LansaLanguage = '0'; }
+    }
 
     if ( (Test-Path $SettingsFile) )
     {
@@ -168,9 +200,7 @@ FeatureOpenTranslationTables=1
 FeatureConnect=1
 StartFolderName=LANSA
 64bitVLSupport=False
-DatabaseAction=2
-DatabaseNewInstance=False
-DatabaseInstanceName=
+DatabaseInstanceName=$InstanceName
 DatabaseInstanceDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
@@ -178,20 +208,30 @@ DatabaseSAHidePassword=False
 .DatabaseSAPassword=
 DatabaseTCPIPWorkaround=
 DatabaseName=LANSA
-DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
-DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
+DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName\MSSQL\Data
+DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName\MSSQL\Data
 DSNNew=True
 DSNName=LANSA
 DSNType=2
 DSNDriverType=12
-DSNDriverName=SQL Server Native Client 11.0
-DSNServerName=(local)
-DSNDatabaseName=LANSA
+DSNDriverName=ODBC Driver 11 for SQL Server" | Add-Content $SettingsFile
+
+if ( $SQLServerInstalled ) {
+"DatabaseAction=2
+DatabaseNewInstance=False
+DSNServerName=(local)" | Add-Content $SettingsFile
+} else {
+"DatabaseAction=3
+DatabaseNewInstance=True
+DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile
+}
+
+"DSNDatabaseName=LANSA
 DSNUseTrustedConnections=True
 DSNUserid=sa
 .DSNPassword=112113200245048055164115207077090084060117130184210029036142038112134034166041252163025013128246
 CompilerInstall=1
-CompilerRootDirectory=C:\Program Files (x86)\LANSA\MicrosoftCompiler2010
+CompilerRootDirectory=C:\Program Files (x86)\LANSA\MicrosoftCompiler2013
 HostRouteLUName=*LOCAL
 HostRouteQualifier=localhost
 HostRoutePortNumber=4545
@@ -214,7 +254,9 @@ ImportDemo=True
 RunDemo=False
 ImportEnableForTheWeb=True
 ImportClientDefinitions=True
-InitializationLanguage=ENG
+InitializationLanguage=$Language
+LansaLanguage=$LansaLanguage
+InstallLanguage=$LansaLanguage
 CCSID=1140
 CustomCCSID=False
 ClientToServerTranslationTable=ANSEBC1140
@@ -491,9 +533,13 @@ function Add-TrustedSite
 param(
     [Parameter(Mandatory=$true)]
     [String] 
-    $SiteName
+    $SiteName,
+
+    [Parameter(Mandatory=$false)]
+    [String] 
+    $Hive="HKLM"
 )
-    $TrustedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
+    $TrustedKey = "${Hive}:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
     $TrustedKeyPath = $TrustedKey + $SiteName
     New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
     New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
