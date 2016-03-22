@@ -294,16 +294,24 @@ try
         New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config"
         New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
+        if ( $Cloud -eq "AWS" ) {
+            # In AWS the administrator user name is known and same as current user so we can launch when administrator user logs in
+            $Hive = "HKCU"
+        } elseif ( $Cloud -eq "Azure" ) {
+            # In Azure the administrator name is not known so forced to launch when machine starts - before desktop is available
+            # And adding trusted sites does not seem to work globally - TBA
+            $Hive = "HKLM"
+        }
 
-        Add-TrustedSite "*.lansa.com"
-        Add-TrustedSite "*.google-analytics.com"
-        Add-TrustedSite "*.googleadservices.com"
-        Add-TrustedSite "*.img.en25.com"
-        Add-TrustedSite "*.addthis.com"
-        Add-TrustedSite "*.lansa.myabsorb.com"
-        Add-TrustedSite "*.cloudfront.com"
+        Set-ItemProperty -Path "${Hive}:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
 
+        Add-TrustedSite "*.lansa.com" $Hive
+        Add-TrustedSite "*.google-analytics.com" $Hive
+        Add-TrustedSite "*.googleadservices.com" $Hive
+        Add-TrustedSite "*.img.en25.com" $Hive
+        Add-TrustedSite "*.addthis.com" $Hive
+        Add-TrustedSite "*.lansa.myabsorb.com" $Hive
+        Add-TrustedSite "*.cloudfront.com" $Hive
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
