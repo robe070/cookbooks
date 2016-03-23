@@ -228,6 +228,26 @@ try
         Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
+        # The following needs to be put in the chef script, when time permits.
+
+        # The IDE requires a desktop environment
+        Import-Module ServerManager
+        Install-WindowsFeature Desktop-Experience
+
+        # Switch on Audio support so that e-learning audio may be heard.
+
+        # Get services related to audio 
+        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+
+        # Start the services
+        Get-Service | Where {$_.Name -match "audio"} | start-service
+
+        # Set the services startup types
+        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+
+        # Validate our startup changes (Should say- StartMode:Auto)
+        Get-WmiObject -class win32_service -filter "Name='AudioSrv'"
+
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
