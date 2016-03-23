@@ -312,7 +312,10 @@ try
         Add-TrustedSite "*.adobetag.com" $Hive
         Add-TrustedSite "*.cloudfront.com" $Hive
         Add-TrustedSite "*.cloudfront.net" $Hive
+        Add-TrustedSite "*.cloudfront.net" $Hive "https"
         Add-TrustedSite "*.demdex.net" $Hive
+        Add-TrustedSite "*.google.com" $Hive "https"
+        Add-TrustedSite "*.googleapis.com" $Hive "https"
         Add-TrustedSite "*.google-analytics.com" $Hive
         Add-TrustedSite "*.google-analytics.com" $Hive "https"
         Add-TrustedSite "*.googleadservices.com" $Hive
@@ -320,6 +323,10 @@ try
         Add-TrustedSite "*.lansa.com" $Hive
         Add-TrustedSite "*.myabsorb.com" $Hive
         Add-TrustedSite "*.myabsorb.com" $Hive "https"
+        Add-TrustedSite "*.gstatic.com" $Hive "https"
+        Add-TrustedSite "*.youtube.com" $Hive
+        Add-TrustedSite "*.youtube.com" $Hive "https"
+        Add-TrustedSite "*.ytimg.com" $Hive "https"
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
