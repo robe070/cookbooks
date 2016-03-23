@@ -537,10 +537,14 @@ param(
 
     [Parameter(Mandatory=$false)]
     [String] 
-    $Hive="HKLM"
+    $Hive="HKLM",
+
+    [Parameter(Mandatory=$false)]
+    [String] 
+    $urlType="http"
 )
     $TrustedKey = "${Hive}:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
     $TrustedKeyPath = $TrustedKey + $SiteName
     New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
-    New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
+    New-ItemProperty -Path "$TrustedKeyPath" -Name $urlType -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
 }
