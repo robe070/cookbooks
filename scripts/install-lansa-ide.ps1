@@ -305,13 +305,21 @@ try
 
         Set-ItemProperty -Path "${Hive}:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
 
-        Add-TrustedSite "*.lansa.com" $Hive
+        Add-TrustedSite "*.addthis.com" $Hive
+        Add-TrustedSite "*.adobe.com" $Hive
+        Add-TrustedSite "*.adobe.com" $Hive "https"
+        Add-TrustedSite "*.adobelogin.com" $Hive "https"
+        Add-TrustedSite "*.adobetag.com" $Hive
+        Add-TrustedSite "*.cloudfront.com" $Hive
+        Add-TrustedSite "*.cloudfront.net" $Hive
+        Add-TrustedSite "*.demdex.net" $Hive
         Add-TrustedSite "*.google-analytics.com" $Hive
+        Add-TrustedSite "*.google-analytics.com" $Hive "https"
         Add-TrustedSite "*.googleadservices.com" $Hive
         Add-TrustedSite "*.img.en25.com" $Hive
-        Add-TrustedSite "*.addthis.com" $Hive
-        Add-TrustedSite "*.lansa.myabsorb.com" $Hive
-        Add-TrustedSite "*.cloudfront.com" $Hive
+        Add-TrustedSite "*.lansa.com" $Hive
+        Add-TrustedSite "*.myabsorb.com" $Hive
+        Add-TrustedSite "*.myabsorb.com" $Hive "https"
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
