@@ -313,7 +313,7 @@ try
         Add-TrustedSite "*.cloudfront.com" $Hive
         Add-TrustedSite "*.cloudfront.net" $Hive
         Add-TrustedSite "*.cloudfront.net" $Hive "https"
-        Add-TrustedSite "*.demdex.net" $Hive
+        Add-TrustedSite "*.demdex.net" $Hive "https"
         Add-TrustedSite "*.google.com" $Hive "https"
         Add-TrustedSite "*.googleapis.com" $Hive "https"
         Add-TrustedSite "*.google-analytics.com" $Hive
