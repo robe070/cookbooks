@@ -281,10 +281,23 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
+    Write-Output "$(Log-Date) Switching on audio in install-lansa-base disables output, but how switch it back on?"
+
     if ( $InstallIDE -eq $true ) {
         if ( $SQLServerInstalled -eq $false ) {
             Write-Output "$(Log-Date) Install SQL Server. Remote execution does not work"
             MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        }
+
+        Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
+        Execute-RemoteBlock $Script:session {  
+    	    Logoff-Allusers
+
+		    Write-Output "$(Log-Date) Restart Required - Restarting..."
+		    Restart-Computer -Force
+    
+            # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+            cmd /c exit 0
         }
 
         MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
