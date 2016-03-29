@@ -305,6 +305,9 @@ try
 
         Set-ItemProperty -Path "${Hive}:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
 
+        # Reset IE to defaults so Flash always runs correctly. Just click Reset
+        & RunDll32.exe InetCpl.cpl,ResetIEtoDefaults | Out-Null
+
         Add-TrustedSite "*.addthis.com" $Hive
         Add-TrustedSite "*.adobe.com" $Hive
         Add-TrustedSite "*.adobe.com" $Hive "https"
