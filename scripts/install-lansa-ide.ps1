@@ -85,7 +85,7 @@ try
 
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
     # On initial install disable TCP Offloading
 
@@ -98,7 +98,7 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    if ( $SQLServerInstalled -and (-not $UPGD_bool) )
+    if ( (-not $UPGD_bool) )
     {
         Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 

@@ -1,5 +1,5 @@
 ﻿$S3DVDImageDirectory = "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest"
-$SQLServerInstalled = $false
+$InstallSQLServer = $true
 
 if ( -not $script:IncludeDir)
 {
@@ -19,7 +19,7 @@ else
 
 Write-Output "$(Log-Date) S3DVDImageDirectory = $S3DVDImageDirectory, DvdDir = $DvdDir"
 
-if ( $SQLServerInstalled -eq $false) {
+if ( $InstallSQLServer) {
     cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--delete" | Write-Output
 } else {
     cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output

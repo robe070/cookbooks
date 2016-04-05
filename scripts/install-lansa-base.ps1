@@ -37,6 +37,7 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 try
 {
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
@@ -93,23 +94,16 @@ try
     Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning"
     Disable-InternetExplorerESC
 
-    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
+    # Switch on Audio support so that e-learning audio may be heard through RDP
 
-    if ( $SQLServerInstalled -eq $false ) {
-        # Switch on Audio support so that e-learning audio may be heard through RDP
+    # Get services related to audio 
+    Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
 
-        # Get services related to audio 
-        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+    # Start the services
+    Get-Service | Where {$_.Name -match "audio"} | start-service
 
-        # Start the services
-        Get-Service | Where {$_.Name -match "audio"} | start-service
-
-        # Set the services startup types
-        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
-
-        # Validate our startup changes (Should say- StartMode:Auto)
-        Get-WmiObject -class win32_service -filter "Name='AudioSrv'"
-    }
+    # Set the services startup types
+    Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
 
     if ( 0 )
     {

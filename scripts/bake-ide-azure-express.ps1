@@ -37,5 +37,5 @@ Bake-IdeMsi -VersionText 'SQL2014' `
             -AmazonAMIName "Windows Server 2012 R2 Datacenter" `
             -GitBranch "feature/azure-ide" `
             -Cloud "Azure" `
-            -SQLServerInstalled $false `
+            -InstallSQLServer $true `
             -InstallIDE $false

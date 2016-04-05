@@ -36,5 +36,5 @@ Bake-IdeMsi -VersionText 'SQLTest' `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-Base*" `
             -GitBranch "feature/azure-ide" `
-            -SQLServerInstalled $false `
+            -InstallSQLServer $true `
             -Language "ENG"

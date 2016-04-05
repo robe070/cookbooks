@@ -58,7 +58,7 @@ try {
 #                /AGTSVCACCOUNT="AUTORITE NT\SERVICE RÉSEAU" | Write-Output
 
         cmd /c $SqlServerFile /QUIETSIMPLE="True" /ACTION="PrepareImage" /INDICATEPROGRESS="false" /INSTANCEID="MSSQLSERVER" `
-                /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  | Write-Output
+                /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true | Write-Output
 
         cp "$script:IncludeDir\SetupComplete2.cmd" -Destination "$env:SystemRoot\OEM"
     }

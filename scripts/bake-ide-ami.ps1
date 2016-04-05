@@ -58,7 +58,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $SQLServerInstalled=$true,
+    $InstallSQLServer=$false,
 
     [Parameter(Mandatory=$false)]
     [boolean]
@@ -223,7 +223,7 @@ try
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
         New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
-        New-ItemProperty -Path $lansaKey  -Name 'SQLServerInstalled' -PropertyType DWord -Value $using:SQLServerInstalled -Force
+        New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force
 
         Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
@@ -264,9 +264,9 @@ try
 
     #####################################################################################
 
-    if ( $SQLServerInstalled -eq $false) {
+    if ( $InstallSQLServer -eq $true) {
         Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed."
-        MessageBox "Run install-base-fra.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
     }
 
     #####################################################################################
@@ -281,9 +281,7 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
-    Write-Output "$(Log-Date) Switching on audio in install-lansa-base disables output, but how switch it back on?"
-
-    if ( $SQLServerInstalled -eq $false ) {
+    if ( $InstallSQLServer -eq $true ) {
         Write-Output "$(Log-Date) Install SQL Server. Remote execution does not work"
         MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
     }
@@ -330,7 +328,7 @@ try
         }
     } else {
         # Scalable image comes through here
-        if ( $SQLServerInstalled -eq $true) {
+        if ( $InstallSQLServer -eq $false) {
             Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
             MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
         }
@@ -338,7 +336,7 @@ try
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
-    if ( $SQLServerInstalled -eq $true ) {
+    if ( $InstallSQLServer -eq $false ) {
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
         Invoke-Command -Session $Script:session {

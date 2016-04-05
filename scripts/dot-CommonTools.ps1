@@ -149,12 +149,7 @@ function Install-VisualLansa
     $SettingsFile = "$Script:ScriptTempPath\LansaSettings.txt"
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
-    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
-    if ( $SQLServerInstalled ) {
-        $InstanceName = "MSSQLSERVER"
-    } else {
-        $InstanceName = "SQLEXPRESS"
-    }
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
     $LansaLanguage = '0';
     switch ($Language) {
@@ -216,7 +211,7 @@ DSNType=2
 DSNDriverType=12
 DSNDriverName=ODBC Driver 11 for SQL Server" | Add-Content $SettingsFile
 
-if ( $SQLServerInstalled ) {
+if ( $InstallSQLServer -eq $false ) {
 "DatabaseAction=2
 DatabaseNewInstance=False
 DSNServerName=(local)" | Add-Content $SettingsFile

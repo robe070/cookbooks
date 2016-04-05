@@ -37,5 +37,5 @@ Bake-IdeMsi -VersionText '14GAFRA' `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-French-64Bit-Base*" `
             -GitBranch "feature/azure-ide" `
             -AdminUserName "Administrateur" `
-            -SQLServerInstalled $false `
+            -InstallSQLServer $true `
             -Language "FRA"
