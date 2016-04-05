@@ -27,14 +27,15 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'test' `
+Bake-IdeMsi -VersionText 'SQL2014' `
             -VersionMajor 14 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140010" `
-            -S3DVDImageDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
-            -S3VisualLANSAUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
-            -S3IntegratorUpdateDirectory "https://lansalpc.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
+            -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
+            -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
+            -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "Windows Server 2012 R2 Datacenter" `
             -GitBranch "feature/azure-ide" `
             -Cloud "Azure" `
-            -SQLServerInstalled $false
+            -SQLServerInstalled $false `
+            -InstallIDE $false

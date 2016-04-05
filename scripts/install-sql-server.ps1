@@ -2,7 +2,7 @@
 .SYNOPSIS
 
 Install SQL Server latest supported version.
-Required because French AMI does not come with SQL Server pre-installed
+Required when cloud image does not come with SQL Server pre-installed
 
 .EXAMPLE
 
@@ -59,13 +59,15 @@ try {
 
         cmd /c $SqlServerFile /QUIETSIMPLE="True" /ACTION="PrepareImage" /INDICATEPROGRESS="false" /INSTANCEID="MSSQLSERVER" `
                 /FEATURES=SQLENGINE,SSMS /IAcceptSQLServerLicenseTerms=true  | Write-Output
+
+        cp "$script:IncludeDir\SetupComplete2.cmd" -Destination "$env:SystemRoot\OEM"
     }
     else
     {
         Write-Error ("$SqlServerFile does not exist")
         throw ("$SqlServerFile does not exist")
     }
-    Write-Output ("$(Log-Date) French SQL Server installation completed successfully")
+    Write-Output ("$(Log-Date) SQL Server installation completed successfully")
     # Successful completion so set Last Exit Code to 0
     cmd /c exit 0
 }
