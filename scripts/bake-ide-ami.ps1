@@ -283,12 +283,12 @@ try
 
     Write-Output "$(Log-Date) Switching on audio in install-lansa-base disables output, but how switch it back on?"
 
-    if ( $InstallIDE -eq $true ) {
-        if ( $SQLServerInstalled -eq $false ) {
-            Write-Output "$(Log-Date) Install SQL Server. Remote execution does not work"
-            MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-        }
+    if ( $SQLServerInstalled -eq $false ) {
+        Write-Output "$(Log-Date) Install SQL Server. Remote execution does not work"
+        MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+    }
 
+    if ( $InstallIDE -eq $true ) {
         Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
         Execute-RemoteBlock $Script:session {  
     	    Logoff-Allusers
@@ -329,12 +329,7 @@ try
             Execute-RemoteInitPostGit
         }
     } else {
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\pull-dvd-image.ps1
-
-        # Speed up the start of the VL IDE
-        # Switch off looking for software license keys
-        Execute-RemoteBlock $Script:session {    [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine') }
-
+        # Scalable image comes through here
         if ( $SQLServerInstalled -eq $true) {
             Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
             MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
@@ -343,12 +338,14 @@ try
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
         
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
+    if ( $SQLServerInstalled -eq $true ) {
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
-    Invoke-Command -Session $Script:session {
-        Write-Verbose "$(Log-Date) Switch Internet download security warning back on"
-        [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine')
-        Set-ExecutionPolicy restricted -Scope CurrentUser
+        Invoke-Command -Session $Script:session {
+            Write-Verbose "$(Log-Date) Switch Internet download security warning back on"
+            [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine')
+            Set-ExecutionPolicy restricted -Scope CurrentUser
+        }
     }
 
     Write-Output "$(Log-Date) Sysprep"
