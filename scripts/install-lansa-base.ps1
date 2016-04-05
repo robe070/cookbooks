@@ -93,19 +93,23 @@ try
     Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning"
     Disable-InternetExplorerESC
 
-    # Switch on Audio support so that e-learning audio may be heard through RDP
+    $SQLServerInstalled = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'SQLServerInstalled').SQLServerInstalled
 
-    # Get services related to audio 
-    Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+    if ( $SQLServerInstalled -eq $false ) {
+        # Switch on Audio support so that e-learning audio may be heard through RDP
 
-    # Start the services
-    Get-Service | Where {$_.Name -match "audio"} | start-service
+        # Get services related to audio 
+        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
 
-    # Set the services startup types
-    Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+        # Start the services
+        Get-Service | Where {$_.Name -match "audio"} | start-service
 
-    # Validate our startup changes (Should say- StartMode:Auto)
-    Get-WmiObject -class win32_service -filter "Name='AudioSrv'"
+        # Set the services startup types
+        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+
+        # Validate our startup changes (Should say- StartMode:Auto)
+        Get-WmiObject -class win32_service -filter "Name='AudioSrv'"
+    }
 
     if ( 0 )
     {
