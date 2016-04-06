@@ -303,8 +303,6 @@ try
         Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
         #####################################################################################
         Execute-RemoteBlock $Script:session {  
-    	    Logoff-Allusers
-
 		    Write-Output "$(Log-Date) Restart Required - Restarting..."
 		    Restart-Computer -Force
     
@@ -314,6 +312,22 @@ try
     }
 
     MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+
+    # Session has probably been lost due to a Windows Updates reboot
+    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+    {
+        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+        if ( $Script:session ) { Remove-PSSession $Script:session }
+
+        if ( $Cloud -eq 'AWS' ) {
+            Connect-RemoteSession
+        } elseif ($Cloud -eq 'Azure' ) {
+            Connect-RemoteSessionUri
+        }
+
+        Execute-RemoteInit
+        Execute-RemoteInitPostGit
+    }
 
     if ( $InstallIDE -eq $true ) {
 
@@ -327,22 +341,6 @@ try
         MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."
 
         MessageBox "Install patches. Then click OK on this message box"
-
-        # Session has probably been lost due to a Windows Updates reboot
-        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-        {
-            Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-            if ( $Script:session ) { Remove-PSSession $Script:session }
-
-            if ( $Cloud -eq 'AWS' ) {
-                Connect-RemoteSession
-            } elseif ($Cloud -eq 'Azure' ) {
-                Connect-RemoteSessionUri
-            }
-
-            Execute-RemoteInit
-            Execute-RemoteInitPostGit
-        }
     } else {
         # Scalable image comes through here
         if ( $InstallSQLServer -eq $false ) {

@@ -565,3 +565,18 @@ function Disable-UserAccessControl {
     Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value 00000000
     Write-Host "User Access Control (UAC) has been disabled." -ForegroundColor Green    
 }
+
+# PlaySound will also play from an RDP session, unlike System.Media.SystemSounds
+# Of course the RDP session needs to be configured to redirect sound to the local machine.
+# This will play notify.wav 5 times
+function PlaySound {
+    $sound = new-Object System.Media.SoundPlayer;
+    $sound.SoundLocation="c:\WINDOWS\Media\notify.wav";
+    $sound.PlayLooping();
+    $flag=$false;
+
+    1..10 | foreach {
+        if($_ -gt 5){$flag=$true} else{sleep -s 1}
+        if($flag) { $sound.Stop() }
+    }
+}

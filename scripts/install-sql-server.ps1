@@ -68,12 +68,16 @@ try {
         throw ("$SqlServerFile does not exist")
     }
     Write-Output ("$(Log-Date) SQL Server installation completed successfully")
+
+    PlaySound
+
     # Successful completion so set Last Exit Code to 0
     cmd /c exit 0
 }
 catch
 {
 	$_
-    Write-Error ("$(Log-Date) French SQL Server installation error")
+    Write-Error ("$(Log-Date) SQL Server installation error")
+    PlaySound
     throw
 }
