@@ -65,6 +65,10 @@ param (
     $InstallIDE=$true,
 
     [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallBaseSoftware=$true,
+
+    [Parameter(Mandatory=$false)]
     [string]
     $Cloud='AWS'
     )
@@ -241,7 +245,7 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
-    if ( $InstallSQLServer -eq $true) {
+    if ( $InstallBaseSoftware ) {
 
         # Install Chocolatey
 
@@ -260,7 +264,7 @@ try
 
         # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
         # Git is a far faster mechansim for transferring files than using RemotePS.
-        # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+        # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing License"
@@ -271,9 +275,10 @@ try
 
         #####################################################################################
 
-        Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed."
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-base-sql-server.ps1
-        # MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        if ( $InstallSQLServer ) {
+            Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed. Has to be run through RDP too!"
+            MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        }
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
@@ -287,10 +292,12 @@ try
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
-        #####################################################################################
-        Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
-        #####################################################################################
-        MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        if ( $InstallSQLServer ) {
+            #####################################################################################
+            Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
+            #####################################################################################
+            MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        }
 
         #####################################################################################
         Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
@@ -338,17 +345,16 @@ try
         }
     } else {
         # Scalable image comes through here
-        if ( $InstallSQLServer -eq $false) {
+        if ( $InstallSQLServer -eq $false ) {
             Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
             MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
         }
     }
 
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
-        
-    if ( $InstallSQLServer -eq $false ) {
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
+    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
+    if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
         Invoke-Command -Session $Script:session {
             Write-Verbose "$(Log-Date) Switch Internet download security warning back on"
             [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine')
