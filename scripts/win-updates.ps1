@@ -42,6 +42,7 @@ function Check-ContinueRestartOrEnd() {
 			# Logoff-Allusers
 
 			LogWrite "Restart Required - Restarting..."
+            [console]::beep(500,1000)
 			Restart-Computer -force
 			exit 0
 		}
@@ -201,6 +202,7 @@ function Check-WindowsUpdates() {
 			Logoff-Allusers
 
 			LogWrite "Restart Required - Restarting..."
+            [console]::beep(500,1000)
 			Restart-Computer -Force
 			exit 0
 		}
@@ -259,3 +261,6 @@ catch
 }
 
 Restart-IfNeeded
+
+[console]::beep(500,1000)
+

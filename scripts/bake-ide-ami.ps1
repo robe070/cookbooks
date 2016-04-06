@@ -241,58 +241,60 @@ try
 
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
-    # Install Chocolatey
-
-    Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
-    
-    # Then we install git using chocolatey and pull down the rest of the files from git
-
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
-
-    Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
-
-    # Load utilities into Remote Session.
-    # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
-    # Reflect local variables into remote session
-    Execute-RemoteInitPostGit
-
-    # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
-    # Git is a far faster mechansim for transferring files than using RemotePS.
-    # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
-
-    #####################################################################################
-    Write-Output "$(Log-Date) Installing License"
-    #####################################################################################
-
-    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-    Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
-
-    #####################################################################################
-
     if ( $InstallSQLServer -eq $true) {
+
+        # Install Chocolatey
+
+        Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
+    
+        # Then we install git using chocolatey and pull down the rest of the files from git
+
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
+
+        Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
+
+        # Load utilities into Remote Session.
+        # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
+        # Reflect local variables into remote session
+        Execute-RemoteInitPostGit
+
+        # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
+        # Git is a far faster mechansim for transferring files than using RemotePS.
+        # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookboks git repo
+
+        #####################################################################################
+        Write-Output "$(Log-Date) Installing License"
+        #####################################################################################
+
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
+
+        #####################################################################################
+
         Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed."
-        MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-    }
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-base-sql-server.ps1
+        # MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
-    #####################################################################################
-    Write-Output "$(Log-Date) Installing base software"
-    #####################################################################################
+        #####################################################################################
+        Write-Output "$(Log-Date) Installing base software"
+        #####################################################################################
 
-    if ( $Cloud -eq 'AWS' ) {
-        $ChefRecipe = "VLWebServer::IDEBase"
-    } elseif ($Cloud -eq 'Azure' ) {
-        $ChefRecipe = "VLWebServer::IDEBaseAzure"
-    }
+        if ( $Cloud -eq 'AWS' ) {
+            $ChefRecipe = "VLWebServer::IDEBase"
+        } elseif ($Cloud -eq 'Azure' ) {
+            $ChefRecipe = "VLWebServer::IDEBaseAzure"
+        }
 
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
-    if ( $InstallSQLServer -eq $true ) {
-        Write-Output "$(Log-Date) Install SQL Server. Remote execution does not work"
+        #####################################################################################
+        Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
+        #####################################################################################
         MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-    }
 
-    if ( $InstallIDE -eq $true ) {
+        #####################################################################################
         Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
+        #####################################################################################
         Execute-RemoteBlock $Script:session {  
     	    Logoff-Allusers
 
@@ -302,14 +304,17 @@ try
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
+    }
 
-        MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+
+    if ( $InstallIDE -eq $true ) {
 
         Write-Output "$(Log-Date) Installing IDE"
         [console]::beep(500,1000)
 
         MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-        # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session but its not possible to log in to that session
+        # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session and its not possible to log in to that session
         # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
         MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."

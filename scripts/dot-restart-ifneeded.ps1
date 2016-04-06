@@ -14,11 +14,13 @@ function Restart-IfNeeded()
 		Logoff-Allusers
 
 		LogWrite "Restart required - Restarting..."
+        [console]::beep(500,1000)
 		Restart-Computer -Force
 		exit 0
 	}
 	else
 	{
 		LogWrite "Restart not required"
+        [console]::beep(500,1000)
 	}
 }

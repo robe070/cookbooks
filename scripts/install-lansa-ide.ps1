@@ -354,5 +354,7 @@ finally
     }
 }
 
+[console]::beep(500,1000)
+
 # Successful completion so set Last Exit Code to 0
 cmd /c exit 0

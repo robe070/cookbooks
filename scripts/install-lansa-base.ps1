@@ -120,5 +120,8 @@ catch
     Write-Error $(Log-Date) ($_ | format-list | out-string)
     throw
 }
+
+[console]::beep(500,1000)
+
 # Ensure last exit code is 0. (exit by itself will terminate the remote session)
 cmd /c exit 0
