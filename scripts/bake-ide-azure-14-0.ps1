@@ -34,6 +34,6 @@ Bake-IdeMsi -VersionText '14GApre' `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "SQL Server 2014 SP1 Web on Windows Server 2012 R2" `
+            -AmazonAMIName "BakeIDESQL2014Image" `
             -GitBranch "feature/azure-ide" `
             -Cloud "Azure"

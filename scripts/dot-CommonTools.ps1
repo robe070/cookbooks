@@ -150,6 +150,7 @@ function Install-VisualLansa
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+    $InstanceName = "MSSQLSERVER"
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
     $LansaLanguage = '0';
     switch ($Language) {

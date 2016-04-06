@@ -157,6 +157,11 @@ try
     } elseif ($Cloud -eq 'Azure' ) {
         $image=Get-AzureVMImage | where-object { $_.ImageFamily -eq $AmazonAMIName } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
+        # If cannot find under ImageFamily, presume its a one-off LANSA image and access it by ImageName
+        if ( -not $image )
+        {
+            $image = $AmazonAMIName
+        }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
         $vmname="BakeIDE$VersionText"
