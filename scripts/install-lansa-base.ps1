@@ -94,17 +94,6 @@ try
     Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning"
     Disable-InternetExplorerESC
 
-    # Switch on Audio support so that e-learning audio may be heard through RDP
-
-    # Get services related to audio 
-    Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
-
-    # Start the services
-    Get-Service | Where {$_.Name -match "audio"} | start-service
-
-    # Set the services startup types
-    Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
-
     if ( 0 )
     {
         # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!

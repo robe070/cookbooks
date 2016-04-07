@@ -236,6 +236,7 @@ else
 }
 
 # Includes
+. "$script:IncludeDir\dot-CommonTools.ps1"
 . "$script:IncludeDir\dot-logoff-allusers.ps1"
 . "$script:IncludeDir\dot-restart-ifneeded.ps1"
 . "$script:IncludeDir\dot-logwrite.ps1"
@@ -261,6 +262,3 @@ catch
 }
 
 Restart-IfNeeded
-
-PlaySound
-

@@ -237,6 +237,11 @@ try
         Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
+        Write-Verbose "Turn on sound from RDP sessions"
+        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+        Get-Service | Where {$_.Name -match "audio"} | start-service
+        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
