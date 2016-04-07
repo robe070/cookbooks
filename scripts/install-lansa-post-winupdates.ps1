@@ -43,7 +43,9 @@ try
 
     Write-Output "$(Log-Date) Tidy up"
 
-    cmd /c rd /S/Q $TempPath
+    if (Test-Path -Path $TempPath) {
+        cmd /c rd /S/Q $TempPath
+    }
 
     if ( $Cloud -eq "AWS" ) {
         cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt"
