@@ -314,7 +314,16 @@ try
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
+    } else {
+        Execute-RemoteBlock $Script:session {
+            Write-Verbose "$(Log-Date) Refreshing git tools repo"
+            cd $using:GitRepoPath
+            git reset --hard HEAD
+            git pull
+            cmd /c exit 0
+        }
     }
+
 
     MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
@@ -337,9 +346,12 @@ try
     if ( $InstallIDE -eq $true ) {
 
         Write-Output "$(Log-Date) Installing IDE"
-        [console]::beep(500,1000)
+        PlaySound
 
-        MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        MessageBox "Check SQL Server is running in VM, then click OK on this message box"
+        MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
+
         # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session and its not possible to log in to that session
         # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
 
@@ -427,7 +439,7 @@ try
         } 
     }    
 
-    [console]::beep(500,1000)
+    PlaySound
 
     if ($Cloud -eq 'AWS') {
         #####################################################################################

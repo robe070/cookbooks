@@ -45,6 +45,10 @@ else
 	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
+if (!(Test-Path -Path $Script:ScriptTempPath)) {
+    New-Item -Path $Script:ScriptTempPath
+}
+
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
 
@@ -304,6 +308,8 @@ try
         }
 
         Set-ItemProperty -Path "${Hive}:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
+
+        PlaySound
 
         # Reset IE to defaults so Flash always runs correctly. Just click Reset
         & RunDll32.exe InetCpl.cpl,ResetIEtoDefaults | Out-Null
