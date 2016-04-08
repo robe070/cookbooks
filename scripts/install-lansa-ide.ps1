@@ -46,7 +46,7 @@ else
 }
 
 if (!(Test-Path -Path $Script:ScriptTempPath)) {
-    New-Item -Path $Script:ScriptTempPath
+    New-Item -ItemType directory -Path $Script:ScriptTempPath
 }
 
 # Put first output on a new line in cfn_init log file
