@@ -21,6 +21,8 @@ param (
 Write-Debug "GitRepo = $GitRepo"
 Write-Debug "GitRepoPath = $GitRepoPath"
 
+$Update = $false
+
 # Git outputs almost all normal messages to stderr. powershell interprets that as an error and 
 # displays the error text. To stop that stderr is redirected to stdout on the git commands.
 
@@ -44,19 +46,25 @@ else
     # Note, the Git install overwrites the current environment so need to modify path here
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files (x86)\Git\cmd"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+    $Update = $true
 }
 Write-Output "Git installed"
 
 Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
 cd $GitRepoPath
-cmd /c git pull origin '2>&1'
-Write-Output "Branch: $Branch"
-cmd /c git checkout -f $Branch  '2>&1'
-if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
-{
-    Write-Error ('Git clone failed');
-    cmd /c exit $LastExitCode;
+if ( $Update ) {
+    # Throw away any local changes and then pull the latest changes
+    cmd /c git reset --hard HEAD '2>&1'
+    cmd /c git pull '2>&1'
+} else {
+    Write-Output "Branch: $Branch"
+    cmd /c git checkout -f $Branch  '2>&1'
+    if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
+    {
+        Write-Error ('Git clone failed');
+        cmd /c exit $LastExitCode;
+    }
 }
 Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
