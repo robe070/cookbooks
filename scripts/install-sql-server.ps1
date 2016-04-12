@@ -43,6 +43,10 @@ try {
         Write-Output ("$(Log-Date) Installing .Net Framework 3.5")
 
         Install-WindowsFeature Net-Framework-Core
+
+        # Note that Desktop-Experience cannot be installed prior to installing SQL Server as the sysprep will fail
+        # e.g. taking the base Azure Microsoft VM "Windows Server 2012 Datacenter" and installing it and sysprep fails
+        Install-WindowsFeature Desktop-Experience
         
         Write-Output ("$(Log-Date) Executing $SqlServerFile")
 

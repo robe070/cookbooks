@@ -91,6 +91,10 @@ try
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
+    # Make sure Desktop-Experience is installed. Its quick if its already there.
+
+    Install-WindowsFeature Desktop-Experience
+
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
