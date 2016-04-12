@@ -30,6 +30,10 @@ else
 }
 
 try {
+    if (!(Test-Path -Path $Script:ScriptTempPath)) {
+        New-Item -ItemType directory -Path $Script:ScriptTempPath
+    }
+
     #####################################################################################
     Write-Output ("$(Log-Date) Download SQL Server") 
 
