@@ -27,7 +27,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14GApre' `
+Bake-IdeMsi -VersionText '14GApreG' `
             -VersionMajor 14 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140010" `
@@ -37,6 +37,6 @@ Bake-IdeMsi -VersionText '14GApre' `
             -AmazonAMIName "BakeIDESQL2014BImage" `
             -GitBranch "feature/azure-ide" `
             -Cloud "Azure" `
-            -InstallBaseSoftware $false `
+            -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $true

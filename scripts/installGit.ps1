@@ -52,19 +52,22 @@ Write-Output "Git installed"
 
 Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
+# Ensure we cope with an existing repo, not just a new clone...
 cd $GitRepoPath
-if ( $Update ) {
-    # Throw away any local changes and then pull the latest changes
-    cmd /c git reset --hard HEAD '2>&1'
-    cmd /c git pull '2>&1'
-} else {
-    Write-Output "Branch: $Branch"
-    cmd /c git checkout -f $Branch  '2>&1'
-    if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
-    {
-        Write-Error ('Git clone failed');
-        cmd /c exit $LastExitCode;
-    }
+# Throw away any local changes
+cmd /c git reset --hard HEAD '2>&1'
+# Ensure we have all changes
+cmd /c git fetch --all '2>&1'
+# Check out a potentially different branch
+Write-Output "Branch: $Branch"
+cmd /c git checkout -f $Branch  '2>&1'
+if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
+{
+    Write-Error ('Git checkout failed');
+    cmd /c exit $LastExitCode;
 }
+# Finally make sure the current branch matches the origin
+cmd /c git pull '2>&1'
+
 Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 

@@ -168,7 +168,11 @@ try
         }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
-        $vmname="BakeIDE$VersionText"
+        if ($InstallIDE) {
+            $vmname="BakeIDE$VersionText"
+        } else {
+            $vmname="Bake$VersionText"
+        }
         $vmsize="Medium"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
@@ -280,10 +284,8 @@ try
 
         #####################################################################################
 
-        if ( $InstallSQLServer ) {
-            Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not installed. Has to be run through RDP too!"
-            MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-        }
+        Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
+        MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
@@ -301,7 +303,7 @@ try
             #####################################################################################
             Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
             #####################################################################################
-            MessageBox "Run install-sql-server.ps1. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            MessageBox "Run install-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
         }
 
         #####################################################################################
@@ -318,14 +320,14 @@ try
         Execute-RemoteBlock $Script:session {
             Write-Verbose "$(Log-Date) Refreshing git tools repo"
             cd $using:GitRepoPath
-            git reset --hard HEAD
-            git pull
+            cmd /c git reset --hard HEAD '2>&1'
+            cmd /c git pull '2>&1'
             cmd /c exit 0
         }
     }
 
 
-    MessageBox "Run Windows Updates. Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
     # Session has probably been lost due to a Windows Updates reboot
     if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
@@ -348,7 +350,7 @@ try
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
-        MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
         MessageBox "Check SQL Server is running in VM, then click OK on this message box"
         MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
 
@@ -362,7 +364,7 @@ try
         # Scalable image comes through here
         if ( $InstallSQLServer -eq $false ) {
             Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
-            MessageBox "Please RDP into $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
+            MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
         }
     }
 
@@ -397,7 +399,7 @@ try
     
         Write-Verbose "$(Log-Date) Delete image if it already exists"
         Get-AzureVMImage -ImageName "$($vmname)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
-        Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($vmname)image" -OSState Generalized
+        Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($VersionText)image" -OSState Generalized
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
