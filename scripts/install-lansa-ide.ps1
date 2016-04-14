@@ -311,7 +311,7 @@ try
             $Hive = "HKLM"
         }
 
-        Set-ItemProperty -Path "${Hive}:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value """$ENV:ProgramFiles\Internet Explorer\iexplore.exe"" ""$ENV:ProgramFiles\CloudStartHere.htm"""
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
 
         PlaySound
 
