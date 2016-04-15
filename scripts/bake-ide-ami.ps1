@@ -298,13 +298,33 @@ try
         }
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
-
-        if ( $InstallSQLServer ) {
-            #####################################################################################
-            Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
-            #####################################################################################
-            MessageBox "Run install-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+    } else {
+        Execute-RemoteBlock $Script:session {
+            Write-Verbose "$(Log-Date) Refreshing git tools repo"
+            # Ensure we cope with an existing repo, not just a new clone...
+            cd $using:GitRepoPath
+            # Throw away any working directory changes
+            cmd /c git reset --hard HEAD '2>&1'
+            # Ensure we have all changes
+            cmd /c git fetch --all '2>&1'
+            # Check out a potentially different branch
+            Write-Output "Branch: $using:GitBranch"
+            cmd /c git checkout -f $using:GitBranch  '2>&1'
+            if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
+            {
+                Write-Error ('Git checkout failed');
+                cmd /c exit $LastExitCode;
+            }
+            # Finally make sure the current branch matches the origin
+            cmd /c git pull '2>&1'
         }
+    }
+
+    if ( $InstallSQLServer ) {
+        #####################################################################################
+        Write-Output "$(Log-Date) Install SQL Server. (Remote execution does not work)"
+        #####################################################################################
+        MessageBox "Run install-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Output "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
@@ -316,16 +336,23 @@ try
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
-    } else {
-        Execute-RemoteBlock $Script:session {
-            Write-Verbose "$(Log-Date) Refreshing git tools repo"
-            cd $using:GitRepoPath
-            cmd /c git reset --hard HEAD '2>&1'
-            cmd /c git pull '2>&1'
-            cmd /c exit 0
+
+        # Session has been lost due to a Windows reboot
+        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+        {
+            Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+            if ( $Script:session ) { Remove-PSSession $Script:session }
+
+            if ( $Cloud -eq 'AWS' ) {
+                Connect-RemoteSession
+            } elseif ($Cloud -eq 'Azure' ) {
+                Connect-RemoteSessionUri
+            }
+
+            Execute-RemoteInit
+            Execute-RemoteInitPostGit
         }
     }
-
 
     MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
@@ -368,6 +395,22 @@ try
         }
     }
 
+    # Check if Session has been lost due to a Windows reboot
+    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+    {
+        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+        if ( $Script:session ) { Remove-PSSession $Script:session }
+
+        if ( $Cloud -eq 'AWS' ) {
+            Connect-RemoteSession
+        } elseif ($Cloud -eq 'Azure' ) {
+            Connect-RemoteSessionUri
+        }
+
+        Execute-RemoteInit
+        Execute-RemoteInitPostGit
+    }
+
     Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
@@ -375,7 +418,7 @@ try
         Invoke-Command -Session $Script:session {
             Write-Verbose "$(Log-Date) Switch Internet download security warning back on"
             [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine')
-            Set-ExecutionPolicy restricted -Scope CurrentUser
+            # Set-ExecutionPolicy restricted -Scope CurrentUser
         }
     }
 
