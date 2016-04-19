@@ -168,11 +168,7 @@ try
         }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
-        if ($InstallIDE) {
-            $vmname="BakeIDE$VersionText"
-        } else {
-            $vmname="Bake$VersionText"
-        }
+        $vmname="Bake$VersionText"
         $vmsize="Medium"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"

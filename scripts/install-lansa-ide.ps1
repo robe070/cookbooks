@@ -91,10 +91,6 @@ try
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
-    # Make sure Desktop-Experience is installed. Its quick if its already there.
-
-    Install-WindowsFeature Desktop-Experience
-
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
@@ -314,9 +310,6 @@ try
         Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
 
         PlaySound
-
-        # Reset IE to defaults so Flash always runs correctly. Just click Reset
-        & RunDll32.exe InetCpl.cpl,ResetIEtoDefaults | Out-Null
 
         Add-TrustedSite "*.addthis.com" $Hive
         Add-TrustedSite "*.adobe.com" $Hive
