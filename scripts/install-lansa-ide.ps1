@@ -333,6 +333,12 @@ try
         Add-TrustedSite "*.youtube.com" $Hive
         Add-TrustedSite "*.youtube.com" $Hive "https"
         Add-TrustedSite "*.ytimg.com" $Hive "https"
+
+        if ( $Cloud -eq "Azure" ) {
+            # Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies 
+            # so that they are running when the license check is made by the Integrator service.
+            cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.0 (LIN14003_EPC140005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+        }
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
