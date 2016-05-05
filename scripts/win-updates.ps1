@@ -42,6 +42,7 @@ function Check-ContinueRestartOrEnd() {
 			# Logoff-Allusers
 
 			LogWrite "Restart Required - Restarting..."
+            PlaySound
 			Restart-Computer -force
 			exit 0
 		}
@@ -66,10 +67,11 @@ function Install-WindowsUpdates() {
                 LogWrite "> Skipping: $($Update.Title) because it requires user input"
             } else {
                 if (!($Update.EulaAccepted)) {
-                    LogWrite "> Note: $($Update.Title) has a license agreement that must be accepted. Accepting the license."
-                    $Update.AcceptEula()
-                    [bool]$addThisUpdate = $true
-                    $script:CycleUpdateCount++
+                    # LogWrite "> Note: $($Update.Title) has a license agreement that must be accepted. Accepting the license."
+                    LogWrite "> Skipping: $($Update.Title) has a license agreement that must be accepted. It cannot be accepted when running Windows Updates remotely."
+                    # $Update.AcceptEula()
+                    # [bool]$addThisUpdate = $true
+                    # $script:CycleUpdateCount++
                 } else {
                     [bool]$addThisUpdate = $true
                     $script:CycleUpdateCount++
@@ -200,6 +202,7 @@ function Check-WindowsUpdates() {
 			Logoff-Allusers
 
 			LogWrite "Restart Required - Restarting..."
+            PlaySound
 			Restart-Computer -Force
 			exit 0
 		}
@@ -233,6 +236,7 @@ else
 }
 
 # Includes
+. "$script:IncludeDir\dot-CommonTools.ps1"
 . "$script:IncludeDir\dot-logoff-allusers.ps1"
 . "$script:IncludeDir\dot-restart-ifneeded.ps1"
 . "$script:IncludeDir\dot-logwrite.ps1"

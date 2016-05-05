@@ -9,6 +9,8 @@ Database tools
 
 function Disable-TcpOffloading
 {
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+
     ##########################################################################
     # Disable TCP Offloading
     # Solve SQL Server "The semaphore timeout period has expired" issue
@@ -43,10 +45,15 @@ function Disable-TcpOffloading
     Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
 
     Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" -NoRestart
     Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"
 
+    if ( $Cloud -eq "AWS" ) {
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"  -NoRestart
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled"
+    } elseif ( $Cloud -eq "Azure" ) {
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled"
+    }
+    
     # Check its worked
     Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue 
     

@@ -45,6 +45,10 @@ else
 	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
+if (!(Test-Path -Path $Script:ScriptTempPath)) {
+    New-Item -ItemType directory -Path $Script:ScriptTempPath
+}
+
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
 
@@ -84,6 +88,8 @@ try
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
     # On initial install disable TCP Offloading
 
@@ -96,7 +102,7 @@ try
     # Require MS C runtime to be installed
     ######################################
 
-    if ( -not $UPGD_bool )
+    if ( (-not $UPGD_bool) )
     {
         Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
@@ -123,16 +129,6 @@ try
         cd "c:"
     }
 
-    if ( -not $UPGD_bool )
-    {
-        Start-WebAppPool -Name "DefaultAppPool"
-
-        # Speed up the start of the VL IDE
-        # Switch off looking for software license keys
-
-        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
-    }
-
     if ($f32bit_bool)
     {
         $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
@@ -148,7 +144,11 @@ try
     cmd /c mkdir $Script:DvdDir '2>nul'
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
-    cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -182,7 +182,11 @@ try
 
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
-    cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -194,7 +198,11 @@ try
 
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
-    cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    if ( $Cloud -eq "AWS" ) {
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+    } elseif ( $Cloud -eq "Azure" ) {
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Output
+    }
     if ( $LastExitCode -ne 0 )
     {
         throw
@@ -217,6 +225,16 @@ try
         $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 
+    if ( -not $UPGD_bool )
+    {
+        # This code creates pendingfilerenameoperations so moved to after LANSA Install which otherwise will require a reboot before installing SQL Server.
+        Start-WebAppPool -Name "DefaultAppPool"
+
+        # Speed up the start of the VL IDE
+        # Switch off looking for software license keys
+
+        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
+    }
 
     if ( -not $UPGD_bool )
     {
@@ -244,7 +262,15 @@ try
         #####################################################################################
         Write-output ("$(Log-Date) Shortcuts")
         #####################################################################################
+
+        # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
+        if ( $Cloud -eq "AWS" ) {
+            copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+        }
+
         $StartHereHtm = "CloudStartHere$Language.htm"
+        copy "$Script:GitRepoPath/scripts/$StartHereHtm" "$ENV:ProgramFiles\CloudStartHere.htm"
+
         switch ($Language) {
             'FRA' { 
                 $StartHereLink = "Commencer ici"
@@ -267,21 +293,53 @@ try
             }
         }
 
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
-        New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "Desktop\$QuickConfigLink.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "Desktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
+        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config"
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
 
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "c:\Users\Administrator\Desktop\$StartHereLink.lnk"
+        if ( $Cloud -eq "AWS" ) {
+            # In AWS the administrator user name is known and same as current user so we can launch when administrator user logs in
+            $Hive = "HKCU"
+        } elseif ( $Cloud -eq "Azure" ) {
+            # In Azure the administrator name is not known so forced to launch when machine starts - before desktop is available
+            # And adding trusted sites does not seem to work globally - TBA
+            $Hive = "HKLM"
+        }
 
-        Add-TrustedSite "*.lansa.com"
-        Add-TrustedSite "*.google-analytics.com"
-        Add-TrustedSite "*.googleadservices.com"
-        Add-TrustedSite "*.img.en25.com"
-        Add-TrustedSite "*.addthis.com"
-        Add-TrustedSite "*.lansa.myabsorb.com"
-        Add-TrustedSite "*.cloudfront.com"
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
 
+        PlaySound
+
+        Add-TrustedSite "*.addthis.com" $Hive
+        Add-TrustedSite "*.adobe.com" $Hive
+        Add-TrustedSite "*.adobe.com" $Hive "https"
+        Add-TrustedSite "*.adobelogin.com" $Hive "https"
+        Add-TrustedSite "*.adobetag.com" $Hive
+        Add-TrustedSite "*.cloudfront.com" $Hive
+        Add-TrustedSite "*.cloudfront.net" $Hive
+        Add-TrustedSite "*.cloudfront.net" $Hive "https"
+        Add-TrustedSite "*.demdex.net" $Hive "https"
+        Add-TrustedSite "*.google.com" $Hive "https"
+        Add-TrustedSite "*.googleapis.com" $Hive "https"
+        Add-TrustedSite "*.google-analytics.com" $Hive
+        Add-TrustedSite "*.google-analytics.com" $Hive "https"
+        Add-TrustedSite "*.googleadservices.com" $Hive
+        Add-TrustedSite "*.img.en25.com" $Hive
+        Add-TrustedSite "*.lansa.com" $Hive
+        Add-TrustedSite "*.myabsorb.com" $Hive
+        Add-TrustedSite "*.myabsorb.com" $Hive "https"
+        Add-TrustedSite "*.gstatic.com" $Hive "https"
+        Add-TrustedSite "*.youtube.com" $Hive
+        Add-TrustedSite "*.youtube.com" $Hive "https"
+        Add-TrustedSite "*.ytimg.com" $Hive "https"
+
+        if ( $Cloud -eq "Azure" ) {
+            Write-Output "Set JSM Service dependencies"
+            Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
+            Write-Verbose "so that they are running when the license check is made by the Integrator service."
+            cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.0 (LIN14003_EPC140005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+        }
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
@@ -305,6 +363,8 @@ finally
         $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
 }
+
+PlaySound
 
 # Successful completion so set Last Exit Code to 0
 cmd /c exit 0

@@ -95,6 +95,8 @@ try
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
@@ -179,6 +181,13 @@ try
 	Write-output ("Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
+
+    if ( $Cloud -eq "Azure" ) {
+        Write-Output "Set JSM Service dependencies"
+        Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
+        Write-Verbose "so that they are running when the license check is made by the Integrator service."
+        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.0 (LIN14003_EPC140005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+    }
 
     Write-Output ("Execute the user script if one has been passed")
 
