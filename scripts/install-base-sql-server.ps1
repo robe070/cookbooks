@@ -1,9 +1,8 @@
 ﻿<#
 .SYNOPSIS
 
-Install the French Base environment.
-Required because
-This cannot be executed remotely. It must be executed directly on the machine, for French. ENG and JPN are fine!
+Install the SQL Server Base environment.
+Required because this cannot be executed remotely. It must be executed directly on the machine
    C:\Windows\system32\dism.exe /online /enable-feature /featurename:IIS-NetFxExtensibility /norestart  /All 
 
 
@@ -36,13 +35,16 @@ try
 
     C:\Windows\system32\dism.exe /online /enable-feature /featurename:IIS-NetFxExtensibility /norestart  /All
 
-    Write-Output ("$(Log-Date) French Base installation completed successfully")
+    Write-Output ("$(Log-Date) SQL Server Base installation completed successfully")
+
+    PlaySound
+
     # Successful completion so set Last Exit Code to 0
     cmd /c exit 0
 }
 catch
 {
 	$_
-    Write-Error ("$(Log-Date) French Base installation error")
+    Write-Error ("$(Log-Date) SQL Server Base installation error")
     throw
 }

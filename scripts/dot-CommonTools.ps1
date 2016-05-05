@@ -96,6 +96,24 @@ function Connect-RemoteSession
     Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
 }
 
+function Connect-RemoteSessionUri
+{
+    # Wait until PSSession is available
+    while ($true)
+    {
+        "$(Log-Date) Waiting for remote PS connection"
+        $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
+        if ($Script:session -ne $null)
+        {
+            break
+        }
+
+        Sleep -Seconds 10
+    }
+
+    Write-Output "$(Log-Date) $Script:publicDNS remote PS connection obtained"
+}
+
 function MessageBox
 {
 param (
@@ -131,6 +149,8 @@ function Install-VisualLansa
     $SettingsFile = "$Script:ScriptTempPath\LansaSettings.txt"
     $SettingsPassword = 'lansa'
     $installer_file = "$Script:DvdDir\Setup\FileTransfer.exe"
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+    $InstanceName = "MSSQLSERVER"
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
     $LansaLanguage = '0';
     switch ($Language) {
@@ -176,9 +196,7 @@ FeatureOpenTranslationTables=1
 FeatureConnect=1
 StartFolderName=LANSA
 64bitVLSupport=False
-DatabaseAction=2
-DatabaseNewInstance=False
-DatabaseInstanceName=
+DatabaseInstanceName=$InstanceName
 DatabaseInstanceDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseDataDirectory=C:\Program Files\Microsoft SQL Server
 DatabaseSharedDirectory=C:\Program Files\Microsoft SQL Server
@@ -186,20 +204,30 @@ DatabaseSAHidePassword=False
 .DatabaseSAPassword=
 DatabaseTCPIPWorkaround=
 DatabaseName=LANSA
-DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
-DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\Data
+DatabaseDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName\MSSQL\Data
+DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName\MSSQL\Data
 DSNNew=True
 DSNName=LANSA
 DSNType=2
 DSNDriverType=12
-DSNDriverName=SQL Server Native Client 11.0
-DSNServerName=(local)
-DSNDatabaseName=LANSA
+DSNDriverName=ODBC Driver 11 for SQL Server" | Add-Content $SettingsFile
+
+if ( $InstallSQLServer -eq $false ) {
+"DatabaseAction=2
+DatabaseNewInstance=False
+DSNServerName=(local)" | Add-Content $SettingsFile
+} else {
+"DatabaseAction=3
+DatabaseNewInstance=True
+DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile
+}
+
+"DSNDatabaseName=LANSA
 DSNUseTrustedConnections=True
 DSNUserid=sa
 .DSNPassword=112113200245048055164115207077090084060117130184210029036142038112134034166041252163025013128246
 CompilerInstall=1
-CompilerRootDirectory=C:\Program Files (x86)\LANSA\MicrosoftCompiler2010
+CompilerRootDirectory=C:\Program Files (x86)\LANSA\MicrosoftCompiler2013
 HostRouteLUName=*LOCAL
 HostRouteQualifier=localhost
 HostRoutePortNumber=4545
@@ -501,10 +529,54 @@ function Add-TrustedSite
 param(
     [Parameter(Mandatory=$true)]
     [String] 
-    $SiteName
+    $SiteName,
+
+    [Parameter(Mandatory=$false)]
+    [String] 
+    $Hive="HKLM",
+
+    [Parameter(Mandatory=$false)]
+    [String] 
+    $urlType="http"
 )
-    $TrustedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
+    $TrustedKey = "${Hive}:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
     $TrustedKeyPath = $TrustedKey + $SiteName
     New-Item "$TrustedKeyPath" -ErrorAction SilentlyContinue
-    New-ItemProperty -Path "$TrustedKeyPath" -Name "http" -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
+    New-ItemProperty -Path "$TrustedKeyPath" -Name $urlType -Value 2 -PropertyType DWord -ErrorAction SilentlyContinue
+}
+
+function Disable-InternetExplorerESC {
+    $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+    $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+    Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
+    Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
+    Write-Host "IE Enhanced Security Configuration (ESC) has been disabled." -ForegroundColor Green
+}
+
+function Enable-InternetExplorerESC {
+    $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+    $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+    Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 1
+    Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 1
+    Write-Host "IE Enhanced Security Configuration (ESC) has been enabled." -ForegroundColor Green
+}
+
+function Disable-UserAccessControl {
+    Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value 00000000
+    Write-Host "User Access Control (UAC) has been disabled." -ForegroundColor Green    
+}
+
+# PlaySound will also play from an RDP session, unlike System.Media.SystemSounds
+# Of course the RDP session needs to be configured to redirect sound to the local machine.
+# This will play notify.wav 5 times
+function PlaySound {
+    $sound = new-Object System.Media.SoundPlayer;
+    $sound.SoundLocation="c:\WINDOWS\Media\notify.wav";
+    $sound.PlayLooping();
+    $flag=$false;
+
+    1..10 | foreach {
+        if($_ -gt 5){$flag=$true} else{sleep -s 1}
+        if($flag) { $sound.Stop() }
+    }
 }

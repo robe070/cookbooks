@@ -1,16 +1,16 @@
-End User License Agreement (EULA)
+﻿End User License Agreement (EULA)
 IMPORTANT: READ CAREFULLY BEFORE ACCESSING OR USING THIS SERVICE.
-The LANSA Software (“Software”) that is the subject of this Agreement is made available exclusively via Amazon Web Services (“AWS”). By accessing the Software via AWS, you (“Licensee”) are agreeing to comply with and be bound by the terms of this agreement (“Agreement”). This Agreement is a legal contract between Licensee and LANSA Holdings, Inc. (“LANSA”) for the Software. Licensee acknowledges it has had the opportunity to review the Agreement, prior to acceptance of this Agreement. If Licensee does not agree to be bound by this Agreement, the Licensee must not attempt to access the Software.
+The LANSA Software (“Software”) that is the subject of this Agreement is made available exclusively via Microsoft Azure (“Azure”). By accessing the Software via Azure, you (“Licensee”) are agreeing to comply with and be bound by the terms of this agreement (“Agreement”). This Agreement is a legal contract between Licensee and LANSA Holdings, Inc. (“LANSA”) for the Software. Licensee acknowledges it has had the opportunity to review the Agreement, prior to acceptance of this Agreement. If Licensee does not agree to be bound by this Agreement, the Licensee must not attempt to access the Software.
 TERMS AND CONDITIONS
-1. Limited Purpose Access Grant. Subject to Licensee’s continuing compliance with the terms and conditions contained in this Agreement, LANSA hereby grants to Licensee, beginning on the date Licensee first accesses the Software (the “Effective Date”) and during the term specified in Paragraph 4 herein, a limited, non-exclusive, non-transferable, non-assignable, non-sublicensable, right and license to access and use the functions and features of the Software as made available via AWS, solely for Licensee’s business purposes.
+1. Limited Purpose Access Grant. Subject to Licensee’s continuing compliance with the terms and conditions contained in this Agreement, LANSA hereby grants to Licensee, beginning on the date Licensee first accesses the Software (the “Effective Date”) and during the term specified in Paragraph 4 herein, a limited, non-exclusive, non-transferable, non-assignable, non-sublicensable, right and license to access and use the functions and features of the Software as made available via Azure, solely for Licensee’s business purposes.
 
 2. Restrictions on Use. Licensee shall not (and shall not allow any third party to) :
 i.	decompile, disassemble, reverse engineer or otherwise attempt to derive the source code of any software used as part of the Software or to reveal any trade secrets embodied by the Software; 
 ii.	access and/or use the software until the applicable Subscription Fees for use have been paid; 
-iii.	access and/or Use the Software except via AWS; 
+iii.	access and/or Use the Software except via Azure; 
 iv.	remove any product identification, copyright notice or other proprietary legend from the Software.
 
-3. Price and Payment. Licensee shall pay to AWS (or to such entity designated by Amazon or LANSA) license fees for the Software (“Subscription Fees”) on the terms specified by LANSA for use of the Software via AWS. Subscription Fees and other charges described in this Agreement do not include federal, state or local sales, VAT, GST, foreign withholding, use, property, excise, service, or similar taxes (“Tax(es)”) now or hereafter levied, all of which shall be for Licensee’s account. If LANSA is required to pay Taxes, Licensee shall reimburse LANSA for such amounts. Licensee hereby agrees to indemnify LANSA for any Taxes and related costs, interest and penalties paid or payable by LANSA.
+3. Price and Payment. Licensee shall pay to Azure (or to such entity designated by Microsoft or LANSA) license fees for the Software (“Subscription Fees”) on the terms specified by LANSA for use of the Software via Azure. Subscription Fees and other charges described in this Agreement do not include federal, state or local sales, VAT, GST, foreign withholding, use, property, excise, service, or similar taxes (“Tax(es)”) now or hereafter levied, all of which shall be for Licensee’s account. If LANSA is required to pay Taxes, Licensee shall reimburse LANSA for such amounts. Licensee hereby agrees to indemnify LANSA for any Taxes and related costs, interest and penalties paid or payable by LANSA.
 
 4. Term; Termination. This Agreement and the license rights granted hereunder shall remain in effect for the term ordered and paid for by Licensee (“Term”) unless earlier terminated as set forth herein. Without prejudice to any other rights LANSA may have, this Agreement shall terminate immediately, without prior or written notice, if Licensee fails to comply with any of the terms and conditions of this Agreement or if Licensee violates any of LANSA’s published policies for use of the Software. In the event of termination of this Agreement for any reason, all rights granted hereunder automatically revert to the granting Party and all licenses shall cease.
 
@@ -20,8 +20,9 @@ iv.	remove any product identification, copyright notice or other proprietary leg
 i.	Access to technical support, for the Licensee’s reporting of problems detected in the Software, from the Designated LANSA Support Office (see Paragraph 17 herein) during LANSA’s normal business hours.  Problems in the Software must be reported within these hours.  Response times are as follows:
 a.	LANSA undertakes to respond to URGENT PROBLEMS within twenty-four hours.  “URGENT PROBLEMS” shall mean defects in the Software causing it to be inoperative
 b.	LANSA undertakes to respond to NON-URGENT PROBLEMS within five working days.  “NON-URGENT PROBLEMS” shall mean defects in the Software that do not cause the Software to be inoperative.
-ii.	Corrections to the Software, where applicable, but only for the current and previous versions of the Software made available via AWS. 
-LANSA shall not be obliged to remedy errors or defects due to any malfunction of the AWS environment or by a failure of the Licensee to use the Software in accordance with the provisions of this Agreement.
+ii.	Corrections to the Software, where applicable, but only for the current and previous versions of the Software made available via Azure. 
+LANSA shall not be obliged to remedy errors or defects due to any malfunction of the Azure environment or by a failure of the Licensee to use the Software in accordance with the provisions of this Agreement.
+All communication between the Licensee and LANSA will be  conducted via email unless otherwise agreed between the parties.
 At your request, LANSA may agree to provide additional support to Licensee at LANSA’s then-current hourly rates.
 
 7. Proprietary Rights. Licensee acknowledges that LANSA and its licensors own all right, title and interest in and to the materials and intellectual property that comprise the Software, including all intellectual property rights relating thereto. LANSA does not grant to Licensee any other right or license, either express or implied, in the Software or any of its components except as expressly stated in this Agreement, and Licensee’s use of the Software shall be subject to the restrictions set forth in this Agreement.
@@ -51,5 +52,5 @@ In the event of a claim for which LANSA seeks defence or indemnification from yo
 17. Designated LANSA Support Office   See LANSA Support contact details
 
 Revision History
-1st August, 2015 – Version 1.0 – Initial Release.
+4th May, 2016 – Version 1.0 – Initial Release.
 

@@ -36,6 +36,9 @@ Write-Debug "script:IncludeDir = $script:IncludeDir"
 
 try
 {
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+
     cmd /c schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /DISABLE
 
     Write-Output "$(Log-Date) Installing Chef"
@@ -64,15 +67,22 @@ try
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
 
-    Write-Output "$(Log-Date) Installing AWS SDK"
-    &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-    Propagate-EnvironmentUpdate
+    if ( $Cloud -eq "AWS" ) {
+        Write-Output "$(Log-Date) Installing AWS SDK"
+        &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+        Propagate-EnvironmentUpdate
 
-    Write-Output "$(Log-Date) Installing AWS CLI"
-    &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
-    Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
+        Write-Output "$(Log-Date) Installing AWS CLI"
+        &"$Script:IncludeDir\installAwsCli.ps1" $TempPath
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
+        Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI"
+    }
+
+    if ( $Cloud -eq "Azure" ) {
+        Write-Output "$(Log-Date) Installing AzCopy"
+        &"$Script:IncludeDir\installAzCopy.ps1" $TempPath
+    }
 
     Write-Output "$(Log-Date) Running scheduleTasks.ps1"
     &"$Script:IncludeDir\scheduleTasks.ps1"
@@ -81,9 +91,13 @@ try
     Write-Output "$(Log-Date) Running Get-StartupCmds.ps1"
     &"$Script:IncludeDir\Get-StartupCmds.ps1"
 
-    if (0)
+    Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning"
+    Disable-InternetExplorerESC
+
+    if ( 0 )
     {
-        # Windows Updates cannot be run remotely using Remote PS. Note that ssh server CAN run it!
+        # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
+        # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
         Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
         &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
         Write-Output "$(Log-Date) Running win-updates.ps1"
@@ -95,5 +109,8 @@ catch
     Write-Error $(Log-Date) ($_ | format-list | out-string)
     throw
 }
+
+PlaySound
+
 # Ensure last exit code is 0. (exit by itself will terminate the remote session)
 cmd /c exit 0
