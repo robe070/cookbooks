@@ -100,6 +100,9 @@ try
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
+    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host")
+    set-item wsman:\localhost\Client\TrustedHosts -value * -force
+
     Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
     Write-Verbose ("Test if source of DVD image exists")
@@ -113,15 +116,14 @@ try
     if ( $Cloud -eq 'AWS' ) {
         # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
         # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
-        [String[]] $S3Arguments = @("""--exclude""", """*ibmi/*""", """--exclude""", """*AS400/*""", """--exclude""", """*linux/*""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x86_*.exe""", """--exclude""", """*setup/Installs/MSSQLEXP/*_x64_JPN.exe""", """--delete""")
+        [String[]] $S3Arguments = @("--exclude", "*ibmi/*", "--exclude", "*AS400/*", "--exclude", "*linux/*", "--exclude", "*setup/Installs/MSSQLEXP/*_x86_*.exe", "--exclude", "*setup/Installs/MSSQLEXP/*_x64_JPN.exe", "--delete")
     
         # If its not a beta, allow everyone to access it
         if ( $VersionText -ne "14beta" )
         {
-            $S3Arguments += @("""--grants""", """read=uri=http://acs.amazonaws.com/groups/global/AllUsers""")
+            $S3Arguments += @("--grants", "read=uri=http://acs.amazonaws.com/groups/global/AllUsers")
         }
-        $a = [string]$S3Arguments
-        cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $a | Write-Output
+        cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $S3Arguments | Write-Output
         if ( $LastExitCode -ne 0 ) { throw }
     } elseif ( $Cloud -eq 'Azure' ) {
         $StorageAccount = 'lansalpcmsdn'
