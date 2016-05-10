@@ -27,7 +27,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'IDESQL-E1' `
+Bake-IdeMsi -VersionText 'IDESQL-E2' `
             -VersionMajor 14 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140020" `
@@ -35,7 +35,7 @@ Bake-IdeMsi -VersionText 'IDESQL-E1' `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "SQL2014-A-Eimage" `
-            -GitBranch "feature/azure-ide" `
+            -GitBranch "support/L4W14000_IDE_Azure" `
             -Cloud "Azure" `
             -InstallBaseSoftware $false `
             -InstallSQLServer $false `
