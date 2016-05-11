@@ -1,0 +1,11 @@
+Visual LANSA is a cross-platform development tool tightly focused on just one thing – rapidly creating high quality commercial applications. It is much more than a productive visual IDE (Integrated Development Environment). Visual LANSA’s platform independent meta data repository and high-level business-focused language, RDML (Rapid Development and Maintenance Language), lets you develop Web, Windows desktop, 5250 and server-based applications – from a single code base.
+
+Anyone who understands the essentials of fields, files and programs can rapidly develop flexible Web, Windows desktop, 5250 and server-based applications with Visual LANSA.
+
+The simplicity and power of LANSA’s RDML makes developing cross-platform software easier. Developers write applications using RDML, choose a platform for deployment and LANSA implements the applications in native code best suited for the platform. You gain the native performance benefit of compiled C/C++ or RPG but you debug at the RDML level. Moving your application to a new platform is just a matter of redeployment.
+
+You can develop applications with seamless access to IBM i, JDBC and ODBC-compliant databases – utilizing LANSA’s portable meta data repository and fast open middleware.
+
+Data definitions, business rules and algorithms are centralized in the meta data repository. This reduces development time for new applications and ongoing maintenance because the data definitions and business rules are defined outside the program code. If any of the definitions or rules need to be changed, you only have to make that change in one place and it applies to all of your applications.
+
+Developers will enjoy all the productivity benefits a Windows-based integrated development environment brings: point-and-click to select fields and files, cut-and-paste to rapidly edit and debug and a powerful forms painter to design the user interface.
