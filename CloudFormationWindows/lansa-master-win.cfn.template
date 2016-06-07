@@ -239,7 +239,7 @@
                "eu-central-1"    : { "64" : "ami-466e6c5b" },
                "eu-west-1"       : { "64" : "ami-71ebc006" },
                "ap-southeast-1"  : { "64" : "ami-e6e7f0b4" },
-               "ap-southeast-2"  : { "64" : "ami-45301e26" },
+               "ap-southeast-2"  : { "64" : "ami-9b6940f8" },
                "ap-northeast-1"  : { "64" : "ami-8c22be8c" },
                "sa-east-1"       : { "64" : "ami-0bf06716" }
         },
