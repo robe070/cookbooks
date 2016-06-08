@@ -73,4 +73,7 @@ function Execute-RemoteInit {
 function Execute-RemoteInitPostGit {
     Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
     Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
+    
+    Write-Output "$(Log-Date) Linking LANSA 64-bit and 32-bit registry keys"
+    Execute-RemoteBlock $Script:session { &"$Script:IncludeDir\lansa64reginit.exe" "-f"}
 }

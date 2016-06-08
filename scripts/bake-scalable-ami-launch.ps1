@@ -27,8 +27,8 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-ScalableMsi -VersionText '13SP2 EPC132900' `
+Bake-ScalableMsi -VersionText '13SP2 EPC132901' `
             -VersionMajor 13 `
             -VersionMinor 2 `
-            -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2014_RTM_Express*" `
-            -GitBranch "support/L4W13200_scalable"
+            -AmazonAMIName "WINDOWS_2012R2_SQL_SERVER_EXPRESS_2014" `
+            -GitBranch "patch/L4W132901"
