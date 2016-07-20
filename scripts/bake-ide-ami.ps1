@@ -439,8 +439,25 @@ try
         Write-Output "$(Log-Date) Creating Azure Image"
     
         Write-Verbose "$(Log-Date) Delete image if it already exists"
-        Get-AzureVMImage -ImageName "$($vmname)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
+        Get-AzureVMImage -ImageName "$($VersionText)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
         Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($VersionText)image" -OSState Generalized
+
+        Write-Output "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
+    
+        # Identify the vhd name
+        $NewImage = @(Get-AzureVMImage -ImageName "$($VersionText)image")
+        $NewImage[0].OSDiskConfiguration
+
+        $blob = "$($NewImage[0].OSDiskConfiguration).vhd"
+        $ContainerName = 'vhds'
+
+        #create the sas token
+        $startTime = Get-Date
+        $endTime = $startTime.AddDays(10)
+        $startTime = $startTime.AddDays(-1)
+        $token = New-AzureStorageContainerSASToken -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
+
+        Write-Output "http://$StorageAccount.blob.core.windows.net/$ContainerName/$blob$token"
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
