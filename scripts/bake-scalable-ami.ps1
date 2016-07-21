@@ -30,7 +30,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitBranch
+    $GitBranch,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Cloud='AWS'
     )
 
 # set up environment if not yet setup
@@ -69,7 +73,7 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object CreationDate -Descending)
+    $AmazonImage = @(Get-EC2ImageByName $AmazonAMIName | Sort-Object CreationDate -Descending)
     $ImageName = $AmazonImage[0].Name
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
@@ -104,6 +108,7 @@ try
         if (!(Test-Path -Path $lansaKey)) {
             New-Item -Path $lansaKey
         }
+        New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force
         New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
         New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force

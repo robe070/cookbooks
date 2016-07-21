@@ -18,7 +18,7 @@ ForEach ( $region in $regionList )
     {
         Write-Output "$InstanceType"
         New-CFNStack -region $region `
-        -StackName "Scalable2" `
+        -StackName "Scalable" `
         -DisableRollback $True `
         -Capability CAPABILITY_IAM `
         -templateURL https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W13200_scalable/lansa-master-win.cfn.template `
