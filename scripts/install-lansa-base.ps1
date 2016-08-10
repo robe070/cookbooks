@@ -107,6 +107,13 @@ try
     # Validate our startup changes (Should say- StartMode:Auto)
     Get-WmiObject -class win32_service -filter "Name='AudioSrv'"
 
+    if ( $Cloud -eq "AWS" ) {
+        # Delete file which causes AWS to falsely detect that there is a virus
+        # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
+        Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue
+        Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue
+    }
+
     if ( 0 )
     {
         # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
