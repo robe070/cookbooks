@@ -161,7 +161,7 @@ try
 
         Create-EC2Instance $Script:Imageid $script:keypair $script:SG
     } elseif ($Cloud -eq 'Azure' ) {
-        $image=Get-AzureVMImage | where-object { $_.ImageFamily -eq $AmazonAMIName } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
+        $image=Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
         # If cannot find under ImageFamily, presume its a one-off LANSA image and access it by ImageName
         if ( -not $image )
@@ -180,7 +180,7 @@ try
 
         Write-Verbose "$(Log-Date) Create VM"
         $vm1 = New-AzureVMConfig -Name $vmname -InstanceSize $vmsize -ImageName $image
-        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password
+        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password -DisableGuestAgent
         new-azurevm -ServiceName $svcName -VMs $vm1 -WaitForBoot -Verbose
 
         $vm1 = Get-AzureVM -ServiceName $svcName -Name $VMName
