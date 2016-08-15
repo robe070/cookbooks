@@ -142,8 +142,11 @@ try
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
         Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC        /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+
+        if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+        }
     }
 
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
