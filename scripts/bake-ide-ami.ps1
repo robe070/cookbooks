@@ -428,8 +428,10 @@ try
     if ( $Cloud -eq 'AWS' ) {
         Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
     } elseif ($Cloud -eq 'Azure' ) {
-        Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
-        Invoke-Command -Session $Script:session {cmd /c sysprep /oobe /generalize /shutdown}
+        MessageBox "Run sysprep manually because it fails remotely!. When complete, click OK on this message box"
+
+        # Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
+        # Invoke-Command -Session $Script:session {cmd /c sysprep /oobe /generalize /shutdown}
     }
 
     Remove-PSSession $Script:session
