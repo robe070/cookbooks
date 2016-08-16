@@ -31,10 +31,10 @@ try
 
     cmd /c "sc triggerinfo w32time start/networkon stop/networkoff"
 
-    # Write-Output "$(Log-Date) Ensure that Framework caching is completed"
+    Write-Output "$(Log-Date) Ensure that Framework caching is completed"
 
-    # cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems"
-    # cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems"
+    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems"
+    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems"
 
     if ( $Cloud -eq "AWS" ) {
         Write-Output "$(Log-Date) Configure EC2 Settings"
