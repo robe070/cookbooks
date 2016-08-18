@@ -30,15 +30,15 @@ Set-StrictMode -Version Latest
 # Image value should be this but there is a defect in the latest Azure image:
 #            -AmazonAMIName "Windows Server 2012 R2 Datacenter" `
 
-Bake-IdeMsi -VersionText 'WS2012R2-A' `
+Bake-IdeMsi -VersionText 'WS2012R2-B' `
             -VersionMajor 14 `
-            -VersionMinor 0 `
-            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\LanCdCut_tip_4120_EPC140020" `
+            -VersionMinor 1 `
+            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "a699494373c04fc0bc8f2bb1389d6106__Windows-Server-2012-R2-20160229-en.us-127GB.vhd" `
-            -GitBranch "feature/azure-ide" `
+            -AmazonAMIName "Windows Server 2012 R2 Datacenter*" `
+            -GitBranch "support/L4W14000_IDE_Azure" `
             -Cloud "Azure" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
