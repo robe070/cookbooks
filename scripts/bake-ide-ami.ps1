@@ -451,9 +451,9 @@ try
     
         # Identify the vhd name
         $NewImage = @(Get-AzureVMImage -ImageName "$($VersionText)image")
-        $NewImage[0].OSDiskConfiguration
+        Write-Output "$(Log-Date) $NewImage[0].OSDiskConfiguration"
 
-        $blob = "$($NewImage[0].OSDiskConfiguration).vhd"
+        $blob = "$($NewImage[0].OSDiskConfiguration.Name).vhd"
         $ContainerName = 'vhds'
 
         #create the sas token
