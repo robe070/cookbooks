@@ -66,6 +66,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
+    $InstallScalable=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
     $InstallBaseSoftware=$true,
 
     [Parameter(Mandatory=$false)]
@@ -277,13 +281,6 @@ try
         # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
 
         #####################################################################################
-        Write-Output "$(Log-Date) Installing License"
-        #####################################################################################
-
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
-
-        #####################################################################################
 
         Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
         MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
@@ -375,6 +372,13 @@ try
 
     if ( $InstallIDE -eq $true ) {
 
+        #####################################################################################
+        Write-Output "$(Log-Date) Installing License"
+        #####################################################################################
+
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
+
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
@@ -388,12 +392,17 @@ try
         MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."
 
         MessageBox "Install patches. Then click OK on this message box"
-    } else {
-        # Scalable image comes through here
-        if ( $InstallSQLServer -eq $false ) {
-            Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
-            MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
-        }
+    }
+
+    if ( $InstallScalable -eq $true ) {
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx"
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx"
+
+        # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+
+        Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
+        MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
     }
 
     # Check if Session has been lost due to a Windows reboot

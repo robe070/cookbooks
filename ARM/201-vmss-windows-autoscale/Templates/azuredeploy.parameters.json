@@ -1,0 +1,30 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+   "parameters": {
+      "vmSku": {
+         "value": "Standard_A2"
+      },
+      "imagePublisher": {
+         "value": "lansa"
+      },
+      "imageSku": {
+         "value": "visuallansa"
+      },
+      "imageOffer": {
+         "value": "visuallansa"
+      },
+      "vmssName": {
+         "value": "vmssrg2"
+      },
+      "instanceCount": {
+         "value": 2
+      },
+      "adminUsername": {
+         "value": "lansa"
+      },
+      "adminPassword": {
+         "value": "Pcxuser@122"
+      }
+   }
+}
