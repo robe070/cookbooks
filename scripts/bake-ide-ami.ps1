@@ -142,8 +142,11 @@ try
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
         Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
         cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC        /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+
+        if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+        }
     }
 
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
@@ -161,7 +164,7 @@ try
 
         Create-EC2Instance $Script:Imageid $script:keypair $script:SG
     } elseif ($Cloud -eq 'Azure' ) {
-        $image=Get-AzureVMImage | where-object { $_.ImageFamily -eq $AmazonAMIName } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
+        $image=Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
         # If cannot find under ImageFamily, presume its a one-off LANSA image and access it by ImageName
         if ( -not $image )
@@ -180,7 +183,7 @@ try
 
         Write-Verbose "$(Log-Date) Create VM"
         $vm1 = New-AzureVMConfig -Name $vmname -InstanceSize $vmsize -ImageName $image
-        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password
+        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password -DisableGuestAgent
         new-azurevm -ServiceName $svcName -VMs $vm1 -WaitForBoot -Verbose
 
         $vm1 = Get-AzureVM -ServiceName $svcName -Name $VMName
@@ -425,8 +428,10 @@ try
     if ( $Cloud -eq 'AWS' ) {
         Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
     } elseif ($Cloud -eq 'Azure' ) {
-        Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
-        Invoke-Command -Session $Script:session {cmd /c sysprep /oobe /generalize /shutdown}
+        MessageBox "Run sysprep manually because it fails remotely!. When complete, click OK on this message box"
+
+        # Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
+        # Invoke-Command -Session $Script:session {cmd /c sysprep /oobe /generalize /shutdown}
     }
 
     Remove-PSSession $Script:session
@@ -446,9 +451,9 @@ try
     
         # Identify the vhd name
         $NewImage = @(Get-AzureVMImage -ImageName "$($VersionText)image")
-        $NewImage[0].OSDiskConfiguration
+        Write-Output "$(Log-Date) $NewImage[0].OSDiskConfiguration"
 
-        $blob = "$($NewImage[0].OSDiskConfiguration).vhd"
+        $blob = "$($NewImage[0].OSDiskConfiguration.Name).vhd"
         $ContainerName = 'vhds'
 
         #create the sas token
