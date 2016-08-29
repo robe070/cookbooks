@@ -32,7 +32,9 @@ param(
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
 [String]$wait,
-[String]$userscripthook
+[String]$userscripthook,
+[Parameter(Mandatory=$false)]
+[String]$DBUT='MSSQLS'
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -68,6 +70,7 @@ Write-Debug ("webuser = $webuser")
 Write-Debug ("32bit = $f32bit")
 Write-Debug ("SUDB = $SUDB")
 Write-Debug ("UPGD = $UPGD")
+Write-Debug ("DBUT = $DBUT")
 
 try
 {
@@ -102,6 +105,7 @@ try
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    Write-Verbose ("Running on $Cloud")
 
     # On initial install disable TCP Offloading
 
@@ -148,7 +152,7 @@ try
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
     Write-Output ("Arguments = $Arguments")
 
@@ -171,7 +175,7 @@ try
 
     if ( (Test-Path -Path $x_err) )
     {
-        Write-Verbose ("Signal to Cloud Formation that the installation has failed")
+        Write-Verbose ("Signal to Cloud log that the installation has failed")
 
         $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
         Write-Error $ErrorMessage -Category NotInstalled
@@ -233,7 +237,9 @@ catch
 finally
 {
     Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
-    Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    if ( $Cloud -eq "AWS" ) {
+        Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    }
 }
 
 # Successful completion so set Last Exit Code to 0
