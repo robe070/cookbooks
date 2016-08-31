@@ -393,10 +393,9 @@
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [
-                                 "[concat('https://raw.githubusercontent.com/robe070/cookbooks/', parameters('gitBranch'), '/scripts/git-pull.ps1')]",
-                                 "[concat('https://raw.githubusercontent.com/robe070/cookbooks/', parameters('gitBranch'), '/scripts/install-lansa-msi.ps1')]"
+                                 "[concat('https://raw.githubusercontent.com/robe070/cookbooks/', parameters('gitBranch'), '/scripts/git-pull.ps1')]"
                               ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;', 'pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '1;popd;}\"')]"
                            }
                         }
                      }
@@ -525,17 +524,25 @@
 
    ],
    "outputs": {
-      "AzureSQLDatabaseServerName": {
+      "dbServerName": {
          "type": "string",
          "value": "[variables('sqlserverName')]"
       },
-      "AzureSQLDatabaseName": {
+      "dbName": {
          "type": "string",
          "value": "[parameters('databaseName')]"
       },
-      "LoadBalancerAddress": {
+      "lbFqdn": {
          "type": "string",
          "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+      },
+      "lbIpAddress": {
+         "type": "string",
+         "value": "[reference(variables('publicIPAddressName')).IpAddress]"
+      },
+      "rdpAddress": {
+         "type": "string",
+         "value": "[concat(reference(variables('publicIPAddressName')).dnsSettings.fqdn, ':50000')]"
       }
    }
 }
