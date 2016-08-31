@@ -2,6 +2,12 @@
    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
    "contentVersion": "1.0.0.0",
    "parameters": {
+      "msiUri": {
+         "type": "string",
+         "metadata": {
+            "description": "URL of MSI to install on each VM."
+         }
+      },
       "vmSku": {
          "type": "string",
          "defaultValue": "Standard_A1",
@@ -68,6 +74,18 @@
          "type": "securestring",
          "metadata": {
             "description": "Admin password on all VMs."
+         }
+      },
+      "webUsername": {
+         "type": "string",
+         "metadata": {
+            "description": "Web Server username on all VMs."
+         }
+      },
+      "webPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Web Server password on all VMs."
          }
       },
       "databaseLogin": {
@@ -395,7 +413,7 @@
                               "fileUris": [
                                  "[concat('https://raw.githubusercontent.com/robe070/cookbooks/', parameters('gitBranch'), '/scripts/git-pull.ps1')]"
                               ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '1;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', variables('sqlserverName'), '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';popd;}\"')]"
                            }
                         }
                      }

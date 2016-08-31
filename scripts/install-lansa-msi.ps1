@@ -34,7 +34,8 @@ param(
 [String]$wait,
 [String]$userscripthook,
 [Parameter(Mandatory=$false)]
-[String]$DBUT='MSSQLS'
+[String]$DBUT='MSSQLS',
+[String]$MSIuri
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -106,6 +107,11 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("Running on $Cloud")
+
+    if ( $Cloud -eq "Azure" ) {
+        Write-Verbose ("Downloading $MSIuri to $installer_file")
+        (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+    }
 
     # On initial install disable TCP Offloading
 
