@@ -25,6 +25,30 @@
       },
       "adminPassword": {
          "value": "Pcxuser@122"
+      },
+      "databaseLogin": {
+         "value":  "lansa"
+      },
+      "databaseLoginPassword": {
+         "value":  "Pcxuser@122"
+      },
+      "databaseName": {
+         "value":  "lansa"
+      },
+      "collation": {
+         "value": "SQL_Latin1_General_CP1_CI_AS"
+      },
+      "edition": {
+         "value": "Basic"
+      },
+      "maxSizeBytes": {
+         "value": "1073741824"
+      },
+      "requestedServiceObjectiveName": {
+         "value": "Basic"
+      },
+      "gitBranch": {
+         "value": "feature/azure_scalable"
       }
    }
 }
