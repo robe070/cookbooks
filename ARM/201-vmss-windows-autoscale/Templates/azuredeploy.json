@@ -206,7 +206,10 @@
       "networkApiVersion": "2016-03-30",
       "storageApiVersion": "2015-06-15",
       "insightsApiVersion": "2015-04-01",
-      "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]"
+      "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
+      "gitRepo": "https://raw.githubusercontent.com/robe070/cookbooks/",
+      "gitRefreshName": "git-pull.ps1",
+      "gitRefreshUri": "[concat(variables('gitRepo'), parameters('gitBranch'), '/scripts/', variables('gitRefreshName'))]"
    },
    "resources": [
       {
@@ -299,6 +302,38 @@
                      "frontendPortRangeStart": "[variables('natStartPort')]",
                      "frontendPortRangeEnd": "[variables('natEndPort')]",
                      "backendPort": "[variables('natBackendPort')]"
+                  }
+               }
+            ],
+            "loadBalancingRules": [
+               {
+                  "name": "lbrule",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('frontEndIPConfigID')]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('bePoolName'))]"
+                     },
+                     "probe": {
+                        "id": "[concat(variables('lbID'), '/probes/lbprobe')]"
+                     },
+                     "protocol": "Tcp",
+                     "loadDistribution":  "SourceIP",
+                     "frontendPort": 80,
+                     "backendPort": 80,
+                     "idleTimeoutInMinutes": 15
+                  }
+               }
+            ],
+            "probes": [
+               {
+                  "name": "lbprobe",
+                  "properties": {
+                     "protocol": "Tcp",
+                     "port": 80,
+                     "intervalInSeconds": 15,
+                     "numberOfProbes": 2
                   }
                }
             ]
@@ -410,10 +445,8 @@
                            "typeHandlerVersion": "1.8",
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
-                              "fileUris": [
-                                 "[concat('https://raw.githubusercontent.com/robe070/cookbooks/', parameters('gitBranch'), '/scripts/git-pull.ps1')]"
-                              ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;.\\git-pull.ps1 ', parameters('gitBranch'), ' 3;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', variables('sqlserverName'), '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';popd;}\"')]"
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
@@ -544,7 +577,7 @@
    "outputs": {
       "dbServerName": {
          "type": "string",
-         "value": "[variables('sqlserverName')]"
+         "value": "[reference(variables('sqlserverName')).fullyQualifiedDomainName]"
       },
       "dbName": {
          "type": "string",

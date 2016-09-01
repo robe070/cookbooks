@@ -75,6 +75,7 @@ Write-Debug ("DBUT = $DBUT")
 
 try
 {
+    $ExitCode = 0
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
     {
         $f32bit_bool = $true
@@ -166,13 +167,20 @@ try
     {
         Write-Output ("Upgrading LANSA")
         $Arguments += "CREATENEWUSERFORSERVICE=""Use Existing User"""
-        Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
+        $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
     else
     {
         Write-Output ("Installing LANSA")
         $Arguments += "APPA=""$APPA""", "CREATENEWUSERFORSERVICE=""Create New Local User"""
-        Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
+        $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
+    }
+
+    if ( $p.ExitCode -ne 0 ) {
+        $ExitCode = $p.ExitCode
+        $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
+        Write-Error $ErrorMessage -Category NotInstalled
+        throw $ErrorMessage
     }
 
     #####################################################################################
@@ -237,14 +245,26 @@ try
 catch
 {
 	$_
-    Write-Error ("Installation error")
-    throw
+    Write-Output ("Installation error")
+    if ( $ExitCode -eq 0 -and $LASTEXITCODE -ne 0) {
+        $ExitCode = $LASTEXITCODE
+    }
+    if ($ExitCode -eq 0 ) {$ExitCode = 1}
+
+    cmd /c exit $ExitCode    #Set $LASTEXITCODE
+    return
 }
 finally
 {
     Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
     if ( $Cloud -eq "AWS" ) {
         Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    } else {
+        if ($Cloud -eq "Azure") {
+            Write-Output ("Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
+            Write-Output ("Note that an exit code of 1603 is an installer error so look at $install_log")
+            Write-Output ("and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
+        }
     }
 }
 
