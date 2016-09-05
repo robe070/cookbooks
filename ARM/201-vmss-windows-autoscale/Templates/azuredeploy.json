@@ -333,7 +333,7 @@
                      "protocol": "Tcp",
                      "port": 80,
                      "intervalInSeconds": 15,
-                     "numberOfProbes": 2
+                     "numberOfProbes": 5
                   }
                }
             ]
@@ -446,7 +446,7 @@
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
