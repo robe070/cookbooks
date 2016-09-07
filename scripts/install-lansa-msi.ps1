@@ -64,14 +64,14 @@ $trusted="NO"
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Write-Debug ("Server_name = $server_name")
-Write-Debug ("dbname = $dbname")
-Write-Debug ("dbuser = $dbuser")
-Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $f32bit")
-Write-Debug ("SUDB = $SUDB")
-Write-Debug ("UPGD = $UPGD")
-Write-Debug ("DBUT = $DBUT")
+Write-Verbose ("Server_name = $server_name")
+Write-Verbose ("dbname = $dbname")
+Write-Verbose ("dbuser = $dbuser")
+Write-Verbose ("webuser = $webuser")
+Write-Verbose ("32bit = $f32bit")
+Write-Verbose ("SUDB = $SUDB")
+Write-Verbose ("UPGD = $UPGD")
+Write-Verbose ("DBUT = $DBUT")
 
 try
 {
