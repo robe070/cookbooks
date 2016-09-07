@@ -159,6 +159,7 @@
       "storageAccountType": "Standard_LRS",
       "namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('vmssName'))]",
+      "vmssNameDb": "[toLower(substring(concat('db',parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "newStorageAccountSuffix": "[concat(variables('namingInfix'), 'sa')]",
       "uniqueStringArray": [
          "[concat(uniqueString(concat(resourceGroup().id, variables('newStorageAccountSuffix'), '0')))]",
@@ -179,7 +180,9 @@
       "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
       "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
       "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
+      "dbnatPoolName": "[concat(variables('namingInfix'), 'dbnatpool')]",
       "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
+      "dbbePoolName": "[concat(variables('namingInfix'), 'dbbepool')]",
       "natStartPort": 50000,
       "natEndPort": 50119,
       "natBackendPort": 3389,
@@ -299,8 +302,8 @@
                         "id": "[variables('frontEndIPConfigID')]"
                      },
                      "protocol": "tcp",
-                     "frontendPortRangeStart": "[variables('natStartPort')]",
-                     "frontendPortRangeEnd": "[variables('natEndPort')]",
+                     "frontendPortRangeStart": "[add(variables('natStartPort'),2)]",
+                     "frontendPortRangeEnd": "[add(variables('natEndPort'), 2)]",
                      "backendPort": "[variables('natBackendPort')]"
                   }
                }
@@ -319,7 +322,7 @@
                         "id": "[concat(variables('lbID'), '/probes/lbprobe')]"
                      },
                      "protocol": "Tcp",
-                     "loadDistribution":  "SourceIP",
+                     "loadDistribution": "SourceIP",
                      "frontendPort": 80,
                      "backendPort": 80,
                      "idleTimeoutInMinutes": 15
@@ -330,10 +333,124 @@
                {
                   "name": "lbprobe",
                   "properties": {
-                     "protocol": "Tcp",
+                     "protocol": "http",
                      "port": 80,
                      "intervalInSeconds": 15,
-                     "numberOfProbes": 5
+                     "timeoutInSeconds": 31,
+                     "numberOfProbes": 2,
+                     "requestPath": "cgi-bin/lansaweb?about"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachineScaleSets",
+         "name": "[variables('vmssNameDb')]",
+         "location": "[resourceGroup().location]",
+         "apiVersion": "[variables('computeApiVersion')]",
+         "dependsOn": [
+            "storageLoop",
+            "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
+            "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]"
+         ],
+         "sku": {
+            "name": "[parameters('vmSku')]",
+            "tier": "Standard",
+            "capacity": "1"
+         },
+         "plan": {
+            "name": "[parameters('imageSKU')]",
+            "product": "[parameters('imageOffer')]",
+            "publisher": "[parameters('imagePublisher')]"
+         },
+         "properties": {
+            "overprovision": "true",
+            "upgradePolicy": {
+               "mode": "Automatic"
+            },
+            "virtualMachineProfile": {
+               "storageProfile": {
+                  "osDisk": {
+                     "vhdContainers": [
+                        "[concat('https://', variables('newStorageAccountSuffix'), variables('uniqueStringArray')[0], '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                        "[concat('https://', variables('newStorageAccountSuffix'), variables('uniqueStringArray')[1], '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                        "[concat('https://', variables('newStorageAccountSuffix'), variables('uniqueStringArray')[2], '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                        "[concat('https://', variables('newStorageAccountSuffix'), variables('uniqueStringArray')[3], '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                        "[concat('https://', variables('newStorageAccountSuffix'), variables('uniqueStringArray')[4], '.blob.core.windows.net/', variables('vhdContainerName'))]"
+                     ],
+                     "name": "[variables('osDiskName')]",
+                     "caching": "ReadOnly",
+                     "createOption": "FromImage"
+                  },
+                  "imageReference": "[variables('imageReference')]"
+               },
+               "osProfile": {
+                  "computerNamePrefix": "[variables('vmssNameDb')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]"
+               },
+               "networkProfile": {
+                  "networkInterfaceConfigurations": [
+                     {
+                        "name": "[concat('db', variables('nicName'))]",
+                        "properties": {
+                           "primary": "true",
+                           "ipConfigurations": [
+                              {
+                                 "name": "[concat( 'db',variables('ipConfigName'))]",
+                                 "properties": {
+                                    "subnet": {
+                                       "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+                                    }
+                                 }
+                              }
+                           ]
+                        }
+                     }
+                  ]
+               },
+               "extensionProfile": {
+                  "extensions": [
+                     {
+                        "name": "Microsoft.Compute.CustomScriptExtension",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "1.8",
+                           "autoUpgradeMinorVersion": "true",
+                           "settings": {
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                           }
+                        }
+                     }
+                  ]
+               }
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Insights/autoscaleSettings",
+         "apiVersion": "[variables('insightsApiVersion')]",
+         "name": "autoscalewaddb",
+         "location": "[resourceGroup().location]",
+         "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameDb'))]"
+         ],
+         "properties": {
+            "name": "autoscalewaddb",
+            "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameDb'))]",
+            "enabled": true,
+            "profiles": [
+               {
+                  "name": "Profile1",
+                  "capacity": {
+                     "minimum": "1",
+                     "maximum": "1",
+                     "default": "1"
                   }
                }
             ]
@@ -349,7 +466,8 @@
             "[concat('Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
             "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
             "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]"
+            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]",
+            "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameDb'))]"
          ],
          "sku": {
             "name": "[parameters('vmSku')]",
@@ -446,7 +564,7 @@
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-SUDB \"0\" -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
@@ -586,10 +704,6 @@
       "lbFqdn": {
          "type": "string",
          "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
-      },
-      "lbIpAddress": {
-         "type": "string",
-         "value": "[reference(variables('publicIPAddressName')).IpAddress]"
       },
       "rdpAddress": {
          "type": "string",
