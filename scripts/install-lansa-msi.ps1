@@ -99,9 +99,6 @@ try
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
 
-    $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
-    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
-
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
@@ -163,6 +160,9 @@ try
 
     Write-Output ("Arguments = $Arguments")
 
+    $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
+    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
+
     if ( $UPGD_bool )
     {
         Write-Output ("Upgrading LANSA")
@@ -179,19 +179,6 @@ try
     if ( $p.ExitCode -ne 0 ) {
         $ExitCode = $p.ExitCode
         $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
-        Write-Error $ErrorMessage -Category NotInstalled
-        throw $ErrorMessage
-    }
-
-    #####################################################################################
-    # Test if post install x_run processing had any fatal errors
-    #####################################################################################
-
-    if ( (Test-Path -Path $x_err) )
-    {
-        Write-Verbose ("Signal to Cloud log that the installation has failed")
-
-        $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
         Write-Error $ErrorMessage -Category NotInstalled
         throw $ErrorMessage
     }
@@ -238,6 +225,23 @@ try
     else
     {
         Write-Verbose ("User Script not passed")
+    }
+
+
+    #####################################################################################
+    # Test if post install x_run processing had any fatal errors
+    # Performed at the end as errors may occur due to the loadbalancer probe executing
+    # before LANSA has completed installing.
+    # This allows it to continue.
+    #####################################################################################
+
+    if ( (Test-Path -Path $x_err) )
+    {
+        Write-Verbose ("Signal to Cloud log that the installation has failed")
+
+        $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
+        Write-Error $ErrorMessage -Category NotInstalled
+        throw $ErrorMessage
     }
 
     Write-Output ("Installation completed successfully")
