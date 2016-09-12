@@ -48,6 +48,9 @@ else
 
 try
 {
+    # Ensure that dependencies are installed (weird issue no time to diagnose)
+    . "$script:IncludeDir\dot-DBTools.ps1"
+
     #####################################################################################
     Write-Output ("$(Log-Date) Enable Named Pipes on local database")
     #####################################################################################
