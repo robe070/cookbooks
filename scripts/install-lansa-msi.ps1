@@ -32,7 +32,10 @@ param(
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
 [String]$wait,
-[String]$userscripthook
+[String]$userscripthook,
+[Parameter(Mandatory=$false)]
+[String]$DBUT='MSSQLS',
+[String]$MSIuri
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -61,16 +64,18 @@ $trusted="NO"
 $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Write-Debug ("Server_name = $server_name")
-Write-Debug ("dbname = $dbname")
-Write-Debug ("dbuser = $dbuser")
-Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $f32bit")
-Write-Debug ("SUDB = $SUDB")
-Write-Debug ("UPGD = $UPGD")
+Write-Verbose ("Server_name = $server_name")
+Write-Verbose ("dbname = $dbname")
+Write-Verbose ("dbuser = $dbuser")
+Write-Verbose ("webuser = $webuser")
+Write-Verbose ("32bit = $f32bit")
+Write-Verbose ("SUDB = $SUDB")
+Write-Verbose ("UPGD = $UPGD")
+Write-Verbose ("DBUT = $DBUT")
 
 try
 {
+    $ExitCode = 0
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
     {
         $f32bit_bool = $true
@@ -94,14 +99,17 @@ try
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
 
-    $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
-    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
-
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    Write-Verbose ("Running on $Cloud")
+
+    if ( $Cloud -eq "Azure" ) {
+        Write-Verbose ("Downloading $MSIuri to $installer_file")
+        (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+    }
 
     # On initial install disable TCP Offloading
 
@@ -148,32 +156,29 @@ try
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
     Write-Output ("Arguments = $Arguments")
+
+    $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
+    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
     if ( $UPGD_bool )
     {
         Write-Output ("Upgrading LANSA")
         $Arguments += "CREATENEWUSERFORSERVICE=""Use Existing User"""
-        Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
+        $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
     else
     {
         Write-Output ("Installing LANSA")
         $Arguments += "APPA=""$APPA""", "CREATENEWUSERFORSERVICE=""Create New Local User"""
-        Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
+        $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
 
-    #####################################################################################
-    # Test if post install x_run processing had any fatal errors
-    #####################################################################################
-
-    if ( (Test-Path -Path $x_err) )
-    {
-        Write-Verbose ("Signal to Cloud Formation that the installation has failed")
-
-        $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
+    if ( $p.ExitCode -ne 0 ) {
+        $ExitCode = $p.ExitCode
+        $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
         Write-Error $ErrorMessage -Category NotInstalled
         throw $ErrorMessage
     }
@@ -222,18 +227,49 @@ try
         Write-Verbose ("User Script not passed")
     }
 
+
+    #####################################################################################
+    # Test if post install x_run processing had any fatal errors
+    # Performed at the end as errors may occur due to the loadbalancer probe executing
+    # before LANSA has completed installing.
+    # This allows it to continue.
+    #####################################################################################
+
+    if ( (Test-Path -Path $x_err) )
+    {
+        Write-Verbose ("Signal to Cloud log that the installation has failed")
+
+        $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
+        Write-Error $ErrorMessage -Category NotInstalled
+        throw $ErrorMessage
+    }
+
     Write-Output ("Installation completed successfully")
 }
 catch
 {
 	$_
-    Write-Error ("Installation error")
-    throw
+    Write-Output ("Installation error")
+    if ( $ExitCode -eq 0 -and $LASTEXITCODE -ne 0) {
+        $ExitCode = $LASTEXITCODE
+    }
+    if ($ExitCode -eq 0 ) {$ExitCode = 1}
+
+    cmd /c exit $ExitCode    #Set $LASTEXITCODE
+    return
 }
 finally
 {
     Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
-    Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    if ( $Cloud -eq "AWS" ) {
+        Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+    } else {
+        if ($Cloud -eq "Azure") {
+            Write-Output ("Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
+            Write-Output ("Note that an exit code of 1603 is an installer error so look at $install_log")
+            Write-Output ("and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
+        }
+    }
 }
 
 # Successful completion so set Last Exit Code to 0

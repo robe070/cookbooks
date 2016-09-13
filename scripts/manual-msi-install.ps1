@@ -1,0 +1,1 @@
+﻿C:\LANSA\scripts\install-lansa-msi.ps1 -server_name "scale-ca1.database.windows.net" -DBUT "SQLAZURE" -dbname "LANSA" -dbuser "lansa" -dbpassword "" -webuser "pcxuser2" -webpassword "" -MSIuri "https://lansalpcmsdn.blob.core.windows.net:443/app/test/AWAMAPP_v14.1.2_en-us.msi"

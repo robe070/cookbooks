@@ -1,0 +1,66 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+   "parameters": {
+      "msiUri": {
+         "value": "https://lansalpcmsdn.blob.core.windows.net:443/app/test/AWAMAPP_v14.1.2_en-us.msi"
+      },
+      "vmSku": {
+         "value": "Standard_A2"
+      },
+      "imagePublisher": {
+         "value": "lansa"
+      },
+      "imageSku": {
+         "value": "lansa-scalable-license"
+      },
+      "imageOffer": {
+         "value": "lansa-scalable-license-preview"
+      },
+      "vmssName": {
+         "value": "vmssrg3"
+      },
+      "minInstanceCount": {
+         "value": 2
+      },
+      "maxInstanceCount": {
+         "value": 100
+      },
+      "adminUsername": {
+         "value": "lansa"
+      },
+      "adminPassword": {
+         "value": "Pcxuser@122"
+      },
+      "webUsername": {
+         "value": "Pcxuser2"
+      },
+      "webPassword": {
+         "value": "Pcxuser@122"
+      },
+      "databaseLogin": {
+         "value": "lansa"
+      },
+      "databaseLoginPassword": {
+         "value": "Pcxuser@122"
+      },
+      "databaseName": {
+         "value": "lansa"
+      },
+      "collation": {
+         "value": "SQL_Latin1_General_CP1_CI_AS"
+      },
+      "edition": {
+         "value": "Standard"
+      },
+      "maxSizeBytes": {
+         "value": "1073741824"
+      },
+      "requestedServiceObjectiveName": {
+         "value": "S2"
+      },
+      "gitBranch": {
+         "value": "feature/azure_scalable"
+      }
+   }
+}

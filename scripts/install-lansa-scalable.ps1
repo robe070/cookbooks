@@ -29,10 +29,24 @@ param (
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
-if ( -not $script:IncludeDir)
-{
-    # Log-Date can't be used yet as Framework has not been loaded
+if ($false) {
+    if ( -not $script:IncludeDir)
+    {
+        # Log-Date can't be used yet as Framework has not been loaded
 
+	    Write-Output "Initialising environment - presumed not running through RemotePS"
+	    $MyInvocation.MyCommand.Path
+	    $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+	    . "$script:IncludeDir\Init-Baking-Vars.ps1"
+	    . "$script:IncludeDir\Init-Baking-Includes.ps1"
+    }
+    else
+    {
+	    Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+    }
+}
+else {
 	Write-Output "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -40,14 +54,12 @@ if ( -not $script:IncludeDir)
 	. "$script:IncludeDir\Init-Baking-Vars.ps1"
 	. "$script:IncludeDir\Init-Baking-Includes.ps1"
 }
-else
-{
-	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
-}
-
 
 try
 {
+    # Ensure that dependencies are installed (weird issue no time to diagnose)
+    . "$script:IncludeDir\dot-DBTools.ps1"
+
     #####################################################################################
     Write-Output ("$(Log-Date) Enable Named Pipes on local database")
     #####################################################################################

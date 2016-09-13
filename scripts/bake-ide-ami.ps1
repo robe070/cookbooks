@@ -66,6 +66,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
+    $InstallScalable=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
     $InstallBaseSoftware=$true,
 
     [Parameter(Mandatory=$false)]
@@ -277,16 +281,12 @@ try
         # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
 
         #####################################################################################
-        Write-Output "$(Log-Date) Installing License"
-        #####################################################################################
-
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
-
-        #####################################################################################
 
         Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
         MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+
+        Write-Output "$(Log-Date) Workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+        MessageBox "Configure gpedit.msc. Enable - \Computer Configuration\Admninistrative Templates\System\User Profiles\'Do not forcefully unload the users registry at logoff' Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
@@ -375,6 +375,13 @@ try
 
     if ( $InstallIDE -eq $true ) {
 
+        #####################################################################################
+        Write-Output "$(Log-Date) Installing License"
+        #####################################################################################
+
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
+
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
@@ -388,12 +395,17 @@ try
         MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."
 
         MessageBox "Install patches. Then click OK on this message box"
-    } else {
-        # Scalable image comes through here
-        if ( $InstallSQLServer -eq $false ) {
-            Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
-            MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
-        }
+    }
+
+    if ( $InstallScalable -eq $true ) {
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx"
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx"
+
+        # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+
+        Write-Output "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
+        MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
     }
 
     # Check if Session has been lost due to a Windows reboot
@@ -444,25 +456,12 @@ try
         Write-Output "$(Log-Date) Creating Azure Image"
     
         Write-Verbose "$(Log-Date) Delete image if it already exists"
-        Get-AzureVMImage -ImageName "$($VersionText)image" -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
-        Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName "$($VersionText)image" -OSState Generalized
+        $ImageName = "$($VersionText)image"
+        Get-AzureVMImage -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
+        Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName $ImageName -OSState Generalized
 
         Write-Output "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-    
-        # Identify the vhd name
-        $NewImage = @(Get-AzureVMImage -ImageName "$($VersionText)image")
-        Write-Output "$(Log-Date) $NewImage[0].OSDiskConfiguration"
-
-        $blob = "$($NewImage[0].OSDiskConfiguration.Name).vhd"
-        $ContainerName = 'vhds'
-
-        #create the sas token
-        $startTime = Get-Date
-        $endTime = $startTime.AddDays(10)
-        $startTime = $startTime.AddDays(-1)
-        $token = New-AzureStorageContainerSASToken -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
-
-        Write-Output "http://$StorageAccount.blob.core.windows.net/$ContainerName/$blob$token"
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ImageName $ImageName
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
