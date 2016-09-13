@@ -3,7 +3,7 @@
 #Requires -Module Azure.Storage
 
 Param(
-    [string] $ResourceGroupLocation = 'Australia East',
+    [string] $ResourceGroupLocation = 'Australia Southeast',
     [string] $ResourceGroupName = 'CloudFormation',
     [switch] $UploadArtifacts,
     [string] $StorageAccountName,

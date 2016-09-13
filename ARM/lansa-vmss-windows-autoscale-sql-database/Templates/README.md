@@ -2,7 +2,7 @@
 
 The following template deploys a LANSA Windows VM Scale Set integrated with Azure autoscale and Azure SQL Database
 
-The template deploys a Windows VMSS with a desired count of VMs in the scale set and a LANSA MSI to install into each VM. Once the VM Scale Set is deployed a custom script extension is used to install the LANSA MSI)
+The template deploys a Windows VMSS with a desired count of VMs in the scale set and a LANSA MSI to install into each VM. Once the VM Scale Set is deployed a custom script extension is used to install the LANSA MSI
 
 The Autoscale rules are configured as follows
 - sample for CPU (\\Processor\\PercentProcessorTime) in each VM every 1 Minute
@@ -30,7 +30,7 @@ The Autoscale rules are configured as follows
 	2. The minimum number of instances is also the starting capacity for the VMSS. Scaling events alter the VMSS capacity which in turn causes a vm to be created or deleted in order to being the current instance count in line with the VMSS capacity.
 	3. Installed with SUDB=0. Otherwise commandToExecute is identical.
 
-2. Scale Out fast. Scale Out action is 10% of current instances. It scales out after 5 mins of avg CPU > 70%. Another scaling event will not occur for 20 minutes - time for VM to be installed.
+2. Scale Out fast. Scale Out action is 10% of current instances. It scales out after 5 mins of avg CPU > 70%. Another scaling event will not occur for 20 minutes. This allows time for the VM to be installed.
 
-3. Scale in slow. Scale in action is 1 VM at a time after 5 mins of avg CPU < 30%. Another scaling event will not occur for 5 mins. Deletion does not take very long. Allows more VMs to be deleted or another to be created.
+3. Scale in slowly. Scale in action is 1 VM at a time after 5 mins of avg CPU < 30%. Another scaling event will not occur for 5 mins. Deletion does not take very long. Allows more VMs to be deleted or another to be created.
 

@@ -12,16 +12,19 @@
          "value": "lansa"
       },
       "imageSku": {
-         "value": "visuallansa"
+         "value": "lansa-scalable-license"
       },
       "imageOffer": {
-         "value": "visuallansa"
+         "value": "lansa-scalable-license-preview"
       },
       "vmssName": {
-         "value": "vmssrg2"
+         "value": "vmssrg3"
       },
-      "instanceCount": {
+      "minInstanceCount": {
          "value": 2
+      },
+      "maxInstanceCount": {
+         "value": 100
       },
       "adminUsername": {
          "value": "lansa"
@@ -48,13 +51,13 @@
          "value": "SQL_Latin1_General_CP1_CI_AS"
       },
       "edition": {
-         "value": "Basic"
+         "value": "Standard"
       },
       "maxSizeBytes": {
          "value": "1073741824"
       },
       "requestedServiceObjectiveName": {
-         "value": "Basic"
+         "value": "S2"
       },
       "gitBranch": {
          "value": "feature/azure_scalable"

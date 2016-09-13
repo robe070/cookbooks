@@ -285,6 +285,9 @@ try
         Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
         MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
+        Write-Output "$(Log-Date) Workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+        MessageBox "Configure gpedit.msc. Enable - \Computer Configuration\Admninistrative Templates\System\User Profiles\'Do not forcefully unload the users registry at logoff' Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
         #####################################################################################
