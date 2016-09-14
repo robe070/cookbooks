@@ -1,92 +1,14 @@
-<html>
+<p>The LANSA Scalable License provides users with a machine image and an Azure Resource Manager template for constructing a production ready Windows stack to deliver LANSA web, mobile and desktop capabilities. The stack has been architected to provide all the essential components including a load balancer, web servers and a database server. This stack is highly available and fault tolerant, including being auto-installing, auto-upgrading, auto-patching, auto-Windows Updates and auto-scaling. The Usage Instructions and Tutorial below provide a step by step guide on how to set up the stack using an Azure Resource Manager template. Users can deploy an application to this production environment from any Visual LANSA IDE including the Azure Visual LANSA Development Environment Web Application Framework.</p>
 
-<head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=Generator content="Microsoft Word 15 (filtered)">
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:8.0pt;
-	margin-left:0cm;
-	line-height:105%;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:#954F72;
-	text-decoration:underline;}
-p.msonormal0, li.msonormal0, div.msonormal0
-	{mso-style-name:msonormal;
-	margin-right:0cm;
-	margin-left:0cm;
-	font-size:12.0pt;
-	font-family:"Times New Roman",serif;}
-p.msochpdefault, li.msochpdefault, div.msochpdefault
-	{mso-style-name:msochpdefault;
-	margin-right:0cm;
-	margin-left:0cm;
-	font-size:10.0pt;
-	font-family:"Calibri",sans-serif;}
-span.mt10
-	{mso-style-name:mt10;}
-.MsoChpDefault
-	{font-size:10.0pt;
-	font-family:"Calibri",sans-serif;}
-@page WordSection1
-	{size:595.3pt 841.9pt;
-	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
-div.WordSection1
-	{page:WordSection1;}
--->
-</style>
+<a href="http://www.lansa.com/game-changer/">Detailed product description</a>
 
-</head>
+<p><b>Usage Instructions.</b></p>
+<p>To deploy a LANSA Stack you need to use an Azure Resource Manager template. An example
+template is provided and referred to in the 
+<a href="http://docs.lansa.com/14/en/lansa022/index.htm#lansa/vldtoolct_0250.htm" target="_blank">Azure Deployment Tutorial</a>.</p>
 
-<body lang=EN-AU link=blue vlink="#954F72">
+<p>The template by default creates two A2 Standard instances and one Azure SQL Database
+Standard S2 database instance.</p>
 
-<div class=WordSection1>
-
-<p class=MsoNormal><span class=mt10>To deploy a LANSA Stack you need to use
-this Azure Resource Manager template: </span><br>
-<span class=mt10>Version 14.1 <a
-href="https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W14000_scalable/lansa-master-win.cfn.template"
-target="_blank">https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W14000_scalable/lansa-master-win.cfn.template</a>.
-</span><br>
-<span class=mt10>The template by default creates two A2 Standard instances and
-one Azure SQL Database Standard S2 database instance.</span> <br>
-<br>
-<span class=mt10>Full instructions for using the templates and creating your
-stack are provided here: <a
-href="http://docs.lansa.com/140/en/#../AutoMerge/lansa022/Content/lansa/VLDtoolCT_0010.htm"
-target="_blank">http://docs.lansa.com/140/en/#../AutoMerge/lansa022/Content/lansa/VLDtoolCT_0010.htm</a></span><br>
-<br>
-<span class=mt10>A summary of the steps involved are:</span><br>
-<span class=mt10>1) Subscribe to the LANSA Scalable License</span><br>
-<span class=mt10>2) Upload your LANSA Web Application MSI to Azure BLOB storage
-and obtain the URL of the MSI.</span><br>
-<span class=mt10>3) Use the Azure Portal to create a scalable LANSA stack using
-the template URL provided above. </span><br>
-<span class=mt10>4) You will be prompted to enter various parameters. The first
-8 parameters are all you need to consider to instantiate a stack that will
-work. The rest are tuning or maintenance parameters which you only need to
-consider when creating a production stack. In particular you need to put the
-URL of the MSI in parameter 01 and provide answers for the other mandatory
-parameters.</span></p>
-
-</div>
-
-</body>
-
-</html>
+<p>For full instructions for using the template and creating your stack go to the 
+<a href="http://docs.lansa.com/14/en/lansa022/index.htm#lansa/vldtoolct_0250.htm" target="_blank">Azure Deployment Tutorial</a></p>
