@@ -35,7 +35,9 @@ param(
 [String]$userscripthook,
 [Parameter(Mandatory=$false)]
 [String]$DBUT='MSSQLS',
-[String]$MSIuri
+[String]$MSIuri,
+[String]$trace,
+[String]$traceSettings
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -142,6 +144,13 @@ try
     if ( -not $UPGD_bool )
     {
         Start-WebAppPool -Name "DefaultAppPool"
+    }
+
+    Write-Output ("Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+    if ($trace -eq "Y") {
+        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+        $env:X_RUN = $traceSettings
     }
 
     Write-Output ("Installing the application")
