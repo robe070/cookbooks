@@ -36,8 +36,8 @@ param(
 [Parameter(Mandatory=$false)]
 [String]$DBUT='MSSQLS',
 [String]$MSIuri,
-[String]$trace,
-[String]$traceSettings
+[String]$trace = 'N',
+[String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999"
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
