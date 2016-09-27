@@ -151,6 +151,9 @@ try
     if ($trace -eq "Y") {
         [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
         $env:X_RUN = $traceSettings
+    } else {
+        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+        $env:X_RUN = ''
     }
 
     Write-Output ("Installing the application")
