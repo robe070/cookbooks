@@ -113,11 +113,6 @@ try
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
     }
 
-    if ( $Cloud -eq "Azure" ) {
-        Write-Output( "$(Log-Date) Pause to allow services to be properly installed")
-        sleep -s 600
-    }
-
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
