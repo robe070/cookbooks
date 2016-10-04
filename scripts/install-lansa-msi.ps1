@@ -209,7 +209,7 @@ try
         Write-Output "$(Log-Date) Set JSM Service dependencies"
         Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
         Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service."
-        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.0 (LIN14003_EPC140005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
     }
 
     Write-Output ("$(Log-Date) Execute the user script if one has been passed")
