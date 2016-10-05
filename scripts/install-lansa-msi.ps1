@@ -111,6 +111,22 @@ try
     if ( $Cloud -eq "Azure" ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+
+        # Temporary code to install new ODBC driver which seems to have fixed the C00001A5 exceptions caused by SqlDriverConnect
+
+        $MSODBCSQL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64_12_0_4219_0.msi"
+        $odbc_installer_file = ( Join-Path -Path "c:\lansa" -ChildPath "msodbcsqlx64.msi" )
+        Write-Verbose ("$(Log-Date) Downloading $MSODBCSQL to $odbc_installer_file")
+        (New-Object System.Net.WebClient).DownloadFile($MSODBCSQL, $odbc_installer_file)
+
+        [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+        $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
+        if ( $p.ExitCode -ne 0 ) {
+            $ExitCode = $p.ExitCode
+            $ErrorMessage = "ODBC Install returned error code $($p.ExitCode)."
+            Write-Error $ErrorMessage -Category NotInstalled
+            throw $ErrorMessage
+        }
     }
 
     # On initial install disable TCP Offloading
