@@ -259,6 +259,7 @@ try
         Write-Verbose ("User Script not passed")
     }
 
+    iisreset
 
     #####################################################################################
     # Test if post install x_run processing had any fatal errors
