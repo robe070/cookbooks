@@ -55,6 +55,9 @@
       },
       "gitBranch": {
          "value": "support/L4W14000_scalable_azure"
+      },
+      "trace": {
+         "value": "N"
       }
    }
 }
