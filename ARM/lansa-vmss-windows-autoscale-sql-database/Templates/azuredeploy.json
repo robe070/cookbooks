@@ -132,6 +132,41 @@
          }
 
       },
+      "webServerMaxConnect": {
+         "type": "string",
+         "defaultValue": "20",
+         "metadata": {
+            "description": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated."
+         }
+      },
+      "updateMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly. If the LansaMSI parameter is not different a repair will be performed"
+         }
+      },
+      "uninstallMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Uninstall the MSI: Increment this by one to trigger an MSI Uninstall. The MSI used to uninstall is the last one that was installed. It is called c:\\lansa\\MyApp.msi"
+         }
+      },
+      "reinstallMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Reinstall the MSI: Increment this by one to trigger an MSI reinstall. The MSI used to reinstall is the last one that was installed. It is called c:\\lansa\\MyApp.msi"
+         }
+      },
+      "triggerWebConfig": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Update Stack: Increment this by one to trigger an update to the web configuration"
+         }
+      },
       "imageOffer": {
          "type": "string",
          "defaultValue": "lansa-scalable-license",
@@ -221,6 +256,7 @@
     "networkApiVersion": "2016-03-30",
     "storageApiVersion": "2015-06-15",
     "insightsApiVersion": "2015-04-01",
+    "customScriptExtensionVersion":  "1.8",
     "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
     "gitRepo": "https://raw.githubusercontent.com/robe070/cookbooks/",
     "gitRefreshName": "git-pull.ps1",
@@ -350,7 +386,7 @@
                   "intervalInSeconds": 15,
                   "timeoutInSeconds": 31,
                   "numberOfProbes": 2,
-                  "requestPath": "cgi-bin/lansaweb?w=XVLWEBTS2&r=GetResponse&ml=LANSA:XHTML&p=SYS&l=ENG"
+                  "requestPath": "cgi-bin/probe"
                 }
                }
             ]
@@ -507,15 +543,71 @@
                "extensionProfile": {
                   "extensions": [
                      {
-                        "name": "Microsoft.Compute.CustomScriptExtension",
+                        "name": "FirstInstall",
                         "properties": {
                            "publisher": "Microsoft.Compute",
                            "type": "CustomScriptExtension",
-                           "typeHandlerVersion": "1.8",
+                           "typeHandlerVersion": "[variables('customScriptExtensionVersion')]",
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',  ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',  ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE}; c:\\lansa\\scripts\\webconfig.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -maxconnections \"', parameters('webServerMaxConnect'), '\"',  ';if ($LASTEXITCODE -ne 0) {Write-Error (\"Web Configuration failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                           }
+                        }
+                     },
+                     {
+                        "name": "UpdateMSI",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "[variables('customScriptExtensionVersion')]",
+                           "autoUpgradeMinorVersion": "true",
+                           "forceUpdateTag": "[parameters('updateMSI')]",
+                           "settings": {
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;if (', parameters('updateMSI'), ' -eq 0) {exit 0}; ./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ';popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-UPGD true -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',  ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Reinstall failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                           }
+                        }
+                     },
+                     {
+                        "name": "WebConfiguration",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "[variables('customScriptExtensionVersion')]",
+                           "autoUpgradeMinorVersion": "true",
+                           "forceUpdateTag": "[parameters('triggerWebConfig')]",
+                           "settings": {
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;if (', parameters('triggerWebConfig'), ' -eq 0) {exit 0};./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\webconfig.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -maxconnections \"', parameters('webServerMaxConnect'), '\"',  ';if ($LASTEXITCODE -ne 0) {Write-Error (\"Web Configuration failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                           }
+                        }
+                     },
+                     {
+                        "name": "Reinstall",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "[variables('customScriptExtensionVersion')]",
+                           "autoUpgradeMinorVersion": "true",
+                           "forceUpdateTag": "[parameters('reinstallMSI')]",
+                           "settings": {
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;if (', parameters('reinstallMSI'), ' -eq 0) {exit 0}; ./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ';popd;', 'pushd; msiexec /quiet /x c:\\lansa\\MyApp.msi;if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Uninstall failed\");exit $LASTEXITCODE}; c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',  ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Reinstall failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                           }
+                        }
+                     },
+                     {
+                        "name": "Uninstall",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "[variables('customScriptExtensionVersion')]",
+                           "autoUpgradeMinorVersion": "true",
+                           "forceUpdateTag": "[parameters('UninstallMSI')]",
+                           "settings": {
+                              "fileUris": [ "[variables('gitRefreshUri')]" ],
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;if (', parameters('UninstallMSI'), ' -eq 0) {exit 0}; ./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ';popd;', 'pushd;msiexec /quiet /x c:\\lansa\\MyApp.msi;if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Uninstall failed\");exit $LASTEXITCODE}; exit 0;popd;}\"')]"
                            }
                         }
                      }
@@ -658,9 +750,10 @@
                            "type": "CustomScriptExtension",
                            "typeHandlerVersion": "1.8",
                            "autoUpgradeMinorVersion": "true",
+                           "forceUpdateTag": "[parameters('forceUpdateMSI')]",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-SUDB \"0\" -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',   ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' ', parameters('forceUpdateMSI'), ';popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-SUDB \"0\" -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',   ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
