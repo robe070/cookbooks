@@ -35,7 +35,9 @@ param(
 [String]$userscripthook,
 [Parameter(Mandatory=$false)]
 [String]$DBUT='MSSQLS',
-[String]$MSIuri
+[String]$MSIuri,
+[String]$trace = 'N',
+[String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999"
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -94,7 +96,11 @@ try
         $UPGD_bool = $false
     }
 
-    Write-Debug ("UPGD_bool = $UPGD_bool" )
+    # Flag to anyone who needs to know that we are installing. Particularly the Load Balancer probe
+
+    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
+
+    Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" )
 
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
@@ -104,11 +110,27 @@ try
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    Write-Verbose ("Running on $Cloud")
+    Write-Verbose ("$(Log-Date) Running on $Cloud")
 
     if ( $Cloud -eq "Azure" ) {
-        Write-Verbose ("Downloading $MSIuri to $installer_file")
+        Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+
+        # Temporary code to install new ODBC driver which seems to have fixed the C00001A5 exceptions caused by SqlDriverConnect
+
+        $MSODBCSQL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64_12_0_4219_0.msi"
+        $odbc_installer_file = ( Join-Path -Path "c:\lansa" -ChildPath "msodbcsqlx64.msi" )
+        Write-Verbose ("$(Log-Date) Downloading $MSODBCSQL to $odbc_installer_file")
+        (New-Object System.Net.WebClient).DownloadFile($MSODBCSQL, $odbc_installer_file)
+
+        [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+        $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
+        if ( $p.ExitCode -ne 0 ) {
+            $ExitCode = $p.ExitCode
+            $ErrorMessage = "ODBC Install returned error code $($p.ExitCode)."
+            Write-Error $ErrorMessage -Category NotInstalled
+            throw $ErrorMessage
+        }
     }
 
     # On initial install disable TCP Offloading
@@ -126,7 +148,7 @@ try
     {
         Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-        Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+        Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
         Import-Module “sqlps” -DisableNameChecking
 
@@ -135,7 +157,7 @@ try
             Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
         }
 
-        Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+        Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
         cd "c:"
     }
 
@@ -144,7 +166,17 @@ try
         Start-WebAppPool -Name "DefaultAppPool"
     }
 
-    Write-Output ("Installing the application")
+    Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+    if ($trace -eq "Y") {
+        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+        $env:X_RUN = $traceSettings
+    } else {
+        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+        $env:X_RUN = ''
+    }
+
+    Write-Output ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
     {
@@ -158,20 +190,20 @@ try
 
     [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
-    Write-Output ("Arguments = $Arguments")
+    Write-Output ("$(Log-Date) Arguments = $Arguments")
 
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
     if ( $UPGD_bool )
     {
-        Write-Output ("Upgrading LANSA")
+        Write-Output ("$(Log-Date) Upgrading LANSA")
         $Arguments += "CREATENEWUSERFORSERVICE=""Use Existing User"""
         $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
     else
     {
-        Write-Output ("Installing LANSA")
+        Write-Output ("$(Log-Date) Installing LANSA")
         $Arguments += "APPA=""$APPA""", "CREATENEWUSERFORSERVICE=""Create New Local User"""
         $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
@@ -183,36 +215,36 @@ try
         throw $ErrorMessage
     }
 
-	Write-output ("Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+	Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
 	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
 	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
 	Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
 
-	Write-output ("Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+	Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
     if ( $Cloud -eq "Azure" ) {
-        Write-Output "Set JSM Service dependencies"
-        Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
-        Write-Verbose "so that they are running when the license check is made by the Integrator service."
-        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.0 (LIN14003_EPC140005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+        Write-Output "$(Log-Date) Set JSM Service dependencies"
+        Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
+        Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service."
+        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
     }
 
-    Write-Output ("Execute the user script if one has been passed")
+    Write-Output ("$(Log-Date) Execute the user script if one has been passed")
 
     if ($userscripthook)
     {
-        Write-Output ("It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
+        Write-Output ("$(Log-Date) It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
 
         $UserScriptFile = "C:\LANSA\UserScript.ps1"
-        Write-Output ("Downloading $userscripthook to $UserScriptFile")
+        Write-Output ("$(Log-Date) Downloading $userscripthook to $UserScriptFile")
         ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile)
 
         if ( Test-Path $UserScriptFile )
         {
-            Write-Output ("Executing $UserScriptFile")
+            Write-Output ("$(Log-Date) Executing $UserScriptFile")
 
             Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook"
         }
@@ -227,6 +259,7 @@ try
         Write-Verbose ("User Script not passed")
     }
 
+    iisreset
 
     #####################################################################################
     # Test if post install x_run processing had any fatal errors
@@ -237,19 +270,19 @@ try
 
     if ( (Test-Path -Path $x_err) )
     {
-        Write-Verbose ("Signal to Cloud log that the installation has failed")
+        Write-Verbose ("$(Log-Date) Signal to Cloud log that the installation has failed")
 
         $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
         Write-Error $ErrorMessage -Category NotInstalled
         throw $ErrorMessage
     }
 
-    Write-Output ("Installation completed successfully")
+    Write-Output ("$(Log-Date) Installation completed successfully")
 }
 catch
 {
 	$_
-    Write-Output ("Installation error")
+    Write-Output ("$(Log-Date) Installation error")
     if ( $ExitCode -eq 0 -and $LASTEXITCODE -ne 0) {
         $ExitCode = $LASTEXITCODE
     }
@@ -260,16 +293,17 @@ catch
 }
 finally
 {
-    Write-Output ("See $install_log and other files in $ENV:TEMP for more details.")
+    Write-Output ("$(Log-Date) See $install_log and other files in $ENV:TEMP for more details.")
     if ( $Cloud -eq "AWS" ) {
-        Write-Output ("Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+        Write-Output ("$(Log-Date) Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
     } else {
         if ($Cloud -eq "Azure") {
-            Write-Output ("Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
-            Write-Output ("Note that an exit code of 1603 is an installer error so look at $install_log")
-            Write-Output ("and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
+            Write-Output ("$(Log-Date) Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
+            Write-Output ("$(Log-Date) Note that an exit code of 1603 is an installer error so look at $install_log")
+            Write-Output ("$(Log-Date) and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
         }
     }
+    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 }
 
 # Successful completion so set Last Exit Code to 0

@@ -4,51 +4,16 @@
    "parameters": {
       "msiUri": {
          "type": "string",
+         "defaultValue": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.1.2_en-us.msi",
          "metadata": {
-            "description": "URL of MSI to install on each VM."
+            "description": "URL of the LANSA MSI to install on each VM."
          }
       },
       "vmSku": {
          "type": "string",
-         "defaultValue": "Standard_A1",
+         "defaultValue": "Standard_A2",
          "metadata": {
             "description": "Size of VMs in the VM Scale Set."
-         }
-      },
-      "imagePublisher": {
-         "type": "string",
-         "defaultValue": "MicrosoftWindowsServer",
-         "allowedValues": [
-            "lansa",
-            "MicrosoftWindowsServer"
-         ],
-         "metadata": {
-            "description": "The publisher of the image. Allowed values: lansa, MicrosoftWindowsServer"
-         }
-      },
-      "imageSku": {
-         "type": "string",
-         "defaultValue": "2012-R2-Datacenter",
-         "allowedValues": [
-            "lansa-scalable-license",
-            "2008-R2-SP1",
-            "2012-Datacenter",
-            "2012-R2-Datacenter"
-         ],
-         "metadata": {
-            "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: visuallansa, 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
-         }
-      },
-      "imageOffer": {
-         "type": "string",
-         "defaultValue": "WindowsServer",
-         "allowedValues": [
-            "lansa-scalable-license",
-            "lansa-scalable-license-preview",
-            "WindowsServer"
-         ],
-         "metadata": {
-            "description": "The offer of the image. Allowed values: visuallansa, WindowsServer"
          }
       },
       "vmssName": {
@@ -60,6 +25,7 @@
       },
       "minInstanceCount": {
          "type": "int",
+         "defaultValue": 1,
          "metadata": {
             "description": "Minimum number of VM instances (1 or more)."
          },
@@ -67,51 +33,15 @@
       },
       "maxInstanceCount": {
          "type": "int",
+         "defaultValue": 100,
          "metadata": {
             "description": "Maximum number of VM instances (100 or less)."
          },
          "maxValue": 100
       },
-      "adminUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Admin username on all VMs."
-         }
-      },
-      "adminPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Admin password on all VMs."
-         }
-      },
-      "webUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Web Server username on all VMs."
-         }
-      },
-      "webPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Web Server password on all VMs."
-         }
-      },
-      "databaseLogin": {
-         "type": "string",
-         "metadata": {
-            "description": "The admin user of the Azure SQL Database"
-         }
-      },
-      "databaseLoginPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "The password of the admin user of the Azure SQL Database"
-         }
-
-      },
       "databaseName": {
          "type": "string",
-         "defaultValue": "sampledb",
+         "defaultValue": "lansa",
          "metadata": {
             "description": "The name of the new database to create."
          }
@@ -135,6 +65,26 @@
             "description": "The type of database to create."
          }
       },
+      "requestedServiceObjectiveName": {
+         "type": "string",
+         "defaultValue": "S2",
+         "allowedValues": [
+            "Basic",
+            "S0",
+            "S1",
+            "S2",
+            "S3",
+            "P1",
+            "P2",
+            "P4",
+            "P6",
+            "P11",
+            "P15"
+         ],
+         "metadata": {
+            "description": "Describes the performance level for Edition"
+         }
+      },
       "maxSizeBytes": {
          "type": "string",
          "defaultValue": "1073741824",
@@ -142,29 +92,71 @@
             "description": "The maximum size, in bytes, for the database"
          }
       },
-      "requestedServiceObjectiveName": {
+      "adminUsername": {
          "type": "string",
-         "defaultValue": "S2",
-        "allowedValues": [
-          "Basic",
-          "S0",
-          "S1",
-          "S2",
-          "S3",
-          "P1",
-          "P2",
-          "P4",
-          "P6",
-          "P11",
-          "P15"
-        ],
+         "defaultValue": "lansa",
          "metadata": {
-            "description": "Describes the performance level for Edition"
+            "description": "Admin username on all VMs."
+         }
+      },
+      "adminPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Admin password on all VMs."
+         }
+      },
+      "webUsername": {
+         "type": "string",
+         "defaultValue": "Pcxuser2",
+         "metadata": {
+            "description": "Web Server username on all VMs."
+         }
+      },
+      "webPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Web Server password on all VMs."
+         }
+      },
+      "databaseLogin": {
+         "type": "string",
+         "defaultValue": "lansa",
+         "metadata": {
+            "description": "The admin user of the Azure SQL Database"
+         }
+      },
+      "databaseLoginPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "The password of the admin user of the Azure SQL Database"
+         }
+
+      },
+      "imageOffer": {
+         "type": "string",
+         "defaultValue": "lansa-scalable-license",
+         "allowedValues": [
+            "lansa-scalable-license",
+            "lansa-scalable-license-preview"
+         ],
+         "metadata": {
+            "description": "The offer of the image. Allowed values: lansa-scalable-license, lansa-scalable-license-preview"
          }
       },
       "gitBranch": {
          "type": "string",
-         "defaultValue": "feature/azure_scalable"
+         "defaultValue": "support/L4W14000_scalable_azure"
+      },
+      "trace": {
+         "type": "string",
+         "defaultValue": "N",
+         "allowedValues": [
+            "Y",
+            "N"
+         ],
+         "metadata": {
+            "description": "Switch tracing on. Allowed values Y or N"
+         }
       }
    },
   "variables": {
@@ -207,10 +199,12 @@
     "nicName": "[concat(variables('namingInfix'), 'nic')]",
     "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+    "imagePublisher": "lansa",
+    "imageSku": "lansa-scalable-license-14-1",
     "osType": {
-      "publisher": "[parameters('imagePublisher')]",
+      "publisher": "[variables('imagePublisher')]",
       "offer": "[parameters('imageOffer')]",
-      "sku": "[parameters('imageSku')]",
+      "sku": "[variables('imageSku')]",
       "version": "latest"
     },
     "imageReference": "[variables('osType')]",
@@ -350,14 +344,14 @@
             "probes": [
                {
                   "name": "lbprobe",
-                  "properties": {
-                      "protocol": "http",
-                      "port": 80,
-                      "intervalInSeconds": 15,
-                      "timeoutInSeconds": 31,
-                      "numberOfProbes": 2,
-                      "requestPath": "cgi-bin/lansaweb?about"
-                  }
+                "properties": {
+                  "protocol": "http",
+                  "port": 80,
+                  "intervalInSeconds": 15,
+                  "timeoutInSeconds": 31,
+                  "numberOfProbes": 2,
+                  "requestPath": "cgi-bin/lansaweb?w=XVLWEBTS2&r=GetResponse&ml=LANSA:XHTML&p=SYS&l=ENG"
+                }
                }
             ]
          }
@@ -423,12 +417,11 @@
                {
                   "name": "lbprobe",
                   "properties": {
-                      "protocol": "http",
-                      "port": 80,
+                      "protocol": "tcp",
+                      "port": 3389,
                       "intervalInSeconds": 15,
                       "timeoutInSeconds": 31,
-                      "numberOfProbes": 2,
-                      "requestPath": "cgi-bin/lansaweb?about"
+                      "numberOfProbes": 2
                   }
                }
             ]
@@ -453,9 +446,9 @@
             "capacity": "1"
          },
          "plan": {
-            "name": "[parameters('imageSKU')]",
+            "name": "[variables('imageSKU')]",
             "product": "[parameters('imageOffer')]",
-            "publisher": "[parameters('imagePublisher')]"
+            "publisher": "[variables('imagePublisher')]"
          },
          "properties": {
             "overprovision": "false",
@@ -522,7 +515,7 @@
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',  ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
@@ -575,9 +568,9 @@
             "capacity": "[parameters('minInstanceCount')]"
          },
          "plan": {
-            "name": "[parameters('imageSKU')]",
+            "name": "[variables('imageSKU')]",
             "product": "[parameters('imageOffer')]",
-            "publisher": "[parameters('imagePublisher')]"
+            "publisher": "[variables('imagePublisher')]"
          },
          "properties": {
             "overprovision": "false",
@@ -667,7 +660,7 @@
                            "autoUpgradeMinorVersion": "true",
                            "settings": {
                               "fileUris": [ "[variables('gitRefreshUri')]" ],
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 7;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-SUDB \"0\" -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ' 1;popd;', 'pushd;c:\\lansa\\scripts\\install-lansa-msi.ps1 ', '-SUDB \"0\" -server_name \"', reference(variables('sqlserverName')).fullyQualifiedDomainName, '\"', ' -DBUT \"SQLAZURE\"',  ' -dbname \"', parameters('databaseName'), '\"', ' -dbuser \"', parameters('databaseLogin'), '\"', ' -dbpassword \"', parameters('databaseLoginPassword'), '\"', ' -webuser \"', parameters('webUsername'), '\"', ' -webpassword \"', parameters('webPassword'), '\"', ' -MSIuri \"', parameters('msiUri'), '\"',   ' -trace \"', parameters('trace'), '\"', ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE};exit 0;popd;}\"')]"
                            }
                         }
                      }
@@ -713,7 +706,7 @@
                            "direction": "Increase",
                            "type": "PercentChangeCount",
                            "value": "10",
-                           "cooldown": "PT5M"
+                           "cooldown": "PT20M"
                         }
                      },
                      {
