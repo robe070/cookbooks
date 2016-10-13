@@ -75,6 +75,7 @@ Write-Verbose ("updateMSI = $updateMSI")
 Write-Verbose ("triggerWebConfig = $triggerWebConfig")
 Write-Verbose ("UninstallMSI = $UninstallMSI")
 Write-Verbose ("trace = $trace")
+Write-Verbose ("fixLicense = $fixLicense")
  
 try
 {
@@ -129,7 +130,7 @@ try
 
     Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script")
 
-    if ($trace -eq "Y" -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
+    if ( $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
         Write-Verbose ("Stopping Listener...")
         if ( $f32bit_bool )
         {
@@ -159,20 +160,25 @@ try
     }
         
     if ( $uninstallMSI -eq "1" ) {
+        Write-Output ("$(Log-Date) Uninstalling...")
         msiexec /quiet /x $installer_file
     }
 
     if ( $installMSI -eq "1" ) {
+        Write-Output ("$(Log-Date) Installing...")
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
     } elseif ( $updateMSI -eq "1" ) {
+        Write-Output ("$(Log-Date) Updating...")
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
     }
 
     if ( $triggerWebConfig -eq "1" ) {
+        Write-Output ("$(Log-Date) Configuring Web Server...")
         .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
     }
 
     if ( $fixLicense -eq "1" ) {
+        Write-Output ("$(Log-Date) Fixing licenses...")
 	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
 	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
 	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
