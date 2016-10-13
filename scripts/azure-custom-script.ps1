@@ -47,6 +47,8 @@ param(
 
 Set-StrictMode -Version Latest
 
+$VerbosePreference = "Continue"
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not (Test-Path variable:script:IncludeDir) )
 {
@@ -77,6 +79,47 @@ try
 {
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
 
+    Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+    if ($trace -eq "Y") {
+        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+        $env:X_RUN = $traceSettings
+    } else {
+        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+        $env:X_RUN = ''
+    }
+
+    Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script")
+
+    if ($trace -eq "Y" -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
+        Write-Verbose ("Stopping Listener...")
+        if ( $f32bit_bool )
+        {
+            Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstop" -Wait
+        }
+        else
+        {
+            Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
+        }
+
+
+        Write-Verbose ("Stopping all web jobs...")
+        Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+
+        Write-Verbose ("Resetting iis...")
+        iisreset
+
+        Write-Verbose ("Starting Listener...")
+        if ( $f32bit_bool )
+        {
+            Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstart" -Wait
+        }
+        else
+        {
+            Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
+        }
+    }
+        
     if ( $installMSI -eq "1" ) {
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
     }
