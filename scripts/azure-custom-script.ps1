@@ -77,6 +77,33 @@ Write-Verbose ("UninstallMSI = $UninstallMSI")
  
 try
 {
+    if ( $f32bit -eq 'true' -or $f32bit -eq '1')
+    {
+        $f32bit_bool = $true
+    }
+    else
+    {
+        $f32bit_bool = $false
+    }
+
+    if ( $UPGD -eq 'true' -or $UPGD -eq '1')
+    {
+        $UPGD_bool = $true
+    }
+    else
+    {
+        $UPGD_bool = $false
+    }
+
+    if ($f32bit_bool)
+    {
+        $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
+    }
+    else
+    {
+        $APPA = "${ENV:ProgramFiles}\LANSA"
+    }
+
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
 
     Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
@@ -121,11 +148,17 @@ try
     }
         
     if ( $installMSI -eq "1" ) {
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
     }
+
     if ( $triggerWebConfig -eq "1" ) {
         .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
     }
+}
+catch
+{
+    Write-Error ("azure-custom-script failed")
+    cmd /c exit 3
 }
 finally
 {
