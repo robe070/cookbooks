@@ -107,6 +107,14 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
 
+    Write-Output ("$(Log-Date) Test if this is the first install")
+    $installer = "MyApp.msi"
+    $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
+    if (-not (Test-Path $installer_file) ) {
+        $installMSI = "1"
+        $triggerWebConfig = "1"
+    }
+
     Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
     if ($trace -eq "Y") {
@@ -150,13 +158,21 @@ try
         }
     }
         
+    if ( $uninstallMSI -eq "1" ) {
+        msiexec /quiet /x $installer_file
+    }
+
     if ( $installMSI -eq "1" ) {
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
+    } else {
+    if ( $updateMSI -eq "1" ) {
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
     }
 
     if ( $triggerWebConfig -eq "1" ) {
         .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
     }
+
 }
 catch
 {
