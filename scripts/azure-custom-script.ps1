@@ -41,8 +41,8 @@ param(
 [String]$installMSI = 1,
 [String]$updateMSI = 0,
 [String]$triggerWebConfig = 1,
-[String]$UninstallMSI = 0
-
+[String]$UninstallMSI = 0,
+[String]$fixLicense = 0
 )
 
 Set-StrictMode -Version Latest
@@ -172,6 +172,11 @@ try
         .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
     }
 
+    if ( $fixLicense -eq "1" ) {
+	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
+	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
+	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+    }
 }
 catch
 {
