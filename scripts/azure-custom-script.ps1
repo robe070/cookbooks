@@ -74,6 +74,7 @@ Write-Verbose ("installMSI = $installMSI")
 Write-Verbose ("updateMSI = $updateMSI")
 Write-Verbose ("triggerWebConfig = $triggerWebConfig")
 Write-Verbose ("UninstallMSI = $UninstallMSI")
+Write-Verbose ("trace = $trace")
  
 try
 {
@@ -109,9 +110,11 @@ try
     Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
     if ($trace -eq "Y") {
+        Write-Output ("$(Log-Date) Set tracing on" )
         [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
         $env:X_RUN = $traceSettings
     } else {
+        Write-Output ("$(Log-Date) Set tracing off" )
         [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
         $env:X_RUN = ''
     }
