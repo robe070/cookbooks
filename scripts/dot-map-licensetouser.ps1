@@ -38,16 +38,11 @@ function Map-LicenseToUser {
         $Thumbprint = $getCert.Thumbprint
 
         $PrivateKey = ((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey)
-        $PrivateKey = 
-        if ( -not $PrivateKey ) {
-            Write-Error ("$(Log-Date) Private Key missing from certificate $certname")
-            throw
-        }
-        else {
+        if ( $PrivateKey ) {
             $NewScalableLicensePrivateKey  =($privateKey.CspKeyContainerInfo).UniqueKeyContainerName
         }
 
-        if ( (Test-Path variable:local:NewScalableLicensePrivateKey) -and -not $NewScalableLicensePrivateKey) {
+        if ( -not $PrivateKey -or -not $NewScalableLicensePrivateKey) {
             Write-Output "No key for $certname"
 
             $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $regkeyname
@@ -97,7 +92,7 @@ function Map-LicenseToUser {
 
             Write-Verbose ("Copy old key to new key")
 
-            $fullPath=$keyPath+$keyName
+            # $fullPath=$keyPath+$keyName
             Copy-Item $($KeyPath + $ScalableLicensePrivateKey.$regkeyname) $($KeyPath + $NewScalableLicensePrivateKey)
         }
         else {
