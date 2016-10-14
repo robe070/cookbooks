@@ -70,6 +70,7 @@ else
 # Put first output on a new line in log file
 Write-Output ("`r`n")
 
+Write-Verbose ("maxconnections = $maxconnections")
 Write-Verbose ("installMSI = $installMSI")
 Write-Verbose ("updateMSI = $updateMSI")
 Write-Verbose ("triggerWebConfig = $triggerWebConfig")
