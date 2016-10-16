@@ -77,6 +77,7 @@ Write-Verbose ("triggerWebConfig = $triggerWebConfig")
 Write-Verbose ("UninstallMSI = $UninstallMSI")
 Write-Verbose ("trace = $trace")
 Write-Verbose ("fixLicense = $fixLicense")
+Write-Verbose ("maxconnections = $maxconnections")
  
 try
 {
@@ -107,14 +108,28 @@ try
         $APPA = "${ENV:ProgramFiles}\LANSA"
     }
 
+    # Flag to anyone who needs to know that we are installing. Particularly the Load Balancer probe
+
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
 
     Write-Output ("$(Log-Date) Test if this is the first install")
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
+    $Installed = $false
     if (-not (Test-Path $installer_file) ) {
+        Write-Output ("$(Log-Date) No installation file so defaulting to install the MSI and setup Web Configuration")
         $installMSI = "1"
         $triggerWebConfig = "1"
+        Write-Verbose ("installMSI = $installMSI")
+        Write-Verbose ("triggerWebConfig = $triggerWebConfig")
+    } else {
+        $Installed = $true
+    }
+
+    if ( $Installed ) {
+        Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
+        Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
+        sleep -s 40
     }
 
     Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
@@ -129,35 +144,10 @@ try
         $env:X_RUN = ''
     }
 
-    Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script")
+    Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
 
     if ( $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
-        Write-Verbose ("Stopping Listener...")
-        if ( $f32bit_bool )
-        {
-            Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstop" -Wait
-        }
-        else
-        {
-            Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
-        }
-
-
-        Write-Verbose ("Stopping all web jobs...")
-        Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
-
-        Write-Verbose ("Resetting iis...")
-        iisreset
-
-        Write-Verbose ("Starting Listener...")
-        if ( $f32bit_bool )
-        {
-            Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstart" -Wait
-        }
-        else
-        {
-            Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
-        }
+        ResetWebServer -APPA $APPA
     }
         
     if ( $uninstallMSI -eq "1" ) {
@@ -183,6 +173,7 @@ try
 	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
 	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
 	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+        ResetWebServer -APPA $APPA
     }
 }
 catch
@@ -195,3 +186,21 @@ finally
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 }
 
+function ResetWebServer{
+   Param (
+	   [string]$APPA
+   )
+    Write-Verbose ("APPA = $APPA")
+
+    Write-Verbose ("Stopping Listener...")
+    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
+
+    Write-Verbose ("Stopping all web jobs...")
+    Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+
+    Write-Verbose ("Resetting iis...")
+    iisreset
+
+    Write-Verbose ("Starting Listener...")
+    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
+}
