@@ -63,8 +63,8 @@ Write-Output ("`r`n")
 
 $trusted="NO"
 
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$DebugPreference = "SilentlyContinue"
+$VerbosePreference = "SilentlyContinue"
 
 Write-Verbose ("Server_name = $server_name")
 Write-Verbose ("dbname = $dbname")
