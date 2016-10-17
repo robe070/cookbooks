@@ -77,7 +77,6 @@ Write-Verbose ("triggerWebConfig = $triggerWebConfig")
 Write-Verbose ("UninstallMSI = $UninstallMSI")
 Write-Verbose ("trace = $trace")
 Write-Verbose ("fixLicense = $fixLicense")
-Write-Verbose ("maxconnections = $maxconnections")
  
 try
 {
@@ -126,9 +125,6 @@ try
         $Installed = $true
     }
 
-    # Temporary so we can see log messages from this script otherwise Install produces too many messages
-    $installMSI = "0"
-
     if ( $Installed ) {
         Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
         Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
@@ -149,7 +145,7 @@ try
 
     Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
 
-    if ( $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
+    if ( $Installed -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
         ResetWebServer -APPA $APPA
     }
         
@@ -160,10 +156,10 @@ try
 
     if ( $installMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Installing...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     } elseif ( $updateMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Updating...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     }
 
     if ( $triggerWebConfig -eq "1" ) {
