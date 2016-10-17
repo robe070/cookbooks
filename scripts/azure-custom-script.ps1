@@ -126,6 +126,9 @@ try
         $Installed = $true
     }
 
+    # Temporary so we can see log messages from this script otherwise Install produces too many messages
+    $installMSI = "0"
+
     if ( $Installed ) {
         Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
         Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
