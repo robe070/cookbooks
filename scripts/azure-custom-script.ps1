@@ -47,7 +47,7 @@ param(
 
 Set-StrictMode -Version Latest
 
-$VerbosePreference = "SilentlyContinue"
+$VerbosePreference = "Continue"
 
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not (Test-Path variable:script:IncludeDir) )
