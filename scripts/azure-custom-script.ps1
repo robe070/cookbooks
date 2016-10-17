@@ -164,8 +164,7 @@ try
 
     if ( $triggerWebConfig -eq "1" ) {
         Write-Output ("$(Log-Date) Configuring Web Server...")
-        Write-Verbose ("$(Log-Date) Note that this 32-bit flag relates to the Web Server which is always 64-bit on 64-bit OS")
-        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $false -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
+        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
     }
 
     if ( $fixLicense -eq "1" ) {

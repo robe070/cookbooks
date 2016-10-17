@@ -189,8 +189,9 @@ try
         Set-Content ($l4w3serv_file)
     }
 
-    Write-Verbose ("Stopping Listener...")
-    if ( $f32bit_bool )
+    Write-Output ("Stopping Listener...")
+    Write-Verbose ("We only install the 64-bit listener on 64-bit OS")
+    if ( $false )
     {
         Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstop" -Wait
     }
@@ -200,14 +201,14 @@ try
     }
 
 
-    Write-Verbose ("Stopping all web jobs...")
+    Write-Output ("Stopping all web jobs...")
     Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
 
-    Write-Verbose ("Resetting iis...")
+    Write-Output ("Resetting iis...")
     iisreset
 
-    Write-Verbose ("Starting Listener...")
-    if ( $f32bit_bool )
+    Write-Output ("Starting Listener...")
+    if ( $false )
     {
         Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstart" -Wait
     }
