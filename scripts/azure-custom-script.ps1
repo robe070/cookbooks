@@ -225,6 +225,8 @@ finally
 Write-Verbose ("$(Log-Date) Only switch off Installing flag when successful. Thus LB Probe will continue to fail if this script fails and indicate to the LB that it should not be used.")
 Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 
+cmd /c exit 0
+
 function ResetWebServer{
    Param (
 	   [string]$APPA
