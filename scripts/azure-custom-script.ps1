@@ -169,7 +169,7 @@ try
         # .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     } elseif ( $updateMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Updating...")
-        # .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -218,7 +218,7 @@ finally
     Write-Verbose ("fixLicense = $fixLicense")
 }
 
-WriteVerbose ("$(Log-Date) Only switch off Installing flag when successful. Thus LB Probe will continue to fail if this script fails and indicate to the LB that it should not be used.")
+Write-Verbose ("$(Log-Date) Only switch off Installing flag when successful. Thus LB Probe will continue to fail if this script fails and indicate to the LB that it should not be used.")
 Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 
 function ResetWebServer{
