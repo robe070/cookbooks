@@ -203,8 +203,18 @@ catch
 }
 finally
 {
-    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
+    # Repeat the basic request params as Azure truncates the log file
+    Write-Verbose ("maxconnections = $maxconnections")
+    Write-Verbose ("installMSI = $installMSI")
+    Write-Verbose ("updateMSI = $updateMSI")
+    Write-Verbose ("triggerWebConfig = $triggerWebConfig")
+    Write-Verbose ("UninstallMSI = $UninstallMSI")
+    Write-Verbose ("trace = $trace")
+    Write-Verbose ("fixLicense = $fixLicense")
 }
+
+WriteVerbose ("$(Log-Date) Only switch off Installing flag when successful. Thus LB Probe will continue to fail if this script fails and indicate to the LB that it should not be used.")
+Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 
 function ResetWebServer{
    Param (
