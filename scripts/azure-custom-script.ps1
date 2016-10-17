@@ -125,14 +125,14 @@ try
         $Installed = $true
     }
 
-    # Test Code 
-    exit 2
+    Write-Verbose ("installMSI = $installMSI")
 
     if ( $Installed ) {
         Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
         Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
         sleep -s 40
     }
+    Write-Verbose ("installMSI = $installMSI")
 
     Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
@@ -145,13 +145,16 @@ try
         [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
         $env:X_RUN = ''
     }
+    Write-Verbose ("installMSI = $installMSI")
 
     Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
 
     if ( $Installed -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
         ResetWebServer -APPA $APPA
     }
-        
+    Write-Verbose ("installMSI = $installMSI")
+    exit 4
+            
     if ( $uninstallMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Uninstalling...")
         msiexec /quiet /x $installer_file
