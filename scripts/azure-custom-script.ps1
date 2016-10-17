@@ -82,6 +82,7 @@ try
 {
     # Make sure we are using the normal file system, not SQLSERVER:\ or some such else.
     cd "c:"
+    cmd /c exit 0              # Ensure $LASTEXITCODE is cleared
 
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
     {
