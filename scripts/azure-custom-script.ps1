@@ -155,6 +155,10 @@ try
         Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
     }
 
+    if ( $LASTEXITCODE -ne 0 ) {
+        throw
+    }
+
     if ( $installMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Installing...")
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
@@ -163,9 +167,17 @@ try
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     }
 
+    if ( $LASTEXITCODE -ne 0 ) {
+        throw
+    }
+
     if ( $triggerWebConfig -eq "1" ) {
         Write-Output ("$(Log-Date) Configuring Web Server...")
         .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
+    }
+
+    if ( $LASTEXITCODE -ne 0 ) {
+        throw
     }
 
     if ( $fixLicense -eq "1" ) {
@@ -175,11 +187,19 @@ try
 	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
         ResetWebServer -APPA $APPA
     }
+
+    if ( $LASTEXITCODE -ne 0 ) {
+        throw
+    }
 }
 catch
 {
     Write-Error ("azure-custom-script failed")
-    cmd /c exit 3
+
+    # If $LASTEXITCODE not already set, make sure it has a value so caller terminates the deployment.
+    if ( $LASTEXITCODE -eq 0 ) {
+        cmd /c exit 3
+    }
 }
 finally
 {
