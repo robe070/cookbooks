@@ -145,13 +145,14 @@ try
 
     Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
 
-    if ( $Installed -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $uninstallMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
+    if ( $Installed -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
         ResetWebServer -APPA $APPA
     }
         
     if ( $uninstallMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Uninstalling...")
         msiexec /quiet /x $installer_file
+        Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
     }
 
     if ( $installMSI -eq "1" ) {
