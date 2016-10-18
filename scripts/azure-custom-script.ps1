@@ -45,6 +45,25 @@ param(
 [String]$fixLicense = 0
 )
 
+function ResetWebServer{
+   Param (
+	   [string]$APPA
+   )
+    Write-Verbose ("APPA = $APPA")
+
+    Write-Verbose ("Stopping Listener...")
+    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
+
+    Write-Verbose ("Stopping all web jobs...")
+    Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+
+    Write-Verbose ("Resetting iis...")
+    iisreset
+
+    Write-Verbose ("Starting Listener...")
+    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
+}
+
 Set-StrictMode -Version Latest
 
 $VerbosePreference = "Continue"
@@ -226,22 +245,3 @@ Write-Verbose ("$(Log-Date) Only switch off Installing flag when successful. Thu
 Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 
 cmd /c exit 0
-
-function ResetWebServer{
-   Param (
-	   [string]$APPA
-   )
-    Write-Verbose ("APPA = $APPA")
-
-    Write-Verbose ("Stopping Listener...")
-    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
-
-    Write-Verbose ("Stopping all web jobs...")
-    Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
-
-    Write-Verbose ("Resetting iis...")
-    iisreset
-
-    Write-Verbose ("Starting Listener...")
-    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
-}
