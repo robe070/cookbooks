@@ -179,8 +179,10 @@ try
             
     if ( $uninstallMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Uninstalling...")
-        msiexec /quiet /x $installer_file
-        Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
+        $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyAppUninstall.log" )
+        msiexec /quiet /x $installer_file /lv*x $install_log
+        Write-Output ("$(Log-Date) Deleting installer file $installer_file...")
+        Remove-Item $installer_file -Force -ErrorAction Continue
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
