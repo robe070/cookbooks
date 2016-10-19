@@ -45,17 +45,44 @@ param(
 [String]$fixLicense = 0
 )
 
+function StopWebJobs{
+   Param (
+	   [string]$APPA
+   )
+    Write-Verbose ("APPA = $APPA")
+
+    # If apps not installed just return
+
+    Write-Verbose ("Stopping Listener...")
+    if ( (Test-Path "$APPA\connect64\lcolist.exe") ) {
+        Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
+    } else {
+        throw
+    }
+
+    Write-Verbose ("Stopping all web jobs...")
+    if ( (Test-Path "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe") ) {
+        Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+    } else {
+        throw
+    }
+
+    Write-Verbose ("Stopping iis...")
+    iisreset /stop
+}
+
 function ResetWebServer{
    Param (
 	   [string]$APPA
    )
     Write-Verbose ("APPA = $APPA")
 
-    Write-Verbose ("Stopping Listener...")
-    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
-
-    Write-Verbose ("Stopping all web jobs...")
-    Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+    try {
+        StopWebJobs -APPA $APPA
+    }
+    catch {
+        return
+    }
 
     Write-Verbose ("Resetting iis...")
     iisreset
@@ -178,11 +205,36 @@ try
     Write-Verbose ("installMSI = $installMSI")
             
     if ( $uninstallMSI -eq "1" ) {
-        Write-Output ("$(Log-Date) Uninstalling...")
-        $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyAppUninstall.log" )
-        msiexec /quiet /x $installer_file /lv*x $install_log
-        Write-Output ("$(Log-Date) Deleting installer file $installer_file...")
-        Remove-Item $installer_file -Force -ErrorAction Continue
+        [bool] $Success = $true
+        if ( $Installed ) {
+            Write-Output ("$(Log-Date) Uninstalling...")
+
+            # Make sure LANSA is absolutely not executing anything
+            try {
+                StopWebJobs -APPA $APPA
+            }
+            catch {
+                $Success = $false
+                Write-Output ("$(Log-Date) Skipping uninstaller as it seems LANSA is not actually installed...")
+            }
+
+            if ( $Success ) {
+                Write-Output ("$(Log-Date) Starting the uninstaller...")
+                $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyAppUninstall.log" )
+                [String[]] $Arguments = @( "/x $installer_file ", "/quiet", "/lv*x $install_log")
+                $p = Start-Process -FilePath msiexec.exe -ArgumentList $Arguments -Wait -PassThru
+                if ( $p.ExitCode -ne 0 ) {
+                    # Set LASTEXITCODE
+                    cmd /c exit $p.ExitCode
+                    throw
+                }
+            }
+
+            Write-Output ("$(Log-Date) Deleting installer file $installer_file...")
+            Remove-Item $installer_file -Force -ErrorAction Continue
+         } else {
+            Write-Output ("$(Log-Date) Uninstall requested but app is not installed...")
+         }
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -230,6 +282,7 @@ catch
     if ( $LASTEXITCODE -eq 0 ) {
         cmd /c exit 3
     }
+    return
 }
 finally
 {
