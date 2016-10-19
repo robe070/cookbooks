@@ -59,10 +59,10 @@
       "triggerWebConfig": {
          "value": "0"
       },
-      "updateMSI": {
+      "installMSI": {
          "value": "0"
       },
-      "reinstallMSI": {
+      "updateMSI": {
          "value": "0"
       },
       "uninstallMSI": {
@@ -73,6 +73,9 @@
       },
       "trace": {
          "value": "N"
+      },
+      "fixLicense": {
+         "value": "0"
       }
    }
 }
