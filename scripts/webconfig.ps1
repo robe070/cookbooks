@@ -27,7 +27,7 @@ Write-Output ("`r`n")
 $trusted="NO"
 
 # $DebugPreference = "Continue"
-# $VerbosePreference = "Continue"
+$VerbosePreference = "Continue"
 
 Write-Debug ("Server_name = $server_name")
 Write-Debug ("dbname = $dbname")
@@ -81,9 +81,9 @@ try
             New-Item -Path $lansawebKey
         }
         New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force
-        # Set to '2' for 2nd level performance log
+        Write-Verbose ("Set to '2' for 2nd level performance log")
         New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'N' -Force
-        # Set to 'Y' for a log file per process rather than 1 log file
+        Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
         New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force
     }
     else
@@ -95,7 +95,9 @@ try
             New-Item -Path $lansawebKey
         }
         New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force
+        Write-Verbose ("Set to '2' for 2nd level performance log")
         New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'N' -Force
+        Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
         New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force
     }
 
@@ -187,8 +189,9 @@ try
         Set-Content ($l4w3serv_file)
     }
 
-    Write-Verbose ("Stopping Listener...")
-    if ( $f32bit_bool )
+    Write-Output ("Stopping Listener...")
+    Write-Verbose ("We only install the 64-bit listener on 64-bit OS")
+    if ( $false )
     {
         Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstop" -Wait
     }
@@ -198,14 +201,14 @@ try
     }
 
 
-    Write-Verbose ("Stopping all web jobs...")
+    Write-Output ("Stopping all web jobs...")
     Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
 
-    Write-Verbose ("Resetting iis...")
+    Write-Output ("Resetting iis...")
     iisreset
 
-    Write-Verbose ("Starting Listener...")
-    if ( $f32bit_bool )
+    Write-Output ("Starting Listener...")
+    if ( $false )
     {
         Start-Process -FilePath "$APPA\connect\lcolist.exe" -ArgumentList "-sstart" -Wait
     }

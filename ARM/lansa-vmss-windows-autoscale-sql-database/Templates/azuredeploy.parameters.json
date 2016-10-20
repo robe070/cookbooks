@@ -2,9 +2,9 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
    "parameters": {
-    "msiUri": {
-      "value": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.1.2_en-us.msi"
-    },
+      "msiUri": {
+         "value": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.1.2_en-us.msi"
+      },
       "vmSku": {
          "value": "Standard_A2"
       },
@@ -53,11 +53,29 @@
       "requestedServiceObjectiveName": {
          "value": "S2"
       },
+      "webServerMaxConnect": {
+         "value": "20"
+      },
+      "triggerWebConfig": {
+         "value": "0"
+      },
+      "installMSI": {
+         "value": "0"
+      },
+      "updateMSI": {
+         "value": "0"
+      },
+      "uninstallMSI": {
+         "value": "0"
+      },
       "gitBranch": {
-         "value": "support/L4W14000_scalable_azure"
+         "value": "patch/autoupdate"
       },
       "trace": {
          "value": "N"
+      },
+      "fixLicense": {
+         "value": "0"
       }
    }
 }
