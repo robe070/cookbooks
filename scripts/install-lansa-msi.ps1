@@ -63,7 +63,7 @@ Write-Output ("`r`n")
 
 $trusted="NO"
 
-$DebugPreference = "Continue"
+$DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 
 Write-Verbose ("Server_name = $server_name")
@@ -95,10 +95,6 @@ try
     {
         $UPGD_bool = $false
     }
-
-    # Flag to anyone who needs to know that we are installing. Particularly the Load Balancer probe
-
-    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
 
     Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" )
 
@@ -303,7 +299,6 @@ finally
             Write-Output ("$(Log-Date) and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
         }
     }
-    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
 }
 
 # Successful completion so set Last Exit Code to 0

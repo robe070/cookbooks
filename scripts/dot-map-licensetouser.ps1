@@ -30,11 +30,19 @@ function Map-LicenseToUser {
 
         $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $certname
 
+        if ( -not $getCert ) {
+            Write-Output ("$(Log-Date) $certname not found")
+            return
+        }
+
         $Thumbprint = $getCert.Thumbprint
 
-        $NewScalableLicensePrivateKey  =(((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
+        $PrivateKey = ((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey)
+        if ( $PrivateKey ) {
+            $NewScalableLicensePrivateKey  =($privateKey.CspKeyContainerInfo).UniqueKeyContainerName
+        }
 
-        if ( -not $NewScalableLicensePrivateKey ) {
+        if ( -not $PrivateKey -or -not $NewScalableLicensePrivateKey) {
             Write-Output "No key for $certname"
 
             $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $regkeyname
@@ -84,7 +92,7 @@ function Map-LicenseToUser {
 
             Write-Verbose ("Copy old key to new key")
 
-            $fullPath=$keyPath+$keyName
+            # $fullPath=$keyPath+$keyName
             Copy-Item $($KeyPath + $ScalableLicensePrivateKey.$regkeyname) $($KeyPath + $NewScalableLicensePrivateKey)
         }
         else {
@@ -105,8 +113,8 @@ function Map-LicenseToUser {
     }
     catch
     {
-        # Report error but don't abort as one or more licenses may be missing
         Write-Error ($_ | format-list | out-string)
         Write-Output ("")
+        throw
     }
 }
