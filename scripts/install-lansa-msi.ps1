@@ -136,25 +136,33 @@ try
         Disable-TcpOffloading
     }
 
-    ######################################
-    # Require MS C runtime to be installed
-    ######################################
+    #########################################################################################################
+    # Database setup
+    # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
+    # The template creates the database so it was conditioned out.
+    #########################################################################################################
 
-    if ( $SUDB -eq '1' -and -not $UPGD_bool)
+    if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
     {
-        Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+        if ( ($DBUT -eq "SQLAZURE") ) {
+            Write-Output ("$(Log-Date) Azure SQL Database presumed to exist")
+        } else {
+            Write-Output ("$(Log-Date) Database Setup work...")
 
-        Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+            Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-        Import-Module “sqlps” -DisableNameChecking
+            Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
-        if ( $SUDB -eq '1' -and -not $UPGD_bool)
-        {
-            Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+            Import-Module “sqlps” -DisableNameChecking
+
+            if ( $SUDB -eq '1' -and -not $UPGD_bool)
+            {
+                Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+            }
+
+            Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+            cd "c:"
         }
-
-        Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
-        cd "c:"
     }
 
     if ( -not $UPGD_bool )
