@@ -284,6 +284,12 @@ catch
     if ( $LASTEXITCODE -eq 0 ) {
         cmd /c exit 3
     }
+
+    if ( ($installMSI -eq "1") -and (Test-Path $installer_file) ) {
+        Write-Output ("$(Log-Date) Deleting $installer_file so that an install will occur by default next time...")
+        Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
+    }
+
     return
 }
 finally
