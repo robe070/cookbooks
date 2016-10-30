@@ -115,7 +115,7 @@ try
 
     if ( $Cloud -eq "Azure" ) {
         # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
-        Write-Output ("$(LOG_DATE) Checking ODBC driver for Database Type $DBUT")
+        Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
         switch -regex ($DBUT) {
             "SQLAZURE|MSSQL" {
