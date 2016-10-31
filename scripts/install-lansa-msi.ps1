@@ -119,7 +119,7 @@ try
 
         switch -regex ($DBUT) {
             "SQLAZURE|MSSQL" {
-                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64_12_0_4219_0.msi"
+                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
                 [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
             }
             "MYSQL" {
