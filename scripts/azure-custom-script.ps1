@@ -165,14 +165,16 @@ try
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $Installed = $false
-    if (-not (Test-Path $installer_file) -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $triggerWebConfig -eq "0" -and $uninstallMSI -eq "0" ) {
-        Write-Output ("$(Log-Date) There is no installation file and no other options specified, so defaulting to install the MSI and setup Web Configuration")
-        # Note that an Uninstall might be being done for all instances where some maybe installed and others not, so we don't want to be installing then
-        # The idea is that if an explicit option is set, then honour that, no defaulting.
-        $installMSI = "1"
-        $triggerWebConfig = "1"
-        Write-Verbose ("installMSI = $installMSI")
-        Write-Verbose ("triggerWebConfig = $triggerWebConfig")
+    if (-not (Test-Path $installer_file) ) {
+        if ( $installMSI -eq "0" -and $updateMSI -eq "0" -and $triggerWebConfig -eq "0" -and $uninstallMSI -eq "0" ) {
+            Write-Output ("$(Log-Date) There is no installation file and no other options specified, so defaulting to install the MSI and setup Web Configuration")
+            # Note that an Uninstall might be being done for all instances where some maybe installed and others not, so we don't want to be installing then
+            # The idea is that if an explicit option is set, then honour that, no defaulting.
+            $installMSI = "1"
+            $triggerWebConfig = "1"
+            Write-Verbose ("installMSI = $installMSI")
+            Write-Verbose ("triggerWebConfig = $triggerWebConfig")
+        }
     } else {
         $Installed = $true
     }

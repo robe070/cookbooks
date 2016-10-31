@@ -147,7 +147,7 @@ try
             throw $ErrorMessage
         }
 
-        if ( $DRIVERURL32 ) {
+        if ( (test-path variable:\DRIVERURL32) ) {
             Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32")
             (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
 
