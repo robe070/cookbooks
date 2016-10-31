@@ -111,21 +111,53 @@ try
     if ( $Cloud -eq "Azure" ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+    }
 
-        # Temporary code to install new ODBC driver which seems to have fixed the C00001A5 exceptions caused by SqlDriverConnect
+    if ( $Cloud -eq "Azure" ) {
+        # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
+        Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
-        $MSODBCSQL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64_12_0_4219_0.msi"
-        $odbc_installer_file = ( Join-Path -Path "c:\lansa" -ChildPath "msodbcsqlx64.msi" )
-        Write-Verbose ("$(Log-Date) Downloading $MSODBCSQL to $odbc_installer_file")
-        (New-Object System.Net.WebClient).DownloadFile($MSODBCSQL, $odbc_installer_file)
+        switch -regex ($DBUT) {
+            "SQLAZURE|MSSQL" {
+                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
+                [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+            }
+            "MYSQL" {
+                $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                [String[]] $Arguments = @( "/quiet")
+            }
+            default {
+                $ExitCode = 2
+                $ErrorMessage = "Database Type $DBUT not supported. Requires an ODBC driver to be installed by this script"
+                Write-Error $ErrorMessage -Category NotInstalled
+                throw $ErrorMessage
+            }
+        }
+        $odbc_installer_file = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver.msi" )
+        $odbc_installer_file32 = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver32.msi" )
+        Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file")
+        (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file)
 
-        [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
         $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
         if ( $p.ExitCode -ne 0 ) {
             $ExitCode = $p.ExitCode
             $ErrorMessage = "ODBC Install returned error code $($p.ExitCode)."
             Write-Error $ErrorMessage -Category NotInstalled
             throw $ErrorMessage
+        }
+
+        if ( (test-path variable:\DRIVERURL32) ) {
+            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32")
+            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
+
+            $p = Start-Process -FilePath $odbc_installer_file32 -ArgumentList $Arguments -Wait -PassThru
+            if ( $p.ExitCode -ne 0 ) {
+                $ExitCode = $p.ExitCode
+                $ErrorMessage = "ODBC Install 32 returned error code $($p.ExitCode)."
+                Write-Error $ErrorMessage -Category NotInstalled
+                throw $ErrorMessage
+            }
         }
     }
 
@@ -144,24 +176,27 @@ try
 
     if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
     {
-        if ( ($DBUT -eq "SQLAZURE") ) {
-            Write-Output ("$(Log-Date) Azure SQL Database presumed to exist")
-        } else {
-            Write-Output ("$(Log-Date) Database Setup work...")
+        switch ($DBUT) {
+            "MSSQLS" {
+                Write-Output ("$(Log-Date) Database Setup work...")
 
-            Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+                Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-            Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
-            Import-Module “sqlps” -DisableNameChecking
+                Import-Module “sqlps” -DisableNameChecking
 
-            if ( $SUDB -eq '1' -and -not $UPGD_bool)
-            {
-                Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+                if ( $SUDB -eq '1' -and -not $UPGD_bool)
+                {
+                    Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+                }
+
+                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+                cd "c:"
             }
-
-            Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
-            cd "c:"
+            default {
+                Write-Output ("$(Log-Date) Database presumed to exist")
+            }
         }
     }
 
