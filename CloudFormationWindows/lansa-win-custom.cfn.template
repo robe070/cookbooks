@@ -900,7 +900,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "Set-ItemProperty -Path \"HKLM\\Software\\lansa\" -Name \"Installing\" -Value 0",
+                                            "Set-ItemProperty -Path \"HKLM:\\Software\\lansa\" -Name \"Installing\" -Value 0",
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
@@ -1618,7 +1618,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "Set-ItemProperty -Path \"HKLM\\Software\\lansa\" -Name \"Installing\" -Value 1",
+                                            "Set-ItemProperty -Path \"HKLM:\\Software\\lansa\" -Name \"Installing\" -Value 1",
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
