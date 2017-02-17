@@ -264,11 +264,18 @@ try
     
     Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
 
-    if ( $Cloud -eq "Azure" ) {
-        Write-Output "$(Log-Date) Set JSM Service dependencies"
-        Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
-        Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service."
-        cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+    if ( (test-path "$APPA\Integrator\Jsminstance\System\Jsmsupp.exe") ) {
+        $JSMServiceName = '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"'
+        if ( $Cloud -eq "Azure" ) {
+            Write-Output "$(Log-Date) Set JSM Service dependencies"
+            Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
+            Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service."
+            cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+        }
+
+        Write-output ("$(Log-Date) Restart JSM Service to load the new license")
+        cmd /c "sc.exe" "stop" $JSMServiceName
+        cmd /c "sc.exe" "start" $JSMServiceName
     }
 
     Write-Output ("$(Log-Date) Execute the user script if one has been passed")
