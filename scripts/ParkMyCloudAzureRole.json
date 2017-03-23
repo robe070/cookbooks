@@ -1,0 +1,23 @@
+﻿{
+  "Name": "ParkMyCloud Limited Access3",
+  "Description": "ParkMyCloud limited access",
+  "IsCustom": "true",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/*/read",
+    "Microsoft.Compute/virtualMachines/start/action",
+    "Microsoft.Compute/virtualMachines/deallocate/action",
+    "Microsoft.Network/networkInterfaces/read",
+    "Microsoft.Network/publicIPAddresses/read",
+    "Microsoft.Compute/virtualMachineScaleSets/read",
+    "Microsoft.Compute/virtualMachineScaleSets/write",
+    "Microsoft.Compute/virtualMachineScaleSets/start/action",
+    "Microsoft.Compute/virtualMachineScaleSets/deallocate/action",
+    "Microsoft.Compute/virtualMachineScaleSets/*/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read"
+  ],
+  "NotActions": [],
+  "AssignableScopes": [
+    "/subscriptions/1926551d-b6c1-452b-a7e1-594b9ce1f194"
+  ]
+}
