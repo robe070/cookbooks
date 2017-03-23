@@ -74,6 +74,7 @@ Write-Verbose ("32bit = $f32bit")
 Write-Verbose ("SUDB = $SUDB")
 Write-Verbose ("UPGD = $UPGD")
 Write-Verbose ("DBUT = $DBUT")
+Write-Verbose ("Password = $dbpassword")
 
 try
 {
