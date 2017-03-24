@@ -4,7 +4,7 @@
     "Parameters": {
         "01LansaMSI": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v1.0.0_en-us.msi",
+            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v14.1.1_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "02LansaMSIBitness": {
@@ -314,29 +314,33 @@
        }
      }
    },
-    "Mappings"                 : {
-        "AWSRegionArch2AMI": {
-            "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace" },
-            "us-east-1": { "64": "ami-d77316c0" },
-            "us-east-2": { "64": "ami-5a6d363f" },
-            "us-west-1": { "64": "ami-d1286ab1" },
-            "us-west-2": { "64": "ami-eb9b4e8b" },
-            "eu-central-1": { "64": "ami-3c897853" },
-            "eu-west-1": { "64": "ami-ce384cbd" },
-            "ap-southeast-1": { "64": "ami-9f15ccfc" },
-            "ap-southeast-2": { "64": "ami-9c685fff" },
-            "ap-south-1": { "64": "ami-657d080a" },
-            "ap-northeast-1": { "64": "ami-b1975ad0" },
-            "ap-northeast-2": { "64": "ami-0663a968" },
-            "sa-east-1": { "64": "ami-ab0690c7" }
-        },
-       "Region2Principal" : {
+   "Mappings"                 : {
+      "AWSRegionArch2AMI": {
+         "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace" },
+         "us-east-1": { "64": "ami-d77316c0" },
+         "us-east-2": { "64": "ami-5a6d363f" },
+         "us-west-1": { "64": "ami-d1286ab1" },
+         "us-west-2": { "64": "ami-eb9b4e8b" },
+         "ca-central-1": { "64": "ami-02299466" },
+         "eu-central-1": { "64": "ami-3c897853" },
+         "eu-west-1": { "64": "ami-ce384cbd" },
+         "eu-west-2": { "64": "ami-1d574379" },
+         "ap-southeast-1": { "64": "ami-9f15ccfc" },
+         "ap-southeast-2": { "64": "ami-9c685fff" },
+         "ap-south-1": { "64": "ami-657d080a" },
+         "ap-northeast-1": { "64": "ami-b1975ad0" },
+         "ap-northeast-2": { "64": "ami-0663a968" },
+         "sa-east-1": { "64": "ami-ab0690c7" }
+      },
+      "Region2Principal" : {
          "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "us-east-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "us-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "us-west-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "eu-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "ca-central-1"   : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "eu-west-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
+         "eu-west-2"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "ap-southeast-1" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "ap-southeast-2" : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "ap-south-1"     : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
@@ -345,21 +349,23 @@
          "sa-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
          "cn-north-1"     : { "EC2Principal" : "ec2.amazonaws.com.cn", "OpsWorksPrincipal" : "opsworks.amazonaws.com.cn" }
        },
-       "Region2ARNPrefix" : {
-         "us-east-1"      : { "ARNPrefix": "arn:aws:" },
-         "us-east-2"      : { "ARNPrefix": "arn:aws:" },
-         "us-west-1"      : { "ARNPrefix": "arn:aws:" },
-         "us-west-2"      : { "ARNPrefix": "arn:aws:" },
-         "eu-central-1"   : { "ARNPrefix": "arn:aws:" },
-         "eu-west-1"      : { "ARNPrefix": "arn:aws:" },
-         "ap-southeast-1" : { "ARNPrefix": "arn:aws:" },
-         "ap-southeast-2" : { "ARNPrefix": "arn:aws:" },
-         "ap-south-1"     : { "ARNPrefix": "arn:aws:" },
-         "ap-northeast-1" : { "ARNPrefix": "arn:aws:" },
-         "ap-northeast-2" : { "ARNPrefix": "arn:aws:" },
-         "sa-east-1"      : { "ARNPrefix": "arn:aws:" },
-         "cn-north-1"     : { "ARNPrefix": "arn:aws-cn:" }
-       },
+      "Region2ARNPrefix": {
+         "us-east-1": { "ARNPrefix": "arn:aws:" },
+         "us-east-2": { "ARNPrefix": "arn:aws:" },
+         "us-west-1": { "ARNPrefix": "arn:aws:" },
+         "us-west-2": { "ARNPrefix": "arn:aws:" },
+         "eu-central-1": { "ARNPrefix": "arn:aws:" },
+         "ca-central-1": { "ARNPrefix": "arn:aws:" },
+         "eu-west-1": { "ARNPrefix": "arn:aws:" },
+         "eu-west-2": { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-1": { "ARNPrefix": "arn:aws:" },
+         "ap-southeast-2": { "ARNPrefix": "arn:aws:" },
+         "ap-south-1": { "ARNPrefix": "arn:aws:" },
+         "ap-northeast-1": { "ARNPrefix": "arn:aws:" },
+         "ap-northeast-2": { "ARNPrefix": "arn:aws:" },
+         "sa-east-1": { "ARNPrefix": "arn:aws:" },
+         "cn-north-1": { "ARNPrefix": "arn:aws-cn:" }
+      },
        "CustomVariable" : {
          "TemplateRoot"      : { "Value" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/" },
          "WebServerTemplate" : { "Value" : "webserver-win.cfn.template"},
