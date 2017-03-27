@@ -1365,11 +1365,11 @@
                     }
                 ]
 
-            },
-            "DependsOn": "DBWebServerGroup"
+            }
         },
         "LaunchWebServer": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn": "DBWaitCondition",
             "Metadata": {
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
