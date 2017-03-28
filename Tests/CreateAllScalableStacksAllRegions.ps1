@@ -21,9 +21,8 @@ ForEach ( $region in $regionList )
         -StackName "Scalable" `
         -DisableRollback $True `
         -Capability CAPABILITY_IAM `
-        -templateURL https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W14000_scalable/lansa-master-win.cfn.template `
+        -templateURL  	https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/L4W14000_scalable/lansa-win-custom.cfn.template `
         -Parameters `
-        @{ParameterKey="01LansaMSI";ParameterValue=" 	https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAM132_v1.0.0_en-us.msi"}, `
         @{ParameterKey="04DBPassword";ParameterValue="Pcxuser122"}, `
         @{ParameterKey="06WebPassword";ParameterValue="Pcxuser122"}, `
         @{ParameterKey="07KeyName";ParameterValue="RobG_id_rsa"}, `
