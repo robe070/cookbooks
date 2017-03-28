@@ -3,6 +3,8 @@
 
 Create a single LANSA Stack in every region so it may be tested in browser.
 
+N.B. The keyPair specified must be in EVERY region.
+
 .EXAMPLE
 
 
@@ -35,6 +37,7 @@ ForEach ( $region in $regionList )
         $ErrorCount++
         Write-Output "Error creating scalable stack in $region"
     }
+    Write-Output ("`r")
 }
 
 if ( $ErrorCount )
