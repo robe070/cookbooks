@@ -123,6 +123,7 @@ Write-Verbose ("triggerWebConfig = $triggerWebConfig")
 Write-Verbose ("UninstallMSI = $UninstallMSI")
 Write-Verbose ("trace = $trace")
 Write-Verbose ("fixLicense = $fixLicense")
+Write-Verbose ("Password = $dbpassword")
  
 try
 {

@@ -21,6 +21,9 @@
     <Compile Include="lansa-master-win.cfn.template">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="lansa-win-custom.cfn.template">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="webserver-win.cfn.template">
       <SubType>Code</SubType>
     </Compile>
