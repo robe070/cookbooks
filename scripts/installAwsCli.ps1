@@ -12,6 +12,6 @@ $source = "https://s3.amazonaws.com/aws-cli/AWSCLI64.msi"
 $destination = Join-Path -Path $tempFolder -ChildPath "AWSCLI64.msi"
 $wc = New-Object system.net.webclient
 $wc.downloadFile( $source, $destination ) | Write-Output
-msiexec /quiet /i $destination | Write-Output
+Run-ExitCode 'msiexec' @('/quiet', '/i', $destination)
 
 Write-Output "$(Log-Date) AWS CLI installed"

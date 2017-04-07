@@ -78,7 +78,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $Win2012=$true
+    $Win2012=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $SkipSlowStuff=$false
     )
 
 # set up environment if not yet setup
@@ -115,45 +119,47 @@ try
     Write-Output ("$(Log-Date) Allow Remote Powershell session to any host")
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
 
-    Write-Output ("$(Log-Date) Upload any changes to current installation image")
+    if ( !$SkipSlowStuff ) {
+        Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-    Write-Verbose ("Test if source of DVD image exists")
-    if ( !(Test-Path -Path $LocalDVDImageDirectory) )
-    {
-        $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
-            ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
-    }
-
-    if ( $Cloud -eq 'AWS' ) {
-        # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
-        # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
-        [String[]] $S3Arguments = @("--exclude", "*ibmi/*", "--exclude", "*AS400/*", "--exclude", "*linux/*", "--exclude", "*setup/Installs/MSSQLEXP/*_x86_*.exe", "--exclude", "*setup/Installs/MSSQLEXP/*_x64_JPN.exe", "--delete")
-    
-        # If its not a beta, allow everyone to access it
-        if ( $VersionText -ne "14beta" )
+        Write-Verbose ("Test if source of DVD image exists")
+        if ( !(Test-Path -Path $LocalDVDImageDirectory) )
         {
-            $S3Arguments += @("--grants", "read=uri=http://acs.amazonaws.com/groups/global/AllUsers")
+            $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
+                ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
-        cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $S3Arguments | Write-Output
-        if ( $LastExitCode -ne 0 ) { throw }
-    } elseif ( $Cloud -eq 'Azure' ) {
-        $StorageAccount = 'lansalpcmsdn'
-                             
-        #Save the storage account key
-        $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
 
-        if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
-            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+        if ( $Cloud -eq 'AWS' ) {
+            # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
+            # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
+            [String[]] $S3Arguments = @("--exclude", "*ibmi/*", "--exclude", "*AS400/*", "--exclude", "*linux/*", "--exclude", "*setup/Installs/MSSQLEXP/*_x86_*.exe", "--exclude", "*setup/Installs/MSSQLEXP/*_x64_JPN.exe", "--delete")
+    
+            # If its not a beta, allow everyone to access it
+            if ( $VersionText -ne "14beta" )
+            {
+                $S3Arguments += @("--grants", "read=uri=http://acs.amazonaws.com/groups/global/AllUsers")
+            }
+            cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $S3Arguments | Write-Output
+            if ( $LastExitCode -ne 0 ) { throw }
+        } elseif ( $Cloud -eq 'Azure' ) {
+            $StorageAccount = 'lansalpcmsdn'
+                             
+            #Save the storage account key
+            $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
+
+            if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
+                Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
+                cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+            }
         }
     }
 
@@ -276,6 +282,8 @@ try
     
         # Then we install git using chocolatey and pull down the rest of the files from git
 
+        # Load basic utils before running git script
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\dot-CommonTools.ps1
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
 
         Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
@@ -374,22 +382,24 @@ try
         }
     }
 
-    MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    if ( !$SkipSlowStuff ) {
+        MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
-    # Session has probably been lost due to a Windows Updates reboot
-    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-    {
-        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-        if ( $Script:session ) { Remove-PSSession $Script:session }
+        # Session has probably been lost due to a Windows Updates reboot
+        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+        {
+            Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+            if ( $Script:session ) { Remove-PSSession $Script:session }
 
-        if ( $Cloud -eq 'AWS' ) {
-            Connect-RemoteSession
-        } elseif ($Cloud -eq 'Azure' ) {
-            Connect-RemoteSessionUri
+            if ( $Cloud -eq 'AWS' ) {
+                Connect-RemoteSession
+            } elseif ($Cloud -eq 'Azure' ) {
+                Connect-RemoteSessionUri
+            }
+
+            Execute-RemoteInit
+            Execute-RemoteInitPostGit
         }
-
-        Execute-RemoteInit
-        Execute-RemoteInitPostGit
     }
 
     if ( $InstallIDE -eq $true ) {

@@ -12,6 +12,6 @@ $source = "http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.
 $destination = Join-Path -Path $tempFolder -ChildPath "AWSToolsAndSDKForNet.msi"
 $wc = New-Object system.net.webclient
 $wc.downloadFile( $source, $destination ) | Write-Output
-msiexec /quiet /i $destination | Write-Output
+Run-ExitCode 'msiexec' @('/quiet', '/i', $destination)
 
 Write-Output "$(Log-Date) AWS SDK for .Net installed"

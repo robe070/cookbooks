@@ -31,14 +31,16 @@ Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
 {
     Write-Output "Installing Git"
-    choco install git -y
-    
+    Run-ExitCode 'choco' @('install', 'git', '-y' )
+    refreshenv
+
     # Note, the Git install overwrites the current environment so need to modify path here
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
     cd \
-    cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
+    # cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
+    Run-ExitCode 'git' @('clone', 'https://github.com/robe070/cookbooks.git', $GitRepo)
 }
 else
 {
