@@ -309,6 +309,7 @@ try
             $Hive = "HKLM"
         }
 
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
         Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
 
         PlaySound

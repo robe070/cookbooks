@@ -15,11 +15,7 @@ try {
     $wc = New-Object system.net.webclient
     $wc.downloadFile( $source, $destination ) | Write-Output
 
-    cmd /c "msiexec /quiet /i ""$destination"" AZURESTORAGETOOLSFOLDER=""$InstallDir"""  | Write-Output
-    if ( $LastExitCode -ne 0 )
-    {
-        throw
-    }
+    Run-ExitCode 'msiexec' @('/quiet', '/i', """$destination""", "AZURESTORAGETOOLSFOLDER=""$InstallDir""")
 
     Add-DirectoryToEnvPathOnce -Directory "$InstallDir\Azcopy"
 
