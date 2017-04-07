@@ -37,18 +37,20 @@ try
     cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems"
 
     if ( $Cloud -eq "AWS" ) {
-        Write-Output "$(Log-Date) Configure EC2 Settings"
-        &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath"
+        if ( Test-Path $ENV:ProgramFiles\Amazon\Ec2ConfigService ) {
+            Write-Output "$(Log-Date) Configure EC2 Settings"
+            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath"
+            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt"
+        } else {
+            # Newer EC2 Launch service
+            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*"
+        }
     }
 
     Write-Output "$(Log-Date) Tidy up"
 
     if (Test-Path -Path $TempPath) {
         cmd /c rd /S/Q $TempPath
-    }
-
-    if ( $Cloud -eq "AWS" ) {
-        cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt"
     }
 }
 catch

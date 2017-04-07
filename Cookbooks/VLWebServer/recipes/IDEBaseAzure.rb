@@ -14,9 +14,3 @@ end
 include_recipe "VLWebServer::iisSetup2"
 include_recipe "chocolatey"
 
-chocolatey "gitextensions"
-chocolatey "kdiff3"
-
-chocolatey "jre8"
-
-Chocolatey "adobereader"

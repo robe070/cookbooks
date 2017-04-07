@@ -265,7 +265,9 @@ try
 
         # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
         if ( $Cloud -eq "AWS" ) {
-            copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+            if ( Test-Path "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml" ) {
+                copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+            }
         }
 
         $StartHereHtm = "CloudStartHere$Language.htm"

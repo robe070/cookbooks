@@ -71,12 +71,14 @@ try
     #Wait for ping to succeed
     while ($true)
     {
-        "$(Log-Date) Waiting for network to come alive"
-        $ping = Test-Connection -ComputerName $Script:publicDNS -Count 2 -ErrorAction SilentlyContinue
-        if ($ping)
+        "$(Log-Date) Waiting for instance status to pass status checks"
+        # Windows Server 2016 disables ping by default, so we can't use ping anymore to see if the network is up.
+        $status = Get-EC2InstanceStatus -InstanceId $instanceid
+        if ($($status.Status.Status) -eq 'ok' -and $($status.SystemStatus.Status) -eq 'ok')
         {
             break
         }
+        "$(Log-Date) Status = $($status.Status.Status), System Status = $($status.SystemStatus.Status)"
         Sleep -Seconds 10
     }
 

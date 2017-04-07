@@ -74,7 +74,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Cloud='AWS'
+    $Cloud='AWS',
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $Win2012=$true
     )
 
 # set up environment if not yet setup
@@ -160,13 +164,18 @@ try
 
     Write-Verbose ("Locate image Name $AmazonAMIName")    
 
+
     if ( $Cloud -eq 'AWS' ) {
+        $AdminUserName = "administrator"
         $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
         $ImageName = $AmazonImage[0].Name
         $Script:Imageid = $AmazonImage[0].ImageId
         Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         Create-EC2Instance $Script:Imageid $script:keypair $script:SG
+
+        $vmname="Bake $Script:instancename"
+
     } elseif ($Cloud -eq 'Azure' ) {
         $image=Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
@@ -177,10 +186,10 @@ try
         }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
-        $vmname="Bake$VersionText"
         $vmsize="Medium"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
+        $vmname = $VersionText
 
         Write-Verbose "$(Log-Date) Delete VM if it already exists"
         Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
@@ -282,7 +291,7 @@ try
 
         #####################################################################################
 
-        Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
+        Write-Output "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
         MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         Write-Output "$(Log-Date) Workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
@@ -352,6 +361,16 @@ try
 
             Execute-RemoteInit
             Execute-RemoteInitPostGit
+        }
+    }
+
+    # No harm installing this again if its already installed    
+    if ( $InstallIDE -eq $true) {
+        if ( $Win2012 ) {
+            Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
+            MessageBox "Run choco install jdk8 -y manually. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        } else {
+            Execute-RemoteBlock $Script:session { Run-ExitCode 'choco' @('install', 'jdk8', '-y') }
         }
     }
 
@@ -438,7 +457,14 @@ try
     Write-Output "$(Log-Date) Sysprep"
     Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
     if ( $Cloud -eq 'AWS' ) {
-        Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+        if ( $Win2012 ) {
+            Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+        } else {
+            # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+            Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts}
+            Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule}
+            Invoke-Command -Session $Script:session {./SysprepInstance.ps1}
+        }
     } elseif ($Cloud -eq 'Azure' ) {
         MessageBox "Run sysprep manually because it fails remotely!. When complete, click OK on this message box"
 

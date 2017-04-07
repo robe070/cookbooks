@@ -579,3 +579,25 @@ function PlaySound {
         if($flag) { $sound.Stop() }
     }
 }
+
+function Run-ExitCode {
+    param( [string]$Program, [String[]]$Arguments )
+
+    $ErrorFile = "$($ENV:TEMP)\error.txt"
+    $OutFile = "$($ENV:TEMP)\out.txt"
+
+    Remove-Item $OutFile -force -ErrorAction SilentlyContinue
+    Remove-Item $ErrorFile -force -ErrorAction SilentlyContinue
+
+    Write-Output( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
+    $p = Start-Process -FilePath $Program -ArgumentList $Arguments -Wait -PassThru -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $OutFile
+
+    cat $OutFile -ErrorAction SilentlyContinue
+    cat $ErrorFile -ErrorAction SilentlyContinue
+    if ( $p.ExitCode -ne 0 ) {
+        $ExitCode = $p.ExitCode
+        $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
+        Write-Error $ErrorMessage -Category NotInstalled
+        throw $ErrorMessage
+    }
+}
