@@ -77,7 +77,13 @@ try
     Run-ExitCode 'choco' @( 'install', 'gitextensions', '--version', '2.49', '-y')
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y' )
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y' )
-    Run-ExitCode 'choco' @( 'install', 'adobereader', '-y' )
+
+    # the --% is so that the rest of the line can use simpler quoting
+    # See this link for full help on passing msiexec params through choco: 
+    # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
+    # This ensures that only English is installed as installing every language does not pass AWS virus checking
+    Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--%', '-ia', 'LANG_LIST=en_US' ) 
+
     New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue
     
     if ( $Cloud -eq "AWS" ) {

@@ -299,11 +299,14 @@ try
 
         #####################################################################################
 
-        Write-Output "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
-        MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        if ( $Cloud -eq 'AWS' ) {
+            Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
+        } else {
+            Write-Output "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
+            Write-Output "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+            MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        }
 
-        Write-Output "$(Log-Date) Workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-        MessageBox "Configure gpedit.msc. Enable - \Computer Configuration\Admninistrative Templates\System\User Profiles\'Do not forcefully unload the users registry at logoff' Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
@@ -383,22 +386,28 @@ try
     }
 
     if ( !$SkipSlowStuff ) {
-        MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+        if ( $Cloud -eq 'AWS' ) {
+            # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
+            Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
+            Write-Host "$(Log-Date) Windows Updates complete"
+        } else {
+            MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
 
-        # Session has probably been lost due to a Windows Updates reboot
-        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-        {
-            Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-            if ( $Script:session ) { Remove-PSSession $Script:session }
+            # Session has probably been lost due to a Windows Updates reboot
+            if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+            {
+                Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+                if ( $Script:session ) { Remove-PSSession $Script:session }
 
-            if ( $Cloud -eq 'AWS' ) {
-                Connect-RemoteSession
-            } elseif ($Cloud -eq 'Azure' ) {
-                Connect-RemoteSessionUri
+                if ( $Cloud -eq 'AWS' ) {
+                    Connect-RemoteSession
+                } elseif ($Cloud -eq 'Azure' ) {
+                    Connect-RemoteSessionUri
+                }
+
+                Execute-RemoteInit
+                Execute-RemoteInitPostGit
             }
-
-            Execute-RemoteInit
-            Execute-RemoteInitPostGit
         }
     }
 
@@ -453,7 +462,7 @@ try
         Execute-RemoteInitPostGit
     }
 
-    Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
+    Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
     if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
@@ -464,7 +473,7 @@ try
         }
     }
 
-    Write-Output "$(Log-Date) Sysprep"
+    Write-Host "$(Log-Date) Sysprep"
     Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
     if ( $Cloud -eq 'AWS' ) {
         if ( $Win2012 ) {
@@ -489,14 +498,14 @@ try
     if ( $Cloud -eq 'Azure' ) {
         Wait-AzureVMState $svcName $vmname "StoppedVM"
 
-        Write-Output "$(Log-Date) Creating Azure Image"
+        Write-Host "$(Log-Date) Creating Azure Image"
     
         Write-Verbose "$(Log-Date) Delete image if it already exists"
         $ImageName = "$($VersionText)image"
         Get-AzureVMImage -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
         Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName $ImageName -OSState Generalized
 
-        Write-Output "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
+        Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
         .$script:IncludeDir\get-azure-sas-token.ps1 -ImageName $ImageName
 
     } elseif ($Cloud -eq 'AWS') {
@@ -504,7 +513,7 @@ try
 
         Wait-EC2State $instanceid "Stopped"
 
-        Write-Output "$(Log-Date) Creating AMI"
+        Write-Host "$(Log-Date) Creating AMI"
 
         $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
         $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
@@ -516,7 +525,7 @@ try
     
         while ( $true )
         {
-            Write-Output "$(Log-Date) Waiting for AMI to become available"
+            Write-Host "$(Log-Date) Waiting for AMI to become available"
             $amiProperties = Get-EC2Image -ImageIds $amiID
 
             if ( $amiProperties.ImageState -eq "available" )
@@ -525,7 +534,7 @@ try
             }
             Sleep -Seconds 10
         }
-        Write-Output "$(Log-Date) AMI is available"
+        Write-Host "$(Log-Date) AMI is available"
   
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
@@ -543,7 +552,7 @@ try
 
     if ($Cloud -eq 'AWS') {
         #####################################################################################
-        Write-Output ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
+        Write-Host ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
         #####################################################################################
 
         $err = $true
@@ -558,7 +567,7 @@ try
             {
                 $_
                 $err = $true
-                Write-Output "$(Log-Date) Waiting for Security Group to be deleted"
+                Write-Host "$(Log-Date) Waiting for Security Group to be deleted"
                 Sleep -Seconds 10
             }
         }

@@ -32,7 +32,7 @@ try {
 
     #create the sas token
     $startTime = Get-Date
-    $endTime = $startTime.AddDays(10)
+    $endTime = $startTime.AddDays(30)
     $startTime = $startTime.AddDays(-1)
     $token = New-AzureStorageContainerSASToken -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
 
