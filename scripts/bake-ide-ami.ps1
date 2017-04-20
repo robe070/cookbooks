@@ -283,6 +283,7 @@ try
 
     # Load up some required tools into remote environment
 
+    # Load basic utils before running anything
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
     if ( $InstallBaseSoftware ) {
@@ -293,8 +294,6 @@ try
     
         # Then we install git using chocolatey and pull down the rest of the files from git
 
-        # Load basic utils before running git script
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\dot-CommonTools.ps1
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
 
         Execute-RemoteBlock $Script:session {    "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" }
@@ -331,6 +330,8 @@ try
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
     } else {
+        Execute-RemoteInitPostGit
+
         Execute-RemoteBlock $Script:session {
             Write-Verbose "$(Log-Date) Refreshing git tools repo"
             # Ensure we cope with an existing repo, not just a new clone...
@@ -439,8 +440,23 @@ try
         PlaySound
 
         if ( $Cloud -eq 'AWS' ) {
-            # Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing LANSA IDE' -Parameter @{'commands'=@("c:\lansa\scripts\install-lansa-ide.ps1")}
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+            if ( $Upgrade -eq $false ) {
+                Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+            } else {
+                # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
+                # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system 
+                Invoke-Command -Session $Script:session {
+                    $lastexitcode = 0
+
+                    c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait = 'false'
+                } -ArgumentList 'true'
+                    
+                $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                    Write-Error "LastExitCode: $remotelastexitcode"
+                    throw 1
+                }      
+            }
         } else {
 
             MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
@@ -548,7 +564,7 @@ try
             }
             Sleep -Seconds 10
         }
-        Write-Host "$(Log-Date) AMI is available"
+        Write-Host "$(Log-Date) AMI $(amiID) is available"
   
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 

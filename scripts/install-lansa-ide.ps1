@@ -25,7 +25,7 @@ param(
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
-[String]$wait
+[String]$wait = 'true'
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -61,6 +61,7 @@ Write-Debug ("webuser = $webuser")
 Write-Debug ("32bit = $f32bit")
 Write-Debug ("SUDB = $SUDB")
 Write-Debug ("UPGD = $UPGD")
+Write-Debug ("WAIT = $Wait")
 
 try
 {
@@ -358,7 +359,7 @@ finally
     Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
 
     # Wait if we are upgrading so the user can see the results
-    if ( $UPGD_bool )
+    if ( $UPGD_bool -and $Wait -eq 'true')
     {
         Write-Output ""
         Write-Output "Press any key to continue ..."
