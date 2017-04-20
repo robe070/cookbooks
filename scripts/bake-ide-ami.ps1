@@ -82,7 +82,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $SkipSlowStuff=$false
+    $SkipSlowStuff=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $Upgrade=$false
     )
 
 # set up environment if not yet setup
@@ -116,8 +120,14 @@ try
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
-    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host")
+    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not runniong as Administrator!")
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
+
+    if ( $Win2012 -eq $true ) {
+        $Platform = 'Win2012'
+    } else {
+        $Platform = 'Win2016'
+    }
 
     if ( !$SkipSlowStuff ) {
         Write-Output ("$(Log-Date) Upload any changes to current installation image")
@@ -261,11 +271,12 @@ try
         Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
-        Write-Verbose "Turn on sound from RDP sessions"
-        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
-        Get-Service | Where {$_.Name -match "audio"} | start-service
-        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
-
+        if ( !$using:Upgrade ) {
+            Write-Verbose "Turn on sound from RDP sessions"
+            Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+            Get-Service | Where {$_.Name -match "audio"} | start-service
+            Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+        }
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
@@ -379,7 +390,11 @@ try
     if ( $InstallIDE -eq $true) {
         if ( $Win2012 ) {
             Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
-            MessageBox "Run choco install jdk8 -y manually. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            if ( $Cloud -eq 'AWS' ) {
+                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
+            } else {
+                MessageBox "Run choco install jdk8 -y manually. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            }
         } else {
             Execute-RemoteBlock $Script:session { Run-ExitCode 'choco' @('install', 'jdk8', '-y') }
         }
@@ -392,23 +407,23 @@ try
             Write-Host "$(Log-Date) Windows Updates complete"
         } else {
             MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
-
-            # Session has probably been lost due to a Windows Updates reboot
-            if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-            {
-                Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
-                if ( $Script:session ) { Remove-PSSession $Script:session }
-
-                if ( $Cloud -eq 'AWS' ) {
-                    Connect-RemoteSession
-                } elseif ($Cloud -eq 'Azure' ) {
-                    Connect-RemoteSessionUri
-                }
-
-                Execute-RemoteInit
-                Execute-RemoteInitPostGit
-            }
         }
+    }
+
+    # Session has probably been lost due to a Windows Updates reboot
+    if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+    {
+        Write-Output "$(Log-Date) Session lost or not open. Reconnecting..."
+        if ( $Script:session ) { Remove-PSSession $Script:session }
+
+        if ( $Cloud -eq 'AWS' ) {
+            Connect-RemoteSession
+        } elseif ($Cloud -eq 'Azure' ) {
+            Connect-RemoteSessionUri
+        }
+
+        Execute-RemoteInit
+        Execute-RemoteInitPostGit
     }
 
     if ( $InstallIDE -eq $true ) {
@@ -423,16 +438,15 @@ try
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
-        MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-        MessageBox "Check SQL Server is running in VM, then click OK on this message box"
-        MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
+        if ( $Cloud -eq 'AWS' ) {
+            # Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing LANSA IDE' -Parameter @{'commands'=@("c:\lansa\scripts\install-lansa-ide.ps1")}
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+        } else {
 
-        # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session and its not possible to log in to that session
-        # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
-
-        MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."
-
-        MessageBox "Install patches. Then click OK on this message box"
+            MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            MessageBox "Check SQL Server is running in VM, then click OK on this message box"
+            MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
+        }
     }
 
     if ( $InstallScalable -eq $true ) {
@@ -516,7 +530,7 @@ try
         Write-Host "$(Log-Date) Creating AMI"
 
         $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
-        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
+        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
@@ -549,29 +563,6 @@ try
     }    
 
     PlaySound
-
-    if ($Cloud -eq 'AWS') {
-        #####################################################################################
-        Write-Host ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
-        #####################################################################################
-
-        $err = $true
-        while ($err)
-        {
-            $err = $false
-            try
-            {
-                Remove-EC2SecurityGroup -GroupName $script:SG -Force
-            }
-            catch
-            {
-                $_
-                $err = $true
-                Write-Host "$(Log-Date) Waiting for Security Group to be deleted"
-                Sleep -Seconds 10
-            }
-        }
-    }
 }
 catch
 {
