@@ -448,7 +448,7 @@ try
                 Invoke-Command -Session $Script:session {
                     $lastexitcode = 0
 
-                    c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait = 'false'
+                    c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
                 } -ArgumentList 'true'
                     
                 $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
