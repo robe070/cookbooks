@@ -56,8 +56,11 @@ $AMIList | Format-Table
 
 for ($i=0; $i -lt $AMIList.Length; $i++ ) {
 
-    $Platform = $AMIList[0].Tags | where-object {$_.Key -eq "Platform"}
-    $Type = $AMIList[0].Tags | where-object {$_.Key -eq "Type"}
+    $Platform = $AMIList[$i].Tags | where-object {$_.Key -eq "Platform"}
+    $State = $AMIList[$i].Tags | where-object {$_.Key -eq "State"}
+    $Type = $AMIList[$i].Tags | where-object {$_.Key -eq "Type"}
+
+    Write-Output ( "$($AMIList[$i].ImageId) $($AMIList[$i].Name)       $($AMIList[$i].EnaSupport) $($Type.Value)  $($Platform.Value)  $($State.Value)         $($AMIList[$i].CreationDate)" )
 
     $Win2012 = $false
     if ( $Platform.Value -eq "Win2012" ) {
@@ -78,7 +81,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
                 -InstallIDE $true `
                 -InstallScalable $false `
                 -Win2012 $Win2012 `
-                -SkipSlowStuff $true `
+                -SkipSlowStuff $false `
                 -Upgrade $true
 
     Write-Output "$(Log-Date) Find the new image..."

@@ -342,14 +342,20 @@ try
             cmd /c git fetch --all '2>&1'
             # Check out a potentially different branch
             Write-Output "Branch: $using:GitBranch"
-            cmd /c git checkout -f $using:GitBranch  '2>&1'
+            # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
+            cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
             if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
             {
                 Write-Error ('Git checkout failed');
                 cmd /c exit $LastExitCode;
             }
-            # Finally make sure the current branch matches the origin
-            cmd /c git pull '2>&1'
+            # Overwrite the origin's current tree onto the branch we really want - the local branch
+            cmd /c git checkout -B $using:GitBranch  '2>&1'
+            if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
+            {
+                Write-Error ('Git checkout failed');
+                cmd /c exit $LastExitCode;
+            }
         }
     }
 
@@ -544,8 +550,17 @@ try
         Wait-EC2State $instanceid "Stopped"
 
         Write-Host "$(Log-Date) Creating AMI"
+        
+        # Updates already have LANSA-appended text so strip it off if its there
+        $SimpleDesc = $($AmazonImage[0].Description)
+        $Index = $SimpleDesc.IndexOf( "created on" )
+        if ( $index -eq -1 ) {
+            $FinalDescription = $SimpleDesc
+        } else {
+            $FinalDescription = $SimpleDesc.substring( 0, $index - 1 )
+        }
 
-        $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
+        $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $VersionText installed on $(Log-Date)"
         $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  
@@ -564,7 +579,7 @@ try
             }
             Sleep -Seconds 10
         }
-        Write-Host "$(Log-Date) AMI $(amiID) is available"
+        Write-Host "$(Log-Date) AMI $amiID is available"
   
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
@@ -583,6 +598,7 @@ try
 catch
 {
     Write-Error ($_ | format-list | out-string)
+    throw 1
 }
 
 }
