@@ -67,10 +67,10 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
         $Win2012 = $true
     }
 
-    Bake-IdeMsi -VersionText '14.1 EPC141099' `
+    Bake-IdeMsi -VersionText '14.1 EPC141030' `
                 -VersionMajor 14 `
                 -VersionMinor 1 `
-                -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC14101x" `
+                -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
                 -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
                 -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
                 -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `

@@ -344,6 +344,8 @@ try
             Write-Verbose "so that they are running when the license check is made by the Integrator service."
             cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
         }
+    } else {
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
