@@ -445,29 +445,22 @@ try
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
-        if ( $Cloud -eq 'AWS' ) {
-            if ( $Upgrade -eq $false ) {
-                Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
-            } else {
-                # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
-                # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system 
-                Invoke-Command -Session $Script:session {
-                    $lastexitcode = 0
-
-                    c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
-                } -ArgumentList 'true'
-                    
-                $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-                    Write-Error "LastExitCode: $remotelastexitcode"
-                    throw 1
-                }      
-            }
+        if ( $Upgrade -eq $false ) {
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
         } else {
+            # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
+            # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system 
+            Invoke-Command -Session $Script:session {
+                $lastexitcode = 0
 
-            MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-            MessageBox "Check SQL Server is running in VM, then click OK on this message box"
-            MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
+                c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
+            } -ArgumentList 'true'
+                    
+            $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+            if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                Write-Error "LastExitCode: $remotelastexitcode"
+                throw 1
+            }      
         }
     }
 

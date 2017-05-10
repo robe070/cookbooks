@@ -11,7 +11,7 @@ Bake an Upgrade to a LANSA Azure Image
 #>
 
 # Azure debug messages are extremely verbose so ensure they are switched off
-$DebugPreference = "ContinueSilently"
+$DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 
 $MyInvocation.MyCommand.Path
