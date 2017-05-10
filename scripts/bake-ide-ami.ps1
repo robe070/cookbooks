@@ -193,9 +193,13 @@ try
         $vmname="Bake $Script:instancename"
 
     } elseif ($Cloud -eq 'Azure' ) {
-        $image=Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
+        $imageObj=@(Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending)
+        if ( $imageObj ) {
+            $imageObj[0]
+            $image=$imageObj[0].ImageName
+        }
 
-        # If cannot find under ImageFamily, presume its a one-off LANSA image and access it by ImageName
+        # If cannot find under Label, presume its a one-off LANSA image and access it as if the supplied name is an ImageName
         if ( -not $image )
         {
             $image = $AmazonAMIName
