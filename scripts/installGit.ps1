@@ -38,7 +38,7 @@ if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
-    cd \
+    Set-Location \
     # cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
     Run-ExitCode 'git' @('clone', 'https://github.com/robe070/cookbooks.git', $GitRepo)
 }
@@ -55,7 +55,7 @@ Write-Output "Git installed"
 Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))"
 
 # Ensure we cope with an existing repo, not just a new clone...
-cd $GitRepoPath
+Set-Location $GitRepoPath
 # Throw away any local changes
 cmd /c git reset --hard HEAD '2>&1'
 # Ensure we have all changes
