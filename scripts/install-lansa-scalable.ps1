@@ -85,13 +85,14 @@ try
     Write-output ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments """$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm""" -WindowStyle "Maximized"
+    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm"
+        
+    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$ENV:ProgramFiles/CloudStartHere.htm" -WindowStyle "Maximized"
     New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
 
-    $RunOnce = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
-    New-Item -Path $RunOnce -ErrorAction SilentlyContinue
-    New-ItemProperty -Path $RunOnce -Name "StartHere" -Value "c:\Users\Administrator\Desktop\Start Here.lnk" -Force
-
+    Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
+        
     Add-TrustedSite "lansa.com"
     Add-TrustedSite "google-analytics.com"
     Add-TrustedSite "googleadservices.com"
