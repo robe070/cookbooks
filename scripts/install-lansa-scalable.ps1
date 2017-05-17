@@ -85,8 +85,8 @@ try
     Write-output ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Start Here.lnk" -Description "Start Here"  -Arguments """$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm""" -WindowStyle "Maximized"
-    New-Shortcut "C:\Program Files\Internet Explorer\iexplore.exe" "Desktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments """$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm""" -WindowStyle "Maximized"
+    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
 
     $RunOnce = "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
     New-Item -Path $RunOnce -ErrorAction SilentlyContinue
