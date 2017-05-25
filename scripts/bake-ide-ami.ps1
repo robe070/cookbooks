@@ -112,8 +112,16 @@ else
 
 Set-StrictMode -Version Latest
 
-$Script:DialogTitle = "LANSA IDE"
-$script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
+if ($InstallIDE -eq $true) {
+    $Script:DialogTitle = "LANSA IDE"
+    $script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
+}
+
+
+if ($InstallScalable -eq $true) {
+    $Script:DialogTitle = "LANSA Scalable License "
+    $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
+}
 
 try
 {
