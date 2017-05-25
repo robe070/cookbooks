@@ -74,7 +74,7 @@ try
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd"
 
-    Run-ExitCode 'choco' @( 'install', 'gitextensions', '--version', '2.49.3', '-y')
+    Run-ExitCode 'choco' @( 'install', 'gitextensions', '--version', '2.49.03', '-y')
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y' )
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y' )
 

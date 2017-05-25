@@ -37,7 +37,7 @@ Set-StrictMode -Version Latest
 # ****** via the registry.
 #******************************************************************************
 # This image contains the Salesforce patch
-Bake-IdeMsi -VersionText 'IDESQL161' `
+Bake-IdeMsi -VersionText 'IDESQL162' `
             -VersionMajor 14 `
             -VersionMinor 1 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
@@ -49,5 +49,6 @@ Bake-IdeMsi -VersionText 'IDESQL161' `
             -Cloud "Azure" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
-            -InstallIDE $true `
+            -InstallIDE $false `
+            -SkipSlowStuff $true `
             -Win2012 $false

@@ -43,15 +43,17 @@ else
 
 Set-StrictMode -Version Latest
 
+Write-Error "$(Log-Date) Not yet been used"
+
 # Update ALL Images which are tagged appropriately
 
 $FilterList = @( @{Name="tag-key"; values="Platform" }
-                 @{Name="tag-value"; values=@("Win2016", "Win2012") }
+                 @{Name="tag-value"; values=@("Win2012") }
                  @{Name="tag-key"; values="Type" }
-                 @{Name="tag-value"; values="IDE" }
+                 @{Name="tag-value"; values="Scalable" }
                  @{Name="tag-key"; values="State" }
                  @{Name="tag-value"; values="Current" } )
-$AMIList = @(Get-EC2Image -owner self -Filter $FilterList | select ImageId, Name, EnaSupport, Tags, CreationDate )
+$AMIList = @(Get-EC2Image -owner self -Filter $FilterList | select-object ImageId, Name, EnaSupport, Tags, CreationDate )
 $AMIList | Format-Table
 
 for ($i=0; $i -lt $AMIList.Length; $i++ ) {
@@ -67,7 +69,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
         $Win2012 = $true
     }
 
-    Bake-IdeMsi -VersionText '14.1 EPC141031' `
+    Bake-IdeMsi -VersionText '14.1 EPC141030' `
                 -VersionMajor 14 `
                 -VersionMinor 1 `
                 -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
@@ -78,7 +80,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
                 -GitBranch "support/L4W14100_IDE"`
                 -InstallBaseSoftware $false `
                 -InstallSQLServer $false `
-                -InstallIDE $true `
+                -InstallIDE $false `
                 -InstallScalable $false `
                 -Win2012 $Win2012 `
                 -SkipSlowStuff $false `
@@ -116,7 +118,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
         {
             break
         }
-        Sleep -Seconds 10
+        Start-Sleep -Seconds 10
     }
     Write-Host "$(Log-Date) Virginia AMI is available"
 

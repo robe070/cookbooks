@@ -49,7 +49,7 @@ $Win2012 = $true
 # To update the last image. put -VersionText image in -AmazonAMIName and increment the last digit by 1
 # so if VersionText = 'IDESQL-F3', then it becomes 'IDESQL-F4' & AmazonAMIName becomes 'IDESQL-F3image'
 
-Bake-IdeMsi -VersionText 'IDESQL-F3' `
+Bake-IdeMsi -VersionText 'IDESQL-F4' `
             -VersionMajor 14 `
             -VersionMinor 1 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `

@@ -35,7 +35,7 @@ Bake-IdeMsi -VersionText 'SCALE-CA3' `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "SQL2014-C-Aimage" `
-            -GitBranch "feature/azure_scalable" `
+            -GitBranch "support/L4W14100_IDE" `
             -Cloud "Azure" `
             -InstallBaseSoftware $false `
             -InstallSQLServer $false `

@@ -120,7 +120,7 @@ try
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
-    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not runniong as Administrator!")
+    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
 
     if ( $Win2012 -eq $true ) {
@@ -129,7 +129,7 @@ try
         $Platform = 'Win2016'
     }
 
-    if ( !$SkipSlowStuff ) {
+    if ( !$SkipSlowStuff -and !$InstallScalable ) {
         Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
         Write-Verbose ("Test if source of DVD image exists")
@@ -448,6 +448,7 @@ try
 
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
+
 
         if ( $Upgrade -eq $false ) {
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1

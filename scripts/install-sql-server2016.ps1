@@ -36,6 +36,7 @@ try {
 
     #####################################################################################
     Write-Output ("$(Log-Date) Download SQL Server") 
+    Write-Output ("$(Log-Date) ****** This is untested code ******") 
 
     $SqlServerFile = "$Script:ScriptTempPath\SQLServer.exe"
     $SqlServerUrl = "https://s3-ap-southeast-2.amazonaws.com/lansa/3rd+party/SQLServer2016-SSEI-Dev.exe"
@@ -68,6 +69,8 @@ try {
         cmd /c $SqlServerFile /Q /ACTION="PrepareImage" /INDICATEPROGRESS="false" /INSTANCEID="MSSQLSERVER" `
                 /FEATURES=SQLENGINE,FULLTEXT,CONN,SSMS /IAcceptSQLServerLicenseTerms=true | Write-Output
 
+        Write-Output ("$(Log-Date) A menu shortcut is created by the prepare. Determine what that is and ensure it can work automatically.") 
+        Write-Output ("$(Log-Date) Maybe it could even be run at this point in the script and still ensure that future syspreps of syspreps results in a working SQL Server - check logins.") 
         cp "$script:IncludeDir\SetupComplete2.cmd" -Destination "$env:SystemRoot\OEM"
     }
     else
