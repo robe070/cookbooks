@@ -102,26 +102,32 @@ try
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
 
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    Write-Verbose ("$(Log-Date) Running on $Cloud")
+
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
 
-    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    Write-Verbose ("$(Log-Date) Running on $Cloud")
+    # Docker passes in a local path to the MSI which is mapped to a host volume
+    # Just copy it to the standard name - its used to determine if an upgrade or not.
+    if ( $Cloud -eq "Docker") {
+        Copy-Item -Path $MSIUri -Destination $installer_file -Force
+    }
 
-    if ( $Cloud -eq "Azure" ) {
+    if ( $Cloud -eq "Azure") {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
     }
 
-    if ( $Cloud -eq "Azure" ) {
+    if ( $Cloud -eq "Azure"  -or $Cloud -eq "Docker") {
         # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
         Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
         switch -regex ($DBUT) {
             "SQLAZURE|MSSQL" {
                 $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
-                [String[]] $Arguments = @( "/quiet", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+                [String[]] $Arguments = @( "/quiet", "/lv*x $( Join-Path -Path $ENV:TEMP -ChildPath "odbc.log" )", "IACCEPTMSODBCSQLLICENSETERMS=YES")
             }
             "MYSQL" {
                 $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"

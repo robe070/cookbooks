@@ -1,8 +1,9 @@
 ﻿<#
 .SYNOPSIS
 
-Install a LANSA MSI.
-Creates a SQL Server Database then installs the MSI
+Manage the life cycle of a LANSA MSI.
+
+First written to be called when deploying or re-deploying an Azure ARM Template which instantiates a LANSA scalable stack.
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
@@ -12,12 +13,12 @@ i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with t
 
 .EXAMPLE
 
-1. Upload msi to c:\lansa\MyApp.msi (Copy file from local machine. Paste into RDP session)
-2. Start SQL Server Service and set to auto start. Change SQL Server to accept SQL Server Authentication
-3. Create lansa database
-4. Add user lansa with password 'Pcxuser@122' to SQL Server as Sysadmin and to the lansa database as dbowner
-5. Change server_name to the machine name in this command line and run it:
-C:\\LANSA\\scripts\\install-lansa-msi.ps1 -server_name "IP-AC1F2F2A" -dbname "lansa" -dbuser "lansa" -dbpassword "Pcxuser@122" -webuser "pcxuser" -webpassword "Lansa@122"
+For Docker
+1. docker run -d -p 1436:1433 -e sa_password=Pcxuser@122robg -e ACCEPT_EULA=Y -v h:/temp/:c:/temp/  -v C:/Users/Robert.SYD/Documents/GitHub/cookbooks/scripts/:c:/scripts/ --isolation=hyperv microsoft/mssql-server-windows
+2. docker exec -it <id> powershell
+3. Place msi in hosts h:\temp or equivalent directory, say h:\temp\AWAMAPP_v14.1.2_en-us.msi (Could map IDE package directory to container's c:\temp)
+5. Change server_name to the ip address of the container in this command line and run it. Presumes that server is on port 1433 and is using the default instance name of MSSQLSERVER:
+C:\scripts\azure-custom-script.ps1 -server_name "172.29.146.164" -dbname "lansa" -dbuser "sa" -dbpassword "Pcxuser@122robg" -webuser "PCXUSER2" -webpassword "Pcxuser@122robg" -MSIuri "c:\temp\AWAMAPP_v14.1.2_en-us.msi"
 
 #>
 param(
@@ -185,7 +186,7 @@ try
     if ( $Installed ) {
         Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
         Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
-        sleep -s 40
+        Start-Sleep -s 40
     }
     Write-Verbose ("installMSI = $installMSI")
 

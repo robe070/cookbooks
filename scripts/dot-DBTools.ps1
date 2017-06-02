@@ -125,12 +125,12 @@ Param (
 
     Try {
         $db.Create()
+        Write-Output ($db.CreateDate)
     }
     Catch {
         $_
         Write-Output ("Database creation failed. Its expected to fail on 2nd and subsequent EC2 instances or iterations")
     }
-    Write-Output ($db.CreateDate)
 }
 
 ##################################################################  
