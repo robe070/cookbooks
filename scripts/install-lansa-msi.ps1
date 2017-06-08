@@ -61,8 +61,6 @@ else
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
 
-$trusted="NO"
-
 $DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 
@@ -181,6 +179,14 @@ try
     # The template creates the database so it was conditioned out.
     #########################################################################################################
 
+    if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") { 
+        Write-Output( "$(Log-Date) Using SQL Authentication")
+        $trusted="NO"
+    } else {
+        Write-Output( "$(Log-Date) Using trusted connection")
+        $trusted="YES"
+    }
+
     if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
     {
         switch ($DBUT) {
@@ -195,7 +201,11 @@ try
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
-                    Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+                    if ( $trusted="NO" ) { 
+                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+                    } else {
+                        Create-SqlServerDatabase $server_name $dbname
+                    }
                 }
 
                 Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
@@ -206,6 +216,7 @@ try
             }
         }
     }
+    throw
 
     if ( -not $UPGD_bool )
     {
@@ -234,7 +245,11 @@ try
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+
+    if ( $trusted="NO" ) { 
+        $Arguments += @("DBUS=$dbuser", "PSWD=$dbpassword")
+    }
 
     Write-Output ("$(Log-Date) Arguments = $Arguments")
 

@@ -1,1 +1,2 @@
-﻿C:\scripts\azure-custom-script.ps1 -server_name "172.29.147.33" -dbname "lansa" -dbuser "sa" -dbpassword "Pcxuser@122robg" -webuser "PCXUSER2" -webpassword "Pcxuser@122robg" -MSIuri "c:\temp\AWAMAPP_v14.1.2_en-us.msi"
+﻿$hostname = hostname
+C:\scripts\azure-custom-script.ps1 -server_name "$hostname" -dbname "lansa" -dbuser "" -dbpassword "" -webuser "PCXUSER2" -webpassword "Pcxuser@122robg" -MSIuri "c:\temp\9.msi"

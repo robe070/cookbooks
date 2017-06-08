@@ -249,7 +249,7 @@ try
 
     if ( $installMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Installing...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser "$dbuser" -dbpassword "$dbpassword" -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
     } elseif ( $updateMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Updating...")
         .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
