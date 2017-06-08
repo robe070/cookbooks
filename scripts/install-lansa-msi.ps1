@@ -63,6 +63,7 @@ Write-Output ("`r`n")
 
 $DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
+[String]$trusted = "NO"
 
 Write-Verbose ("Server_name = $server_name")
 Write-Verbose ("dbname = $dbname")
@@ -168,8 +169,7 @@ try
 
     # On initial install disable TCP Offloading
 
-    if ( -not $UPGD_bool )
-    {
+    if ( (-not $UPGD_bool) -and $Cloud -ne "Docker") {
         Disable-TcpOffloading
     }
 
@@ -201,7 +201,7 @@ try
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
-                    if ( $trusted="NO" ) { 
+                    if ( $trusted -eq "NO" ) { 
                         Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
                     } else {
                         Create-SqlServerDatabase $server_name $dbname
@@ -216,7 +216,6 @@ try
             }
         }
     }
-    throw
 
     if ( -not $UPGD_bool )
     {
@@ -247,7 +246,7 @@ try
 
     [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
-    if ( $trusted="NO" ) { 
+    if ( $trusted -eq "NO" ) { 
         $Arguments += @("DBUS=$dbuser", "PSWD=$dbpassword")
     }
 
