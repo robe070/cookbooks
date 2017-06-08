@@ -25,7 +25,7 @@ param(
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
-[String]$wait
+[String]$wait = 'true'
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -61,6 +61,7 @@ Write-Debug ("webuser = $webuser")
 Write-Debug ("32bit = $f32bit")
 Write-Debug ("SUDB = $SUDB")
 Write-Debug ("UPGD = $UPGD")
+Write-Debug ("WAIT = $Wait")
 
 try
 {
@@ -265,7 +266,9 @@ try
 
         # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
         if ( $Cloud -eq "AWS" ) {
-            copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+            if ( Test-Path "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml" ) {
+                copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+            }
         }
 
         $StartHereHtm = "CloudStartHere$Language.htm"
@@ -307,6 +310,7 @@ try
             $Hive = "HKLM"
         }
 
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
         Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
 
         PlaySound
@@ -340,6 +344,8 @@ try
             Write-Verbose "so that they are running when the license check is made by the Integrator service."
             cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
         }
+    } else {
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
@@ -355,7 +361,7 @@ finally
     Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
 
     # Wait if we are upgrading so the user can see the results
-    if ( $UPGD_bool )
+    if ( $UPGD_bool -and $Wait -eq 'true')
     {
         Write-Output ""
         Write-Output "Press any key to continue ..."

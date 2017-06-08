@@ -37,12 +37,15 @@ else
 }
 
 if(-not ((Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'StartHereShown' -ErrorAction SilentlyContinue).StartHereShown)) {
-    # Enable Video in Internet Explorer. Note that the VM will fail to sysprep with this set.
-    # To be able to sysprep, delete the HKCU entries referred to in the following file
-    & reg import "$Script:GitRepoPath\scripts\VideoEnable.reg"
-
-    start-process "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "$ENV:ProgramFiles\CloudStartHere.htm"
-
+    $ie = new-object -comobject InternetExplorer.Application 
+ 
+    $ie.visible = $true 
+ 
+    #$ie2 = $ie.Width = 200  
+ 
+    $ie.top = 0; $ie.width = 1450; $ie.height = 1000 ; $ie.Left = 100 
+ 
+    $ie.navigate("$ENV:ProgramFiles\CloudStartHere.htm")
 
     New-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown -PropertyType DWord -Value $true –Force | Out-Null
 

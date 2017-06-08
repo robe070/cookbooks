@@ -74,7 +74,19 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Cloud='AWS'
+    $Cloud='AWS',
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $Win2012=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $SkipSlowStuff=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $Upgrade=$false
     )
 
 # set up environment if not yet setup
@@ -100,56 +112,72 @@ else
 
 Set-StrictMode -Version Latest
 
-$Script:DialogTitle = "LANSA IDE"
-$script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
+if ($InstallIDE -eq $true) {
+    $Script:DialogTitle = "LANSA IDE"
+    $script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
+}
+
+
+if ($InstallScalable -eq $true) {
+    $Script:DialogTitle = "LANSA Scalable License "
+    $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
+}
 
 try
 {
     # Use Forms for a MessageBox
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
-    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host")
+    Write-Output ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
 
-    Write-Output ("$(Log-Date) Upload any changes to current installation image")
-
-    Write-Verbose ("Test if source of DVD image exists")
-    if ( !(Test-Path -Path $LocalDVDImageDirectory) )
-    {
-        $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
-            ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
+    if ( $Win2012 -eq $true ) {
+        $Platform = 'Win2012'
+    } else {
+        $Platform = 'Win2016'
     }
 
-    if ( $Cloud -eq 'AWS' ) {
-        # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
-        # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
-        [String[]] $S3Arguments = @("--exclude", "*ibmi/*", "--exclude", "*AS400/*", "--exclude", "*linux/*", "--exclude", "*setup/Installs/MSSQLEXP/*_x86_*.exe", "--exclude", "*setup/Installs/MSSQLEXP/*_x64_JPN.exe", "--delete")
-    
-        # If its not a beta, allow everyone to access it
-        if ( $VersionText -ne "14beta" )
-        {
-            $S3Arguments += @("--grants", "read=uri=http://acs.amazonaws.com/groups/global/AllUsers")
-        }
-        cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $S3Arguments | Write-Output
-        if ( $LastExitCode -ne 0 ) { throw }
-    } elseif ( $Cloud -eq 'Azure' ) {
-        $StorageAccount = 'lansalpcmsdn'
-                             
-        #Save the storage account key
-        $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
-        Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
-        cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
+    if ( !$SkipSlowStuff -and !$InstallScalable ) {
+        Write-Output ("$(Log-Date) Upload any changes to current installation image")
 
-        if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
-            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+        Write-Verbose ("Test if source of DVD image exists")
+        if ( !(Test-Path -Path $LocalDVDImageDirectory) )
+        {
+            $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
+                ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
+        }
+
+        if ( $Cloud -eq 'AWS' ) {
+            # Standard arguments. Triple quote so we actually pass double quoted parameters to aws S3
+            # MSSQLEXP excludes ensure that just 64 bit english is uploaded.
+            [String[]] $S3Arguments = @("--exclude", "*ibmi/*", "--exclude", "*AS400/*", "--exclude", "*linux/*", "--exclude", "*setup/Installs/MSSQLEXP/*_x86_*.exe", "--exclude", "*setup/Installs/MSSQLEXP/*_x64_JPN.exe", "--delete")
+    
+            # If its not a beta, allow everyone to access it
+            if ( $VersionText -ne "14beta" )
+            {
+                $S3Arguments += @("--grants", "read=uri=http://acs.amazonaws.com/groups/global/AllUsers")
+            }
+            cmd /c aws s3 sync  $LocalDVDImageDirectory $S3DVDImageDirectory $S3Arguments | Write-Output
+            if ( $LastExitCode -ne 0 ) { throw }
+        } elseif ( $Cloud -eq 'Azure' ) {
+            $StorageAccount = 'lansalpcmsdn'
+                             
+            #Save the storage account key
+            $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary    
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Output
+            Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Output
+
+            if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
+                Write-Output ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
+                cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Output
+            }
         }
     }
 
@@ -160,27 +188,36 @@ try
 
     Write-Verbose ("Locate image Name $AmazonAMIName")    
 
+
     if ( $Cloud -eq 'AWS' ) {
+        $AdminUserName = "administrator"
         $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
         $ImageName = $AmazonImage[0].Name
         $Script:Imageid = $AmazonImage[0].ImageId
         Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         Create-EC2Instance $Script:Imageid $script:keypair $script:SG
-    } elseif ($Cloud -eq 'Azure' ) {
-        $image=Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending | select-object -ExpandProperty ImageName -First 1
 
-        # If cannot find under ImageFamily, presume its a one-off LANSA image and access it by ImageName
+        $vmname="Bake $Script:instancename"
+
+    } elseif ($Cloud -eq 'Azure' ) {
+        $imageObj=@(Get-AzureVMImage | where-object { $_.Label -like "$AmazonAMIName" } | sort-object PublishedDate -Descending)
+        if ( $imageObj ) {
+            $imageObj[0]
+            $image=$imageObj[0].ImageName
+        }
+
+        # If cannot find under Label, presume its a one-off LANSA image and access it as if the supplied name is an ImageName
         if ( -not $image )
         {
             $image = $AmazonAMIName
         }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
-        $vmname="Bake$VersionText"
         $vmsize="Medium"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
+        $vmname = $VersionText
 
         Write-Verbose "$(Log-Date) Delete VM if it already exists"
         Get-AzureVM -ServiceName $svcName -Name $VMName -ErrorAction SilentlyContinue | Remove-AzureVM -DeleteVHD -ErrorAction SilentlyContinue
@@ -246,17 +283,19 @@ try
         Write-Verbose "Switch off Internet download security warning"
         [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
 
-        Write-Verbose "Turn on sound from RDP sessions"
-        Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
-        Get-Service | Where {$_.Name -match "audio"} | start-service
-        Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
-
+        if ( !$using:Upgrade ) {
+            Write-Verbose "Turn on sound from RDP sessions"
+            Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
+            Get-Service | Where {$_.Name -match "audio"} | start-service
+            Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+        }
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
 
     # Load up some required tools into remote environment
 
+    # Load basic utils before running anything
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
     if ( $InstallBaseSoftware ) {
@@ -282,11 +321,14 @@ try
 
         #####################################################################################
 
-        Write-Output "$(Log-Date) workaround which must be done before Chef is installed when SQL Server is not already installed. Has to be run through RDP too!"
-        MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        if ( $Cloud -eq 'AWS' ) {
+            Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
+        } else {
+            Write-Output "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
+            Write-Output "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+            MessageBox "Run install-base-sql-server.ps1. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        }
 
-        Write-Output "$(Log-Date) Workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-        MessageBox "Configure gpedit.msc. Enable - \Computer Configuration\Admninistrative Templates\System\User Profiles\'Do not forcefully unload the users registry at logoff' Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Output "$(Log-Date) Installing base software"
@@ -300,6 +342,8 @@ try
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
     } else {
+        Execute-RemoteInitPostGit
+
         Execute-RemoteBlock $Script:session {
             Write-Verbose "$(Log-Date) Refreshing git tools repo"
             # Ensure we cope with an existing repo, not just a new clone...
@@ -310,14 +354,20 @@ try
             cmd /c git fetch --all '2>&1'
             # Check out a potentially different branch
             Write-Output "Branch: $using:GitBranch"
-            cmd /c git checkout -f $using:GitBranch  '2>&1'
+            # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
+            cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
             if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
             {
                 Write-Error ('Git checkout failed');
                 cmd /c exit $LastExitCode;
             }
-            # Finally make sure the current branch matches the origin
-            cmd /c git pull '2>&1'
+            # Overwrite the origin's current tree onto the branch we really want - the local branch
+            cmd /c git checkout -B $using:GitBranch  '2>&1'
+            if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
+            {
+                Write-Error ('Git checkout failed');
+                cmd /c exit $LastExitCode;
+            }
         }
     }
 
@@ -355,7 +405,29 @@ try
         }
     }
 
-    MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+    # No harm installing this again if its already installed    
+    if ( $InstallIDE -eq $true) {
+        if ( $Win2012 ) {
+            Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
+            if ( $Cloud -eq 'AWS' ) {
+                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
+            } else {
+                MessageBox "Run choco install jdk8 -y manually. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            }
+        } else {
+            Execute-RemoteBlock $Script:session { Run-ExitCode 'choco' @('install', 'jdk8', '-y') }
+        }
+    }
+
+    if ( !$SkipSlowStuff ) {
+        if ( $Cloud -eq 'AWS' ) {
+            # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
+            Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
+            Write-Host "$(Log-Date) Windows Updates complete"
+        } else {
+            MessageBox "Run Windows Updates. Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+        }
+    }
 
     # Session has probably been lost due to a Windows Updates reboot
     if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
@@ -385,16 +457,24 @@ try
         Write-Output "$(Log-Date) Installing IDE"
         PlaySound
 
-        MessageBox "Please RDP into $vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-        MessageBox "Check SQL Server is running in VM, then click OK on this message box"
-        MessageBox "Run install-lansa-ide.ps1 in a NEW Powershell ISE session. When complete, click OK on this message box"
 
-        # Fixed? => Cannot install IDE remotely at the moment becasue it requires user input on the remote session and its not possible to log in to that session
-        # Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+        if ( $Upgrade -eq $false ) {
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+        } else {
+            # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
+            # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system 
+            Invoke-Command -Session $Script:session {
+                $lastexitcode = 0
 
-        MessageBox "Have you re-sized the Internet Explorer window? SIZE it, don't MAXIMIZE it, so that all of the StartHere document can be read."
-
-        MessageBox "Install patches. Then click OK on this message box"
+                c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
+            } -ArgumentList 'true'
+                    
+            $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+            if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                Write-Error "LastExitCode: $remotelastexitcode"
+                throw 1
+            }      
+        }
     }
 
     if ( $InstallScalable -eq $true ) {
@@ -424,7 +504,7 @@ try
         Execute-RemoteInitPostGit
     }
 
-    Write-Output "$(Log-Date) Completing installation steps, except for sysprep"
+    Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
     if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
@@ -435,10 +515,17 @@ try
         }
     }
 
-    Write-Output "$(Log-Date) Sysprep"
+    Write-Host "$(Log-Date) Sysprep"
     Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
     if ( $Cloud -eq 'AWS' ) {
-        Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+        if ( $Win2012 ) {
+            Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep}
+        } else {
+            # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+            Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts}
+            Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule}
+            Invoke-Command -Session $Script:session {./SysprepInstance.ps1}
+        }
     } elseif ($Cloud -eq 'Azure' ) {
         MessageBox "Run sysprep manually because it fails remotely!. When complete, click OK on this message box"
 
@@ -453,14 +540,14 @@ try
     if ( $Cloud -eq 'Azure' ) {
         Wait-AzureVMState $svcName $vmname "StoppedVM"
 
-        Write-Output "$(Log-Date) Creating Azure Image"
+        Write-Host "$(Log-Date) Creating Azure Image"
     
         Write-Verbose "$(Log-Date) Delete image if it already exists"
         $ImageName = "$($VersionText)image"
         Get-AzureVMImage -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue
         Save-AzureVMImage -ServiceName $svcName -Name $vmname -ImageName $ImageName -OSState Generalized
 
-        Write-Output "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
+        Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
         .$script:IncludeDir\get-azure-sas-token.ps1 -ImageName $ImageName
 
     } elseif ($Cloud -eq 'AWS') {
@@ -468,10 +555,19 @@ try
 
         Wait-EC2State $instanceid "Stopped"
 
-        Write-Output "$(Log-Date) Creating AMI"
+        Write-Host "$(Log-Date) Creating AMI"
+        
+        # Updates already have LANSA-appended text so strip it off if its there
+        $SimpleDesc = $($AmazonImage[0].Description)
+        $Index = $SimpleDesc.IndexOf( "created on" )
+        if ( $index -eq -1 ) {
+            $FinalDescription = $SimpleDesc
+        } else {
+            $FinalDescription = $SimpleDesc.substring( 0, $index - 1 )
+        }
 
-        $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with LANSA IDE $VersionText installed on $(Log-Date)"
-        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
+        $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $VersionText installed on $(Log-Date)"
+        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
  
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
@@ -480,7 +576,7 @@ try
     
         while ( $true )
         {
-            Write-Output "$(Log-Date) Waiting for AMI to become available"
+            Write-Host "$(Log-Date) Waiting for AMI to become available"
             $amiProperties = Get-EC2Image -ImageIds $amiID
 
             if ( $amiProperties.ImageState -eq "available" )
@@ -489,7 +585,7 @@ try
             }
             Sleep -Seconds 10
         }
-        Write-Output "$(Log-Date) AMI is available"
+        Write-Host "$(Log-Date) AMI $amiID is available"
   
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
@@ -504,33 +600,11 @@ try
     }    
 
     PlaySound
-
-    if ($Cloud -eq 'AWS') {
-        #####################################################################################
-        Write-Output ("Delete Security Group. Should work first time, provided its not being used by an EC2 instance, but just in case, try it in a loop")
-        #####################################################################################
-
-        $err = $true
-        while ($err)
-        {
-            $err = $false
-            try
-            {
-                Remove-EC2SecurityGroup -GroupName $script:SG -Force
-            }
-            catch
-            {
-                $_
-                $err = $true
-                Write-Output "$(Log-Date) Waiting for Security Group to be deleted"
-                Sleep -Seconds 10
-            }
-        }
-    }
 }
 catch
 {
     Write-Error ($_ | format-list | out-string)
+    throw 1
 }
 
 }

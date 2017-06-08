@@ -17,7 +17,7 @@
 # ==============================================================================
 
 # variables
-$url = "https://chocolatey.org/api/v2/package/chocolatey/0.9.8.33"
+$url = "https://chocolatey.org/api/v2/package/chocolatey/0.10.3"
 if ($env:TEMP -eq $null) {
   $env:TEMP = Join-Path $env:SystemDrive 'temp'
 }
@@ -87,6 +87,9 @@ if ($chocoPath -ne $null) {
 if ($($env:Path).ToLower().Contains($($chocoExePath).ToLower()) -eq $false) {
   $env:Path = [Environment]::GetEnvironmentVariable('Path',[System.EnvironmentVariableTarget]::Machine);
 }
+
+# Answer yes to all prompts
+choco feature enable --name=allowGlobalConfirmation
 
 # update chocolatey to the latest version
 #Write-Host "Updating chocolatey to the latest version"

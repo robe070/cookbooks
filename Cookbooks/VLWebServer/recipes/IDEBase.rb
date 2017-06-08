@@ -12,20 +12,14 @@ features.each do |feature|
 end
 
 # Run then disable Ec2ConfigMonitor
-powershell_script "ProcessEc2ConfigMonitor" do
-  code <<-EOH
-    Enable-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
-    Start-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
-    Disable-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
-  EOH
-end
+#powershell_script "ProcessEc2ConfigMonitor" do
+#  code <<-EOH
+#    Enable-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
+#    Start-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
+#    Disable-ScheduledTask -TaskName "Ec2ConfigMonitorTask"
+#  EOH
+#end
 
 include_recipe "VLWebServer::iisSetup2"
 include_recipe "chocolatey"
 
-chocolatey "gitextensions"
-chocolatey "kdiff3"
-
-chocolatey "jre8"
-
-Chocolatey "adobereader"

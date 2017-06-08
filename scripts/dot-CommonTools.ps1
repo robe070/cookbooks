@@ -579,3 +579,50 @@ function PlaySound {
         if($flag) { $sound.Stop() }
     }
 }
+
+function Run-ExitCode {
+    param( [string]$Program, [String[]]$Arguments )
+
+    $ErrorFile = "$($ENV:TEMP)\error.txt"
+    $OutFile = "$($ENV:TEMP)\out.txt"
+
+    Remove-Item $OutFile -force -ErrorAction SilentlyContinue
+    Remove-Item $ErrorFile -force -ErrorAction SilentlyContinue
+
+    Write-Output( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
+    $p = Start-Process -FilePath $Program -ArgumentList $Arguments -Wait -PassThru -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $OutFile
+
+    cat $OutFile -ErrorAction SilentlyContinue
+    cat $ErrorFile -ErrorAction SilentlyContinue
+    if ( $p.ExitCode -ne 0 ) {
+        $ExitCode = $p.ExitCode
+        $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
+        Write-Error $ErrorMessage -Category NotInstalled
+        throw $ErrorMessage
+    }
+}
+
+function Run-SSMCommand {
+    param( [string] $instanceid, [string]$DocumentName, [Int32]$TimeoutSecond = 600, [string] $Comment, [HashTable] $Parameter, [Int32] $Sleep = 3 )
+
+    $DebugPreference = "SilentlyContinue"
+
+    $runPSCommand = Send-SSMCommand -InstanceId $instanceid -DocumentName $DocumentName -TimeoutSecond $TimeoutSecond -Comment $Comment -Parameter $Parameter
+    Write-Host "$(Log-Date) Waiting for $Comment to complete..."
+    do {
+        Sleep -Seconds $Sleep
+        $CmdStatus = Get-SSMCommandInvocation -InstanceId $instanceid -CommandId $runPSCommand.CommandId
+    } while ($CmdStatus.Status -eq "Pending" -or $CmdStatus.Status -eq "InProgress")
+    
+    Write-Host "$(Log-Date) Command completed. Status"
+    Out-Default -InputObject $CmdStatus.Status
+    
+    # Output the result
+    $Output = Get-SSMCommandInvocation -CommandId $runPSCommand.CommandId -Details $true -InstanceId $instanceid | select -ExpandProperty CommandPlugins
+    Out-Default -InputObject $output.Output
+    
+    $DebugPreference = "Continue"
+
+    # Its expected that the Command will throw an error and thus the command will be flagged as 'failed'. Powershell scripts we run all throw when there is an error.
+    if ( $CmdStatus.Status -eq "Failed" ) { throw }
+}

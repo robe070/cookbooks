@@ -18,15 +18,24 @@ function Disable-TcpOffloading
     # http://www.evernote.com/l/AA2JZF2lGelC8oTEKDEECWA8uNt-SbtzwuQ/
     # http://www.evernote.com/l/AA3NUlB9xtdN4qciBFoXwX_8NuWcPM0nlqY/
     ##########################################################################
-    # English  'Ethernet'
+    # English  'Ethernet 2'
     # Japanese 'イーサネット'
-    # French   'Ethernet'
+    # French   'Ethernet 2'
     get-culture
     $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
     $IsoLang
+
+    if ( [System.Environment]::OSVersion.Version.Major -eq 6 -and [System.Environment]::OSVersion.Version.Minor -eq 2) {
+        $EngNicName = 'Ethernet'
+        $JpnNicName = 'イーサネット'
+    } else {
+        $EngNicName = 'Ethernet 2'
+        $JpnNicName = 'イーサネット'
+    }        
+
     switch ( $IsoLang ) {
-        'jpn' {$NICName = 'イーサネット' }
-        default {$NICName = 'Ethernet' }
+        'jpn' {$NICName = $JpnNicName }
+        default {$NICName = $EngNicName }
     }
 
     Write-Output ("Disable TCP Offloading on NIC $NICName")
@@ -116,12 +125,12 @@ Param (
 
     Try {
         $db.Create()
+        Write-Output ($db.CreateDate)
     }
     Catch {
         $_
         Write-Output ("Database creation failed. Its expected to fail on 2nd and subsequent EC2 instances or iterations")
     }
-    Write-Output ($db.CreateDate)
 }
 
 ##################################################################  
