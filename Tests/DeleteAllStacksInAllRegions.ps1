@@ -1,7 +1,7 @@
 ﻿<#
 .SYNOPSIS
 
-List all stacks in all regions
+Delete all stacks in all regions
 
 .EXAMPLE
 
