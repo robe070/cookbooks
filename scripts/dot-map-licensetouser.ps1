@@ -49,7 +49,15 @@ function Map-LicenseToUser {
             $PriorMachineGuid          = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid
             $MachineGuid               = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
 
-            if ( -not $ScalableLicensePrivateKey -or -not $PriorMachineGuid -or -not $MachineGuid)
+            # Workaround for when ScalableLicense Image 14.1 EPC 141031 on AWS had an empty value for the Integrator private key
+            if ( $ScalableLicensePrivateKey -and -not $ScalableLicensePrivateKey.$regkeyname ) {
+                Set-ItemProperty -Path HKLM:\Software\LANSA  -Name $regkeyname -Value '70b31c86f62ce70b122c67984981a890_aed32363-64f4-4406-b5ad-ff5841643ff5' -Force
+                $ScalableLicensePrivateKey = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $regkeyname
+            }
+
+            if ( -not $ScalableLicensePrivateKey -or -not $ScalableLicensePrivateKey.$regkeyname `
+             -or -not $PriorMachineGuid -or -not $PriorMachineGuid.PriorMachineGuid `
+             -or -not $MachineGuid -or -not $MachineGuid.MachineGuid)
             {
                 Write-Output ("")
                 Write-Output ("ScalableLicensePrivateKey=")
