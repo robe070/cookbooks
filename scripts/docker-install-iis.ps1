@@ -34,10 +34,9 @@ try {
     }
     New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value 'Docker' -Force
 
-    New-Item -ItemType directory -Path C:\lansa -Force
+    Write-Output ("Copying Files")
 
-    # Patched Licensing DLL to get past that
-    Copy-Item c:\temp\x_pdfms.dll 'C:\Program Files (x86)\lansa\x_win95\x_lansa\execute'
+    New-Item -ItemType directory -Path C:\lansa -Force
 
     # Temporarily copy in Windows System DLLs
     # Copy current versions rather than the contents of a temporary directory which will become out of date
@@ -98,10 +97,18 @@ try {
        Copy-Item aepic.dll c:\windows\syswow64
        Copy-Item avifil32.dll c:\windows\syswow64
        Copy-Item en-US\avifil32.dll.mui c:\windows\syswow64
+    }
+
+    if ( $false -eq $true) {
+        Write-Output ("One")
        Copy-Item avrt.dll c:\windows\syswow64
        Copy-Item chakra.dll c:\windows\syswow64
        Copy-Item comppkgsup.dll c:\windows\syswow64
        Copy-Item coreuicomponents.dll c:\windows\syswow64
+    }
+
+    if ( $false -eq $true) {
+    Write-Output ("Two")
        Copy-Item cryptngc.dll c:\windows\syswow64
        Copy-Item dcomp.dll c:\windows\syswow64
        Copy-Item devmgr.dll c:\windows\syswow64
@@ -142,6 +149,7 @@ try {
        Copy-Item tapi32.dll c:\windows\syswow64
     }
 } catch {
+    Write-Error ("Failed")
 } finally {
     Pop-Location
     Write-Output ("Finished")
