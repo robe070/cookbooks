@@ -95,22 +95,24 @@ Param (
     Try {
         # this should be unnecessary, hence commented out
         # Add-Type -Path "C:\Program Files\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll"
-
-        $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$Server_name")
+        [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')
 
         if ( -not $dbuser ) {
-            $SqlServer.ConnectionContext.LoginSecure = $true
+            Write-Output( "Trusted Connection" )
+            $ConnectionString = "data source = $Server_name; initial catalog = master; trusted_connection = true;"
         } else {
-            $SqlServer.ConnectionContext.LoginSecure = $false
-
-            $SqlServer.ConnectionContext.Login = $dbuser
-
-            $SqlServer.ConnectionContext.SecurePassword = convertto-securestring -string $dbpassword -AsPlainText -Force
+            Write-Output( "SQL Authentication" )
+            $ConnectionString = "data source = $Server_name; initial catalog = master; User ID = $dbuser; Password = $dbpassword;"
         }
+        $ConnectionString
+        $ServerConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
+        $ServerConnection.ConnectionString = $ConnectionString
+
+        $SqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server($ServerConnection)
     }
     Catch {
         $_
-        Write-Output ("Error using SQL Server cmdlets")
+        Write-Output ("Database connection failed. Is SQL Server running? Are login parameters correct?")
         throw ("Error using SQL Server cmdlets")
     }
 
@@ -120,7 +122,7 @@ Param (
     Catch
     {
         $_
-        Write-Output ("Database connection failed. Is SQL Server running?")
+        throw ("Error using SQL Server cmdlets")
     }
 
     Try {
