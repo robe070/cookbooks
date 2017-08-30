@@ -49,14 +49,14 @@ $Win2012 = $true
 # To update the last image. put -VersionText image in -AmazonAMIName and increment the last digit by 1
 # so if VersionText = 'IDESQL-F3', then it becomes 'IDESQL-F4' & AmazonAMIName becomes 'IDESQL-F3image'
 
-Bake-IdeMsi -VersionText 'IDESQL-F4' `
+Bake-IdeMsi -VersionText 'IDESQL-F5' `
             -VersionMajor 14 `
             -VersionMinor 1 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName 'IDESQL-F2image' `
+            -AmazonAMIName 'IDESQL-F4image' `
             -GitBranch "support/L4W14100_IDE"`
             -Cloud "Azure" `
             -InstallBaseSoftware $false `
