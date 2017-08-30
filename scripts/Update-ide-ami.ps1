@@ -67,7 +67,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
         $Win2012 = $true
     }
 
-    Bake-IdeMsi -VersionText '14.1 EPC141031' `
+    Bake-IdeMsi -VersionText '14.1 EPC141050' `
                 -VersionMajor 14 `
                 -VersionMinor 1 `
                 -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
