@@ -1,4 +1,4 @@
-function CreateChecksumFile
+﻿function CreateChecksumFile
 {
     param (
         [Parameter(Mandatory=$true)]
@@ -6,10 +6,26 @@ function CreateChecksumFile
             $Algorithm,
     
         [Parameter(Mandatory=$true)]
-            [String[]] 
-            $FilePath
+            [String] 
+            $FilePath,
+            
+        [Parameter(Mandatory=$false)]
+            [boolean] 
+            $Target = $false
     )
-    $Exec = "S:\Kelvin\util\nt\x64\$($Algorithm).exe"
+    $Exec = "s:\Kelvin\util\nt\x64\$($Algorithm).exe"
+    
+    if ( -not (Test-Path $Exec) ) {
+        # Can't access the network so presume we are in a remote session where network access is not available
+        
+        # Presume its in the current directory
+        $Exec = "$Script:ScriptDir\$($Algorithm).exe"    
+        if ( -not (Test-Path $Exec )) {
+            # And further, presume the checksum exe is in the path
+            $Exec = "$($Algorithm).exe"    
+        }
+    }
+    $exec
     
     $files = Get-ChildItem $FilePath 
     foreach ($file in $files ) {
@@ -24,9 +40,10 @@ function CreateChecksumFile
         $Algorithm
         $FileChecked
         $Checksum
-        New-Item "$($FileChecked)_$Checksum.$Algorithm" -ItemType file -Force
+        $AlgoFileName = "$($FileChecked)_$Checksum.$Algorithm" 
+        if ( $Target) {
+            $AlgoFileName += '.tgt'
+        }
+        New-Item $AlgoFileName -ItemType file -Force
     }
 }
-
-# Example execution...
-# CreateChecksumFile md5 '.\post-ide-boot.ps1'
