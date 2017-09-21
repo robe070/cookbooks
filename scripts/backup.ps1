@@ -14,7 +14,7 @@ try {
     . $ScriptDir\CreateChecksumFile.ps1
      
     del 'd:\*.md5'
-    CreateChecksumFile md5 'd:\*.zip' | Out-File c:\backup.log -Encoding "ASCII" -Append
+    CreateChecksumFile md5 'd:\*.zip'
 
     # c:\test.bat
     # CreateChecksumFile md5 'd:\symstore_framework_backup.zip'
