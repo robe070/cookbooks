@@ -83,3 +83,4 @@ releaselib*
 UpgradeLog.htm
 *.pfx
 *.VC.db
+*/.vscode/*
