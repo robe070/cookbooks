@@ -4,7 +4,7 @@
     "Parameters": {
         "01LansaMSI": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v14.1.1_en-us.msi",
+            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/beta/WEBSERVR_v14.2.0_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "02LansaMSIBitness": {
@@ -17,7 +17,7 @@
             ],
             "ConstraintDescription": "Must be either 1 (true) or 0 (false)."
         },
-        "ApplCount": {
+        "03ApplCount": {
             "Description": "The number of application environments to create.",
             "Type": "Number",
             "Default": 1
@@ -56,7 +56,7 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "08RemoteAccessLocation": {
-            "Description": "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.159.65/32 This is a security feature which limits remote access to your EC2 instances.",
+            "Description": "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.169.65/32 This is a security feature which limits remote access to your EC2 instances.",
             "Type": "String",
             "MinLength": "9",
             "MaxLength": "18",
@@ -165,10 +165,10 @@
             "Description": "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "18WebServerCapacity": {
-            "Default": "1",
-            "Description": "The initial number of EXTRA WebServer EC2 instances. Must be between at least 1. Default maximum allowed by AWS in an account is 50.",
+            "Default": "0",
+            "Description": "The initial number of EXTRA WebServer EC2 instances. Highly recommended to be at least 1 for fault tolerance. Default maximum allowed by AWS in an account is 50.",
             "Type": "Number",
-            "MinValue": "1"
+            "MinValue": "0"
         },
         "19DBAllocatedStorage": {
             "Default": "100",
@@ -240,7 +240,7 @@
             "Parameters": [
                "01LansaMSI",
                "02LansaMSIBitness",
-               "ApplCount",
+               "03ApplCount",
                "03DBUsername",
                "04DBPassword",
                "05WebUser",
@@ -289,40 +289,41 @@
             ]
          }
        ],
-       "ParameterLabels" : {
-         "01LansaMSI" : { "default" : "Lansa MSI URL" },
-         "02LansaMSIBitness" : { "default" : "MSI Bitness" },
-         "03DBUsername" : { "default" : "Database User Name" },
-         "04DBPassword" : { "default" : "Database Password" },
-         "05WebUser" : { "default" : "Web Server User" },
-         "06WebPassword" : { "default" : "Web Server Password" },
-         "07KeyName" : { "default" : "Keypair Name" },
-         "08RemoteAccessLocation" : { "default" : "Remote Access Location CIDR" },
-         "13DBInstanceClass" : { "default" : "Instance Class" },
-         "14DBName" : { "default" : "Name" },
-         "15DBEngine" : { "default" : "SQL Server Engine Type" },
-         "19DBAllocatedStorage" : { "default" : "Maximum Size" },
-         "20DBIops" : { "default" : "I/O OPS" },
-         "11WebServerInstanceTyp" : { "default" : "Instance Type" },
-         "12WebServerMaxConnec" : { "default" : "Maximum Web Jobs" },
-         "18WebServerCapacity" : { "default" : "Minimum Number of Instances" },
-         "22TriggerCakeUpdate" : { "default" : "Trigger Cake Update" },
-         "23TriggerChefUpdate" : { "default" : "Trigger Chef Update" },
-         "24TriggerWinUpdate" : { "default" : "Trigger Win Update" },
-         "25TriggerWebConfig" : { "default" : "Trigger Web Config" },
-         "26TriggerIcingUpdate" : { "default" : "Trigger Icing Update" },
-         "27TriggerPatchInstall" : { "default" : "Trigger Patch Install" },
-         "28PatchBucketName" : { "default" : "Patch Bucket Name" },
-         "29PatchFolderName" : { "default" : "Patch Folder Name" },
-         "21ELBTimeout" : { "default" : "Load Balancer Timeout" },
-         "17UserScriptHook" : { "default" : "User Script Hook" },
-         "10LansaGitRepoBranch" : { "default" : "Git Repository Branch" }
-       }
+      "ParameterLabels": {
+         "01LansaMSI": { "default": "Lansa MSI URL" },
+         "02LansaMSIBitness": { "default": "MSI Bitness" },
+         "03ApplCount": { "default": "Application Count" },
+         "03DBUsername": { "default": "Database User Name" },
+         "04DBPassword": { "default": "Database Password" },
+         "05WebUser": { "default": "Web Server User" },
+         "06WebPassword": { "default": "Web Server Password" },
+         "07KeyName": { "default": "Keypair Name" },
+         "08RemoteAccessLocation": { "default": "Remote Access Location CIDR" },
+         "13DBInstanceClass": { "default": "Instance Class" },
+         "14DBName": { "default": "Name" },
+         "15DBEngine": { "default": "SQL Server Engine Type" },
+         "19DBAllocatedStorage": { "default": "Maximum Size" },
+         "20DBIops": { "default": "I/O OPS" },
+         "11WebServerInstanceTyp": { "default": "Instance Type" },
+         "12WebServerMaxConnec": { "default": "Maximum Web Jobs" },
+         "18WebServerCapacity": { "default": "Minimum Number of Instances" },
+         "22TriggerCakeUpdate": { "default": "Trigger Cake Update" },
+         "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
+         "24TriggerWinUpdate": { "default": "Trigger Win Update" },
+         "25TriggerWebConfig": { "default": "Trigger Web Config" },
+         "26TriggerIcingUpdate": { "default": "Trigger Icing Update" },
+         "27TriggerPatchInstall": { "default": "Trigger Patch Install" },
+         "28PatchBucketName": { "default": "Patch Bucket Name" },
+         "29PatchFolderName": { "default": "Patch Folder Name" },
+         "21ELBTimeout": { "default": "Load Balancer Timeout" },
+         "17UserScriptHook": { "default": "User Script Hook" },
+         "10LansaGitRepoBranch": { "default": "Git Repository Branch" }
+      }
      }
    },
    "Mappings"                 : {
       "AWSRegionArch2AMI": {
-         "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace" },
+         "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace. Note that ap-southeast-2 is the only free AMI" },
          "us-east-1": { "64": "ami-739cde65" },
          "us-east-2": { "64": "ami-884660ed" },
          "us-west-1": { "64": "ami-12efcf72" },
@@ -332,7 +333,7 @@
          "eu-west-1": { "64": "ami-124e5974" },
          "eu-west-2": { "64": "ami-8b2730ef" },
          "ap-southeast-1": { "64": "ami-777bfd14" },
-         "ap-southeast-2": { "64": "ami-97d3c7f4" },
+         "ap-southeast-2": { "64": "ami-4b091d28" },
          "ap-south-1": { "64": "ami-371f6358" },
          "ap-northeast-1": { "64": "ami-0a92976d" },
          "ap-northeast-2": { "64": "ami-2fbe6241" },
