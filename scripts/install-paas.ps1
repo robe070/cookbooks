@@ -41,8 +41,12 @@ param(
 [String]$LansaMSI,
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
-[String]$ApplCount = ""
-[String]$ApplMSIuri = ""
+[String]$ApplCount = "",
+[String]$ApplMSIuri = "",
+[String]$HTTPPortNumber = "",
+[String]$HostRoutePortNumber = "",
+[String]$JSMPortNumber = "",
+[String]$JSMAdminPortNumber = ""
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -83,8 +87,10 @@ else
     $APPA = "${ENV:ProgramFiles}\$($ApplName)"
 }
 
-& "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -MSIuri $LansaMSI
+& "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -MSIuri $LansaMSI -HTTPPortNumber $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber
 
 For ( $i = 1; $i -le $ApplCount; $i++) {
-    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/app$($i)_v14.2.0_en-us.msi"
+    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/app$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber
 }
+
+iisreset

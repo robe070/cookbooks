@@ -39,7 +39,11 @@ param(
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
 [String]$ApplName = "MyApp",
-[String]$CompanionInstallPath = ""
+[String]$CompanionInstallPath = "",
+[String]$HTTPPortNumber = "",
+[String]$HostRoutePortNumber = "",
+[String]$JSMPortNumber = "",
+[String]$JSMAdminPortNumber = ""
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -262,6 +266,23 @@ try
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
 
+    # Arguments to pass only if they have a value
+    if ( $HTTPPortNumber.Length -gt 0) {
+        $Arguments += "HTTPPORTNUMBER=$HTTPPortNumber"
+    }
+
+    if ( $HostRoutePortNumber.Length -gt 0) {
+        $Arguments += "HOSTROUTEPORTNUMBER=$HostRoutePortNumber"
+    }
+
+    if ( $HTTPPortNumber.Length -gt 0) {
+        $Arguments += "JSMPORTNUMBER=$JSMPortNumber"
+    }
+
+    if ( $HTTPPortNumber.Length -gt 0) {
+        $Arguments += "JSMADMINPORTNUMBER=$JSMAdminPortNumber"
+    }
+
     if ( $UPGD_bool )
     {
         Write-Output ("$(Log-Date) Upgrading LANSA")
@@ -335,7 +356,9 @@ try
         Write-Verbose ("User Script not passed")
     }
 
-    iisreset
+    if ( $CompanionInstall ) {
+        iisreset
+    }
 
     #####################################################################################
     # Test if post install x_run processing had any fatal errors

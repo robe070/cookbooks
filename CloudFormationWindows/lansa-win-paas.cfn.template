@@ -175,6 +175,26 @@
             "Type": "Number",
             "MinValue": "0"
         },
+        "19HTTPPortNumber": {
+            "Default": "80",
+            "Description": "Web Site port number.",
+            "Type": "Number"
+        },
+        "19HostRoutePortNumber": {
+            "Default": "4541",
+            "Description": "LANSA Listener port number.",
+            "Type": "Number"
+        },
+        "19JSMPortNumber": {
+            "Default": "4561",
+            "Description": "Java Service Manager port number.",
+            "Type": "Number"
+        },
+        "19JSMAdminPortNumber": {
+            "Default": "4581",
+            "Description": "LANSA Listener port number.",
+            "Type": "Number"
+        },
         "19DBAllocatedStorage": {
             "Default": "100",
             "Description": "The maximum size of the database. Must be between 100 and 4096 GB. Minimum 200 for 'sqlserver-ee' and 'sqlserver-se'.",
@@ -267,10 +287,14 @@
          },
          {
            "Label" : { "default":"Web Server Configuration" },
-           "Parameters" : [ 
-               "11WebServerInstanceTyp", 
-               "12WebServerMaxConnec", 
-               "18WebServerCapacity" 
+            "Parameters": [
+               "11WebServerInstanceTyp",
+               "12WebServerMaxConnec",
+               "18WebServerCapacity",
+               "19HTTPPortNumber",
+               "19HostRoutePortNumber",
+               "19JSMPortNumber",
+               "19JSMAdminPortNumber"
             ]
          },
          {
@@ -314,6 +338,10 @@
          "11WebServerInstanceTyp": { "default": "Instance Type" },
          "12WebServerMaxConnec": { "default": "Maximum Web Jobs" },
          "18WebServerCapacity": { "default": "Minimum Number of Instances" },
+         "19HTTPPortNumber": { "default": "Web Site Port Number" },
+         "19HostRoutePortNumber": { "default": "LANSA Listener Port number" },
+         "19JSMPortNumber": { "default": "JSM Port number" },
+         "19JSMAdminPortNumber": { "default": "JSM Admin Port number" },
          "22TriggerCakeUpdate": { "default": "Trigger Cake Update" },
          "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
          "24TriggerWinUpdate": { "default": "Trigger Win Update" },
@@ -1768,6 +1796,10 @@
                                 "source": { "Ref": "01LansaMSI" }
                             }
                         },
+                         "19HTTPPortNumber": { "default": "Web Site Port Number" },
+         "19HostRoutePortNumber": { "default": "LANSA Listener Port number" },
+         "19JSMPortNumber": { "default": "JSM Port number" },
+         "19JSMAdminPortNumber": { "default": "JSM Admin Port number" },
                         "commands": {
                             "01_install_msi": {
                                 "command": {
@@ -1790,6 +1822,14 @@
                                             { "Ref": "06WebPassword" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
                                             " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
