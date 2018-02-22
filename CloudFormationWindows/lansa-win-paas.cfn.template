@@ -22,6 +22,11 @@
             "Type": "Number",
             "Default": 1
         },
+        "03ApplMSIuri": {
+            "Type": "String",
+            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/beta",
+            "Description": "URL of the S3 folder which contains the Application MSIs to install. The filenames in the folder are of the form app<n>_v14.2.0_en-us.msi, where <n> is a number from 1 to Application Count. The MSIs must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
+        },
         "03DBUsername": {
             "Default": "admin",
             "Description": "The LANSA database administrator account username. Must begin with a letter and contain only alphanumeric characters. Maximum length 16.",
@@ -165,7 +170,7 @@
             "Description": "URL of a Powershell script to execute after installing the LANSA MSI. The script must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "18WebServerCapacity": {
-            "Default": "0",
+            "Default": "1",
             "Description": "The initial number of EXTRA WebServer EC2 instances. Highly recommended to be at least 1 for fault tolerance. Default maximum allowed by AWS in an account is 50.",
             "Type": "Number",
             "MinValue": "0"
@@ -241,6 +246,7 @@
                "01LansaMSI",
                "02LansaMSIBitness",
                "03ApplCount",
+               "03ApplMSIuri",
                "03DBUsername",
                "04DBPassword",
                "05WebUser",
@@ -293,6 +299,7 @@
          "01LansaMSI": { "default": "Lansa MSI URL" },
          "02LansaMSIBitness": { "default": "MSI Bitness" },
          "03ApplCount": { "default": "Application Count" },
+         "03ApplMSIuri": { "default": "Application MSI uri" },
          "03DBUsername": { "default": "Database User Name" },
          "04DBPassword": { "default": "Database Password" },
          "05WebUser": { "default": "Web Server User" },
@@ -1026,7 +1033,13 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -applcount ",
+                                            { "Ref": "03ApplCount" },
+                                            " -LansaMSI ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",
@@ -1075,7 +1088,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",
@@ -1358,7 +1371,7 @@
                 "LaunchConfigurationName": {
                     "Ref": "LaunchWebServer"
                 },
-                "MinSize": { "Ref": "18WebServerCapacity" },
+                "MinSize": "0",
                 "MaxSize": "150",
                 "DesiredCapacity": { "Ref": "18WebServerCapacity" },
                 "HealthCheckType": "ELB",
@@ -1762,7 +1775,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",
@@ -1811,7 +1824,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",

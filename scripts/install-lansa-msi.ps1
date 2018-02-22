@@ -37,7 +37,9 @@ param(
 [String]$DBUT='MSSQLS',
 [String]$MSIuri,
 [String]$trace = 'N',
-[String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999"
+[String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
+[String]$ApplName = "MyApp",
+[String]$CompanionInstallPath = ""
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -75,6 +77,10 @@ Write-Verbose ("SUDB = $SUDB")
 Write-Verbose ("UPGD = $UPGD")
 Write-Verbose ("DBUT = $DBUT")
 Write-Verbose ("Password = $dbpassword")
+Write-Verbose ("ApplName = $ApplName")
+Write-Verbose ("ApplMSIurl = $ApplMSIurl")
+Write-Verbose ("CompanionInstallPath = $CompanionInstallPath")
+
 
 try
 {
@@ -104,10 +110,21 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("$(Log-Date) Running on $Cloud")
+    
+    [boolean]$CompanionInstall = $false
 
-    $installer = "MyApp.msi"
+    if ( $CompanionInstallPath.Length > 0) {
+        if ( -not (test-path $CompanionInstallPath)) {
+            Write-Error ("CompanionInstallPath '$CompanionInstallPath' does not exist")
+            throw ("CompanionInstallPath '$CompanionInstallPath' does not exist")            
+        }
+        $CompanionInstall = $true
+    }
+
+    $installer = "$($ApplName).msi"
+
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
-    $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyApp.log" )
+    $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "$($ApplName).log" )
 
     # Docker passes in a local path to the MSI which is mapped to a host volume
     # Just copy it to the standard name - its used to determine if an upgrade or not.
@@ -115,12 +132,12 @@ try
         Copy-Item -Path $MSIUri -Destination $installer_file -Force
     }
 
-    if ( $Cloud -eq "Azure") {
+    if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
     }
 
-    if ( $Cloud -eq "Azure"  -or $Cloud -eq "Docker") {
+    if ( (-not $CompanionInstall) -and ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
         # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
         Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
@@ -170,7 +187,7 @@ try
 
     # On initial install disable TCP Offloading
 
-    if ( -not $UPGD_bool )
+    if ( (-not $CompanionInstall) -and (-not $UPGD_bool) )
     {
         Disable-TcpOffloading
     }
@@ -191,7 +208,9 @@ try
 
                 Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
-                Import-Module “sqlps” -DisableNameChecking
+                if ( -not $CompanionInstall ) {
+                    Import-Module “sqlps” -DisableNameChecking
+                }
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
@@ -207,34 +226,36 @@ try
         }
     }
 
-    if ( -not $UPGD_bool )
-    {
-        Start-WebAppPool -Name "DefaultAppPool"
+    if ( -not $CompanionInstall ) {
+        if ( -not $UPGD_bool )
+        {
+            Start-WebAppPool -Name "DefaultAppPool"
+        }
+
+        Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+        if ($trace -eq "Y") {
+            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+            $env:X_RUN = $traceSettings
+        } else {
+            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+            $env:X_RUN = ''
+        }
     }
-
-    Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
-
-    if ($trace -eq "Y") {
-        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
-        $env:X_RUN = $traceSettings
-    } else {
-        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
-        $env:X_RUN = ''
-    }
-
+    
     Write-Output ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
     {
-        $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
+        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
     }
     else
     {
-        $APPA = "${ENV:ProgramFiles}\LANSA"
+        $APPA = "${ENV:ProgramFiles}\$($ApplName)"
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=LANSA", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=$($ApplName)", "DBSV=$server_name", "DBAS=$dbname", "DBUS=$dbuser", "PSWD=$dbpassword", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword", "COMPANIONINSTALLPATH=$CompanionInstallPath")
 
     Write-Output ("$(Log-Date) Arguments = $Arguments")
 
@@ -261,15 +282,17 @@ try
         throw $ErrorMessage
     }
 
-	Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+    if ( -not $CompanionInstall ) {
+        Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
-	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+        Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
+        Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
+        Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
 
-	Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
-    
-    Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
+        Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+        
+        Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
+    }
 
     if ( (test-path "$APPA\Integrator\Jsminstance\System\Jsmsupp.exe") ) {
         $JSMServiceName = '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"'
