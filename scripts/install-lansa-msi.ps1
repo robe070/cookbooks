@@ -44,6 +44,7 @@ param(
 [String]$HostRoutePortNumber = "",
 [String]$JSMPortNumber = "",
 [String]$JSMAdminPortNumber = "",
+[String]$HTTPPortNumberHub = "",
 [String]$GitRepoUrl = ""
 )
 
@@ -284,6 +285,10 @@ try
         $Arguments += "JSMADMINPORTNUMBER=$JSMAdminPortNumber"
     }
 
+    if ( $HTTPPortNumberHub.Length -gt 0) {
+        $Arguments += "HTTPPORTNUMBERHUB=$HTTPPortNumberHub"
+    }
+    
     if ( $GitRepoUrl.Length -gt 0) {
         $Arguments += "GITREPOURL=$GitRepoUrl"
     }    

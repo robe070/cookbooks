@@ -4,7 +4,7 @@
     "Parameters": {
         "01LansaMSI": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/beta/WEBSERVR_v14.2.0_en-us.msi",
+            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/beta/WEBSERVR_v1.0.0_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "02LansaMSIBitness": {
@@ -180,6 +180,11 @@
             "Description": "Web Site port number.",
             "Type": "Number"
         },
+        "19HTTPPortNumberHub": {
+            "Default": "8090",
+            "Description": "Web Site port number for Git Deploy Hub.",
+            "Type": "Number"
+        },
         "19HostRoutePortNumber": {
             "Default": "4541",
             "Description": "LANSA Listener port number.",
@@ -292,6 +297,7 @@
                "12WebServerMaxConnec",
                "18WebServerCapacity",
                "19HTTPPortNumber",
+               "19HTTPPortNumberHub",
                "19HostRoutePortNumber",
                "19JSMPortNumber",
                "19JSMAdminPortNumber"
@@ -339,6 +345,7 @@
          "12WebServerMaxConnec": { "default": "Maximum Web Jobs" },
          "18WebServerCapacity": { "default": "Minimum Number of Instances" },
          "19HTTPPortNumber": { "default": "Web Site Port Number" },
+         "19HTTPPortNumberHub": { "default": "Web Site Port Number for Git Deploy Hub" },
          "19HostRoutePortNumber": { "default": "LANSA Listener Port number" },
          "19JSMPortNumber": { "default": "JSM Port number" },
          "19JSMAdminPortNumber": { "default": "JSM Admin Port number" },
@@ -1796,10 +1803,6 @@
                                 "source": { "Ref": "01LansaMSI" }
                             }
                         },
-                         "19HTTPPortNumber": { "default": "Web Site Port Number" },
-         "19HostRoutePortNumber": { "default": "LANSA Listener Port number" },
-         "19JSMPortNumber": { "default": "JSM Port number" },
-         "19JSMAdminPortNumber": { "default": "JSM Admin Port number" },
                         "commands": {
                             "01_install_msi": {
                                 "command": {
@@ -1824,6 +1827,8 @@
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
                                             { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
                                             " -HostRoutePortNumber ",
                                             { "Ref": "19HostRoutePortNumber" },
                                             " -JSMPortNumber ",
