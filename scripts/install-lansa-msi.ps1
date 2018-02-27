@@ -43,7 +43,8 @@ param(
 [String]$HTTPPortNumber = "",
 [String]$HostRoutePortNumber = "",
 [String]$JSMPortNumber = "",
-[String]$JSMAdminPortNumber = ""
+[String]$JSMAdminPortNumber = "",
+[String]$GitRepoUrl = ""
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -275,14 +276,18 @@ try
         $Arguments += "HOSTROUTEPORTNUMBER=$HostRoutePortNumber"
     }
 
-    if ( $HTTPPortNumber.Length -gt 0) {
+    if ( $JSMPortNumber.Length -gt 0) {
         $Arguments += "JSMPORTNUMBER=$JSMPortNumber"
     }
 
-    if ( $HTTPPortNumber.Length -gt 0) {
+    if ( $JSMAdminPortNumber.Length -gt 0) {
         $Arguments += "JSMADMINPORTNUMBER=$JSMAdminPortNumber"
     }
 
+    if ( $GitRepoUrl.Length -gt 0) {
+        $Arguments += "GITREPOURL=$GitRepoUrl"
+    }    
+    
     if ( $UPGD_bool )
     {
         Write-Output ("$(Log-Date) Upgrading LANSA")
