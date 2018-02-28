@@ -1057,8 +1057,11 @@
                     },
                     "install-msi": {
                         "files": {
-                            "C:\\users\\LANSA\\MyApp.msi": {
-                                "source": { "Ref": "01LansaMSI" }
+                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa" 
+                            },
+                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config" 
                             }
                         },
                         "commands": {
@@ -1825,8 +1828,11 @@
                     },
                     "install-msi": {
                         "files": {
-                            "C:\\LANSA\\MyApp.msi": {
-                                "source": { "Ref": "01LansaMSI" }
+                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa" 
+                            },
+                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config" 
                             }
                         },
                         "commands": {

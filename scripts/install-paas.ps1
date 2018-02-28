@@ -81,19 +81,21 @@ else
 cmd /c exit 0    #Set $LASTEXITCODE
 
 try {
-    Write-Output ("$(Log-Date) Create .ssh directory")
-    mkdir "$ENV:USERPROFILE\.ssh"
+    if ( $false ) {
+        Write-Output ("$(Log-Date) Create .ssh directory")
+        mkdir "$ENV:USERPROFILE\.ssh"
 
-    $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
-    $sshfile = "$env:USERPROFILE\.ssh\lpcprivate5.id_rsa"
-    Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
-    (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
+        $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+        $sshfile = "$env:USERPROFILE\.ssh\lpcprivate5.id_rsa"
+        Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
+        (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
 
-    $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
-    $sshfile = "C:\Program Files\Git\etc\ssh\ssh_config"
-    Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
-    (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
-    
+        $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+        $sshfile = "C:\Program Files\Git\etc\ssh\ssh_config"
+        Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
+        (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
+    }
+
     $ApplName = "WebServer"
     if ($f32bit_bool) {
         $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
