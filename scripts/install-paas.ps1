@@ -78,20 +78,66 @@ else
     $f32bit_bool = $false
 }
 
-$ApplName = "WebServer"
-if ($f32bit_bool)
-{
-    $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
-}
-else
-{
-    $APPA = "${ENV:ProgramFiles}\$($ApplName)"
-}
+cmd /c exit 0    #Set $LASTEXITCODE
 
-& "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -MSIuri $LansaMSI -HTTPPortNumber $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub 
+try {
+    Write-Output ("$(Log-Date) Create .ssh directory")
+    mkdir "$ENV:USERPROFILE\.ssh"
 
-For ( $i = 1; $i -le $ApplCount; $i++) {
-    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/app$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
-}
+    $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+    $sshfile = "$env:USERPROFILE\.ssh\lpcprivate5.id_rsa"
+    Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
+    (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
 
-iisreset
+    $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+    $sshfile = "C:\Program Files\Git\etc\ssh\ssh_config"
+    Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
+    (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
+    
+    $ApplName = "WebServer"
+    if ($f32bit_bool) {
+        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
+    } else {
+        $APPA = "${ENV:ProgramFiles}\$($ApplName)"
+    }
+
+    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -MSIuri $LansaMSI -HTTPPortNumber $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub 
+    if ($LASTEXITCODE -eq 0 ) {
+        For ( $i = 1; $i -le $ApplCount; $i++) {
+            if ( $LASTEXITCODE -eq 0) {
+                & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/app$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
+            }
+        }
+
+        if ($LASTEXITCODE -eq 0 ) {
+            iisreset
+        }
+    }
+} catch {
+    $e = $_.Exception
+    $e | format-list -force
+ 
+    Write-Output( "PaaS Installation failed" )
+    Write-Output( "Raw LASTEXITCODE $LASTEXITCODE" )
+    if ( ( -not [ string ]::IsNullOrWhiteSpace( $LASTEXITCODE ) ) -and ( $LASTEXITCODE -ne 0 ) )
+    {
+       $ExitCode = $LASTEXITCODE
+       Write-Output( "ExitCode set to LASTEXITCODE $ExitCode" )
+    } else {
+       $ExitCode = $e.HResult
+       Write-Output( "ExitCode set to HResult $ExitCode" )
+    }
+ 
+    if ( $ExitCode -eq $null -or $ExitCode -eq 0 )
+    {
+       $ExitCode = -1
+       Write-Output( "ExitCode set to $ExitCode" )
+    }
+    Write-Output( "Final ExitCode $ExitCode" )
+    cmd /c exit $ExitCode    #Set $LASTEXITCODE
+    Write-Output( "Final LASTEXITCODE $LASTEXITCODE" )
+    return
+ }
+ Write-Output( "PaaS Installation succeeded" )
+ cmd /c exit 0    #Set $LASTEXITCODE
+ Write-Output( "LASTEXITCODE $LASTEXITCODE" )

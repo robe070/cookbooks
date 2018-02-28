@@ -25,7 +25,7 @@
         "03ApplMSIuri": {
             "Type": "String",
             "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/beta",
-            "Description": "URL of the S3 folder which contains the Application MSIs to install. The filenames in the folder are of the form app<n>_v14.2.0_en-us.msi, where <n> is a number from 1 to Application Count. The MSIs must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
+            "Description": "URL of the S3 folder which contains the Application MSIs to install. The filenames in the folder are of the form app<n>_v1.0.0_en-us.msi, where <n> is a number from 1 to Application Count. The MSIs must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "03DBUsername": {
             "Default": "admin",
@@ -508,7 +508,7 @@
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [ { "Ref": "IAMRole" } ]
+                "Roles": [ "paas-ec2" ]
             }
         },
         "WebServerELB": {
@@ -1057,7 +1057,7 @@
                     },
                     "install-msi": {
                         "files": {
-                            "C:\\LANSA\\MyApp.msi": {
+                            "C:\\users\\LANSA\\MyApp.msi": {
                                 "source": { "Ref": "01LansaMSI" }
                             }
                         },
@@ -1432,7 +1432,7 @@
                 "LaunchConfigurationName": {
                     "Ref": "LaunchWebServer"
                 },
-                "MinSize": "0",
+                "MinSize": "1",
                 "MaxSize": "150",
                 "DesiredCapacity": { "Ref": "18WebServerCapacity" },
                 "HealthCheckType": "ELB",
