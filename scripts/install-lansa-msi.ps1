@@ -196,6 +196,15 @@ try
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) )
     {
         Disable-TcpOffloading
+
+        Write-Output ("$(Log-Date) Open Windows Firewall for HTTP ports...")
+        Write-Output ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site themselves. For now, we know the environment as its a cloud image that we build.")
+        if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
+            New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
+        }
+        if ( $HTTPPortNumberHub.Length -gt 0) {
+            New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
+        }
     }
 
     #########################################################################################################

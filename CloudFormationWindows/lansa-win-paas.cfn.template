@@ -181,7 +181,7 @@
             "Type": "Number"
         },
         "19HTTPPortNumberHub": {
-            "Default": "8090",
+            "Default": "8101",
             "Description": "Web Site port number for Git Deploy Hub.",
             "Type": "Number"
         },
@@ -530,8 +530,14 @@
                 ],
                 "Listeners": [
                     {
-                        "LoadBalancerPort": "80",
-                        "InstancePort": "80",
+                        "LoadBalancerPort": { "Ref": "19HTTPPortNumber" },
+                        "InstancePort": { "Ref": "19HTTPPortNumber" },
+                        "Protocol": "HTTP",
+                        "PolicyNames": [ "CookieBasedPolicy" ]
+                    },
+                    {
+                        "LoadBalancerPort": { "Ref": "19HTTPPortNumberHub" },
+                        "InstancePort": { "Ref": "19HTTPPortNumberHub" },
                         "Protocol": "HTTP",
                         "PolicyNames": [ "CookieBasedPolicy" ]
                     }
@@ -541,7 +547,14 @@
                     "Timeout": "300"
                 },
                 "HealthCheck": {
-                    "Target": "HTTP:80/cgi-bin/probe",
+                    "Target": {
+                       "Fn::Join": [
+                          "",
+                          [
+                             "HTTP:", { "Ref": "19HTTPPortNumber"}, "/cgi-bin/probe"
+                          ]
+                       ]
+                    },
                     "HealthyThreshold": "3",
                     "UnhealthyThreshold": "5",
                     "Interval": "90",
@@ -618,12 +631,29 @@
         "LansaSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable HTTP access via port 80 locked down to the load balancers + SSH access + RDP access",
+                "GroupDescription": "Enable HTTP access for webserver requests and gitdeployhub requests locked down to the load balancers + SSH access + RDP access",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": {"Ref":  "19HTTPPortNumber"},
+                        "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "SourceSecurityGroupOwnerId": {
+                            "Fn::GetAtt": [
+                                "WebServerELB",
+                                "SourceSecurityGroup.OwnerAlias"
+                            ]
+                        },
+                        "SourceSecurityGroupName": {
+                            "Fn::GetAtt": [
+                                "WebServerELB",
+                                "SourceSecurityGroup.GroupName"
+                            ]
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
                         "SourceSecurityGroupOwnerId": {
                             "Fn::GetAtt": [
                                 "WebServerELB",
