@@ -191,14 +191,18 @@ try
         }
     }
 
-    # On initial install disable TCP Offloading
+    # On initial install
 
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) )
     {
+        Write-Output ("$(Log-Date) Disable TCP Offloading" )
         Disable-TcpOffloading
 
+        Write-Output ("$(Log-Date) Add github.com to known_hosts" )
+        Get-Content "$script:IncludeDir\github.txt" | out-file  "$ENV:USERPROFILE\.ssh\known_hosts" -Append -encoding utf8
+
         Write-Output ("$(Log-Date) Open Windows Firewall for HTTP ports...")
-        Write-Output ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site themselves. For now, we know the environment as its a cloud image that we build.")
+        Write-Output ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
         if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
             New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
         }
