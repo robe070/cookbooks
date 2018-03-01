@@ -265,7 +265,7 @@ try
 
     # Arguments to pass only if they have a value
     if ( $CompanionInstallPath.Length -gt 0) {
-        $Arguments += "COMPANIONINSTALLPATH=$CompanionInstallPath"
+        $Arguments += "COMPANIONINSTALLPATH=`"$CompanionInstallPath`""
     }
 
     if ( $HTTPPortNumber.Length -gt 0) {

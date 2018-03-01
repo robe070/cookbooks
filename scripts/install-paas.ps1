@@ -113,7 +113,11 @@ try {
 
         if ($LASTEXITCODE -eq 0 ) {
             iisreset
+        } else {
+            throw
         }
+    } else {
+        throw
     }
 } catch {
     $e = $_.Exception
