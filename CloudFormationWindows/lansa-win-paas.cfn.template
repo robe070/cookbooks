@@ -522,6 +522,7 @@
                     "Fn::GetAZs": ""
                 },
                 "CrossZone": "true",
+                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
                         "PolicyName": "CookieBasedPolicy",
@@ -626,6 +627,35 @@
                 "FromPort": "1433",
                 "ToPort": "1433",
                 "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
+            }
+        },
+        "ELBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "ELB Enable HTTP access for standard http traffic & web hooks from GitGub",
+                "SecurityGroupIngress": [
+                    {
+                        "Description":  "HTTP Port",
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumber"},
+                        "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "Description":  "GitHub Web Hook Server",
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "185.199.108.0/22"
+                    },
+                    {
+                        "Description":  "GitHub Web Hook Server",
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "192.30.252.0/22"
+                    }
+                ]
             }
         },
         "LansaSecurityGroup": {
