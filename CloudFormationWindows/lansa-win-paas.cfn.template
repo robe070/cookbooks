@@ -1529,6 +1529,12 @@
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
                 "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },
                 "TriggerPatchInstall": { "Ref": "27TriggerPatchInstall" },
+                "AWS::CloudFormation::Authentication": {
+                    "S3AccessCreds": {
+                        "type": "S3",
+                        "roleName": { "Ref": "IAMRoleInstanceProfile" }
+                    }
+                },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig", "ready" ],
@@ -1897,10 +1903,12 @@
                     "install-msi": {
                         "files": {
                             "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa" 
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
+                                 "authentication": "S3AccessCreds" 
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config" 
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
+                                 "authentication": "S3AccessCreds"
                             }
                         },
                         "commands": {
