@@ -769,6 +769,14 @@
                     },
                     "install-cfn": {
                         "files": {
+                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
+                                 "authentication": "S3AccessCreds" 
+                            },
+                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
+                                 "authentication": "S3AccessCreds"
+                            },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": [
@@ -1122,16 +1130,6 @@
                         }
                     },
                     "install-msi": {
-                        "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
-                                 "authentication": "S3AccessCreds"
-                            },
-                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
-                                 "authentication": "S3AccessCreds"
-                            }
-                        },
                         "commands": {
                             "01_install_msi": {
                                 "command": {
@@ -1548,6 +1546,14 @@
                     },
                     "install-cfn": {
                         "files": {
+                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
+                                 "authentication": "S3AccessCreds" 
+                            },
+                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
+                                 "authentication": "S3AccessCreds"
+                            },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
                                     "Fn::Join": [
@@ -1901,16 +1907,6 @@
                         }
                     },
                     "install-msi": {
-                        "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
-                                 "authentication": "S3AccessCreds" 
-                            },
-                            "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
-                                 "authentication": "S3AccessCreds"
-                            }
-                        },
                         "commands": {
                             "01_install_msi": {
                                 "command": {
