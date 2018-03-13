@@ -86,6 +86,7 @@ Write-Verbose ("Password = $dbpassword")
 Write-Verbose ("ApplName = $ApplName")
 Write-Verbose ("ApplMSIurl = $ApplMSIurl")
 Write-Verbose ("CompanionInstallPath = $CompanionInstallPath")
+Write-Verbose ("Wait Handle = $Wait")
 
 
 try
@@ -108,6 +109,10 @@ try
     {
         $UPGD_bool = $false
     }
+
+    # test error handling
+    
+    throw
 
     Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" )
 
@@ -198,8 +203,25 @@ try
         Write-Output ("$(Log-Date) Disable TCP Offloading" )
         Disable-TcpOffloading
 
-        Write-Output ("$(Log-Date) Add github.com to known_hosts" )
-        Get-Content "$script:IncludeDir\github.txt" | out-file  "$ENV:USERPROFILE\.ssh\known_hosts" -Append -encoding utf8
+        # When installing through cloudformation the current user is systemprofile.
+        # When GitDeployHub receives a webhook it may be running as administrator
+
+        Write-Output ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
+        $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
+        if ( -not (test-path $KnownHostsDir)) {
+            mkdir $KnownHostsDir          
+        }
+        Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+
+        # If there is an adminstrator user, create the known hosts there too.
+        $KnownHostsDir = "c:\users\administrator"
+        if ( (test-path $KnownHostsDir)) {
+            $KnownHostsDir = "$KnownHostsDir\.ssh"
+            if ( -not (test-path $KnownHostsDir)) {
+                mkdir $KnownHostsDir          
+            }
+            Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+        }
 
         Write-Output ("$(Log-Date) Open Windows Firewall for HTTP ports...")
         Write-Output ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
@@ -413,7 +435,16 @@ catch
         $ExitCode = $LASTEXITCODE
     }
     if ($ExitCode -eq 0 ) {$ExitCode = 1}
-
+            
+    $response = @{
+        Status='FAILURE'
+        Reason='Installation Error'
+        UniqueId='ID1'
+        Data="Error code $ExitCode"
+    }
+    $json = $response | ConvertTo-Json
+    $response = Invoke-RestMethod "$Wait" -Method POST -Body $json -ContentType 'application/json'
+    
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
 }
