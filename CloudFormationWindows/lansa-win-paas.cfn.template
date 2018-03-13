@@ -753,7 +753,8 @@
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
-                        "roleName": { "Ref": "IAMRoleInstanceProfile" }
+                        "buckets": [ "lansa-secure" ],
+                        "roleName": "paas-ec2"
                     }
                 },
                 "AWS::CloudFormation::Init": {
@@ -770,12 +771,10 @@
                     "install-cfn": {
                         "files": {
                             "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
-                                 "authentication": "S3AccessCreds" 
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
-                                 "authentication": "S3AccessCreds"
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
@@ -1405,8 +1404,7 @@
                                 { "Ref": "AWS::StackId" },
                                 "  --resource DBLaunchWebServer",
                                 "  --configsets icing-install ",
-                                "  --region ",
-                                { "Ref": "AWS::Region" },
+                                "  --region ", { "Ref": "AWS::Region" },
                                 "\n",
 
                                 "cfn-signal.exe -e %ERRORLEVEL% ",
@@ -1530,7 +1528,8 @@
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
-                        "roleName": { "Ref": "IAMRoleInstanceProfile" }
+                        "buckets": [ "lansa-secure" ],
+                        "roleName": "paas-ec2"
                     }
                 },
                 "AWS::CloudFormation::Init": {
@@ -1547,12 +1546,10 @@
                     "install-cfn": {
                         "files": {
                             "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa",
-                                 "authentication": "S3AccessCreds" 
+                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config",
-                                 "authentication": "S3AccessCreds"
+                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
