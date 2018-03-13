@@ -110,10 +110,6 @@ try
         $UPGD_bool = $false
     }
 
-    # test error handling
-    
-    throw
-
     Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" )
 
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
@@ -436,15 +432,6 @@ catch
     }
     if ($ExitCode -eq 0 ) {$ExitCode = 1}
             
-    $response = @{
-        Status='FAILURE'
-        Reason='Installation Error'
-        UniqueId='ID1'
-        Data="Error code $ExitCode"
-    }
-    $json = $response | ConvertTo-Json
-    $response = Invoke-RestMethod "$Wait" -Method POST -Body $json -ContentType 'application/json'
-    
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
 }
