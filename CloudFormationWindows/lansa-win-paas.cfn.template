@@ -614,18 +614,25 @@
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "Description":  "GitHub Web Hook Server",
+                        "Description":  "GitHub Web Hook Server Address",
                         "IpProtocol": "tcp",
                         "FromPort": {"Ref":  "19HTTPPortNumberHub"},
                         "ToPort": {"Ref":  "19HTTPPortNumberHub"},
                         "CidrIp": "185.199.108.0/22"
                     },
                     {
-                        "Description":  "GitHub Web Hook Server",
+                        "Description":  "GitHub Web Hook Server Address",
                         "IpProtocol": "tcp",
                         "FromPort": {"Ref":  "19HTTPPortNumberHub"},
                         "ToPort": {"Ref":  "19HTTPPortNumberHub"},
                         "CidrIp": "192.30.252.0/22"
+                    },
+                    {
+                        "Description":  "GitDeployHub Status Panel for Owner Address",
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": {"Ref": "08RemoteAccessLocation" }
                     }
                 ]
             }
