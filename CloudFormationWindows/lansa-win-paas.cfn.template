@@ -240,11 +240,6 @@
             "Type": "String",
             "Default": "1",
             "Description": "Update Stack: Increment this by one to trigger an update to the web configuration"
-        },
-        "26TriggerIcingUpdate": {
-            "Type": "String",
-            "Default": "1",
-            "Description": "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly."
         }
     },
    "Metadata" : {
@@ -294,8 +289,7 @@
                "22TriggerCakeUpdate", 
                "23TriggerChefUpdate", 
                "24TriggerWinUpdate", 
-               "25TriggerWebConfig", 
-               "26TriggerIcingUpdate"
+               "25TriggerWebConfig"
             ]
          },
          {
@@ -335,7 +329,6 @@
          "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
          "24TriggerWinUpdate": { "default": "Trigger Win Update" },
          "25TriggerWebConfig": { "default": "Trigger Web Config" },
-         "26TriggerIcingUpdate": { "default": "Trigger Icing Update" },
          "21ELBTimeout": { "default": "Load Balancer Timeout" },
          "17UserScriptHook": { "default": "User Script Hook" },
          "10LansaGitRepoBranch": { "default": "Git Repository Branch" }
@@ -727,7 +720,6 @@
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
-                "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
@@ -742,8 +734,7 @@
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
-                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
-                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ]
+                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ]
                     },
                     "install-cfn": {
                         "files": {
@@ -859,25 +850,6 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r DBLaunchWebServer",
                                             " --configsets webconfig ",
-                                            " --region ",
-                                            { "Ref": "AWS::Region" },
-                                            "\n"
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\cfn\\hooks.d\\cfn-icing.conf": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "[cfn-icing-hook]\n",
-                                            "triggers=post.update\n",
-                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerIcingUpdate\n",
-                                            "action=cfn-init.exe -v -s ",
-                                            { "Ref": "AWS::StackId" },
-                                            " -r DBLaunchWebServer",
-                                            " --configsets icing-update ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -1145,69 +1117,6 @@
                             }
                         }
                     },
-                    "upgrade-msi": {
-                        "files": {
-                            "C:\\LANSA\\MyApp.msi": {
-                                "source": { "Ref": "01LansaMSI" }
-                            }
-                        },
-                        "commands": {
-                            "01_upgrade_msi": {
-                                "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
-                                            " -applcount ",
-                                            { "Ref": "03ApplCount" },
-                                            " -LansaMSI ",
-                                            { "Ref": "01LansaMSI" },
-                                            " -ApplMSIuri ",
-                                            { "Ref": "03ApplMSIuri" },
-                                            " -server_name ",
-                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
-                                            " -dbname ",
-                                            { "Ref": "14DBName" },
-                                            " -dbuser ",
-                                            { "Ref": "03DBUsername" },
-                                            " -dbpassword ",
-                                            { "Ref": "04DBPassword" },
-                                            " -webuser ",
-                                            { "Ref": "05WebUser" },
-                                            " -webpassword ",
-                                            { "Ref": "06WebPassword" },
-                                            " -f32bit ",
-                                            { "Ref": "02LansaMSIBitness" },
-                                            " -HTTPPortNumber ",
-                                            { "Ref": "19HTTPPortNumber" },
-                                            " -HTTPPortNumberHub ",
-                                            { "Ref": "19HTTPPortNumberHub" },
-                                            " -HostRoutePortNumber ",
-                                            { "Ref": "19HostRoutePortNumber" },
-                                            " -JSMPortNumber ",
-                                            { "Ref": "19JSMPortNumber" },
-                                            " -JSMAdminPortNumber ",
-                                            { "Ref": "19JSMAdminPortNumber" },
-                                            " -SUDB 1",
-                                            " -UPGD true",
-                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
-                                            {
-                                                "Fn::If": [
-                                                    "HasUserScript",
-                                                    { "Ref": "17UserScriptHook" },
-                                                    ""
-                                                ]
-                                            },
-                                            ";exit $LastExitCode",
-                                            "}\""
-                                        ]
-                                    ]
-                                },
-                                "waitAfterCompletion": "0"
-                            }
-                        }
-                    },
                     "cloud-watch-config": {
                         "commands": {
                             "01_cloud_watch_config": {
@@ -1451,7 +1360,6 @@
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
-                "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
@@ -1466,8 +1374,7 @@
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
-                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
-                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ]
+                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ]
                     },
                     "install-cfn": {
                         "files": {
@@ -1583,25 +1490,6 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r LaunchWebServer",
                                             " --configsets webconfig ",
-                                            " --region ",
-                                            { "Ref": "AWS::Region" },
-                                            "\n"
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\cfn\\hooks.d\\cfn-icing.conf": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "[cfn-icing-hook]\n",
-                                            "triggers=post.update\n",
-                                            "path=Resources.LaunchWebServer.Metadata.TriggerIcingUpdate\n",
-                                            "action=cfn-init.exe -v -s ",
-                                            { "Ref": "AWS::StackId" },
-                                            " -r LaunchWebServer",
-                                            " --configsets icing-update ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -1860,69 +1748,6 @@
                                             },
                                             " -Wait ",
                                             { "Fn::Base64": { "Ref": "WaitHandle" } },
-                                            ";exit $LastExitCode",
-                                            "}\""
-                                        ]
-                                    ]
-                                },
-                                "waitAfterCompletion": "0"
-                            }
-                        }
-                    },
-                    "upgrade-msi": {
-                        "files": {
-                            "C:\\LANSA\\MyApp.msi": {
-                                "source": { "Ref": "01LansaMSI" }
-                            }
-                        },
-                        "commands": {
-                            "01_upgrade_msi": {
-                                "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
-                                            " -applcount ",
-                                            { "Ref": "03ApplCount" },
-                                            " -LansaMSI ",
-                                            { "Ref": "01LansaMSI" },
-                                            " -ApplMSIuri ",
-                                            { "Ref": "03ApplMSIuri" },
-                                            " -server_name ",
-                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
-                                            " -dbname ",
-                                            { "Ref": "14DBName" },
-                                            " -dbuser ",
-                                            { "Ref": "03DBUsername" },
-                                            " -dbpassword ",
-                                            { "Ref": "04DBPassword" },
-                                            " -webuser ",
-                                            { "Ref": "05WebUser" },
-                                            " -webpassword ",
-                                            { "Ref": "06WebPassword" },
-                                            " -f32bit ",
-                                            { "Ref": "02LansaMSIBitness" },
-                                            " -HTTPPortNumber ",
-                                            { "Ref": "19HTTPPortNumber" },
-                                            " -HTTPPortNumberHub ",
-                                            { "Ref": "19HTTPPortNumberHub" },
-                                            " -HostRoutePortNumber ",
-                                            { "Ref": "19HostRoutePortNumber" },
-                                            " -JSMPortNumber ",
-                                            { "Ref": "19JSMPortNumber" },
-                                            " -JSMAdminPortNumber ",
-                                            { "Ref": "19JSMAdminPortNumber" },
-                                            " -SUDB 0",
-                                            " -UPGD true",
-                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
-                                            {
-                                                "Fn::If": [
-                                                    "HasUserScript",
-                                                    { "Ref": "17UserScriptHook" },
-                                                    ""
-                                                ]
-                                            },
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
