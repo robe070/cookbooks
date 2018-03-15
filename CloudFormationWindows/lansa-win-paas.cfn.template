@@ -310,16 +310,16 @@
          },
          {
            "Label" : { "default":"Stack Maintenance" },
+            "Parameters": [
                "22TriggerAppUpdate",
-           "Parameters" : [ 
-               "22TriggerCakeUpdate", 
-               "23TriggerChefUpdate", 
-               "24TriggerWinUpdate", 
-               "25TriggerWebConfig", 
-               "26TriggerIcingUpdate", 
-               "27TriggerPatchInstall", 
-               "28PatchBucketName", 
-               "29PatchFolderName" 
+               "22TriggerCakeUpdate",
+               "23TriggerChefUpdate",
+               "24TriggerWinUpdate",
+               "25TriggerWebConfig",
+               "26TriggerIcingUpdate",
+               "27TriggerPatchInstall",
+               "28PatchBucketName",
+               "29PatchFolderName"
             ]
          },
          {
@@ -773,8 +773,8 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
-                        "app-update": [ "installing", "git-pull", "app-update", "ready" ],
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig", "ready" ],
+                        "update-app": [ "installing", "git-pull", "update-app", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
@@ -839,7 +839,7 @@
                                             "action=cfn-init.exe -v -s ",
                                             { "Ref": "AWS::StackId" },
                                             " -r DBLaunchWebServer",
-                                            " --configsets app-update ",
+                                            " --configsets update-app ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -1170,13 +1170,9 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
-                                            " -applcount ",
-                                            { "Ref": "03ApplCount" },
+                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -LansaMSI ",
                                             { "Ref": "01LansaMSI" },
-                                            " -ApplMSIuri ",
-                                            { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",
@@ -1222,7 +1218,120 @@
                             }
                         }
                     },
-                    "app-update": {
+                    "install-app": {
+                        "commands": {
+                            "01_install_app": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -LansaMSI ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 1",
+                                            " -UPGD false",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            " -Wait ",
+                                            { "Fn::Base64": { "Ref": "DBWaitHandle" } },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "update-app": {
+                        "commands": {
+                            "01_app_update": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -applcount ",
+                                            { "Ref": "03ApplCount" },
+                                            " -LansaMSI ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 1",
+                                            " -UPGD true",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
                     "upgrade-msi": {
                         "files": {
                             "C:\\LANSA\\MyApp.msi": {
@@ -1230,14 +1339,13 @@
                             }
                         },
                         "commands": {
-                            "01_app_update": {
                             "01_upgrade_msi": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -LansaMSI ",
@@ -1571,8 +1679,8 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
-                        "app-update": [ "installing", "git-pull", "app-update", "ready" ],
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig", "ready" ],
+                        "update-app": [ "installing", "git-pull", "update-app", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
@@ -1637,7 +1745,7 @@
                                             "action=cfn-init.exe -v -s ",
                                             { "Ref": "AWS::StackId" },
                                             " -r LaunchWebServer",
-                                            " --configsets app-update ",
+                                            " --configsets update-app ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -2020,7 +2128,124 @@
                             }
                         }
                     },
-                    "app-update": {
+                    "install-app": {
+                        "commands": {
+                            "01_install_msi": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -applcount ",
+                                            { "Ref": "03ApplCount" },
+                                            " -LansaMSI ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 0",
+                                            " -UPGD false",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            " -Wait ",
+                                            { "Fn::Base64": { "Ref": "WaitHandle" } },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "update-app": {
+                        "commands": {
+                            "01_app_update": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -applcount ",
+                                            { "Ref": "03ApplCount" },
+                                            " -LansaMSI ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 1",
+                                            " -UPGD true",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
                     "upgrade-msi": {
                         "files": {
                             "C:\\LANSA\\MyApp.msi": {
@@ -2034,7 +2259,7 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -LansaMSI ",

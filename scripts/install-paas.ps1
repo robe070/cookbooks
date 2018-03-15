@@ -78,24 +78,18 @@ else
     $f32bit_bool = $false
 }
 
+if ( $UPGD -eq 'true' -or $UPGD -eq '1')
+{
+    $UPGD_bool = $true
+}
+else
+{
+    $UPGD_bool = $false
+}
+
 cmd /c exit 0    #Set $LASTEXITCODE
 
 try {
-    if ( $false ) {
-        Write-Output ("$(Log-Date) Create .ssh directory")
-        mkdir "$ENV:USERPROFILE\.ssh"
-
-        $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
-        $sshfile = "$env:USERPROFILE\.ssh\lpcprivate5.id_rsa"
-        Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
-        (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
-
-        $sshuri = "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
-        $sshfile = "C:\Program Files\Git\etc\ssh\ssh_config"
-        Write-Output ("$(Log-Date) Downloading $sshuri to $sshfile")
-        (New-Object System.Net.WebClient).DownloadFile($sshuri, $sshfile)
-    }
-
     $ApplName = "WebServer"
     if ($f32bit_bool) {
         $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
@@ -103,7 +97,6 @@ try {
         $APPA = "${ENV:ProgramFiles}\$($ApplName)"
     }
 
-    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -MSIuri $LansaMSI -HTTPPortNumber $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub 
     if ($LASTEXITCODE -eq 0 ) {
         For ( $i = 1; $i -le $ApplCount; $i++) {
             if ( $LASTEXITCODE -eq 0) {
