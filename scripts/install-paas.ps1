@@ -38,7 +38,7 @@ param(
 [String]$userscripthook,
 [Parameter(Mandatory=$false)]
 [String]$DBUT='MSSQLS',
-[String]$LansaMSI,
+[String]$MSIuri,
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
 [String]$ApplCount = "",
