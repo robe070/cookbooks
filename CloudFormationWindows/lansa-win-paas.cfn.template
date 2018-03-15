@@ -245,6 +245,26 @@
             "Type": "String",
             "Default": "1",
             "Description": "Update Stack: Increment this by one to trigger an update to the web configuration"
+        },
+        "26TriggerIcingUpdate": {
+            "Type": "String",
+            "Default": "1",
+            "Description": "Update Stack: Increment this by one to trigger an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly."
+        },
+        "27TriggerPatchInstall": {
+            "Type": "String",
+            "Default": "1",
+            "Description": "Update Stack: Increment this by one to trigger patches to be installed.  Obtains all MSPs from the PatchBucket and PatchFolder and applies those not already applied. The PatchFolder is usually specified as just the folder in which the patches are located. e.g. 'app/Test'. Its also possible to limit it to a particular file match e.g. to limit it to just install the patches for a particular version - 'app/Test/AWAMAPP_v1.0.0.' N.B. ensure there is a '.' on the end of the name to ensure that only patches for this version are applied."
+        },
+        "28PatchBucketName": {
+            "Type": "String",
+            "Default": "lansa",
+            "Description": "Update Stack: S3 Bucket which will contain the patches. (case sensitive). See TriggerPatchInstall parameter for more details."
+        },
+        "29PatchFolderName": {
+            "Type": "String",
+            "Default": "/change me",
+            "Description": "Update Stack: S3 folder which will contain the patches. (case sensitive). Note that ALL sub-directories are searched so ensure the directory used to store the patches has no sub directories. For the demo use app/test-patches. See TriggerPatchInstall parameter for more details."
         }
     },
    "Metadata" : {
@@ -290,12 +310,16 @@
          },
          {
            "Label" : { "default":"Stack Maintenance" },
-            "Parameters": [
                "22TriggerAppUpdate",
-               "22TriggerCakeUpdate",
-               "23TriggerChefUpdate",
-               "24TriggerWinUpdate",
-               "25TriggerWebConfig"
+           "Parameters" : [ 
+               "22TriggerCakeUpdate", 
+               "23TriggerChefUpdate", 
+               "24TriggerWinUpdate", 
+               "25TriggerWebConfig", 
+               "26TriggerIcingUpdate", 
+               "27TriggerPatchInstall", 
+               "28PatchBucketName", 
+               "29PatchFolderName" 
             ]
          },
          {
@@ -336,6 +360,10 @@
          "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
          "24TriggerWinUpdate": { "default": "Trigger Win Update" },
          "25TriggerWebConfig": { "default": "Trigger Web Config" },
+         "26TriggerIcingUpdate": { "default": "Trigger Icing Update" },
+         "27TriggerPatchInstall": { "default": "Trigger Patch Install" },
+         "28PatchBucketName": { "default": "Patch Bucket Name" },
+         "29PatchFolderName": { "default": "Patch Folder Name" },
          "21ELBTimeout": { "default": "Load Balancer Timeout" },
          "17UserScriptHook": { "default": "User Script Hook" },
          "10LansaGitRepoBranch": { "default": "Git Repository Branch" }
@@ -730,11 +758,12 @@
         "DBLaunchWebServer": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
-                "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
+                "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },
+                "TriggerPatchInstall": { "Ref": "27TriggerPatchInstall" },
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
@@ -744,13 +773,15 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "ready" ],
                         "app-update": [ "installing", "git-pull", "app-update", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
-                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ]
+                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
+                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ],
+                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "ready" ]
                     },
                     "install-cfn": {
                         "files": {
@@ -891,6 +922,44 @@
                                         ]
                                     ]
                                 }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-icing.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-icing-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerIcingUpdate\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r DBLaunchWebServer",
+                                            " --configsets icing-update ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-patch.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-patch-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerPatchInstall\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r DBLaunchWebServer",
+                                            " --configsets apply-patches ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
                             }
                         },
                         "services": {
@@ -906,6 +975,7 @@
                                         "c:\\cfn\\hooks.d\\cfn-windows.conf",
                                         "c:\\cfn\\hooks.d\\cfn-icing.conf",
                                         "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-patch.conf",
                                         "C:\\LANSA\\MyApp.msi"
                                     ]
                                 }
@@ -1153,8 +1223,15 @@
                         }
                     },
                     "app-update": {
+                    "upgrade-msi": {
+                        "files": {
+                            "C:\\LANSA\\MyApp.msi": {
+                                "source": { "Ref": "01LansaMSI" }
+                            }
+                        },
                         "commands": {
                             "01_app_update": {
+                            "01_upgrade_msi": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -1201,8 +1278,35 @@
                                                     ""
                                                 ]
                                             },
-                                            " -Wait ",
-                                            { "Fn::Base64": { "Ref": "DBWaitHandle" } },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "install-patches": {
+                        "commands": {
+                            "01_install_patches": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\copy-s3-install-patches.ps1",
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -SUDB 1",
+                                            " -bucket_name ",
+                                            { "Ref": "28PatchBucketName" },
+                                            " -region ",
+                                            { "Ref": "AWS::Region" },
+                                            " -folder ",
+                                            { "Ref": "29PatchFolderName" },
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
@@ -1456,6 +1560,8 @@
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
+                "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },
+                "TriggerPatchInstall": { "Ref": "27TriggerPatchInstall" },
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
                         "type": "S3",
@@ -1465,13 +1571,15 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "ready" ],
                         "app-update": [ "installing", "git-pull", "app-update", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "run-webconfig", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
-                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ]
+                        "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
+                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ],
+                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "ready" ]
                     },
                     "install-cfn": {
                         "files": {
@@ -1612,6 +1720,44 @@
                                         ]
                                     ]
                                 }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-icing.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-icing-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.LaunchWebServer.Metadata.TriggerIcingUpdate\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r LaunchWebServer",
+                                            " --configsets icing-update ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-patch.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-patch-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.LaunchWebServer.Metadata.TriggerPatchInstall\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r LaunchWebServer",
+                                            " --configsets apply-patches ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
                             }
                         },
                         "services": {
@@ -1627,6 +1773,7 @@
                                         "c:\\cfn\\hooks.d\\cfn-windows.conf",
                                         "c:\\cfn\\hooks.d\\cfn-icing.conf",
                                         "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-patch.conf",
                                         "C:\\LANSA\\MyApp.msi"
                                     ]
                                 }
@@ -1874,8 +2021,14 @@
                         }
                     },
                     "app-update": {
+                    "upgrade-msi": {
+                        "files": {
+                            "C:\\LANSA\\MyApp.msi": {
+                                "source": { "Ref": "01LansaMSI" }
+                            }
+                        },
                         "commands": {
-                            "01_app_update": {
+                            "01_upgrade_msi": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -1912,7 +2065,7 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
-                                            " -SUDB 1",
+                                            " -SUDB 0",
                                             " -UPGD true",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
@@ -1922,8 +2075,35 @@
                                                     ""
                                                 ]
                                             },
-                                            " -Wait ",
-                                            { "Fn::Base64": { "Ref": "DBWaitHandle" } },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "install-patches": {
+                        "commands": {
+                            "01_install_patches": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\copy-s3-install-patches.ps1",
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -SUDB 0",
+                                            " -bucket_name ",
+                                            { "Ref": "28PatchBucketName" },
+                                            " -region ",
+                                            { "Ref": "AWS::Region" },
+                                            " -folder ",
+                                            { "Ref": "29PatchFolderName" },
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
