@@ -84,7 +84,6 @@ Write-Verbose ("UPGD = $UPGD")
 Write-Verbose ("DBUT = $DBUT")
 Write-Verbose ("Password = $dbpassword")
 Write-Verbose ("ApplName = $ApplName")
-Write-Verbose ("ApplMSIurl = $ApplMSIurl")
 Write-Verbose ("CompanionInstallPath = $CompanionInstallPath")
 Write-Verbose ("Wait Handle = $Wait")
 
@@ -120,7 +119,7 @@ try
     
     [boolean]$CompanionInstall = $false
 
-    if ( $CompanionInstallPath.Length > 0) {
+    if ( $CompanionInstallPath.Length -gt 0) {
         if ( -not (test-path $CompanionInstallPath)) {
             Write-Error ("CompanionInstallPath '$CompanionInstallPath' does not exist")
             throw ("CompanionInstallPath '$CompanionInstallPath' does not exist")            
