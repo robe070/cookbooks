@@ -96,19 +96,53 @@ try {
     } else {
         $APPA = "${ENV:ProgramFiles}\$($ApplName)"
     }
+    Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
-    if ($LASTEXITCODE -eq 0 ) {
-        For ( $i = 1; $i -le $ApplCount; $i++) {
+    Write-Output( "$(Log-Date) Requested installation count $ApplCount" )
+    
+    $CurrentApplCount = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -ErrorAction SilentlyContinue).ApplCount
+    if ( $CurrentApplCount ) {
+        Write-Output( "$(Log-Date) Current Installation count $CurrentApplCount" )
+        if ( $CurrentApplCount > $ApplCount ) {
+            $ApplInstall = $true
+            $CurrentApplCount += 1
+        } elseif ( $CurrentApplCount < $ApplCount ) {
+            $ApplUninstall = $true
+        }
+    } else {
+        Write-Output( "$(Log-Date) Current Installation count 0" )
+        $ApplInstall = $true 
+        $CurrentApplCount = 1
+    }
+
+    if ( $ApplInstall ) {
+        Write-Output( "$(Log-Date) Installing applications from $CurrentApplCount to $ApplCount")
+        For ( $i = $CurrentApplCount; $i -le $ApplCount; $i++) {
             if ( $LASTEXITCODE -eq 0) {
                 & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
+
+                if ( $LASTEXITCODE -eq 0 ) {
+                    $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value $i -PropertyType DWORD -Force | Out-Null
+                }
             }
         }
+    }
 
-        if ($LASTEXITCODE -eq 0 ) {
-            iisreset
-        } else {
-            throw
+    if ( $ApplUninstall ) {
+        Write-Output( "$(Log-Date) Uninstalling applications from $CurrentApplCount to $ApplCount")
+        For ( $i = $CurrentApplCount; $i -ge 1; $i--) {
+            if ( $LASTEXITCODE -eq 0) {
+                & "$script:IncludeDir\uninstall-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
+
+                if ( $LASTEXITCODE -eq 0 ) {
+                    $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value ($i - 1) -PropertyType DWORD -Force | Out-Null
+                }                
+            }
         }
+    }
+    
+    if ($LASTEXITCODE -eq 0 ) {
+        iisreset
     } else {
         throw
     }

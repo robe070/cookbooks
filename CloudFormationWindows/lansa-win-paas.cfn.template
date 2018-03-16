@@ -1173,6 +1173,7 @@
                                             "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
+                                            " -ApplName ", "WebServer",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbname ",
@@ -1348,6 +1349,7 @@
                                             "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
+                                            " -ApplName ", "WebServer",
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",
@@ -2076,9 +2078,10 @@
                                         "",
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
-                                            "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
+                                            " -ApplName ", "WebServer",
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",
@@ -2130,7 +2133,7 @@
                     },
                     "install-app": {
                         "commands": {
-                            "01_install_msi": {
+                            "01_install_app": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -2262,6 +2265,7 @@
                                             "C:\\LANSA\\scripts\\install-lansa-msi.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
+                                            " -ApplName ", "WebServer",
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",
