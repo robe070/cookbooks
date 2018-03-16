@@ -69,6 +69,8 @@ else
 
 Write-Output "$(Log-Date) Constructing LANSA PaaS environment"
 
+Write-Output("$(Log-Date) Scriot Directory: $script:IncludeDir")
+
 if ( $f32bit -eq 'true' -or $f32bit -eq '1')
 {
     $f32bit_bool = $true
@@ -100,13 +102,15 @@ try {
 
     Write-Output( "$(Log-Date) Requested installation count $ApplCount" )
     
+    $ApplInstall = $false
+    $ApplUninstall = $false
     $CurrentApplCount = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -ErrorAction SilentlyContinue).ApplCount
     if ( $CurrentApplCount ) {
         Write-Output( "$(Log-Date) Current Installation count $CurrentApplCount" )
-        if ( $CurrentApplCount -gt $ApplCount ) {
+        if ( $CurrentApplCount -lt $ApplCount ) {
             $ApplInstall = $true
             $CurrentApplCount += 1
-        } elseif ( $CurrentApplCount -lt $ApplCount ) {
+        } elseif ( $CurrentApplCount -gt $ApplCount ) {
             $ApplUninstall = $true
         }
     } else {
@@ -115,10 +119,15 @@ try {
         $CurrentApplCount = 1
     }
 
+    cmd /c exit 0    #Set $LASTEXITCODE
+
     if ( $ApplInstall ) {
         Write-Output( "$(Log-Date) Installing applications from $CurrentApplCount to $ApplCount")
         For ( $i = $CurrentApplCount; $i -le $ApplCount; $i++) {
-            if ( $LASTEXITCODE -eq 0) {
+            Write-Output( "$(Log-Date) Installing App$($i)")
+            cmd /c exit 0    #Set $LASTEXITCODE
+            if ( $LASTEXITCODE -eq '0') {
+                Write-Output( "$(Log-Date) Installing App$($i)")
                 & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
 
                 if ( $LASTEXITCODE -eq 0 ) {
@@ -144,6 +153,7 @@ try {
     if ($LASTEXITCODE -eq 0 ) {
         iisreset
     } else {
+        Write-Output( "$(Log-Date) throwing")
         throw
     }
 } catch {
