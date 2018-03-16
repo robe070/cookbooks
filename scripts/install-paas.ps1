@@ -103,10 +103,10 @@ try {
     $CurrentApplCount = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -ErrorAction SilentlyContinue).ApplCount
     if ( $CurrentApplCount ) {
         Write-Output( "$(Log-Date) Current Installation count $CurrentApplCount" )
-        if ( $CurrentApplCount > $ApplCount ) {
+        if ( $CurrentApplCount -gt $ApplCount ) {
             $ApplInstall = $true
             $CurrentApplCount += 1
-        } elseif ( $CurrentApplCount < $ApplCount ) {
+        } elseif ( $CurrentApplCount -lt $ApplCount ) {
             $ApplUninstall = $true
         }
     } else {
