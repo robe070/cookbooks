@@ -244,9 +244,7 @@ try
 
                 Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
 
-                if ( -not $CompanionInstall ) {
-                    Import-Module “sqlps” -DisableNameChecking
-                }
+                Import-Module “sqlps” -DisableNameChecking
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
