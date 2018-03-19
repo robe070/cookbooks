@@ -136,7 +136,7 @@ try {
 
     if ( $ApplUninstall ) {
         Write-Output( "$(Log-Date) Uninstalling applications from $CurrentApplCount to $ApplCount")
-        For ( $i = $CurrentApplCount; $i -ge 1; $i--) {
+        For ( $i = $CurrentApplCount; $i -gt $ApplCount; $i--) {
             if ( $LASTEXITCODE -eq 0) {
                 & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA    
 
