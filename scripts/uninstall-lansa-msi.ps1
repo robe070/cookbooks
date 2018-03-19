@@ -36,6 +36,17 @@ Write-Output ("`r`n")
 $DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 
+Write-Verbose ("Server_name = $server_name")
+Write-Verbose ("dbname = $dbname")
+Write-Verbose ("dbuser = $dbuser")
+Write-Verbose ("32bit = $f32bit")
+Write-Verbose ("SUDB = $SUDB")
+Write-Verbose ("UPGD = $UPGD")
+Write-Verbose ("DBUT = $DBUT")
+Write-Verbose ("Password = $dbpassword")
+Write-Verbose ("ApplName = $ApplName")
+Write-Verbose ("CompanionInstallPath = $CompanionInstallPath")
+
 $installer = "$($ApplName).msi"
 
 $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )

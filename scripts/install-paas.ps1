@@ -138,7 +138,7 @@ try {
         Write-Output( "$(Log-Date) Uninstalling applications from $CurrentApplCount to $ApplCount")
         For ( $i = $CurrentApplCount; $i -ge 1; $i--) {
             if ( $LASTEXITCODE -eq 0) {
-                & "$script:IncludeDir\uninstall-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA    
+                & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA    
 
                 if ( $LASTEXITCODE -eq 0 ) {
                     $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value ($i - 1) -PropertyType DWORD -Force | Out-Null
