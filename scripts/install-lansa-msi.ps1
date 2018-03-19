@@ -398,7 +398,7 @@ try
         Write-Verbose ("User Script not passed")
     }
 
-    if ( $CompanionInstall ) {
+    if ( -not $CompanionInstall ) {
         iisreset
     }
 
