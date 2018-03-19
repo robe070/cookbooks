@@ -758,8 +758,8 @@
         "DBLaunchWebServer": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
+                "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
-                "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
                 "TriggerIcingUpdate": { "Ref": "26TriggerIcingUpdate" },

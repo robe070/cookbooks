@@ -77,7 +77,7 @@ try {
         throw $ErrorMessage
     }
 
-    if ( ($SUDB -eq '1') {
+    if ( ($SUDB -eq '1') ) {
         switch ($DBUT) {
             "MSSQLS" {
                 Write-Output ("$(Log-Date) Drop Database...")
