@@ -221,6 +221,17 @@
             "MaxValue": "60",
             "Default": "30"
         },
+        "22TriggerAppReinstall": {
+            "Type": "String",
+            "Default": "1",
+            "Description": "Update Stack: Increment this by one to reinstall a particular application, as specified in 'Application to Reinstall'."
+        },
+        "22AppToReinstall": {
+            "Default": "0",
+            "Description": "The number of the application to re-install.",
+            "Type": "Number",
+            "MinValue": "0"
+        },
         "22TriggerAppUpdate": {
             "Type": "String",
             "Default": "1",
@@ -311,6 +322,8 @@
          {
            "Label" : { "default":"Stack Maintenance" },
             "Parameters": [
+               "22TriggerAppReinstall",
+               "22AppToReinstall",
                "22TriggerAppUpdate",
                "22TriggerCakeUpdate",
                "23TriggerChefUpdate",
@@ -355,6 +368,8 @@
          "19HostRoutePortNumber": { "default": "LANSA Listener Port number" },
          "19JSMPortNumber": { "default": "JSM Port number" },
          "19JSMAdminPortNumber": { "default": "JSM Admin Port number" },
+         "22TriggerAppReinstall": { "default": "Trigger Application Reinstall" },
+         "22AppToReinstall": { "default": "Application To Reinstall" },
          "22TriggerAppUpdate": { "default": "Trigger Application Update" },
          "22TriggerCakeUpdate": { "default": "Trigger Cake Update" },
          "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
@@ -758,6 +773,7 @@
         "DBLaunchWebServer": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
+                "TriggerAppReinstall": { "Ref": "22TriggerAppReinstall" },
                 "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
@@ -773,6 +789,7 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
@@ -821,6 +838,25 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r DBLaunchWebServer",
                                             " --configsets cfn-update ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-app-reinstall-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerAppReinstall\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r DBLaunchWebServer",
+                                            " --configsets reinstall-app ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -969,6 +1005,8 @@
                                     "ensureRunning": "true",
                                     "files": [
                                         "c:\\cfn\\cfn-hup.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-app.conf",
                                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf",
                                         "c:\\cfn\\hooks.d\\cfn-cake.conf",
                                         "c:\\cfn\\hooks.d\\cfn-chef.conf",
@@ -1290,6 +1328,64 @@
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
+                                            " -MSIUri ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 1",
+                                            " -UPGD true",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "reinstall-app": {
+                        "commands": {
+                            "01_app_reinstall": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
+                                            " -ApplNumber ",
+                                            { "Ref": "22AppToReinstall" },
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",
@@ -1665,6 +1761,7 @@
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "DependsOn": "DBWaitCondition",
             "Metadata": {
+                "TriggerAppReinstall": { "Ref": "22TriggerAppReinstall" },
                 "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
@@ -1681,6 +1778,7 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
@@ -1729,6 +1827,25 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r LaunchWebServer",
                                             " --configsets cfn-update ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-app-reinstall-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.LaunchWebServer.Metadata.TriggerAppReinstall\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r LaunchWebServer",
+                                            " --configsets reinstall-app ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -1877,6 +1994,8 @@
                                     "ensureRunning": "true",
                                     "files": [
                                         "c:\\cfn\\cfn-hup.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-app.conf",
                                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf",
                                         "c:\\cfn\\hooks.d\\cfn-cake.conf",
                                         "c:\\cfn\\hooks.d\\cfn-chef.conf",
@@ -2198,6 +2317,64 @@
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
+                                            " -MSIUri ",
+                                            { "Ref": "01LansaMSI" },
+                                            " -ApplMSIuri ",
+                                            { "Ref": "03ApplMSIuri" },
+                                            " -server_name ",
+                                            { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbname ",
+                                            { "Ref": "14DBName" },
+                                            " -dbuser ",
+                                            { "Ref": "03DBUsername" },
+                                            " -dbpassword ",
+                                            { "Ref": "04DBPassword" },
+                                            " -webuser ",
+                                            { "Ref": "05WebUser" },
+                                            " -webpassword ",
+                                            { "Ref": "06WebPassword" },
+                                            " -f32bit ",
+                                            { "Ref": "02LansaMSIBitness" },
+                                            " -HTTPPortNumber ",
+                                            { "Ref": "19HTTPPortNumber" },
+                                            " -HTTPPortNumberHub ",
+                                            { "Ref": "19HTTPPortNumberHub" },
+                                            " -HostRoutePortNumber ",
+                                            { "Ref": "19HostRoutePortNumber" },
+                                            " -JSMPortNumber ",
+                                            { "Ref": "19JSMPortNumber" },
+                                            " -JSMAdminPortNumber ",
+                                            { "Ref": "19JSMAdminPortNumber" },
+                                            " -SUDB 1",
+                                            " -UPGD true",
+                                            { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
+                                            {
+                                                "Fn::If": [
+                                                    "HasUserScript",
+                                                    { "Ref": "17UserScriptHook" },
+                                                    ""
+                                                ]
+                                            },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "reinstall-app": {
+                        "commands": {
+                            "01_app_reinstall": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
+                                            " -ApplNumber ",
+                                            { "Ref": "22AppToReinstall" },
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",

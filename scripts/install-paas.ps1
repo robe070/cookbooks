@@ -3,7 +3,6 @@
 
 Install a LANSA PaaS.
 
-Installs a WebServer installation - a Companion system for the Applications
 Installs n Applications app1, app2, ...,appn which configure the Companion system to redirect 
 alias requests for app1, app2, ..., appn to the appropriate application.
 
@@ -69,7 +68,7 @@ else
 
 Write-Output "$(Log-Date) Constructing LANSA PaaS environment"
 
-Write-Output("$(Log-Date) Scriot Directory: $script:IncludeDir")
+Write-Output("$(Log-Date) Script Directory: $script:IncludeDir")
 
 if ( $f32bit -eq 'true' -or $f32bit -eq '1')
 {
