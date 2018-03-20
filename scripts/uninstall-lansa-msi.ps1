@@ -87,7 +87,7 @@ try {
         $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
         Write-Error $ErrorMessage -Category NotInstalled
         throw $ErrorMessage
-    }
+    } 
 
     if ( ($SUDB -eq '1') ) {
         switch ($DBUT) {
@@ -127,11 +127,28 @@ try {
     }
     if ($ExitCode -eq 0 -or -not $ExitCode) {$ExitCode = 1}
 
-    Write-Output ("$(Log-Date) State Before returning: ExitCode=$ExitCode")
-    Write-Output ("$(Log-Date) An exit code of 1605 means the MSI is not installed")
-    Write-Output ("$(Log-Date) An exit code of 1603 is an installer error so look at $install_log")
-    Write-Output ("$(Log-Date) An exit code of 1602 means the application is already installed using a different build of the MSI. See the powershell.log file")
-    Write-Output ("$(Log-Date) An exit code of 1 is a command line error when executing the powershell script. See the main log file")
+    switch ($ExitCode){
+        1619 {
+            $ErrorMessage = "The MSI is already uninstalled"
+        }
+        1605 {
+            $ErrorMessage = "The MSI is not installed"
+        }
+        1603 {
+            $ErrorMessage = "An installer error => look at $install_log"
+        }
+        1602 {
+            $ErrorMessage = "The same version of the MSI is already installed but its a different build of the MSI. See the powershell.log file"
+        }
+        1 {
+            $ErrorMessage = "Command line error when executing the powershell script. See the main log file"
+        }
+        default {
+            $ErrorMessage = "Unknown error code"
+        }        
+    }
+
+    Write-Output ("$(Log-Date) State Before returning: ExitCode=${$ExitCode} : $ErrorMessage")
 
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return

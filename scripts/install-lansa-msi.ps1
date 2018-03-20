@@ -424,11 +424,34 @@ catch
 {
 	$_
     Write-Output ("$(Log-Date) Installation error")
-    if ( $ExitCode -eq 0 -and $LASTEXITCODE -ne 0) {
+    if ( $ExitCode -eq 0 -and $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         $ExitCode = $LASTEXITCODE
     }
-    if ($ExitCode -eq 0 ) {$ExitCode = 1}
-            
+    if ($ExitCode -eq 0 -or -not $ExitCode) {$ExitCode = 1}
+
+    switch ($ExitCode){
+        1619 {
+            $ErrorMessage = "The MSI is already uninstalled"
+        }
+        1605 {
+            $ErrorMessage = "The MSI is not installed"
+        }
+        1603 {
+            $ErrorMessage = "An installer error => look at $install_log"
+        }
+        1602 {
+            $ErrorMessage = "The same version of the MSI is already installed but its a different incompatible build of the MSI. See the powershell.log file"
+        }
+        1 {
+            $ErrorMessage = "Command line error when executing the powershell script. See the main log file"
+        }
+        default {
+            $ErrorMessage = "Unknown error code"
+        }        
+    }
+
+    Write-Output ("$(Log-Date) State Before returning: ExitCode=${$ExitCode} : $ErrorMessage")
+    
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
 }
@@ -440,7 +463,6 @@ finally
     } else {
         if ($Cloud -eq "Azure") {
             Write-Output ("$(Log-Date) Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
-            Write-Output ("$(Log-Date) Note that an exit code of 1603 is an installer error so look at $install_log")
             Write-Output ("$(Log-Date) and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
         }
     }
