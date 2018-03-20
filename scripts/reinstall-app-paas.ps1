@@ -94,7 +94,7 @@ try {
     }
     Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
-    $ApplName = "app$ApplNumber"
+    $ApplName = "APP$ApplNumber"
     Write-Output( "$(Log-Date) Uninstalling application $ApplName")
     & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA    
 

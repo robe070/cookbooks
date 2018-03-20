@@ -789,10 +789,10 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
-                        "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
@@ -1357,7 +1357,7 @@
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
                                             " -SUDB 1",
-                                            " -UPGD true",
+                                            " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
                                                 "Fn::If": [
@@ -1415,7 +1415,7 @@
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
                                             " -SUDB 1",
-                                            " -UPGD true",
+                                            " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
                                                 "Fn::If": [
@@ -1778,10 +1778,10 @@
                 },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
-                        "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
@@ -2346,7 +2346,7 @@
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
                                             " -SUDB 1",
-                                            " -UPGD true",
+                                            " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
                                                 "Fn::If": [
@@ -2404,7 +2404,7 @@
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
                                             " -SUDB 1",
-                                            " -UPGD true",
+                                            " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
                                                 "Fn::If": [
