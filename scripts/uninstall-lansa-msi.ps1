@@ -81,7 +81,8 @@ try {
 
     $p = Start-Process -FilePath 'msiexec.exe' -ArgumentList $Arguments -Wait -PassThru
 
-    if ( $p.ExitCode -ne 0 ) {
+    # Error 1619 is the app is not installed
+    if ( $p.ExitCode -ne 0 -and $p.ExitCode -ne 1619) {
         $ExitCode = $p.ExitCode
         $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
         Write-Error $ErrorMessage -Category NotInstalled
