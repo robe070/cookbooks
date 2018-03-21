@@ -174,7 +174,7 @@
             "Type": "Number"
         },
         "19HostRoutePortNumber": {
-            "Default": "4541",
+            "Default": "4540",
             "Description": "LANSA Listener port number.",
             "Type": "Number"
         },

@@ -450,7 +450,7 @@ catch
         }        
     }
 
-    Write-Output ("$(Log-Date) State Before returning: ExitCode=${$ExitCode} : $ErrorMessage")
+    Write-Output ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")
     
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
