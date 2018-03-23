@@ -102,7 +102,8 @@ try {
     & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($ApplNumber).git"    
    
     if ($LASTEXITCODE -eq 0 ) {
-        iisreset
+        # No need to perform a reset as the web-alias and port numbers have not changed.
+        # iisreset
     } else {
         Write-Output( "$(Log-Date) throwing")
         throw
