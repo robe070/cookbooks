@@ -25,7 +25,7 @@ function Disable-TcpOffloading
     $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
     $IsoLang
 
-    if ( [System.Environment]::OSVersion.Version.Major -eq 6 -and [System.Environment]::OSVersion.Version.Minor -eq 2) {
+    if ( [System.Environment]::OSVersion.Version.Major -le 6) {
         $EngNicName = 'Ethernet'
         $JpnNicName = 'イーサネット'
     } else {
