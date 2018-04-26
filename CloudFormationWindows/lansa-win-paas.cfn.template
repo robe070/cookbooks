@@ -7,6 +7,11 @@
             "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/paas-live/WEBSERVR_v1.0.0_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
+        "WebServerGitRepo": {
+            "Type": "String",
+            "Default": "git@github.com:lansa/webserver.git",
+            "Description": "Webserver distribution repo url. May leave blank to NOT be able to update the webserver configuration via 1-click deploy"
+        },
         "02LansaMSIBitness": {
             "Default": "1",
             "Description": "Set to 1 if the MSI is a 32-bit application. Set to 0 if the MSI is a 64-bit application.",
@@ -1260,6 +1265,7 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -gitrepourl git@github.com:lansa/webserver.git",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -1498,6 +1504,7 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -gitrepourl git@github.com:lansa/webserver.git",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2249,6 +2256,7 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -gitrepourl git@github.com:lansa/webserver.git",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2487,6 +2495,7 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -gitrepourl git@github.com:lansa/webserver.git",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
