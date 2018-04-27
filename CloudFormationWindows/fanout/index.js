@@ -19,17 +19,17 @@ function error(e){
 
 // AWS.config.update({region: 'us-west-2'});
     
-var autoscaling = new AWS.AutoScaling();
-var ec2 = new AWS.EC2();
-var http = require('http');
-
 exports.handler = (event, context, callback) => {
     
     function success(s){
         console.log( 'Successful');
         callback(null, 'Successfully deployed by lambda');
     }
-    
+
+    var autoscaling = new AWS.AutoScaling();
+    var ec2 = new AWS.EC2();
+    var http = require('http');
+
     var region = process.env.AWS_DEFAULT_REGION;
     console.log( 'Region:', region);
 
@@ -75,17 +75,18 @@ exports.handler = (event, context, callback) => {
                         if (err) console.log(err, err.stack); // an error occurred
                         else {
                             // successful response
-                            // console.log(data);        
-                            var PrivateIpAddress = data.Reservations[0].Instances[0].PrivateIpAddress;
-                            console.log("PrivateIpAddress: ", JSON.stringify( PrivateIpAddress ) );
+                            // console.log(data.Reservations[0].Instances[0]);        
+                            var PublicIpAddress = data.Reservations[0].Instances[0].PublicIpAddress;
+                            console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
-                            // Build the post string from an object
+                            // post the payload from GitHub
                             var post_data = JSON.stringify(message);
+
                             console.log("post_data length: ", JSON.stringify( post_data.length ) );
                             
                             // An object of options to indicate where to post to
                             var post_options = {
-                                host: PrivateIpAddress,
+                                host: PublicIpAddress,
                                 port: '8101',
                                 path: '/Deployment/Start/APP2?source=sourceName',
                                 method: 'POST',
@@ -98,6 +99,11 @@ exports.handler = (event, context, callback) => {
                             var post_request = http.request(post_options, function(res) {
                                 var body = '';
                         
+                                if (res.statusCode === 200) {
+                                    context.succeed('Lambda Successfully Deployed to ' + post_options.host + ' ' + post_options.path);
+                                } else {
+                                    context.fail('status code: ' + res.statusCode);
+                                }                        
                                 res.on('data', function(chunk)  {
                                     body += chunk;
                                 });
@@ -111,7 +117,7 @@ exports.handler = (event, context, callback) => {
                                 });
                             });    
                             // post the data
-                            console.log( 'Posting to:', PrivateIpAddress );
+                            console.log( 'Posting to:', PublicIpAddress );
                             post_request.write(post_data);
                             post_request.end();
                         }
