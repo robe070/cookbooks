@@ -77,12 +77,12 @@ exports.handler = (event, context, callback) => {
                             // successful response
                             // console.log(data.Reservations[0].Instances[0]);        
                             var PublicIpAddress = data.Reservations[0].Instances[0].PublicIpAddress;
-                            console.log("Host: ", JSON.stringify( PublicIpAddress ) );
+                            // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
                             // post the payload from GitHub
                             var post_data = JSON.stringify(message);
 
-                            console.log("post_data length: ", JSON.stringify( post_data.length ) );
+                            // console.log("post_data length: ", JSON.stringify( post_data.length ) );
                             
                             // An object of options to indicate where to post to
                             var post_options = {
@@ -100,7 +100,7 @@ exports.handler = (event, context, callback) => {
                                 var body = '';
                         
                                 if (res.statusCode === 200) {
-                                    context.succeed('Lambda Successfully Deployed to ' + post_options.host + ' ' + post_options.path);
+                                    context.succeed('Application update successfully deployed by Lambda function to ' + post_options.path);
                                 } else {
                                     context.fail('status code: ' + res.statusCode);
                                 }                        
@@ -117,7 +117,7 @@ exports.handler = (event, context, callback) => {
                                 });
                             });    
                             // post the data
-                            console.log( 'Posting to:', PublicIpAddress );
+                            console.log( 'Posting to:', post_options.host, post_options.path );
                             post_request.write(post_data);
                             post_request.end();
                         }
