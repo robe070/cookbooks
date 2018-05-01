@@ -22,8 +22,13 @@
             ],
             "ConstraintDescription": "Must be either 1 (true) or 0 (false)."
         },
+        "StackNumber": {
+            "Description": "The number of this stack. This causes a different git repo to be used for each Application. lansaeval<ApplCount+(StackNumber-1)*10>",
+            "Type": "Number",
+            "Default": 1
+        },
         "03ApplCount": {
-            "Description": "The number of application environments to create.",
+            "Description": "The count of application environments to create.",
             "Type": "Number",
             "Default": 1
         },
@@ -297,6 +302,7 @@
             "Parameters": [
                "01LansaMSI",
                "02LansaMSIBitness",
+               "StackNumber",
                "03ApplCount",
                "03ApplMSIuri",
                "03DBUsername",
@@ -360,6 +366,7 @@
       "ParameterLabels": {
          "01LansaMSI": { "default": "Lansa MSI URL" },
          "02LansaMSIBitness": { "default": "MSI Bitness" },
+         "StackNumber": { "default": "Stack Number" },
          "03ApplCount": { "default": "Application Count" },
          "03ApplMSIuri": { "default": "Application MSI uri" },
          "03DBUsername": { "default": "Database User Name" },
@@ -766,6 +773,13 @@
                                 "SourceSecurityGroup.GroupName"
                             ]
                         }
+                    },
+                    {
+                        "Description":  "Lambda Function access to GitDeployHub",
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "0.0.0.0/0"
                     },
                     {
                         "IpProtocol": "tcp",
@@ -1308,6 +1322,8 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -stacknumber ",
+                                            { "Ref": "StackNumber" },
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -MSIUri ",
@@ -1368,6 +1384,8 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -stacknumber ",
+                                            { "Ref": "StackNumber" },
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -MSIUri ",
@@ -2299,6 +2317,8 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -stacknumber ",
+                                            { "Ref": "StackNumber" },
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -MSIUri ",
@@ -2359,6 +2379,8 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\install-paas.ps1",
+                                            " -stacknumber ",
+                                            { "Ref": "StackNumber" },
                                             " -applcount ",
                                             { "Ref": "03ApplCount" },
                                             " -MSIUri ",

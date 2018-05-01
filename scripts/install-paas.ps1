@@ -40,6 +40,7 @@ param(
 [String]$MSIuri,
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
+[String]$StackNumber = "1",
 [String]$ApplCount = "",
 [String]$ApplMSIuri = "",
 [String]$HTTPPortNumber = "",
@@ -121,10 +122,11 @@ try {
     if ( $ApplInstall ) {
         Write-Output( "$(Log-Date) Installing applications from $CurrentApplCount to $ApplCount")
         For ( $i = $CurrentApplCount; $i -le $ApplCount; $i++) {
-            
+            $GitRepoNum = $i + ($StackNumber - 1) * 10    
+        
             if ( $LASTEXITCODE -eq '0') {
                 Write-Output( "$(Log-Date) Installing App$($i)")
-                & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($i).git"    
+                & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$($GitRepoNum).git"    
 
                 if ( $LASTEXITCODE -eq 0 ) {
                     $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value $i -PropertyType DWORD -Force | Out-Null
