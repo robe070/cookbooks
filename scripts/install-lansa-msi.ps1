@@ -226,6 +226,12 @@ try
         if ( $HTTPPortNumberHub.Length -gt 0) {
             New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
         }
+
+        Write-Output ("$(Log-Date) Switch off Sentinel ")
+        New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null 
+        New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null 
+
+        [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine")
     }
 
     #########################################################################################################
