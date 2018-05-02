@@ -9,14 +9,13 @@ var AWS = require('aws-sdk');
 exports.handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false; // Errors need to be returned ASAP
 
-    var elb = new AWS.ELB();
-    var ec2 = new AWS.EC2();
+    // Any variables which need to be updated by multiple callbacks need to be declared before the first callback
+    // otherwise each callback gets its own copy of the global.
+    
     var instanceCount = 0;
     var successCodes = 0;
     
     var region = process.env.AWS_DEFAULT_REGION;
-    console.log( 'Region:', region);
-// AWS.config.update({region: 'us-west-2'});
 
     //console.log('Received event:', JSON.stringify(event).substring(0,400));
     //console.log('context:', context);
@@ -34,7 +33,7 @@ exports.handler = (event, context, callback) => {
     var paramsListRRS = {
       HostedZoneId: 'Z2K4W96HUY1FNC', /* required - paas.lansa.com */
       MaxItems: '1',
-      StartRecordName: 'eval1.paas.lansa.com.',
+      StartRecordName: 'one.paas.lansa.com.',
       StartRecordType: 'A'
     };
 
@@ -56,17 +55,39 @@ exports.handler = (event, context, callback) => {
         }
         
         console.log('ELB DNS Name: ', data.ResourceRecordSets[0].AliasTarget.DNSName);
+        var DNSName = data.ResourceRecordSets[0].AliasTarget.DNSName;
         // e.g. paas-livb-webserve-ztessziszyzz-1633164328.us-east-1.elb.amazonaws.com.
         
+        var DNSsplit = DNSName.split("."); 
+        var ELBNameFull = DNSsplit[0];
+        region = DNSsplit[1];
         
-        var params = {
-          LoadBalancerNames: [
-            'paas-WebServerELB-W84PXG3L9PEE'
-          ]
-        };
+        var ELBsplit = ELBNameFull.split("-");
+        ELBsplit.pop(); // remove last element
         
+        // Put ELB Name back together again
+        var i;
+        var ELBLowerCase = '';
+        for (i = 0; i < ELBsplit.length; i++) {
+            ELBLowerCase += ELBsplit[i];
+            if ( i < ELBsplit.length - 1 ) {
+                ELBLowerCase += "-";
+            }
+        } 
+        
+        console.log( 'Region: ' + region );
+        console.log( 'ELB:    ' + ELBLowerCase );
+        
+        AWS.config.update({region: region});
+        
+        // Need the region to be set before creating these variables.
+        
+        var elb = new AWS.ELB();
+        var ec2 = new AWS.EC2();        
+        
+        // List all Load Balancers
         // Async call
-        elb.describeLoadBalancers(params, function(err, data) {
+        elb.describeLoadBalancers(function(err, data) {
             if (err) {
                 console.log(err, err.stack); // an error occurred
                 callback(err, err.stack); 
@@ -74,8 +95,30 @@ exports.handler = (event, context, callback) => {
             }
             
             // successful response
-
-            var instances = data.LoadBalancerDescriptions[0].Instances;
+            console.log('Instances: ', JSON.stringify(data.LoadBalancerDescriptions).substring(0,400));   
+            console.log( 'length: ' , data.LoadBalancerDescriptions.length);
+            
+            // Find the lower case ELB name by listing all the load balancers in the region 
+            // and doing a case insensitive compare
+            
+            var i;
+            var ELBNum = -1;
+            var ELBCurrent = '';
+            for (i = 0; i < data.LoadBalancerDescriptions.length; i++) {
+                ELBCurrent =  data.LoadBalancerDescriptions[i].LoadBalancerName.toLowerCase();
+                console.log( 'ELBCurrent: ', ELBCurrent );
+                if ( ELBLowerCase === ELBCurrent) {
+                    ELBNum = i;
+                    break;
+                }
+            }            
+            
+            if ( ELBNum == -1 ) {
+                var error = new Error('ELB Name not found');
+                callback(error);                                         
+                return;
+            }
+            var instances = data.LoadBalancerDescriptions[ELBNum].Instances;
             console.log('Instances: ', JSON.stringify(instances).substring(0,400));   
 
             // forEach is a Sync call
