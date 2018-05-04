@@ -12,10 +12,10 @@ exports.handler = (event, context, callback) => {
     // Any variables which need to be updated by multiple callbacks need to be declared before the first callback
     // otherwise each callback gets its own copy of the global.
     
-    var instanceCount = 0;
-    var successCodes = 0;
+    let instanceCount = 0;
+    let successCodes = 0;
     
-    var region = process.env.AWS_DEFAULT_REGION;
+    let region = process.env.AWS_DEFAULT_REGION;
 
     //console.log('Received event:', JSON.stringify(event).substring(0,400));
     //console.log('context:', context);
@@ -24,13 +24,13 @@ exports.handler = (event, context, callback) => {
     console.log('SNS Type:', type);
     //console.log('Message:', message.substring(0,100));
     
-    var payload = JSON.parse(message); // converts it to a JS native object.
+    let payload = JSON.parse(message); // converts it to a JS native object.
     // console.log('GitHub Payload:', JSON.stringify(message));
     console.log('GitHub Compare', JSON.stringify( payload.compare) );
 
-    var route53 = new AWS.Route53();
+    let route53 = new AWS.Route53();
     
-    var paramsListRRS = {
+    let paramsListRRS = {
       HostedZoneId: 'Z2K4W96HUY1FNC', /* required - paas.lansa.com */
       MaxItems: '1',
       StartRecordName: 'testold.paas.lansa.com.',
@@ -50,17 +50,17 @@ exports.handler = (event, context, callback) => {
         console.log('Searched for Alias: ', paramsListRRS.StartRecordName);
         console.log('Located Alias:      ', data.ResourceRecordSets[0].Name);
         if ( paramsListRRS.StartRecordName !== data.ResourceRecordSets[0].Name) {
-            var error = new Error('Searched for Alias is not the one located');
+            let error = new Error('Searched for Alias is not the one located');
             callback(error);                                         
         }
         
         console.log('ELB DNS Name: ', data.ResourceRecordSets[0].AliasTarget.DNSName);
-        var DNSName = data.ResourceRecordSets[0].AliasTarget.DNSName;
+        let DNSName = data.ResourceRecordSets[0].AliasTarget.DNSName;
         // e.g. paas-livb-webserve-ztessziszyzz-1633164328.us-east-1.elb.amazonaws.com.
 
-        var DNSsplit = DNSName.split("."); 
-        var ELBNameFull = '';
-        var ELBsplit = '';
+        let DNSsplit = DNSName.split("."); 
+        let ELBNameFull = '';
+        let ELBsplit = '';
         console.log( 'DNSsplit[0]: ', DNSsplit[0]);
         if ( DNSsplit[0] === 'dualstack') {
             ELBNameFull = DNSsplit[1];
@@ -73,8 +73,8 @@ exports.handler = (event, context, callback) => {
         ELBsplit.pop(); // remove last element
 
         // Put ELB Name back together again
-        var i;
-        var ELBLowerCase = '';
+        let i;
+        let ELBLowerCase = '';
         for (i = 0; i < ELBsplit.length; i++) {
             ELBLowerCase += ELBsplit[i];
             if ( i < ELBsplit.length - 1 ) {
@@ -89,11 +89,11 @@ exports.handler = (event, context, callback) => {
         
         // Need the region to be set before creating these variables.
         
-        var elb = new AWS.ELB();
-        var ec2 = new AWS.EC2();        
+        let elb = new AWS.ELB();
+        let ec2 = new AWS.EC2();        
         
         // List all Load Balancers
-        var params = {
+        let params = {
           LoadBalancerNames: []
         };
         
@@ -112,9 +112,9 @@ exports.handler = (event, context, callback) => {
             // Find the lower case ELB name by listing all the load balancers in the region 
             // and doing a case insensitive compare
             
-            var i;
-            var ELBNum = -1;
-            var ELBCurrent = '';
+            let i;
+            let ELBNum = -1;
+            let ELBCurrent = '';
             for (i = 0; i < data.LoadBalancerDescriptions.length; i++) {
                 ELBCurrent =  data.LoadBalancerDescriptions[i].LoadBalancerName.toLowerCase();
                 console.log( 'ELBCurrent: ', ELBCurrent );
@@ -125,11 +125,11 @@ exports.handler = (event, context, callback) => {
             }            
             
             if ( ELBNum == -1 ) {
-                var error = new Error('ELB Name not found');
+                let error = new Error('ELB Name not found');
                 callback(error);                                         
                 return;
             }
-            var instances = data.LoadBalancerDescriptions[ELBNum].Instances;
+            let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
             console.log('Instances: ', JSON.stringify(instances).substring(0,400));   
 
             // forEach is a Sync call
@@ -138,7 +138,7 @@ exports.handler = (event, context, callback) => {
                 
                 instanceCount++;
                 
-                var params = {
+                let params = {
                     DryRun: false,
                     InstanceIds: [
                         instances[key].InstanceId
@@ -155,16 +155,16 @@ exports.handler = (event, context, callback) => {
                     
                     // successful response
                     // console.log(data.Reservations[0].Instances[0]);        
-                    var PublicIpAddress = data.Reservations[0].Instances[0].PublicIpAddress;
+                    let PublicIpAddress = data.Reservations[0].Instances[0].PublicIpAddress;
                     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
                     // post the payload from GitHub
-                    var post_data = JSON.stringify(message);
+                    let post_data = JSON.stringify(message);
 
                     // console.log("post_data length: ", JSON.stringify( post_data.length ) );
                     
                     // An object of options to indicate where to post to
-                    var post_options = {
+                    let post_options = {
                         host: PublicIpAddress,
                         port: '8101',
                         path: '/Deployment/Start/APP2?source=sourceName',
@@ -176,8 +176,8 @@ exports.handler = (event, context, callback) => {
                     };
                 
                     // Async call
-                    var post_request = http.request(post_options, function(res) {
-                        var body = '';
+                    let post_request = http.request(post_options, function(res) {
+                        let body = '';
             
                         if (res.statusCode === 200) {
                             successCodes++;
@@ -192,7 +192,7 @@ exports.handler = (event, context, callback) => {
                                 context.callbackWaitsForEmptyEventLoop = false; 
                             }
                         } else {
-                            var error = new Error('Error ' + res.statusCode + ' posting to ' + post_options.host);
+                            let error = new Error('Error ' + res.statusCode + ' posting to ' + post_options.host);
                             callback(error ); 
                         }                        
                         
