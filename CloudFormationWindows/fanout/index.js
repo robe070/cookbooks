@@ -33,7 +33,7 @@ exports.handler = (event, context, callback) => {
     var paramsListRRS = {
       HostedZoneId: 'Z2K4W96HUY1FNC', /* required - paas.lansa.com */
       MaxItems: '1',
-      StartRecordName: 'one.paas.lansa.com.',
+      StartRecordName: 'testold.paas.lansa.com.',
       StartRecordType: 'A'
     };
 
@@ -57,14 +57,21 @@ exports.handler = (event, context, callback) => {
         console.log('ELB DNS Name: ', data.ResourceRecordSets[0].AliasTarget.DNSName);
         var DNSName = data.ResourceRecordSets[0].AliasTarget.DNSName;
         // e.g. paas-livb-webserve-ztessziszyzz-1633164328.us-east-1.elb.amazonaws.com.
-        
+
         var DNSsplit = DNSName.split("."); 
-        var ELBNameFull = DNSsplit[0];
-        region = DNSsplit[1];
-        
-        var ELBsplit = ELBNameFull.split("-");
+        var ELBNameFull = '';
+        var ELBsplit = '';
+        console.log( 'DNSsplit[0]: ', DNSsplit[0]);
+        if ( DNSsplit[0] === 'dualstack') {
+            ELBNameFull = DNSsplit[1];
+            region = DNSsplit[2];
+        } else {
+            ELBNameFull = DNSsplit[0];
+            region = DNSsplit[1];
+        }
+        ELBsplit = ELBNameFull.split("-");
         ELBsplit.pop(); // remove last element
-        
+
         // Put ELB Name back together again
         var i;
         var ELBLowerCase = '';
@@ -86,6 +93,10 @@ exports.handler = (event, context, callback) => {
         var ec2 = new AWS.EC2();        
         
         // List all Load Balancers
+        var params = {
+          LoadBalancerNames: []
+        };
+        
         // Async call
         elb.describeLoadBalancers(function(err, data) {
             if (err) {
@@ -179,7 +190,7 @@ exports.handler = (event, context, callback) => {
                                 context.callbackWaitsForEmptyEventLoop = true; 
                                 callback(null, 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName);  
                                 context.callbackWaitsForEmptyEventLoop = false; 
-                        }
+                            }
                         } else {
                             var error = new Error('Error ' + res.statusCode + ' posting to ' + post_options.host);
                             callback(error ); 
