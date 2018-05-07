@@ -9,76 +9,56 @@ var AWS = require('aws-sdk');
 exports.handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false; // Errors need to be returned ASAP
 
-    let name = "you";
-    let city = 'World';
-    let time = 'day';
-    let day = '';
     let responseCode = 200;
-    //console.log("request: " + JSON.stringify(event));
+    let hostedzoneid = '';
+    let alias = '';
+    let port = 8101;
+    let appl = '';
     
-    // This is a simple illustration of app-specific logic to return the response. 
-    // Although only 'event.queryStringParameters' are used here, other request data, 
-    // such as 'event.headers', 'event.pathParameters', 'event.body', 'event.stageVariables', 
-    // and 'event.requestContext' can be used to determine what response to return. 
-    //
+    console.log("request: " + JSON.stringify(event));
+    
+    // 
     console.log("event.queryStringParameters" + JSON.stringify(event.queryStringParameters));
+
     if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
-        if (event.queryStringParameters.name !== undefined && 
-            event.queryStringParameters.name !== null && 
-            event.queryStringParameters.name !== "") {
-            console.log("Received name: " + event.queryStringParameters.name);
-            name = event.queryStringParameters.name;
+        if (event.queryStringParameters.hostedzoneid !== undefined && 
+            event.queryStringParameters.hostedzoneid !== null && 
+            event.queryStringParameters.hostedzoneid !== "") {
+            hostedzoneid = event.queryStringParameters.hostedzoneid;
+            console.log("Received hostedzoneid: " + hostedzoneid);
         }
+
+        
+        if (event.queryStringParameters.alias !== undefined && 
+            event.queryStringParameters.alias !== null && 
+            event.queryStringParameters.alias !== "") {
+            alias = event.queryStringParameters.alias;
+            console.log("Received alias: " + alias);
+        }
+        
+        if (event.queryStringParameters.port !== undefined && 
+            event.queryStringParameters.port !== null && 
+            event.queryStringParameters.port !== "") {
+            port = event.queryStringParameters.port;
+            console.log("Received port: " + port);
+        }
+
+        if (event.queryStringParameters.appl !== undefined && 
+            event.queryStringParameters.appl !== null && 
+            event.queryStringParameters.appl !== "") {
+            appl = event.queryStringParameters.appl;
+            console.log("Received appl: " + appl);
+        }
+        
     }
 
-    if (event.pathParameters !== null && event.pathParameters !== undefined) {
-        if (event.pathParameters.proxy !== undefined && 
-            event.pathParameters.proxy !== null && 
-            event.pathParameters.proxy !== "") {
-            console.log("Received proxy: " + event.pathParameters.proxy);
-            city = event.pathParameters.proxy;
-        }
+    // Mandatory parameters
+    if ( hostedzoneid === "" || alias === "" || appl === "") {
+        let error = new Error('hostedzoneid, alias and appl are mandatory parameters');
+        callback(error);   
+        return;
     }
     
-    if (event.headers !== null && event.headers !== undefined) {
-        if (event.headers['day'] !== undefined && event.headers['day'] !== null && event.headers['day'] !== "") {
-            console.log("Received day: " + event.headers.day);
-            day = event.headers.day;
-        }
-    }
-    
-    if (event.body !== null && event.body !== undefined) {
-        let body = JSON.parse(event.body)
-        if (body.time) 
-            time = body.time;
-    }
- 
-    let greeting = 'Good ' + time + ', ' + name + ' of ' + city + '. ';
-    if (day) greeting += 'Happy ' + day + '!';
-
-    var responseBody = {
-        message: greeting,
-        input: event
-    };
-    
-    // The output from a Lambda proxy integration must be 
-    // of the following JSON object. The 'headers' property 
-    // is for custom response headers in addition to standard 
-    // ones. The 'body' property  must be a JSON string. For 
-    // base64-encoded payload, you must also set the 'isBase64Encoded'
-    // property to 'true'.
-    var response = {
-        statusCode: responseCode,
-        headers: {
-            "x-custom-header" : "my custom header value"
-        },
-        body: JSON.stringify(responseBody)
-    };
-    console.log("response: " + JSON.stringify(response))
-    callback(null, response);
-
-    return;
-
     // Any variables which need to be updated by multiple callbacks need to be declared before the first callback
     // otherwise each callback gets its own copy of the global.
     
@@ -89,21 +69,21 @@ exports.handler = (event, context, callback) => {
 
     //console.log('Received event:', JSON.stringify(event).substring(0,400));
     //console.log('context:', context);
-    const message = event.Records[0].Sns.Message;
-    const type = event.Records[0].Sns.Type;
-    console.log('SNS Type:', type);
+    // const message = event.Records[0].Sns.Message;
+    // const type = event.Records[0].Sns.Type;
+    //console.log('SNS Type:', type);
     //console.log('Message:', message.substring(0,100));
     
-    let payload = JSON.parse(message); // converts it to a JS native object.
+    //let payload = JSON.parse(message); // converts it to a JS native object.
     // console.log('GitHub Payload:', JSON.stringify(message));
-    console.log('GitHub Compare', JSON.stringify( payload.compare) );
+    //console.log('GitHub Compare', JSON.stringify( payload.compare) );
 
     let route53 = new AWS.Route53();
     
     let paramsListRRS = {
-      HostedZoneId: 'Z2K4W96HUY1FNC', /* required - paas.lansa.com */
+      HostedZoneId: hostedzoneid, /* required - paas.lansa.com */
       MaxItems: '1',
-      StartRecordName: 'testold.paas.lansa.com.',
+      StartRecordName: alias,
       StartRecordType: 'A'
     };
 
@@ -163,9 +143,9 @@ exports.handler = (event, context, callback) => {
         let ec2 = new AWS.EC2();        
         
         // List all Load Balancers
-        let params = {
-          LoadBalancerNames: []
-        };
+        // let params = {
+        //   LoadBalancerNames: []
+        // };
         
         // Async call
         elb.describeLoadBalancers(function(err, data) {
@@ -229,15 +209,16 @@ exports.handler = (event, context, callback) => {
                     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
                     // post the payload from GitHub
-                    let post_data = JSON.stringify(message);
+                    //let post_data = JSON.stringify(message);
+                    let post_data = "";
 
                     // console.log("post_data length: ", JSON.stringify( post_data.length ) );
                     
                     // An object of options to indicate where to post to
                     let post_options = {
                         host: PublicIpAddress,
-                        port: '8101',
-                        path: '/Deployment/Start/APP2?source=sourceName',
+                        port: port,
+                        path: '/Deployment/Start/' + appl + '?source=GitHubWebHookReplication',
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -256,9 +237,30 @@ exports.handler = (event, context, callback) => {
                             if ( successCodes >= instanceCount ){
                                 console.log('Application update successfully deployed to stack ' + paramsListRRS.StartRecordName);  
                                 
+                                
+                                let responseBody = {
+                                    message: 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName,
+                                    input: event.queryStringParameters
+                                };
+                                
+                                // The output from a Lambda proxy integration must be 
+                                // of the following JSON object. The 'headers' property 
+                                // is for custom response headers in addition to standard 
+                                // ones. The 'body' property  must be a JSON string. For 
+                                // base64-encoded payload, you must also set the 'isBase64Encoded'
+                                // property to 'true'.
+                                let response = {
+                                    statusCode: res.statusCode,
+                                    headers: {
+                                        "x-custom-header" : "my custom header value"
+                                    },
+                                    body: JSON.stringify(responseBody)
+                                };
+                                console.log("response: " + JSON.stringify(response));
+                                
                                 // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
                                 context.callbackWaitsForEmptyEventLoop = true; 
-                                callback(null, 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName);  
+                                callback(null, response);                                
                                 context.callbackWaitsForEmptyEventLoop = false; 
                             }
                         } else {
