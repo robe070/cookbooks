@@ -6,10 +6,34 @@ var AWS = require('aws-sdk');
 
 // The code outside of the handler is executed just the once. Make sure it doesn't need to be dynamic.
 
+// Errors are formatted for processing by the API Gateway so that a caller gets useful diagnostics.
+// So notice that it doesn't call callback( err ) as the caller would end up with a 502 error and no message or stack trace.
+// Thus all calls to this Lambda function are 'successful'. It requires the API Gateway to interpret the statusCode
+// and return that to the caller as the HTTP response.
+function returnAPIError( statusCode, message, callback) {
+    // Construct an error object so that we can omit constructError from the stack trace
+    const myObject = {};
+    Error.captureStackTrace(myObject, returnAPIError);
+
+    let responseBody = {
+        errorMessage: message,
+        stackTrace: (myObject.stack)
+    };
+    console.log( "responseBody: ", responseBody);
+    let response = {
+        statusCode: statusCode,
+        body: JSON.stringify(responseBody)
+    };    
+    if (callback) {
+        callback( null, response);
+    }
+    
+    return response;
+}
+
 exports.handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false; // Errors need to be returned ASAP
 
-    let responseCode = 200;
     let hostedzoneid = '';
     let alias = '';
     let port = 8101;
@@ -54,8 +78,7 @@ exports.handler = (event, context, callback) => {
 
     // Mandatory parameters
     if ( hostedzoneid === "" || alias === "" || appl === "") {
-        let error = new Error('hostedzoneid, alias and appl are mandatory parameters');
-        callback(error);   
+        returnAPIError( 500, 'Error 500 hostedzoneid, alias and appl are mandatory parameters', callback);
         return;
     }
     
@@ -66,17 +89,6 @@ exports.handler = (event, context, callback) => {
     let successCodes = 0;
     
     let region = process.env.AWS_DEFAULT_REGION;
-
-    //console.log('Received event:', JSON.stringify(event).substring(0,400));
-    //console.log('context:', context);
-    // const message = event.Records[0].Sns.Message;
-    // const type = event.Records[0].Sns.Type;
-    //console.log('SNS Type:', type);
-    //console.log('Message:', message.substring(0,100));
-    
-    //let payload = JSON.parse(message); // converts it to a JS native object.
-    // console.log('GitHub Payload:', JSON.stringify(message));
-    //console.log('GitHub Compare', JSON.stringify( payload.compare) );
 
     let route53 = new AWS.Route53();
     
@@ -91,7 +103,7 @@ exports.handler = (event, context, callback) => {
     route53.listResourceRecordSets(paramsListRRS, function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
-            callback( err, err.stack );
+            returnAPIError( 500, err.message, callback);
             return;
         } 
         
@@ -100,8 +112,8 @@ exports.handler = (event, context, callback) => {
         console.log('Searched for Alias: ', paramsListRRS.StartRecordName);
         console.log('Located Alias:      ', data.ResourceRecordSets[0].Name);
         if ( paramsListRRS.StartRecordName !== data.ResourceRecordSets[0].Name) {
-            let error = new Error('Searched for Alias is not the one located');
-            callback(error);                                         
+            returnAPIError( 500, 'Searched for Alias is not the one located', callback);
+            return;
         }
         
         console.log('ELB DNS Name: ', data.ResourceRecordSets[0].AliasTarget.DNSName);
@@ -142,16 +154,11 @@ exports.handler = (event, context, callback) => {
         let elb = new AWS.ELB();
         let ec2 = new AWS.EC2();        
         
-        // List all Load Balancers
-        // let params = {
-        //   LoadBalancerNames: []
-        // };
-        
         // Async call
         elb.describeLoadBalancers(function(err, data) {
             if (err) {
                 console.log(err, err.stack); // an error occurred
-                callback(err, err.stack); 
+                returnAPIError( 500, err.message, callback);
                 return;
             }
             
@@ -175,8 +182,7 @@ exports.handler = (event, context, callback) => {
             }            
             
             if ( ELBNum == -1 ) {
-                let error = new Error('ELB Name not found');
-                callback(error);                                         
+                returnAPIError( 500, 'ELB Name not found', callback);
                 return;
             }
             let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
@@ -199,7 +205,7 @@ exports.handler = (event, context, callback) => {
                 ec2.describeInstances(params, function(err, data) {
                     if (err) {
                         console.log(err, err.stack); // an error occurred
-                        callback( err, err.stack );
+                        returnAPIError( 500, err.message, callback);
                         return;
                     }
                     
@@ -264,8 +270,8 @@ exports.handler = (event, context, callback) => {
                                 context.callbackWaitsForEmptyEventLoop = false; 
                             }
                         } else {
-                            let error = new Error('Error ' + res.statusCode + ' posting to ' + post_options.host);
-                            callback(error ); 
+                            returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback);
+                            return;
                         }                        
                         
                         res.on('data', function(chunk)  {
@@ -278,7 +284,8 @@ exports.handler = (event, context, callback) => {
                         });
                 
                         res.on('error', function(e) {
-                            callback(e, 'error posting to EC2 instance: ' + post_options.host);                                         
+                            returnAPIError( e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback);
+                            return;
                         });
                     });    
                     // post the data
