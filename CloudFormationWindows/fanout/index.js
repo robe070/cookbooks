@@ -110,6 +110,15 @@ exports.handler = (event, context, callback) => {
         // successful response
         
         console.log('Searched for Alias: ', paramsListRRS.StartRecordName);
+        if (data.ResourceRecordSets[0] === undefined || 
+            data.ResourceRecordSets[0] === null || 
+            data.ResourceRecordSets[0] === "") {
+            
+            console.log('Alias not found');
+            returnAPIError( 500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback);
+            return;
+        }
+ 
         console.log('Located Alias:      ', data.ResourceRecordSets[0].Name);
         if ( paramsListRRS.StartRecordName !== data.ResourceRecordSets[0].Name) {
             returnAPIError( 500, 'Searched for Alias is not the one located', callback);
