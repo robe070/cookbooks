@@ -189,12 +189,17 @@ exports.handler = (event, context, callback) => {
                     break;
                 }
             }            
-            
+
             if ( ELBNum == -1 ) {
                 returnAPIError( 500, 'ELB Name not found', callback);
                 return;
             }
+
             let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
+            if (instances.length === 0) {
+                returnAPIError( 500, 'No instances running in ELB ' + ELBCurrent, callback);
+                return;               
+            }
             console.log('Instances: ', JSON.stringify(instances).substring(0,400));   
 
             // forEach is a Sync call
