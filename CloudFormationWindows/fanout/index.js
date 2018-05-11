@@ -38,10 +38,43 @@ exports.handler = (event, context, callback) => {
     let alias = '';
     let port = 8101;
     let appl = '';
+    let accountwide='n';
+    let repo = '';
+
+    // *******************************************************************************************************
+    // Parameter setup
+    // *******************************************************************************************************
     
-    console.log("request: " + JSON.stringify(event));
+    // The body is not proper JSON. It looks like its not in the expected code page
+    // performing for(var key in bodyobj)( console.log(bodyobj[key])}
+    // outputs a single line character for every character in the body!
     
-    // 
+    // So, this code cleans the string up and then searches for whats is needed - the git repo name
+    
+    let bodyoriginal = JSON.stringify(event.body);
+    
+    let bodyclean = bodyoriginal.replace(/(^\s+|\s+$|\\r?\\n|\\r|\t| |\\)/g, "");
+    console.log( "bodyclean: ", bodyclean.substring(0,200));
+    
+    let repository_pos = bodyclean.indexOf('repository');
+    console.log( "repository_pos: ", repository_pos );
+    let name_pos = bodyclean.indexOf('"name":', repository_pos);
+    
+    if ( name_pos !== -1) {
+        console.log("name_pos: ", bodyclean.substring(name_pos, name_pos + 20 ));
+        let start_pos = bodyclean.indexOf(':"', name_pos);
+        if ( start_pos !== -1) {
+            console.log( "start_pos: ", start_pos );
+            let end_pos = bodyclean.indexOf('",', start_pos);
+            repo = bodyclean.substring(start_pos + 2, end_pos);
+            console.log("git repo:: ", repo);
+        }
+    }
+
+    if (repo === '') {
+        console.log( "Warning: Repository name not found");
+    }
+    
     console.log("event.queryStringParameters" + JSON.stringify(event.queryStringParameters));
 
     if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
@@ -74,13 +107,82 @@ exports.handler = (event, context, callback) => {
             console.log("Received appl: " + appl);
         }
         
+        if (event.queryStringParameters.accountwide !== undefined && 
+            event.queryStringParameters.accountwide !== null && 
+            event.queryStringParameters.accountwide !== "") {
+            accountwide = event.queryStringParameters.accountwide;
+            console.log("Received accountwide: " + accountwide);
+        }
     }
 
-    // Mandatory parameters
-    if ( hostedzoneid === "" || alias === "" || appl === "") {
-        returnAPIError( 500, 'Error 500 hostedzoneid, alias and appl are mandatory parameters', callback);
+    if ( repo === '' && accountwide === 'y') {
+        returnAPIError( 500, "Error 500 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback);
         return;
     }
+    
+    if ( accountwide !== 'n' && accountwide !== 'y') {
+        returnAPIError( 500, "Error 500 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback);
+        return;
+    }
+    
+    // Mandatory parameters
+    if ( hostedzoneid === "" ) {
+        returnAPIError( 500, 'Error 500 hostedzoneid is a mandatory parameter', callback);
+        return;
+    }
+    if ( accountwide === 'n' && (alias === "" || appl === "") ) {
+        returnAPIError( 500, "Error 500 when accountwide = 'n', alias and appl are mandatory parameters", callback);
+        return;
+    }
+    
+    if ( accountwide === 'y' && (alias !== "" || appl !== "") ) {
+        returnAPIError( 500, "Error 500 when accountwide = 'y', alias and appl must not be specified", callback);
+        return;
+    }
+    
+    // If accountwide webhook then derive alias and appl from the repo name
+    if ( accountwide === 'y') {
+        // The repo number indicates the stack and appl to use
+        // lansaeval1 - lansaeval10 use stack 1 and appl 1 - 10
+        // lansaeval11 - lansaeval20 use stack 2 and appl 1 - 10
+        // etc
+        let lansarepo = repo.indexOf('lansaeval');
+        if ( lansarepo !== 0) {
+            returnAPIError( 500, "Error 500 only lansaevalxxx repo names are supported. All other repo names require explicit alias and appl parameters", callback);
+            return;            
+        }
+        
+        let repoNumber = repo.match( /\d+/g );  
+        console.log( "repoNumber: ", repoNumber.toString() );
+
+        let stack = Math.ceil(repoNumber / 10);
+        console.log( "stack: ", stack.toString() );
+        
+        if ( stack < 1 || stack > 10 ){
+            returnAPIError( 500, "Error 500 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback);
+            return;               
+        }
+        
+        let applnum = repoNumber % 10;
+        if ( applnum === 0) {
+            applnum = 10;
+        }
+        console.log( "applnum: ", applnum.toString() );
+
+        if ( applnum < 1 || applnum > 10 ){
+            returnAPIError( 500, "Error 500 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback);
+            return;               
+        }
+        
+        alias = 'eval' + stack.toString() + '.paas.lansa.com.';
+        appl = 'app' + applnum.toString();
+        
+        console.log( "Using alias: %s, appl: %s", alias, appl);
+    }
+    
+    // *******************************************************************************************************
+    // Resolving EC2 ip addresses and posting github webhook to each one
+    // *******************************************************************************************************
     
     // Any variables which need to be updated by multiple callbacks need to be declared before the first callback
     // otherwise each callback gets its own copy of the global.
