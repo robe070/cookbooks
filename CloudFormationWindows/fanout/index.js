@@ -4,6 +4,7 @@ console.log('Loading function');
 var http = require('http');
 var AWS = require('aws-sdk');
 
+
 // The code outside of the handler is executed just the once. Make sure it doesn't need to be dynamic.
 
 // Errors are formatted for processing by the API Gateway so that a caller gets useful diagnostics.
@@ -74,6 +75,32 @@ exports.handler = (event, context, callback) => {
     if (repo === '') {
         console.log( "Warning: Repository name not found");
     }
+    
+    //*************************
+    // Don't use secret as can't get secret to match up because of the issues with the payload not being of the expected format.
+    
+    // var crypto    = require('crypto');
+
+    // var secret    = 'abcdeg'; //make this your secret!!
+    // var algorithm = 'sha1';   //consider using sha256
+    // var hash, hmac;
+    
+    // let signature = event.headers['X-Hub-Signature'];
+    // console.log( 'signature: ', signature );
+    
+    // // Method 1 - Writing to a stream
+    // hmac = crypto.createHmac(algorithm, secret);    
+    // hmac.write(bodyclean); // write in to the stream
+    // hmac.end();       // can't read from the stream until you call end()
+    // hash = hmac.read().toString('hex');    // read out hmac digest
+    // console.log("Method 1 clean: ", hash);
+    
+    // let hmac2 = crypto.createHmac(algorithm, secret);    
+    // hmac2.write(JSON.stringify(event.body)); // write in to the stream
+    // hmac2.end();       // can't read from the stream until you call end()
+    // hash = hmac2.read().toString('hex');    // read out hmac digest
+    // console.log("Method 1 event.body: ", hash);
+    //*****************************************************
     
     console.log("event.queryStringParameters" + JSON.stringify(event.queryStringParameters));
 
@@ -332,7 +359,7 @@ exports.handler = (event, context, callback) => {
 
                     // post the payload from GitHub
                     //let post_data = JSON.stringify(message);
-                    let post_data = "";
+                    let post_data = bodyclean;
 
                     // console.log("post_data length: ", JSON.stringify( post_data.length ) );
                     
