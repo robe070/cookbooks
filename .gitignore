@@ -84,3 +84,4 @@ UpgradeLog.htm
 *.pfx
 *.VC.db
 scripts/.vscode/launch.json
+*/.vscode/*

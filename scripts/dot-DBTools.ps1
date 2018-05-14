@@ -25,7 +25,7 @@ function Disable-TcpOffloading
     $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
     $IsoLang
 
-    if ( [System.Environment]::OSVersion.Version.Major -eq 6 -and [System.Environment]::OSVersion.Version.Minor -eq 2) {
+    if ( [System.Environment]::OSVersion.Version.Major -le 6) {
         $EngNicName = 'Ethernet'
         $JpnNicName = 'イーサネット'
     } else {
@@ -135,6 +135,67 @@ Param (
     }
 }
 
+function Drop-SqlServerDatabase {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $server_name,
+    
+        [Parameter(Mandatory=$true)]
+        [String]
+        $dbname,
+    
+        [Parameter(Mandatory=$false)]
+        [String]
+        $dbuser,
+    
+        [Parameter(Mandatory=$false)]
+        [String]
+        $dbpassword
+    )
+    
+    # Delete database in SQL Server
+    Write-Output ("Deleting database")
+
+    # This requires the Powershell SQL Server cmdlets to be imported. This should already be done
+    Try {
+        [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')
+
+        if ( -not $dbuser ) {
+            Write-Output( "Trusted Connection" )
+            $ConnectionString = "data source = $Server_name; initial catalog = master; trusted_connection = true;"
+        } else {
+            Write-Output( "SQL Authentication" )
+            $ConnectionString = "data source = $Server_name; initial catalog = master; User ID = $dbuser; Password = $dbpassword;"
+        }
+        $ConnectionString
+        $ServerConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
+        $ServerConnection.ConnectionString = $ConnectionString
+
+        $SqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server($ServerConnection)
+    }
+    Catch {
+        $_
+        Write-Output ("Database connection failed. Is SQL Server running? Are login parameters correct?")
+        throw ("Error using SQL Server cmdlets")
+    }
+
+    Try {
+        $db = $sqlserver.Databases.Item($dbname)
+        if ( $db ) {
+            $db.drop()
+            Write-Output( "Database dropped")
+        } else {
+            Write-Output( "Database does not exist")
+        }
+    }
+    Catch
+    {
+        $_
+        throw ("Database drop failed.")
+    }
+}
+    
 ##################################################################  
 # Function to Enable or Disable a SQL Server Network Protocol 
 ################################################################## 
