@@ -12,13 +12,13 @@ var ipRangeCheck = require('ip-range-check');
 // So notice that it doesn't call callback( err ) as the caller would end up with a 502 error and no message or stack trace.
 // Thus all calls to this Lambda function are 'successful'. It requires the API Gateway to interpret the statusCode
 // and return that to the caller as the HTTP response.
-function returnAPIError( statusCode, message, callback) {
-    // Construct an error object so that we can omit constructError from the stack trace
+function returnAPIError( statusCode, message, callback, context) {
+    // Construct an error object so that we can omit returnAPIError from the stack trace
     const myObject = {};
     Error.captureStackTrace(myObject, returnAPIError);
 
     let responseBody = {
-        errorMessage: message,
+        errorMessage: message + ' (using ' + context.invokedFunctionArn + ')',
         stackTrace: (myObject.stack)
     };
     console.log( "responseBody: ", responseBody);
@@ -50,7 +50,7 @@ exports.handler = (event, context, callback) => {
     // 192.168.196.186 is the ip address of the test server
     // 103.231.169.65/32 is the ip address of LPC
     if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','103.231.169.65/32','192.168.196.186']) ) {
-        returnAPIError( 403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback);
+        returnAPIError( 403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback, context);
         return;
     }
     
@@ -155,27 +155,27 @@ exports.handler = (event, context, callback) => {
     }
 
     if ( repo === '' && accountwide === 'y') {
-        returnAPIError( 400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback);
+        returnAPIError( 400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback, context);
         return;
     }
     
     if ( accountwide !== 'n' && accountwide !== 'y') {
-        returnAPIError( 400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback);
+        returnAPIError( 400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback, context);
         return;
     }
     
     // Mandatory parameters
     if ( hostedzoneid === "" ) {
-        returnAPIError( 400, 'Error 400 hostedzoneid is a mandatory parameter', callback);
+        returnAPIError( 400, 'Error 400 hostedzoneid is a mandatory parameter', callback, context);
         return;
     }
     if ( accountwide === 'n' && (alias === "" || appl === "") ) {
-        returnAPIError( 400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback);
+        returnAPIError( 400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback, context);
         return;
     }
     
     if ( accountwide === 'y' && (alias !== "" || appl !== "") ) {
-        returnAPIError( 400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback);
+        returnAPIError( 400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback, context);
         return;
     }
     
@@ -187,7 +187,7 @@ exports.handler = (event, context, callback) => {
         // etc
         let lansarepo = repo.indexOf('lansaeval');
         if ( lansarepo !== 0) {
-            returnAPIError( 400, "Error 400 only lansaevalxxx repo names are supported. All other repo names require explicit alias and appl parameters", callback);
+            returnAPIError( 400, "Error 400 only lansaevalxxx repo names are supported. All other repo names require explicit alias and appl parameters", callback, context);
             return;            
         }
         
@@ -198,7 +198,7 @@ exports.handler = (event, context, callback) => {
         console.log( "stack: ", stack.toString() );
         
         if ( stack < 1 || stack > 10 ){
-            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback);
+            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback, context);
             return;               
         }
         
@@ -209,7 +209,7 @@ exports.handler = (event, context, callback) => {
         console.log( "applnum: ", applnum.toString() );
 
         if ( applnum < 1 || applnum > 10 ){
-            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback);
+            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback, context);
             return;               
         }
         
@@ -244,7 +244,7 @@ exports.handler = (event, context, callback) => {
     route53.listResourceRecordSets(paramsListRRS, function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
-            returnAPIError( 500, err.message, callback);
+            returnAPIError( 500, err.message, callback, context);
             return;
         } 
         
@@ -256,13 +256,13 @@ exports.handler = (event, context, callback) => {
             data.ResourceRecordSets[0] === "") {
             
             console.log('Alias not found');
-            returnAPIError( 500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback);
+            returnAPIError( 500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback, context);
             return;
         }
  
         console.log('Located Alias:      ', data.ResourceRecordSets[0].Name);
         if ( paramsListRRS.StartRecordName !== data.ResourceRecordSets[0].Name) {
-            returnAPIError( 500, 'Searched for Alias is not the one located', callback);
+            returnAPIError( 500, 'Searched for Alias is not the one located', callback, context);
             return;
         }
         
@@ -308,7 +308,7 @@ exports.handler = (event, context, callback) => {
         elb.describeLoadBalancers(function(err, data) {
             if (err) {
                 console.log(err, err.stack); // an error occurred
-                returnAPIError( 500, err.message, callback);
+                returnAPIError( 500, err.message, callback, context);
                 return;
             }
             
@@ -332,13 +332,13 @@ exports.handler = (event, context, callback) => {
             }            
 
             if ( ELBNum == -1 ) {
-                returnAPIError( 500, 'ELB Name not found', callback);
+                returnAPIError( 500, 'ELB Name not found', callback, context);
                 return;
             }
 
             let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
             if (instances.length === 0) {
-                returnAPIError( 500, 'No instances running in ELB ' + ELBCurrent, callback);
+                returnAPIError( 500, 'No instances running in ELB ' + ELBCurrent, callback, context);
                 return;               
             }
             console.log('Instances: ', JSON.stringify(instances).substring(0,400));   
@@ -360,7 +360,7 @@ exports.handler = (event, context, callback) => {
                 ec2.describeInstances(params, function(err, data) {
                     if (err) {
                         console.log(err, err.stack); // an error occurred
-                        returnAPIError( 500, err.message, callback);
+                        returnAPIError( 500, err.message, callback, context);
                         return;
                     }
                     
@@ -395,7 +395,7 @@ exports.handler = (event, context, callback) => {
                             console.log('Application update successfully deployed by Lambda function to ' + post_options.host);
                             // console.log('successCodes: ' + successCodes + ' instanceCount: ' + instanceCount);
                             if ( successCodes >= instanceCount ){
-                                let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repo;
+                                let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repo + ' using ' + context.invokedFunctionArn;
                                 console.log(message);  
                                 
                                 let responseBody = {
@@ -424,7 +424,7 @@ exports.handler = (event, context, callback) => {
                                 context.callbackWaitsForEmptyEventLoop = false; 
                             }
                         } else {
-                            returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback);
+                            returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback, context);
                             return;
                         }                        
                         
@@ -438,7 +438,7 @@ exports.handler = (event, context, callback) => {
                         });
                 
                         res.on('error', function(e) {
-                            returnAPIError( e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback);
+                            returnAPIError( e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + post_options.host + ':' + port + post_options.path, callback, context);
                             return;
                         });
                     });    
