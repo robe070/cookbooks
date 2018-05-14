@@ -42,6 +42,10 @@ exports.handler = (event, context, callback) => {
     let accountwide='n';
     let repo = '';
 
+    console.log('event.requestContext.identity: ', event.requestContext.identity );
+    console.log('event.message: ', event.message );
+    console.log('context: ', context );
+    
     // *******************************************************************************************************
     // Parameter setup
     // *******************************************************************************************************
@@ -358,8 +362,7 @@ exports.handler = (event, context, callback) => {
                     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
                     // post the payload from GitHub
-                    //let post_data = JSON.stringify(message);
-                    let post_data = bodyclean;
+                    let post_data = '';
 
                     // console.log("post_data length: ", JSON.stringify( post_data.length ) );
                     
