@@ -3,6 +3,7 @@
 console.log('Loading function');
 var http = require('http');
 var AWS = require('aws-sdk');
+var ipRangeCheck = require('ip-range-check');
 
 
 // The code outside of the handler is executed just the once. Make sure it doesn't need to be dynamic.
@@ -43,8 +44,15 @@ exports.handler = (event, context, callback) => {
     let repo = '';
 
     console.log('event.requestContext.identity: ', event.requestContext.identity );
-    console.log('event.message: ', event.message );
     console.log('context: ', context );
+
+    // Check that sender is a GitHub server
+    // 192.168.196.186 is the ip address of the test server
+    // 103.231.169.65/32 is the ip address of LPC
+    if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','103.231.169.65/32','192.168.196.186']) ) {
+        returnAPIError( 500, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback);
+        return;
+    }
     
     // *******************************************************************************************************
     // Parameter setup
