@@ -395,11 +395,11 @@ exports.handler = (event, context, callback) => {
                             console.log('Application update successfully deployed by Lambda function to ' + post_options.host);
                             // console.log('successCodes: ' + successCodes + ' instanceCount: ' + instanceCount);
                             if ( successCodes >= instanceCount ){
-                                console.log('Application update successfully deployed to stack ' + paramsListRRS.StartRecordName);  
-                                
+                                let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repo;
+                                console.log(message);  
                                 
                                 let responseBody = {
-                                    message: 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName,
+                                    message: message,
                                     input: event.queryStringParameters
                                 };
                                 
