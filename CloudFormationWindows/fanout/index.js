@@ -50,7 +50,7 @@ exports.handler = (event, context, callback) => {
     // 192.168.196.186 is the ip address of the test server
     // 103.231.169.65/32 is the ip address of LPC
     if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','103.231.169.65/32','192.168.196.186']) ) {
-        returnAPIError( 500, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback);
+        returnAPIError( 403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback);
         return;
     }
     
@@ -155,27 +155,27 @@ exports.handler = (event, context, callback) => {
     }
 
     if ( repo === '' && accountwide === 'y') {
-        returnAPIError( 500, "Error 500 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback);
+        returnAPIError( 400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback);
         return;
     }
     
     if ( accountwide !== 'n' && accountwide !== 'y') {
-        returnAPIError( 500, "Error 500 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback);
+        returnAPIError( 400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback);
         return;
     }
     
     // Mandatory parameters
     if ( hostedzoneid === "" ) {
-        returnAPIError( 500, 'Error 500 hostedzoneid is a mandatory parameter', callback);
+        returnAPIError( 400, 'Error 400 hostedzoneid is a mandatory parameter', callback);
         return;
     }
     if ( accountwide === 'n' && (alias === "" || appl === "") ) {
-        returnAPIError( 500, "Error 500 when accountwide = 'n', alias and appl are mandatory parameters", callback);
+        returnAPIError( 400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback);
         return;
     }
     
     if ( accountwide === 'y' && (alias !== "" || appl !== "") ) {
-        returnAPIError( 500, "Error 500 when accountwide = 'y', alias and appl must not be specified", callback);
+        returnAPIError( 400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback);
         return;
     }
     
@@ -187,7 +187,7 @@ exports.handler = (event, context, callback) => {
         // etc
         let lansarepo = repo.indexOf('lansaeval');
         if ( lansarepo !== 0) {
-            returnAPIError( 500, "Error 500 only lansaevalxxx repo names are supported. All other repo names require explicit alias and appl parameters", callback);
+            returnAPIError( 400, "Error 400 only lansaevalxxx repo names are supported. All other repo names require explicit alias and appl parameters", callback);
             return;            
         }
         
@@ -198,7 +198,7 @@ exports.handler = (event, context, callback) => {
         console.log( "stack: ", stack.toString() );
         
         if ( stack < 1 || stack > 10 ){
-            returnAPIError( 500, "Error 500 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback);
+            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback);
             return;               
         }
         
@@ -209,7 +209,7 @@ exports.handler = (event, context, callback) => {
         console.log( "applnum: ", applnum.toString() );
 
         if ( applnum < 1 || applnum > 10 ){
-            returnAPIError( 500, "Error 500 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback);
+            returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback);
             return;               
         }
         
