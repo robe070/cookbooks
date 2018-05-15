@@ -36,6 +36,7 @@ function returnAPIError( statusCode, message, callback, context) {
 exports.handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false; // Errors need to be returned ASAP
 
+    let body = '';
     let hostedzoneid = '';
     let alias = '';
     let port = 8101;
@@ -53,66 +54,52 @@ exports.handler = (event, context, callback) => {
         returnAPIError( 403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback, context);
         return;
     }
-    
-    // *******************************************************************************************************
-    // Parameter setup
-    // *******************************************************************************************************
-    
-    // The body is not proper JSON. It looks like its not in the expected code page
-    // performing for(var key in bodyobj)( console.log(bodyobj[key])}
-    // outputs a single line character for every character in the body!
-    
-    // So, this code cleans the string up and then searches for whats is needed - the git repo name
-    
-    let bodyoriginal = JSON.stringify(event.body);
-    
-    let bodyclean = bodyoriginal.replace(/(^\s+|\s+$|\\r?\\n|\\r|\t| |\\)/g, "");
-    console.log( "bodyclean: ", bodyclean.substring(0,200));
-    
-    let repository_pos = bodyclean.indexOf('repository');
-    console.log( "repository_pos: ", repository_pos );
-    let name_pos = bodyclean.indexOf('"name":', repository_pos);
-    
-    if ( name_pos !== -1) {
-        console.log("name_pos: ", bodyclean.substring(name_pos, name_pos + 20 ));
-        let start_pos = bodyclean.indexOf(':"', name_pos);
-        if ( start_pos !== -1) {
-            console.log( "start_pos: ", start_pos );
-            let end_pos = bodyclean.indexOf('",', start_pos);
-            repo = bodyclean.substring(start_pos + 2, end_pos);
-            console.log("git repo:: ", repo);
-        }
-    }
 
+    // The test code is already a JSON object
+    // But when passed through the API Gateway, its not. So simple, when you know ;)
+    if ( typeof(event.body) === 'object' ) {
+        console.log( 'Body is an object');
+        body = event.body;
+    } else {
+        console.log( 'Body is not an object');
+        body = JSON.parse(event.body);
+    }
+    //console.log( 'body: ', JSON.stringify(body).substring(0, 400));
+    //console.log( 'body.repository: ', body.repository );
+    console.log( 'body.repository.name: ', body.repository.name );
+    
+    repo = body.repository.name;
     if (repo === '') {
         console.log( "Warning: Repository name not found");
     }
     
-    //*************************
-    // Don't use secret as can't get secret to match up because of the issues with the payload not being of the expected format.
-    
-    // var crypto    = require('crypto');
+    // *******************************************************************************************************
+    // Check the secret
+    // *******************************************************************************************************
 
-    // var secret    = 'abcdeg'; //make this your secret!!
-    // var algorithm = 'sha1';   //consider using sha256
-    // var hash, hmac;
+    var crypto    = require('crypto');
+
+    var secret    = process.env.SECRET;
+    var algorithm = 'sha1';   
+    var hash, hmac;
     
-    // let signature = event.headers['X-Hub-Signature'];
-    // console.log( 'signature: ', signature );
+    let signature = event.headers['X-Hub-Signature'];
+    console.log( 'signature: ', signature );
     
-    // // Method 1 - Writing to a stream
-    // hmac = crypto.createHmac(algorithm, secret);    
-    // hmac.write(bodyclean); // write in to the stream
-    // hmac.end();       // can't read from the stream until you call end()
-    // hash = hmac.read().toString('hex');    // read out hmac digest
-    // console.log("Method 1 clean: ", hash);
+    hmac = crypto.createHmac(algorithm, secret);    
+    hmac.write(JSON.stringify(body)); // write in to the stream
+    hmac.end();       // can't read from the stream until you call end()
+    hash = hmac.read().toString('hex');    // read out hmac digest
+    // console.log("Method 1 JSON.parse: ", hash);
+
+    if ( signature !== hash ) {
+        returnAPIError( 403, 'Error 403 Secret is invalid', callback, context);
+        return;        
+    }
     
-    // let hmac2 = crypto.createHmac(algorithm, secret);    
-    // hmac2.write(JSON.stringify(event.body)); // write in to the stream
-    // hmac2.end();       // can't read from the stream until you call end()
-    // hash = hmac2.read().toString('hex');    // read out hmac digest
-    // console.log("Method 1 event.body: ", hash);
-    //*****************************************************
+    // *******************************************************************************************************
+    // Parameter setup
+    // *******************************************************************************************************
     
     console.log("event.queryStringParameters" + JSON.stringify(event.queryStringParameters));
 
