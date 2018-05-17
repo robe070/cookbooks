@@ -192,8 +192,8 @@ exports.handler = (event, context, callback) => {
             let stack = Math.ceil(repoNumber / 10);
             console.log( "stack: ", stack.toString() );
             
-            if ( stack < 1 || stack > 10 ){
-                returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 10", callback, context);
+            if ( stack < 1 || stack > 50 ){
+                returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 50", callback, context);
                 return;               
             }
             
