@@ -292,7 +292,12 @@
             "Description": "Domain Prefix to be created in Route 53. e.g. 'prefix' in prefix.paas.lansa.com. Must begin with a letter and contain only alphanumeric characters.",
             "MinLength": "1",
             "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*"
-        }
+        },
+         "SSLCertificateARN": {
+            "Type": "String",
+            "Default": "arn:aws:acm:us-east-1:775488040364:certificate/1773da1f-5a8c-4e5e-b308-1065002b7121",
+            "Description": "ARN of the SSL Certificate. Region & account specific. The default will only work in us-east-1 in the LANSA account"
+         }
     },
    "Metadata" : {
      "AWS::CloudFormation::Interface" : {
@@ -312,7 +317,8 @@
                "07KeyName",
                "08RemoteAccessLocation",
                "DomainName",
-               "DomainPrefix"
+               "DomainPrefix",
+               "SSLCertificateARN"
             ]
          },
          {
@@ -377,6 +383,7 @@
          "08RemoteAccessLocation": { "default": "Remote Access Location CIDR" },
          "DomainName": { "default": "Domain Name" },
          "DomainPrefix": { "default": "Domain Prefix" },
+         "SSLCertificateARN": { "default": "SSL Certificate ARN" },
          "13DBInstanceClass": { "default": "Instance Class" },
          "14DBName": { "default": "Name" },
          "15DBEngine": { "default": "SQL Server Engine Type" },
@@ -578,13 +585,24 @@
                         "LoadBalancerPort": { "Ref": "19HTTPPortNumber" },
                         "InstancePort": { "Ref": "19HTTPPortNumber" },
                         "Protocol": "HTTP",
+                        "InstanceProtocol":  "HTTP",
                         "PolicyNames": [ "CookieBasedPolicy" ]
+                    },
+                    {
+                        "LoadBalancerPort": 443,
+                        "InstancePort": { "Ref": "19HTTPPortNumber" },
+                        "Protocol": "HTTPS",
+                        "InstanceProtocol":  "HTTP",
+                        "PolicyNames": [ "CookieBasedPolicy" ],
+                        "SSLCertificateId": { "Ref":  "SSLCertificateARN" }
                     },
                     {
                         "LoadBalancerPort": { "Ref": "19HTTPPortNumberHub" },
                         "InstancePort": { "Ref": "19HTTPPortNumberHub" },
-                        "Protocol": "HTTP",
-                        "PolicyNames": [ "CookieBasedPolicy" ]
+                        "Protocol": "HTTPS",
+                        "InstanceProtocol":  "HTTP",
+                        "PolicyNames": [ "CookieBasedPolicy" ],
+                        "SSLCertificateId": { "Ref":  "SSLCertificateARN" }
                     }
                 ],
                 "ConnectionDrainingPolicy": {
@@ -709,6 +727,13 @@
                         "IpProtocol": "tcp",
                         "FromPort": {"Ref":  "19HTTPPortNumber"},
                         "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "Description":  "HTTPS Port",
+                        "IpProtocol": "tcp",
+                        "FromPort": 443,
+                        "ToPort": 443,
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
