@@ -50,8 +50,8 @@
             "Description": "The LANSA database administrator account password. Minimum length 8, maximum length 41. There must be at least one character from each of the following character classes: uppercase letters, lowercase letters and numeric digits. Only printable ASCII characters, not including '/', '@', '\"', and space, may be used.",
             "Type": "String",
             "MinLength": "8",
-            "MaxLength": "41",
-            "AllowedPattern": "(?!.*[/\"@\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,41}"
+            "MaxLength": "30",
+            "AllowedPattern": "(?!.*[/\"@\\s])(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).{8,30}"
         },
         "05WebUser": {
             "Type": "String",
@@ -156,7 +156,7 @@
             "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*"
         },
         "15DBEngine": {
-            "Description": "Database engine type. Must be a valid SQL Server engine type. Note that to support mirroring you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-web'.",
+            "Description": "Database engine type. Oracle and SQL Server are supported. Note that to support mirroring you need to choose 'sqlserver-ee' or 'sqlserver-se'. Otherwise you may choose 'sqlserver-web'.",
             "Type": "String",
             "Default": "sqlserver-ex",
             "AllowedValues": [
@@ -164,7 +164,10 @@
                 "sqlserver-web",
                 "sqlserver-se",
                 "sqlserver-ee",
-                "oracle-se2"
+                "oracle-se2",
+                "aurora-mysql",
+                "mysql",
+                "mariadb"
             ]
         },
         "17UserScriptHook": {
@@ -466,6 +469,16 @@
          "sa-east-1": { "ARNPrefix": "arn:aws:" },
          "cn-north-1": { "ARNPrefix": "arn:aws-cn:" }
       },
+      "DBEngine2DBUT": {
+         "sqlserver-ex": { "DBUT": "MSSQLS", "Port" : 1433 },
+         "sqlserver-web": { "DBUT": "MSSQLS", "Port" : 1433 },
+         "sqlserver-se": { "DBUT": "MSSQLS", "Port" : 1433 },
+         "sqlserver-ee": { "DBUT": "MSSQLS", "Port" : 1433 },
+         "oracle-se2": { "DBUT": "ODBCORACLE", "Port" : 1521 },
+         "aurora-mysql": { "DBUT": "MYSQL", "Port" : 3306 },
+         "mysql": { "DBUT": "MYSQL", "Port" : 3306 },
+         "mariadb": { "DBUT": "MYSQL", "Port" : 3306 }
+      },
        "CustomVariable" : {
          "TemplateRoot"      : { "Value" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/" },
          "WebServerTemplate" : { "Value" : "webserver-win.cfn.template"},
@@ -475,7 +488,8 @@
     "Conditions" : {
        "IsReleaseLevel" : {"Fn::Equals" : [{ "Fn::FindInMap" : [ "CustomVariable", "TemplateLevel", "Value" ] }, "R"]},
        "DoesNotHaveUserScript" : {"Fn::Equals" : [{"Ref" : "17UserScriptHook"}, ""]},
-       "HasUserScript" : {"Fn::Not" : [{"Condition" : "DoesNotHaveUserScript"}]}     },
+       "HasUserScript" : {"Fn::Not" : [{"Condition" : "DoesNotHaveUserScript"}]}
+    },
     "Resources": {
         "IAMRole": {
             "Type": "AWS::IAM::Role",
@@ -573,7 +587,8 @@
                     "Fn::GetAZs": ""
                 },
                 "CrossZone": "true",
-                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] } ],
+                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] }, 
+                                     {"Fn::GetAtt": [ "LPCHubSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
                         "PolicyName": "CookieBasedPolicy",
@@ -668,6 +683,9 @@
                 "VPCSecurityGroups": [
                     {
                         "Fn::GetAtt": [ "DBSecurityGroup", "GroupId" ]
+                    },
+                    {
+                        "Fn::GetAtt": [ "LPCDBSecurityGroup", "GroupId" ]
                     }
                 ],
                 "AllocatedStorage": {
@@ -691,6 +709,20 @@
             },
             "DeletionPolicy": "Snapshot"
         },
+        "LPCDBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable SQL Server Access for LPC",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "CidrIp": "103.231.169.65/32"
+                    }
+                ]
+            }
+        },
         "DBSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -698,8 +730,8 @@
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "1433",
-                        "ToPort": "1433",
+                        "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
                         "CidrIp": {
                             "Ref": "08RemoteAccessLocation"
                         }
@@ -712,9 +744,23 @@
             "Properties": {
                 "GroupName": { "Ref": "DBSecurityGroup" },
                 "IpProtocol": "tcp",
-                "FromPort": "1433",
-                "ToPort": "1433",
+                "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
                 "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
+            }
+        },
+        "LPCHubSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable GitDeployHub access for LPC",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "103.231.169.65/32"
+                    }
+                ]
             }
         },
         "ELBSecurityGroup": {
@@ -1294,6 +1340,8 @@
                                             " -ApplName ", "WebServer",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1304,7 +1352,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
-                                            " -gitrepourl git@github.com:lansa/webserver.git",
+                                            " -gitrepourl ",
+                                            { "Ref":  "WebServerGitRepo" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -1357,6 +1406,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1419,6 +1470,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1477,6 +1530,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1537,6 +1592,8 @@
                                             { "Ref": "01LansaMSI" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1547,7 +1604,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
-                                            " -gitrepourl git@github.com:lansa/webserver.git",
+                                            " -gitrepourl ",
+                                            { "Ref":  "WebServerGitRepo" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -1653,6 +1711,8 @@
                                             "C:\\LANSA\\scripts\\webconfig.ps1",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -1718,7 +1778,8 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" } ],
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                                    { "Ref": "LPCHubSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {
@@ -2289,6 +2350,8 @@
                                             { "Ref": "01LansaMSI" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2299,7 +2362,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
-                                            " -gitrepourl git@github.com:lansa/webserver.git",
+                                            " -gitrepourl ",
+                                            { "Ref":  "WebServerGitRepo" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2352,6 +2416,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2414,6 +2480,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2472,6 +2540,8 @@
                                             { "Ref": "03ApplMSIuri" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2532,6 +2602,8 @@
                                             { "Ref": "01LansaMSI" },
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2542,7 +2614,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
-                                            " -gitrepourl git@github.com:lansa/webserver.git",
+                                            " -gitrepourl ",
+                                            { "Ref":  "WebServerGitRepo" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2648,6 +2721,8 @@
                                             "C:\\LANSA\\scripts\\webconfig.ps1",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
+                                            " -dbut ",
+                                            { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "DBUT" ] },
                                             " -dbname ",
                                             { "Ref": "14DBName" },
                                             " -dbuser ",
@@ -2713,7 +2788,8 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" } ],
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                                    { "Ref": "LPCHubSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {
