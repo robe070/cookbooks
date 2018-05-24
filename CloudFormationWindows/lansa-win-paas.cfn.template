@@ -470,14 +470,14 @@
          "cn-north-1": { "ARNPrefix": "arn:aws-cn:" }
       },
       "DBEngine2DBUT": {
-         "sqlserver-ex": { "DBUT": "MSSQLS", "Port" : 1433 },
-         "sqlserver-web": { "DBUT": "MSSQLS", "Port" : 1433 },
-         "sqlserver-se": { "DBUT": "MSSQLS", "Port" : 1433 },
-         "sqlserver-ee": { "DBUT": "MSSQLS", "Port" : 1433 },
-         "oracle-se2": { "DBUT": "ODBCORACLE", "Port" : 1521 },
-         "aurora-mysql": { "DBUT": "MYSQL", "Port" : 3306 },
-         "mysql": { "DBUT": "MYSQL", "Port" : 3306 },
-         "mariadb": { "DBUT": "MYSQL", "Port" : 3306 }
+         "sqlserver-ex": { "DBUT": "MSSQLS", "Port" : 1433, "LicenseModel" :  "license-included"  },
+         "sqlserver-web": { "DBUT": "MSSQLS", "Port" : 1433, "LicenseModel" :  "license-included"  },
+         "sqlserver-se": { "DBUT": "MSSQLS", "Port" : 1433, "LicenseModel" :  "license-included"  },
+         "sqlserver-ee": { "DBUT": "MSSQLS", "Port" : 1433, "LicenseModel" :  "license-included"  },
+         "oracle-se2": { "DBUT": "ODBCORACLE", "Port" : 1521, "LicenseModel" :  "license-included"  },
+         "aurora-mysql": { "DBUT": "MYSQL", "Port" : 3306, "LicenseModel" :  "general-public-license" },
+         "mysql": { "DBUT": "MYSQL", "Port" : 3306, "LicenseModel" :  "general-public-license"  },
+         "mariadb": { "DBUT": "MYSQL", "Port" : 3306, "LicenseModel" :  "general-public-license"  }
       },
        "CustomVariable" : {
          "TemplateRoot"      : { "Value" : "https://s3-ap-southeast-2.amazonaws.com/lansa/templates/" },
@@ -699,7 +699,7 @@
                 },
                 "AllowMajorVersionUpgrade": "false",
                 "AutoMinorVersionUpgrade": "true",
-                "LicenseModel": "license-included",
+                "LicenseModel": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "LicenseModel" ] },
                 "Tags": [
                     {
                         "Key": "Network",
