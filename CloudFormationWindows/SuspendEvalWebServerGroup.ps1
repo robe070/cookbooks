@@ -7,5 +7,5 @@ foreach ( $stack in $stacks ) {
     $stack.ResourceId
     # aws autoscaling suspend-processes --region $Region --auto-scaling-group-name $stack.ResourceId --scaling-processes Terminate, ReplaceUnhealthy
     # Suspend all processes
-    Suspend-ASProcess -AutoScalingGroupName $stack.ResourceId
+    Suspend-ASProcess -Region $Region -AutoScalingGroupName $stack.ResourceId
 }
