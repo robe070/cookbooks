@@ -143,50 +143,86 @@ try
         (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
     }
 
-    if ( (-not $CompanionInstall) -and ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
-        # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
-        Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
+    $DownloadODBCDriver = $true
+    if ( (-not $CompanionInstall) ) {
+        if (  ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
+            # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
+            Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
-        switch -regex ($DBUT) {
-            "SQLAZURE|MSSQL" {
-                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
-                [String[]] $Arguments = @( "/quiet", "/lv*x $( Join-Path -Path $ENV:TEMP -ChildPath "odbc.log" )", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+            switch -regex ($DBUT) {
+                "SQLAZURE|MSSQL" {
+                    $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
+                    [String[]] $Arguments = @( "/quiet", "/lv*x $( Join-Path -Path $ENV:TEMP -ChildPath "odbc.log" )", "IACCEPTMSODBCSQLLICENSETERMS=YES")
+                }
+                "MYSQL" {
+                    $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                    $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                    [String[]] $Arguments = @( "/quiet")
+                }
+                "ODBCORACLE" {
+                    $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                    $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                    [String[]] $Arguments = @( "/quiet")
+                }
+                default {
+                    $ExitCode = 2
+                    $ErrorMessage = "Database Type $DBUT not supported. Requires an ODBC driver to be installed by this script"
+                    Write-Error $ErrorMessage -Category NotInstalled
+                    throw $ErrorMessage
+                }
             }
-            "MYSQL" {
-                $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
-                $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
-                [String[]] $Arguments = @( "/quiet")
-            }
-            default {
-                $ExitCode = 2
-                $ErrorMessage = "Database Type $DBUT not supported. Requires an ODBC driver to be installed by this script"
-                Write-Error $ErrorMessage -Category NotInstalled
-                throw $ErrorMessage
+         } else {
+            # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
+            Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
+    
+            switch -regex ($DBUT) {
+                "SQLAZURE|MSSQL" {
+                    Write-Output( "$(Log-Date) $DBUT ODBC Driver presumed already installed on $Cloud")
+                    $DownloadODBCDriver = $false
+                }
+                "MYSQL" {
+                    $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                    $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                    [String[]] $Arguments = @( "/quiet")
+                }
+                "ODBCORACLE" {
+                    $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                    $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                    [String[]] $Arguments = @( "/quiet")
+                }
+                default {
+                    $ExitCode = 2
+                    $ErrorMessage = "Database Type $DBUT not supported. Requires an ODBC driver to be installed by this script"
+                    Write-Error $ErrorMessage -Category NotInstalled
+                    throw $ErrorMessage
+                }
             }
         }
-        $odbc_installer_file = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver.msi" )
-        $odbc_installer_file32 = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver32.msi" )
-        Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file")
-        (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file)
+        if ( $DownloadODBCDriver ) {
+            $odbc_installer_file = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver.msi" )
+            $odbc_installer_file32 = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver32.msi" )
+            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file")
+            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file)
 
-        $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
-        if ( $p.ExitCode -ne 0 ) {
-            $ExitCode = $p.ExitCode
-            $ErrorMessage = "ODBC Install returned error code $($p.ExitCode)."
-            Write-Error $ErrorMessage -Category NotInstalled
-            throw $ErrorMessage
-        }
-
-        if ( (test-path variable:\DRIVERURL32) ) {
-            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32")
-            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
-
-            $p = Start-Process -FilePath $odbc_installer_file32 -ArgumentList $Arguments -Wait -PassThru
+            $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
             if ( $p.ExitCode -ne 0 ) {
                 $ExitCode = $p.ExitCode
-                $ErrorMessage = "ODBC Install 32 returned error code $($p.ExitCode)."
+                $ErrorMessage = "ODBC Install returned error code $($p.ExitCode)."
                 Write-Error $ErrorMessage -Category NotInstalled
                 throw $ErrorMessage
+            }
+
+            if ( (test-path variable:\DRIVERURL32) ) {
+                Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32")
+                (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
+
+                $p = Start-Process -FilePath $odbc_installer_file32 -ArgumentList $Arguments -Wait -PassThru
+                if ( $p.ExitCode -ne 0 ) {
+                    $ExitCode = $p.ExitCode
+                    $ErrorMessage = "ODBC Install 32 returned error code $($p.ExitCode)."
+                    Write-Error $ErrorMessage -Category NotInstalled
+                    throw $ErrorMessage
+                }
             }
         }
     }
