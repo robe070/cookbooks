@@ -588,7 +588,7 @@
                 },
                 "CrossZone": "true",
                 "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] }, 
-                                     {"Fn::GetAtt": [ "LPCHubSecurityGroup", "GroupId" ] } ],
+                                     {"Fn::GetAtt": [ "LPCSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
                         "PolicyName": "CookieBasedPolicy",
@@ -749,15 +749,21 @@
                 "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
             }
         },
-        "LPCHubSecurityGroup": {
+        "LPCSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable GitDeployHub access for LPC",
+                "GroupDescription": "Enable GitDeployHub access, Shell and RDP access for LANSA Support",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
                         "FromPort": {"Ref":  "19HTTPPortNumberHub"},
                         "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "103.231.169.65/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 3389,
+                        "ToPort": 3389,
                         "CidrIp": "103.231.169.65/32"
                     }
                 ]
@@ -1779,7 +1785,7 @@
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
                 "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
-                                    { "Ref": "LPCHubSecurityGroup" } ],
+                                    { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {
@@ -2789,7 +2795,7 @@
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
                 "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
-                                    { "Ref": "LPCHubSecurityGroup" } ],
+                                    { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {
