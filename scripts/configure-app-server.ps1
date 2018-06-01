@@ -12,6 +12,6 @@ For ( $i = 1; $i -le 10; $i++) {
     New-ItemProperty -Path $regkeyfolder  -Name $regkeyname -Value '0' -PropertyType String -Force  | Out-Null
 
     $regkeyname = "MAXFREE"
-    Write-Output("Setting $RegKeyFolder $RegKeyName Ready To Use Maximum to 20")
-    New-ItemProperty -Path $regkeyfolder  -Name $regkeyname -Value '20' -PropertyType String -Force  | Out-Null
+    Write-Output("Setting $RegKeyFolder $RegKeyName Ready To Use Maximum to 9999")
+    New-ItemProperty -Path $regkeyfolder  -Name $regkeyname -Value '9999' -PropertyType String -Force  | Out-Null
 }
