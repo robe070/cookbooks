@@ -1,6 +1,6 @@
 # 
 "configure-app-server.ps1"
-For ( $i = 1; $i -le 11; $i++) {
+For ( $i = 1; $i -le 10; $i++) {
     Write-Output("")
     $regkeyfolder = "HKLM:\Software\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5CAPP$($i)\LANSAWEB"
     $regkeyname = "FREESLOTS"
