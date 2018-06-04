@@ -31,16 +31,16 @@ $trusted="NO"
 # $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Write-Debug ("Server_name = $server_name")
-Write-Debug ("DBUT = $DBUT")
-Write-Debug ("dbname = $dbname")
-Write-Debug ("dbuser = $dbuser")
-Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $f32bit")
-Write-Debug ("SUDB = $SUDB")
-Write-Debug ("UPGD = $UPGD")
-Write-Debug ("maxconnections = $maxconnections")
-Write-Debug ("ApplName = $ApplName")
+Write-Verbose ("Server_name = $server_name")
+Write-Verbose ("DBUT = $DBUT")
+Write-Verbose ("dbname = $dbname")
+Write-Verbose ("dbuser = $dbuser")
+Write-Verbose ("webuser = $webuser")
+Write-Verbose ("32bit = $f32bit")
+Write-Verbose ("SUDB = $SUDB")
+Write-Verbose ("UPGD = $UPGD")
+Write-Verbose ("maxconnections = $maxconnections")
+Write-Verbose ("ApplName = $ApplName")
 
 try
 {
@@ -65,11 +65,11 @@ try
 
     if ($f32bit_bool)
     {
-        $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
+        $APPA = "${ENV:ProgramFiles(x86)}\$ApplName"
     }
     else
     {
-        $APPA = "${ENV:ProgramFiles}\LANSA"
+        $APPA = "${ENV:ProgramFiles}\$ApplName"
     }
 
     #####################################################################################
@@ -84,15 +84,15 @@ try
         New-Item -Path $lansawebKey
     }
     Write-Output("Set Maximum Concurrent Users (MAXUSERS) to Unlimited (9999)" )
-    New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force
+    New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force  | Out-Null
 
     Write-Verbose ("Set to '2' for 2nd level performance log")
     Write-Output("Log high level Performance Stats (LOG_PERF)" )
-    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'Y' -Force
+    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'Y' -Force  | Out-Null
 
     Write-Output("Log all performance stats into one log file (LOG_PERF_PER_PROC)" )
     Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
-    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force
+    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force  | Out-Null
 
     $regkeyname = "FREESLOTS"
     Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Minimum to 5")
