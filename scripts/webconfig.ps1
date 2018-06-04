@@ -86,8 +86,8 @@ try
     Write-Output("Set Maximum Concurrent Users (MAXUSERS) to Unlimited (9999)" )
     New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force  | Out-Null
 
-    Write-Verbose ("Set to '2' for 2nd level performance log")
     Write-Output("Log high level Performance Stats (LOG_PERF)" )
+    Write-Verbose ("Set to '2' for 2nd level performance log")
     New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'Y' -Force  | Out-Null
 
     Write-Output("Log all performance stats into one log file (LOG_PERF_PER_PROC)" )
@@ -134,6 +134,8 @@ try
 
             Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections"
         }
+    } else {
+        Write-Output( "$webplugin_file does not exist. Presumed there is not a plugin running in this system.")
     }
     
     Write-Output ("Stopping Listener...")
@@ -150,9 +152,6 @@ try
     Write-Output ("Stopping all web jobs...")
     Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
 
-    Write-Output ("Resetting iis...")
-    iisreset
-
     Write-Output ("Starting Listener...")
     if ( $false )
     {
@@ -162,7 +161,10 @@ try
     {
         Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
     }
-    
+
+    Write-Output ("Resetting iis...")
+    iisreset
+
     Write-Output ("Webconfig completed successfully")
     cmd /c exit 0
 }
