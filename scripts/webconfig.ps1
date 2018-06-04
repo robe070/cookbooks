@@ -9,6 +9,7 @@ Configure a LANSA Web Server
 #>
 param(
 [String]$server_name='robertpc\sqlserver2012',
+[String]$DBUT='MSSQLS',
 [String]$dbname='test1',
 [String]$dbuser = 'admin',
 [String]$dbpassword = 'password',
@@ -31,6 +32,7 @@ $trusted="NO"
 $VerbosePreference = "Continue"
 
 Write-Debug ("Server_name = $server_name")
+Write-Debug ("DBUT = $DBUT")
 Write-Debug ("dbname = $dbname")
 Write-Debug ("dbuser = $dbuser")
 Write-Debug ("webuser = $webuser")
@@ -38,6 +40,7 @@ Write-Debug ("32bit = $f32bit")
 Write-Debug ("SUDB = $SUDB")
 Write-Debug ("UPGD = $UPGD")
 Write-Debug ("maxconnections = $maxconnections")
+Write-Debug ("ApplName = $ApplName")
 
 try
 {
