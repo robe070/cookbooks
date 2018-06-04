@@ -20,7 +20,8 @@ param(
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
 [String]$userscripthook,
-[string]$ApplName = 'LANSA'
+[String]$ApplName = 'LANSA',
+[Boolean]$Reset = $true
 )
 
 # Put first output on a new line in cfn_init log file
@@ -162,8 +163,10 @@ try
         Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
     }
 
-    Write-Output ("Resetting iis...")
-    iisreset
+    if ( $Reset ) {
+        Write-Output ("Resetting iis...")
+        iisreset
+    }
 
     Write-Output ("Webconfig completed successfully")
     cmd /c exit 0
