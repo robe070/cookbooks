@@ -1,5 +1,5 @@
 # Update all WebServerGroup evaluation stacks to suspend scaling
-"SuspendEvalASGTermination.ps1"
+"SuspendEvalWebServerGroup.ps1"
 
 $Region = 'us-east-1'
 $stacks = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'WebServerGroup'}

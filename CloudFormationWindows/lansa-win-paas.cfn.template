@@ -588,7 +588,7 @@
                 },
                 "CrossZone": "true",
                 "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] }, 
-                                     {"Fn::GetAtt": [ "LPCHubSecurityGroup", "GroupId" ] } ],
+                                     {"Fn::GetAtt": [ "LPCSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
                         "PolicyName": "CookieBasedPolicy",
@@ -749,15 +749,21 @@
                 "SourceSecurityGroupName": { "Ref": "LansaSecurityGroup" }
             }
         },
-        "LPCHubSecurityGroup": {
+        "LPCSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable GitDeployHub access for LPC",
+                "GroupDescription": "Enable GitDeployHub access, Shell and RDP access for LANSA Support",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
                         "FromPort": {"Ref":  "19HTTPPortNumberHub"},
                         "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "103.231.169.65/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 3389,
+                        "ToPort": 3389,
                         "CidrIp": "103.231.169.65/32"
                     }
                 ]
@@ -918,12 +924,12 @@
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
                         "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
-                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ],
+                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "run-webconfig", "ready" ],
                         "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "ready" ]
                     },
                     "install-cfn": {
@@ -1418,6 +1424,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -MaxConnections ",
+                                            { "Ref": "12WebServerMaxConnec"},
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -1482,6 +1490,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -MaxConnections ",
+                                            { "Ref": "12WebServerMaxConnec"},
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -1709,6 +1719,7 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\webconfig.ps1",
+                                            " -ApplName ", "WebServer",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbut ",
@@ -1779,7 +1790,7 @@
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
                 "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
-                                    { "Ref": "LPCHubSecurityGroup" } ],
+                                    { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {
@@ -2428,6 +2439,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -MaxConnections ",
+                                            { "Ref": "12WebServerMaxConnec"},
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2492,6 +2505,8 @@
                                             { "Ref": "05WebUser" },
                                             " -webpassword ",
                                             { "Ref": "06WebPassword" },
+                                            " -MaxConnections ",
+                                            { "Ref": "12WebServerMaxConnec"},
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             " -HTTPPortNumber ",
@@ -2719,6 +2734,7 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\webconfig.ps1",
+                                            " -ApplName ", "WebServer",
                                             " -server_name ",
                                             { "Fn::GetAtt": [ "DBInstance", "Endpoint.Address" ] },
                                             " -dbut ",
@@ -2789,7 +2805,7 @@
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
                 "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
-                                    { "Ref": "LPCHubSecurityGroup" } ],
+                                    { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
                     "Fn::Base64": {

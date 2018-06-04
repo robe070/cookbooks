@@ -100,6 +100,10 @@ try {
     }
     Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
+    # Potentially repeat the webserver configuration for cases where not re-installing webserver and are installing the applications and the webconfig needs to be altered too
+    Write-Output( "$(Log-Date) Configuring web options for $ApplName")
+    & "$script:IncludeDir\webconfig.ps1" -DBUT $DBUT -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -ApplName $ApplName -MaxConnections $maxconnections
+
     Write-Output( "$(Log-Date) Requested installation count $ApplCount" )
     
     $ApplInstall = $false
@@ -135,6 +139,9 @@ try {
 
                 if ( $LASTEXITCODE -eq 0 ) {
                     $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value $i -PropertyType DWORD -Force | Out-Null
+
+                    Write-Output( "$(Log-Date) Configuring web options for App$($i)")
+                    & "$script:IncludeDir\webconfig.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -ApplName "app$i" -MaxConnections $maxconnections
                 }
             }
         }

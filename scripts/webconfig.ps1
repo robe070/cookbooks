@@ -9,6 +9,7 @@ Configure a LANSA Web Server
 #>
 param(
 [String]$server_name='robertpc\sqlserver2012',
+[String]$DBUT='MSSQLS',
 [String]$dbname='test1',
 [String]$dbuser = 'admin',
 [String]$dbpassword = 'password',
@@ -18,7 +19,8 @@ param(
 [String]$SUDB = '1',
 [String]$UPGD = 'false',
 [String]$maxconnections = '20',
-[String]$userscripthook
+[String]$userscripthook,
+[string]$ApplName = 'LANSA'
 )
 
 # Put first output on a new line in cfn_init log file
@@ -29,14 +31,16 @@ $trusted="NO"
 # $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
 
-Write-Debug ("Server_name = $server_name")
-Write-Debug ("dbname = $dbname")
-Write-Debug ("dbuser = $dbuser")
-Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $f32bit")
-Write-Debug ("SUDB = $SUDB")
-Write-Debug ("UPGD = $UPGD")
-Write-Debug ("maxconnections = $maxconnections")
+Write-Verbose ("Server_name = $server_name")
+Write-Verbose ("DBUT = $DBUT")
+Write-Verbose ("dbname = $dbname")
+Write-Verbose ("dbuser = $dbuser")
+Write-Verbose ("webuser = $webuser")
+Write-Verbose ("32bit = $f32bit")
+Write-Verbose ("SUDB = $SUDB")
+Write-Verbose ("UPGD = $UPGD")
+Write-Verbose ("maxconnections = $maxconnections")
+Write-Verbose ("ApplName = $ApplName")
 
 try
 {
@@ -61,134 +65,79 @@ try
 
     if ($f32bit_bool)
     {
-        $APPA = "${ENV:ProgramFiles(x86)}\LANSA"
+        $APPA = "${ENV:ProgramFiles(x86)}\$ApplName"
     }
     else
     {
-        $APPA = "${ENV:ProgramFiles}\LANSA"
+        $APPA = "${ENV:ProgramFiles}\$ApplName"
     }
 
     #####################################################################################
-    # Configure maximum users
+    # Configure Application Server
     #####################################################################################
 
-    if ( $f32bit_bool )
+    Write-Verbose ("64-bit Application Server Settings")
+    $lansawebKey = "HKLM:\Software\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5C$($ApplName)\LANSAWEB"
+
+    if (!(Test-Path -Path $lansawebkey))
     {
-        Write-Verbose ("32-bit MAXUSERS=9999")
-        $lansawebKey = 'HKLM:\Software\wow6432node\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5CLANSA\LANSAWEB'
-        if (!(Test-Path -Path $lansawebkey))
-        {
-            New-Item -Path $lansawebKey
-        }
-        New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force
-        Write-Verbose ("Set to '2' for 2nd level performance log")
-        New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'N' -Force
-        Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
-        New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force
+        New-Item -Path $lansawebKey
     }
-    else
-    {
-        Write-Verbose ("64-bit MAXUSERS=9999")
-        $lansawebKey = 'HKLM:\Software\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5CLANSA\LANSAWEB'
-        if (!(Test-Path -Path $lansawebkey))
-        {
-            New-Item -Path $lansawebKey
-        }
-        New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force
-        Write-Verbose ("Set to '2' for 2nd level performance log")
-        New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'N' -Force
-        Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
-        New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force
-    }
+    Write-Output("Set Maximum Concurrent Users (MAXUSERS) to Unlimited (9999)" )
+    New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '9999' -Force  | Out-Null
+
+    Write-Output("Log high level Performance Stats (LOG_PERF)" )
+    Write-Verbose ("Set to '2' for 2nd level performance log")
+    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF -PropertyType String -Value 'Y' -Force  | Out-Null
+
+    Write-Output("Log all performance stats into one log file (LOG_PERF_PER_PROC)" )
+    Write-Verbose ("Set to 'Y' for a log file per process rather than 1 log file")
+    New-ItemProperty -Path $lansawebKey  -Name LOG_PERF_PER_PROC -PropertyType String -Value 'N' -Force  | Out-Null
+
+    $regkeyname = "FREESLOTS"
+    Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Minimum to 5")
+    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '5' -PropertyType String -Force  | Out-Null
+
+    $regkeyname = "REUSE"
+    Write-Output("Setting $lansawebKey $RegKeyName To 500. That is, terminate web job & restart when it has been used 500 times")
+    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '500' -PropertyType String -Force  | Out-Null
+
+    $regkeyname = "MAXFREE"
+    Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Maximum to 9999")
+    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '9999' -PropertyType String -Force  | Out-Null
 
     #####################################################################################
     # Change MAXCONNECT to reflect max WAM sessions you want running on a Web Server. 
-    # i.e l4w3serv.cfg
+    # i.e webplugin.conf
     # This value is passed from the CloudFormation script and may be changed using a
     # trigger in that script.
     #####################################################################################
+    $webplugin_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\webplugin.conf')
+    if ((Test-Path -Path $webplugin_file)) {
+        # web plugin configuration file changed name in V14
+        Write-Output ("Using Web Plugin configuration file $webplugin_file")
 
-    # web plugin configuration file changed name in V14
-    $l4w3serv_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv.cfg')
-    $l4w3serv_default_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv_factory_default.cfg')
-    if ( -not (Test-Path -Path $l4w3serv_file) )
-    {
-        $l4w3serv_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\webplugin.conf')
-        $l4w3serv_default_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\webplugin_factory_default.cfg')
-    }
-    Write-Output ("Using Web Plugin configuration file $l4w3serv_file")
+        Write-Verbose ("Set maximum lcotp sessions to $maxconnections in $webplugin_file")
 
-    Write-Verbose ("Set maximum lcotp sessions to $maxconnections in $l4w3serv_file")
+        Write-Verbose ("Check if MAXCONNECT exists in file at all")
 
-    # Either save the installed file as the default, or if the default exists, restore the installed file.
-    # Thus we have a consistent starting point.
-    if ( -not (Test-Path -Path $l4w3serv_default_file) )
-    {
-        Write-Verbose ("Save default config file $l4w3serv_default_file")
+        If (Get-Content $webplugin_file | Select-String -Pattern "MAXCONNECT=") {
+            
+            Write-Verbose ("It exists so replace it with user setting")
 
-        copy-item -Path $l4w3serv_file -Destination ( $l4w3serv_default_file )
-    }
-    else
-    {
-        copy-item -Path $l4w3serv_default_file -Destination ( $l4w3serv_file )
-    }
+            (Get-Content $webplugin_file) |
+            Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  | 
+            Set-Content ($webplugin_file)
+        } else {
+            
+            Write-Verbose ("Does not exist, append it to file")
 
-    Write-Output ("Set MAXCONNECT to $maxconnections")
-
-    Write-Verbose ("Check if MAXCONNECT exists in file at all")
-
-    If (Get-Content $l4w3serv_file | Select-String -Pattern "MAXCONNECT=") {
-        
-        Write-Verbose ("It exists so replace it with user setting")
-
-        (Get-Content $l4w3serv_file) |
-        Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  | 
-        Set-Content ($l4w3serv_file)
+            Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections"
+        }
     } else {
-        
-        Write-Verbose ("Does not exist, append it to file")
-
-        Add-Content $l4w3serv_file "`nMAXCONNECT=$maxconnections"
+        Write-Output( "$webplugin_file does not exist. Presumed there is not a plugin running in this system.")
     }
-
-    #####################################################################################
-    # Switch off "Transform XSLT on WebServer" - LANSA;XHTML;N;yes;N;0;Y;yes;Y to LANSA;XHTML;N;yes;N;0;Y;yes;N
-    #####################################################################################
-    #(Get-Content $l4w3serv_file) |
-    #Foreach-Object {$_ -replace "LANSA;XHTML;N;yes;N;0;Y;yes;Y","LANSA;XHTML;N;yes;N;0;Y;yes;N"}  | 
-    #Set-Content ($l4w3serv_file)
-
-    #####################################################################################
-    # Change max WAM sessions you want running for the Web Site. 
-    # i.e l4w3serv.cfg - look for N;100. Change to Y;<your value>
-    #####################################################################################
-
-    if ( 0 )
-    {
-        $l4w3serv_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv.cfg')
-        $l4w3serv_default_file = (Join-Path -Path $APPA -ChildPath 'Webserver\iisplugin\l4w3serv_factory_default.cfg')
-        Write-Verbose ("Set maximum lcotp sessions to $maxconnections in $l4w3serv_file")
-
-        # Either save the installed file as the default, or if the default exists, restore the installed file.
-        # Thus we have a consistent starting point.
-        if ( !(Test-Path -Path $l4w3serv_default_file) )
-        {
-            Write-Verbose ("Save default config file $l4w3serv_default_file")
-
-            copy-item -Path $l4w3serv_file -Destination ( $l4w3serv_default_file )
-        }
-        else
-        {
-            copy-item -Path $l4w3serv_default_file -Destination ( $l4w3serv_file )
-        }
-
-        Write-Verbose ("Replace N;100;-; with Y;$maxconnections;-;")
-
-        (Get-Content $l4w3serv_file) |
-        Foreach-Object {$_ -replace 'N;100;-;',"Y;$maxconnections;-;"}  | 
-        Set-Content ($l4w3serv_file)
-    }
-
+    
     Write-Output ("Stopping Listener...")
     Write-Verbose ("We only install the 64-bit listener on 64-bit OS")
     if ( $false )
@@ -200,12 +149,8 @@ try
         Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
     }
 
-
     Write-Output ("Stopping all web jobs...")
     Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
-
-    Write-Output ("Resetting iis...")
-    iisreset
 
     Write-Output ("Starting Listener...")
     if ( $false )
@@ -216,7 +161,10 @@ try
     {
         Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
     }
-    
+
+    Write-Output ("Resetting iis...")
+    iisreset
+
     Write-Output ("Webconfig completed successfully")
     cmd /c exit 0
 }
