@@ -463,11 +463,31 @@ try
     }
 
     Write-Output ("$(Log-Date) Installation completed successfully")
-}
-catch
-{
-	$_
+} catch {
     Write-Output ("$(Log-Date) Installation error")
+    $_
+    # To show inner exception...
+    Write-Output "$(Log-Date) Exception caught: $($_.Exception)"
+
+    # Show other details if they exist
+    If ($_.Exception.Response) {
+        $response = ($_.Exception.Response ).ToString().Trim();
+        Write-Output ("$(Log-Date) Exception.Response $response")
+    }
+    If ($_.Exception.Response.StatusCode.value__) {
+        $htmlResponseCode = ($_.Exception.Response.StatusCode.value__ ).ToString().Trim();
+        Write-Output ("$(Log-Date) ResponseCode $htmlResponseCode")
+    }
+    If  ($_.Exception.Message) {
+        $exceptionMessage = ($_.Exception.Message).ToString().Trim()
+        Write-Output ("$(Log-Date) Exception.Message $exceptionMessage")
+    }
+    If  ($_.ErrorDetails.Message) {
+        $exceptionDescription = ($_.ErrorDetails.Message).ToString().Trim()
+        Write-Output ("$(Log-Date) ErrorDetails.Message $exceptionDescription")
+    }
+    
+    #####################################################################################    
     if ( $ExitCode -eq 0 -and $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         $ExitCode = $LASTEXITCODE
     }
