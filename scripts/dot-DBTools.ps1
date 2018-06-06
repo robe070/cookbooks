@@ -157,7 +157,7 @@ function Drop-SqlServerDatabase {
 
     # This requires the Powershell SQL Server cmdlets to be imported. This should already be done
     Try {
-        [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')
+        [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer')
 
         if ( -not $dbuser ) {
             Write-Output( "Trusted Connection" )
@@ -181,6 +181,12 @@ function Drop-SqlServerDatabase {
     Try {
         $db = $sqlserver.Databases.Item($dbname)
         if ( $db ) {
+            Write-Output( "Drop any connections to database $dbname")
+            Write-Output( "Current connections to $dbname = $($sqlserver.GetActiveDBConnectionCount($dbname))" )
+            $sqlserver.KillAllProcesses($dbname)
+            Write-Output( "Final connections to $dbname = $($sqlserver.GetActiveDBConnectionCount($dbname))" )
+            
+            Write-Output( "Dropping database $dbname")
             $db.drop()
             Write-Output( "Database dropped")
         } else {
