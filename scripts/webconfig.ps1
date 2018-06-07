@@ -166,6 +166,8 @@ try
     if ( $Reset ) {
         Write-Output ("Resetting iis...")
         iisreset
+        # Do it twice as sometimes the first fails as it takes too long when there are 11 applications installed and managed by 1 plugin.
+        iisreset
     }
 
     Write-Output ("Webconfig completed successfully")
