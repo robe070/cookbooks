@@ -30,12 +30,14 @@ function Write-FormattedOutput
     $host.UI.RawUI.ForegroundColor = $fc
 }
 
+$Region = 'us-east-1'
 $ELBS = @()
 Write-Output 'DBWebServerGroup'
 $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'DBWebServerGroup'}
 foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
     # Get a list of all the LoadBalancers
     $ELB = Get-ASLoadBalancer -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId
+    $ELB.LoadBalancerName
     $ELBs += $ELB
 }
 
