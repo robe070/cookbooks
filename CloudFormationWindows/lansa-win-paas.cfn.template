@@ -712,13 +712,25 @@
         "LPCDBSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable SQL Server Access for LPC",
+                "GroupDescription": "Enable Database Server Access for LANSA Support in Aus, UK and USA",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
                         "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
                         "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
                         "CidrIp": "103.231.169.65/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "CidrIp": "50.205.57.62/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "ToPort": { "Fn::FindInMap" : [ "DBEngine2DBUT", { "Ref": "15DBEngine" }, "Port" ] },
+                        "CidrIp": "81.134.253.226/32"
                     }
                 ]
             }
@@ -752,7 +764,7 @@
         "LPCSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable GitDeployHub access, Shell and RDP access for LANSA Support",
+                "GroupDescription": "Enable GitDeployHub access and RDP access for LANSA Support in Aus, UK and USA",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -765,6 +777,30 @@
                         "FromPort": 3389,
                         "ToPort": 3389,
                         "CidrIp": "103.231.169.65/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "50.205.57.62/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 3389,
+                        "ToPort": 3389,
+                        "CidrIp": "50.205.57.62/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "ToPort": {"Ref":  "19HTTPPortNumberHub"},
+                        "CidrIp": "81.134.253.226/32"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 3389,
+                        "ToPort": 3389,
+                        "CidrIp": "81.134.253.226/32"
                     }
                 ]
             }
