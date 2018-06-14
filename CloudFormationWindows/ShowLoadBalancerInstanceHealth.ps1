@@ -30,9 +30,11 @@ function Write-FormattedOutput
     $host.UI.RawUI.ForegroundColor = $fc
 }
 
+[Boolean]$ErrorsOnly = $true
+[Boolean]$ErrorFound = $false
 $Region = 'us-east-1'
 $ELBS = @()
-Write-Output 'DBWebServerGroup'
+Write-Output 'List Load Balancers'
 $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'DBWebServerGroup'}
 foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
     # Get a list of all the LoadBalancers
@@ -43,15 +45,52 @@ foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
 
 Write-Output("Show Load Balancer Status")
 foreach ( $ELB in $ELBs ) {
-    Write-Output("ELB $($ELB.LoadBalancerName)")
     $ELBInstances = @(Get-ELBInstanceHealth -Region $Region -LoadBalancerName $ELB.LoadBalancerName)
+    [boolean]$FirstInstance = $true
     foreach ( $Instance in $ELBInstances ) {
         if ( $($Instance.State) -eq 'InService' ) {
             $colour = 'White'
         } else {
+            $ErrorFound = $true
             $colour = 'Red'
         }
-        Write-FormattedOutput "$($Instance.InstanceId) is $($Instance.State)" -ForegroundColor $colour
+        if ( -not $ErrorsOnly -or $($Instance.State) -ne 'InService' ) {
+            if ( $FirstInstance ) {
+                $FirstInstance = $false
+                Write-Output("ELB $($ELB.LoadBalancerName)")
+            }
+            Write-FormattedOutput "$($Instance.InstanceId) is $($Instance.State)" -ForegroundColor $colour
+        }
     }
-    Write-Output("")
+    if ( -not $FirstInstance ) {
+        Write-Output("")
+    }
 }
+
+if ( $ErrorFound ) {
+    Write-FormattedOutput "ELB Health Check: One or more EC2 instances are not InService" -ForegroundColor 'Red'
+} else {
+    Write-FormattedOutput "ELB Health Check: All EC2 instances are InService" -ForegroundColor 'Green'
+}
+
+Write-Output("Show Auto Scaling Group Health")
+
+# Look at ASG Status too - it can be different when the EC2 instance has been Unhealthy and then becomes Healthy again
+$ErrorFound = $false
+$ASGInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like 'eval*' } )
+# $ASGInstances | Format-Table
+foreach ( $ASGInstance in $ASGInstances ) {
+    if ($ASGInstance.HealthStatus -ne 'HEALTHY' ) {
+        $ErrorFound = $true
+        Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus)" -ForegroundColor 'Red'
+    } elseif ( -not $ErrorsOnly ) {
+        Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus)" -ForegroundColor 'White'
+    }
+}
+
+if ( $ErrorFound ) {
+    Write-FormattedOutput "ASG Health Check: One or more EC2 instances are not HEALTHY" -ForegroundColor 'Red'
+} else {
+    Write-FormattedOutput "ASG Health Check: All EC2 instances are HEALTHY" -ForegroundColor 'Green'
+}
+
