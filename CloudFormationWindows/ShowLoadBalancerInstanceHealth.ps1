@@ -1,4 +1,3 @@
-# Get-ELBInstanceHealth -Region 'us-east-1' -LoadBalancerName 'eval7-WebServerELB-19VOGOIJ3231E'  
 function Write-FormattedOutput
 {
     [CmdletBinding()]
@@ -90,6 +89,9 @@ foreach ( $ASGInstance in $ASGInstances ) {
 
 if ( $ErrorFound ) {
     Write-FormattedOutput "ASG Health Check: One or more EC2 instances are not HEALTHY" -ForegroundColor 'Red'
+    Write-Output( 'You are stongly advised to consider running this to fix it: ')
+    Write-Output( '   Set-ASInstanceHealth -HealthStatus Healthy -InstanceId <instance id> -ShouldRespectGracePeriod $false')
+    Write-Output( 'In particular it should be resolved before updating stacks and resuming the ReplaceUnhealthy process')
 } else {
     Write-FormattedOutput "ASG Health Check: All EC2 instances are HEALTHY" -ForegroundColor 'Green'
 }
