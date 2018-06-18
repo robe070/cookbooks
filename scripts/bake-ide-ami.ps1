@@ -129,6 +129,7 @@ try
     [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | out-null
 
     Write-Output ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
+    enable-psremoting -SkipNetworkProfileCheck -force
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
 
     if ( $Win2012 -eq $true ) {
