@@ -72,6 +72,10 @@ try {
                     $AllInService = $false
                     Write-Output("Waiting")
                     Start-Sleep( 30)
+                } else {
+                    # If the ELB has flagged the instance as Unhealthy the ASG has also been flagged as Unhealthy.
+                    # Once the instance comes online the ASG will STILL be Unhealthy. So, manually set it.
+                    Set-ASInstanceHealth -Region $Region -HealthStatus Healthy -InstanceId $Instance.InstanceId -ShouldRespectGracePeriod $false
                 }
             }
         }
@@ -81,20 +85,23 @@ try {
     # Resume processes
     # *****************************************************************************
 
-    Write-Output 'Resume All Processes on WebServerGroup'
+    Write-Output 'Resume all Processes on WebServerGroup'
     foreach ( $WebServerGroup in $WebServerGroups ) {
         $WebServerGroup.ResourceId
+
         # Resume all processes
         Resume-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId
     }
 
-    Write-Output 'Resume most processes on DBWebServerGroup'
+    Write-Output 'Resume all processes on DBWebServerGroup'
     foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
         $DBWebServerGroup.ResourceId
-        # Resume most processes - Leave ReplaceUnhealthy suspended - Ensure that the instance is not terminated just because it is momentarily being updated.
-        Resume-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess @("Launch", "AlarmNotification", "HealthCheck", "AZRebalance", "ScheduledActions", "AddToLoadBalancer", "Terminate", "RemoveFromLoadBalancerLowPriority")
+
+        # Resume all processes
+        Resume-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId
     }
 } catch {
+    $_
     Write-Output( "$(date) Windows Update failure. Check Systems Manager Console")  
     cmd /c exit -1
 }
