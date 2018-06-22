@@ -50,8 +50,7 @@ param (
     Invoke-Command -Session $session -Scriptblock $ScriptBlock
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-        Write-Error "LastExitCode: $remotelastexitcode"
-        throw 1
+        throw "Execute-RemoteBlock: LastExitCode: $remotelastexitcode"
     }      
 }
 

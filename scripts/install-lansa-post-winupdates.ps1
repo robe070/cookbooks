@@ -25,32 +25,32 @@ param (
 try
 {
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    Write-Output "$(Log-Date) Updating $Cloud instance"
+    Write-Host "$(Log-Date) Updating $Cloud instance"
 
-    Write-Output "$(Log-Date) Synchronise clock"
+    Write-Host "$(Log-Date) Synchronise clock"
 
-    cmd /c "sc triggerinfo w32time start/networkon stop/networkoff"
+    cmd /c "sc triggerinfo w32time start/networkon stop/networkoff" | Out-Host
 
-    Write-Output "$(Log-Date) Ensure that Framework caching is completed"
+    Write-Host "$(Log-Date) Ensure that Framework caching is completed"
 
-    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems"
-    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems"
+    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems" | Out-Host
+    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems" | Out-Host
 
     if ( $Cloud -eq "AWS" ) {
         if ( Test-Path $ENV:ProgramFiles\Amazon\Ec2ConfigService ) {
-            Write-Output "$(Log-Date) Configure EC2 Settings"
-            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath"
-            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt"
+            Write-Host "$(Log-Date) Configure EC2 Settings"
+            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath" | Out-Host
+            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt" | Out-Host
         } else {
             # Newer EC2 Launch service
-            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*"
+            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*" | Out-Host
         }
     }
 
-    Write-Output "$(Log-Date) Tidy up"
+    Write-Host "$(Log-Date) Tidy up"
 
     if (Test-Path -Path $TempPath) {
-        cmd /c rd /S/Q $TempPath
+        cmd /c rd /S/Q $TempPath | Out-Host
     }
 }
 catch

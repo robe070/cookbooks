@@ -263,31 +263,36 @@ try
     Execute-RemoteInit
 
     Execute-RemoteBlock $Script:session {  
+        try {
+            Write-Verbose ("Save S3 DVD image url and other global variables in registry") | Out-Host
+            $lansaKey = 'HKLM:\Software\LANSA\'
+            if (!(Test-Path -Path $lansaKey)) {
+                New-Item -Path $lansaKey | Out-Host
+            }
+            New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force | Out-Host
+            New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force | Out-Host
 
-        Write-Verbose ("Save S3 DVD image url and other global variables in registry") | Out-Host
-        $lansaKey = 'HKLM:\Software\LANSA\'
-        if (!(Test-Path -Path $lansaKey)) {
-            New-Item -Path $lansaKey
-        }
-        New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force
-        New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force
-        New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force
-        New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force
-        New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force
-        New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force
-        New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force
-        New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force
-        New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force
-        New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force
+            Write-Verbose "Switch off Internet download security warning" | Out-Host
+            [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine') | Out-Host
 
-        Write-Verbose "Switch off Internet download security warning" | Out-Host
-        [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine')
-
-        if ( !$using:Upgrade ) {
-            Write-Verbose "Turn on sound from RDP sessions" | Out-Host
-            Get-Service | Where {$_.Name -match "audio"} | format-table -autosize
-            Get-Service | Where {$_.Name -match "audio"} | start-service
-            Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic"
+            if ( !$using:Upgrade ) {
+                Write-Verbose "Turn on sound from RDP sessions" | Out-Host
+                Get-Service | Where {$_.Name -match "audio"} | format-table -autosize | Out-Host
+                Get-Service | Where {$_.Name -match "audio"} | start-service | Out-Host
+                Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic" | Out-Host
+            }
+        } catch {
+            Write-RedOutput $_ | Out-Host
+            Write-RedOutput $PSItem.ScriptStackTrace | Out-Host
+            throw 'Script Block 10'
         }
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
@@ -362,15 +367,13 @@ try
             cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
             if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
             {
-                Write-Error ('Git checkout failed');
-                cmd /c exit $LastExitCode;
+                throw 'Git checkout failed'
             }
             # Overwrite the origin's current tree onto the branch we really want - the local branch
             cmd /c git checkout -B $using:GitBranch  '2>&1'
             if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
             {
-                Write-Error ('Git checkout failed');
-                cmd /c exit $LastExitCode;
+                throw 'Git checkout failed'
             }
         }
     }
@@ -426,7 +429,9 @@ try
                 MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
             }
         } else {
-            Execute-RemoteBlock $Script:session { Run-ExitCode 'choco' @('install', 'jdk8', '-y') }
+            Execute-RemoteBlock $Script:session { 
+                Run-ExitCode 'choco' @('install', 'jdk8', '-y') 
+            }
         }
     }
 
@@ -452,6 +457,8 @@ try
         Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
         Execute-RemoteBlock $Script:session {
             CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" 
+            # Errors are thrown out of CreateLicense so no need to catch a throw here.
+            # Let the local script catch it
         }
 
         Execute-RemoteBlock $Script:session {  
@@ -459,11 +466,11 @@ try
                 Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
             } catch {
                 Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
-                . "$Script:IncludeDir\dot-catch-block.ps1"                
+                Write-RedOutput $_ | Out-Host
+                Write-RedOutput $PSItem.ScriptStackTrace | Out-Host
+                cmd /c exit 1
+                throw              
             }
-    
-            # Ensure last exit code is success
-            cmd /c exit 0
         }
 
         Write-Host "$(Log-Date) Installing IDE"
@@ -504,12 +511,12 @@ try
                 Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
             } catch {
                 Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
-                . "$Script:IncludeDir\dot-catch-block.ps1"                
+                Write-RedOutput $_ | Out-Host
+                Write-RedOutput $PSItem.ScriptStackTrace | Out-Host
+                cmd /c exit 1
+                throw              
             }
-    
-            # Ensure last exit code is success
-            cmd /c exit 0
-        }
+         }
     }
 
     # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
@@ -534,11 +541,11 @@ try
                 Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
             } catch {
                 Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
-                . "$Script:IncludeDir\dot-catch-block.ps1"                
+                Write-RedOutput $_ | Out-Host
+                Write-RedOutput $PSItem.ScriptStackTrace | Out-Host
+                cmd /c exit 1
+                throw              
             }
-    
-            # Ensure last exit code is success
-            cmd /c exit 0
         }
     }
 
