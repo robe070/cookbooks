@@ -33,8 +33,8 @@ try
 
     Write-Host "$(Log-Date) Ensure that Framework caching is completed"
 
-    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems" | Out-Host
-    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems" | Out-Host
+    cmd /c "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Ngen executequeueditems" | Out-Null
+    cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems" | Out-Null
 
     if ( $Cloud -eq "AWS" ) {
         if ( Test-Path $ENV:ProgramFiles\Amazon\Ec2ConfigService ) {
