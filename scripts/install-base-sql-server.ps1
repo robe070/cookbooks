@@ -65,10 +65,12 @@ Finally {
     # Note that any errors occurring in functions which call Write-Error may not be captured and may already
     # have been captured by AWS Run Command before all this captured information is output. So, do not presume 
     # that the Result Code is on the first line of the output.
-    Write-Output "$(Log-Date) Result Code = $LASTEXITCODE"
-    Write-Output "$(Log-Date) Note that logging messages are re-ordered to workaround AWS Run Command truncating output, so the log date will seem to be out of order. You can piece it back together in chronological order if thats needed."
+    Write-Host "$(Log-Date) Result Code = $LASTEXITCODE"
+    Write-Host "$(Log-Date) Note that logging messages are re-ordered to workaround AWS Run Command truncating output, so the log date will seem to be out of order. You can piece it back together in chronological order if thats needed."
 
-    Get-Content $ErrorFile -ErrorAction SilentlyContinue
-    Get-Content $OutputFile -ErrorAction SilentlyContinue
+    Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
+    Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
     $LASTEXITCODE | Out-File $ResultFile
 }
+
+cmd /c exit 0

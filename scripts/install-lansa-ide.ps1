@@ -33,7 +33,7 @@ if ( -not $script:IncludeDir)
 {
     # Log-Date can't be used yet as Framework has not been loaded
 
-	Write-Output "Initialising environment - presumed not running through RemotePS"
+	Write-Host "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -42,7 +42,7 @@ if ( -not $script:IncludeDir)
 }
 else
 {
-	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+	Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
 if (!(Test-Path -Path $Script:ScriptTempPath)) {
@@ -50,7 +50,7 @@ if (!(Test-Path -Path $Script:ScriptTempPath)) {
 }
 
 # Put first output on a new line in cfn_init log file
-Write-Output ("`r`n")
+Write-Host ("`r`n")
 
 $trusted=$true
 
@@ -105,9 +105,9 @@ try
 
     if ( (-not $UPGD_bool) )
     {
-        Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+        Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-        Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+        Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Host
 
         Import-Module “sqlps” -DisableNameChecking
 
@@ -117,7 +117,7 @@ try
         }
 
         #####################################################################################
-        Write-Output ("$(Log-Date) Enable Named Pipes on database")
+        Write-Host ("$(Log-Date) Enable Named Pipes on database")
         #####################################################################################
 
         if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
@@ -126,7 +126,7 @@ try
             restart-service $service.name -force #Restart SQL Services 
         }
 
-        Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+        Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Host
         cd "c:"
     }
 
@@ -140,15 +140,15 @@ try
     }
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Pull down DVD image ")
+    Write-Host ("$(Log-Date) Pull down DVD image ")
     #####################################################################################
     cmd /c mkdir $Script:DvdDir '2>nul'
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Output
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Output
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -158,10 +158,10 @@ try
     if ( $UPGD_bool )
     {
         #####################################################################################
-        Write-Output ("$(Log-Date) Installing all EPCs")
+        Write-Host ("$(Log-Date) Installing all EPCs")
         #####################################################################################
 
-        cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Write-Output
+        cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Write-Host
         if ( $LastExitCode -ne 0 )
         {
             throw
@@ -170,23 +170,23 @@ try
     else
     {
         #####################################################################################
-        Write-Output ("$(Log-Date) Installing the application")
+        Write-Host ("$(Log-Date) Installing the application")
         #####################################################################################
 
         Install-VisualLansa
     }
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Pull down latest Visual LANSA updates")
+    Write-Host ("$(Log-Date) Pull down latest Visual LANSA updates")
     #####################################################################################
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop" # Must stop JSM otherwise aws s3 sync will throw errors accessing files which are locked
 
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Output
+        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Output
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -194,15 +194,15 @@ try
     }
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Pull down latest Integrator updates")
+    Write-Host ("$(Log-Date) Pull down latest Integrator updates")
     #####################################################################################
 
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Output
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Output
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -210,37 +210,35 @@ try
     }
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
 
-    Write-Output "$(Log-Date) IDE Installation completed"
-    Write-Output ""
+    Write-Host "$(Log-Date) IDE Installation completed"
+    Write-Host ""
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Test if post install x_run processing had any fatal errors")
+    Write-Host ("$(Log-Date) Test if post install x_run processing had any fatal errors")
     #####################################################################################
 
     if ( (Test-Path -Path $x_err) )
     {
-        Write-Verbose ("Signal to caller that the installation has failed")
+        Write-Verbose ("Signal to caller that the installation has failed") | Out-Host
 
-        $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
-            NotInstalled $region -Message "$x_err exists which indicates an installation error has occurred."
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
+        throw "$x_err exists which indicates an installation error has occurred."
     }
 
     if ( -not $UPGD_bool )
     {
         # This code creates pendingfilerenameoperations so moved to after LANSA Install which otherwise will require a reboot before installing SQL Server.
-        Start-WebAppPool -Name "DefaultAppPool"
+        Start-WebAppPool -Name "DefaultAppPool" | Out-Host
 
         # Speed up the start of the VL IDE
         # Switch off looking for software license keys
 
-        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine')
+        [Environment]::SetEnvironmentVariable('LSFORCEHOST', 'NO-NET', 'Machine') | Out-Host
     }
 
     if ( -not $UPGD_bool )
     {
         #####################################################################################
-        Write-Output ("$(Log-Date) Import test case")
+        Write-Host ("$(Log-Date) Import test case")
         #####################################################################################
 
         # Note: have not been able to find a way to pass a parameter with spaces in and NOT have the entire parameter surrounded by quotes by Powershell
@@ -248,20 +246,18 @@ try
 
         $import = "$script:IncludeDir\..\Tests\WAMTest"
         $x_dir = "$APPA\x_win95\x_lansa\execute"
-        cd $x_dir
-        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=$Language" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Write-Output
+        cd $x_dir | Out-Host
+        cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=$Language" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Out-Host
 
         if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
         {
             Write-Verbose ("Signal to caller that the import has failed")
 
-            $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RegionDoesNotExist `
-                NotInstalled $region -Message "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            throw "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
         }
 
         #####################################################################################
-        Write-output ("$(Log-Date) Shortcuts")
+        Write-Host ("$(Log-Date) Shortcuts")
         #####################################################################################
 
         # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
@@ -339,32 +335,33 @@ try
         Add-TrustedSite "*.ytimg.com" $Hive "https"
 
         if ( $Cloud -eq "Azure" ) {
-            Write-Output "Set JSM Service dependencies"
-            Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
-            Write-Verbose "so that they are running when the license check is made by the Integrator service."
-            cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+            Write-Host "Set JSM Service dependencies"
+            Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Host
+            Write-Verbose "so that they are running when the license check is made by the Integrator service." | Out-Host
+            cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Host
         }
     } else {
         Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
     }
 
-    Write-Output ("$(Log-Date) Installation completed successfully")
+    Write-Host ("$(Log-Date) Installation completed successfully")
 }
 catch
 {
-	$_
-    Write-Error ("$(Log-Date) Installation error")
-    throw
+    Write-RedOutput ("$(Log-Date) Installation error") | Out-Host
+
+    Write-RedOutput "install-lansa-base.ps1 is the <No file> in the stack dump below" | Out-Host
+    . "$Script:IncludeDir\dot-catch-block.ps1"
 }
 finally
 {
-    Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
+    Write-Host ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
 
     # Wait if we are upgrading so the user can see the results
     if ( $UPGD_bool -and $Wait -eq 'true')
     {
-        Write-Output ""
-        Write-Output "Press any key to continue ..."
+        Write-Host ""
+        Write-Host "Press any key to continue ..."
 
         $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }

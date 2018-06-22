@@ -29,7 +29,7 @@ param (
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
-if ($false) {
+if ($true) {
     if ( -not $script:IncludeDir)
     {
         # Log-Date can't be used yet as Framework has not been loaded
@@ -58,69 +58,61 @@ else {
 try
 {
     # Ensure that dependencies are installed (weird issue no time to diagnose)
-    . "$script:IncludeDir\dot-DBTools.ps1"
+    # . "$script:IncludeDir\dot-DBTools.ps1" | Out-Host
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Enable Named Pipes on local database")
+    Write-Output ("$(Log-Date) Enable Named Pipes on local database") | Out-Host
     #####################################################################################
 
-    Import-Module “sqlps” -DisableNameChecking
+    Import-Module “sqlps” -DisableNameChecking | Out-Host
+    
+    Write-Output( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session") | Out-Host
     Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
     cd "c:"
 
     #####################################################################################
-    Write-Output "$(Log-Date) Set local SQL Server to manual"
+    Write-Output "$(Log-Date) Set local SQL Server to manual" | Out-Host
     #####################################################################################
 
-    Set-Service "MSSQLSERVER" -startuptype "manual"
+    Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
 
     #####################################################################################
-    Write-Output "$(Log-Date) Installing License"
+    Write-Output "$(Log-Date) Installing License" | Out-Host
     #####################################################################################
-    Write-Output "Password: $licensekeypassword_"
-    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey"
-    CreateLicence "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" $LicenseKeyPassword_ "LANSA Integrator License" "IntegratorLicensePrivateKey"
+    Write-Debug "Password: $licensekeypassword_" | Out-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
+    CreateLicence "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" $LicenseKeyPassword_ "LANSA Integrator License" "IntegratorLicensePrivateKey" | Out-Host
 
     #####################################################################################
-    Write-output ("$(Log-Date) Shortcuts")
+    Write-output ("$(Log-Date) Shortcuts") | Out-Host
     #####################################################################################
 
-    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm"
+    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
         
-    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "file://$ENV:ProgramFiles/CloudStartHere.htm" -WindowStyle "Maximized"
-    New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
+    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
+    
+    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
 
-    Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
-    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
+    Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
+
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
         
-    Add-TrustedSite "lansa.com"
-    Add-TrustedSite "google-analytics.com"
-    Add-TrustedSite "googleadservices.com"
-    Add-TrustedSite "img.en25.com"
-    Add-TrustedSite "addthis.com"
-    Add-TrustedSite "*.lansa.myabsorb.com"
-    Add-TrustedSite "*.cloudfront.com"
+    Add-TrustedSite "lansa.com" | Out-Host
+    Add-TrustedSite "google-analytics.com" | Out-Host
+    Add-TrustedSite "googleadservices.com" | Out-Host
+    Add-TrustedSite "img.en25.com" | Out-Host
+    Add-TrustedSite "addthis.com" | Out-Host
+    Add-TrustedSite "*.lansa.myabsorb.com" | Out-Host
+    Add-TrustedSite "*.cloudfront.com" | Out-Host
 
-    Write-Output ("$(Log-Date) Installation completed successfully")
+    Write-Output ("$(Log-Date) Installation completed successfully") | Out-Host
 }
 catch
 {
-	$_
-    Write-Error ("$(Log-Date) Installation error")
-    throw
-}
-finally
-{
-    Write-Output ("$(Log-Date) See LansaInstallLog.txt and other files in $ENV:TEMP for more details.")
+    Write-Error ("$(Log-Date) Installation error") | Out-Host
 
-    # Wait if we are upgrading so the user can see the results
-    if ( $UPGD_bool )
-    {
-        Write-Output ""
-        Write-Output "Press any key to continue ..."
-
-        $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    }
+    Write-RedOutput "install-lansa-scalable.ps1 is the <No file> in the stack dump below" | Out-Host
+    . "$Script:IncludeDir\dot-catch-block.ps1"
 }
 
 # Successful completion so set Last Exit Code to 0

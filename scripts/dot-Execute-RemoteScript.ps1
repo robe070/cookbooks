@@ -31,8 +31,7 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
     Invoke-Command -Session $session -FilePath $FilePath -ArgumentList $ArgumentList
     $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-        Write-Error "LastExitCode: $remotelastexitcode"
-        throw 1
+        throw "Execute-RemoteScript: LastExitCode: $remotelastexitcode"
     }      
 }
 
@@ -71,9 +70,9 @@ function Execute-RemoteInit {
 
 # Initialization that must wait until the git repo has been cloned so all the scripts are there.
 function Execute-RemoteInitPostGit {
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" }
-    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1"}
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Vars.ps1" | Out-Host }
+    Execute-RemoteBlock $Script:session { . "$script:IncludeDir\Init-Baking-Includes.ps1" | Out-Host}
     
-    Write-Output "$(Log-Date) Linking LANSA 64-bit and 32-bit registry keys"
-    Execute-RemoteBlock $Script:session { &"$Script:IncludeDir\lansa64reginit.exe" "-f"}
+    Write-Output "$(Log-Date) Linking LANSA 64-bit and 32-bit registry keys" | Out-Host
+    Execute-RemoteBlock $Script:session { &"$Script:IncludeDir\lansa64reginit.exe" "-f" | Out-Host}
 }

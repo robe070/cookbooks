@@ -26,4 +26,7 @@ $Script:LicenseKeyPath = $Script:ScriptTempPath
 $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
 $Script:DVDDir = 'c:\LanDvdCut'
 
+# Make non-terminating errors into terminating errors. That is, the script will throw an exception so we know its gone wrong
+$ErrorActionPreference = 'Stop'
+
 Write-Debug "Variables loaded"

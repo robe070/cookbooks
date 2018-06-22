@@ -7,6 +7,56 @@ Common tools
 
 #>
 
+function Write-FormattedOutput
+{
+    [CmdletBinding()]
+    Param(
+         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object,
+         [Parameter(Mandatory=$False)][ConsoleColor] $BackgroundColor,
+         [Parameter(Mandatory=$False)][ConsoleColor] $ForegroundColor
+    )    
+
+    # save the current color
+    $bc = $host.UI.RawUI.BackgroundColor
+    $fc = $host.UI.RawUI.ForegroundColor
+
+    # set the new color
+    if($BackgroundColor -ne $null)
+    { 
+       $host.UI.RawUI.BackgroundColor = $BackgroundColor
+    }
+
+    if($ForegroundColor -ne $null)
+    {
+        $host.UI.RawUI.ForegroundColor = $ForegroundColor
+    }
+
+    Write-Output $Object
+  
+    # restore the original color
+    $host.UI.RawUI.BackgroundColor = $bc
+    $host.UI.RawUI.ForegroundColor = $fc
+}
+
+function Write-RedOutput
+{
+    [CmdletBinding()]
+    Param(
+         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
+    ) 
+
+    Write-FormattedOutput $Object -ForegroundColor 'Red'
+}
+
+function Write-GreenOutput
+{
+    [CmdletBinding()]
+    Param(
+         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
+    ) 
+
+    Write-FormattedOutput $Object -ForegroundColor 'Green'
+}
 function Log-Date 
 {
     ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
@@ -114,24 +164,53 @@ function Connect-RemoteSessionUri
     Write-Output "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
+function ReConnect-Session
+{
+    Write-Host "$(Log-Date) Reconnecting session..."
+    if ( $Script:session ) { Remove-PSSession $Script:session | Out-Host }
+
+    if ( $Cloud -eq 'AWS' ) {
+        Connect-RemoteSession | Out-Host
+    } elseif ($Cloud -eq 'Azure' ) {
+        Connect-RemoteSessionUri | Out-Host
+    }
+
+    Execute-RemoteInit | Out-Host
+    Execute-RemoteInitPostGit | Out-Host
+}
+
+# Returns the button index for testing (Unless its Cancel in which case it throws an error)
+# See https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/windows-scripting/x83z1d9f(v=vs.84)
+# for details
+# $Buttons => 0 = OK, 1 = Ok/Cancel, 0x3 = Yes/No/Cancel, 0x4 = Yes/No
+# Response => 2 = Cancel, 6 = Yes, 7 = No
 function MessageBox
 {
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $Message
+    $Message,
+    [Parameter(Mandatory=$false)]
+    [int]
+    $buttons = 0x1  # Ok/Cancel buttons
     )
 
-    [console]::beep(500,1000)
+    if ( -not $Script:msgbox ) {
+        $Script:msgbox = New-Object -ComObject WScript.Shell
+    }
 
     # OK and Cancel buttons
-    Write-Output "$(Log-Date) $Message"
-    $Response = [System.Windows.Forms.MessageBox]::Show("$Message", $Script:DialogTitle, 1 ) 
-    if ( $Response -eq "Cancel" )
+    Write-Host "$(Log-Date) $Message"
+    # Make a Sound, be System Modal
+    $Response = $($Script:msgbox).popup( $Message, 0, $Script:DialogTitle, 0x30 + 0x1000 + $buttons)
+    # 2 = Cancel
+    if ( $Response -eq 2 )
     {
         Write-Output "$(Log-Date) $Script:DialogTitle cancelled"
         throw
     }
+
+    return $Response
 }
 
 function Install-VisualLansa
@@ -589,16 +668,28 @@ function Run-ExitCode {
     Remove-Item $OutFile -force -ErrorAction SilentlyContinue
     Remove-Item $ErrorFile -force -ErrorAction SilentlyContinue
 
-    Write-Output( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
+    Write-GreenOutput( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
     $p = Start-Process -FilePath $Program -ArgumentList $Arguments -Wait -PassThru -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $OutFile
 
     cat $OutFile -ErrorAction SilentlyContinue
     cat $ErrorFile -ErrorAction SilentlyContinue
     if ( $p.ExitCode -ne 0 ) {
-        $ExitCode = $p.ExitCode
+        cmd /c exit $p.ExitCode
         $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
-        Write-Error $ErrorMessage -Category NotInstalled
+        # Use Write-Host instead of Write-Error as the latter seemed to produce the message
+        # A positional parameter cannot be found that accepts argument 'Run-ExitCode : choco install jre -y returned error code 1.
+        # At line:79 char:5
+        # +     Run-ExitCode 'choco' @( 'install', 'jre', '-y' ) | Out-Host
+        # +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #     + CategoryInfo          : NotInstalled: (:) [Write-Error], WriteErrorException
+        #     + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,Run-ExitCode      
+        #  
+        # Notice that its a WriteErrorException, so presumably its WriteError thats producing these messages
         throw $ErrorMessage
+       
+        # $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RunExitCodeError `
+        #    NotInstalled $p.ExitCode -Message $ErrorMessage
+        # $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
 }
 
@@ -624,5 +715,15 @@ function Run-SSMCommand {
     $DebugPreference = "Continue"
 
     # Its expected that the Command will throw an error and thus the command will be flagged as 'failed'. Powershell scripts we run all throw when there is an error.
-    if ( $CmdStatus.Status -eq "Failed" ) { throw }
+    if ( $CmdStatus.Status -eq "Failed" ) { 
+        cmd /c exit 1
+        throw "Run-SSMCommand"
+    }
+}
+
+function Get-CurrentLineNumber { 
+    $MyInvocation.ScriptLineNumber 
+}
+function Get-CurrentFileName { 
+    $MyInvocation.ScriptName 
 }

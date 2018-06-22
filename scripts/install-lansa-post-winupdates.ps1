@@ -55,6 +55,6 @@ try
 }
 catch
 {
-    Write-Error $(Get-Date) ($_ | format-list | out-string)
-    throw
+    Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Host
+    . "$Script:IncludeDir\dot-catch-block.ps1"
 }
