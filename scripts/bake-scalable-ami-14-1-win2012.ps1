@@ -34,7 +34,7 @@ Bake-IdeMsi -VersionText '14.1 EPC141050' `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14100_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W1400_latest" `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2016_SP1_Express*" `
-            -GitBranch "trunk"`
+            -GitBranch "support/L4W14100_scalable"`
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $false `

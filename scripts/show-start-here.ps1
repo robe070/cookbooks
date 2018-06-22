@@ -37,15 +37,7 @@ else
 }
 
 if(-not ((Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'StartHereShown' -ErrorAction SilentlyContinue).StartHereShown)) {
-    $ie = new-object -comobject InternetExplorer.Application 
- 
-    $ie.visible = $true 
- 
-    #$ie2 = $ie.Width = 200  
- 
-    $ie.top = 0; $ie.width = 1450; $ie.height = 1000 ; $ie.Left = 100 
- 
-    $ie.navigate("$ENV:ProgramFiles\CloudStartHere.htm")
+    Start-Process 'chrome.exe' "`"$ENV:ProgramFiles\CloudStartHere.htm`""
 
     New-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown -PropertyType DWord -Value $true –Force | Out-Null
 

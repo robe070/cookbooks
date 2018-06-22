@@ -344,6 +344,7 @@ try
         ReConnect-Session
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
+
     } else {
         Execute-RemoteInitPostGit
 
@@ -449,7 +450,21 @@ try
         #####################################################################################
 
         Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-        Execute-RemoteBlock $Script:session {CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" }
+        Execute-RemoteBlock $Script:session {
+            CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey" 
+        }
+
+        Execute-RemoteBlock $Script:session {  
+            try {
+                Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+            } catch {
+                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
+                . "$Script:IncludeDir\dot-catch-block.ps1"                
+            }
+    
+            # Ensure last exit code is success
+            cmd /c exit 0
+        }
 
         Write-Host "$(Log-Date) Installing IDE"
         PlaySound
@@ -481,12 +496,23 @@ try
         # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
-        # Write-Host "$(Log-Date) workaround for sysprep failing unless admin has logged in!"
-        # MessageBox "Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password' and then click OK on this message box. (Yes, do nothing else. Just log in!)"
+        Write-Host "Test that keys are configured"
+
+        Execute-RemoteBlock $Script:session {  
+            try {
+                Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+            } catch {
+                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
+                . "$Script:IncludeDir\dot-catch-block.ps1"                
+            }
+    
+            # Ensure last exit code is success
+            cmd /c exit 0
+        }
     }
 
     # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
-    # if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
     ReConnect-Session
 
     Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
@@ -497,6 +523,22 @@ try
             Write-Verbose "$(Log-Date) Switch Internet download security warning back on" | Out-Host
             [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine') | Out-Host
             # Set-ExecutionPolicy restricted -Scope CurrentUser
+        }
+    }
+
+    Write-Host "Test that keys are still configured"
+    if ( $InstallScalable -eq $true ) {
+        Execute-RemoteBlock $Script:session {  
+            try {
+                Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+            } catch {
+                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
+                . "$Script:IncludeDir\dot-catch-block.ps1"                
+            }
+    
+            # Ensure last exit code is success
+            cmd /c exit 0
         }
     }
 

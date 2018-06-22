@@ -81,7 +81,7 @@ try
     #####################################################################################
     Write-Debug "Password: $licensekeypassword_" | Out-Host
     CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
-    CreateLicence "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" $LicenseKeyPassword_ "LANSA Integrator License" "IntegratorLicensePrivateKey" | Out-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Host
 
     #####################################################################################
     Write-output ("$(Log-Date) Shortcuts") | Out-Host

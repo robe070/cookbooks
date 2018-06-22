@@ -727,3 +727,16 @@ function Get-CurrentLineNumber {
 function Get-CurrentFileName { 
     $MyInvocation.ScriptName 
 }
+
+function Test-RegKeyValueIsNotNull {
+    param (
+        [string]$RegKey
+    )
+
+    $RegKeyValue = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $RegKey
+    if ( [ string ]::IsNullOrWhiteSpace($RegKeyValue.$RegKey) ) {
+        throw "$RegKey is empty"
+    } else {
+        Write-Output( "$RegKey has value '$($RegKeyValue.$RegKey)'" ) | Out-Host
+    }
+}
