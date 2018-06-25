@@ -52,8 +52,7 @@ try
 catch
 {
 	$_
-    Write-Error ("License activation error")
-    throw
+    throw "License activation error"
 }
 
 # Successful completion so set Last Exit Code to 0

@@ -31,8 +31,7 @@ function Map-LicenseToUser {
         $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $certname
 
         if ( -not $getCert ) {
-            Write-Output ("$(Log-Date) $certname not found")
-            return
+            throw "$(Log-Date) $certname certificate not found"
         }
 
         $Thumbprint = $getCert.Thumbprint
@@ -72,7 +71,6 @@ function Map-LicenseToUser {
                 Write-Output ("Begin")
                 Write-Output $MachineGuid | fl
                 Write-Output ("End")
-                Write-Error ("One of the following registry keys (values listed above) is invalid: HKLM:\Software\LANSA\$regkeyname, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
                 Write-Output ("")
                 throw ("One of the following registry keys is invalid: HKLM:\Software\LANSA\$regkeyname, HKLM:\Software\LANSA\PriorMachineGuid, HKLM:\SOFTWARE\Microsoft\Cryptography\MachineGuid")
             }
@@ -86,7 +84,6 @@ function Map-LicenseToUser {
                                                     $($PriorMachineGuid.PriorMachineGuid + "$"), $MachineGuid.MachineGuid
                 if ($ScalableLicensePrivateKey.$regkeyname -eq $NewScalableLicensePrivateKey)
                 {
-                    Write-Error ("Prior Machine GUID {0} not found at end of Scalable License Private Key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.$regkeyname)
                     throw ("Prior Machine GUID {0} not found at end of Scalable License Private Key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.$regkeyname)
                 }
 
@@ -94,7 +91,6 @@ function Map-LicenseToUser {
             }
             else
             {
-                Write-Error ( "PriorMachine GUID {0} is not in current LANSA Scalable License Private key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.$regkeyname)
                 throw ( "PriorMachine GUID {0} is not in current LANSA Scalable License Private key {1}" -f $PriorMachineGuid.PriorMachineGuid, $ScalableLicensePrivateKey.$regkeyname)
             }
 
@@ -117,11 +113,11 @@ function Map-LicenseToUser {
         $acl.AddAccessRule($accessRule)
         Set-Acl $pkFile $acl
 
-        Write-Output "User $webuser given access to license $certname"
+        Write-GreenOutput "User $webuser given access to license $certname"
     }
     catch
     {
-        Write-Error ($_ | format-list | out-string)
+        Write-RedOutput ($_ | format-list | out-string)
         Write-Output ("")
         throw
     }
