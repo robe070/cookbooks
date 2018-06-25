@@ -340,10 +340,10 @@ try
     # Arguments to pass only if they have a value
     if ( $CompanionInstallPath.Length -gt 0) {
         $Arguments += "COMPANIONINSTALLPATH=`"$CompanionInstallPath`""
-        
+    }
+
     if ( $trusted -eq "NO" ) { 
         $Arguments += @("DBUS=$dbuser", "PSWD=$dbpassword")
-    }
     }
 
     if ( $HTTPPortNumber.Length -gt 0) {
