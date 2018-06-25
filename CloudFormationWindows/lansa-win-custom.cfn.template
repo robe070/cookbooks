@@ -51,7 +51,7 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "08RemoteAccessLocation": {
-            "Description": "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.159.65/32 This is a security feature which limits remote access to your EC2 instances.",
+            "Description": "The IP address range that may be used to remotely access the EC2 instances. Must be a valid IP CIDR range of the form x.x.x.x/x. e.g. 103.231.169.65/32 This is a security feature which limits remote access to your EC2 instances.",
             "Type": "String",
             "MinLength": "9",
             "MaxLength": "18",
@@ -326,7 +326,7 @@
          "eu-west-1": { "64": "ami-124e5974" },
          "eu-west-2": { "64": "ami-8b2730ef" },
          "ap-southeast-1": { "64": "ami-777bfd14" },
-         "ap-southeast-2": { "64": "ami-97d3c7f4" },
+         "ap-southeast-2": { "64": "ami-07f94f4cf36e96017" },
          "ap-south-1": { "64": "ami-371f6358" },
          "ap-northeast-1": { "64": "ami-0a92976d" },
          "ap-northeast-2": { "64": "ami-2fbe6241" },
