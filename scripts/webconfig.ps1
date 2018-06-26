@@ -78,11 +78,16 @@ try
     #####################################################################################
 
     Write-Verbose ("64-bit Application Server Settings")
-    $lansawebKey = "HKLM:\Software\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5C$($ApplName)\LANSAWEB"
+    $lansaKey = "HKLM:\Software\LANSA\C:%5CPROGRAM%20FILES%20(X86)%5C$($ApplName)"
+    $lansawebKey = "$lansakey\LANSAWEB"
 
-    if (!(Test-Path -Path $lansawebkey))
+    if (!(Test-Path -Path $lansakey))
     {
-        New-Item -Path $lansawebKey
+        New-Item -Path $lansaKey -ErrorAction 'Stop' | format-list
+        if (!(Test-Path -Path $lansawebkey))
+        {
+            New-Item -Path $lansawebKey -ErrorAction 'Stop' | format-list
+        }
     }
     Write-Output("Set Maximum Concurrent Users (MAXUSERS) to Unlimited (0)" )
     New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '0' -Force  | Out-Null
@@ -175,6 +180,7 @@ try
 }
 catch
 {
-    Write-Error ("Webconfig failed")
+    $_
+    throw "Webconfig failed"
     cmd /c exit 2
 }

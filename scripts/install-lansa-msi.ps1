@@ -38,7 +38,7 @@ param(
 [String]$MSIuri,
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
-[String]$ApplName = "MyApp",
+[String]$ApplName = "LANSA",
 [String]$CompanionInstallPath = "",
 [String]$HTTPPortNumber = "",
 [String]$HostRoutePortNumber = "",
