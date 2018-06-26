@@ -398,9 +398,7 @@ try
     if ( -not $CompanionInstall ) {
         Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
-        Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-        Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-        Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+        &"$Script:IncludeDir\activate-all-licenses.ps1"  $webuser
 
         Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
         

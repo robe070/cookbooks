@@ -29,13 +29,8 @@ else
 	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
-
 # Put first output on a new line in cfn_init log file
 Write-Output ("`r`n")
-
-
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
 
 Write-Debug ("webuser = $webuser")
 
@@ -43,15 +38,23 @@ try
 {
 	Write-output ("Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
-	Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	# Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+    [string[][]]$Keys = @(@("LANSA Scalable License", "ScalableLicensePrivateKey"), @("LANSA Integrator License", "IntegratorLicensePrivateKey"), @("LANSA Development License", "DevelopmentLicensePrivateKey") )
+    foreach ( $LicensePrivateKey in $Keys ) {
+        $LicensePrivateKey[0]
+        $LicensePrivateKey[1]
+        $LicensePrivateKeyValue = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name $LicensePrivateKey[1] -ErrorAction SilentlyContinue
+        if ( $LicensePrivateKeyValue ) {
+            Map-LicenseToUser $LicensePrivateKey[0] $LicensePrivateKey[1] $webuser
+        } else {
+            Write-Warning "$(LOG-DATE) $($LicensePrivateKey[1]) not installed"
+        }
+    }
 
     Write-Output ("License activation completed successfully")
 }
 catch
 {
-	$_
+    cmd /c exit 1
     throw "License activation error"
 }
 

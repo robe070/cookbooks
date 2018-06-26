@@ -18,12 +18,14 @@ Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" "PC
 
 #>
 function Map-LicenseToUser {
-   Param (
-	   [string]$certname,
-	   [string]$regkeyname,
-	   [string]$webuser
-   )
-
+    Param (
+        [string]$certname,
+        [string]$regkeyname,
+        [string]$webuser
+    )
+ 
+    Import-Module "$($script:IncludeDir)\Modules\NTFSSecurity"
+ 
     try
     {
         $keyPath = "C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\"
@@ -98,6 +100,12 @@ function Map-LicenseToUser {
 
             # $fullPath=$keyPath+$keyName
             Copy-Item $($KeyPath + $ScalableLicensePrivateKey.$regkeyname) $($KeyPath + $NewScalableLicensePrivateKey)
+
+            # Set ownership of file to Local Admin Group rather than SYSTEM which is typically the current account when CloudFormation runs the script
+            # And if its not changed, then re-running this script manually as Administrator fails when attempting to set the ACLs - see below
+            takeown /a /f $($KeyPath + $NewScalableLicensePrivateKey)
+            # And then give Admins FullControl
+            get-item $($KeyPath + $NewScalableLicensePrivateKey) |  Add-NTFSAccess -account 'BUILTIN\Administrators' -AccessRights FullControl            
         }
         else {
             Write-Verbose ("Private key $NewScalableLicensePrivateKey already exists. Ensure $webuser can access it")
