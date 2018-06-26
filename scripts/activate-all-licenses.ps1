@@ -36,7 +36,7 @@ Write-Debug ("webuser = $webuser")
 
 try
 {
-	Write-output ("Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+	Write-output ("Remap licenses to new instance Guid and set permissions so that $webuser may access them" )
 
     [string[][]]$Keys = @(@("LANSA Scalable License", "ScalableLicensePrivateKey"), @("LANSA Integrator License", "IntegratorLicensePrivateKey"), @("LANSA Development License", "DevelopmentLicensePrivateKey") )
     foreach ( $LicensePrivateKey in $Keys ) {

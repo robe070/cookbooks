@@ -1182,7 +1182,7 @@
                                         "c:\\cfn\\hooks.d\\cfn-icing.conf",
                                         "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
                                         "c:\\cfn\\hooks.d\\cfn-patch.conf",
-                                        "C:\\LANSA\\MyApp.msi"
+                                        "C:\\LANSA\\lansa.msi"
                                     ]
                                 }
                             }
@@ -1621,7 +1621,7 @@
                     },
                     "upgrade-msi": {
                         "files": {
-                            "C:\\LANSA\\MyApp.msi": {
+                            "C:\\LANSA\\lansa.msi": {
                                 "source": { "Ref": "01LansaMSI" }
                             }
                         },
@@ -2197,7 +2197,7 @@
                                         "c:\\cfn\\hooks.d\\cfn-icing.conf",
                                         "c:\\cfn\\hooks.d\\cfn-webconfig.conf",
                                         "c:\\cfn\\hooks.d\\cfn-patch.conf",
-                                        "C:\\LANSA\\MyApp.msi"
+                                        "C:\\LANSA\\lansa.msi"
                                     ]
                                 }
                             }
@@ -2636,7 +2636,7 @@
                     },
                     "upgrade-msi": {
                         "files": {
-                            "C:\\LANSA\\MyApp.msi": {
+                            "C:\\LANSA\\lansa.msi": {
                                 "source": { "Ref": "01LansaMSI" }
                             }
                         },
