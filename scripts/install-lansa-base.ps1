@@ -147,9 +147,9 @@ try
 }
 catch
 {
+    Write-RedOutput "Remote-Script lastexitcode = $lastexitcode" | Out-Host
     Write-RedOutput "install-lansa-base.ps1 is the <No file> in the stack dump below" | Out-Host
-
-    . "$Script:IncludeDir\dot-catch-block.ps1"
+    throw
 }
 
 PlaySound

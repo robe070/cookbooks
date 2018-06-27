@@ -10,5 +10,4 @@
         cmd /c exit 1
     }
 
-    return
 

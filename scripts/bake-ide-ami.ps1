@@ -650,10 +650,13 @@ try
 catch
 {
     . "$Script:IncludeDir\dot-catch-block.ps1"
-    
+
+    Write-Host 'Tidying up'
+    Remove-PSSession $Script:session | Out-Host      
+
     MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
-}
+} 
 
 }
 
