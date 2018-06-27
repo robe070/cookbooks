@@ -75,10 +75,10 @@ try
 
     Write-Debug $ENV:PATH | Out-Host
     
+    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Out-Host
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
     
