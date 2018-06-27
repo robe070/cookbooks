@@ -75,24 +75,24 @@ try
 
     Write-Debug $ENV:PATH | Out-Host
     
-    Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y')  | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'jre8', '-y' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'vscode', '-y' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y' ) | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
     
     # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts. 
     # Required for Windows Server 2012. What happens with 2016?
     # Requires a reboot to be fully installed. Presumed to be done by Windows Updates
     # Commented out because fails to install through this script - install it manually when needed
-    # Run-ExitCode 'choco' @( 'install', 'powershell', '-y' ) | Out-Host
+    # Run-ExitCode 'choco' @( 'install', 'powershell', '-y', '--no-progress' ) | Out-Host
 
     # the --% is so that the rest of the line can use simpler quoting
     # See this link for full help on passing msiexec params through choco: 
     # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
     # This ensures that only English is installed as installing every language does not pass AWS virus checking
-    Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
+    Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
     # JRE often fails to download with a 404, so install it explicitly from AWS S3
     # $jreurl = 'jre-8u172-windows-x64.exe'
