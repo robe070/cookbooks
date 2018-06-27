@@ -23,7 +23,7 @@
             "ConstraintDescription": "Must be either 1 (true) or 0 (false)."
         },
         "StackNumber": {
-            "Description": "The number of this stack. This causes a different git repo to be used for each Application. lansaeval<ApplCount+(StackNumber-1)*10>",
+            "Description": "The number of this stack. This causes a different git repo to be used for each Application. lansaeval<StackNumber><ApplNumber>",
             "Type": "Number",
             "Default": 1
         },
@@ -1570,6 +1570,8 @@
                                             "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
                                             " -ApplNumber ",
                                             { "Ref": "22AppToReinstall" },
+                                            " -StackNumber ",
+                                            { "Ref": "StackNumber" },
                                             " -MSIUri ",
                                             { "Ref": "01LansaMSI" },
                                             " -ApplMSIuri ",
@@ -2583,6 +2585,8 @@
                                         [
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
+                                            " -StackNumber ",
+                                            { "Ref": "StackNumber" },                                            
                                             " -ApplNumber ",
                                             { "Ref": "22AppToReinstall" },
                                             " -MSIUri ",
