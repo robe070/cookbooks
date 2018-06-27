@@ -129,8 +129,11 @@ try
     $Script:msgbox = $null
 
     Write-Host ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
+    $VerbosePreferenceSaved = $VerbosePreference
+    $VerbosePreference = "SilentlyContinue"
     enable-psremoting -SkipNetworkProfileCheck -force
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
+    $VerbosePreference = $VerbosePreferenceSaved
 
     if ( $Win2012 -eq $true ) {
         $Platform = 'Win2012'

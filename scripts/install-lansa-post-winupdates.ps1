@@ -55,7 +55,8 @@ try
 }
 catch
 {
+    $Global:LANSAEXITCODE = $LASTEXITCODE
+    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host    
     Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Host
-    Write-RedOutput "Remote-Script lastexitcode = $lastexitcode" | Out-Host
     throw
 }

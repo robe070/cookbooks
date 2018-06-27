@@ -6,8 +6,7 @@
     Write-Host "" # A seperator line
 
     # Set a default error code
-    if ( $LASTEXITCODE -eq 0 ) {
+    if ( $LASTEXITCODE -and $LASTEXITCODE -eq 0 ) {
         cmd /c exit 1
     }
-
-
+    

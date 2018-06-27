@@ -15,11 +15,11 @@ Requires a running instance thats already beein initialised with git, etc.
 param (
     [Parameter(Mandatory=$false)]
     [string]
-    $instanceid='i-079c2c76f6ca4066a',
+    $instanceid='i-036df655f615fab66',
 
     [Parameter(Mandatory=$false)]
     [string]
-    $PublicDNS='ec2-13-210-98-151.ap-southeast-2.compute.amazonaws.com',
+    $PublicDNS='ec2-54-252-146-21.ap-southeast-2.compute.amazonaws.com',
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -27,7 +27,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $AdminPassword='qajJJsc(aeg7DagKNugCxtnjp%aL;BN$',
+    $AdminPassword='wZqYnW(rpnp=3ln=QiDdeCfDiW6%xQLe',
 
     [Parameter(Mandatory=$false)]
     [string]

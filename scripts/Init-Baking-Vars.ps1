@@ -29,4 +29,6 @@ $Script:DVDDir = 'c:\LanDvdCut'
 # Make non-terminating errors into terminating errors. That is, the script will throw an exception so we know its gone wrong
 $ErrorActionPreference = 'Stop'
 
+cmd /c exit 0       # Set $LASTEXITCODE so it always exists. Saves testing it everywhere
+
 Write-Debug "Variables loaded"

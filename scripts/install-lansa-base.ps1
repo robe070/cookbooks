@@ -75,14 +75,16 @@ try
 
     Write-Debug $ENV:PATH | Out-Host
     
-    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
+    # Chrome had a packaging issue which temporarily required ignoring the checksum.
+    # Re-instate it when next building an image
+    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress', '--ignorechecksum' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Out-Host
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
     
-    # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts. 
+    # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts reliably and completely. 
     # Required for Windows Server 2012. What happens with 2016?
     # Requires a reboot to be fully installed. Presumed to be done by Windows Updates
     # Commented out because fails to install through this script - install it manually when needed
@@ -95,6 +97,7 @@ try
     Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
     # JRE often fails to download with a 404, so install it explicitly from AWS S3
+    # ( Latest choco seems to have fixed this)
     # $jreurl = 'jre-8u172-windows-x64.exe'
     # $jretarget = 'jre-8u172-windows-x64.exe'
     # Run-ExitCode $jre @( '/s' ) | Out-Host
@@ -147,7 +150,8 @@ try
 }
 catch
 {
-    Write-RedOutput "Remote-Script lastexitcode = $lastexitcode" | Out-Host
+    $Global:LANSAEXITCODE = $LASTEXITCODE
+    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host
     Write-RedOutput "install-lansa-base.ps1 is the <No file> in the stack dump below" | Out-Host
     throw
 }

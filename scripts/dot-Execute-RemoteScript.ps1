@@ -27,12 +27,24 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
-    Invoke-command -Session $session -ScriptBlock { $lastexitcode = 0}
+    # Invoke-command -Session $session -ScriptBlock { $Global:LANSAEXITCODE = 0 } # Set $LASTEXITCODE to 0
     Invoke-Command -Session $session -FilePath $FilePath -ArgumentList $ArgumentList
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-        throw "Execute-RemoteScript: LastExitCode: $remotelastexitcode"
-    }      
+    # Sometimes when the remote script throws, its not caught by the local catch block. Instead
+    # the Session is as if its been reset. So if $LASTEXITCODE does not exist, that indicates an
+    # exception has been thrown.
+    # $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { 
+    #     if ( Get-Variable 'LANSAEXITCODE' -Scope Global -ErrorAction 'Ignore') {
+    #         Write-Host '$Global:LANSAEXITCODE value'
+    #         $Global:LANSAEXITCODE 
+    #     } else {
+    #         Write-Host '$Global:LANSAEXITCODE does not exist'
+    #         -1
+    #     }
+    # }
+    # cmd /c exit $remotelastexitcode
+    # if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+    #     throw "Execute-RemoteScript: LastExitCode: $remotelastexitcode"
+    # }      
 }
 
 function Execute-RemoteBlock {
@@ -46,12 +58,7 @@ param (
     $ScriptBlock
     )
 
-    Invoke-command -Session $session -ScriptBlock { $lastexitcode = 0}
     Invoke-Command -Session $session -Scriptblock $ScriptBlock
-    $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-        throw "Execute-RemoteBlock: LastExitCode: $remotelastexitcode"
-    }      
 }
 
 function Execute-RemoteInit {
