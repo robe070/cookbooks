@@ -180,7 +180,7 @@ function Drop-SqlServerDatabase {
     }
 
     Try {
-        $db = New-Object Microsoft.SqlServer.Management.Smo.Database($SqlServer, $dbname)
+        $db = $sqlserver.Databases.Item($dbname)
         if ( $db ) {
             Write-Output( "Drop any connections to database $dbname")
             Write-Output( "Current connections to $dbname = $($sqlserver.GetActiveDBConnectionCount($dbname))" )
