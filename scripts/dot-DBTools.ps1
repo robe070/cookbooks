@@ -154,29 +154,30 @@ function Drop-SqlServerDatabase {
         $dbpassword
     )
     
+    Write-Verbose ("Server_name = $server_name")
+    Write-Verbose ("dbname = $dbname")
+    Write-Verbose ("dbuser = $dbuser")
+
     # Delete database in SQL Server
     Write-Output ("Deleting database")
 
     # This requires the Powershell SQL Server cmdlets to be imported. This should already be done
     Try {
-        [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer')
+        $SqlServer = new-Object Microsoft.SqlServer.Management.Smo.Server("$Server_name")
 
         if ( -not $dbuser ) {
-            Write-Output( "Trusted Connection" )
-            $ConnectionString = "data source = $Server_name; initial catalog = master; trusted_connection = true;"
+            $SqlServer.ConnectionContext.LoginSecure = $true
         } else {
-            Write-Output( "SQL Authentication" )
-            $ConnectionString = "data source = $Server_name; initial catalog = master; User ID = $dbuser; Password = $dbpassword;"
-        }
-        $ConnectionString
-        $ServerConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
-        $ServerConnection.ConnectionString = $ConnectionString
+            $SqlServer.ConnectionContext.LoginSecure = $false
 
-        $SqlServer = New-Object Microsoft.SqlServer.Management.Smo.Server($ServerConnection)
+            $SqlServer.ConnectionContext.Login = $dbuser
+
+            $SqlServer.ConnectionContext.SecurePassword = convertto-securestring -string $dbpassword -AsPlainText -Force
+        }
     }
     Catch {
         $_
-        Write-Output ("Database connection failed. Is SQL Server running? Are login parameters correct?")
+        Write-RedOutput ("Database connection failed. Is SQL Server running? Are login parameters correct?")
         throw ("Error using SQL Server cmdlets")
     }
 
@@ -192,7 +193,7 @@ function Drop-SqlServerDatabase {
             $db.drop()
             Write-Output( "Database dropped")
         } else {
-            Write-Output( "Database does not exist")
+            Write-RedOutput( "Database does not exist or database connection failed")
         }
     }
     Catch
