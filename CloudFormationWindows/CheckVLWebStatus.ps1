@@ -24,7 +24,7 @@ else
 	Write-Output "$(Log-Date) Environment already initialised"
 }
 
-date
+Write-Output "$(date) AEST"
 
 $a = Get-Date
 Write-Host "$($a.ToUniversalTime()) UTC"
