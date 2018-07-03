@@ -40,13 +40,18 @@ try {
         $stacklist.add($stack) | Out-Null 
     }
     $stacklist.add(10) | Out-Null
-    # $stacklist.add(20) | Out-Null
+    $stacklist.add(20) | Out-Null
     $stacklist.add(30) | Out-Null
 
     $StackError = $false
     Foreach ( $stack in $stacklist) {
         Write-Host "Stack $stack"
-        for ( $appl = 1; $appl -le 10; $appl++ ) {
+        if ( $stack -eq 20 ) {
+            $max = 5
+        } else {
+            $max = 10
+        }
+        for ( $appl = 1; $appl -le $max; $appl++ ) {
             try {
                 $url = "https://eval$stack.paas.lansa.com/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
                 $response = Invoke-WebRequest -Uri $url

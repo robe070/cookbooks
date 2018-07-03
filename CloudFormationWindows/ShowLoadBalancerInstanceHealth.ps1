@@ -75,13 +75,20 @@ if ( $ErrorFound ) {
 Write-Output("Show Auto Scaling Group Health")
 
 # Look at ASG Status too - it can be different when the EC2 instance has been Unhealthy and then becomes Healthy again
+$ELBErrorFound = $ErrorFound
 $ErrorFound = $false
 $ASGInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like 'eval*' } )
 # $ASGInstances | Format-Table
 foreach ( $ASGInstance in $ASGInstances ) {
     if ($ASGInstance.HealthStatus -ne 'HEALTHY' ) {
-        $ErrorFound = $true
-        Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus)" -ForegroundColor 'Red'
+        if ($ELBErrorFound ) {
+            $ErrorFound = $true
+            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus)" -ForegroundColor 'Red'
+        } else {
+            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus). Fixing it now..." -ForegroundColor 'Yellow'
+            Set-ASInstanceHealth -Region "$Region" -HealthStatus Healthy -InstanceId $ASGInstance.InstanceId -ShouldRespectGracePeriod $true
+            Write-FormattedOutput "Run this check again to make sure it worked" -ForegroundColor 'Yellow'
+        }
     } elseif ( -not $ErrorsOnly ) {
         Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId) is $($ASGInstance.HealthStatus)" -ForegroundColor 'White'
     }
@@ -90,7 +97,7 @@ foreach ( $ASGInstance in $ASGInstances ) {
 if ( $ErrorFound ) {
     Write-FormattedOutput "ASG Health Check: One or more EC2 instances are not HEALTHY" -ForegroundColor 'Red'
     Write-Output( 'You are stongly advised to consider running this to fix it: ')
-    Write-Output( '   Set-ASInstanceHealth -HealthStatus Healthy -InstanceId <instance id> -ShouldRespectGracePeriod $false')
+    Write-Output( "   Set-ASInstanceHealth -Region '$Region' -HealthStatus Healthy -InstanceId <instance id> -ShouldRespectGracePeriod " + '$false')
     Write-Output( 'In particular it should be resolved before updating stacks and resuming the ReplaceUnhealthy process')
 } else {
     Write-FormattedOutput "ASG Health Check: All EC2 instances are HEALTHY" -ForegroundColor 'Green'
