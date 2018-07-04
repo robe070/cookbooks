@@ -9,8 +9,8 @@
 date
 
 $Region = 'us-east-1'
-$StackStart = 30
-$StackEnd = 30
+$StackStart = 1
+$StackEnd = 10
 
 try {
 
