@@ -1,33 +1,23 @@
-function Write-FormattedOutput
+$script:IncludeDir = $null
+if ( !$script:IncludeDir)
 {
-    [CmdletBinding()]
-    Param(
-         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object,
-         [Parameter(Mandatory=$False)][ConsoleColor] $BackgroundColor,
-         [Parameter(Mandatory=$False)][ConsoleColor] $ForegroundColor
-    )    
+    # Log-Date can't be used yet as Framework has not been loaded
 
-    # save the current color
-    $bc = $host.UI.RawUI.BackgroundColor
-    $fc = $host.UI.RawUI.ForegroundColor
-
-    # set the new color
-    if($BackgroundColor -ne $null)
-    { 
-       $host.UI.RawUI.BackgroundColor = $BackgroundColor
-    }
-
-    if($ForegroundColor -ne $null)
-    {
-        $host.UI.RawUI.ForegroundColor = $ForegroundColor
-    }
-
-    Write-Output $Object
-  
-    # restore the original color
-    $host.UI.RawUI.BackgroundColor = $bc
-    $host.UI.RawUI.ForegroundColor = $fc
+	Write-Host "Initialising environment - presumed not running through RemotePS"
+	$MyInvocation.MyCommand.Path
+	$script:IncludeDir = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\scripts'
+    Write-Host "Include path $script:IncludeDir"
+	. "$script:IncludeDir\Init-Baking-Vars.ps1"
+	. "$script:IncludeDir\Init-Baking-Includes.ps1"
 }
+else
+{
+	Write-Output "$(Log-Date) Environment already initialised"
+}
+
+$a = Get-Date
+Write-Host "$($a.ToLocalTime()) Local Time"
+Write-Host "$($a.ToUniversalTime()) UTC"
 
 [Boolean]$ErrorsOnly = $true
 [Boolean]$ErrorFound = $false

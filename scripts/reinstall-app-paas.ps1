@@ -95,12 +95,21 @@ try {
     }
     Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
+
     $ApplName = "APP$ApplNumber"
     Write-Output( "$(Log-Date) Uninstalling application $ApplName")
     & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA    
 
     Write-Output( "$(Log-Date) Installing $ApplName")
-    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/lansaeval$StackNumber$ApplNumber.git"    
+
+    if ( $ApplNumber -le 9 ) {
+        $RepoAppIndex = $ApplNumber
+    } else {
+        $RepoAppIndex = 0
+    } 
+    $GitRepoName = "lansaeval$StackNumber$RepoAppIndex"       
+
+    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl $GitRepoName    
    
     if ($LASTEXITCODE -eq 0 ) {
         # No need to perform a reset as the web-alias and port numbers have not changed.

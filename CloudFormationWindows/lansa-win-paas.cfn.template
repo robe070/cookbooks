@@ -2557,7 +2557,7 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
-                                            " -SUDB 1",
+                                            " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
@@ -2619,7 +2619,7 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
-                                            " -SUDB 1",
+                                            " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {

@@ -24,16 +24,15 @@ else
 	Write-Output "$(Log-Date) Environment already initialised"
 }
 
-Write-Output "$(date) AEST"
-
 $a = Get-Date
+Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
 try {
     $404count = 0
     $500count = 0
     $defaultcount = 0
-    $StackStart = 1
+    $StackStart = 10
     $StackEnd = 9
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
@@ -60,7 +59,7 @@ try {
                     200 { }
                     404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
                     500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
-                    default { Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'orange' | Out-Host; $StackError = $true; $defaultcount++ }
+                    default { Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
                 }                  
             } catch {
                 $StackError = $true
@@ -68,7 +67,7 @@ try {
                 switch ($ResponseCode) {
                     404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
                     500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'orange' | Out-Host; $defaultcount++ }
+                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
                 }               
             }
         }
@@ -77,7 +76,17 @@ try {
     $_
 } finally {
     If ( !$StackError ) {
-        Write-GreenOutput "All Apps in stacks $StackStart to $StackEnd in service " | Out-Host
+        Write-Host "All Apps in stacks " -NoNewline
+        $first = $true
+        foreach ( $stack in $stacklist) {
+            if ( $first ) {
+                $first = $false
+            } else {
+                Write-Host ', ' -NoNewline
+            }
+            Write-Host $Stack -NoNewline
+        }
+        Write-Host " are in service"
     } else {
         Write-Output "" | Out-Host
         if ( $404count -gt 0 -or $defaultcount -gt 0  ) {
