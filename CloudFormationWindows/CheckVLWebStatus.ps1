@@ -32,7 +32,7 @@ try {
     $404count = 0
     $500count = 0
     $defaultcount = 0
-    $StackStart = 1
+    $StackStart = 10
     $StackEnd = 9
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
@@ -67,7 +67,7 @@ try {
                 switch ($ResponseCode) {
                     404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
                     500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'orange' | Out-Host; $defaultcount++ }
+                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
                 }               
             }
         }

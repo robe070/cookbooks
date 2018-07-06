@@ -24,23 +24,28 @@ Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
 $ApplCount = 10
-$StackStart = 1
-$StackEnd = 10
+$StackStart = 30
+$StackEnd = 30
 $Region = 'us-east-1'
 For ( $i = $StackStart; $i -le $StackEnd; $i++) {
     Write-Host("stack-name eval$($i)")
 
-    # Reset the GracePeriod so the stack has time to deploy the new apps before the ASG times them out
+    # Stop instances being terminated whilst being updated.
+    # The ASGs are left in this state. This must be changed in order for normal ASG operation to operate.
+    # Running ShowLoadBalancerStatus.ps1 will set the instance back to Healthy so that the ReplaceUnhealthy process
+    # may be presumed.
 
     $ASGInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like "eval$($i)-*" } )
     # $ASGInstances | Format-Table
     foreach ( $ASGInstance in $ASGInstances ) {
-            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId). Resetting Grace Period..." -ForegroundColor 'Yellow'  | Out-Host
+            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId). Suspending ReplaceUnhealthy process..." -ForegroundColor 'Yellow'  | Out-Host
+
             try {
-                Set-ASInstanceHealth -Region "$Region" -HealthStatus Healthy -InstanceId $ASGInstance.InstanceId -ShouldRespectGracePeriod $true   | Out-Host
+                Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("ReplaceUnhealthy")
             } catch {
                 $_
-                Write-FormattedOutput "Error setting Grace Period." -ForegroundColor 'Red'  | Out-Host
+                Write-FormattedOutput "Error suspending ReplaceUnhealthy process." -ForegroundColor 'Red'  | Out-Host
+                exit
             }
     }
     
