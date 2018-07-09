@@ -139,7 +139,19 @@ try
 
     if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
-        (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+        $downloaded = $false
+        $loops = 0
+        while (-not $Downloaded -and ($Loop -le 5) ) {
+            try {
+                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+                $downloaded = $true
+            } catch {
+                if ($loops -gt 5) {
+                    throw "Failed to download $MSIuri from S3"
+                }
+                $loops += 1
+            }
+        }
     }
 
     $DownloadODBCDriver = $true
