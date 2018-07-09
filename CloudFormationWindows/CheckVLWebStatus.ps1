@@ -29,10 +29,11 @@ Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
 try {
+    $Region = 'us-east-1'
     $404count = 0
     $500count = 0
     $defaultcount = 0
-    $StackStart = 10
+    $StackStart = 1
     $StackEnd = 9
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
@@ -43,34 +44,67 @@ try {
     $stacklist.add(30) | Out-Null
 
     $StackError = $false
-    Foreach ( $stack in $stacklist) {
-        Write-Host "Stack $stack"
-        if ( $stack -eq 20 ) {
-            $max = 5
-        } else {
-            $max = 10
-        }
-        for ( $appl = 1; $appl -le $max; $appl++ ) {
-            try {
-                $url = "https://eval$stack.paas.lansa.com/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                $response = Invoke-WebRequest -Uri $url
-                $ResponseCode = $response.StatusCode
-                switch ($ResponseCode) {
-                    200 { }
-                    404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
-                    500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
-                    default { Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                }                  
-            } catch {
-                $StackError = $true
-                $ResponseCode = $_.Exception.Response.StatusCode.Value__
-                switch ($ResponseCode) {
-                    404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
-                    500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                }               
+
+    $FoundInstance = $false
+    # Traverse each ASG for each stack to enumerate all the instances
+    for ($j = 1; $j -le 2; $j++) {
+        # Use a numbered loop so that individual stacks can be updated
+        foreach ( $stack in $stacklist) {
+            # Match on stack name too
+            if ( $J -eq 1 ){
+                $match = "eval$stack-DB*"
+            } else {
+                $match = "eval$stack-Web*"
+            }
+
+            Write-GreenOutput $match | Out-Host
+            $StackInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like $match } )
+
+            if ( $StackInstances){
+                $FoundInstance = $true
+                foreach ( $StackInstance in $StackInstances ) {
+                    $EC2Detail = Get-EC2Instance -Region $Region $StackInstance.InstanceId
+
+                    $IPAddress = $Ec2Detail[0].Instances[0].PublicIpAddress
+                    Write-Host "EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
+                    if ( $stack -eq 20 ) {
+                        $max = 5
+                    } else {
+                        $max = 10
+                    }
+                    for ( $appl = 1; $appl -le $max; $appl++ ) {
+                        Write-Host -NoNewline " $appl"
+                        try {
+                            $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
+                            $response = Invoke-WebRequest -Uri $url
+                            $ResponseCode = $response.StatusCode
+                            switch ($ResponseCode) {
+                                200 { }
+                                404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
+                                500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
+                                default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
+                            }              
+                        } catch {
+                            Write-Host ""
+                            $StackError = $true
+                            $ResponseCode = $_.Exception.Response.StatusCode.Value__
+                            switch ($ResponseCode) {
+                                404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
+                                500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
+                                default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
+                            }               
+                        }
+                    }     
+                    Write-Host ""
+                }
             }
         }
+    }
+
+    if ( -not $FoundInstance ) {
+        $StackError = $true
+        Write-RedOutput "Test failed"  | Out-Host
+        throw "No EC2 instances found"
     }
 } catch {
     $_

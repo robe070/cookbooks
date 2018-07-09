@@ -36,7 +36,7 @@ param(
 [String]$trace = 'N',
 [String]$traceSettings = "ITRO:Y ITRL:4 ITRM:9999999999",
 [String]$StackNumber = "",
-[String]$ApplNumber = "",
+[Decimal]$ApplNumber = "",
 [String]$ApplMSIuri = "",
 [String]$HTTPPortNumber = "",
 [String]$HostRoutePortNumber = "",
@@ -107,9 +107,11 @@ try {
     } else {
         $RepoAppIndex = 0
     } 
-    $GitRepoName = "lansaeval$StackNumber$RepoAppIndex"       
+    $GitRepoName = "lansaeval$StackNumber$RepoAppIndex"    
+    
+    Write-Output( "$(Log-Date) gitreponame $GitRepoName")
 
-    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl $GitRepoName    
+    & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/$($GitRepoName).git"    
    
     if ($LASTEXITCODE -eq 0 ) {
         # No need to perform a reset as the web-alias and port numbers have not changed.
