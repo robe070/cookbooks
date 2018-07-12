@@ -94,6 +94,12 @@ try {
                                 default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
                             }               
                         }
+                        if ( $appl -eq 1) {
+                            # Workaround for IIS Plugin not coping with too many requests when first starting up
+                            # First request causes all the listener connections to be setup
+                            # 15 second is too short. Still get failures.
+                            Start-Sleep 30
+                        }
                     }     
                     Write-Host ""
                 }
@@ -128,6 +134,6 @@ try {
         }
         if ( $404count -gt 0 ){ Write-RedOutput "404 usually means the Listener is not running this is important to fix ASAP. And its simple to fix. Just re-deploy the app"}
         if ( $500count -gt 0 ){ Write-FormattedOutput "500 usually means Free Trial was installed but no app was deployed. Look at git repo and check that there is just the one commit. If thats the case then this error may be ignored." -ForegroundColor 'yellow'}
-        if ( $defaultcount -gt 0 ){ Write-FormattedOutput "Other response codes have unknown cause" -ForegroundColor 'orange'}
+        if ( $defaultcount -gt 0 ){ Write-FormattedOutput "Other response codes have unknown cause" -ForegroundColor 'magenta'}
     }
 }
