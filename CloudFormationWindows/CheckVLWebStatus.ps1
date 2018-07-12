@@ -94,6 +94,12 @@ try {
                                 default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
                             }               
                         }
+                        if ( $appl -eq 1) {
+                            # Workaround for IIS Plugin not coping with too many requests when first starting up
+                            # First request causes all the listener connections to be setup
+                            # 15 second is too short. Still get failures.
+                            Start-Sleep 30
+                        }
                     }     
                     Write-Host ""
                 }
