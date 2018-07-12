@@ -21,7 +21,8 @@ param(
 [String]$maxconnections = '20',
 [String]$userscripthook,
 [String]$ApplName = 'LANSA',
-[Boolean]$Reset = $true
+[Boolean]$Reset = $true,
+[String]$MAXFREE = '9999'
 )
 
 # Put first output on a new line in cfn_init log file
@@ -109,8 +110,8 @@ try
     New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '500' -PropertyType String -Force  | Out-Null
 
     $regkeyname = "MAXFREE"
-    Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Maximum to 2 - this needs to be configurable from the template parameters. Its appropriate for PaaS becasue 10 apps are sharing 1 Plugin which must be set MAXCONNECT=20 because thats what a t2.medium can support. But, the Plugin allows 20 PER APPLICATIONS SERVER. Hence with 10 app servers thats a potential for 200 jobs when the machine can handle only 20. So, idle jobs need to be terminated. Setting this to 2 ensures we won't keep more than 20 running unless more than 2 are active for an app server.")
-    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '2' -PropertyType String -Force  | Out-Null
+    Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Maximum to $MAXFREE - this is currently the same value as MAXCONNECT. This is OK as a default but it really needs to be a template parameter. The resources on an instance need to be shared across the 10 applications. So using t2.medium as an example, that supports 20 concurrent jobs so that means 2 jobs per application ( 20 / 10 ) - if all applications are using their maximum allocation. But they won't be generally. For Paid environments where we can tune the settings and educate customers on the effects, then we can 'over-clock' each application to allow EACH to use the maximum that the instance can support. 20 jobs per app in this example. Obviously, this is momentarily. If each used its maximum comcurrently the machine would be 10 times overloaded. So for such a setup MAXCONNECT would be set to the instance maximum - 20 for this example, and MAXFREE set to the status quo value - 2 for this example. Thus up to 20 may be used momentarily, but once they have stopped being used they will be terminated back to 2 jobs. And MAXCONNECT may be tuned up and down as necessary within this range")
+    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value $MAXFREE -PropertyType String -Force  | Out-Null
 
     #####################################################################################
     # Change MAXCONNECT to reflect max WAM sessions you want running on a Web Server. 
@@ -140,6 +141,11 @@ try
 
             Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections"
         }
+
+        Write-Output( "Setting Restart Delay to 4 seconds so that an app comes online quicker after a 1-Click deployment")
+        (Get-Content $webplugin_file) |
+        Foreach-Object {$_ -replace ";60;",";4;"}  | 
+        Set-Content ($webplugin_file)
     } else {
         Write-Output( "$webplugin_file does not exist. Presumed there is not a plugin running in this system.")
     }

@@ -1793,6 +1793,8 @@
                                             " -UPGD true",
                                             " -maxconnections ",
                                             { "Ref": "12WebServerMaxConnec" },
+                                            " -MAXFREE ",
+                                            { "Ref": "12WebServerMaxConnec" },
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
                                                 "Fn::If": [
@@ -2809,6 +2811,8 @@
                                             " -SUDB 0",
                                             " -UPGD true",
                                             " -maxconnections ",
+                                            { "Ref": "12WebServerMaxConnec" },
+                                            " -MAXFREE ",
                                             { "Ref": "12WebServerMaxConnec" },
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
