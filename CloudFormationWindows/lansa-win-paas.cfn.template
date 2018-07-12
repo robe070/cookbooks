@@ -764,7 +764,7 @@
         "LPCSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable GitDeployHub access and RDP access for LANSA Support in Aus, UK and USA",
+                "GroupDescription": "Enable HTTP, GitDeployHub access and RDP access for LANSA Support in Aus, UK and USA",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -773,6 +773,11 @@
                         "CidrIp": "103.231.169.65/32"
                     },
                     {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumber"},
+                        "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "CidrIp": "103.231.169.65/32"
+                    },                    {
                         "IpProtocol": "tcp",
                         "FromPort": 3389,
                         "ToPort": 3389,
@@ -785,6 +790,11 @@
                         "CidrIp": "50.205.57.62/32"
                     },
                     {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumber"},
+                        "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "CidrIp": "50.205.57.62/32"
+                    },                    {
                         "IpProtocol": "tcp",
                         "FromPort": 3389,
                         "ToPort": 3389,
@@ -797,6 +807,11 @@
                         "CidrIp": "81.134.253.226/32"
                     },
                     {
+                        "IpProtocol": "tcp",
+                        "FromPort": {"Ref":  "19HTTPPortNumber"},
+                        "ToPort": {"Ref":  "19HTTPPortNumber"},
+                        "CidrIp": "81.134.253.226/32"
+                    },                    {
                         "IpProtocol": "tcp",
                         "FromPort": 3389,
                         "ToPort": 3389,
@@ -1777,6 +1792,8 @@
                                             " -SUDB 1",
                                             " -UPGD true",
                                             " -maxconnections ",
+                                            { "Ref": "12WebServerMaxConnec" },
+                                            " -MAXFREE ",
                                             { "Ref": "12WebServerMaxConnec" },
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {
@@ -2794,6 +2811,8 @@
                                             " -SUDB 0",
                                             " -UPGD true",
                                             " -maxconnections ",
+                                            { "Ref": "12WebServerMaxConnec" },
+                                            " -MAXFREE ",
                                             { "Ref": "12WebServerMaxConnec" },
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
                                             {

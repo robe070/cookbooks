@@ -139,7 +139,30 @@ try
 
     if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
-        (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+        $downloaded = $false
+        $TotalFailedDownloadAttempts = 0
+        $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
+        $loops = 0
+        while (-not $Downloaded -and ($Loops -le 10) ) {
+            try {
+                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+                $downloaded = $true
+            } catch {
+                $TotalFailedDownloadAttempts += 1
+                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
+                $loops += 1
+                
+                Write-Output ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
+                
+                if ($loops -gt 10) {
+                    throw "Failed to download $MSIuri from S3"
+                }
+
+                # Pause for 30 seconds. Maybe that will help it work?
+                Start-Sleep 30
+            }
+        }
+    
     }
 
     $DownloadODBCDriver = $true
