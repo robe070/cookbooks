@@ -21,7 +21,8 @@ param(
 [String]$maxconnections = '20',
 [String]$userscripthook,
 [String]$ApplName = 'LANSA',
-[Boolean]$Reset = $true
+[Boolean]$Reset = $true,
+[String]$MAXFREE = '9999'
 )
 
 # Put first output on a new line in cfn_init log file
@@ -110,7 +111,7 @@ try
 
     $regkeyname = "MAXFREE"
     Write-Output("Setting $lansawebKey $RegKeyName Ready To Use Maximum to 2 - this needs to be configurable from the template parameters. Its appropriate for PaaS becasue 10 apps are sharing 1 Plugin which must be set MAXCONNECT=20 because thats what a t2.medium can support. But, the Plugin allows 20 PER APPLICATIONS SERVER. Hence with 10 app servers thats a potential for 200 jobs when the machine can handle only 20. So, idle jobs need to be terminated. Setting this to 2 ensures we won't keep more than 20 running unless more than 2 are active for an app server.")
-    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value '2' -PropertyType String -Force  | Out-Null
+    New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value $MAXFREE -PropertyType String -Force  | Out-Null
 
     #####################################################################################
     # Change MAXCONNECT to reflect max WAM sessions you want running on a Web Server. 
