@@ -140,6 +140,11 @@ try
 
             Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections"
         }
+
+        Write-Output( "Setting Restart Delay to 4 seconds so that an app comes online quicker after a 1-Click deployment")
+        (Get-Content $webplugin_file) |
+        Foreach-Object {$_ -replace ";60;",";4;"}  | 
+        Set-Content ($webplugin_file)
     } else {
         Write-Output( "$webplugin_file does not exist. Presumed there is not a plugin running in this system.")
     }
