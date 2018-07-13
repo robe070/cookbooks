@@ -1,9 +1,7 @@
-# Call the Vl Web Test server module through the load balancer
+# Call the Vl Web Test server module directly on each instance, not through the load balancer
 
 # Could be improved:
 # 1) Also run the web page too - xvlwebtst
-# 2) Run against EVERY instance in a stack, not just the one the LB sends it too.
-#    Requires enumerating the ASG and obtaining the DNS of each instance.
 
 'CheckVLWebStatus.ps1'
 
@@ -57,14 +55,13 @@ try {
     $Region = 'us-east-1'
     $Perpetual = $true
 
-    $StackStart = 10
-    $StackEnd = 1
+    $StackStart = 1
+    $StackEnd = 10
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
         $stacklist.add($stack) | Out-Null 
     }
-    #$stacklist.add(10) | Out-Null
-    #$stacklist.add(20) | Out-Null
+    $stacklist.add(20) | Out-Null
     $stacklist.add(30) | Out-Null
 
     $Loop = 0
@@ -96,6 +93,20 @@ try {
                         $EC2Detail = Get-EC2Instance -Region $Region $StackInstance.InstanceId
 
                         $IPAddress = $Ec2Detail[0].Instances[0].PublicIpAddress
+
+                        try {
+                            # HTTP:80/cgi-bin/probe
+                            $url = "http://$IPAddress/cgi-bin/probe"
+                            $response = Invoke-WebRequest -Uri $url
+                            $ResponseCode = $response.StatusCode                                
+                        } catch {
+                            $StackError = $true
+                            $ResponseCode = $_.Exception.Response.StatusCode.Value__
+                            Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
+                            Start-Sleep 0
+                            break
+                        }
+
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
                         if ( $stack -eq 20 ) {
                             $max = 5
