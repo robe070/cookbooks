@@ -65,10 +65,10 @@ try
     #####################################################################################
 
     Import-Module “sqlps” -DisableNameChecking | Out-Host
-    
+
     Write-Output( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session") | Out-Host
     Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
-    cd "c:"
+    Set-Location "c:"
 
     #####################################################################################
     Write-Output "$(Log-Date) Set local SQL Server to manual" | Out-Host
@@ -88,15 +88,15 @@ try
     #####################################################################################
 
     copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-        
+
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
-    
+
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
 
     Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
-        
+
     Add-TrustedSite "lansa.com" | Out-Host
     Add-TrustedSite "google-analytics.com" | Out-Host
     Add-TrustedSite "googleadservices.com" | Out-Host
@@ -110,7 +110,7 @@ try
 catch
 {
     Write-RedOutput ("$(Log-Date) Installation error") | Out-Host
-    
+
     $Global:LANSAEXITCODE = $LASTEXITCODE
     Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host
 
