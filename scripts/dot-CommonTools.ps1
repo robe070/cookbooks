@@ -288,8 +288,8 @@ DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName
 DSNNew=True
 DSNName=LANSA
 DSNType=2
-DSNDriverType=12
-DSNDriverName=ODBC Driver 11 for SQL Server" | Add-Content $SettingsFile
+DSNDriverType=17
+DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile
 
 if ( $InstallSQLServer -eq $false ) {
 "DatabaseAction=2
