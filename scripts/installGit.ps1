@@ -32,7 +32,7 @@ try {
     if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     {
         Write-Output "Installing Git" | Out-Host
-        Run-ExitCode 'choco' @('install', 'git', '-y', '--no-progress' ) | Out-Host
+        Run-ExitCode 'choco' @('install', 'git', '-y', '--no-progress', '--force' ) | Out-Host
         refreshenv | Out-Host
 
         # Note, the Git install overwrites the current environment so need to modify path here
@@ -74,6 +74,7 @@ try {
 
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
 } catch {
+    $_
     Write-Host "installGit.ps1 is the <No file> in the stack dump below"
     $PSItem.ScriptStackTrace | Out-Host
     if ( $LASTEXITCODE -eq 0 ) {
