@@ -89,6 +89,8 @@ param (
     $Upgrade=$false
     )
 
+    #Requires -RunAsAdministrator
+    
 # set up environment if not yet setup
 if ( -not $script:IncludeDir)
 {
@@ -147,9 +149,7 @@ try
         Write-Verbose ("Test if source of DVD image exists") | Out-Host
         if ( !(Test-Path -Path $LocalDVDImageDirectory) )
         {
-            $errorRecord = New-ErrorRecord System.IO.FileNotFoundException  ObjectNotFound `
-                ObjectNotFound $LocalDVDImageDirectory -Message "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
-            $PSCmdlet.ThrowTerminatingError($errorRecord)
+            throw "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
         }
 
         if ( $Cloud -eq 'AWS' ) {
@@ -655,7 +655,9 @@ catch
     . "$Script:IncludeDir\dot-catch-block.ps1"
 
     Write-Host 'Tidying up'
-    Remove-PSSession $Script:session | Out-Host      
+    if ( Test-Path variable:Script:session ) {
+        Remove-PSSession $Script:session | Out-Host
+    }
 
     MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console

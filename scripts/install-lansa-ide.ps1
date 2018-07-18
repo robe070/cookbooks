@@ -6,8 +6,8 @@ Creates a SQL Server Database then installs from the DVD image
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -46,22 +46,22 @@ else
 }
 
 if (!(Test-Path -Path $Script:ScriptTempPath)) {
-    New-Item -ItemType directory -Path $Script:ScriptTempPath
+    New-Item -ItemType directory -Path $Script:ScriptTempPath | Out-Host
 }
 
 # Put first output on a new line in cfn_init log file
 Write-Host ("`r`n")
 
-$trusted=$true
+# $trusted=$true
 
-Write-Debug ("Server_name = $server_name")
-Write-Debug ("dbname = $dbname")
-Write-Debug ("dbuser = $dbuser")
-Write-Debug ("webuser = $webuser")
-Write-Debug ("32bit = $f32bit")
-Write-Debug ("SUDB = $SUDB")
-Write-Debug ("UPGD = $UPGD")
-Write-Debug ("WAIT = $Wait")
+Write-Debug ("Server_name = $server_name") | Out-Host
+Write-Debug ("dbname = $dbname") | Out-Host
+Write-Debug ("dbuser = $dbuser") | Out-Host
+Write-Debug ("webuser = $webuser") | Out-Host
+Write-Debug ("32bit = $f32bit") | Out-Host
+Write-Debug ("SUDB = $SUDB") | Out-Host
+Write-Debug ("UPGD = $UPGD") | Out-Host
+Write-Debug ("WAIT = $Wait") | Out-Host
 
 try
 {
@@ -83,20 +83,20 @@ try
         $UPGD_bool = $false
     }
 
-    Write-Debug ("UPGD_bool = $UPGD_bool" )
+    Write-Debug ("UPGD_bool = $UPGD_bool" ) | Out-Host
 
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
-    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
+    Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Host
 
     $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+    # $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
 
     # On initial install disable TCP Offloading
 
     if ( -not $UPGD_bool )
     {
-        Disable-TcpOffloading
+        Disable-TcpOffloading | Out-Host
     }
 
     ######################################
@@ -109,11 +109,11 @@ try
 
         Write-Verbose ("Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Host
 
-        Import-Module “sqlps” -DisableNameChecking
+        Import-Module “sqlps” -DisableNameChecking | Out-Host
 
         if ( $SUDB -eq '1' -and -not $UPGD_bool)
         {
-            Create-SqlServerDatabase $server_name $dbname
+            Create-SqlServerDatabase $server_name $dbname | Out-Host
         }
 
         #####################################################################################
@@ -122,12 +122,12 @@ try
 
         if ( Change-SQLProtocolStatus -server $server_name -instance "MSSQLSERVER" -protocol "NP" -enable $true )
         {
-            $service = get-service "MSSQLSERVER"  
-            restart-service $service.name -force #Restart SQL Services 
+            $service = get-service "MSSQLSERVER"
+            restart-service $service.name -force  | Out-Host    #Restart SQL Services
         }
 
         Write-Verbose ("Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Host
-        cd "c:"
+        Set-Location "c:"
     }
 
     if ($f32bit_bool)
@@ -146,9 +146,9 @@ try
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Write-Host
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Out-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Write-Host
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Out-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -161,11 +161,11 @@ try
         Write-Host ("$(Log-Date) Installing all EPCs")
         #####################################################################################
 
-        cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Write-Host
+        cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Out-Host
         if ( $LastExitCode -ne 0 )
         {
             throw
-        }        
+        }
     }
     else
     {
@@ -184,9 +184,9 @@ try
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Host
+        cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Out-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Host
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Out-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -200,15 +200,15 @@ try
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator" | Write-Host
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator"  | Out-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Host
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Out-Host
     }
     if ( $LastExitCode -ne 0 )
     {
         throw
     }
-    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart"
+    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart" | Out-Host
 
     Write-Host "$(Log-Date) IDE Installation completed"
     Write-Host ""
@@ -246,12 +246,12 @@ try
 
         $import = "$script:IncludeDir\..\Tests\WAMTest"
         $x_dir = "$APPA\x_win95\x_lansa\execute"
-        cd $x_dir | Out-Host
+        Set-Location $x_dir | Out-Host
         cmd /c "x_run.exe" "PROC=*LIMPORT" "LANG=$Language" "PART=DEX" "USER=$webuser" "DBIT=MSSQLS" "DBII=$dbname" "DBTC=Y" "ALSC=NO" "BPQS=Y" "EXPR=$import" "LOCK=NO" | Out-Host
 
         if ( $LastExitCode -ne 0 -or (Test-Path -Path $x_err) )
         {
-            Write-Verbose ("Signal to caller that the import has failed")
+            Write-Verbose ("Signal to caller that the import has failed") | Out-Host
 
             throw "$x_err exists or an exception has been thrown which indicate an installation error has occurred whilst importing $import."
         }
@@ -263,27 +263,27 @@ try
         # Sysprep file needs to be put in a specific place for AWS. But on Azure we cannot use an unattend file
         if ( $Cloud -eq "AWS" ) {
             if ( Test-Path "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml" ) {
-                copy "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml"
+                Copy-Item "$Script:GitRepoPath/scripts/sysprep2008.xml" "$ENV:ProgramFiles\amazon\Ec2ConfigService\sysprep2008.xml" | Out-Host
             }
         }
 
         $StartHereHtm = "CloudStartHere$Language.htm"
-        copy "$Script:GitRepoPath/scripts/$StartHereHtm" "$ENV:ProgramFiles\CloudStartHere.htm"
+        Copy-Item "$Script:GitRepoPath/scripts/$StartHereHtm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
 
         switch ($Language) {
-            'FRA' { 
+            'FRA' {
                 $StartHereLink = "Commencer ici"
                 $EducationLink = "Education"
                 $QuickConfigLink = "LANSA configuration rapide"
                 $InstallEPCsLink = "Installer les EPCs"
             }
-            'JPN' { 
+            'JPN' {
                 $StartHereLink = "ここから開始"
                 $EducationLink = "教育"
                 $QuickConfigLink = "LANSA クイック    構成"
                 $InstallEPCsLink = "EPC をインストール"
             }
-            default{ 
+            default{
                 $StartHereLink = "Start Here"
                 $EducationLink = "Education"
                 $QuickConfigLink = "Lansa Quick Config"
@@ -292,10 +292,10 @@ try
             }
         }
 
-        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized"
-        New-Shortcut "$ENV:ProgramFiles\Internet Explorer\iexplore.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized"
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config"
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true"""
+        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized" | Out-Host
+        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
+        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config" | Out-Host
+        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true""" | Out-Host
 
         if ( $Cloud -eq "AWS" ) {
             # In AWS the administrator user name is known and same as current user so we can launch when administrator user logs in
@@ -306,33 +306,33 @@ try
             $Hive = "HKLM"
         }
 
-        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1"
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
 
         PlaySound
 
-        Add-TrustedSite "*.addthis.com" $Hive
-        Add-TrustedSite "*.adobe.com" $Hive
-        Add-TrustedSite "*.adobe.com" $Hive "https"
-        Add-TrustedSite "*.adobelogin.com" $Hive "https"
-        Add-TrustedSite "*.adobetag.com" $Hive
-        Add-TrustedSite "*.cloudfront.com" $Hive
-        Add-TrustedSite "*.cloudfront.net" $Hive
-        Add-TrustedSite "*.cloudfront.net" $Hive "https"
-        Add-TrustedSite "*.demdex.net" $Hive "https"
-        Add-TrustedSite "*.google.com" $Hive "https"
-        Add-TrustedSite "*.googleapis.com" $Hive "https"
-        Add-TrustedSite "*.google-analytics.com" $Hive
-        Add-TrustedSite "*.google-analytics.com" $Hive "https"
-        Add-TrustedSite "*.googleadservices.com" $Hive
-        Add-TrustedSite "*.img.en25.com" $Hive
-        Add-TrustedSite "*.lansa.com" $Hive
-        Add-TrustedSite "*.myabsorb.com" $Hive
-        Add-TrustedSite "*.myabsorb.com" $Hive "https"
-        Add-TrustedSite "*.gstatic.com" $Hive "https"
-        Add-TrustedSite "*.youtube.com" $Hive
-        Add-TrustedSite "*.youtube.com" $Hive "https"
-        Add-TrustedSite "*.ytimg.com" $Hive "https"
+        Add-TrustedSite "*.addthis.com" $Hive | Out-Host
+        Add-TrustedSite "*.adobe.com" $Hive | Out-Host
+        Add-TrustedSite "*.adobe.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.adobelogin.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.adobetag.com" $Hive | Out-Host
+        Add-TrustedSite "*.cloudfront.com" $Hive | Out-Host
+        Add-TrustedSite "*.cloudfront.net" $Hive | Out-Host
+        Add-TrustedSite "*.cloudfront.net" $Hive "https" | Out-Host
+        Add-TrustedSite "*.demdex.net" $Hive "https" | Out-Host
+        Add-TrustedSite "*.google.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.googleapis.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.google-analytics.com" $Hive | Out-Host
+        Add-TrustedSite "*.google-analytics.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.googleadservices.com" $Hive | Out-Host
+        Add-TrustedSite "*.img.en25.com" $Hive | Out-Host
+        Add-TrustedSite "*.lansa.com" $Hive | Out-Host
+        Add-TrustedSite "*.myabsorb.com" $Hive | Out-Host
+        Add-TrustedSite "*.myabsorb.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.gstatic.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.youtube.com" $Hive | Out-Host
+        Add-TrustedSite "*.youtube.com" $Hive "https" | Out-Host
+        Add-TrustedSite "*.ytimg.com" $Hive "https" | Out-Host
 
         if ( $Cloud -eq "Azure" ) {
             Write-Host "Set JSM Service dependencies"
@@ -341,7 +341,7 @@ try
             cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Host
         }
     } else {
-        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force | Out-Null
+        Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
     }
 
     Write-Host ("$(Log-Date) Installation completed successfully")
@@ -352,7 +352,7 @@ catch
     $Global:LANSAEXITCODE = $LASTEXITCODE
     Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host
 
-    Write-RedOutput "install-lansa-base.ps1 is the <No file> in the stack dump below" | Out-Host
+    Write-RedOutput "install-lansa-ide.ps1 is the <No file> in the stack dump below" | Out-Host
     throw
 }
 finally
@@ -365,7 +365,7 @@ finally
         Write-Host ""
         Write-Host "Press any key to continue ..."
 
-        $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
 }
 

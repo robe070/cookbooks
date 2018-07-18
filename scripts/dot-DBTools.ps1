@@ -25,13 +25,13 @@ function Disable-TcpOffloading
     $IsoLang = (Get-Culture).ThreeLetterISOLanguageName
     $IsoLang
 
-    if ( [System.Environment]::OSVersion.Version.Major -le 6) {
+    if ( [System.Environment]::OSVersion.Version.Major -le 6 -or ([System.Environment]::OSVersion.Version.Major -ge 10)) {
         $EngNicName = 'Ethernet'
         $JpnNicName = 'イーサネット'
     } else {
         $EngNicName = 'Ethernet 2'
         $JpnNicName = 'イーサネット'
-    }        
+    }
 
     switch ( $IsoLang ) {
         'jpn' {$NICName = $JpnNicName }
@@ -50,7 +50,7 @@ function Disable-TcpOffloading
     # Display existing settings:
     Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue
     # Set all the settings required to switch off TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
-    
+
     Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
 
     Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart
@@ -62,7 +62,7 @@ function Disable-TcpOffloading
     } elseif ( $Cloud -eq "Azure" ) {
         Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled"
     }
-    
+
     # Check its worked
     Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue 
     
@@ -188,7 +188,6 @@ function Drop-SqlServerDatabase {
             Write-Output( "Current connections to $dbname = $($sqlserver.GetActiveDBConnectionCount($dbname))" )
             $sqlserver.KillAllProcesses($dbname)
             Write-Output( "Final connections to $dbname = $($sqlserver.GetActiveDBConnectionCount($dbname))" )
-            
             Write-Output( "Dropping database $dbname")
             $db.drop()
             Write-Output( "Database dropped")
@@ -202,28 +201,28 @@ function Drop-SqlServerDatabase {
         throw ("Database drop failed.")
     }
 }
-    
+
 ##################################################################  
 # Function to Enable or Disable a SQL Server Network Protocol 
 ################################################################## 
 function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){ 
- 
+
     $smo = 'Microsoft.SqlServer.Management.Smo.' 
-     
+
     $wmi = new-object ($smo + 'Wmi.ManagedComputer') 
- 
+
     $singleWmi = $wmi | where {$_.Name -eq $server}   
- 
+
     $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$instance']/ServerProtocol[@Name='$protocol']" 
-     
+
     $protocol = $singleWmi.GetSmoObject($uri) 
-     
+
     if ( $protocol.IsEnabled -ne $enable )
     {
         $protocol.IsEnabled = $enable 
-     
+
         $protocol.Alter() 
-     
+
         $protocol 
 
         return $true

@@ -31,7 +31,7 @@ function Write-FormattedOutput
         $host.UI.RawUI.ForegroundColor = $ForegroundColor
     }
 
-    Write-Output $Object
+    Write-Host $Object
   
     # restore the original color
     $host.UI.RawUI.BackgroundColor = $bc
@@ -109,20 +109,20 @@ param (
     $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
     $match = '*' + $Directory + '*'
     $replace = $oldPath + ';' + $Directory 
-    Write-Debug "OldPath = $Oldpath"
-    Write-Debug "match = $match"
-    Write-Debug "replace = $replace"
+    Write-Debug "OldPath = $Oldpath" | Out-Host
+    Write-Debug "match = $match" | Out-Host
+    Write-Debug "replace = $replace" | Out-Host
     if ( $oldpath -notlike $match )
     {
         [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
-        Write-Debug "Machine $EnvVarToSet updated"
+        Write-Debug "Machine $EnvVarToSet updated" | Out-Host
     }
 
     # System Path may be different to remote PS starting environment, so check it separately
     if ( $env:Path -notlike $match )
     {
         $env:Path += ';' + $Directory
-        Write-Debug "local Path updated"
+        Write-Debug "local Path updated" | Out-Host
     }
 
     Propagate-EnvironmentUpdate
@@ -143,7 +143,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Output "$(Log-Date) $Script:instanceid remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:instanceid remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -161,7 +161,7 @@ function Connect-RemoteSessionUri
         Sleep -Seconds 10
     }
 
-    Write-Output "$(Log-Date) $Script:publicDNS remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function ReConnect-Session
@@ -206,7 +206,7 @@ param (
     # 2 = Cancel
     if ( $Response -eq 2 )
     {
-        Write-Output "$(Log-Date) $Script:DialogTitle cancelled"
+        Write-Host "$(Log-Date) $Script:DialogTitle cancelled"
         throw
     }
 
@@ -288,8 +288,8 @@ DatabaseLogDirectory=C:\Program Files\Microsoft SQL Server\MSSQL12.$InstanceName
 DSNNew=True
 DSNName=LANSA
 DSNType=2
-DSNDriverType=12
-DSNDriverName=ODBC Driver 11 for SQL Server" | Add-Content $SettingsFile
+DSNDriverType=17
+DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile
 
 if ( $InstallSQLServer -eq $false ) {
 "DatabaseAction=2
@@ -391,13 +391,13 @@ CompilerType=0
 CompilerSdkDirectory=" | Add-Content $SettingsFile
     }
 
-    Write-Output ("Installing Visual LANSA")
+    Write-Host ("Installing Visual LANSA")
     # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
     # Piping output to anywhere causes powershell to wait until the process completes execution
     if ( $VersionMajor -lt 14 ) {
-        &$installer_file """$SettingsPassword""" """$SettingsFile""" | Write-Output
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" | Out-Host
     } else {
-        &$installer_file """$SettingsPassword""" """$SettingsFile""" """E""" | Write-Output
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" """E""" | Out-Host
     }
 }
 
@@ -498,7 +498,7 @@ function New-ShortCutFile {
 	}
 
   $Link.Save()
-	Write-Output (get-item $LinkPath)
+	Write-Host (get-item $LinkPath)
 }
 
 
@@ -662,34 +662,33 @@ function PlaySound {
 function Run-ExitCode {
     param( [string]$Program, [String[]]$Arguments )
 
-    $ErrorFile = "$($ENV:TEMP)\error.txt"
-    $OutFile = "$($ENV:TEMP)\out.txt"
+    try {
+        # Errors are handled specifically here so don't treat them as terminating errors (which these scripts do by default)
 
-    Remove-Item $OutFile -force -ErrorAction SilentlyContinue
-    Remove-Item $ErrorFile -force -ErrorAction SilentlyContinue
+        $ErrorActionSaved = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
 
-    Write-GreenOutput( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
-    $p = Start-Process -FilePath $Program -ArgumentList $Arguments -Wait -PassThru -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $OutFile
+        $ErrorFile = "$($ENV:TEMP)\error.txt"
+        $OutFile = "$($ENV:TEMP)\out.txt"
 
-    cat $OutFile -ErrorAction SilentlyContinue
-    cat $ErrorFile -ErrorAction SilentlyContinue
-    if ( $p.ExitCode -ne 0 ) {
-        cmd /c exit $p.ExitCode
-        $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
-        # Use Write-Host instead of Write-Error as the latter seemed to produce the message
-        # A positional parameter cannot be found that accepts argument 'Run-ExitCode : choco install jre -y returned error code 1.
-        # At line:79 char:5
-        # +     Run-ExitCode 'choco' @( 'install', 'jre', '-y' ) | Out-Host
-        # +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #     + CategoryInfo          : NotInstalled: (:) [Write-Error], WriteErrorException
-        #     + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,Run-ExitCode      
-        #  
-        # Notice that its a WriteErrorException, so presumably its WriteError thats producing these messages
-        throw $ErrorMessage
-       
-        # $errorRecord = New-ErrorRecord System.Configuration.Install.InstallException RunExitCodeError `
-        #    NotInstalled $p.ExitCode -Message $ErrorMessage
-        # $PSCmdlet.ThrowTerminatingError($errorRecord)
+        Remove-Item $OutFile -force -ErrorAction SilentlyContinue
+        Remove-Item $ErrorFile -force -ErrorAction SilentlyContinue
+
+        Write-GreenOutput( "$(Log-Date) Running $Program $([String]::Join(" ", $Arguments))." )
+        $p = -1     # Set a value in case start-process throws an exception so we throw it cleanly after capturing whatever log messages there may be
+        $p = Start-Process -FilePath $Program -ArgumentList $Arguments -Wait -PassThru -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $OutFile
+    } catch {
+        $_
+    } finally {
+        $ErrorActionPreference = $ErrorActionSaved
+        cat $OutFile -ErrorAction SilentlyContinue
+        cat $ErrorFile -ErrorAction SilentlyContinue
+        if ( $p.ExitCode -ne 0 ) {
+            cmd /c exit $p.ExitCode
+            $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
+
+            throw $ErrorMessage
+        }
     }
 }
 
@@ -737,6 +736,6 @@ function Test-RegKeyValueIsNotNull {
     if ( [ string ]::IsNullOrWhiteSpace($RegKeyValue.$RegKey) ) {
         throw "$RegKey is empty"
     } else {
-        Write-Output( "$RegKey has value '$($RegKeyValue.$RegKey)'" ) | Out-Host
+        Write-Host( "$RegKey has value '$($RegKeyValue.$RegKey)'" )
     }
 }
