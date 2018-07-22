@@ -13,7 +13,7 @@ $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Value
 foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
     $DBWebServerGroup.ResourceId
 
-    # Resume most processes - Leave ReplaceUnhealthy suspended - Ensure that the instance is not terminated just because it is momentarily being updated.
+    # Resume most processes - Leave HealthCheck suspended - Ensure that the instance is not terminated just because it is momentarily being updated.
     # Done this way instead of resuming All and suspending RemoveUnhealthy so that any instances that are unhealthy are not replaced.
-    Resume-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess @("Launch", "AlarmNotification", "HealthCheck", "AZRebalance", "ScheduledActions", "AddToLoadBalancer", "Terminate", "RemoveFromLoadBalancerLowPriority")
+    Resume-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess @("Launch", "AlarmNotification", "ReplaceUnhealthy", "AZRebalance", "ScheduledActions", "AddToLoadBalancer", "Terminate", "RemoveFromLoadBalancerLowPriority")
 }

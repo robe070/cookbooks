@@ -110,11 +110,11 @@ try {
     # Resume processes
     # *****************************************************************************
 
-    Write-Output "$(date) Suspend ReplaceUnhealthy process due to mysterious termination of instances"
+    Write-Output "$(date) Suspend HealthCheck process due to mysterious termination of instances"
     foreach ( $ASG in $ASG_DB ) {
         $ASG
          
-        Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASG -ScalingProcess @("ReplaceUnhealthy")
+        Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASG -ScalingProcess @("HealthCheck")
     }
 } catch {
     $_
