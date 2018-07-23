@@ -398,6 +398,11 @@ try
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue
     
+    if ( ($SUDB -ne '1') ) {
+        Write-Output ("$(Log-Date) Waiting for Database tables to be created...")
+        Start-Sleep -s 60
+    }
+
     if ( $UPGD_bool )
     {
         Write-Output ("$(Log-Date) Upgrading LANSA")
