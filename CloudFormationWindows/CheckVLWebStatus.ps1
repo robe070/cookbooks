@@ -63,7 +63,7 @@ try {
     }
     $stacklist.add(10) | Out-Null
     #$stacklist.add(20) | Out-Null
-    #$stacklist.add(30) | Out-Null
+    $stacklist.add(30) | Out-Null
 
     $Loop = 0
     do {
