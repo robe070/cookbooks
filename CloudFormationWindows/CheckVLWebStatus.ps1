@@ -56,13 +56,14 @@ try {
     $Perpetual = $true
 
     $StackStart = 1
-    $StackEnd = 10
+    $StackEnd = 2
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
         $stacklist.add($stack) | Out-Null 
     }
-    $stacklist.add(20) | Out-Null
-    $stacklist.add(30) | Out-Null
+    $stacklist.add(10) | Out-Null
+    #$stacklist.add(20) | Out-Null
+    #$stacklist.add(30) | Out-Null
 
     $Loop = 0
     do {
