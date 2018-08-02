@@ -1,7 +1,6 @@
-# Replace all EC2 instances whose launch configuration has change so that template changes are applied to all evaluation instances
+# Replace all EC2 instances so that template changes are applied to all evaluation instances
 # E.g. Security Group changes require a new ASG launch configuration
-# List all EC2 instances that have an empty LaunchConfigurationName which indicates the stack update
-# has introduced a change which requires the ASG instance to be terminated and re-created.
+# List all EC2 instances.
 # This should be done in a controlled manner using ReplaceAllEc2InstancesEvalStacks.ps1. At least one
 # instance is left in service. Use ShowLoadBalancerInstanceHealth.ps1 to check that all instances are 
 # In Service before running ReplaceAllEc2InstancesEvalStacks.ps1
@@ -25,17 +24,18 @@ try {
         $ASGS = @()
 
         # Use a numbered loop so that individual stacks can be updated
-        # Note that if the LaunchConfigurationName is not empty then nothing is done.
+        # Note that ALL instances are ALWAYS terminated. 
 
         for ( $i = $StackStart; $i -le $StackEnd; $i++) {
             # Match on stack name too
             if ( $J -eq 1 ){
                 $match = "eval$i-DB*"
+                & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $i
             } else {
                 $match = "eval$i-Web*"
             }
 
-            $StackInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like $match -and [string]::IsNullOrEmpty($_.LaunchConfigurationName) } )
+            $StackInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like $match } )
 
             if ( $StackInstances){
                 Write-Output( "$(date) Instances to be terminated...")
@@ -46,7 +46,7 @@ try {
                     $ASG = $StackInstance.AutoScalingGroupName
                     $ASGs += $ASG
 
-                    # Ensure that the ASG is free to behave normally by resuning all autoscaling processes
+                    # Ensure that the ASG is free to behave normally by resuming all autoscaling processes
                     Resume-ASProcess -Region $Region -AutoScalingGroupName $ASG
 
                     # Keep a list of all the LoadBalancers
@@ -107,14 +107,11 @@ try {
     }
 
     # *****************************************************************************
-    # Resume processes
+    # Resume stacks
     # *****************************************************************************
 
-    Write-Output "$(date) Suspend HealthCheck process due to mysterious termination of instances"
-    foreach ( $ASG in $ASG_DB ) {
-        $ASG
-         
-        Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASG -ScalingProcess @("HealthCheck")
+    for ( $i = $StackStart; $i -le $StackEnd; $i++) {
+        & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "ResumeStack.ps1") -Stack $i
     }
 } catch {
     $_
