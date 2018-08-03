@@ -32,19 +32,19 @@ For ( $i = $StackStart; $i -le $StackEnd; $i++) {
 
     # Stop instances being terminated whilst being updated.
     # The ASGs are left in this state. This must be changed in order for normal ASG operation to operate.
-    # Running ShowLoadBalancerStatus.ps1 will set the instance back to Healthy so that the ReplaceUnhealthy process
+    # Running ShowLoadBalancerStatus.ps1 will set the instance back to Healthy so that the HealthCheck process
     # may be presumed.
 
     $ASGInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like "eval$($i)-*" } )
     # $ASGInstances | Format-Table
     foreach ( $ASGInstance in $ASGInstances ) {
-            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId). Suspending ReplaceUnhealthy process..." -ForegroundColor 'Yellow'  | Out-Host
+            Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId). Suspending HealthCheck process..." -ForegroundColor 'Yellow'  | Out-Host
 
             try {
-                Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("ReplaceUnhealthy")
+                Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("HealthCheck")
             } catch {
                 $_
-                Write-FormattedOutput "Error suspending ReplaceUnhealthy process." -ForegroundColor 'Red'  | Out-Host
+                Write-FormattedOutput "Error suspending HealthCheck process." -ForegroundColor 'Red'  | Out-Host
                 exit
             }
     }

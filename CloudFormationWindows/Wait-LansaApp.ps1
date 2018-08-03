@@ -1,9 +1,29 @@
-# Call the Vl Web Test server module directly on each instance, not through the load balancer
+# Wait for a LANSA Application to be Ready or NotReady
 
-# Could be improved:
-# 1) Also run the web page too - xvlwebtst
+param(
+[Parameter(Mandatory=$true)]
+[String]$StackName,
 
-'CheckVLWebStatus.ps1'
+[Parameter(Mandatory=$true)]
+[String]$App,
+
+[Parameter(Mandatory=$true)]
+[String]$Region,
+
+[Parameter(Mandatory=$false)]
+[Decimal]$Timeout = 1200,                   # Default to wait 1200 seconds = 20 mins
+
+[Parameter(ParameterSetName='Status')] # Continue indefinitely reporting the status
+[switch]$Status,
+
+[Parameter(ParameterSetName='WaitNotReady')] # Wait for ANY httpcode on any instance that is NOT 200
+[switch]$WaitNotReady,
+
+[Parameter(ParameterSetName='WaitReady')] # Wait for 200 on ALL instances in stack
+[switch]$WaitReady
+)
+
+"Wait-LansaApp.ps1"
 
 function Summary {
     If ( !$StackError ) {
@@ -52,18 +72,11 @@ Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
 try {
-    $Region = 'us-east-1'
     $Perpetual = $true
 
-    $StackStart = 1
-    $StackEnd = 2
     [System.Collections.ArrayList]$stacklist = @()
-    For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-        $stacklist.add($stack) | Out-Null 
-    }
-    $stacklist.add(10) | Out-Null
-    #$stacklist.add(20) | Out-Null
-    $stacklist.add(30) | Out-Null
+
+    $stacklist.add($StackName) | Out-Null
 
     $Loop = 0
     do {
@@ -75,14 +88,15 @@ try {
         $Loop++
 
         # Traverse each ASG for each stack to enumerate all the instances
+        # First the DB Instances then the Web Instances
         for ($j = 1; $j -le 2; $j++) {
             # Use a numbered loop so that individual stacks can be updated
             foreach ( $stack in $stacklist) {
                 # Match on stack name too
                 if ( $J -eq 1 ){
-                    $match = "eval$stack-DB*"
+                    $match = "$stack-DB*"
                 } else {
-                    $match = "eval$stack-Web*"
+                    $match = "$stack-Web*"
                 }
 
                 Write-GreenOutput $match | Out-Host
@@ -99,8 +113,13 @@ try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
                             $response = Invoke-WebRequest -Uri $url
-                            $ResponseCode = $response.StatusCode                                
+                            $ResponseCode = $response.StatusCode
                         } catch {
+                            if ( $WaitNotReady ) {
+                                Write-Host( "Stack $StackName App $app is not ready" )
+                                Exit 0
+                            }
+
                             $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
                             Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
@@ -114,41 +133,59 @@ try {
                         } else {
                             $max = 10
                         }
-                        for ( $appl = 1; $appl -le $max; $appl++ ) {
-                            Write-Host -NoNewline " $appl"
-                            try {
-                                $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                                $response = Invoke-WebRequest -Uri $url
-                                $ResponseCode = $response.StatusCode
-                                switch ($ResponseCode) {
-                                    200 { }
-                                    404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
-                                    500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
-                                    default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                                }              
-                            } catch {
-                                Write-Host ""
-                                $StackError = $true
-                                $ResponseCode = $_.Exception.Response.StatusCode.Value__
-                                switch ($ResponseCode) {
-                                    404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
-                                    500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                                }               
+                        Write-Host -NoNewline " $app"
+                        try {
+                            $url = "http://$IPAddress/app$app/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
+                            $response = Invoke-WebRequest -Uri $url
+                            $ResponseCode = $response.StatusCode
+                            switch ($ResponseCode) {
+                                200 { }
+                                404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
+                                500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
+                                default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $app $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
+                            }              
+                        } catch {
+                            if ( $WaitNotReady ) {
+                                Write-Host( "Stack $StackName App $app is not ready" )
+                                Exit 0
                             }
-                            if ( $appl -eq 1) {
-                                # Workaround for IIS Plugin not coping with too many requests when first starting up
-                                # First request causes all the listener connections to be setup
-                                # 15 second is too short. Still get failures.
-                                Start-Sleep 0
-                            }
-                        }     
+
+                            Write-Host ""
+                            $StackError = $true
+                            $ResponseCode = $_.Exception.Response.StatusCode.Value__
+                            switch ($ResponseCode) {
+                                404 { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'red' | Out-Host; $404count++ }
+                                500 { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
+                                default { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
+                            }               
+                        }
+                        if ( $app -eq 1) {
+                            # Workaround for IIS Plugin not coping with too many requests when first starting up
+                            # First request causes all the listener connections to be setup
+                            # 15 second is too short. Still get failures.
+                            Start-Sleep 0
+                        }
                         Write-Host ""
                     }
                 }
             }
         }
-        Summary
+
+        if ( $WaitReady -and (-not $StackError) ) {
+            Write-Host( "Stack $StackName App $app is ready" )
+            exit 0
+        }
+
+        if ( $WaitReady -or $WaitNotReady ) {
+            $TimeDiff = New-TimeSpan $a
+            Write-Host( "Waited $($TimeDiff.TotalSeconds) seconds so far...")
+            if ( $TimeDiff.TotalSeconds -ge $Timeout) {
+                throw "$Timeout second timeout has expired"
+            }
+            Start-Sleep 2   
+        } else {
+            Summary
+        }
     } while ($Perpetual -and $FoundInstance)
 
     if ( -not $FoundInstance ) {
@@ -158,4 +195,5 @@ try {
     }
 } catch {
     $_
+    throw
 }
