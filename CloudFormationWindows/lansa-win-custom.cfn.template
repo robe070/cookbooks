@@ -4,7 +4,7 @@
     "Parameters": {
         "01LansaMSI": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v14.1.1_en-us.msi",
+            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/Test/AWAMAPP_v14.2.1_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "02LansaMSIBitness": {
@@ -58,7 +58,7 @@
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
         },
         "10LansaGitRepoBranch": {
-            "Default": "support/L4W14100_scalable",
+            "Default": "support/L4W14200_scalable",
             "Description": "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type": "String"
         },
