@@ -37,11 +37,11 @@ try {
     $StackInstances = @(Get-ASAutoScalingGroup -Region $Region | where-object {$_.AutoScalingGroupName -like $match } )
 
     foreach ( $ASGInstance in $StackInstances){
-        Write-Host( "$(Log-Date) Resuming process HealthCheck in $($ASGInstance.AutoScalingGroupName)  ")
+        Write-Host( "$(Get-Date) Resuming process HealthCheck in $($ASGInstance.AutoScalingGroupName)  ")
         Resume-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("HealthCheck")
     }
 
-    Write-Host( "$(date) Set the ELB $($StackInstances[0].LoadBalancerNames[0]) health check back to the live values")
+    Write-Host( "$(Get-Date) Set the ELB $($StackInstances[0].LoadBalancerNames[0]) health check back to the live values")
     Set-ELBHealthCheck -Region $Region -LoadBalancerName $StackInstances[0].LoadBalancerNames[0]  -HealthCheck_Interval 90 -HealthCheck_Timeout 30 -HealthCheck_UnhealthyThreshold 5 -HealthCheck_HealthyThreshold 3 -HealthCheck_Target 'HTTP:80/cgi-bin/probe'    
  } catch {
     $_

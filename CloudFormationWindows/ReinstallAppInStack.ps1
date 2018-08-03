@@ -37,7 +37,7 @@ try {
 
     & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $Stack
     
-    Write-GreenOutput( "Re-installing Application $App in stack $stack") | Out-Host
+    Write-GreenOutput( "$(Get-Date) Re-installing Application $App in stack $stack") | Out-Host
 
     aws cloudformation update-stack --stack-name eval$($stack) --region us-east-1 --capabilities CAPABILITY_IAM --use-previous-template `
     --parameters ParameterKey=03ApplCount,UsePreviousValue=true ParameterKey=03DBUsername,UsePreviousValue=true ParameterKey=04DBPassword,UsePreviousValue=true ParameterKey=05WebUser,UsePreviousValue=true ParameterKey=06WebPassword,UsePreviousValue=true ParameterKey=07KeyName,UsePreviousValue=true ParameterKey=08RemoteAccessLocation,UsePreviousValue=true ParameterKey=10LansaGitRepoBranch,UsePreviousValue=true ParameterKey=11WebServerInstanceTyp,UsePreviousValue=true ParameterKey=12WebServerMaxConnec,UsePreviousValue=true ParameterKey=13DBInstanceClass,UsePreviousValue=true ParameterKey=14DBName,UsePreviousValue=true ParameterKey=15DBEngine,UsePreviousValue=true ParameterKey=18WebServerCapacity,UsePreviousValue=true ParameterKey=19DBAllocatedStorage,UsePreviousValue=true ParameterKey=20DBIops,UsePreviousValue=true ParameterKey=DomainName,UsePreviousValue=true ParameterKey=DomainPrefix,UsePreviousValue=true ParameterKey=StackNumber,UsePreviousValue=true ParameterKey=WebServerGitRepo,UsePreviousValue=true `
@@ -56,6 +56,9 @@ try {
     # Wait for application to NOT be ready before checking its back online
     Write-GreenOutput( "Wait until Stack eval$($stack) app $app is NOT ready before checking if its back online") | Out-Host
     & "$script:InvocationDir\Wait-LansaApp.ps1" -WaitNotReady -Region $Region -Stack "eval$stack" -App $app -Timeout 300
+
+    Write-Host( "$(Get-Date) Wait for 10 minutes so that no activity is occurring whilst install is occurring...")
+    Start-Sleep -S 600
 
     Write-GreenOutput( "Wait until Stack eval$($stack) app $app is back online") | Out-Host
     & "$script:InvocationDir\Wait-LansaApp.ps1" -WaitReady -Region $Region -Stack "eval$stack" -App $app -Timeout 1200
