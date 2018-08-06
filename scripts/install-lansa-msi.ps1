@@ -445,12 +445,12 @@ try
                 Write-Host( "$(Log-Date) JSM Service details:")
                 $JSMInstance | format-list | Out-Host
                 $JSMServiceName = $JSMInstance.Name
-                Write-Host( "$(Log-Date) JSM Service name is $ServiceName")
+                Write-Host( "$(Log-Date) JSM Service name is $JSMServiceName")
                 break
             }
         }
 
-        if ( [string]::IsNullOrWhiteSpace( $JSMServiceName) ) {
+        if ( -not [string]::IsNullOrWhiteSpace( $JSMServiceName) ) {
             if ( $Cloud -eq "Azure" ) {
                 Write-Host "$(Log-Date) Set JSM Service dependencies"
                 Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Host
