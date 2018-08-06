@@ -53,7 +53,7 @@ if ( -not $script:IncludeDir)
 {
     # Log-Date can't be used yet as Framework has not been loaded
 
-	Write-Output "Initialising environment - presumed not running through RemotePS"
+	Write-Host "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -62,29 +62,29 @@ if ( -not $script:IncludeDir)
 }
 else
 {
-	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+	Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
 
 # Put first output on a new line in cfn_init log file
-Write-Output ("`r`n")
+Write-Host ("`r`n")
 
 $DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 [String]$trusted = "NO"
 
-Write-Verbose ("Server_name = $server_name")
-Write-Verbose ("dbname = $dbname")
-Write-Verbose ("dbuser = $dbuser")
-Write-Verbose ("webuser = $webuser")
-Write-Verbose ("32bit = $f32bit")
-Write-Verbose ("SUDB = $SUDB")
-Write-Verbose ("UPGD = $UPGD")
-Write-Verbose ("DBUT = $DBUT")
-Write-Verbose ("Password = $dbpassword")
-Write-Verbose ("ApplName = $ApplName")
-Write-Verbose ("CompanionInstallPath = $CompanionInstallPath")
-Write-Verbose ("Wait Handle = $Wait")
+Write-Verbose ("Server_name = $server_name") | Out-Host
+Write-Verbose ("dbname = $dbname") | Out-Host
+Write-Verbose ("dbuser = $dbuser") | Out-Host
+Write-Verbose ("webuser = $webuser") | Out-Host
+Write-Verbose ("32bit = $f32bit") | Out-Host
+Write-Verbose ("SUDB = $SUDB") | Out-Host
+Write-Verbose ("UPGD = $UPGD") | Out-Host
+Write-Verbose ("DBUT = $DBUT") | Out-Host
+Write-Verbose ("Password = $dbpassword") | Out-Host
+Write-Verbose ("ApplName = $ApplName") | Out-Host
+Write-Verbose ("CompanionInstallPath = $CompanionInstallPath") | Out-Host
+Write-Verbose ("Wait Handle = $Wait") | Out-Host
 
 
 try
@@ -108,7 +108,7 @@ try
         $UPGD_bool = $false
     }
 
-    Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" )
+    Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" ) | Out-Host
 
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
@@ -134,25 +134,25 @@ try
     # Docker passes in a local path to the MSI which is mapped to a host volume
     # Just copy it to the standard name - its used to determine if an upgrade or not.
     if ( $Cloud -eq "Docker") {
-        Copy-Item -Path $MSIUri -Destination $installer_file -Force
+        Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Host
     }
 
     if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) ) {
-        Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file")
+        Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
         $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
         $loops = 0
         while (-not $Downloaded -and ($Loops -le 10) ) {
             try {
-                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file)
+                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Host
                 $downloaded = $true
             } catch {
                 $TotalFailedDownloadAttempts += 1
                 New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
                 $loops += 1
                 
-                Write-Output ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
+                Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
                 
                 if ($loops -gt 10) {
                     throw "Failed to download $MSIuri from S3"
@@ -169,7 +169,7 @@ try
     if ( (-not $CompanionInstall) ) {
         if (  ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
             # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
-            Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
+            Write-Host ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
             switch -regex ($DBUT) {
                 "SQLAZURE|MSSQL" {
@@ -195,11 +195,11 @@ try
             }
          } else {
             # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
-            Write-Output ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
+            Write-Host ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
     
             switch -regex ($DBUT) {
                 "SQLAZURE|MSSQL" {
-                    Write-Output( "$(Log-Date) $DBUT ODBC Driver presumed already installed on $Cloud")
+                    Write-Host( "$(Log-Date) $DBUT ODBC Driver presumed already installed on $Cloud")
                     $DownloadODBCDriver = $false
                 }
                 "MYSQL" {
@@ -223,8 +223,8 @@ try
         if ( $DownloadODBCDriver ) {
             $odbc_installer_file = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver.msi" )
             $odbc_installer_file32 = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver32.msi" )
-            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file")
-            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file)
+            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file") | Out-Host
+            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file) | Out-Host
 
             $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
             if ( $p.ExitCode -ne 0 ) {
@@ -235,7 +235,7 @@ try
             }
 
             if ( (test-path variable:\DRIVERURL32) ) {
-                Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32")
+                Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32") | Out-Host
                 (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
 
                 $p = Start-Process -FilePath $odbc_installer_file32 -ArgumentList $Arguments -Wait -PassThru
@@ -252,13 +252,13 @@ try
     # On initial install
 
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker")) {
-        Write-Output ("$(Log-Date) Disable TCP Offloading" )
+        Write-Host ("$(Log-Date) Disable TCP Offloading" )
         Disable-TcpOffloading
 
         # When installing through cloudformation the current user is systemprofile.
         # When GitDeployHub receives a webhook it may be running as administrator
 
-        Write-Output ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
+        Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
         $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
         if ( -not (test-path $KnownHostsDir)) {
             mkdir $KnownHostsDir          
@@ -275,8 +275,8 @@ try
             Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
         }
 
-        Write-Output ("$(Log-Date) Open Windows Firewall for HTTP ports...")
-        Write-Output ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
+        Write-Host ("$(Log-Date) Open Windows Firewall for HTTP ports...")
+        Write-Host ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
         if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
             New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
         }
@@ -292,10 +292,10 @@ try
     #########################################################################################################
 
     if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") { 
-        Write-Output( "$(Log-Date) Using SQL Authentication")
+        Write-Host( "$(Log-Date) Using SQL Authentication")
         $trusted="NO"
     } else {
-        Write-Output( "$(Log-Date) Using trusted connection")
+        Write-Host( "$(Log-Date) Using trusted connection")
         $trusted="YES"
     }
 
@@ -303,28 +303,28 @@ try
     {
         switch ($DBUT) {
             "MSSQLS" {
-                Write-Output ("$(Log-Date) Database Setup work...")
+                Write-Host ("$(Log-Date) Database Setup work...")
 
-                Write-Output ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+                Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later")
+                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Host
 
-                Import-Module “sqlps” -DisableNameChecking
+                Import-Module “sqlps” -DisableNameChecking | Out-Null
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
                     if ( $trusted -eq "NO" ) { 
-                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword
+                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Host
                     } else {
-                        Create-SqlServerDatabase $server_name $dbname
+                        Create-SqlServerDatabase $server_name $dbname | Out-Host
                     }
                 }
 
-                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly")
+                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Host
                 cd "c:"
             }
             default {
-                Write-Output ("$(Log-Date) Database presumed to exist")
+                Write-Host ("$(Log-Date) Database presumed to exist")
             }
         }
     }
@@ -332,21 +332,21 @@ try
     if ( -not $CompanionInstall ) {
         if ( -not $UPGD_bool )
         {
-            Start-WebAppPool -Name "DefaultAppPool"
+            Start-WebAppPool -Name "DefaultAppPool" | Out-Host
         }
 
-        Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+        Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
         if ($trace -eq "Y") {
-            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Host
             $env:X_RUN = $traceSettings
         } else {
-            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Host
             $env:X_RUN = ''
         }
     }
     
-    Write-Output ("$(Log-Date) Installing the application")
+    Write-Host ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
     {
@@ -393,25 +393,25 @@ try
         $Arguments += "GITREPOURL=$GitRepoUrl"
     }    
 
-    Write-Output ("$(Log-Date) Arguments = $Arguments")
+    Write-Host ("$(Log-Date) Arguments = $Arguments")
 
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
-    Remove-Item $x_err -Force -ErrorAction SilentlyContinue
+    Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Host
     
     if ( ($SUDB -ne '1') ) {
-        Write-Output ("$(Log-Date) Waiting for Database tables to be created...")
+        Write-Host ("$(Log-Date) Waiting for Database tables to be created...")
         Start-Sleep -s 60
     }
 
     if ( $UPGD_bool )
     {
-        Write-Output ("$(Log-Date) Upgrading LANSA")
+        Write-Host ("$(Log-Date) Upgrading LANSA")
         $Arguments += "CREATENEWUSERFORSERVICE=""Use Existing User"""
         $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
     else
     {
-        Write-Output ("$(Log-Date) Installing LANSA")
+        Write-Host ("$(Log-Date) Installing LANSA")
         $Arguments += "APPA=""$APPA""", "CREATENEWUSERFORSERVICE=""Create New Local User"""
         $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
     }
@@ -424,52 +424,71 @@ try
     }
 
     if ( -not $CompanionInstall ) {
-        Write-output ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
+        Write-Host ("$(Log-Date) Remap licenses to new instance Guid and set permissions so that webuser may access them" )
 
         &"$Script:IncludeDir\activate-all-licenses.ps1"  $webuser
 
-        Write-output ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
+        Write-Host ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
         
-        Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit"
+        Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit" | Out-Host
     }
 
-    if ( (test-path "$APPA\Integrator\Jsminstance\System\Jsmsupp.exe") ) {
-        $JSMServiceName = '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"'
-        if ( $Cloud -eq "Azure" ) {
-            Write-Output "$(Log-Date) Set JSM Service dependencies"
-            Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies"
-            Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service."
-            cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Output
+    $JSMpath = Join-Path $APPA 'Integrator\Jsmadmin\Strjsm.exe'
+    if ( (test-path $JSMpath) ) {
+        $JSM = @(Get-WmiObject win32_service | ?{$_.Name -like 'LANSA Integrator*'} | select Name, DisplayName, State, PathName )
+        # $JSM | format-list | Out-Host
+
+        $JSMServiceName = $null
+        foreach ( $JSMInstance in $JSM) {
+            # $JSMInstance.PathName
+            if ( $JSMInstance.PathName -eq $JSMPath) {
+                Write-Host( "$(Log-Date) JSM Service details:")
+                $JSMInstance | format-list | Out-Host
+                $JSMServiceName = $JSMInstance.Name
+                Write-Host( "$(Log-Date) JSM Service name is $ServiceName")
+                break
+            }
         }
 
-        Write-output ("$(Log-Date) Restart JSM Service to load the new license")
-        cmd /c "sc.exe" "stop" $JSMServiceName
-        cmd /c "sc.exe" "start" $JSMServiceName
+        if ( [string]::IsNullOrWhiteSpace( $JSMServiceName) ) {
+            if ( $Cloud -eq "Azure" ) {
+                Write-Host "$(Log-Date) Set JSM Service dependencies"
+                Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Host
+                Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Host
+                cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Host
+            }
+
+            Write-Host ("$(Log-Date) Restart JSM Service to load the new license")
+            cmd /c "sc.exe" "stop" $JSMServiceName | Out-Host
+            cmd /c "sc.exe" "start" $JSMServiceName | Out-Host
+        } else {
+            throw "JSM service is not installed correctly in $JSMpath"
+        }
     }
 
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
-        Write-Output ("$(Log-Date) Switch off Sentinel ")
+        Write-Host ("$(Log-Date) Switch off Sentinel ")
         New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null 
         New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null 
 
-        [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine")
+        [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Out-Host
     }
         
-    Write-Output ("$(Log-Date) Execute the user script if one has been passed")
+    Write-Host ("$(Log-Date) Execute the user script if one has been passed")
 
     if ($userscripthook)
     {
-        Write-Output ("$(Log-Date) It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
+        Write-Host ("$(Log-Date) It is executed on the first install and for upgrade, so either make it idempotent or don't pass the script name when upgrading")
 
         $UserScriptFile = "C:\LANSA\UserScript.ps1"
-        Write-Output ("$(Log-Date) Downloading $userscripthook to $UserScriptFile")
-        ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile)
+        Write-Host ("$(Log-Date) Downloading $userscripthook to $UserScriptFile")
+        ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile) | Out-Host
 
         if ( Test-Path $UserScriptFile )
         {
-            Write-Output ("$(Log-Date) Executing $UserScriptFile")
+            Write-Host ("$(Log-Date) Executing $UserScriptFile")
 
-            Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook"
+            Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook" | Out-Host
         }
         else
         {
@@ -479,12 +498,12 @@ try
     }
     else
     {
-        Write-Verbose ("User Script not passed")
+        Write-Verbose ("User Script not passed") | Out-Host
     }
 
 
     if ( -not $CompanionInstall ) {
-        iisreset
+        iisreset | Out-Host
     }
 
     #####################################################################################
@@ -496,36 +515,36 @@ try
 
     if ( (Test-Path -Path $x_err) )
     {
-        Write-Verbose ("$(Log-Date) Signal to Cloud log that the installation has failed")
+        Write-Verbose ("$(Log-Date) Signal to Cloud log that the installation has failed") | Out-Host
 
         $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
         Write-Error $ErrorMessage -Category NotInstalled
         throw $ErrorMessage
     }
 
-    Write-Output ("$(Log-Date) Installation completed successfully")
+    Write-Host ("$(Log-Date) Installation completed successfully")
 } catch {
-    Write-Output ("$(Log-Date) Installation error")
+    Write-Host ("$(Log-Date) Installation error")
     $_
     # To show inner exception...
-    Write-Output "$(Log-Date) Exception caught: $($_.Exception)"
+    Write-Host "$(Log-Date) Exception caught: $($_.Exception)"
 
     # Show other details if they exist
     If ($_.Exception.Response) {
         $response = ($_.Exception.Response ).ToString().Trim();
-        Write-Output ("$(Log-Date) Exception.Response $response")
+        Write-Host ("$(Log-Date) Exception.Response $response")
     }
     If ($_.Exception.Response.StatusCode.value__) {
         $htmlResponseCode = ($_.Exception.Response.StatusCode.value__ ).ToString().Trim();
-        Write-Output ("$(Log-Date) ResponseCode $htmlResponseCode")
+        Write-Host ("$(Log-Date) ResponseCode $htmlResponseCode")
     }
     If  ($_.Exception.Message) {
         $exceptionMessage = ($_.Exception.Message).ToString().Trim()
-        Write-Output ("$(Log-Date) Exception.Message $exceptionMessage")
+        Write-Host ("$(Log-Date) Exception.Message $exceptionMessage")
     }
     If  ($_.ErrorDetails.Message) {
         $exceptionDescription = ($_.ErrorDetails.Message).ToString().Trim()
-        Write-Output ("$(Log-Date) ErrorDetails.Message $exceptionDescription")
+        Write-Host ("$(Log-Date) ErrorDetails.Message $exceptionDescription")
     }
     
     #####################################################################################    
@@ -555,23 +574,23 @@ try
         }        
     }
 
-    Write-Output ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")
+    Write-Host ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")
     
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
 }
 finally
 {
-    Write-Output ("$(Log-Date) See $install_log and other files in $ENV:TEMP for more details.")
+    Write-Host ("$(Log-Date) See $install_log and other files in $ENV:TEMP for more details.")
     if ( $Cloud -eq "AWS" ) {
-        Write-Output ("$(Log-Date) Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
+        Write-Host ("$(Log-Date) Also see C:\cfn\cfn-init\data\metadata.json for the CloudFormation template with all parameters expanded.")
     } else {
         if ($Cloud -eq "Azure") {
-            Write-Output ("$(Log-Date) Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
-            Write-Output ("$(Log-Date) and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
+            Write-Host ("$(Log-Date) Also see C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\CustomScriptHandler.log for an overview of the result.")
+            Write-Host ("$(Log-Date) and C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status for the trace of this install.")
         }
     }
 }
 
 # Successful completion so set Last Exit Code to 0
-cmd /c exit 0
+cmd /c exit 0 | Out-Host
