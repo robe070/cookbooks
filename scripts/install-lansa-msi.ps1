@@ -464,6 +464,8 @@ try
         } else {
             throw "JSM service is not installed correctly in $JSMpath"
         }
+    } else {
+        Write-Warning( "$(Log-Date) $JSMpath is not installed") | Out-Host
     }
 
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
