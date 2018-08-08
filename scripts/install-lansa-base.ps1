@@ -47,13 +47,13 @@ try
     
     Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Host
 
-    Write-Output "$(Log-Date) Installing Chef" | Out-Host
+    Write-GreenOutput "$(Log-Date) Installing Chef" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
 
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Out-Host
 
-    Write-Output "$(Log-Date) Running Chef" | Out-Host
+    Write-GreenOutput "$(Log-Date) Running Chef" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
@@ -110,7 +110,7 @@ try
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Out-Host
 
-        # Unzip
+        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Out-Host
         $filePath = $installer_file
         $shell = New-Object -ComObject Shell.Application
         $zipFile = $shell.NameSpace($filePath)
@@ -133,7 +133,13 @@ try
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
+    try {
+        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host 
+    } catch {
+        Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Out-Host
+        Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Out-Host
+        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Out-Host 
+    }
     
 
     # the --% is so that the rest of the line can use simpler quoting
@@ -151,19 +157,19 @@ try
     New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Host
     
     if ( $Cloud -eq "AWS" ) {
-        Write-Output "$(Log-Date) Installing AWS SDK" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AWS SDK" | Out-Host
         &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Propagate-EnvironmentUpdate | Out-Host
     
-        Write-Output "$(Log-Date) Installing AWS CLI" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AWS CLI" | Out-Host
         &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI" | Out-Host
         }
 
     if ( $Cloud -eq "Azure" ) {
-        Write-Output "$(Log-Date) Installing AzCopy" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AzCopy" | Out-Host
         &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Host
     }
 

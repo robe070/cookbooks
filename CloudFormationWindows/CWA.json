@@ -5,7 +5,7 @@
 				"collect_list": [
 					{
 						"file_path": "c:\\program files (x86)\\lansa\\log\\lx_perf.log",
-						"log_group_name": "{{stack_id}}",
+						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-lansa-lx_perf.log"
 					},
 					{
@@ -39,7 +39,7 @@
 						"log_stream_name": "{instance_id}-x_err.log"
 					},
 					{
-						"file_path": "C:\\inetpub\\logs\\LogFiles\\*.log",
+						"file_path": "C:\\inetpub\\logs\\LogFiles\\**\\*.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-iis.log"
 					},
@@ -64,17 +64,17 @@
 						"log_stream_name": "{instance_id}-configuration-validation.log"
 					},
 					{
-						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Ec2Launch.log",
+						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\Ec2Launch.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-Ec2Launch.log"
 					},
 					{
-						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\UserdataExecution.log",
+						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\UserdataExecution.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-UserdataExecution.log"
 					},
 					{
-						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\WallpaperSetup.log",
+						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\WallpaperSetup.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-WallpaperSetup.log"
 					}					
