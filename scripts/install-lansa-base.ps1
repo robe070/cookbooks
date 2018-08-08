@@ -78,8 +78,6 @@ try
     if ( $Cloud -eq "AWS" ) {
         Write-GreenOutput("$(Log-Date) Installing CloudWatch Agent") | Out-Host
 
-        Import-Module Microsoft.PowerShell.Archive | Out-Host
-
         $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip'
         $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.zip' )
         Write-Host ("$(Log-Date) Downloading $CWASetup to $installer_file")
