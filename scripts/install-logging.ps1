@@ -58,7 +58,7 @@ try
 
         # Write-Host ("$(Log-Date) Stopping CloudWatch Agent, if its installed")
 
-        # $CWAController = Join-Path $CWAProgramFiles -ChildPath 'amazon-cloudwatch-agent-ctl.ps1'
+        $CWAController = Join-Path $CWAProgramFiles -ChildPath 'amazon-cloudwatch-agent-ctl.ps1'
         # if ( Test-Path $CWAController ) {
         #     & $CWAController -a stop | Out-Host
         # }
