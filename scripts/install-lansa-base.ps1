@@ -106,6 +106,7 @@ try
         }
 
         $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
+        New-Item $InstallerDirectory -ItemType directory -Force
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Out-Host
 
