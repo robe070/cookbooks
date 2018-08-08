@@ -29,12 +29,12 @@
 						"log_stream_name": "{instance_id}-deployments.log"
 					},
 					{
-						"file_path": "c:\\windows\\temp\\x_trace*.log",
+						"file_path": "c:\\**\\x_trace*.txt",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-x_trace.log"
+						"log_stream_name": "{instance_id}-x_trace.txt"
 					},
 					{
-						"file_path": "c:\\windows\\temp\\x_err.log",
+						"file_path": "c:\\**\\x_err.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-x_err.log"
 					},

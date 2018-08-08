@@ -56,23 +56,27 @@ try
             $CWAProgramData = "${Env:ALLUSERSPROFILE}\Application Data\${CWADirectory}"
         }
 
-        Write-Host ("$(Log-Date) Stopping CloudWatch Agent, if its installed")
+        # Write-Host ("$(Log-Date) Stopping CloudWatch Agent, if its installed")
 
-        $CWAController = Join-Path $CWAProgramFiles -ChildPath 'amazon-cloudwatch-agent-ctl.ps1'
-        if ( Test-Path $CWAController ) {
-            & $CWAController -a stop | Out-Host
-        }
+        # $CWAController = Join-Path $CWAProgramFiles -ChildPath 'amazon-cloudwatch-agent-ctl.ps1'
+        # if ( Test-Path $CWAController ) {
+        #     & $CWAController -a stop | Out-Host
+        # }
+
+        Write-Host ("$(Log-Date) Configuring CloudWatch Agent")
 
         $CWASrcConfig = Join-Path -Path $script:IncludeDir -ChildPath '..\CloudFormationWindows\CWA.json'
         $CWAConfig = Join-Path -Path $CWAProgramData -ChildPath 'CWA.json'
 
         copy-item -Path $CWASrcConfig -Destination $CWAConfig -Force
 
-        Write-Host ("Updating $CWAConfig")
-
         # Use backtick to escape double quotes
-        (Get-Content $CWAConfig) |
-        Foreach-Object {$_ -replace "{stack_id}","$Stack"}  | Set-Content ($CWAConfig)
+
+        Write-Host( "$(Log-Date) Replace LANSA-specific replacement variables")
+
+        (Get-Content $CWAConfig) | Foreach-Object {$_ -replace "{stack_id}","$Stack"}  | Set-Content ($CWAConfig) 
+
+        Write-Host( "$(Log-Date) Apply new configuration file $CWAConfig")
 
         & $CWAController -a fetch-config -m ec2 -c file:$CWAConfig -s | Out-Host
     }
