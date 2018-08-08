@@ -179,6 +179,18 @@ function ReConnect-Session
     Execute-RemoteInitPostGit | Out-Host
 }
 
+function Reboot-Session
+{
+    # Execute Restart-Computer through remote session as executing from local machine is blocked
+    Execute-RemoteBlock $Script:session { 
+        Restart-Computer -force
+    }
+    # Allow computer to stop before attempting a connection
+    Start-Sleep -s 10
+
+    ReConnect-Session
+}
+
 # Returns the button index for testing (Unless its Cancel in which case it throws an error)
 # See https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/windows-scripting/x83z1d9f(v=vs.84)
 # for details
@@ -660,7 +672,7 @@ function PlaySound {
 }
 
 function Run-ExitCode {
-    param( [string]$Program, [String[]]$Arguments )
+    param( [string]$Program, [String[]]$Arguments, [decimal]$ExitCodeException=0 )
 
     try {
         # Errors are handled specifically here so don't treat them as terminating errors (which these scripts do by default)
@@ -683,7 +695,12 @@ function Run-ExitCode {
         $ErrorActionPreference = $ErrorActionSaved
         cat $OutFile -ErrorAction SilentlyContinue
         cat $ErrorFile -ErrorAction SilentlyContinue
-        if ( $p.ExitCode -ne 0 ) {
+        if ( $p -eq -1 ) {
+            cmd /c exit -1
+            $ErrorMessage = "$Program not found in path."
+
+            throw $ErrorMessage
+        } elseif ( $p.ExitCode -ne 0 -and ($p.ExitCode  -ne $ExitCodeException) ) {
             cmd /c exit $p.ExitCode
             $ErrorMessage = "$Program $([String]::Join(" ", $Arguments)) returned error code $($p.ExitCode)."
 

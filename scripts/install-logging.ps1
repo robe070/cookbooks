@@ -43,10 +43,6 @@ Write-Debug ("32bit = $f32bit") | Out-Host
 
 try
 {
-    # Write-Warning ("Disable logging configuration whilst working out how to use CloudWatch Agent")
-    # cmd /c exit 0
-    # return
-
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Host ("$(Log-Date) Running on $Cloud")
 
@@ -66,43 +62,6 @@ try
         if ( Test-Path $CWAController ) {
             & $CWAController -a stop | Out-Host
         }
-
-        Write-Warning("$(Log-Date) Installation of CloudWatch Agent needs to be moved to Baking of the AMI") | Out-Host
-
-        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip'
-        $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.zip' )
-        Write-Host ("$(Log-Date) Downloading $CWASetup to $installer_file")
-        $downloaded = $false
-        $TotalFailedDownloadAttempts = 0
-        $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
-        $loops = 0
-        while (-not $Downloaded -and ($Loops -le 10) ) {
-            try {
-                (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Host
-                $downloaded = $true
-            } catch {
-                $TotalFailedDownloadAttempts += 1
-                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
-                $loops += 1
-
-                Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
-
-                if ($loops -gt 10) {
-                    throw "Failed to download $CWASetup from S3"
-                }
-
-                # Pause for 30 seconds. Maybe that will help it work?
-                Start-Sleep 30
-            }
-        }
-    
-        $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
-        Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Out-Host
-
-        # Installer file MUST be executed with the current directory set to the installer directory
-        $InstallerScript = '.\install.ps1'
-        Set-Location $InstallerDirectory
-        & $InstallerScript | Out-Host
 
         $CWASrcConfig = Join-Path -Path $script:IncludeDir -ChildPath '..\CloudFormationWindows\CWA.json'
         $CWAConfig = Join-Path -Path $CWAProgramData -ChildPath 'CWA.json'

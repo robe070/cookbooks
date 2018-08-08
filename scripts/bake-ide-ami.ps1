@@ -82,6 +82,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
+    $ManualWinUpd=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
     $SkipSlowStuff=$false,
 
     [Parameter(Mandatory=$false)]
@@ -334,7 +338,7 @@ try
         } else {
             Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
             Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-            MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
         }
 
 
@@ -352,7 +356,6 @@ try
         ReConnect-Session
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
-
     } else {
         Execute-RemoteInitPostGit
 
@@ -387,7 +390,7 @@ try
         #####################################################################################
         Write-Host "$(Log-Date) Install SQL Server. (Remote execution does not work)"
         #####################################################################################
-        MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
         #####################################################################################
         Write-Host "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
@@ -428,8 +431,8 @@ try
             if ( $Cloud -eq 'AWS' ) {
                 Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
             } else {
-                MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-                MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
+                $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
             }
         } else {
             Execute-RemoteBlock $Script:session { 
@@ -444,9 +447,13 @@ try
             Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
             Write-Host "$(Log-Date) Windows Updates complete"
         } else {
-            MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-            MessageBox "Run Windows Updates. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
+            $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
+            $dummy = MessageBox "Run Windows Updates. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
         }
+    }
+
+    if ( $ManualWinUpd ) {
+        $dummy = MessageBox "Manually install Windows updates"
     }
 
     ReConnect-Session
@@ -578,7 +585,7 @@ try
                 cmd /c sysprep /oobe /generalize /shutdown | Out-Host;
             }
         } else {
-            MessageBox "Run sysprep manually. When complete, click OK on this message box"    
+            $dummy = MessageBox "Run sysprep manually. When complete, click OK on this message box"    
         }            
     }
 
@@ -648,7 +655,7 @@ try
         } 
     }    
 
-    MessageBox "Image bake successful" 0
+    $dummy = MessageBox "Image bake successful" 0
 }
 catch
 {
@@ -659,7 +666,7 @@ catch
         Remove-PSSession $Script:session | Out-Host
     }
 
-    MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
+    $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 } 
 
