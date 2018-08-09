@@ -16,7 +16,7 @@
 					{
 						"file_path": "c:\\windows\\temp\\lansa.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-lansa-msi.log"
+						"log_stream_name": "{instance_id}-lansa.msilog"
 					},
 					{
 						"file_path": "c:\\windows\\temp\\dpinstal.log",
@@ -36,12 +36,12 @@
 					{
 						"file_path": "c:\\windows\\temp\\app*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-app-msi.log"
+						"log_stream_name": "{instance_id}-app.msilog"
 					},
 					{
 						"file_path": "c:\\windows\\temp\\webserver.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-webserver-msi.log"
+						"log_stream_name": "{instance_id}-webserver.msilog"
 					},
 					{
 						"file_path": "c:\\program files (x86)\\lansa\\log\\lx_perf.log",
