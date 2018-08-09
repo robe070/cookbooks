@@ -4,9 +4,59 @@
 			"files": {
 				"collect_list": [
 					{
+						"file_path": "c:\\windows\\temp\\import*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-import.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\lansainstall*.txt",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-lansainstall.txt"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\lansa.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-lansa-msi.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\dpinstal.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-dpinstal.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\ScriptInstall.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-scriptinstall.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\features.txt",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-features.txt"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\app*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app-msi.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\webserver.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-webserver-msi.log"
+					},
+					{
 						"file_path": "c:\\program files (x86)\\lansa\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-lansa-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\lansa\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-lansa-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\lansa\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-lansa-integrator-license.log"
 					},
 					{
 						"file_path": "c:\\program files (x86)\\app1\\log\\lx_perf.log",
@@ -14,14 +64,154 @@
 						"log_stream_name": "{instance_id}-app1-lx_perf.log"
 					},
 					{
+						"file_path": "c:\\program files (x86)\\app1\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app1-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app1\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app1-integrator-license.log"
+					},
+					{
 						"file_path": "c:\\program files (x86)\\app2\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app2-lx_perf.log"
 					},
 					{
+						"file_path": "c:\\program files (x86)\\app2\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app2-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app2\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app2-integrator-license.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app3\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app3-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app3\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app3-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app3\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app3-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app4\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app4-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app4\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app4-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app4\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app4-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app5\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app5-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app5\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app5-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app5\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app5-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app6\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app6-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app6\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app6-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app6\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app6-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app7\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app7-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app7\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app7-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app7\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app7-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app8\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app8-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app8\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app8-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app8\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app8-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app9\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app9-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app9\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app9-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app9\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app9-integrator-license.log"
+					},					
+					{
+						"file_path": "c:\\program files (x86)\\app10\\log\\lx_perf.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app10-lx_perf.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app10\\Integrator\\Jsmadmin\\Strjsm*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app10-strjsm.log"
+					},
+					{
+						"file_path": "c:\\program files (x86)\\app10\\Integrator\\Jsminstance\\system\\license.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-app10-integrator-license.log"
+					},					
+					{
 						"file_path": "c:\\program files (x86)\\**\\log\\lansaweb.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-lansaweb.log"
+						"log_stream_name": "{instance_id}-app-lansaweb.log"
 					},
 					{
 						"file_path": "c:\\program files (x86)\\**\\deployments.log",
@@ -29,12 +219,17 @@
 						"log_stream_name": "{instance_id}-deployments.log"
 					},
 					{
-						"file_path": "c:\\**\\x_trace*.txt",
+						"file_path": "c:\\windows\\temp\\lansaweb.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-lansaweb.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\x_trace*.txt",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-x_trace.txt"
 					},
 					{
-						"file_path": "c:\\**\\x_err.log",
+						"file_path": "c:\\windows\\temp\\x_err.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-x_err.log"
 					},
@@ -51,7 +246,7 @@
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AWSUpdateWindowsInstance\\**\\*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-WindowsUpdates"
+						"log_stream_name": "{instance_id}-windows-updates"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\logs\\amazon-cloudwatch-agent.log",
@@ -92,7 +287,7 @@
 						],
 						"event_name": "System",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-EventLogSystem"
+						"log_stream_name": "{instance_id}-event-log-system"
 					},
 					{
 						"event_format": "text",
@@ -103,7 +298,7 @@
 						],
 						"event_name": "Application",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-EventLogApplication"
+						"log_stream_name": "{instance_id}-event-log-application"
 					}
 				]
 			}
