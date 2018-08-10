@@ -44,6 +44,46 @@
 						"log_stream_name": "{instance_id}-webserver.msilog"
 					},
 					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\import*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-import.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\lansainstall*.txt",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-lansainstall.txt"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\lansa.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-lansa.msilog"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\dpinstal.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-dpinstal.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\ScriptInstall.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-scriptinstall.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\features.txt",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-features.txt"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\app*.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-app.msilog"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\webserver.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-webserver.msilog"
+					},
+					{
 						"file_path": "c:\\program files (x86)\\lansa\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-lansa-lx_perf.log"
@@ -261,17 +301,17 @@
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\Ec2Launch.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-ec2launch.log"
+						"log_stream_name": "{instance_id}-Ec2Launch.log"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\UserdataExecution.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-userdataexecution.log"
+						"log_stream_name": "{instance_id}-UserdataExecution.log"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\WallpaperSetup.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-wallpapersetup.log"
+						"log_stream_name": "{instance_id}-WallpaperSetup.log"
 					}					
 				]
 			},
