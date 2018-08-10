@@ -9,7 +9,7 @@
 						"log_stream_name": "{instance_id}-import.log"
 					},
 					{
-						"file_path": "c:\\windows\\temp\\lansainstall*.txt",
+						"file_path": "c:\\windows\\temp\\LansaInstall*.txt",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-lansainstall.txt"
 					},
@@ -49,7 +49,7 @@
 						"log_stream_name": "{instance_id}-admin-import.log"
 					},
 					{
-						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\lansainstall*.txt",
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\LansaInstall*.txt",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-admin-lansainstall.txt"
 					},
@@ -301,17 +301,17 @@
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\Ec2Launch.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-Ec2Launch.log"
+						"log_stream_name": "{instance_id}-ec2launch.log"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\UserdataExecution.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-UserdataExecution.log"
+						"log_stream_name": "{instance_id}-userdataexecution.log"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\WallpaperSetup.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-WallpaperSetup.log"
+						"log_stream_name": "{instance_id}-wallpapersetup.log"
 					}					
 				]
 			},
