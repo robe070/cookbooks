@@ -29,10 +29,10 @@ Set-StrictMode -Version Latest
 Bake-IdeMsi -VersionText '14.2 EPC142010' `
             -VersionMajor 14 `
             -VersionMinor 2 `
-            -LocalDVDImageDirectory "a" `
-            -S3DVDImageDirectory "a" `
-            -S3VisualLANSAUpdateDirectory "a" `
-            -S3IntegratorUpdateDirectory "a" `
+            -LocalDVDImageDirectory "n/a" `
+            -S3DVDImageDirectory "n/a" `
+            -S3VisualLANSAUpdateDirectory "n/a" `
+            -S3IntegratorUpdateDirectory "n/a" `
             -AmazonAMIName "Windows_Server-2012-R2_RTM-English-64Bit-SQL_2016_SP1_Express*" `
             -GitBranch "support/L4W14200_scalable"`
             -InstallBaseSoftware $true `

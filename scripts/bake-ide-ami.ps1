@@ -453,7 +453,7 @@ try
     }
 
     if ( $ManualWinUpd ) {
-        $dummy = MessageBox "Manually install Windows updates"
+        $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877"
     }
 
     ReConnect-Session

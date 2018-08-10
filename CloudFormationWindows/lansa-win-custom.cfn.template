@@ -338,7 +338,7 @@
          "eu-west-2": { "win2012": "ami-8d26cfea", "win2016" : "" },
          "eu-west-3": { "win2012": "ami-1eee5e63", "win2016" : "" },
          "ap-southeast-1": { "win2012": "ami-e7b9b49b", "win2016" : "" },
-         "ap-southeast-2": { "win2012": "ami-fafc2498", "win2016" : "ami-00857a1f9e54d8f6a" },
+         "ap-southeast-2": { "win2012": "ami-0470139816fa1bec2", "win2016" : "ami-063c84b9992a58aea" },
          "ap-south-1": { "win2012": "ami-3182b75e", "win2016" : "" },
          "ap-northeast-1": { "win2012": "ami-8f30e0f0", "win2016" : "" },
          "ap-northeast-2": { "win2012": "ami-eb64d185", "win2016" : "" },
