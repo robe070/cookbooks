@@ -4,9 +4,44 @@
 			"files": {
 				"collect_list": [
 					{
-						"file_path": "c:\\windows\\temp\\import*.log",
+						"file_path": "C:\\windows\\Temp\\import.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-import.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importMessages.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importmessages.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importStd_weblets.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importstd_weblets.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importSysImport.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importsysimport.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importSysvars.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importsysvars.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importTechServices.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importtechservices.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importWebResources.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importwebresources.log"
+					},
+					{
+						"file_path": "c:\\windows\\temp\\importWebutil.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-importwebutil.log"
 					},
 					{
 						"file_path": "c:\\windows\\temp\\LansaInstall*.txt",
@@ -44,9 +79,44 @@
 						"log_stream_name": "{instance_id}-webserver.msilog"
 					},
 					{
-						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\import*.log",
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\import.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-admin-import.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importMessages.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importmessages.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importStd_weblets.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importstd_weblets.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importSysImport.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importsysimport.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importSysvars.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importsysvars.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importTechServices.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importtechservices.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importWebResources.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importwebresources.log"
+					},
+					{
+						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\importWebutil.log",
+						"log_group_name": "{stack_id}",
+						"log_stream_name": "{instance_id}-admin-importwebutil.log"
 					},
 					{
 						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\LansaInstall*.txt",
