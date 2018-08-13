@@ -71,12 +71,14 @@
 					{
 						"file_path": "c:\\windows\\temp\\app*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-app.msilog"
+						"log_stream_name": "{instance_id}-app.msilog",
+						"encoding": "utf-16"
 					},
 					{
 						"file_path": "c:\\windows\\temp\\webserver.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-webserver.msilog"
+						"log_stream_name": "{instance_id}-webserver.msilog",
+						"encoding": "utf-16"
 					},
 					{
 						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\import.log",
@@ -146,12 +148,14 @@
 					{
 						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\app*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-admin-app.msilog"
+						"log_stream_name": "{instance_id}-admin-app.msilog",
+						"encoding": "utf-16"
 					},
 					{
 						"file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\webserver.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-admin-webserver.msilog"
+						"log_stream_name": "{instance_id}-admin-webserver.msilog",
+						"encoding": "utf-16"
 					},
 					{
 						"file_path": "c:\\program files (x86)\\lansa\\log\\lx_perf.log",
@@ -212,7 +216,7 @@
 						"file_path": "c:\\program files (x86)\\app3\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app3-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app4\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -227,7 +231,7 @@
 						"file_path": "c:\\program files (x86)\\app4\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app4-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app5\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -242,7 +246,7 @@
 						"file_path": "c:\\program files (x86)\\app5\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app5-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app6\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -257,7 +261,7 @@
 						"file_path": "c:\\program files (x86)\\app6\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app6-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app7\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -272,7 +276,7 @@
 						"file_path": "c:\\program files (x86)\\app7\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app7-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app8\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -287,7 +291,7 @@
 						"file_path": "c:\\program files (x86)\\app8\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app8-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app9\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -302,7 +306,7 @@
 						"file_path": "c:\\program files (x86)\\app9\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app9-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\app10\\log\\lx_perf.log",
 						"log_group_name": "{stack_id}",
@@ -317,7 +321,7 @@
 						"file_path": "c:\\program files (x86)\\app10\\Integrator\\Jsminstance\\system\\license.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-app10-integrator-license.log"
-					},					
+					},
 					{
 						"file_path": "c:\\program files (x86)\\**\\log\\lansaweb.log",
 						"log_group_name": "{stack_id}",
@@ -382,7 +386,7 @@
 						"file_path": "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\log\\WallpaperSetup.log",
 						"log_group_name": "{stack_id}",
 						"log_stream_name": "{instance_id}-wallpapersetup.log"
-					}					
+					}
 				]
 			},
 			"windows_events": {
