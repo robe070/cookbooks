@@ -4,7 +4,7 @@
     "Parameters": {
         "01LansaMSI": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/paas-live/WEBSERVR_v1.0.0_en-us.msi",
+            "Default": "https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi",
             "Description": "URL of the LANSA MSI to install. The MSI must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "WebServerGitRepo": {
@@ -34,7 +34,7 @@
         },
         "03ApplMSIuri": {
             "Type": "String",
-            "Default": "https://s3-ap-southeast-2.amazonaws.com/lansa/app/paas-live",
+            "Default": "https://s3.amazonaws.com/lansa-us-east-1/app/paas-live",
             "Description": "URL of the S3 folder which contains the Application MSIs to install. The filenames in the folder are of the form app<n>_v1.0.0_en-us.msi, where <n> is a number from 1 to Application Count. The MSIs must have been previously uploaded to the specified location in Amazon S3 BLOB storage."
         },
         "03DBUsername": {
@@ -81,6 +81,15 @@
             "Default": "support/L4W14200_paas",
             "Description": "Git branch to checkout from Lansa Git repository. This pulls in the script files which are used to assemble the Icing. This is performed during the initial launch and also everytime a Trigger is fired.",
             "Type": "String"
+        },
+        "11WebserverOSVersion": {
+            "Default": "win2012",
+            "Description": "WebServer Windows operating system version.",
+            "Type": "String",
+            "AllowedValues": [
+                "win2012",
+                "win2016"
+            ]
         },
         "11WebServerInstanceTyp": {
             "Description": "WebServer EC2 instance type. See http://aws.amazon.com/ec2/instance-types/ for more information.",
@@ -337,6 +346,7 @@
          {
            "Label" : { "default":"Web Server Configuration" },
             "Parameters": [
+               "11WebserverOSVersion",
                "11WebServerInstanceTyp",
                "12WebServerMaxConnec",
                "18WebServerCapacity",
@@ -392,6 +402,7 @@
          "15DBEngine": { "default": "SQL Server Engine Type" },
          "19DBAllocatedStorage": { "default": "Maximum Size" },
          "20DBIops": { "default": "I/O OPS" },
+         "11WebserverOSVersion": { "default": "OS Version" },
          "11WebServerInstanceTyp": { "default": "Instance Type" },
          "12WebServerMaxConnec": { "default": "Maximum Web Jobs" },
          "18WebServerCapacity": { "default": "Minimum Number of Instances" },
@@ -420,20 +431,20 @@
    "Mappings"                 : {
       "AWSRegionArch2AMI": {
          "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace. Note that ap-southeast-2 and us-east-1 are the only FREE AMIs" },
-         "us-east-1": { "64": "ami-051fae1574593cf3c" },
-         "us-east-2": { "64": "" },
-         "us-west-1": { "64": "" },
-         "us-west-2": { "64": "" },
-         "ca-central-1": { "64": "" },
-         "eu-central-1": { "64": "" },
-         "eu-west-1": { "64": "" },
-         "eu-west-2": { "64": "" },
-         "ap-southeast-1": { "64": "" },
-         "ap-southeast-2": { "64": "ami-07f94f4cf36e96017" },
-         "ap-south-1": { "64": "" },
-         "ap-northeast-1": { "64": "" },
-         "ap-northeast-2": { "64": "" },
-         "sa-east-1": { "64": "" }
+         "us-east-1": { "win2012": "ami-0537b48168d5ae436", "win2016" : "ami-008c04e32fafc3e3f" },
+         "us-east-2": { "win2012": "", "win2016" : "" },
+         "us-west-1": { "win2012": "", "win2016" : "" },
+         "us-west-2": { "win2012": "", "win2016" : "" },
+         "ca-central-1": { "win2012": "", "win2016" : "" },
+         "eu-central-1": { "win2012": "", "win2016" : "" },
+         "eu-west-1": { "win2012": "", "win2016" : "" },
+         "eu-west-2": { "win2012": "", "win2016" : "" },
+         "ap-southeast-1": { "win2012": "", "win2016" : "" },
+         "ap-southeast-2": { "win2012": "ami-0470139816fa1bec2", "win2016" : "ami-063c84b9992a58aea" },
+         "ap-south-1": { "win2012": "", "win2016" : "" },
+         "ap-northeast-1": { "win2012": "", "win2016" : "" },
+         "ap-northeast-2": { "win2012": "", "win2016" : "" },
+         "sa-east-1": { "win2012": "", "win2016" : "" }
       },
       "Region2Principal" : {
          "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
@@ -491,7 +502,14 @@
        "HasUserScript" : {"Fn::Not" : [{"Condition" : "DoesNotHaveUserScript"}]}
     },
     "Resources": {
-        "IAMRole": {
+      "CloudWatchLogGroup":  {
+           "Type" : "AWS::Logs::LogGroup",
+           "Properties" : {
+               "LogGroupName" : { "Ref": "AWS::StackName" },
+               "RetentionInDays" : 30
+           }
+        },
+          "IAMRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -514,59 +532,15 @@
                         }
                     ]
                 },
-                "Path": "/",
-                "Policies": [
-                    {
-                        "PolicyName": "IAMRolePolicy",
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Sid": "AllowAccessToLogs",
-                                    "Resource": [
-                                        {
-                                            "Fn::Join": [
-                                                "",
-                                                [
-                                                    {
-                                                        "Fn::FindInMap": [
-                                                            "Region2ARNPrefix",
-                                                            { "Ref": "AWS::Region" },
-                                                            "ARNPrefix"
-                                                        ]
-                                                    },
-                                                    "logs:*:*:*"
-                                                ]
-                                            ]
-                                        }
-                                    ],
-                                    "Action": [
-                                        "logs:CreateLogStream",
-                                        "logs:PutLogEvents",
-                                        "logs:DescribeLogGroups",
-                                        "logs:DescribeLogStreams"
-                                    ],
-                                    "Effect": "Allow"
-                                },
-                                {
-                                    "Sid": "PermitAddingToLogs",
-                                    "Resource": [ "*" ],
-                                    "Action": [ "cloudwatch:PutMetricData" ],
-                                    "Effect": "Allow"
-                                },
-                                {
-                                    "Sid": "PermitReadingS3",
-                                    "Resource": [ "arn:aws:s3:::*" ],
-                                    "Action": [
-                                        "s3:Get*",
-                                        "s3:List*"
-                                    ],
-                                    "Effect": "Allow"
-                                }
-                            ]
-                        }
-                    }
-                ]
+                "ManagedPolicyArns": [
+                   "arn:aws:iam::aws:policy/AWSHealthFullAccess",
+                   "arn:aws:iam::aws:policy/AWSConfigUserAccess",
+                   "arn:aws:iam::aws:policy/AmazonSSMFullAccess",
+                   "arn:aws:iam::aws:policy/AWSResourceGroupsReadOnlyAccess",
+                   "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+                   "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+                ],
+                "Path": "/"
             }
         },
         "IAMRoleInstanceProfile": {
@@ -1312,35 +1286,6 @@
                         }
                     },
                     "install-logging": {
-                        "files": {
-                            "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json": {
-                                "source": {
-                                    "Fn::If": [
-                                        "IsReleaseLevel",
-                                        {
-                                            "Fn::Join": [
-                                                "",
-                                                [
-                                                    { "Fn::FindInMap": [ "CustomVariable", "TemplateRoot", "Value" ] },
-                                                    { "Ref": "10LansaGitRepoBranch" },
-                                                    "/AWS.EC2.Windows.CloudWatch.json"
-                                                ]
-                                            ]
-                                        },
-                                        {
-                                            "Fn::Join": [
-                                                "",
-                                                [
-                                                    { "Fn::FindInMap": [ "CustomVariable", "TemplateRoot", "Value" ] },
-                                                    { "Ref": "10LansaGitRepoBranch" },
-                                                    "/beta/AWS.EC2.Windows.CloudWatch.json"
-                                                ]
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        },
                         "commands": {
                             "01_install_logging": {
                                 "command": {
@@ -1353,7 +1298,6 @@
                                             { "Ref": "AWS::StackName" },
                                             " -region ",
                                             { "Ref": "AWS::Region" },
-                                            " - ",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             ";exit $LastExitCode",
@@ -1361,7 +1305,7 @@
                                         ]
                                     ]
                                 },
-                                "waitAfterCompletion": "forever"
+                                "waitAfterCompletion": "0"
                             }
                         }
                     },
@@ -1839,7 +1783,7 @@
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
                         { "Ref": "AWS::Region" },
-                        "64"
+                        { "Ref": "11WebserverOSVersion" }
                     ]
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
@@ -2331,35 +2275,6 @@
                         }
                     },
                     "install-logging": {
-                        "files": {
-                            "c:\\program files\\Amazon\\Ec2ConfigService\\Settings\\AWS.EC2.Windows.CloudWatch.json": {
-                                "source": {
-                                    "Fn::If": [
-                                        "IsReleaseLevel",
-                                        {
-                                            "Fn::Join": [
-                                                "",
-                                                [
-                                                    { "Fn::FindInMap": [ "CustomVariable", "TemplateRoot", "Value" ] },
-                                                    { "Ref": "10LansaGitRepoBranch" },
-                                                    "/AWS.EC2.Windows.CloudWatch.json"
-                                                ]
-                                            ]
-                                        },
-                                        {
-                                            "Fn::Join": [
-                                                "",
-                                                [
-                                                    { "Fn::FindInMap": [ "CustomVariable", "TemplateRoot", "Value" ] },
-                                                    { "Ref": "10LansaGitRepoBranch" },
-                                                    "/beta/AWS.EC2.Windows.CloudWatch.json"
-                                                ]
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        },
                         "commands": {
                             "01_install_logging": {
                                 "command": {
@@ -2372,7 +2287,6 @@
                                             { "Ref": "AWS::StackName" },
                                             " -region ",
                                             { "Ref": "AWS::Region" },
-                                            " - ",
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
                                             ";exit $LastExitCode",
@@ -2380,7 +2294,7 @@
                                         ]
                                     ]
                                 },
-                                "waitAfterCompletion": "forever"
+                                "waitAfterCompletion": "0"
                             }
                         }
                     },
@@ -2858,7 +2772,7 @@
                     "Fn::FindInMap": [
                         "AWSRegionArch2AMI",
                         { "Ref": "AWS::Region" },
-                        "64"
+                        { "Ref": "11WebserverOSVersion" }
                     ]
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
