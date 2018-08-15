@@ -350,22 +350,26 @@
 					{
 						"file_path": "C:\\inetpub\\logs\\LogFiles\\**\\*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-iis.log"
+						"log_stream_name": "{instance_id}-iis.log",
+						"timestamp_format": "%d-%m-%Y %H:%M:%S"
 					},
 					{
 						"file_path": "c:\\cfn\\log\\cfn-init.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-cfn-init.log"
+						"log_stream_name": "{instance_id}-cfn-init.log",
+						"timestamp_format": "%Y-%m-%d %H:%M:%S"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AWSUpdateWindowsInstance\\**\\*.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-windows-updates"
+						"log_stream_name": "{instance_id}-windows-updates",
+						"timestamp_format": "%m/%d/%Y %H:%M:%S"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\logs\\amazon-cloudwatch-agent.log",
 						"log_group_name": "{stack_id}",
-						"log_stream_name": "{instance_id}-amazon-cloudwatch-agent.log"
+						"log_stream_name": "{instance_id}-amazon-cloudwatch-agent.log",
+						"timestamp_format": "%Y-%m-%dT%H:%M:%S"
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\logs\\configuration-validation.log",
