@@ -10,7 +10,7 @@
         "WebServerGitRepo": {
             "Type": "String",
             "Default": "git@github.com:lansa/webserver.git",
-            "Description": "Webserver distribution repo url. May leave blank to NOT be able to update the webserver configuration via 1-click deploy"
+            "Description": "Application distribution repo git url. May leave blank to NOT be able to update the application installation via git"
         },
         "02LansaMSIBitness": {
             "Default": "1",
@@ -252,6 +252,11 @@
             "Default": "1",
             "Description": "Update Stack: Increment this by one to adjust the number of applications installed."
         },
+        "22TriggerAppRepoPull": {
+            "Type": "String",
+            "Default": "1",
+            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo."
+        },
         "22TriggerCakeUpdate": {
             "Type": "String",
             "Default": "1",
@@ -318,6 +323,7 @@
            "Label" : { "default" : "Essential Parameters" },
             "Parameters": [
                "01LansaMSI",
+               "WebServerGitRepo",
                "02LansaMSIBitness",
                "StackNumber",
                "03ApplCount",
@@ -360,9 +366,10 @@
          {
            "Label" : { "default":"Stack Maintenance" },
             "Parameters": [
+               "22TriggerAppUpdate",
                "22TriggerAppReinstall",
                "22AppToReinstall",
-               "22TriggerAppUpdate",
+               "22TriggerAppRepoPull",
                "22TriggerCakeUpdate",
                "23TriggerChefUpdate",
                "24TriggerWinUpdate",
@@ -384,6 +391,7 @@
        ],
       "ParameterLabels": {
          "01LansaMSI": { "default": "Lansa MSI URL" },
+         "WebServerGitRepo": { "default": "Application Distribution repo git url" },
          "02LansaMSIBitness": { "default": "MSI Bitness" },
          "StackNumber": { "default": "Stack Number" },
          "03ApplCount": { "default": "Application Count" },
@@ -414,6 +422,7 @@
          "22TriggerAppReinstall": { "default": "Trigger Application Reinstall" },
          "22AppToReinstall": { "default": "Application To Reinstall" },
          "22TriggerAppUpdate": { "default": "Trigger Application Update" },
+         "22TriggerAppRepoPull": { "default": "Trigger Application Distribution Repo Pull" },
          "22TriggerCakeUpdate": { "default": "Trigger Cake Update" },
          "23TriggerChefUpdate": { "default": "Trigger Chef Update" },
          "24TriggerWinUpdate": { "default": "Trigger Win Update" },
@@ -932,6 +941,7 @@
             "Metadata": {
                 "TriggerAppReinstall": { "Ref": "22TriggerAppReinstall" },
                 "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
+                "TriggerAppRepoPull": { "Ref": "22TriggerAppRepoPull" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
                 "TriggerWebConfig": { "Ref": "25TriggerWebConfig" },
@@ -949,6 +959,7 @@
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
+                        "apprepopull": [ "installing", "git-pull", "apprepopull", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
@@ -1033,6 +1044,25 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r DBLaunchWebServer",
                                             " --configsets update-app ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-AppRepoPull.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-app-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerAppRepoPull\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r DBLaunchWebServer",
+                                            " --configsets AppRepoPull ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -1164,6 +1194,7 @@
                                         "c:\\cfn\\cfn-hup.conf",
                                         "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf",
                                         "c:\\cfn\\hooks.d\\cfn-app.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-apprepopull.conf",
                                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf",
                                         "c:\\cfn\\hooks.d\\cfn-cake.conf",
                                         "c:\\cfn\\hooks.d\\cfn-chef.conf",
@@ -1216,6 +1247,12 @@
                                             "if ( $oldpath -notlike $match )",
                                             "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
                                             "$env:Path;",
+                                            "New-ItemProperty -Path HKLM:\\Software\\LANSA  -Name 'GitBranch' -Value '",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "' -PropertyType String -Force; ",
+                                            "New-ItemProperty -Path HKLM:\\Software\\LANSA  -Name 'GitBranchWebServer' -Value '",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "' -PropertyType String -Force; ",
                                             "cd \\lansa;",
                                             "cmd /C git fetch '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git fetch failed');exit $LastExitCode};",
                                             "cmd /C git checkout -f ",
@@ -1300,6 +1337,26 @@
                                             { "Ref": "AWS::Region" },
                                             " -f32bit ",
                                             { "Ref": "02LansaMSIBitness" },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "apprepopull": {
+                        "commands": {
+                            "01_apprepopull": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\apprepopull.ps1",
+                                            " -gitrepobranch ",
+                                            { "Ref":  "10LansaGitRepoBranch" },
                                             ";exit $LastExitCode",
                                             "}\""
                                         ]
@@ -1920,6 +1977,7 @@
             "Metadata": {
                 "TriggerAppReinstall": { "Ref": "22TriggerAppReinstall" },
                 "TriggerAppUpdate": { "Ref": "22TriggerAppUpdate" },
+                "TriggerAppRepoPull": { "Ref": "22TriggerAppRepoPull" },
                 "TriggerCakeUpdate": { "Ref": "22TriggerCakeUpdate" },
                 "TriggerChefUpdate": { "Ref": "23TriggerChefUpdate" },
                 "TriggerWindowsUpdate": { "Ref": "24TriggerWinUpdate" },
@@ -1938,6 +1996,7 @@
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
                         "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
                         "update-app": [ "installing", "git-pull", "update-app", "ready" ],
+                        "apprepopull": [ "installing", "git-pull", "apprepopull", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
@@ -2022,6 +2081,25 @@
                                             { "Ref": "AWS::StackId" },
                                             " -r LaunchWebServer",
                                             " --configsets update-app ",
+                                            " --region ",
+                                            { "Ref": "AWS::Region" },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-AppRepoPull.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-app-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerAppRepoPull\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            { "Ref": "AWS::StackId" },
+                                            " -r DBLaunchWebServer",
+                                            " --configsets AppRepoPull ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
@@ -2153,6 +2231,7 @@
                                         "c:\\cfn\\cfn-hup.conf",
                                         "c:\\cfn\\hooks.d\\cfn-app-reinstall.conf",
                                         "c:\\cfn\\hooks.d\\cfn-app.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-apprepopull.conf",
                                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf",
                                         "c:\\cfn\\hooks.d\\cfn-cake.conf",
                                         "c:\\cfn\\hooks.d\\cfn-chef.conf",
@@ -2205,6 +2284,12 @@
                                             "if ( $oldpath -notlike $match )",
                                             "{[Environment]::SetEnvironmentVariable('PATH', $replace, 'Machine');$env:Path += ';' + $newpath;}",
                                             "$env:Path;",
+                                            "New-ItemProperty -Path HKLM:\\Software\\LANSA  -Name 'GitBranch' -Value '",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "' -PropertyType String -Force; ",
+                                            "New-ItemProperty -Path HKLM:\\Software\\LANSA  -Name 'GitBranchWebServer' -Value '",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "' -PropertyType String -Force; ",
                                             "cd \\lansa;",
                                             "cmd /C git fetch '2>&1';if ($LASTEXITCODE -ne 0) {Write-Error ('Git fetch failed');exit $LastExitCode};",
                                             "cmd /C git checkout -f ",
@@ -2298,6 +2383,27 @@
                             }
                         }
                     },
+                    "apprepopull": {
+                        "commands": {
+                            "01_apprepopull": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
+                                            "C:\\LANSA\\scripts\\apprepopull.ps1",
+                                            " -gitrepobranch ",
+                                            { "Ref":  "10LansaGitRepoBranch" },
+                                            ";exit $LastExitCode",
+                                            "}\""
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+
                     "config-windows-update": {
                         "commands": {
                             "01_config_windows_update": {

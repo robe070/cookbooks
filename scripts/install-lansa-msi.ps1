@@ -6,8 +6,8 @@ Creates a SQL Server Database then installs the MSI
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+# N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -73,18 +73,18 @@ $DebugPreference = "SilentlyContinue"
 $VerbosePreference = "Continue"
 [String]$trusted = "NO"
 
-Write-Verbose ("Server_name = $server_name") | Out-Host
-Write-Verbose ("dbname = $dbname") | Out-Host
-Write-Verbose ("dbuser = $dbuser") | Out-Host
-Write-Verbose ("webuser = $webuser") | Out-Host
-Write-Verbose ("32bit = $f32bit") | Out-Host
-Write-Verbose ("SUDB = $SUDB") | Out-Host
-Write-Verbose ("UPGD = $UPGD") | Out-Host
-Write-Verbose ("DBUT = $DBUT") | Out-Host
-Write-Verbose ("Password = $dbpassword") | Out-Host
-Write-Verbose ("ApplName = $ApplName") | Out-Host
-Write-Verbose ("CompanionInstallPath = $CompanionInstallPath") | Out-Host
-Write-Verbose ("Wait Handle = $Wait") | Out-Host
+Write-Verbose ("Server_name = $server_name") | Write-Host
+Write-Verbose ("dbname = $dbname") | Write-Host
+Write-Verbose ("dbuser = $dbuser") | Write-Host
+Write-Verbose ("webuser = $webuser") | Write-Host
+Write-Verbose ("32bit = $f32bit") | Write-Host
+Write-Verbose ("SUDB = $SUDB") | Write-Host
+Write-Verbose ("UPGD = $UPGD") | Write-Host
+Write-Verbose ("DBUT = $DBUT") | Write-Host
+Write-Verbose ("Password = $dbpassword") | Write-Host
+Write-Verbose ("ApplName = $ApplName") | Write-Host
+Write-Verbose ("CompanionInstallPath = $CompanionInstallPath") | Write-Host
+Write-Verbose ("Wait Handle = $Wait") | Write-Host
 
 
 try
@@ -108,20 +108,20 @@ try
         $UPGD_bool = $false
     }
 
-    Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" ) | Out-Host
+    Write-Debug ("$(Log-Date) UPGD_bool = $UPGD_bool" ) | Write-Host
 
     $temp_out = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install.log )
     $temp_err = ( Join-Path -Path $ENV:TEMP -ChildPath temp_install_err.log )
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("$(Log-Date) Running on $Cloud")
-    
+
     [boolean]$CompanionInstall = $false
 
     if ( $CompanionInstallPath.Length -gt 0) {
         if ( -not (test-path $CompanionInstallPath)) {
             Write-Error ("CompanionInstallPath '$CompanionInstallPath' does not exist")
-            throw ("CompanionInstallPath '$CompanionInstallPath' does not exist")            
+            throw ("CompanionInstallPath '$CompanionInstallPath' does not exist")
         }
         $CompanionInstall = $true
     }
@@ -134,26 +134,26 @@ try
     # Docker passes in a local path to the MSI which is mapped to a host volume
     # Just copy it to the standard name - its used to determine if an upgrade or not.
     if ( $Cloud -eq "Docker") {
-        Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Host
+        Copy-Item -Path $MSIUri -Destination $installer_file -Force | Write-Host
     }
 
     if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) ) {
-        Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Host
+        Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
         $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
         $loops = 0
         while (-not $Downloaded -and ($Loops -le 10) ) {
             try {
-                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Host
+                (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Write-Host
                 $downloaded = $true
             } catch {
                 $TotalFailedDownloadAttempts += 1
-                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
+                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
-                
+
                 Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
-                
+
                 if ($loops -gt 10) {
                     throw "Failed to download $MSIuri from S3"
                 }
@@ -162,7 +162,7 @@ try
                 Start-Sleep 30
             }
         }
-    
+
     }
 
     $DownloadODBCDriver = $true
@@ -196,7 +196,7 @@ try
          } else {
             # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
             Write-Host ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
-    
+
             switch -regex ($DBUT) {
                 "SQLAZURE|MSSQL" {
                     Write-Host( "$(Log-Date) $DBUT ODBC Driver presumed already installed on $Cloud")
@@ -223,8 +223,8 @@ try
         if ( $DownloadODBCDriver ) {
             $odbc_installer_file = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver.msi" )
             $odbc_installer_file32 = ( Join-Path -Path $ENV:TEMP -ChildPath "odbc_driver32.msi" )
-            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file") | Out-Host
-            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file) | Out-Host
+            Write-Verbose ("$(Log-Date) Downloading $DRIVERURL to $odbc_installer_file") | Write-Host
+            (New-Object System.Net.WebClient).DownloadFile($DRIVERURL, $odbc_installer_file) | Write-Host
 
             $p = Start-Process -FilePath $odbc_installer_file -ArgumentList $Arguments -Wait -PassThru
             if ( $p.ExitCode -ne 0 ) {
@@ -235,7 +235,7 @@ try
             }
 
             if ( (test-path variable:\DRIVERURL32) ) {
-                Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32") | Out-Host
+                Write-Verbose ("$(Log-Date) Downloading $DRIVERURL32 to $odbc_installer_file32") | Write-Host
                 (New-Object System.Net.WebClient).DownloadFile($DRIVERURL32, $odbc_installer_file32)
 
                 $p = Start-Process -FilePath $odbc_installer_file32 -ArgumentList $Arguments -Wait -PassThru
@@ -261,7 +261,7 @@ try
         Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
         $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
         if ( -not (test-path $KnownHostsDir)) {
-            mkdir $KnownHostsDir          
+            mkdir $KnownHostsDir
         }
         Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
 
@@ -270,7 +270,7 @@ try
         if ( (test-path $KnownHostsDir)) {
             $KnownHostsDir = "$KnownHostsDir\.ssh"
             if ( -not (test-path $KnownHostsDir)) {
-                mkdir $KnownHostsDir          
+                mkdir $KnownHostsDir
             }
             Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
         }
@@ -291,7 +291,7 @@ try
     # The template creates the database so it was conditioned out.
     #########################################################################################################
 
-    if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") { 
+    if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") {
         Write-Host( "$(Log-Date) Using SQL Authentication")
         $trusted="NO"
     } else {
@@ -307,20 +307,20 @@ try
 
                 Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Host
+                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Write-Host
 
                 Import-Module “sqlps” -DisableNameChecking | Out-Null
 
                 if ( $SUDB -eq '1' -and -not $UPGD_bool)
                 {
-                    if ( $trusted -eq "NO" ) { 
-                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Host
+                    if ( $trusted -eq "NO" ) {
+                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Write-Host
                     } else {
-                        Create-SqlServerDatabase $server_name $dbname | Out-Host
+                        Create-SqlServerDatabase $server_name $dbname | Write-Host
                     }
                 }
 
-                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Host
+                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Write-Host
                 cd "c:"
             }
             default {
@@ -332,20 +332,20 @@ try
     if ( -not $CompanionInstall ) {
         if ( -not $UPGD_bool )
         {
-            Start-WebAppPool -Name "DefaultAppPool" | Out-Host
+            Start-WebAppPool -Name "DefaultAppPool" | Write-Host
         }
 
         Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
         if ($trace -eq "Y") {
-            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Host
+            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Write-Host
             $env:X_RUN = $traceSettings
         } else {
-            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Host
+            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Write-Host
             $env:X_RUN = ''
         }
     }
-    
+
     Write-Host ("$(Log-Date) Installing the application")
 
     if ($f32bit_bool)
@@ -357,6 +357,9 @@ try
         $APPA = "${ENV:ProgramFiles}\$($ApplName)"
     }
 
+    if ( -not $CompanionInstall ) {
+        New-ItemProperty -Path 'HKLM:\\Software\\LANSA'  -Name MainAppInstallPath -Value $APPA -PropertyType String -Force | Write-Host
+    }
 
     [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=$($ApplName)", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
@@ -365,7 +368,7 @@ try
         $Arguments += "COMPANIONINSTALLPATH=`"$CompanionInstallPath`""
     }
 
-    if ( $trusted -eq "NO" ) { 
+    if ( $trusted -eq "NO" ) {
         $Arguments += @("DBUS=$dbuser", "PSWD=$dbpassword")
     }
 
@@ -388,16 +391,16 @@ try
     if ( $HTTPPortNumberHub.Length -gt 0) {
         $Arguments += "HTTPPORTNUMBERHUB=$HTTPPortNumberHub"
     }
-    
+
     if ( $GitRepoUrl.Length -gt 0) {
         $Arguments += "GITREPOURL=$GitRepoUrl"
-    }    
+    }
 
     Write-Host ("$(Log-Date) Arguments = $Arguments")
 
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
-    Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Host
-    
+    Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Write-Host
+
     if ( ($SUDB -ne '1') ) {
         Write-Host ("$(Log-Date) Waiting for Database tables to be created...")
         Start-Sleep -s 60
@@ -429,21 +432,21 @@ try
         &"$Script:IncludeDir\activate-all-licenses.ps1"  $webuser
 
         Write-Host ("$(Log-Date) Allow webuser to create directory in c:\windows\temp so that LOB and BLOB processing works" )
-        
-        Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit" | Out-Host
+
+        Set-AccessControl $webuser "C:\Windows\Temp" "Modify" "ContainerInherit, ObjectInherit" | Write-Host
     }
 
     $JSMpath = Join-Path $APPA 'Integrator\Jsmadmin\Strjsm.exe'
     if ( (test-path $JSMpath) ) {
         $JSM = @(Get-WmiObject win32_service | ?{$_.Name -like 'LANSA Integrator*'} | select Name, DisplayName, State, PathName )
-        # $JSM | format-list | Out-Host
+        # $JSM | format-list | Write-Host
 
         $JSMServiceName = $null
         foreach ( $JSMInstance in $JSM) {
             # $JSMInstance.PathName
             if ( $JSMInstance.PathName -eq $JSMPath) {
                 Write-Host( "$(Log-Date) JSM Service details:")
-                $JSMInstance | format-list | Out-Host
+                $JSMInstance | format-list | Write-Host
                 $JSMServiceName = $JSMInstance.Name
                 Write-Host( "$(Log-Date) JSM Service name is $JSMServiceName")
                 break
@@ -453,29 +456,29 @@ try
         if ( -not [string]::IsNullOrWhiteSpace( $JSMServiceName) ) {
             if ( $Cloud -eq "Azure" ) {
                 Write-Host "$(Log-Date) Set JSM Service dependencies"
-                Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Host
-                Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Host
-                cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Host
+                Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Write-Host
+                Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Write-Host
+                cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Host
             }
 
             Write-Host ("$(Log-Date) Restart JSM Service to load the new license")
-            cmd /c "sc.exe" "stop" $JSMServiceName | Out-Host
-            cmd /c "sc.exe" "start" $JSMServiceName | Out-Host
+            cmd /c "sc.exe" "stop" $JSMServiceName | Write-Host
+            cmd /c "sc.exe" "start" $JSMServiceName | Write-Host
         } else {
             throw "JSM service is not installed correctly in $JSMpath"
         }
     } else {
-        Write-Warning( "$(Log-Date) $JSMpath is not installed") | Out-Host
+        Write-Warning( "$(Log-Date) $JSMpath is not installed") | Write-Host
     }
 
     if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
         Write-Host ("$(Log-Date) Switch off Sentinel ")
-        New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null 
-        New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null 
+        New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null
+        New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null
 
-        [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Out-Host
+        [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Write-Host
     }
-        
+
     Write-Host ("$(Log-Date) Execute the user script if one has been passed")
 
     if ($userscripthook)
@@ -484,13 +487,13 @@ try
 
         $UserScriptFile = "C:\LANSA\UserScript.ps1"
         Write-Host ("$(Log-Date) Downloading $userscripthook to $UserScriptFile")
-        ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile) | Out-Host
+        ( New-Object Net.WebClient ). DownloadFile($userscripthook, $UserScriptFile) | Write-Host
 
         if ( Test-Path $UserScriptFile )
         {
             Write-Host ("$(Log-Date) Executing $UserScriptFile")
 
-            Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook" | Out-Host
+            Invoke-Expression "$UserScriptFile -Server_name $server_name -dbname $dbname -dbuser $dbuser -webuser $webuser -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook" | Write-Host
         }
         else
         {
@@ -500,12 +503,12 @@ try
     }
     else
     {
-        Write-Verbose ("User Script not passed") | Out-Host
+        Write-Verbose ("User Script not passed") | Write-Host
     }
 
 
     if ( -not $CompanionInstall ) {
-        iisreset | Out-Host
+        iisreset | Write-Host
     }
 
     #####################################################################################
@@ -517,7 +520,7 @@ try
 
     if ( (Test-Path -Path $x_err) )
     {
-        Write-Verbose ("$(Log-Date) Signal to Cloud log that the installation has failed") | Out-Host
+        Write-Verbose ("$(Log-Date) Signal to Cloud log that the installation has failed") | Write-Host
 
         $ErrorMessage = "$x_err exists and indicates an installation error has occurred."
         Write-Error $ErrorMessage -Category NotInstalled
@@ -548,8 +551,8 @@ try
         $exceptionDescription = ($_.ErrorDetails.Message).ToString().Trim()
         Write-Host ("$(Log-Date) ErrorDetails.Message $exceptionDescription")
     }
-    
-    #####################################################################################    
+
+    #####################################################################################
     if ( $ExitCode -eq 0 -and $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         $ExitCode = $LASTEXITCODE
     }
@@ -573,11 +576,11 @@ try
         }
         default {
             $ErrorMessage = "Unknown error code"
-        }        
+        }
     }
 
     Write-Host ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")
-    
+
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     return
 }
@@ -595,4 +598,4 @@ finally
 }
 
 # Successful completion so set Last Exit Code to 0
-cmd /c exit 0 | Out-Host
+cmd /c exit 0 | Write-Host
