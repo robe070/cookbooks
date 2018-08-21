@@ -67,7 +67,7 @@ try {
         while ( -not $AllInService ) {
             $AllInService = $true
             foreach ( $Instance in $ELBInstances ) {
-                Write-Output( "$($Instance.InstanceId) is $($Instance.State)")
+                Write-Output( "$($Instance.InstanceId) is '$($Instance.State)'")
                 if ( $Instance.State -ne 'InService') {
                     $AllInService = $false
                     Write-Output("Waiting")
@@ -102,8 +102,8 @@ try {
     }
 } catch {
     $_
-    Write-Output( "$(date) Windows Update failure. Check Systems Manager Console")  
+    Write-Output( "$(date) Windows Update failure. Check Systems Manager Console")
     cmd /c exit -1
 }
-Write-Output( "$(date) Windows Update successful.")  
+Write-Output( "$(date) Windows Update successful.")
 cmd /c exit 0

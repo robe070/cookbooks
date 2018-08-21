@@ -1,4 +1,4 @@
-# Suspend a specific stack 
+# Suspend a specific stack
 
 param(
 [Parameter(Mandatory=$true)]
@@ -44,7 +44,7 @@ try {
     }
 
     Write-Host( "$(Get-Date) Make the ELB $($StackInstances[0].LoadBalancerNames[0]) health check as long as possible so that ALARMs are not sent")
-    Set-ELBHealthCheck -Region $Region -LoadBalancerName $StackInstances[0].LoadBalancerNames[0]  -HealthCheck_Interval 300 -HealthCheck_Timeout 60 -HealthCheck_UnhealthyThreshold 10 -HealthCheck_HealthyThreshold 3 -HealthCheck_Target 'HTTP:80/cgi-bin/probe'
+    Set-ELBHealthCheck -Region $Region -LoadBalancerName $StackInstances[0].LoadBalancerNames[0]  -HealthCheck_Interval 300 -HealthCheck_Timeout 60 -HealthCheck_UnhealthyThreshold 10 -HealthCheck_HealthyThreshold 2 -HealthCheck_Target 'HTTP:80/cgi-bin/probe'
  } catch {
     $_
 }
