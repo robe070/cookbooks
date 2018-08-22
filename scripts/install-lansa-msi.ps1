@@ -263,6 +263,7 @@ try
         if ( -not (test-path $KnownHostsDir)) {
             mkdir $KnownHostsDir
         }
+        Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
         Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
 
         # If there is an adminstrator user, create the known hosts there too.
@@ -272,6 +273,7 @@ try
             if ( -not (test-path $KnownHostsDir)) {
                 mkdir $KnownHostsDir
             }
+            Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
             Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
         }
 
