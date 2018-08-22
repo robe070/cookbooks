@@ -169,11 +169,19 @@ try {
     Write-Host( "Final LASTEXITCODE $LASTEXITCODE" )
     return
  } finally {
+    $SAVEDLASTEXITCODE = $null
+    if ( ( -not [ string ]::IsNullOrWhiteSpace( $LASTEXITCODE ) ) -and ( $LASTEXITCODE -ne 0 ) )
+    {
+         $SAVEDLASTEXITCODE = $LASTEXITCODE
+    }
     & iisreset /start
 
     $postdeploy = Join-Path $APPA "autodeploy\postdeploy.ps1"
     Write-Host( "$(Log-Date) Run $postdeploy to put it all back online")
     & $postdeploy
+    if ( $null -ne $SAVEDLASTEXITCODE ) {
+        cmd /c exit $SAVEDLASTEXITCODE
+    }
  }
  Write-Host( "AppRepoPull succeeded" )
  cmd /c exit 0    #Set $LASTEXITCODE
