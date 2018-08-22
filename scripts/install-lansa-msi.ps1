@@ -363,6 +363,12 @@ try
         New-ItemProperty -Path 'HKLM:\\Software\\LANSA'  -Name MainAppInstallPath -Value $APPA -PropertyType String -Force | Write-Host
     }
 
+    if ( $CompanionInstall ) {
+        Write-Host( "$(Log-Date) Kill any msiexec.exe that are still hanging around and haven't been fully ended by Windows so that this install starts ok. Fixes MSI return code 1618. Presumes sysinternals has been installed. choco install sysinternals")
+        & pskill -t 'msiexec.exe'
+    }
+
+
     [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=$($ApplName)", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
     # Arguments to pass only if they have a value
