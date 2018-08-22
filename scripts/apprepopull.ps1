@@ -44,6 +44,14 @@ cmd /c exit 0    #Set $LASTEXITCODE
 
 try {
     $APPA = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'MainAppInstallPath' -ErrorAction SilentlyContinue).MainAppInstallPath
+
+    $predeploy = Join-Path $APPA "autodeploy\predeploy.ps1"
+    Write-Host( "$(Log-Date) Run $predeploy to prepare for git pull")
+    & $predeploy
+
+    Write-Host( "$(Log-Date) Stop IIS entirely so GitDeployHub may be updated")
+    & iisreset /stop
+
     if ( [string]::IsNullOrWhiteSpace($APPA) ) {
         Write-Warning( "$(Log-Date) MainAppInstallPath registry value is non-existent or empty") | Write-Host
     } else {
@@ -96,17 +104,17 @@ try {
                 # cmd /C git remote add origin $GDHRepoUrl '2>&1' | Write-Host
                 # if ($LASTEXITCODE -ne 0) {
                 #     throw ("$GDHPath Git remote add failed")
-                # }                                        
+                # }
 
                 # cmd /C git remote fetch -q '2>&1' | Write-Host
                 # if ($LASTEXITCODE -ne 0) {
                 #     throw ("$GDHPath Git fetch failed")
-                # }                                        
+                # }
 
                 # cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
                 # if ($LASTEXITCODE -ne 0) {
                 #     throw ("$GDHPath Git checkout failed")
-                # } 
+                # }
             } else {
 
                 Write-Host( "$(Log-Date) Pulling $GDHPath")
@@ -126,7 +134,7 @@ try {
                     cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
                     if ($LASTEXITCODE -ne 0) {
                         throw ("$GDHPath Git checkout failed")
-                    }                    
+                    }
                 } else {
                     cmd /C git pull '2>&1' | Write-Host
                     if ($LASTEXITCODE -ne 0) {
@@ -134,12 +142,12 @@ try {
                     }
                 }
             }
-        }        
+        }
     }
 } catch {
     $e = $_.Exception
     $e | format-list -force
- 
+
     Write-Host( "AppRepoPull failed" )
     Write-Host( "Raw LASTEXITCODE $LASTEXITCODE" )
     if ( ( -not [ string ]::IsNullOrWhiteSpace( $LASTEXITCODE ) ) -and ( $LASTEXITCODE -ne 0 ) )
@@ -150,7 +158,7 @@ try {
        $ExitCode = $e.HResult
        Write-Host( "ExitCode set to HResult $ExitCode" )
     }
- 
+
     if ( $null -eq $ExitCode -or $ExitCode -eq 0 )
     {
        $ExitCode = -1
@@ -160,6 +168,12 @@ try {
     cmd /c exit $ExitCode    #Set $LASTEXITCODE
     Write-Host( "Final LASTEXITCODE $LASTEXITCODE" )
     return
+ } finally {
+    & iisreset /start
+
+    $postdeploy = Join-Path $APPA "autodeploy\postdeploy.ps1"
+    Write-Host( "$(Log-Date) Run $postdeploy to put it all back online")
+    & $postdeploy
  }
  Write-Host( "AppRepoPull succeeded" )
  cmd /c exit 0    #Set $LASTEXITCODE
