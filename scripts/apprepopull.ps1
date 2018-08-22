@@ -45,6 +45,10 @@ cmd /c exit 0    #Set $LASTEXITCODE
 try {
     $APPA = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'MainAppInstallPath' -ErrorAction SilentlyContinue).MainAppInstallPath
 
+    # Clean up what we may need to restore in case there is an exception before the new config is saved.
+    $GDHSaveConfig = Join-Path $Env:temp 'Web.config'
+    Remove-Item $GDHSaveConfig -Force -ErrorAction SilentlyContinue | Write-Host
+
     $predeploy = Join-Path $APPA "autodeploy\predeploy.ps1"
     Write-Host( "$(Log-Date) Run $predeploy to prepare for git pull")
     & $predeploy
@@ -119,6 +123,10 @@ try {
 
                 Write-Host( "$(Log-Date) Pulling $GDHPath")
 
+                $GDHConfig = Join-Path $GDHPath 'Web\Web.config'
+                Write-Host( "$(Log-Date) Save GDH Configuration $GDHConfig to $GDHSaveConfig")
+                copy-item -Path $GDHConfig -Destination $GDHSaveConfig -Force | Write-Host
+
                 $gitbranchfile = Join-Path -Path $ENV:TEMP -ChildPath 'gitbranch.txt'
                 cmd /C git symbolic-ref -q --short HEAD '2>&1' > $gitbranchfile
                 $gitbranch = Get-Content $gitbranchfile -First 1
@@ -174,6 +182,13 @@ try {
     {
          $SAVEDLASTEXITCODE = $LASTEXITCODE
     }
+
+    if ( Test-Path $GDHSaveConfig ) {
+        Write-Host( "$(Log-Date) Restore GDH Configuration form $GDHSaveConfig to $GDHConfig")
+        copy-item -Path $GDHSaveConfig -Destination $GDHConfig -Force | Write-Host
+        Remove-Item $GDHSaveConfig -Force -ErrorAction Continue | Write-Host
+    }
+
     & iisreset /start
 
     $postdeploy = Join-Path $APPA "autodeploy\postdeploy.ps1"
