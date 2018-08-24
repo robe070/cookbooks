@@ -10,8 +10,8 @@ Bake a LANSA AMI
 
 #>
 
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$DebugPreference = "SilentlyContinue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -26,10 +26,10 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14.2 GA' `
+Bake-IdeMsi -VersionText '14.2 EPC142020' `
             -VersionMajor 14 `
             -VersionMinor 2 `
-            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0335_LanDVDcut_L4W14200_4158_180503_GA" `
+            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0335_LanDVDcut_L4W14200_4158_180503_EPC142020" `
             -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W14000_latest" `
