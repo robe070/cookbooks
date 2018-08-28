@@ -365,7 +365,7 @@ try
 
     if ( $CompanionInstall ) {
         Write-Host( "$(Log-Date) Kill any msiexec.exe that are still hanging around and haven't been fully ended by Windows so that this install starts ok. Fixes MSI return code 1618. Presumes sysinternals has been installed. choco install sysinternals")
-        & pskill -t 'msiexec.exe'
+        & pskill 'msiexec.exe'
     }
 
 
