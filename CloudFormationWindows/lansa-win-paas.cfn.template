@@ -1056,16 +1056,16 @@
                                     "Fn::Join": [
                                         "",
                                         [
-                                            "[cfn-app-hook]\n",
-                                            "triggers=post.update\n",
-                                            "path=Resources.DBLaunchWebServer.Metadata.TriggerAppRepoPull\n",
-                                            "action=cfn-init.exe -v -s ",
-                                            { "Ref": "AWS::StackId" },
-                                            " -r DBLaunchWebServer",
-                                            " --configsets AppRepoPull ",
-                                            " --region ",
-                                            { "Ref": "AWS::Region" },
-                                            "\n"
+                                           "[cfn-apprepopull]\n",
+                                           "triggers=post.update\n",
+                                           "path=Resources.DBLaunchWebServer.Metadata.TriggerAppRepoPull\n",
+                                           "action=cfn-init.exe -v -s ",
+                                           { "Ref": "AWS::StackId" },
+                                           " -r DBLaunchWebServer",
+                                           " --configsets apprepopull ",
+                                           " --region ",
+                                           { "Ref": "AWS::Region" },
+                                           "\n"
                                         ]
                                     ]
                                 }
@@ -2093,13 +2093,13 @@
                                     "Fn::Join": [
                                         "",
                                         [
-                                            "[cfn-app-hook]\n",
+                                            "[cfn-apprepopull]\n",
                                             "triggers=post.update\n",
                                             "path=Resources.DBLaunchWebServer.Metadata.TriggerAppRepoPull\n",
                                             "action=cfn-init.exe -v -s ",
                                             { "Ref": "AWS::StackId" },
                                             " -r DBLaunchWebServer",
-                                            " --configsets AppRepoPull ",
+                                            " --configsets apprepopull ",
                                             " --region ",
                                             { "Ref": "AWS::Region" },
                                             "\n"
