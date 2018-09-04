@@ -368,7 +368,7 @@ try
 
         # Pskill outputs in utf-16, so change to utf-8
         $pskillOutput = "$ENV:TEMP\pskill.txt"
-        & pskill 'msiexec.exe' 2>&1 | Out-File $pskillOutput -encoding utf8
+        & pskill -accepteula 'msiexec.exe' 2>&1 | Out-File $pskillOutput -encoding utf8
         Get-Content $pskillOutput | Write-Host
     }
 
