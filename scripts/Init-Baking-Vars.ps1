@@ -35,7 +35,8 @@ $ErrorActionPreference = 'Stop'
 # A better solution is just to effect >, >> and out-file but it requires PS 5.1
 # Once win2012 support is no longer required, this should be changed
 # $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
-$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+# *** Following did NOT work on PS 4.0!
+# $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 cmd /c exit 0       # Set $LASTEXITCODE so it always exists. Saves testing it everywhere
 

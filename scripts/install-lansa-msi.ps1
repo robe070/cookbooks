@@ -365,7 +365,11 @@ try
 
     if ( $CompanionInstall ) {
         Write-Host( "$(Log-Date) Kill any msiexec.exe that are still hanging around and haven't been fully ended by Windows so that this install starts ok. Fixes MSI return code 1618. Presumes sysinternals has been installed. choco install sysinternals")
-        & pskill 'msiexec.exe'
+
+        # Pskill outputs in utf-16, so change to utf-8
+        $pskillOutput = "$ENV:TEMP\pskill.txt"
+        & pskill 'msiexec.exe' 2>&1 | Out-File $pskillOutput -encoding utf8
+        Get-Content $pskillOutput | Write-Host
     }
 
 
