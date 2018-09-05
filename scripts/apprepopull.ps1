@@ -19,6 +19,54 @@ param(
 [String]$GitRepoBranch='master'
 )
 
+function Checkout-GitRepo
+{
+    param (
+        [Parameter(Mandatory=$true)]
+            [string]
+            $RepoPath,
+
+        [Parameter(Mandatory=$true)]
+            [String]
+            $GitRepoBranch,
+
+        [Parameter(Mandatory=$true)]
+            [boolean]
+            $IgnoreError
+
+    )
+
+    Write-Host( "$(Log-Date) Checking out $RepoPath branch $GitRepoBranch")
+    Set-Location $RepoPath | Write-Host
+
+    $gitbranchfile = Join-Path -Path $ENV:TEMP -ChildPath 'gitbranch.txt'
+    cmd /C git symbolic-ref -q --short HEAD '2>&1' > $gitbranchfile
+    $gitcurrentbranch = Get-Content $gitbranchfile -First 1
+    Write-Host( "$(Log-Date) Current branch is $gitcurrentbranch" )
+
+    if ( $gitcurrentbranch -ne $GitRepoBranch ) {
+        Write-Host( "$(Log-Date) Checking out new branch $GitRepoBranch" )
+        cmd /C git fetch -q '2>&1' | Write-Host
+        if ($LASTEXITCODE -ne 0) {
+            throw ("$RepoPath Git fetch failed")
+        }
+
+        cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
+        if ($LASTEXITCODE -ne 0) {
+            if ( $IgnoreError ) {
+                Write-Warning ("$RepoPath Git checkout failed, continuing") | Write-Host
+            } else {
+                throw ("$RepoPath Git checkout failed")
+            }
+        }
+    } else {
+        cmd /C git pull '2>&1' | Write-Host
+        if ($LASTEXITCODE -ne 0) {
+            throw ("$RepoPath Git pull failed")
+        }
+    }
+}
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -43,18 +91,13 @@ Write-Host("$(Log-Date) Script Directory: $script:IncludeDir")
 cmd /c exit 0    #Set $LASTEXITCODE
 
 try {
+    $APPARepoOK = $false
+    $GDHRepoOK = $false
     $APPA = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'MainAppInstallPath' -ErrorAction SilentlyContinue).MainAppInstallPath
 
     # Clean up what we may need to restore in case there is an exception before the new config is saved.
     $GDHSaveConfig = Join-Path $Env:temp 'Web.config'
     Remove-Item $GDHSaveConfig -Force -ErrorAction SilentlyContinue | Write-Host
-
-    $predeploy = Join-Path $APPA "autodeploy\predeploy.ps1"
-    Write-Host( "$(Log-Date) Run $predeploy to prepare for git pull")
-    & $predeploy
-
-    Write-Host( "$(Log-Date) Stop IIS entirely so GitDeployHub may be updated")
-    & iisreset /stop
 
     if ( [string]::IsNullOrWhiteSpace($APPA) ) {
         Write-Warning( "$(Log-Date) MainAppInstallPath registry value is non-existent or empty") | Write-Host
@@ -74,12 +117,9 @@ try {
             if ( $gitstatusline -contains 'fatal: not a git repository' ) {
                 Write-Warning( "$(Log-Date) $APPA is not a git repository" ) | Write-Host
             } else {
-                Write-Host( "$(Log-Date) Pulling $APPA")
-
-                cmd /C git pull '2>&1' | Write-Host
-                if ($LASTEXITCODE -ne 0) {
-                    throw ("$APPA Git pull failed")
-                }
+                Write-Host( "$(Log-Date) Checkout whatever can be updated, especially scripts needed for this install")
+                Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $true
+                $APPARepoOK = $true
             }
         }
 
@@ -120,38 +160,35 @@ try {
                 #     throw ("$GDHPath Git checkout failed")
                 # }
             } else {
-
-                Write-Host( "$(Log-Date) Pulling $GDHPath")
-
                 $GDHConfig = Join-Path $GDHPath 'Web\Web.config'
                 Write-Host( "$(Log-Date) Save GDH Configuration $GDHConfig to $GDHSaveConfig")
                 copy-item -Path $GDHConfig -Destination $GDHSaveConfig -Force | Write-Host
 
-                $gitbranchfile = Join-Path -Path $ENV:TEMP -ChildPath 'gitbranch.txt'
-                cmd /C git symbolic-ref -q --short HEAD '2>&1' > $gitbranchfile
-                $gitbranch = Get-Content $gitbranchfile -First 1
-                Write-Host( "$(Log-Date) Current branch is $gitbranch" )
-
-                if ( $gitbranch -ne $GitRepoBranch ) {
-                    Write-Host( "$(Log-Date) Checking out new branch $GitRepoBranch" )
-                    cmd /C git fetch -q '2>&1' | Write-Host
-                    if ($LASTEXITCODE -ne 0) {
-                        throw ("$GDHPath Git fetch failed")
-                    }
-
-                    cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
-                    if ($LASTEXITCODE -ne 0) {
-                        throw ("$GDHPath Git checkout failed")
-                    }
-                } else {
-                    cmd /C git pull '2>&1' | Write-Host
-                    if ($LASTEXITCODE -ne 0) {
-                        throw ("$GDHPath Git pull failed")
-                    }
-                }
+                Write-Host( "$(Log-Date) Checkout whatever can be updated, especially scripts needed for this install")
+                Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $true
+                $GDHRepoOK = $true
             }
         }
     }
+
+    $predeploy = Join-Path $APPA "autodeploy\predeploy.ps1"
+    Write-Host( "$(Log-Date) Run $predeploy to prepare for git pull")
+    & $predeploy
+
+    Write-Host( "$(Log-Date) Stop IIS entirely so GitDeployHub may be updated")
+    & iisreset /stop
+
+    Write-Host( "$(Log-Date) Perform full checkout now that everything has been stopped")
+
+    if ( $APPARepoOK ) {
+        Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $false
+    }
+
+    if ( $GDHRepoOK ) {
+        Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $false
+    }
+
+
 } catch {
     $e = $_.Exception
     $e | format-list -force
@@ -184,7 +221,7 @@ try {
     }
 
     if ( Test-Path $GDHSaveConfig ) {
-        Write-Host( "$(Log-Date) Restore GDH Configuration form $GDHSaveConfig to $GDHConfig")
+        Write-Host( "$(Log-Date) Restore GDH Configuration from $GDHSaveConfig to $GDHConfig")
         copy-item -Path $GDHSaveConfig -Destination $GDHConfig -Force | Write-Host
         Remove-Item $GDHSaveConfig -Force -ErrorAction Continue | Write-Host
     }
