@@ -14,7 +14,7 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
-   
+
 
 param (
     [Parameter(Mandatory=$true)]
@@ -44,7 +44,7 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
-    
+
     Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Host
 
     Write-GreenOutput "$(Log-Date) Installing Chef" | Out-Host
@@ -61,14 +61,14 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
     Write-Debug $ENV:PATH | Out-Host
     cd "$GitRepoPath\Cookbooks" | Out-Host
-    
+
     chef-client -z -o $ChefRecipe | Out-Host
     if ( $LASTEXITCODE -ne 0 )
     {
         throw "Chef-Client exit code = $LASTEXITCODE."
     }
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
-    
+
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Host
     Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Host
@@ -91,7 +91,7 @@ try
                 $downloaded = $true
             } catch {
                 $TotalFailedDownloadAttempts += 1
-                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
+                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
 
                 Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
@@ -125,7 +125,7 @@ try
         # Installer file MUST be executed with the current directory set to the installer directory
         $InstallerScript = '.\install.ps1'
         Set-Location $InstallerDirectory | Out-Host
-        & $InstallerScript | Out-Host    
+        & $InstallerScript | Out-Host
     }
 
     Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
@@ -134,16 +134,20 @@ try
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
     try {
-        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host 
+        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
     } catch {
-        Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Out-Host
-        Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Out-Host
-        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Out-Host 
+        # This was temporary and left in as an example of working around hashes not matching. BUT, its probably best to not
+        # circumvent the check - its probably been hacked. This issue was actually addressed the day that I reported it.
+        # Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Out-Host
+        # Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Out-Host
+        # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Out-Host
+        $_
+        throw
     }
-    
+
 
     # the --% is so that the rest of the line can use simpler quoting
-    # See this link for full help on passing msiexec params through choco: 
+    # See this link for full help on passing msiexec params through choco:
     # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
     # This ensures that only English is installed as installing every language does not pass AWS virus checking
     Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
@@ -155,13 +159,13 @@ try
     # Run-ExitCode $jre @( '/s' ) | Out-Host
 
     New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Host
-    
+
     if ( $Cloud -eq "AWS" ) {
         Write-GreenOutput "$(Log-Date) Installing AWS SDK" | Out-Host
         &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Propagate-EnvironmentUpdate | Out-Host
-    
+
         Write-GreenOutput "$(Log-Date) Installing AWS CLI" | Out-Host
         &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
