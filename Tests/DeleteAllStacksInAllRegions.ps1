@@ -7,6 +7,10 @@ Delete all stacks in all regions
 
 
 #>
+
+Write-Host "This script is intended to be used to delete the scalable stacks that are used to test the scalable image works in all regions with the scalable template."
+Write-Host "N.B. Its is imperative to list all stacks first using its companion ListAllStacksInAllRegions.ps1 and ensure that only the stacks you want to delete will be deleted."
+
 $regionlist = Get-AWSRegion
 ForEach ( $region in $regionList )
 {
@@ -18,9 +22,14 @@ ForEach ( $region in $regionList )
       foreach ( $stack in $stacks )
       {
         Write-Output "$($stack.stackName) - $($stack.StackStatus)"
-        Remove-CFNStack -Region $region -StackName $stack.StackName -Force
+        if ( $stack.stackName -eq 'Scalable' -and ($stack.StackStatus -eq 'CREATE_COMPLETE' -or $stack.StackStatus -eq 'UPDATE_COMPLETE')) {
+            Write-Host "Deleting $($stack.stackName)..."
+            Remove-CFNStack -Region $region -StackName $stack.StackName -Force
+        } else {
+            Write-Host "Skipping $($stack.stackName)"
+        }
       }
 
       $nextToken = $AWSHistory.LastServiceResponse.NextToken
-    } while ($nextToken -ne $null)
+    } while ($null -ne $nextToken)
 }
