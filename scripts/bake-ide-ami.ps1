@@ -333,16 +333,12 @@ try
 
         #####################################################################################
 
-        # Attempt to run this script directly, now that the pipeline is more robust
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-base-sql-server.ps1
-        if ( $false) {
-            if ( $Cloud -eq 'AWS' ) {
-                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
-            } else {
-                Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
-                Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-                $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-            }
+        if ( $Cloud -eq 'AWS' ) {
+            Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
+        } else {
+            Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
+            Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+            $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
         }
 
         #####################################################################################
