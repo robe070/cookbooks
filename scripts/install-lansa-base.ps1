@@ -134,7 +134,8 @@ try
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
     try {
-        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
+        # Don't install sysinternals because the license expressly forbids installing it on hosting services
+        # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
     } catch {
         # This was temporary and left in as an example of working around hashes not matching. BUT, its probably best to not
         # circumvent the check - its probably been hacked. This issue was actually addressed the day that I reported it.
