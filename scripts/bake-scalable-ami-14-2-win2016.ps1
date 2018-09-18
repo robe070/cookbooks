@@ -41,4 +41,6 @@ Bake-IdeMsi -VersionText '14.2 EPC142011' `
             -InstallScalable $true `
             -Win2012 $false `
             -ManualWinUpd $false `
-            -SkipSlowStuff $false
+            -SkipSlowStuff $true
+
+            # Note Skipping slow stuff skips DVD upload and Windows updates, neither of which is needed when Scalable and its a new AWS image

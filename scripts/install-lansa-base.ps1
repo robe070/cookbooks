@@ -129,7 +129,7 @@ try
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
         # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
-        .\amazon-cloudwatch-agent-ctl.ps1 -s
+        .\amazon-cloudwatch-agent-ctl.ps1 -a start -s
 
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
         set-service -Name AmazonCloudWatchAgent -StartupType Manual | Write-Host
