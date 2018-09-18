@@ -364,15 +364,6 @@ try
                 get-service MSSQLSERVER | SELECT-OBJECT Name, StartType, Status
             }
 
-            if ( $Cloud -eq 'AWS' ) {
-                Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
-                Execute-RemoteBlock $Script:session {
-                    set-service -Name AmazonCloudWatchAgent -StartupType Manual
-                    stop-service -Name AmazonCloudWatchAgent
-                    get-service AmazonCloudWatchAgent | SELECT-OBJECT Name, StartType, Status
-                }
-            }
-
             if ( -not $Win2012 ) {
                 Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
                 Write-Host( "$(Log-Date) Only Windows 2016 because the api requires powershell 5.x" )

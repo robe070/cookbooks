@@ -40,5 +40,5 @@ Bake-IdeMsi -VersionText '14.2 EPC142011' `
             -InstallIDE $false `
             -InstallScalable $true `
             -Win2012 $false `
-            -ManualWinUpd $true `
-            -SkipSlowStuff $true
+            -ManualWinUpd $false `
+            -SkipSlowStuff $false
