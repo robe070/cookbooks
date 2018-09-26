@@ -2,7 +2,7 @@
 
 param (
     [Parameter(Mandatory=$true)]
-    [String]$Region = 'East US',
+    [String]$Region = 'eastus',
 
     [Parameter(Mandatory=$true)]
     [String]$ResourceGroup = 'daftruck2',
@@ -18,8 +18,6 @@ param (
 )
 
 'AzureAG.ps1'
-
-Write-Host( "Region : $Region (must be the Display Name e.g. 'East US' not 'eastus' in order for the Application Gateway creation to work")
 
 # Remove warnings that proliferate in the AzureRm cmdlets
 $WarningPreference = "SilentlyContinue"
@@ -37,6 +35,71 @@ try {
     # So names may be changed if desired
     $agsubnet = $vmssName + '-agsubnet'
     $pipname = $vmssName + '-agpip'
+    $appgwName = $vmssName + '-ag'
+
+    try {
+        Write-Host( "Check parameters")
+
+        $AllLocations = Get-AzureRmLocation
+        $found = $false
+        foreach ($Location in $AllLocations ) {
+            if ( $location.Location -eq $Region) {
+                $found = $true
+                # Write-Host( "Location $Region must be the Display Name not the identifier. Changing to the Display Name $($location.DisplayName)" )
+                # $Region = $location.DisplayName
+                break
+            }
+            if ( $location.DisplayName -eq $Region){
+                $found = $true
+                Write-Host( "Location $Region must be the Identifier not the Display Name. Changing to the Identifier $($location.Location)" )
+                $Region = $location.Location
+                break
+            }
+        }
+        if ( -not $found ) {
+            Write-Host( "Location $Region does not exist" )
+            throw
+        }
+
+        $RG = Get-AzureRmResourceGroup -Name $ResourceGroup -Location $Region -ErrorAction "SilentlyContinue"
+        if ( $null -eq $RG ) {
+            Write-Host( "Resource Group $ResourceGroup does not exist" )
+            throw
+        }
+
+        $VMSS = Get-AzureRmVmss -ResourceGroupName $ResourceGroup -VMScaleSetName $VMSSName -ErrorAction "SilentlyContinue"
+        if ( $null -eq $VMSS ) {
+            Write-Host( "VirtualMachineScaleSet $VMSSName does not exist" )
+            throw
+        }
+
+        if ( -not (Test-Path -Path $CertificateFilePath) ) {
+            Write-Host( "Certificate File Path $CertificateFilePath does not exist" )
+            throw
+        }
+
+        $appgw = Get-AzureRmApplicationGateway `
+            -Name $appgwName `
+            -ResourceGroupName $ResourceGroup `
+            -ErrorAction "SilentlyContinue"
+
+        if ( $null -ne $appgw) {
+            Write-Host( "Application Gateway already exists" )
+
+            try {
+                Remove-AzureRmApplicationGateway -Name $appgwName -ResourceGroupName $ResourceGroup -force
+            } catch {
+                $_
+                Write-Host( "Application Gateway $appgwName cannot be deleted. Probably because the VMSS is still using the backend pool. Make sure all targets are removed from the backend pool. Then retry")
+                exit
+            }
+        }
+
+    } catch {
+        $_
+        Write-Host ("Invalid parameter")
+        Exit
+    }
 
     Write-Host( "Create the Application Gateway Subnet" )
     $vnet = Get-AzureRmVirtualNetwork `
@@ -45,7 +108,8 @@ try {
 
     $subnet = Get-AzureRmVirtualNetworkSubnetConfig `
         -Name $agsubnet `
-        -VirtualNetwork $vnet
+        -VirtualNetwork $vnet `
+        -ErrorAction "SilentlyContinue"
 
     if ( $null -eq $subnet ) {
         Add-AzureRmVirtualNetworkSubnetConfig `
@@ -53,8 +117,6 @@ try {
             -VirtualNetwork $vnet `
             -AddressPrefix "10.0.1.0/24" | Set-AzureRmVirtualNetwork
     }
-
-    $vnet | Format-List | Write-Host
 
     Write-Host( "Create the Application Gateway Public IP" )
 
@@ -95,8 +157,7 @@ try {
     Write-Host( "Create the backend pool for the application gateway using New-AzureRmApplicationGatewayBackendAddressPool." )
 
     $AGPoolName = $vmssName + '-agPool'
-    $AGPool = New-AzureRmApplicationGatewayBackendAddressPool `
-    -Name $AGPoolName
+    $AGPool = New-AzureRmApplicationGatewayBackendAddressPool -Name $AGPoolName
 
     Write-Host( "Configure the settings for the backend pool using New-AzureRmApplicationGatewayBackendHttpSettings." )
 
@@ -140,7 +201,9 @@ try {
         -BackendAddressPool $AGPool `
         -BackendHttpSettings $AGPoolSettings
 
-    Write-Host( "Create the application gateway with the certificate")
+    $probe = New-AzureRmApplicationGatewayProbeConfig -Name $($VMSSName + '-probe') -Protocol Http -PickHostNameFromBackendHttpSettings -Path "/cgi-bin/probe" -Interval 30 -Timeout 120 -UnhealthyThreshold 8
+
+    Write-Host( "Create the application gateway with the certificate. This may take 10 minutes or more")
     # Now that you created the necessary supporting resources, specify parameters for the application gateway named
     # myAppGateway using New-AzureRmApplicationGatewaySku, and then create it using New-AzureRmApplicationGateway with the certificate.
 
@@ -149,20 +212,6 @@ try {
         -Tier Standard `
         -Capacity 2
 
-    $appgwName.GetType()
-    $ResourceGroup.GetType()
-    $Region.GetType()
-    $AGPool.GetType()
-    $AGPoolSettings.GetType()
-    $fipconfig.GetType()
-    $gipconfig.GetType()
-    $frontendport.GetType()
-    $defaultlistener.GetType()
-    $frontendRule.GetType()
-    $sku.GetType()
-    $cert.GetType()
-
-    $appgwName = $vmssName + '-ag'
     $appgw = New-AzureRmApplicationGateway `
         -Name $appgwName `
         -ResourceGroupName $ResourceGroup `
@@ -175,8 +224,9 @@ try {
         -HttpListeners $defaultlistener `
         -RequestRoutingRules $frontendRule `
         -Sku $sku `
-        -SslCertificates $cert
-    # $appgw | Format-List | Write-Host
+        -SslCertificates $cert `
+        -Probes $probe
+        # $appgw | Format-List | Write-Host
 
     if ( $false ) {
         Write-Host( "Add Application Gateway to VMSS")
@@ -186,14 +236,13 @@ try {
             -SubnetId $subnet.Id `
             -ApplicationGatewayBackendAddressPoolsId $AGPool.Id
 
-        $VMSS = Get-AzureRmVmss -ResourceGroupName $ResourceGroup -VMScaleSetName $VMSSName
-        Add-AzureRmVmssNetworkInterfaceConfiguration -VirtualMachineScaleSet $VMSS -Name $VMSSName -Primary $True -IPConfiguration $ipConfig
-        Update-AzureRmVmss -ResourceGroupName $ResourceGroup -VirtualMachineScaleSet $VMSS -VMScaleSetName $VMSSName
+        $VMSS = Add-AzureRmVmssNetworkInterfaceConfiguration -VirtualMachineScaleSet $VMSS -Name $($VMSSName + '-VmssNetConfig') -Primary $false -IPConfiguration $ipConfig
+        $VMSS = Update-AzureRmVmss -ResourceGroupName $ResourceGroup -VirtualMachineScaleSet $VMSS -VMScaleSetName $VMSSName
     }
 } catch {
     $_
     Write-Host ("Fatal Error")
-    Write-Host( "This message may mean the Location field is not valid! 'Generic types are not supported for input fields at this time'")
+    Write-Host( "This message may mean the Location field is not valid or the Gateway already exists! 'Generic types are not supported for input fields at this time'")
     Exit
 }
 Write-Host( "Successful" )
