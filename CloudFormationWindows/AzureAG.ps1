@@ -1,16 +1,16 @@
 # Script inspired by https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-ssl-arm
 
 param (
-    [Parameter(Mandatory=$false)]
-    [String]$Region = 'eastus',
+    [Parameter(Mandatory=$true)]
+    [String]$Region = 'uksouth',
 
-    [Parameter(Mandatory=$false)]
-    [String]$ResourceGroup = 'daftruck2',
+    [Parameter(Mandatory=$true)]
+    [String]$ResourceGroup = 'daftruck3',
 
-    [Parameter(Mandatory=$false)]
-    [String]$VMSSName = 'daftruck2',
+    [Parameter(Mandatory=$true)]
+    [String]$VMSSName = 'daftruck3',
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory=$true)]
     [String]$CertificateFilePath = 'c:\appgwcert.pfx' ,
 
     [Parameter(Mandatory=$true)]
@@ -19,13 +19,16 @@ param (
 
 'AzureAG.ps1'
 
-# Remove warnings that proliferate in the AzureRm cmdlets
+# Remove unhelpful warnings that proliferate in the AzureRm cmdlets
 $WarningPreference = "SilentlyContinue"
-$VerbosePreference = "SilentlyContinue"
+$VerbosePreference = "Continue"
 $DebugPreference = "SilentlyContinue"
 
 # Recreate the application gateway
-$Recreate = $false
+$Recreate = $true
+
+# Validate the Region
+$ValidateRegion = $true
 
 # Make non-terminating errors into terminating errors. That is, the script will throw an exception so we know its gone wrong
 $ErrorActionPreference = 'Stop'
@@ -43,25 +46,27 @@ try {
     try {
         Write-Host( "Check parameters")
 
-        $AllLocations = Get-AzureRmLocation
-        $found = $false
-        foreach ($Location in $AllLocations ) {
-            if ( $location.Location -eq $Region) {
-                $found = $true
-                # Write-Host( "Location $Region must be the Display Name not the identifier. Changing to the Display Name $($location.DisplayName)" )
-                # $Region = $location.DisplayName
-                break
+        if ( $ValidateRegion ) {
+            $AllLocations = Get-AzureRmLocation
+            $found = $false
+            foreach ($Location in $AllLocations ) {
+                if ( $location.Location -eq $Region) {
+                    $found = $true
+                    # Write-Host( "Location $Region must be the Display Name not the identifier. Changing to the Display Name $($location.DisplayName)" )
+                    # $Region = $location.DisplayName
+                    break
+                }
+                if ( $location.DisplayName -eq $Region){
+                    $found = $true
+                    Write-Host( "Location $Region must be the Identifier not the Display Name. Changing to the Identifier $($location.Location)" )
+                    $Region = $location.Location
+                    break
+                }
             }
-            if ( $location.DisplayName -eq $Region){
-                $found = $true
-                Write-Host( "Location $Region must be the Identifier not the Display Name. Changing to the Identifier $($location.Location)" )
-                $Region = $location.Location
-                break
+            if ( -not $found ) {
+                Write-Host( "Location $Region does not exist" )
+                throw
             }
-        }
-        if ( -not $found ) {
-            Write-Host( "Location $Region does not exist" )
-            throw
         }
 
         $RG = Get-AzureRmResourceGroup -Name $ResourceGroup -Location $Region -ErrorAction "SilentlyContinue"
@@ -228,7 +233,7 @@ try {
         $appgw = New-AzureRmApplicationGateway `
             -Name $appgwName `
             -ResourceGroupName $ResourceGroup `
-            -Location $Region`
+            -Location $Region `
             -BackendAddressPools $AGPool `
             -BackendHttpSettingsCollection $AGPoolSettings `
             -FrontendIpConfigurations $fipconfig `
@@ -240,21 +245,6 @@ try {
             -SslCertificates $cert `
             -Probes $probe
             # $appgw | Format-List | Write-Host
-    }
-
-    if ( $true ) {
-        Write-Host( "Add Application Gateway to VMSS")
-
-        # get the pool thats been created with the Gateway so we also get the id allocated to it
-        $AGPool = Get-AzureRmApplicationGatewayBackendAddressPool -Name $AGPoolName -ApplicationGateway $AppGw
-
-        $ipConfig = New-AzureRmVmssIpConfig `
-            -Name $($VMSSName + 'VmssIpConfig') `
-            -SubnetId $subnet.Id `
-            -ApplicationGatewayBackendAddressPoolsId $AGPool.Id
-
-        $VMSS = Add-AzureRmVmssNetworkInterfaceConfiguration -VirtualMachineScaleSet $VMSS -Name $($VMSSName + '-VmssNetConfig') -Primary $false -IPConfiguration $ipConfig
-        $VMSS = Update-AzureRmVmss -ResourceGroupName $ResourceGroup -VirtualMachineScaleSet $VMSS -VMScaleSetName $VMSSName
     }
 } catch {
     $_
