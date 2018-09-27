@@ -1,16 +1,16 @@
 # Script inspired by https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-ssl-arm
 
 param (
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [String]$Region = 'eastus',
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [String]$ResourceGroup = 'daftruck2',
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [String]$VMSSName = 'daftruck2',
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [String]$CertificateFilePath = 'c:\appgwcert.pfx' ,
 
     [Parameter(Mandatory=$true)]
@@ -23,6 +23,9 @@ param (
 $WarningPreference = "SilentlyContinue"
 $VerbosePreference = "SilentlyContinue"
 $DebugPreference = "SilentlyContinue"
+
+# Recreate the application gateway
+$Recreate = $false
 
 # Make non-terminating errors into terminating errors. That is, the script will throw an exception so we know its gone wrong
 $ErrorActionPreference = 'Stop'
@@ -83,18 +86,20 @@ try {
             -ResourceGroupName $ResourceGroup `
             -ErrorAction "SilentlyContinue"
 
-        if ( $null -ne $appgw) {
-            Write-Host( "Application Gateway already exists" )
+        if( $Recreate ) {
+            if ( $null -ne $appgw) {
+                Write-Host( "Application Gateway already exists" )
 
-            try {
-                Remove-AzureRmApplicationGateway -Name $appgwName -ResourceGroupName $ResourceGroup -force
-            } catch {
-                $_
-                Write-Host( "Application Gateway $appgwName cannot be deleted. Probably because the VMSS is still using the backend pool. Make sure all targets are removed from the backend pool. Then retry")
-                exit
+                try {
+                    Remove-AzureRmApplicationGateway -Name $appgwName -ResourceGroupName $ResourceGroup -force
+                } catch {
+                    $_
+                    Write-Host( "Application Gateway $appgwName cannot be deleted. Probably because the VMSS is still using the backend pool. Make sure all targets are removed from the backend pool. Then retry")
+                    exit
+                }
+                $appgw = $null
             }
         }
-
     } catch {
         $_
         Write-Host ("Invalid parameter")
@@ -129,24 +134,31 @@ try {
 
     Write-Host ( "Create the IP configurations and frontend port" )
 
+    # The subnet id is required. This is only obtained by getting the vnet again after the subnet has been created
+    $vnet = Get-AzureRmVirtualNetwork `
+        -ResourceGroupName $ResourceGroup `
+        -Name $vnetname
+
     $subnet = Get-AzureRmVirtualNetworkSubnetConfig `
         -Name $agsubnet `
         -VirtualNetwork $vnet
 
-    Write-Host ( "Associate myAGSubnet that was previously created to the application gateway using New-AzureRmApplicationGatewayIPConfiguration.")
+    $subnet | Format-List
+
+    Write-Host ( "Associate subnet with the application gateway.")
     $gipconfigname = $vmssName + '-agIPConfig'
     $gipconfig = New-AzureRmApplicationGatewayIPConfiguration `
         -Name $gipconfigname `
         -Subnet $subnet
 
-    Write-Host ( "Assign myAGPublicIPAddress to the application gateway using New-AzureRmApplicationGatewayFrontendIPConfig.")
+    Write-Host ( "Assign PublicIPAddress to the application gateway.")
 
     $fipconfigname = $vmssName + '-agFrontEndIPConfig'
     $fipconfig = New-AzureRmApplicationGatewayFrontendIPConfig `
         -Name $fipconfigname `
         -PublicIPAddress $pip
 
-    Write-Host ( "Assign https port to the application gateway using New-AzureRmApplicationGatewayFrontendPort.")
+    Write-Host ( "Assign https port to the application gateway.")
 
     $frontendportname = $vmssName + '-agFrontEndPort'
     $frontendport = New-AzureRmApplicationGatewayFrontendPort `
@@ -154,12 +166,12 @@ try {
         -Port 443
 
     Write-Host( "Create the backend pool and settings" )
-    Write-Host( "Create the backend pool for the application gateway using New-AzureRmApplicationGatewayBackendAddressPool." )
+    Write-Host( "Create the backend pool for the application gateway." )
 
     $AGPoolName = $vmssName + '-agPool'
     $AGPool = New-AzureRmApplicationGatewayBackendAddressPool -Name $AGPoolName
 
-    Write-Host( "Configure the settings for the backend pool using New-AzureRmApplicationGatewayBackendHttpSettings." )
+    Write-Host( "Configure the settings for the backend pool." )
 
     $AGPoolSettingsName = $vmssName + '-agPoolSettings'
     $AGPoolSettings = New-AzureRmApplicationGatewayBackendHttpSettings `
@@ -191,7 +203,7 @@ try {
         -FrontendPort $frontendport `
         -SslCertificate $cert
 
-    Write-Host( "Create the default listener rule with Backend Pool seetings")
+    Write-Host( "Create the default listener rule with Backend Pool settings")
 
     $frontendRuleName = $vmssName + '-agRule'
     $frontendRule = New-AzureRmApplicationGatewayRequestRoutingRule `
@@ -212,24 +224,29 @@ try {
         -Tier Standard `
         -Capacity 2
 
-    $appgw = New-AzureRmApplicationGateway `
-        -Name $appgwName `
-        -ResourceGroupName $ResourceGroup `
-        -Location $Region`
-        -BackendAddressPools $AGPool `
-        -BackendHttpSettingsCollection $AGPoolSettings `
-        -FrontendIpConfigurations $fipconfig `
-        -GatewayIpConfigurations $gipconfig `
-        -FrontendPorts $frontendport `
-        -HttpListeners $defaultlistener `
-        -RequestRoutingRules $frontendRule `
-        -Sku $sku `
-        -SslCertificates $cert `
-        -Probes $probe
-        # $appgw | Format-List | Write-Host
+    if ( $null -eq $appgw ) {
+        $appgw = New-AzureRmApplicationGateway `
+            -Name $appgwName `
+            -ResourceGroupName $ResourceGroup `
+            -Location $Region`
+            -BackendAddressPools $AGPool `
+            -BackendHttpSettingsCollection $AGPoolSettings `
+            -FrontendIpConfigurations $fipconfig `
+            -GatewayIpConfigurations $gipconfig `
+            -FrontendPorts $frontendport `
+            -HttpListeners $defaultlistener `
+            -RequestRoutingRules $frontendRule `
+            -Sku $sku `
+            -SslCertificates $cert `
+            -Probes $probe
+            # $appgw | Format-List | Write-Host
+    }
 
-    if ( $false ) {
+    if ( $true ) {
         Write-Host( "Add Application Gateway to VMSS")
+
+        # get the pool thats been created with the Gateway so we also get the id allocated to it
+        $AGPool = Get-AzureRmApplicationGatewayBackendAddressPool -Name $AGPoolName -ApplicationGateway $AppGw
 
         $ipConfig = New-AzureRmVmssIpConfig `
             -Name $($VMSSName + 'VmssIpConfig') `
@@ -242,7 +259,7 @@ try {
 } catch {
     $_
     Write-Host ("Fatal Error")
-    Write-Host( "This message may mean the Location field is not valid or the Gateway already exists! 'Generic types are not supported for input fields at this time'")
+    Write-Host( "The message 'Generic types are not supported for input fields at this time' may mean the Location field is not valid or the Gateway already exists!")
     Exit
 }
 Write-Host( "Successful" )
