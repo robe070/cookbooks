@@ -26,7 +26,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14.2 EPC142020' `
+Bake-IdeMsi -VersionText '14.2 EPC142021' `
             -VersionMajor 14 `
             -VersionMinor 2 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0335_LanDVDcut_L4W14200_4158_180503_EPC142020" `
