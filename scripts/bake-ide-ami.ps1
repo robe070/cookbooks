@@ -341,7 +341,6 @@ try
             $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
         }
 
-
         #####################################################################################
         Write-Host "$(Log-Date) Installing base software"
         #####################################################################################
@@ -356,6 +355,24 @@ try
         ReConnect-Session
 
         Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
+
+        if ( $InstallScalable ) {
+            Write-Host( "$(Log-Date) Adjust service startup" )
+            Write-Host( "$(Log-Date) Disable SQL Server service otherwise it chews up about 20% CPU on a t2.medium AWS instance")
+            Execute-RemoteBlock $Script:session {
+                set-service -Name MSSQLSERVER -StartupType Disabled
+                get-service MSSQLSERVER | SELECT-OBJECT Name, StartType, Status
+            }
+
+            if ( -not $Win2012 ) {
+                Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
+                Write-Host( "$(Log-Date) Only Windows 2016 because the api requires powershell 5.x" )
+                Execute-RemoteBlock $Script:session {
+                    Add-MpPreference -ExclusionPath ("${ENV:ProgramFiles(x86)}\Lansa","${ENV:ProgramFiles(x86)}\webserver","${ENV:ProgramFiles(x86)}\app1","${ENV:ProgramFiles(x86)}\app2","${ENV:ProgramFiles(x86)}\app3","${ENV:ProgramFiles(x86)}\app4","${ENV:ProgramFiles(x86)}\app5","${ENV:ProgramFiles(x86)}\app6","${ENV:ProgramFiles(x86)}\app7","${ENV:ProgramFiles(x86)}\app8","${ENV:ProgramFiles(x86)}\app9","${ENV:ProgramFiles(x86)}\app10")
+                }
+            }
+        }
+
     } else {
         Execute-RemoteInitPostGit
 
