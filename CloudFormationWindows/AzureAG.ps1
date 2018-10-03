@@ -17,7 +17,7 @@ param (
     [Security.SecureString]$password
 )
 
-'AzureAG.ps1'
+'AzureAG.ps1 v4'
 
 # Remove unhelpful warnings that proliferate in the AzureRm cmdlets
 $WarningPreference = "SilentlyContinue"
