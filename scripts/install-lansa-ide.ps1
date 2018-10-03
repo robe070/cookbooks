@@ -146,13 +146,13 @@ try
     $S3DVDImageDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'DVDUrl').DVDUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Out-Host
+        cmd /c aws s3 sync  $S3DVDImageDirectory $Script:DvdDir "--exclude" "*ibmi/*" "--exclude" "*AS400/*" "--exclude" "*linux/*" "--exclude" "*setup/Installs/MSSQLEXP/*" "--delete" | Out-Null
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Out-Host
+        cmd /c AzCopy /Source:$S3DVDImageDirectory /Dest:$Script:DvdDir /S /XO /Y /MT | Out-Null
     }
     if ( $LastExitCode -ne 0 )
     {
-        throw
+        throw "Error downloading DVD Image"
     }
 
     if ( $UPGD_bool )
@@ -164,7 +164,7 @@ try
         cmd /c $Script:DvdDir\EPC\allepcs.exe """$APPA""" | Out-Host
         if ( $LastExitCode -ne 0 )
         {
-            throw
+            throw "Error installing EPCs"
         }
     }
     else
@@ -190,7 +190,7 @@ try
     }
     if ( $LastExitCode -ne 0 )
     {
-        throw
+        throw "Error downloading Visual LANSA updates"
     }
 
     #####################################################################################
@@ -206,7 +206,7 @@ try
     }
     if ( $LastExitCode -ne 0 )
     {
-        throw
+        throw "Error downloading Integrator updates"
     }
     cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart" | Out-Host
 
