@@ -3,16 +3,18 @@
 
 Pull application git repos.
 
+Presumes the repos are already setup.
 
+There may be 2 repos:
+1) The application repo whose location is found in the registry entry MainAppInstallPath
+2) A possible sub repo in [root]\tools\GitDeployHub
+
+Both repos use the same branch.
+
+The application directory must exist, otherwise its a fatal error. If the application repo does not exist, its a fatal.
+The GDH directory is optional, if not a warning is displayed. If it exists but the git repo does not, its a fatal.
 
 .EXAMPLE
-
-1. Upload msi to c:\lansa\MyApp.msi (Copy file from local machine. Paste into RDP session)
-2. Start SQL Server Service and set to auto start. Change SQL Server to accept SQL Server Authentication
-3. Create lansa database
-4. Add user lansa with password 'Pcxuser@122' to SQL Server as Sysadmin and to the lansa database as dbowner
-5. Change server_name to the machine name in this command line and run it:
-C:\\LANSA\\scripts\\install-lansa-msi.ps1 -server_name "IP-AC1F2F2A" -dbname "lansa" -dbuser "lansa" -dbpassword "Pcxuser@122" -webuser "pcxuser" -webpassword "Lansa@122"
 
 #>
 param(
@@ -91,8 +93,6 @@ Write-Host("$(Log-Date) Script Directory: $script:IncludeDir")
 cmd /c exit 0    #Set $LASTEXITCODE
 
 try {
-    $APPARepoOK = $false
-    $GDHRepoOK = $false
     $APPA = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'MainAppInstallPath' -ErrorAction SilentlyContinue).MainAppInstallPath
 
     # Clean up what we may need to restore in case there is an exception before the new config is saved.
@@ -100,12 +100,12 @@ try {
     Remove-Item $GDHSaveConfig -Force -ErrorAction SilentlyContinue | Write-Host
 
     if ( [string]::IsNullOrWhiteSpace($APPA) ) {
-        Write-Warning( "$(Log-Date) MainAppInstallPath registry value is non-existent or empty") | Write-Host
+        throw "MainAppInstallPath registry value is non-existent or empty"
     } else {
         Write-Host( "$(Log-Date) Pulling Main Install Path $APPA" )
 
         If ( -not (Test-Path -Path $APPA) ) {
-            Write-Warning( "$(Log-Date) $APPA does not exist" ) | Write-Host
+            throw "$APPA does not exist"
         } else {
             Set-Location $APPA | Write-Host
 
@@ -115,11 +115,10 @@ try {
             $gitstatusline = Get-Content $gitstatus -First 1
             $gitstatusline | Write-Host
             if ( $gitstatusline -contains 'fatal: not a git repository' ) {
-                Write-Warning( "$(Log-Date) $APPA is not a git repository" ) | Write-Host
+                throw "$APPA is not a git repository"
             } else {
                 Write-Host( "$(Log-Date) Checkout whatever can be updated, especially scripts needed for this install")
                 Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $true
-                $APPARepoOK = $true
             }
         }
 
@@ -133,32 +132,7 @@ try {
 
             $gitdir = Join-Path -Path $GDHPath -ChildPath '.git'
             If ( -not (Test-Path -Path $gitdir) ) {
-                Write-Warning( "$(Log-Date) $GDHPath is not a git repository. GDH is presumed to have the .git directory shipped in the MSI package.
-                This requires that the build environment has the GDH repo setup. Then the MSI will
-                contain it and will be installed." ) | Write-Host
-
-                # $GDHRepoUrl = 'git@github.com:lansa/gitdeployhub.git'
-                # Write-Host( "$(Log-Date) Cloning $GDHRepoUrl")
-
-                # cmd /C git init '2>&1' | Write-Host
-                # if ($LASTEXITCODE -ne 0) {
-                #     throw ("$GDHPath Git init failed")
-                # }
-
-                # cmd /C git remote add origin $GDHRepoUrl '2>&1' | Write-Host
-                # if ($LASTEXITCODE -ne 0) {
-                #     throw ("$GDHPath Git remote add failed")
-                # }
-
-                # cmd /C git remote fetch -q '2>&1' | Write-Host
-                # if ($LASTEXITCODE -ne 0) {
-                #     throw ("$GDHPath Git fetch failed")
-                # }
-
-                # cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
-                # if ($LASTEXITCODE -ne 0) {
-                #     throw ("$GDHPath Git checkout failed")
-                # }
+                throw "$GDHPath is not a git repository"
             } else {
                 $GDHConfig = Join-Path $GDHPath 'Web\Web.config'
                 Write-Host( "$(Log-Date) Save GDH Configuration $GDHConfig to $GDHSaveConfig")
@@ -166,7 +140,6 @@ try {
 
                 Write-Host( "$(Log-Date) Checkout whatever can be updated, especially scripts needed for this install")
                 Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $true
-                $GDHRepoOK = $true
             }
         }
     }
@@ -180,18 +153,12 @@ try {
 
     Write-Host( "$(Log-Date) Perform full checkout now that everything has been stopped")
 
-    if ( $APPARepoOK ) {
-        Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $false
-    }
-
-    if ( $GDHRepoOK ) {
-        Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $false
-    }
-
-
+    Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $false
+    Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $false
 } catch {
+    $_ | Write-Host
     $e = $_.Exception
-    $e | format-list -force
+    $e | format-list -force | Write-Host
 
     Write-Host( "AppRepoPull failed" )
     Write-Host( "Raw LASTEXITCODE $LASTEXITCODE" )

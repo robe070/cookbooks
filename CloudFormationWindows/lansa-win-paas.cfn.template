@@ -440,7 +440,7 @@
    "Mappings"                 : {
       "AWSRegionArch2AMI": {
          "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace. Note that ap-southeast-2 and us-east-1 are the only FREE AMIs" },
-         "us-east-1": { "win2012": "ami-0537b48168d5ae436", "win2016" : "ami-008c04e32fafc3e3f" },
+         "us-east-1": { "win2012": "ami-0537b48168d5ae436", "win2016" : "ami-05f0177f9f94b755b" },
          "us-east-2": { "win2012": "", "win2016" : "" },
          "us-west-1": { "win2012": "", "win2016" : "" },
          "us-west-2": { "win2012": "", "win2016" : "" },
@@ -449,7 +449,7 @@
          "eu-west-1": { "win2012": "", "win2016" : "" },
          "eu-west-2": { "win2012": "", "win2016" : "" },
          "ap-southeast-1": { "win2012": "", "win2016" : "" },
-         "ap-southeast-2": { "win2012": "ami-0470139816fa1bec2", "win2016" : "ami-063c84b9992a58aea" },
+         "ap-southeast-2": { "win2012": "ami-0470139816fa1bec2", "win2016" : "ami-01eaa15d85dccd80c" },
          "ap-south-1": { "win2012": "", "win2016" : "" },
          "ap-northeast-1": { "win2012": "", "win2016" : "" },
          "ap-northeast-2": { "win2012": "", "win2016" : "" },
