@@ -364,12 +364,13 @@ try
     }
 
     if ( $CompanionInstall ) {
-        Write-Host( "$(Log-Date) Kill any msiexec.exe that are still hanging around and haven't been fully ended by Windows so that this install starts ok. Fixes MSI return code 1618. Presumes sysinternals has been installed. choco install sysinternals")
+        Write-Host( "$(Log-Date) Kill any msiexec.exe that are still hanging around and haven't been fully ended by Windows so that this install starts ok. Fixes MSI return code 1618.")
 
-        # Pskill outputs in utf-16, so change to utf-8
-        $pskillOutput = "$ENV:TEMP\pskill.txt"
-        & pskill -accepteula 'msiexec.exe' 2>&1 | Out-File $pskillOutput -encoding utf8
-        Get-Content $pskillOutput | Write-Host
+        $Processes = @(Get-Process | Where-Object {$_.Path -like "*\msiexec.exe" })
+        foreach ($process in $processes ) {
+            Write-Host("$(Log-Date) Stopping $($Process.ProcessName)")
+            Stop-Process $process.id -Force | Write-Host
+        }
     }
 
 
