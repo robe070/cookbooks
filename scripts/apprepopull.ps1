@@ -56,7 +56,7 @@ function Checkout-GitRepo
         cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
         if ($LASTEXITCODE -ne 0) {
             if ( $IgnoreError ) {
-                Write-Warning ("$RepoPath Git checkout failed, continuing") | Write-Host
+                Write-Warning ("$RepoPath Git checkout failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this checkout") | Write-Host
             } else {
                 throw ("$RepoPath Git checkout failed")
             }
@@ -64,7 +64,11 @@ function Checkout-GitRepo
     } else {
         cmd /C git pull '2>&1' | Write-Host
         if ($LASTEXITCODE -ne 0) {
-            throw ("$RepoPath Git pull failed")
+            if ( $IgnoreError ) {
+                Write-Warning ("$RepoPath Git pull failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this pull") | Write-Host
+            } else {
+                throw ("$RepoPath Git pull failed")
+            }
         }
     }
 }
@@ -108,6 +112,8 @@ try {
             throw "$APPA does not exist"
         } else {
             Set-Location $APPA | Write-Host
+
+            Write-Host( "Current location $(Get-Location)") | Write-Host
 
             $gitstatus = Join-Path -Path $ENV:TEMP -ChildPath 'gitstatus.txt'
             cmd /C git status '2>&1' > $gitstatus
