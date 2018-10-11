@@ -2,6 +2,7 @@
 
 console.log('Loading function');
 var http = require('http');
+var https = require('https');
 var AWS = require('aws-sdk');
 var ipRangeCheck = require('ip-range-check');
 
@@ -25,11 +26,11 @@ function returnAPIError( statusCode, message, callback, context) {
     let response = {
         statusCode: statusCode,
         body: JSON.stringify(responseBody)
-    };    
+    };
     if (callback) {
         callback( null, response);
     }
-    
+
     return response;
 }
 
@@ -68,12 +69,12 @@ exports.handler = (event, context, callback) => {
     //console.log( 'body: ', JSON.stringify(body).substring(0, 400));
     //console.log( 'body.repository: ', body.repository );
     console.log( 'body.repository.name: ', body.repository.name );
-    
+
     repo = body.repository.name;
     if (repo === '') {
         console.log( "Warning: Repository name not found");
     }
-    
+
     // *******************************************************************************************************
     // Check the secret
     // *******************************************************************************************************
@@ -81,13 +82,13 @@ exports.handler = (event, context, callback) => {
     var crypto    = require('crypto');
 
     var secret    = process.env.SECRET;
-    var algorithm = 'sha1';   
+    var algorithm = 'sha1';
     var hash, hmac;
-    
+
     let signature = event.headers['X-Hub-Signature'];
     //console.log( 'signature: ', signature );
-    
-    hmac = crypto.createHmac(algorithm, secret);    
+
+    hmac = crypto.createHmac(algorithm, secret);
     hmac.write(JSON.stringify(body)); // write in to the stream
     hmac.end();       // can't read from the stream until you call end()
     hash = hmac.read().toString('hex');    // read out hmac digest
@@ -95,47 +96,47 @@ exports.handler = (event, context, callback) => {
 
     if ( signature !== ('sha1=' + hash ) ) {
         returnAPIError( 403, 'Error 403 Secret is invalid', callback, context);
-        return;        
+        return;
     }
-    
+
     // *******************************************************************************************************
     // Parameter setup
     // *******************************************************************************************************
-    
+
     console.log("event.queryStringParameters" + JSON.stringify(event.queryStringParameters));
 
     if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
-        if (event.queryStringParameters.hostedzoneid !== undefined && 
-            event.queryStringParameters.hostedzoneid !== null && 
+        if (event.queryStringParameters.hostedzoneid !== undefined &&
+            event.queryStringParameters.hostedzoneid !== null &&
             event.queryStringParameters.hostedzoneid !== "") {
             hostedzoneid = event.queryStringParameters.hostedzoneid;
             console.log("Received hostedzoneid: " + hostedzoneid);
         }
 
-        
-        if (event.queryStringParameters.alias !== undefined && 
-            event.queryStringParameters.alias !== null && 
+
+        if (event.queryStringParameters.alias !== undefined &&
+            event.queryStringParameters.alias !== null &&
             event.queryStringParameters.alias !== "") {
             alias = event.queryStringParameters.alias;
             console.log("Received alias: " + alias);
         }
-        
-        if (event.queryStringParameters.port !== undefined && 
-            event.queryStringParameters.port !== null && 
+
+        if (event.queryStringParameters.port !== undefined &&
+            event.queryStringParameters.port !== null &&
             event.queryStringParameters.port !== "") {
             port = event.queryStringParameters.port;
             console.log("Received port: " + port);
         }
 
-        if (event.queryStringParameters.appl !== undefined && 
-            event.queryStringParameters.appl !== null && 
+        if (event.queryStringParameters.appl !== undefined &&
+            event.queryStringParameters.appl !== null &&
             event.queryStringParameters.appl !== "") {
             appl = event.queryStringParameters.appl;
             console.log("Received appl: " + appl);
         }
-        
-        if (event.queryStringParameters.accountwide !== undefined && 
-            event.queryStringParameters.accountwide !== null && 
+
+        if (event.queryStringParameters.accountwide !== undefined &&
+            event.queryStringParameters.accountwide !== null &&
             event.queryStringParameters.accountwide !== "") {
             accountwide = event.queryStringParameters.accountwide;
             console.log("Received accountwide: " + accountwide);
@@ -146,12 +147,31 @@ exports.handler = (event, context, callback) => {
         returnAPIError( 400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback, context);
         return;
     }
-    
+
+    // Check if its a repo that we fan out with this code
+    let isFanoutRepo = repo.indexOf('lansaeval') || repo.indexOf('lansapaid');
+    if ( !isFanoutRepo && accountwide === 'y'){
+        let responseBody = {
+            errorMessage: repo + ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide',
+        };
+        console.log( "responseBody: ", responseBody);
+
+        // Send a response code to indicate its not been processed (202 = Accepted) and its probably not an error. e.g. webserver & gitdeployhub repos are not handled through here
+        let response = {
+            statusCode: 202,
+            body: JSON.stringify(responseBody)
+        };
+        if (callback) {
+            callback( null, response);
+        }
+        return;
+    }
+
     if ( accountwide !== 'n' && accountwide !== 'y') {
         returnAPIError( 400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback, context);
         return;
     }
-    
+
     // Mandatory parameters
     if ( hostedzoneid === "" ) {
         returnAPIError( 400, 'Error 400 hostedzoneid is a mandatory parameter', callback, context);
@@ -161,12 +181,12 @@ exports.handler = (event, context, callback) => {
         returnAPIError( 400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback, context);
         return;
     }
-    
+
     if ( accountwide === 'y' && (alias !== "" || appl !== "") ) {
         returnAPIError( 400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback, context);
         return;
     }
-    
+
     // If accountwide webhook then derive alias and appl from the repo name
     if ( accountwide === 'y') {
         if ( repo === 'webserver' ){
@@ -176,58 +196,60 @@ exports.handler = (event, context, callback) => {
             console.log( "Using alias: %s, appl: %s", alias, appl);
         } else {
             // The repo number indicates the stack and appl to use
-            // lansaeval1 - lansaeval10 use stack 1 and appl 1 - 10
-            // lansaeval11 - lansaeval20 use stack 2 and appl 1 - 10
+            // lansaeval11 use stack 1 and appl 1
+            // lansaeval12 use stack 1 and appl 2
+            // lansaeval10 use stack 1 and appl 10 (exception to rule 0 = 10)
+            // lansaeval21 use stack 2 and appl 1
             // etc
-        
-            let lansarepo = repo.indexOf('lansaeval');
+
+            let lansarepo = repo.indexOf('lansaeval') || repo.indexOf('lansapaid');
             if ( lansarepo !== 0) {
-                returnAPIError( 400, "Error 400 only lansaevalxxx and webserver repo names are supported when accountwide='y'. All other repo names require explicit alias and appl parameters", callback, context);
-                return;            
+                returnAPIError( 400, "Error 400 only lansaevalxxx and lansapaidxxx repo names are supported when accountwide='y'. All other repo names require explicit alias and appl parameters", callback, context);
+                return;
             }
-            
-            let repoNumber = repo.match( /\d+/g );  
+
+            let repoNumber = repo.match( /\d+/g );
             console.log( "repoNumber: ", repoNumber.toString() );
-    
+
             let stack = Math.ceil(repoNumber / 10);
             console.log( "stack: ", stack.toString() );
-            
+
             if ( stack < 1 || stack > 50 ){
                 returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 50", callback, context);
-                return;               
+                return;
             }
-            
+
             let applnum = repoNumber % 10;
             if ( applnum === 0) {
                 applnum = 10;
             }
             console.log( "applnum: ", applnum.toString() );
-    
+
             if ( applnum < 1 || applnum > 10 ){
                 returnAPIError( 400, "Error 400 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback, context);
-                return;               
+                return;
             }
-        
+
             alias = 'eval' + stack.toString() + '.paas.lansa.com.';
             appl = 'app' + applnum.toString();
             console.log( "Using alias: %s, appl: %s", alias, appl);
         }
     }
-    
+
     // *******************************************************************************************************
     // Resolving EC2 ip addresses and posting github webhook to each one
     // *******************************************************************************************************
-    
+
     // Any variables which need to be updated by multiple callbacks need to be declared before the first callback
     // otherwise each callback gets its own copy of the global.
-    
+
     let instanceCount = 0;
     let successCodes = 0;
-    
+
     let region = process.env.AWS_DEFAULT_REGION;
 
     let route53 = new AWS.Route53();
-    
+
     let paramsListRRS = {
       HostedZoneId: hostedzoneid, /* required - paas.lansa.com */
       MaxItems: '100',
@@ -241,20 +263,20 @@ exports.handler = (event, context, callback) => {
             console.log(err, err.stack); // an error occurred
             returnAPIError( 500, err.message, callback, context);
             return;
-        } 
-        
+        }
+
         // successful response
-        
+
         console.log('Searched for Alias: ', paramsListRRS.StartRecordName);
-        if (data.ResourceRecordSets[0] === undefined || 
-            data.ResourceRecordSets[0] === null || 
+        if (data.ResourceRecordSets[0] === undefined ||
+            data.ResourceRecordSets[0] === null ||
             data.ResourceRecordSets[0] === "") {
-            
+
             console.log('Alias not found');
             returnAPIError( 500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback, context);
             return;
         }
-        
+
         // forEach is a Sync call
         let recordSets = data.ResourceRecordSets;
         Object.keys(recordSets).forEach(function(keyRS) {
@@ -265,28 +287,28 @@ exports.handler = (event, context, callback) => {
             if ( !webserver && 0 != keyRS) {
                 return;
             }
-            
+
             if ( !webserver && paramsListRRS.StartRecordName !== recordSets[keyRS].Name) {
                 returnAPIError( 500, 'Searched for Alias is not the one located', callback, context);
                 return;
             }
-            
+
             if ( recordSets[keyRS].Type != 'A' || recordSets[keyRS].AliasTarget === undefined || recordSets[keyRS].AliasTarget.DNSName === undefined) {
                 console.log( 'Skipping ', recordSets[keyRS].Name);
                 return;
             }
-            
+
             // For webserver, process all recordsets starting evalx, skip the rest
             if ( webserver && !recordSets[keyRS].Name.match( /eval\d+/ )) {
                 console.log( 'Skipping ', recordSets[keyRS].Name);
                 return;
             }
-            
+
             console.log('ELB DNS Name: ', recordSets[keyRS].AliasTarget.DNSName);
             let DNSName = recordSets[keyRS].AliasTarget.DNSName;
             // e.g. paas-livb-webserve-ztessziszyzz-1633164328.us-east-1.elb.amazonaws.com.
-    
-            let DNSsplit = DNSName.split("."); 
+
+            let DNSsplit = DNSName.split(".");
             let ELBNameFull = '';
             let ELBsplit = '';
             console.log( 'DNSsplit[0]: ', DNSsplit[0]);
@@ -299,7 +321,7 @@ exports.handler = (event, context, callback) => {
             }
             ELBsplit = ELBNameFull.split("-");
             ELBsplit.pop(); // remove last element
-    
+
             // Put ELB Name back together again
             let i;
             let ELBLowerCase = '';
@@ -308,12 +330,12 @@ exports.handler = (event, context, callback) => {
                 if ( i < ELBsplit.length - 1 ) {
                     ELBLowerCase += "-";
                 }
-            } 
+            }
 
             // Need the region to be set before creating these variables.
-            
+
             let elb = new AWS.ELB();
-            let ec2 = new AWS.EC2();        
+            let ec2 = new AWS.EC2();
 
             console.log( 'Region: ' + region );
             console.log( 'ELB:    ' + ELBLowerCase );
@@ -322,11 +344,11 @@ exports.handler = (event, context, callback) => {
                 // ignore undefined ELB - its an invalid recordset we've found
                 return;
             }
-            
+
             console.log( 'Fanning out to ', ELBLowerCase );
 
             AWS.config.update({region: region});
-            
+
             // Async call
             elb.describeLoadBalancers(function(err, data) {
                 if (err) {
@@ -334,14 +356,14 @@ exports.handler = (event, context, callback) => {
                     returnAPIError( 500, err.message, callback, context);
                     return;
                 }
-                
+
                 // successful response
-                console.log('Instances: ', JSON.stringify(data.LoadBalancerDescriptions).substring(0,400));   
+                console.log('Instances: ', JSON.stringify(data.LoadBalancerDescriptions).substring(0,400));
                 console.log( 'length: ' , data.LoadBalancerDescriptions.length);
-                
-                // Find the lower case ELB name by listing all the load balancers in the region 
+
+                // Find the lower case ELB name by listing all the load balancers in the region
                 // and doing a case insensitive compare
-                
+
                 let i;
                 let ELBNum = -1;
                 let ELBCurrent = '';
@@ -352,38 +374,38 @@ exports.handler = (event, context, callback) => {
                         ELBNum = i;
                         break;
                     }
-                }            
-    
+                }
+
                 if ( ELBNum == -1 ) {
                     if ( webserver ) {
                         // searching through all record sets so may hit an invalid one. Best to keep going and resolve what we can.
                         console.log( 'ELB ' + ELBLowerCase + ' not found. Skipping ');
-                        return; 
+                        return;
                     }
                     returnAPIError( 500, 'ELB Name not found ' + ELBLowerCase, callback, context);
                     return;
                 }
-    
+
                 let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
                 if (instances.length === 0) {
                     returnAPIError( 500, 'No instances running in ELB ' + ELBLowerCase, callback, context);
-                    return;               
+                    return;
                 }
-                console.log('Instances: ', JSON.stringify(instances).substring(0,400));   
-    
+                console.log('Instances: ', JSON.stringify(instances).substring(0,400));
+
                 // forEach is a Sync call
                 Object.keys(instances).forEach(function(key) {
                     console.log("InstanceId[" + key + "] " + JSON.stringify( instances[key].InstanceId ) );
-                    
+
                     instanceCount++;
-                    
+
                     let params = {
                         DryRun: false,
                         InstanceIds: [
                             instances[key].InstanceId
                         ]
                     };
-                    
+
                     // Async call
                     ec2.describeInstances(params, function(err, data) {
                         if (err) {
@@ -391,17 +413,17 @@ exports.handler = (event, context, callback) => {
                             returnAPIError( 500, err.message, callback, context);
                             return;
                         }
-                        
+
                         // successful response
-                        // console.log(data.Reservations[0].Instances[0]);        
+                        // console.log(data.Reservations[0].Instances[0]);
                         let PublicIpAddress = data.Reservations[0].Instances[0].PublicIpAddress;
                         // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
-    
+
                         // post the payload from GitHub
                         let post_data = '';
-    
+
                         // console.log("post_data length: ", JSON.stringify( post_data.length ) );
-                        
+
                         // An object of options to indicate where to post to
                         let post_options = {
                             host: PublicIpAddress,
@@ -413,28 +435,28 @@ exports.handler = (event, context, callback) => {
                                 'Content-Length': post_data.length
                             }
                         };
-                    
+
                         // Async call
                         let post_request = http.request(post_options, function(res) {
                             let body = '';
-                
+
                             if (res.statusCode === 200) {
                                 successCodes++;
                                 console.log('Application update successfully deployed by Lambda function to ' + post_options.host);
                                 // console.log('successCodes: ' + successCodes + ' instanceCount: ' + instanceCount);
                                 if ( successCodes >= instanceCount ){
                                     let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repo + ' using ' + context.invokedFunctionArn;
-                                    console.log(message);  
-                                    
+                                    console.log(message);
+
                                     let responseBody = {
                                         message: message,
                                         input: event.queryStringParameters
                                     };
-                                    
-                                    // The output from a Lambda proxy integration must be 
-                                    // of the following JSON object. The 'headers' property 
-                                    // is for custom response headers in addition to standard 
-                                    // ones. The 'body' property  must be a JSON string. For 
+
+                                    // The output from a Lambda proxy integration must be
+                                    // of the following JSON object. The 'headers' property
+                                    // is for custom response headers in addition to standard
+                                    // ones. The 'body' property  must be a JSON string. For
                                     // base64-encoded payload, you must also set the 'isBase64Encoded'
                                     // property to 'true'.
                                     let response = {
@@ -445,38 +467,100 @@ exports.handler = (event, context, callback) => {
                                         body: JSON.stringify(responseBody)
                                     };
                                     console.log("response: " + JSON.stringify(response));
-                                    
-                                    // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
-                                    context.callbackWaitsForEmptyEventLoop = true; 
-                                    callback(null, response);                                
-                                    context.callbackWaitsForEmptyEventLoop = false; 
+
+                                    console.log("Test timing");
+
+                                    // **********************************************************
+                                    // Post deployment state to Dashboard
+                                    // **********************************************************
+                                    let PublicIpAddress = 'paas.lansa.com.au';
+                                    // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
+
+                                    let post_data = {
+                                        "ApplicationName" : repo,
+	                                    "State" : "abcdef"
+                                    };
+                                    let post_data_string = JSON.stringify( post_data )
+                                    console.log("post_data: ", post_data_string );
+                                    console.log("post_data length: ", JSON.stringify( post_data_string.length ) );
+
+                                    // An object of options to indicate where to post to
+                                    let post_options = {
+                                        host: PublicIpAddress,
+                                        port: 443,
+                                        path: '/licensing/ws/paasapi/updatestate?l=eng&p=ils',
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Content-Length': post_data_string.length
+                                        }
+                                    };
+                                    // Async call
+                                    let post_request = https.request(post_options, function(res) {
+                                        let body = '';
+
+                                        if (res.statusCode === 200) {
+                                            successCodes++;
+                                            console.log('Status successfully sent to Dashboard ' + post_options.host);
+
+                                            // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
+                                            context.callbackWaitsForEmptyEventLoop = true;
+                                            callback(null, response);
+                                            context.callbackWaitsForEmptyEventLoop = false;
+                                        } else {
+                                            returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + port + post_options.path, callback, context);
+                                            return;
+                                        }
+
+                                        res.on('data', function(chunk)  {
+                                            body += chunk;
+                                        });
+
+                                        res.on('end', function() {
+                                            console.log( 'end ' + post_options.host );
+                                            // body is ready to return. Is this needed?
+                                        });
+
+                                        res.on('error', function(e) {
+                                            returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + port + post_options.path, callback, context);
+                                            return;
+                                        });
+                                    });
+                                    // post the data
+                                    console.log( 'Posting to Dashboard: ', post_options.host, post_options.path );
+                                    post_request.write(post_data_string);
+                                    post_request.end();
+                                    // **********************************************************
+                                    // END
+                                    // Post deployment state to Dashboard
+                                    // **********************************************************
                                 }
                             } else {
                                 returnAPIError( res.statusCode, 'Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
                                 return;
-                            }                        
-                            
+                            }
+
                             res.on('data', function(chunk)  {
                                 body += chunk;
                             });
-                    
+
                             res.on('end', function() {
                                 console.log( 'end ' + post_options.host );
                                 // body is ready to return. Is this needed?
                             });
-                    
+
                             res.on('error', function(e) {
                                 returnAPIError( e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
                                 return;
                             });
-                        });    
+                        });
                         // post the data
                         console.log( 'Posting to:', ELBLowerCase, post_options.host, post_options.path );
                         post_request.write(post_data);
                         post_request.end();
-                    });                
+                    });
                 });
             });
         });
-    });    
+    });
 };
