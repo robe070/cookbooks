@@ -523,7 +523,7 @@ exports.handler = (event, context, callback) => {
                                     };
                                     console.log("response: " + JSON.stringify(response));
 
-                                    postDashboardState(repo, "Deployed to Cloud", response, callback, context );
+                                    postDashboardState(repo, "Deployed To Cloud", response, callback, context );
                                 }
                             } else {
                                 returnAPIError( repo,  res.statusCode, 'Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
