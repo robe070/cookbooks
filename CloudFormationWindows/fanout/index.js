@@ -147,13 +147,19 @@ exports.handler = (event, context, callback) => {
         console.log( "Warning: Repository name not found");
     }
 
-    let comment = body.commits[0].message;
     repository.firstPush = false;
-    console.log("Comment " + comment );
-    if ( comment === 'Setup initial environment') {
-        console.log("First Push")
+    if ( body.commits ) {
+        let comment = body.commits[0].message;
+        console.log("Comment " + comment );
+        if ( comment === 'Setup initial environment') {
+            console.log("First Push");
+            repository.firstPush = true;
+        }
+    } else if (body.zen) {
+        console.log( "Payload delivered for testing, so don't send state to Dashboard" );
         repository.firstPush = true;
     }
+
 
     // *******************************************************************************************************
     // Check the secret
@@ -275,9 +281,8 @@ exports.handler = (event, context, callback) => {
     if ( accountwide === 'y') {
         {
             // The repo number indicates the stack and appl to use
-            // lansaeval11 use stack 1 and appl 1
-            // lansaeval12 use stack 1 and appl 2
             // lansaeval10 use stack 1 and appl 10 (exception to rule 0 = 10)
+            // lansaeval11 use stack 1 and appl 1
             // lansaeval21 use stack 2 and appl 1
             // etc
 
@@ -289,7 +294,7 @@ exports.handler = (event, context, callback) => {
             let repoNumber = repository.name.match( /\d+/g );
             console.log( "repoNumber: ", repoNumber.toString() );
 
-            let stack = Math.ceil(repoNumber / 10);
+            let stack = Math.floor(repoNumber / 10);
             console.log( "stack: ", stack.toString() );
 
             if ( stack < 1 || stack > 50 ){
