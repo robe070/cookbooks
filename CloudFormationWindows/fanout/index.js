@@ -13,7 +13,7 @@ var ipRangeCheck = require('ip-range-check');
 // So notice that it doesn't call callback( err ) as the caller would end up with a 502 error and no message or stack trace.
 // Thus all calls to this Lambda function are 'successful'. It requires the API Gateway to interpret the statusCode
 // and return that to the caller as the HTTP response.
-function returnAPIError( repo,  statusCode, message, callback, context) {
+function returnAPIError( repository,  statusCode, message, callback, context) {
     // Construct an error object so that we can omit returnAPIError from the stack trace
     const myObject = {};
     Error.captureStackTrace(myObject, returnAPIError);
@@ -28,8 +28,8 @@ function returnAPIError( repo,  statusCode, message, callback, context) {
         body: JSON.stringify(responseBody)
     };
 
-    if ( repo ) {
-        postDashboardState(repo, "Deployment Failed", response, callback, context );
+    if ( repository.name && !repository.firstPush) {
+        postDashboardState(repository, "Deployment Failed", response, callback, context );
     } else {
         if (callback) {
             callback( null, response);
@@ -39,12 +39,23 @@ function returnAPIError( repo,  statusCode, message, callback, context) {
     return response;
 }
 
-function postDashboardState(repo, state, response, callback, context ) {
+function postDashboardState(repository, state, response, callback, context ) {
     let PublicIpAddress = 'paas.lansa.com.au';
     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
+    console.log(  "Repository ", JSON.stringify( repository ));
+    if ( repository.name === '' || repository.firstPush) {
+        console.log('No repository name or the first push, so skip sending deployment state');
+
+        // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
+        context.callbackWaitsForEmptyEventLoop = true;
+        callback(null, response);
+        context.callbackWaitsForEmptyEventLoop = false;
+        return;
+    }
+
     let post_data = {
-        "ApplicationName" : repo,
+        "ApplicationName" : repository.name,
         "State" : state
     };
     let post_data_string = JSON.stringify( post_data );
@@ -72,7 +83,7 @@ function postDashboardState(repo, state, response, callback, context ) {
             callback(null, response);
             context.callbackWaitsForEmptyEventLoop = false;
         } else {
-            returnAPIError( repo,  res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + post_options.path, callback, context);
+            returnAPIError( repository.name,  res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + post_options.path, callback, context);
             return;
         }
 
@@ -81,7 +92,7 @@ function postDashboardState(repo, state, response, callback, context ) {
         });
 
         res.on('error', function(e) {
-            returnAPIError( repo,  res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + post_options.path, callback, context);
+            returnAPIError( repository.name,  res.statusCode, 'Error ' + res.statusCode + ' posting to Dashboard ' + post_options.host + ':' + post_options.path, callback, context);
             return;
         });
     });
@@ -100,8 +111,12 @@ exports.handler = (event, context, callback) => {
     let port = 8101;
     let appl = '';
     let accountwide='n';
-    let repo = '';
     let webserver = false;
+
+    let repository = {
+        name : '',
+        firstPush : false
+    };
 
     console.log('event.requestContext.identity: ', event.requestContext.identity );
     console.log('context: ', context );
@@ -110,7 +125,7 @@ exports.handler = (event, context, callback) => {
     // 192.168.196.186 is the ip address of the test server
     // 103.231.169.65/32 is the ip address of LPC
     if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','103.231.169.65/32','192.168.196.186']) ) {
-        returnAPIError( repo,  403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback, context);
+        returnAPIError( repository,  403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback, context);
         return;
     }
 
@@ -127,9 +142,17 @@ exports.handler = (event, context, callback) => {
     //console.log( 'body.repository: ', body.repository );
     console.log( 'body.repository.name: ', body.repository.name );
 
-    repo = body.repository.name;
-    if (repo === '') {
+    repository.name = body.repository.name;
+    if (repository.name === '') {
         console.log( "Warning: Repository name not found");
+    }
+
+    let comment = body.commits[0].message;
+    repository.firstPush = false;
+    console.log("Comment " + comment );
+    if ( comment === 'Setup initial environment') {
+        console.log("First Push")
+        repository.firstPush = true;
     }
 
     // *******************************************************************************************************
@@ -152,7 +175,7 @@ exports.handler = (event, context, callback) => {
     //console.log("Method 1 JSON.parse: ", hash);
 
     if ( signature !== ('sha1=' + hash ) ) {
-        returnAPIError( repo,  403, 'Error 403 Secret is invalid', callback, context);
+        returnAPIError( repository,  403, 'Error 403 Secret is invalid', callback, context);
         return;
     }
 
@@ -200,19 +223,19 @@ exports.handler = (event, context, callback) => {
         }
     }
 
-    if ( repo === '' && accountwide === 'y') {
-        returnAPIError( repo,  400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback, context);
+    if ( repository.name === '' && accountwide === 'y') {
+        returnAPIError( repository,  400, "Error 400 accountwide parameter is set to 'y' but the git repo name cannot be located. Use repo-specific webhook and explicitly specify alias and appl instead", callback, context);
         return;
     }
 
     // Check if its a repo that we fan out with this code
-    let lansarepo = repo.indexOf('lansaeval');
+    let lansarepo = repository.name.indexOf('lansaeval');
     if ( lansarepo < 0 ) {
-        lansarepo = repo.indexOf('lansapaid');
+        lansarepo = repository.name.indexOf('lansapaid');
     }
     if ( lansarepo < 0 && accountwide === 'y'){
         let responseBody = {
-            errorMessage: repo + ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide',
+            errorMessage: repository.name + ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide',
         };
         console.log( "responseBody: ", responseBody);
 
@@ -229,22 +252,22 @@ exports.handler = (event, context, callback) => {
     }
 
     if ( accountwide !== 'n' && accountwide !== 'y') {
-        returnAPIError( repo,  400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback, context);
+        returnAPIError( repository,  400, "Error 400 accountwide parameter must be 'y' or 'n'. Defaults to 'n'", callback, context);
         return;
     }
 
     // Mandatory parameters
     if ( hostedzoneid === "" ) {
-        returnAPIError( repo,  400, 'Error 400 hostedzoneid is a mandatory parameter', callback, context);
+        returnAPIError( repository,  400, 'Error 400 hostedzoneid is a mandatory parameter', callback, context);
         return;
     }
     if ( accountwide === 'n' && (alias === "" || appl === "") ) {
-        returnAPIError( repo,  400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback, context);
+        returnAPIError( repository,  400, "Error 400 when accountwide = 'n', alias and appl are mandatory parameters", callback, context);
         return;
     }
 
     if ( accountwide === 'y' && (alias !== "" || appl !== "") ) {
-        returnAPIError( repo,  400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback, context);
+        returnAPIError( repository,  400, "Error 400 when accountwide = 'y', alias and appl must not be specified", callback, context);
         return;
     }
 
@@ -259,18 +282,18 @@ exports.handler = (event, context, callback) => {
             // etc
 
             if ( lansarepo < 0) {
-                returnAPIError( repo,  400, "Error 400 only lansaevalxxx and lansapaidxxx repo names are supported when accountwide='y'. All other repo names require explicit alias and appl parameters", callback, context);
+                returnAPIError( repository,  400, "Error 400 only lansaevalxxx and lansapaidxxx repo names are supported when accountwide='y'. All other repo names require explicit alias and appl parameters", callback, context);
                 return;
             }
 
-            let repoNumber = repo.match( /\d+/g );
+            let repoNumber = repository.name.match( /\d+/g );
             console.log( "repoNumber: ", repoNumber.toString() );
 
             let stack = Math.ceil(repoNumber / 10);
             console.log( "stack: ", stack.toString() );
 
             if ( stack < 1 || stack > 50 ){
-                returnAPIError( repo,  400, "Error 400 Repository name " + repo + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 50", callback, context);
+                returnAPIError( repository,  400, "Error 400 Repository name " + repository.name + " invalid. Resolves to stack " + stack + " which is less than 1 or greater than 50", callback, context);
                 return;
             }
 
@@ -281,7 +304,7 @@ exports.handler = (event, context, callback) => {
             console.log( "applnum: ", applnum.toString() );
 
             if ( applnum < 1 || applnum > 10 ){
-                returnAPIError( repo,  400, "Error 400 Repository name " + repo + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback, context);
+                returnAPIError( repository,  400, "Error 400 Repository name " + repository.name + " invalid. Resolves to application " + applnum + " which is less than 1 or greater than 10", callback, context);
                 return;
             }
 
@@ -316,7 +339,7 @@ exports.handler = (event, context, callback) => {
     route53.listResourceRecordSets(paramsListRRS, function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
-            returnAPIError( repo,  500, err.message, callback, context);
+            returnAPIError( repository,  500, err.message, callback, context);
             return;
         }
 
@@ -328,14 +351,14 @@ exports.handler = (event, context, callback) => {
             data.ResourceRecordSets[0] === "") {
 
             console.log('Alias not found');
-            returnAPIError( repo,  500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback, context);
+            returnAPIError( repository,  500, 'Alias ' + paramsListRRS.StartRecordName + ' not found', callback, context);
             return;
         }
 
         // forEach is a Sync call
         let recordSets = data.ResourceRecordSets;
         Object.keys(recordSets).forEach(function(keyRS) {
-            console.log('********************************************************************************')
+            console.log('********************************************************************************');
             console.log('Located Alias:      ', recordSets[keyRS].Name);
 
             // Only use the first record unless this is the webserver repo
@@ -344,7 +367,7 @@ exports.handler = (event, context, callback) => {
             }
 
             if ( !webserver && paramsListRRS.StartRecordName !== recordSets[keyRS].Name) {
-                returnAPIError( repo,  500, 'Searched for Alias is not the one located', callback, context);
+                returnAPIError( repository,  500, 'Searched for Alias is not the one located', callback, context);
                 return;
             }
 
@@ -408,7 +431,7 @@ exports.handler = (event, context, callback) => {
             elb.describeLoadBalancers(function(err, data) {
                 if (err) {
                     console.log(err, err.stack); // an error occurred
-                    returnAPIError( repo,  500, err.message, callback, context);
+                    returnAPIError( repository,  500, err.message, callback, context);
                     return;
                 }
 
@@ -437,13 +460,13 @@ exports.handler = (event, context, callback) => {
                         console.log( 'ELB ' + ELBLowerCase + ' not found. Skipping ');
                         return;
                     }
-                    returnAPIError( repo,  500, 'ELB Name not found ' + ELBLowerCase, callback, context);
+                    returnAPIError( repository,  500, 'ELB Name not found ' + ELBLowerCase, callback, context);
                     return;
                 }
 
                 let instances = data.LoadBalancerDescriptions[ELBNum].Instances;
                 if (instances.length === 0) {
-                    returnAPIError( repo,  500, 'No instances running in ELB ' + ELBLowerCase, callback, context);
+                    returnAPIError( repository,  500, 'No instances running in ELB ' + ELBLowerCase, callback, context);
                     return;
                 }
                 console.log('Instances: ', JSON.stringify(instances).substring(0,400));
@@ -465,7 +488,7 @@ exports.handler = (event, context, callback) => {
                     ec2.describeInstances(params, function(err, data) {
                         if (err) {
                             console.log(err, err.stack); // an error occurred
-                            returnAPIError( repo,  500, err.message, callback, context);
+                            returnAPIError( repository,  500, err.message, callback, context);
                             return;
                         }
 
@@ -500,7 +523,7 @@ exports.handler = (event, context, callback) => {
                                 console.log('Application update successfully deployed by Lambda function to ' + post_options.host);
                                 // console.log('successCodes: ' + successCodes + ' instanceCount: ' + instanceCount);
                                 if ( successCodes >= instanceCount ){
-                                    let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repo + ' using ' + context.invokedFunctionArn;
+                                    let message = 'Application update successfully deployed to stack ' + paramsListRRS.StartRecordName + ' application ' + appl + ' repo ' + repository.name + ' using ' + context.invokedFunctionArn;
                                     console.log(message);
 
                                     let responseBody = {
@@ -523,10 +546,10 @@ exports.handler = (event, context, callback) => {
                                     };
                                     console.log("response: " + JSON.stringify(response));
 
-                                    postDashboardState(repo, "Deployed To Cloud", response, callback, context );
+                                    postDashboardState(repository, "Deployed To Cloud", response, callback, context );
                                 }
                             } else {
-                                returnAPIError( repo,  res.statusCode, 'Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
+                                returnAPIError( repository,  res.statusCode, 'Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
                                 return;
                             }
 
@@ -540,7 +563,7 @@ exports.handler = (event, context, callback) => {
                             });
 
                             res.on('error', function(e) {
-                                returnAPIError( repo,  e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
+                                returnAPIError( repository,  e.code, e.message + ' Error ' + res.statusCode + ' posting to ' + ELBLowerCase + ' ' + post_options.host + ':' + port + post_options.path, callback, context);
                                 return;
                             });
                         });
