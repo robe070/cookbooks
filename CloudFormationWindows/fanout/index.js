@@ -28,7 +28,7 @@ function returnAPIError( repository,  statusCode, message, callback, context) {
         body: JSON.stringify(responseBody)
     };
 
-    if ( repository.name && !repository.firstPush) {
+    if ( repository.name && repository.updateDashboard) {
         postDashboardState(repository, "Deployment Failed", response, callback, context );
     } else {
         if (callback) {
@@ -44,8 +44,8 @@ function postDashboardState(repository, state, response, callback, context ) {
     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
     console.log(  "Repository ", JSON.stringify( repository ));
-    if ( repository.name === '' || repository.firstPush) {
-        console.log('No repository name or the first push, so skip sending deployment state');
+    if ( repository.name === '' || !repository.updateDashboard) {
+        console.log('No repository name or not updating Dashboard, so skip sending deployment state');
 
         // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
         context.callbackWaitsForEmptyEventLoop = true;
@@ -115,7 +115,7 @@ exports.handler = (event, context, callback) => {
 
     let repository = {
         name : '',
-        firstPush : false
+        updateDashboard : true
     };
 
     console.log('event.requestContext.identity: ', event.requestContext.identity );
@@ -147,17 +147,17 @@ exports.handler = (event, context, callback) => {
         console.log( "Warning: Repository name not found");
     }
 
-    repository.firstPush = false;
+    repository.updateDashboard = true;
     if ( body.commits ) {
         let comment = body.commits[0].message;
         console.log("Comment " + comment );
         if ( comment === 'Setup initial environment') {
             console.log("First Push");
-            repository.firstPush = true;
+            repository.updateDashboard = false;
         }
     } else if (body.zen) {
         console.log( "Payload delivered for testing, so don't send state to Dashboard" );
-        repository.firstPush = true;
+        repository.updateDashboard = false;
     }
 
 
@@ -278,6 +278,8 @@ exports.handler = (event, context, callback) => {
     }
 
     // If accountwide webhook then derive alias and appl from the repo name
+    let stack = 0
+
     if ( accountwide === 'y') {
         {
             // The repo number indicates the stack and appl to use
@@ -294,7 +296,7 @@ exports.handler = (event, context, callback) => {
             let repoNumber = repository.name.match( /\d+/g );
             console.log( "repoNumber: ", repoNumber.toString() );
 
-            let stack = Math.floor(repoNumber / 10);
+            stack = Math.floor(repoNumber / 10);
             console.log( "stack: ", stack.toString() );
 
             if ( stack < 1 || stack > 50 ){
@@ -319,6 +321,10 @@ exports.handler = (event, context, callback) => {
         }
     }
 
+    if ( stack == 20 || stack == 30 ) {
+        console.log( "Don't update Dashboard when using the System Test stack - because the Test Dashboard is not publically accessible, nor when using the development stack which is not configured in either Dashboard.")
+        repository.updateDashboard = false;
+    }
     // *******************************************************************************************************
     // Resolving EC2 ip addresses and posting github webhook to each one
     // *******************************************************************************************************
