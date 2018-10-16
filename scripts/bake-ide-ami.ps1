@@ -458,8 +458,11 @@ try
         #####################################################################################
 
         Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Host
+
         Execute-RemoteBlock $Script:session {
             CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+            CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
             # Errors are thrown out of CreateLicense so no need to catch a throw here.
             # Let the local script catch it
         }
@@ -467,6 +470,7 @@ try
         Execute-RemoteBlock $Script:session {
             try {
                 Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
             } catch {
                 Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Host
                 Write-RedOutput $_ | Out-Host

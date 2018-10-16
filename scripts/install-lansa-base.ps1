@@ -14,7 +14,7 @@ It is intended to be run via remote PS on an AWS instance that has the LANSA Coo
 
 
 #>
-   
+
 
 param (
     [Parameter(Mandatory=$true)]
@@ -44,7 +44,7 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
-    
+
     Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Host
 
     Write-Output "$(Log-Date) Installing Chef" | Out-Host
@@ -61,20 +61,20 @@ try
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
     Write-Debug $ENV:PATH | Out-Host
     cd "$GitRepoPath\Cookbooks" | Out-Host
-    
+
     chef-client -z -o $ChefRecipe | Out-Host
     if ( $LASTEXITCODE -ne 0 )
     {
         throw "Chef-Client exit code = $LASTEXITCODE."
     }
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
-    
+
     # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
     Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Host
     Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Host
 
     Write-Debug $ENV:PATH | Out-Host
-    
+
     # Chrome had a packaging issue which temporarily required ignoring the checksum.
     # Re-instate it when next building an image
     Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
@@ -82,16 +82,16 @@ try
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
-    
-    # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts reliably and completely. 
+    # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
+
+    # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts reliably and completely.
     # Required for Windows Server 2012. What happens with 2016?
     # Requires a reboot to be fully installed. Presumed to be done by Windows Updates
     # Commented out because fails to install through this script - install it manually when needed
     # Run-ExitCode 'choco' @( 'install', 'powershell', '-y', '--no-progress' ) | Out-Host
 
     # the --% is so that the rest of the line can use simpler quoting
-    # See this link for full help on passing msiexec params through choco: 
+    # See this link for full help on passing msiexec params through choco:
     # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
     # This ensures that only English is installed as installing every language does not pass AWS virus checking
     Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
@@ -103,13 +103,13 @@ try
     # Run-ExitCode $jre @( '/s' ) | Out-Host
 
     New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Host
-    
+
     if ( $Cloud -eq "AWS" ) {
         Write-Output "$(Log-Date) Installing AWS SDK" | Out-Host
         &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Propagate-EnvironmentUpdate | Out-Host
-    
+
         Write-Output "$(Log-Date) Installing AWS CLI" | Out-Host
         &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
@@ -130,7 +130,7 @@ try
 
     Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Out-Host
     Disable-InternetExplorerESC | Out-Host
-    
+
     if ( $Cloud -eq "AWS" ) {
         # Delete file which causes AWS to falsely detect that there is a virus
         # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
