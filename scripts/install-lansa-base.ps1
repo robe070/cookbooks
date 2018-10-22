@@ -81,7 +81,7 @@ try
     Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Write-Host
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Write-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
-    #Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
+    Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
     # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Write-Host
 
     # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts reliably and completely.
