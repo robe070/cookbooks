@@ -177,10 +177,12 @@ try
             cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Host
             Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
             cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Host
+            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\html directory")
+            cmd /c AzCopy /Source:$LocalDVDImageDirectory\html      /Dest:$S3DVDImageDirectory/html        /DestKey:$StorageKey /S /XO /Y | Write-Host
 
-            if ( (Test-Path -Path $LocalDVDImageDirectory\EPC) ) {
-                Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\EPC directory")
-                cmd /c AzCopy /Source:$LocalDVDImageDirectory\EPC    /Dest:$S3DVDImageDirectory/EPC        /DestKey:$StorageKey /S /XO /Y | Write-Host
+            if ( (Test-Path -Path $LocalDVDImageDirectory\epc) ) {
+                Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\epc directory")
+                cmd /c AzCopy /Source:$LocalDVDImageDirectory\epc    /Dest:$S3DVDImageDirectory/epc        /DestKey:$StorageKey /S /XO /Y | Write-Host
             }
         }
     }
