@@ -28,8 +28,12 @@ function returnAPIError( repository,  statusCode, message, callback, context) {
         body: JSON.stringify(responseBody)
     };
 
-    if ( repository.name && repository.updateDashboard) {
-        postDashboardState(repository, "Deployment Failed", response, callback, context );
+    if ( repository.name ) {
+        if ( repository.realDeployment) {
+            postDashboardState(repository, "Deployment Failed", response, callback, context );
+        } else {
+            postDashboardState(repository, "Cloud Init Failed", response, callback, context );
+        }
     } else {
         if (callback) {
             callback( null, response);
@@ -43,8 +47,10 @@ function postDashboardState(repository, state, response, callback, context ) {
     let PublicIpAddress = 'paas.lansa.com.au';
     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
 
+    console.log("postDashboardState response: ", JSON.stringify( response ) );
+
     console.log(  "Repository ", JSON.stringify( repository ));
-    if ( repository.name === '' || !repository.updateDashboard) {
+    if ( repository.name === '' || (!repository.realDeployment && response.statusCode == 200)) {
         console.log('No repository name or not updating Dashboard, so skip sending deployment state');
 
         // Allow final states to be unwound before ending this invocation. E.g. Last 'End' is processed.
@@ -115,7 +121,7 @@ exports.handler = (event, context, callback) => {
 
     let repository = {
         name : '',
-        updateDashboard : true
+        realDeployment : true
     };
 
     console.log('event.requestContext.identity: ', event.requestContext.identity );
@@ -147,17 +153,17 @@ exports.handler = (event, context, callback) => {
         console.log( "Warning: Repository name not found");
     }
 
-    repository.updateDashboard = true;
+    repository.realDeployment = true;
     if ( body.commits ) {
         let comment = body.commits[0].message;
         console.log("Comment " + comment );
         if ( comment === 'Setup initial environment') {
             console.log("First Push");
-            repository.updateDashboard = false;
+            repository.realDeployment = false;
         }
     } else if (body.zen) {
         console.log( "Payload delivered for testing, so don't send state to Dashboard" );
-        repository.updateDashboard = false;
+        repository.realDeployment = false;
     }
 
 
@@ -323,7 +329,7 @@ exports.handler = (event, context, callback) => {
 
     if ( stack == 20 || stack == 30 ) {
         console.log( "Don't update Dashboard when using the System Test stack - because the Test Dashboard is not publically accessible, nor when using the development stack which is not configured in either Dashboard.")
-        repository.updateDashboard = false;
+        repository.realDeployment = false;
     }
     // *******************************************************************************************************
     // Resolving EC2 ip addresses and posting github webhook to each one
