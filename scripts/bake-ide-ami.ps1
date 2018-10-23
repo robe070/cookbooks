@@ -458,7 +458,7 @@ try
         Write-Host "$(Log-Date) Installing License"
         #####################################################################################
 
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
         Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
 
         Execute-RemoteBlock $Script:session {
@@ -562,6 +562,7 @@ try
         Execute-RemoteBlock $Script:session {
             try {
                 Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
             } catch {
                 Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Write-Host
                 Write-RedOutput $_ | Write-Host
