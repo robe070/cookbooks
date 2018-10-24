@@ -219,7 +219,7 @@ try
         }
         $subscription = "Visual Studio Enterprise with MSDN"
         $svcName = "bakingMSDN"
-        $vmsize="Medium"
+        $vmsize="Standard_D2_v3"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
@@ -383,6 +383,13 @@ try
     }
 
     ReConnect-Session
+
+    Execute-RemoteBlock $Script:session {
+        SyncRegistryPathToCurentProcess
+        
+        # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+        cmd /c exit 0
+    }
 
     if ( $InstallSQLServer ) {
         #####################################################################################
