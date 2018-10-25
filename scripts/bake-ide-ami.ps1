@@ -229,7 +229,7 @@ try
 
         Write-Verbose "$(Log-Date) Create VM" | Write-Host
         $vm1 = New-AzureVMConfig -Name $Script:vmname -InstanceSize $vmsize -ImageName $image
-        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password -DisableGuestAgent
+        $vm1 | Add-AzureProvisioningConfig -Windows -AdminUsername $AdminUserName -Password $Script:password
         new-azurevm -ServiceName $svcName -VMs $vm1 -WaitForBoot -Verbose
 
         $vm1 = Get-AzureVM -ServiceName $svcName -Name $Script:vmname
@@ -386,7 +386,7 @@ try
 
     Execute-RemoteBlock $Script:session {
         SyncRegistryPathToCurentProcess
-        
+
         # Ensure last exit code is 0. (exit by itself will terminate the remote session)
         cmd /c exit 0
     }
@@ -599,23 +599,27 @@ try
             }
         }
     } elseif ($Cloud -eq 'Azure' ) {
-        $Response = MessageBox "Do you want to run sysprep automatically?" 0x3
-        $Response
-        if ( $response -eq 0x6 ) {
+        # $Response = MessageBox "Do you want to run sysprep automatically?" 0x3
+        # $Response
+        # if ( $response -eq 0x6 ) {
             Write-Host( "$(Log-Date) Running sysprep automatically")
 
             try {
-                # Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
                 Invoke-Command -Session $Script:session {
                     cd "$env:SystemRoot\system32\sysprep"  | Write-Host;
-                    cmd /c sysprep /oobe /generalize /shutdown | Write-Host;
+                    # Does not work unless in Panther directory
+                    copy-item $env:SystemRoot\panther\unattend.xml $env:SystemRoot\panther\unattend-backup.xml
+                    copy-item c:\lansa\scripts\unattend.xml $env:SystemRoot\panther
+                    # This unattend file is a copy of the default Azure one that is in c:\windows\panther,
+                    # with the section added to NOT display the system manager when logging in
+                    cmd /c sysprep /oobe /generalize /shutdown /quiet /unattend:c:\lansa\scripts\unattend.xml | Write-Host;
                 }
             } catch {
                 Write-Host( "$(Log-Date) Ignore errors during sysprep and rely on the instance stopping, or not, to indicate a real error")
             }
-        } else {
-            MessageBox "Run sysprep manually. When complete, click OK on this message box"
-        }
+        # } else {
+        #     MessageBox "Run sysprep manually. When complete, click OK on this message box"
+        # }
     }
 
     Remove-PSSession $Script:session | Write-Host
