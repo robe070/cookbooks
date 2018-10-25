@@ -608,11 +608,11 @@ try
                 Invoke-Command -Session $Script:session {
                     cd "$env:SystemRoot\system32\sysprep"  | Write-Host;
                     # Does not work unless in Panther directory
-                    copy-item $env:SystemRoot\panther\unattend.xml $env:SystemRoot\panther\unattend-backup.xml
-                    copy-item c:\lansa\scripts\unattend.xml $env:SystemRoot\panther
+                    copy-item $env:SystemRoot\panther\unattend.xml $env:SystemRoot\panther\unattend-backup.xml | Write-Host;
+                    copy-item c:\lansa\scripts\unattend.xml $env:SystemRoot\panther | Write-Host;
                     # This unattend file is a copy of the default Azure one that is in c:\windows\panther,
-                    # with the section added to NOT display the system manager when logging in
-                    cmd /c sysprep /oobe /generalize /shutdown /quiet /unattend:c:\lansa\scripts\unattend.xml | Write-Host;
+                    # with the section added to NOT display the Server Manager when logging in
+                    cmd /c sysprep /oobe /generalize /shutdown /quiet | Write-Host;
                 }
             } catch {
                 Write-Host( "$(Log-Date) Ignore errors during sysprep and rely on the instance stopping, or not, to indicate a real error")
