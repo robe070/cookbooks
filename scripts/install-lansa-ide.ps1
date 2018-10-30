@@ -338,7 +338,25 @@ try
             Write-Host "Set JSM Service dependencies"
             Write-Verbose "Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Write-Host
             Write-Verbose "so that they are running when the license check is made by the Integrator service." | Write-Host
-            cmd /c "sc.exe" "config" '"LANSA Integrator JSM Administrator Service 1 - 14.1 (LIN14100_EPC141005)"' "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Write-Host
+            $JSMServices = @(Get-WmiObject win32_service -Filter 'Name like "LANSA Integrator JSM Administrator Service%"')
+            $Service = $null
+            foreach ( $JSMService in $JSMServices ) {
+                if ( $JSMService.Pathname -like $APPA) {
+                    $Service = $JSMService
+                    break
+                }
+            }
+
+            if ( -not $Service ) {
+                $JSMServices | Select-object Name, DisplayName, State, Pathname | Format-Table | Out-Host
+                throw "JSM Instance service not found for $APPA"
+            }
+            $Service.Name | Out-Host
+            $RegKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Services\" + $Service.Name
+            $RegKeyPath | Out-Host
+            New-ItemProperty  -Path $RegKeyPath -Name DependOnService  -PropertyType MultiString -Value @("WindowsAzureGuestAgent","WindowsAzureTelemetryService") -Force  | Out-Host
+
+            @(get-service $service.Name) | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
         }
     } else {
         Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
