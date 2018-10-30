@@ -126,6 +126,22 @@ try
         $CompanionInstall = $true
     }
 
+    # ***********************************************************************************
+    if ( (-not $CompanionInstall) ) {
+        Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
+        $service = @(get-service "MSSQLSERVER")
+        $count = $($service | Measure-Object).Count
+        if ( $Count -ne 1 ) {
+            $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+            throw "Should only be one MSSQLSERVER service"
+        }
+        stop-service $service[0] -Force | Write-Host
+        set-service $Service[0].Name -StartupType Disabled | Write-Host
+
+        @(get-service "MSSQLSERVER") | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+    }
+    # ***********************************************************************************
+
     $installer = "$($ApplName).msi"
 
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
