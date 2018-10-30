@@ -39,27 +39,27 @@ function Disable-TcpOffloading
     Write-Host ("Disable TCP Offloading on NIC $NICName")
 
     # Display valid values
-    Get-NetAdapterAdvancedProperty $NICName | Write-Host
+    Get-NetAdapterAdvancedProperty $NICName | Out-Host
     $VerbosePreference = $CurrentVerbosePreference
 
     # Display existing settings:
-    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue
+    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue | Out-Host
     # Set all the settings required to switch off TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
 
     Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
 
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart | Write-Host
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart | Write-Host
+    Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart | Out-Host
+    Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart | Out-Host
 
     if ( $Cloud -eq "AWS" ) {
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"  -NoRestart | Write-Host
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" | Write-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"  -NoRestart | Out-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" | Out-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled" | Write-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled" | Out-Host
     }
 
     # Check its worked
-    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue  | Write-Host
+    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue  | Out-Host
 
     Write-Host ("TCP Offloading disabled")
 }

@@ -341,7 +341,7 @@ try
             $JSMServices = @(Get-WmiObject win32_service -Filter 'Name like "LANSA Integrator JSM Administrator Service%"')
             $Service = $null
             foreach ( $JSMService in $JSMServices ) {
-                if ( $JSMService.Pathname -like $APPA) {
+                if ( $JSMService.Pathname -like $($APPA + '*')) {
                     $Service = $JSMService
                     break
                 }
