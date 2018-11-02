@@ -654,15 +654,6 @@
         "DBInstance": {
             "Type": "AWS::RDS::DBInstance",
             "Properties": {
-                "AvailabilityZone": {
-                   "Fn::Join": [
-                      "",
-                      [
-                         { "Ref": "AWS::Region" },
-                         "b"
-                      ]
-                   ]
-                },
                 "Engine": {
                     "Ref": "15DBEngine"
                 },
@@ -923,15 +914,9 @@
         "DBWebServerGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
-               "AvailabilityZones": [
-                  {"Fn::Join": [
-                     "",
-                     [
-                        { "Ref": "AWS::Region" },
-                        "b"
-                     ]
-                  ] }
-               ],
+                "AvailabilityZones": {
+                    "Fn::GetAZs": ""
+                },
                 "LaunchConfigurationName": {
                     "Ref": "DBLaunchWebServer"
                 },
