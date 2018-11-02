@@ -475,7 +475,7 @@ try
             # $JSMInstance.PathName
             if ( $JSMInstance.PathName -eq $JSMPath) {
                 Write-Host( "$(Log-Date) JSM Service details:")
-                $JSMInstance | format-list | Write-Host
+                $JSMInstance | format-list | Out-Host
                 $JSMServiceName = $JSMInstance.Name
                 Write-Host( "$(Log-Date) JSM Service name is $JSMServiceName")
                 break

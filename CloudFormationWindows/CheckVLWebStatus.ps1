@@ -105,7 +105,7 @@ try {
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
                             Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
                             Start-Sleep 0
-                            break
+                            continue
                         }
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
