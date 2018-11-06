@@ -43,6 +43,24 @@ function returnAPIError( repository,  statusCode, message, callback, context) {
     return response;
 }
 
+function returnWarning( repository,  message, callback, context) {
+    let responseBody = {
+        errorMessage: repository.name + ' ' + message,
+    };
+    console.log( "responseBody: ", responseBody);
+
+    // Send a response code to indicate its not been processed (202 = Accepted) and its probably not an error. e.g. webserver & gitdeployhub repos are not handled through here
+    // This stops error being reported for repos that are not handled by this function, and at the same time a clear message is returned.
+    let response = {
+        statusCode: 202,
+        body: JSON.stringify(responseBody)
+    };
+    if (callback) {
+        callback( null, response);
+    }
+    return response;
+}
+
 function postDashboardState(repository, state, response, callback, context ) {
     let PublicIpAddress = 'paas.lansa.com.au';
     // console.log("Host: ", JSON.stringify( PublicIpAddress ) );
@@ -155,17 +173,21 @@ exports.handler = (event, context, callback) => {
 
     repository.realDeployment = true;
     if ( body.commits ) {
-        let comment = body.commits[0].message;
-        console.log("Comment " + comment );
-        if ( comment === 'Setup initial environment') {
-            console.log("First Push");
-            repository.realDeployment = false;
+        if ( body.commits[0] ) {
+            let comment = body.commits[0].message;
+            console.log("Comment " + comment );
+            if ( comment === 'Setup initial environment') {
+                console.log("Payload contains the first Push, so don't send state to Dashboard");
+                repository.realDeployment = false;
+            }
+        } else {
+            return returnWarning( repository,  "Payload does not contain a commit. Maybe a tag or branch, so don't fanout", callback, context );
         }
     } else if (body.zen) {
-        console.log( "Payload delivered for testing, so don't send state to Dashboard" );
-        repository.realDeployment = false;
+        return returnWarning( repository,  "Payload delivered for testing, so don't fanout", callback, context );
+    } else {
+        return returnWarning( repository,  "Payload unknown, so don't fanout", callback, context );
     }
-
 
     // *******************************************************************************************************
     // Check the secret
@@ -246,21 +268,7 @@ exports.handler = (event, context, callback) => {
         lansarepo = repository.name.indexOf('lansapaid');
     }
     if ( lansarepo < 0 && accountwide === 'y'){
-        let responseBody = {
-            errorMessage: repository.name + ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide',
-        };
-        console.log( "responseBody: ", responseBody);
-
-        // Send a response code to indicate its not been processed (202 = Accepted) and its probably not an error. e.g. webserver & gitdeployhub repos are not handled through here
-        // This stops error being reported for repos that are not handled by this function, and at the same time a clear message is returned.
-        let response = {
-            statusCode: 202,
-            body: JSON.stringify(responseBody)
-        };
-        if (callback) {
-            callback( null, response);
-        }
-        return response;
+        return returnWarning( repository,  ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide', callback, context );
     }
 
     if ( accountwide !== 'n' && accountwide !== 'y') {
