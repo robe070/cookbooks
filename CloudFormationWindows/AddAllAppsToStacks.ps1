@@ -26,12 +26,12 @@ Write-Host "$($a.ToUniversalTime()) UTC"
 $ApplCount = 10
 $WebserverOSVersion = 'win2016'
 $WebServerMaxConnec = 10
-$S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-test/'
-$LansaMSI = $S3BaseUrl + 'WEBSERVR_v1.0.0_en-us.msi'
+$S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-test'
+$LansaMSI = $S3BaseUrl + '/WEBSERVR_v1.0.0_en-us.msi'
 $ApplMSIuri = $S3BaseUrl
 
-$StackStart = 30
-$StackEnd = 30
+$StackStart = 20
+$StackEnd = 20
 $Region = 'us-east-1'
 For ( $i = $StackStart; $i -le $StackEnd; $i++) {
     Write-Host("stack-name eval$($i)")
@@ -47,7 +47,7 @@ For ( $i = $StackStart; $i -le $StackEnd; $i++) {
             Write-FormattedOutput "$($ASGInstance.AutoScalingGroupName) $($ASGInstance.InstanceId). Suspending HealthCheck process..." -ForegroundColor 'Yellow'  | Out-Host
 
             try {
-                Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("HealthCheck", "Terminate")
+                Suspend-ASProcess -Region $Region -AutoScalingGroupName $ASGInstance.AutoScalingGroupName -ScalingProcess @("HealthCheck", "Terminate", "ReplaceUnhealthy")
             } catch {
                 $_
                 Write-FormattedOutput "Error suspending HealthCheck process." -ForegroundColor 'Red'  | Out-Host
