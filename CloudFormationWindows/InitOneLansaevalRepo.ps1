@@ -8,7 +8,7 @@ param(
 [String]$EnvironmentName,
 
 [Parameter(Mandatory=$false)]
-[String]$Directory = 'c:\lansa\lansaeval2'
+[String]$Directory = 'c:\lansa\lansaeval-master'
 )
 "InitOneLansaevalRepo.ps1" | Write-Host
 
