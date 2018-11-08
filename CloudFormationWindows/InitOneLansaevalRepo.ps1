@@ -23,12 +23,13 @@ try {
     git pull
 
     try {
-        $ErrorActionPreference = "Stop"
+        $ErrorActionPreference = "Continue"
         Write-Host( "Second and subsequent runs of this script will get an error on the next line. Ignore it" )
         &git remote add $environmentName $TargetEnvironmentUrl
     } catch {
         Write-Host( "git remote add : LASTEXITCODE $LASTEXITCODE" )
     }
+    $ErrorActionPreference = "Stop"
 
     Write-Host( "Remote $EnvironmentName configured to...")
     git remote get-url $environmentName
