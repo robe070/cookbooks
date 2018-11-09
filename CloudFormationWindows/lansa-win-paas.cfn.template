@@ -957,16 +957,16 @@
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
-                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
-                        "update-app": [ "installing", "git-pull", "update-app", "ready" ],
-                        "apprepopull": [ "installing", "git-pull", "apprepopull", "ready" ],
+                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "run-webconfig", "ready" ],
+                        "update-app": [ "installing", "git-pull", "update-app", "run-webconfig", "ready" ],
+                        "apprepopull": [ "installing", "git-pull", "apprepopull", "run-webconfig", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
                         "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
                         "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "run-webconfig", "ready" ],
-                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "ready" ]
+                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "run-webconfig", "ready" ]
                     },
                     "install-cfn": {
                         "files": {
@@ -1994,17 +1994,16 @@
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
-                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "ready" ],
-                        "update-app": [ "installing", "git-pull", "update-app", "ready" ],
-                        "apprepopull": [ "installing", "git-pull", "apprepopull", "ready" ],
-                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "ready" ],
+                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "run-webconfig", "ready" ],
+                        "update-app": [ "installing", "git-pull", "update-app", "run-webconfig", "ready" ],
+                        "apprepopull": [ "installing", "git-pull", "apprepopull", "run-webconfig", "ready" ],
+                        "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],
                         "cake-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "run-windows-update", "ready" ],
                         "chef-update": [ "installing", "git-pull", "restart-ifneeded", "run-chef", "ready" ],
                         "windows-update": [ "installing", "git-pull", "restart-ifneeded", "run-windows-update", "ready" ],
                         "webconfig": [ "installing", "git-pull", "run-webconfig", "ready" ],
-                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "ready" ],
-                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "ready" ]
-                    },
+                        "icing-update": [ "installing", "git-pull", "restart-ifneeded", "install-cfn", "upgrade-msi", "run-webconfig", "ready" ],
+                        "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "run-webconfig", "ready" ]                    },
                     "install-cfn": {
                         "files": {
                             "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
