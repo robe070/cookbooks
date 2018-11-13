@@ -255,7 +255,7 @@
         "22TriggerAppRepoPull": {
             "Type": "String",
             "Default": "1",
-            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo."
+            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo. N.B. MUST have re-booted once since LANSA was installed, otherwise the Git security is not setup correctly and the pull fails."
         },
         "22TriggerCakeUpdate": {
             "Type": "String",
