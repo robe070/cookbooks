@@ -106,15 +106,11 @@ try {
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
                             Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
                             Start-Sleep 0
-                            break
+                            continue
                         }
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        if ( $stack -eq 20 ) {
-                            $max = 5
-                        } else {
-                            $max = 10
-                        }
+                        $max = 10
                         for ( $appl = 1; $appl -le $max; $appl++ ) {
                             Write-Host -NoNewline " $appl"
                             try {

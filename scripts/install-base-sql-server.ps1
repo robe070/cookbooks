@@ -33,6 +33,8 @@ else {
 	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
+$ErrorActionPreference = 'Stop'
+
 try {
     #####################################################################################
     Write-Output ("$(Log-Date) Installing IIS-NetFxExtensibility") | Out-File $OutputFile -Append
@@ -66,7 +68,7 @@ Finally {
     # have been captured by AWS Run Command before all this captured information is output. So, do not presume 
     # that the Result Code is on the first line of the output.
     Write-Host "$(Log-Date) Result Code = $LASTEXITCODE"
-    Write-Host "$(Log-Date) Note that logging messages are re-ordered to workaround AWS Run Command truncating output, so the log date will seem to be out of order. You can piece it back together in chronological order if thats needed."
+    Write-Host "$(Log-Date) Logging messages are re-ordered for errors first. So check time."
 
     Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
     Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host

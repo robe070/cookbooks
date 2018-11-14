@@ -10,8 +10,8 @@ Bake a LANSA AMI
 
 #>
 
-$DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$DebugPreference = "SilentlyContinue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -26,17 +26,19 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14.1 EPC141050' `
+Bake-IdeMsi -VersionText '14.2 EPC142010' `
             -VersionMajor 14 `
-            -VersionMinor 1 `
-            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\CloudOnly\SPIN0334_LanDVDcut_L4W14100_4138_160727_EPC1410xx" `
-            -S3DVDImageDirectory "s3://lansa/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
-            -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v14/VisualLANSA_L4W14100_latest" `
-            -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v14/Integrator_L4W1400_latest" `
+            -VersionMinor 2 `
+            -LocalDVDImageDirectory "n\a" `
+            -S3DVDImageDirectory "n\a" `
+            -S3VisualLANSAUpdateDirectory "n\a" `
+            -S3IntegratorUpdateDirectory "n\a" `
             -AmazonAMIName "Windows_Server-2016-English-Full-SQL_2017_Express*" `
-            -GitBranch "trunk"`
+            -GitBranch "support/L4W14200_scalable"`
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $false `
             -InstallScalable $true `
-            -Win2012 $false
+            -Win2012 $false `
+            -ManualWinUpd $true `
+            -SkipSlowStuff $true

@@ -47,13 +47,13 @@ try
     
     Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Host
 
-    Write-Output "$(Log-Date) Installing Chef" | Out-Host
+    Write-GreenOutput "$(Log-Date) Installing Chef" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
 
     $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
     Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Out-Host
 
-    Write-Output "$(Log-Date) Running Chef" | Out-Host
+    Write-GreenOutput "$(Log-Date) Running Chef" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
     Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Host
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
@@ -74,21 +74,73 @@ try
     Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Host
 
     Write-Debug $ENV:PATH | Out-Host
-    
-    # Chrome had a packaging issue which temporarily required ignoring the checksum.
-    # Re-instate it when next building an image
+
+    if ( $Cloud -eq "AWS" ) {
+        Write-GreenOutput("$(Log-Date) Installing CloudWatch Agent") | Out-Host
+
+        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip'
+        $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.zip' )
+        Write-Host ("$(Log-Date) Downloading $CWASetup to $installer_file")
+        $downloaded = $false
+        $TotalFailedDownloadAttempts = 0
+        $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
+        $loops = 0
+        while (-not $Downloaded -and ($Loops -le 10) ) {
+            try {
+                (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Host
+                $downloaded = $true
+            } catch {
+                $TotalFailedDownloadAttempts += 1
+                New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null                  
+                $loops += 1
+
+                Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
+
+                if ($loops -gt 10) {
+                    throw "Failed to download $CWASetup from S3"
+                }
+
+                # Pause for 30 seconds. Maybe that will help it work?
+                Start-Sleep 30
+            }
+        }
+
+        $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
+        New-Item $InstallerDirectory -ItemType directory -Force
+
+        # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Out-Host
+
+        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Out-Host
+        $filePath = $installer_file
+        $shell = New-Object -ComObject Shell.Application
+        $zipFile = $shell.NameSpace($filePath)
+        $destinationFolder = $shell.NameSpace($InstallerDirectory)
+
+        $copyFlags = 0x00
+        $copyFlags += 0x04 # Hide progress dialogs
+        $copyFlags += 0x10 # Overwrite existing files
+
+        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags)
+
+        # Installer file MUST be executed with the current directory set to the installer directory
+        $InstallerScript = '.\install.ps1'
+        Set-Location $InstallerDirectory | Out-Host
+        & $InstallerScript | Out-Host    
+    }
+
     Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Out-Host
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host
+    try {
+        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Out-Host 
+    } catch {
+        Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Out-Host
+        Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Out-Host
+        Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Out-Host 
+    }
     
-    # Install Powershell 5.1. Needed for VS Code to debug Powershell scripts reliably and completely. 
-    # Required for Windows Server 2012. What happens with 2016?
-    # Requires a reboot to be fully installed. Presumed to be done by Windows Updates
-    # Commented out because fails to install through this script - install it manually when needed
-    # Run-ExitCode 'choco' @( 'install', 'powershell', '-y', '--no-progress' ) | Out-Host
 
     # the --% is so that the rest of the line can use simpler quoting
     # See this link for full help on passing msiexec params through choco: 
@@ -105,19 +157,19 @@ try
     New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Host
     
     if ( $Cloud -eq "AWS" ) {
-        Write-Output "$(Log-Date) Installing AWS SDK" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AWS SDK" | Out-Host
         &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Propagate-EnvironmentUpdate | Out-Host
     
-        Write-Output "$(Log-Date) Installing AWS CLI" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AWS CLI" | Out-Host
         &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Out-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Host
         Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI" | Out-Host
         }
 
     if ( $Cloud -eq "Azure" ) {
-        Write-Output "$(Log-Date) Installing AzCopy" | Out-Host
+        Write-GreenOutput "$(Log-Date) Installing AzCopy" | Out-Host
         &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Host
     }
 
@@ -130,8 +182,8 @@ try
 
     Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Out-Host
     Disable-InternetExplorerESC | Out-Host
-    
-    if ( $Cloud -eq "AWS" ) {
+
+     if ( $Cloud -eq "AWS" ) {
         # Delete file which causes AWS to falsely detect that there is a virus
         # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
         Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Out-Host
