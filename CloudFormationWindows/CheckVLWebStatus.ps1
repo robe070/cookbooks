@@ -26,7 +26,7 @@ function Summary {
         if ( $404count -gt 0 ){ Write-RedOutput "404 usually means the Listener is not running this is important to fix ASAP. And its simple to fix. Just re-deploy the app"}
         if ( $500count -gt 0 ){ Write-FormattedOutput "500 usually means Free Trial was installed but no app was deployed. Look at git repo and check that there is just the one commit. If thats the case then this error may be ignored." -ForegroundColor 'yellow'}
         if ( $defaultcount -gt 0 ){ Write-FormattedOutput "Other response codes have unknown cause" -ForegroundColor 'magenta'}
-    }    
+    }
     Write-Host ""
 }
 
@@ -55,14 +55,15 @@ try {
     $Region = 'us-east-1'
     $Perpetual = $true
 
+    [Decimal]$stack = 0
     $StackStart = 1
-    $StackEnd = 2
+    $StackEnd = 10
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-        $stacklist.add($stack) | Out-Null 
+        $stacklist.add($stack) | Out-Null
     }
-    $stacklist.add(10) | Out-Null
-    #$stacklist.add(20) | Out-Null
+    #$stacklist.add(10) | Out-Null
+    $stacklist.add(20) | Out-Null
     $stacklist.add(30) | Out-Null
 
     $Loop = 0
@@ -99,7 +100,7 @@ try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
                             $response = Invoke-WebRequest -Uri $url
-                            $ResponseCode = $response.StatusCode                                
+                            $ResponseCode = $response.StatusCode
                         } catch {
                             $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
@@ -125,7 +126,7 @@ try {
                                     404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
                                     500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
                                     default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                                }              
+                                }
                             } catch {
                                 Write-Host ""
                                 $StackError = $true
@@ -134,7 +135,7 @@ try {
                                     404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
                                     500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
                                     default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                                }               
+                                }
                             }
                             if ( $appl -eq 1) {
                                 # Workaround for IIS Plugin not coping with too many requests when first starting up
@@ -142,7 +143,7 @@ try {
                                 # 15 second is too short. Still get failures.
                                 Start-Sleep 0
                             }
-                        }     
+                        }
                         Write-Host ""
                     }
                 }

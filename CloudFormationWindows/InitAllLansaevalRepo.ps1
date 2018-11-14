@@ -1,0 +1,23 @@
+"InitAllLansaevalRepo.ps1"
+
+push-location
+set-location 'c:\lansa\lansaeval2'
+
+$RepoStart = 100
+$RepoEnd = 99
+[System.Collections.ArrayList]$Repolist = @()
+For ( $Repo = $RepoStart; $Repo -le $RepoEnd; $Repo++) {
+    $Repolist.add($Repo) | Out-Null
+}
+
+$Repolist.add(200) | Out-Null
+
+foreach ( $Repo in $Repolist ) {
+    #Next line only needed when first deploying from a git repo
+    #git remote add lansaeval$($Repo) git@github.com:lansa/lansaeval$($Repo).git
+    git remote get-url lansaeval$($Repo)
+    git push --force lansaeval$($Repo)
+    Write-Output( "*********************************************")
+}
+
+Pop-Location
