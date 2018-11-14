@@ -20,6 +20,7 @@ param (
         [string]
         $webalias = 'licensing'
 )
+Get-Date
 cmd /c exit 0 # Set LASTEXITCODE
 try {
     Write-Output( "Prestarting..." )
@@ -32,9 +33,11 @@ try {
         default { throw "Error $ResponseCode running $url" }
     }
 } catch {
+    Get-Date
     Write-Output ( "Exception running $url")
     $_
     cmd /c exit -1 # Set LASTEXITCODE
     return
 }
+Get-Date
 Write-Output( "Success")
