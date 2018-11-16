@@ -174,11 +174,15 @@ exports.handler = (event, context, callback) => {
     repository.realDeployment = true;
     if ( body.commits ) {
         if ( body.commits[0] ) {
-            let comment = body.commits[0].message;
-            console.log("Comment " + comment );
-            if ( comment === 'Setup initial environment') {
-                console.log("Payload contains the first Push, so don't send state to Dashboard");
-                repository.realDeployment = false;
+            // If we have a commit, don't use it's comment as it may not be the only commit.
+            // Use the head commit - the latest commit of the set being pushed.
+            if ( body.head_commit ) {
+                let comment = body.head_commit.message;
+                console.log("Comment " + comment );
+                if ( comment === 'Setup initial environment') {
+                    console.log("Payload contains the first Push, so don't send state to Dashboard");
+                    repository.realDeployment = false;
+                }
             }
         } else {
             return returnWarning( repository,  "Payload does not contain a commit. Maybe a tag or branch, so don't fanout", callback, context );
@@ -263,11 +267,14 @@ exports.handler = (event, context, callback) => {
     }
 
     // Check if its a repo that we fan out with this code
+    let lansaevalMaster = repository.name.indexOf('lansaeval-master');
+
     let lansarepo = repository.name.indexOf('lansaeval');
     if ( lansarepo < 0 ) {
         lansarepo = repository.name.indexOf('lansapaid');
     }
-    if ( lansarepo < 0 && accountwide === 'y'){
+
+    if ( (lansarepo < 0 || lansaevalMaster  >= 0) && accountwide === 'y' ){
         return returnWarning( repository,  ' is not handled for accountwide fanning out. Use a repository specific webhook, not account wide', callback, context );
     }
 
