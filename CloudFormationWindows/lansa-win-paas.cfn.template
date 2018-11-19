@@ -314,6 +314,19 @@
             "Type": "String",
             "Default": "arn:aws:acm:us-east-1:775488040364:certificate/1773da1f-5a8c-4e5e-b308-1065002b7121",
             "Description": "ARN of the SSL Certificate. Region & account specific. The default will only work in us-east-1 in the LANSA account"
+         },
+         "Trace":  {
+            "Type":  "String",
+            "Default":  "N",
+            "MinLength": "1",
+            "MaxLength": "1",
+            "AllowedPattern": "[yYnN]",
+            "Description": "Switch tracing On Y/N. Also set Trigger App Update to ensure the settings get re-applied."
+         },
+         "TraceSettings":  {
+            "Type":  "String",
+            "Default":  "ITRO:Y ITRL:4 ITRM:9999999999",
+            "Description": "Trace Settings"
          }
     },
    "Metadata" : {
@@ -382,10 +395,12 @@
          },
          {
            "Label" : { "default":"Advanced Configuration" },
-           "Parameters" : [ 
-               "21ELBTimeout", 
-               "17UserScriptHook", 
-               "10LansaGitRepoBranch" 
+            "Parameters": [
+               "21ELBTimeout",
+               "17UserScriptHook",
+               "10LansaGitRepoBranch",
+               "Trace",
+               "TraceSettings"
             ]
          }
        ],
@@ -433,7 +448,9 @@
          "29PatchFolderName": { "default": "Patch Folder Name" },
          "21ELBTimeout": { "default": "Load Balancer Timeout" },
          "17UserScriptHook": { "default": "User Script Hook" },
-         "10LansaGitRepoBranch": { "default": "Git Repository Branch" }
+         "10LansaGitRepoBranch": { "default": "Git Repository Branch" },
+         "Trace": { "default": "Switch Tracing On" },
+         "TraceSettings": { "default": "X_RUN Trace Settings" }
       }
      }
    },
@@ -1490,6 +1507,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 1",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -1556,6 +1577,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 1",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -2527,6 +2552,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -2593,6 +2622,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
