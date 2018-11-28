@@ -179,14 +179,14 @@ try
     #####################################################################################
     Write-Host ("$(Log-Date) Pull down latest Visual LANSA updates")
     #####################################################################################
-    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstop" # Must stop JSM otherwise aws s3 sync will throw errors accessing files which are locked
+    cmd /c """$APPA\integrator\jsmadmin\strjsm.exe""" "-sstop" # Must stop JSM otherwise aws s3 sync will throw errors accessing files which are locked
 
     $S3VisualLANSAUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VisualLANSAUrl').VisualLANSAUrl
 
     if ( $Cloud -eq "AWS" ) {
         cmd /c aws s3 sync  $S3VisualLANSAUpdateDirectory "$APPA" | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"$APPA" /S /XO /Y /MT | Write-Host
+        cmd /c AzCopy /Source:$S3VisualLANSAUpdateDirectory /Dest:"""$APPA""" /S /XO /Y /MT | Write-Host
     }
     if ( $LastExitCode -ne 0 )
     {
@@ -200,15 +200,15 @@ try
     $S3IntegratorUpdateDirectory = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'IntegratorUrl').IntegratorUrl
 
     if ( $Cloud -eq "AWS" ) {
-        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory "$APPA\Integrator"  | Write-Host
+        cmd /c aws s3 sync  $S3IntegratorUpdateDirectory """$APPA\Integrator"""  | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"$APPA\Integrator" /S /XO /Y /MT | Write-Host
+        cmd /c AzCopy /Source:$S3IntegratorUpdateDirectory /Dest:"""$APPA\Integrator""" /S /XO /Y /MT | Write-Host
     }
     if ( $LastExitCode -ne 0 )
     {
         throw "Error downloading Integrator updates"
     }
-    cmd /c "$APPA\integrator\jsmadmin\strjsm.exe" "-sstart" | Write-Host
+    cmd /c """$APPA\integrator\jsmadmin\strjsm.exe""" "-sstart" | Write-Host
 
     Write-Host "$(Log-Date) IDE Installation completed"
     Write-Host ""
