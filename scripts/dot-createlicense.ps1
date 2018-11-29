@@ -28,11 +28,15 @@ function CreateLicence {
             Write-Host "$(Log-Date) $dnsName_ : Save private key filename & current Machine Guid to registry"
             #####################################################################################
 
-            $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $dnsName_
-
-            $Thumbprint = $getCert.Thumbprint
-
-            Write-Host("$(Log-Date) Thumbprint: $Thumbprint" )
+            # This call is unreliable and is presumed to be a timing issue as when there is a failure, running this script again works.
+            # So, loop until its successful
+            while ( [string]::IsNullOrEmpty($getCert.Thumbprint) ) {
+                Start-Sleep -Milliseconds 100
+                Write-Host("$(Log-Date) Read certificate attempt..." )
+                $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $dnsName_
+                $Thumbprint = $getCert.Thumbprint
+                Write-Host("$(Log-Date) Thumbprint: $Thumbprint" )
+            }
 
             $keyName = (((Get-ChildItem Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -like $Thumbprint}).PrivateKey).CspKeyContainerInfo).UniqueKeyContainerName
             if ( [string]::IsNullOrEmpty($keyName) ) {
@@ -51,10 +55,6 @@ function CreateLicence {
 
             #Now delete it from Explorer
             Remove-Item $licenseFile_ | Write-Host
-
-            Write-Host( "$(Log-Date) Waiting a few seconds to maybe help reliability of installing the next license key" )
-
-            Start-Sleep 10
          }
          catch {
              $_ | Write-Host

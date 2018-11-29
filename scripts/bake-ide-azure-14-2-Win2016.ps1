@@ -51,5 +51,4 @@ Bake-IdeMsi -VersionText 'IDESQL171' `
             -InstallSQLServer $false `
             -InstallIDE $true `
             -InstallScalable $false `
-            -SkipSlowStuff $false `
             -Win2012 $false
