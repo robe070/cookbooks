@@ -82,14 +82,27 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $SkipSlowStuff=$false,
+    $SkipSlowStuff=$false,          # Don't use. Here for backward compatibility with old scripts
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $RunWindowsUpdates=$false,          # Generally, not required to run Windows Updates because we are using the latest VM Image
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $UploadInstallationImageChanges=$true,
 
     [Parameter(Mandatory=$false)]
     [boolean]
     $Upgrade=$false
     )
 
-    #Requires -RunAsAdministrator
+#Requires -RunAsAdministrator
+
+# Backward compatibility
+if ( $SkipSlowStuff ) {
+    $UploadInstallationImageChanges = $false
+}
 
 # set up environment if not yet setup
 if ( -not $script:IncludeDir)
@@ -143,7 +156,7 @@ try
         $Platform = 'Win2016'
     }
 
-    if ( !$SkipSlowStuff -and !$InstallScalable ) {
+    if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
 
         Write-Verbose ("Test if source of DVD image exists") | Out-Host
@@ -446,7 +459,7 @@ try
         }
     }
 
-    if ( !$SkipSlowStuff ) {
+    if ( $RunWindowsUpdates ) {
         if ( $Cloud -eq 'AWS' ) {
             # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
             Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
