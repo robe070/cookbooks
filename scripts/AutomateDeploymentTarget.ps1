@@ -1,14 +1,14 @@
 # Specify empty Database Password to use Windows Authentication to connect to the database
 param(
     [Parameter(Mandatory=$false)]
-    [String] $DatabaseUser='lansa',
+    [String] $DatabaseUser='lansadb',
 
     [Parameter(Mandatory=$true)]
     [SecureString] $DatabasePassword,
 
     [Parameter(Mandatory=$false)]
     [ValidateNotNullOrEmpty()]
-    [String] $WebUser='pcxuser2',
+    [String] $WebUser='pcxuser3',
 
     [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
@@ -43,6 +43,10 @@ param(
     [boolean] $f32bit=1
 )
 
+# This script was used with Windows Authentication and it all worked up to the point of the GitDeployHub deploying an application
+# because the GitDepoyHub process runs under a system account which does not have access to the database. That may be re-configured,
+# but for the purpose of this initial trial, it does not seem to be a big restriction to require a SQL Server login to access the database.
+
 #Requires -RunAsAdministrator
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -54,8 +58,8 @@ if ( -not $script:IncludeDir)
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-	. "$script:IncludeDir\Init-Baking-Vars.ps1"",
-	. "$script:IncludeDir\Init-Baking-Includes.ps1"",
+	. "$script:IncludeDir\Init-Baking-Vars.ps1"
+	. "$script:IncludeDir\Init-Baking-Includes.ps1"
 }
 else
 {
@@ -110,7 +114,6 @@ try {
                 "IIS-NetFxExtensibility45",
 
                 "IIS-HealthAndDiagnostics",
-                "IIS-HttpLogging",
                 "IIS-LoggingLibraries",
                 "IIS-RequestMonitor",
                 "IIS-HttpTracing",
@@ -129,11 +132,15 @@ try {
                 "IIS-ASPNET45",
                 "IIS-CGI"
             )
-            $required_IIS_results = @(Get-WindowsOptionalFeature -FeatureName IIS* -Online | Where-Object {$_.FeatureName -in $required_IIS_features -and $_.state -eq "Disabled"} | select-object FeatureName)
-            $required_IIS_results
-            Write-Host( Enable-WindowsOptionalFeature -Online -FeatureName $required_IIS_results | format-list | Out-String )
+            $required_IIS_results = @(Get-WindowsOptionalFeature -FeatureName IIS* -Online | Where-Object {$_.FeatureName -in $required_IIS_features -and $_.state -eq "Disabled"} | foreach-object {"$($_.FeatureName)"})
+            if ( $required_IIS_results.Length -gt 0) {
+                $required_IIS_results
+                Write-Host( Enable-WindowsOptionalFeature -Online -FeatureName $required_IIS_results | format-list | Out-String )
+            } else {
+                Write-Host( "$(Log-Date) IIS is already configured" )
+            }
 
-          Write-Host( "IIS Configuration complete")
+          Write-Host( "$(Log-Date) IIS Configuration complete")
      }
 
     $DBCredentials = New-Object System.Management.Automation.PSCredential `
@@ -156,15 +163,6 @@ try {
     $Cloud = New-ItemProperty -Path $LANSAKey -Name 'Cloud' -Value $Cloud -PropertyType String -Force
     Write-Host( "Cloud = $Cloud")
 
-    Write-Host("$(Log-Date) Setting up shared licensing")
-    # HKEY_LOCAL_MACHINE\SOFTWARE\LANSA\COMMON
-    $KeyPath = "$LANSAKey\COMMON"
-    if ( -not (Test-Path -Path $KeyPath) ) {
-        New-Item -Path $KeyPath | Out-Null
-    }
-    $LicenseDir = New-ItemProperty -Path "$KeyPath" -Name "LicenseDir" -Value "${ENV:ProgramFiles(x86)}\Common Files\LANSA" -PropertyType String -Force
-    Write-Host( "LicenseDir = $LicenseDir" )
-
     Write-Host( "$(Log-Date) Registry done" )
 
     Write-Host( "$(Log-Date) Install Webserver..." )
@@ -182,22 +180,32 @@ try {
 
     Write-Host( "$(Log-Date) Webserver installed" )
 
-    Write-Host( "$(Log-Date) Configuring web options for $ApplName")
-    & "$script:IncludeDir\webconfig.ps1" -MaxConnections $MaxConnections -ApplName $ApplName -DBName $ApplName -Reset $false $CommonParams",
-
     Write-Host( "$(Log-Date) Install Application..." )
     $ApplName = 'APP1'  # Note that LANSA MSI files use upper case characters. The rest are case insensitive.
 
     $Arguments = $CommonParams + @("-CompanionInstallPath `"$APPA`"", "-MSIUri $BaseMSIuri/$($ApplName)_v1.0.0_en-us.msi", "-ApplName $ApplName", "-dbname $ApplName", "-gitrepourl $app1RepoUrl", "-DisableSQLServer 0")
     $Arguments
-    Invoke-Expression "& $script:IncludeDir\install-lansa-msi.ps1 $Arguments"",
+    Invoke-Expression "& $script:IncludeDir\install-lansa-msi.ps1 $Arguments"
     if ( $LASTEXITCODE -ne 0) {
         throw "Error installing application"
     }
     Write-Host( "$(Log-Date) $ApplName installed" )
 
-    Write-Host( "$(Log-Date) Configuring web options for $ApplName")
-    & "$script:IncludeDir\webconfig.ps1" -MaxConnections $MaxConnections -ApplName $ApplName -DBName $ApplName -Reset $false $CommonParams",
+
+    # Do the Shared Licensing registry entry afdter teh MSI installs which delete the registry entry.
+
+    Write-Host("$(Log-Date) Setting up shared licensing")
+    # HKEY_LOCAL_MACHINE\SOFTWARE\LANSA\COMMON
+    $KeyPath = "$LANSAKey\COMMON"
+    if ( -not (Test-Path -Path $KeyPath) ) {
+        New-Item -Path $KeyPath | Out-Null
+    }
+    $LicenseDir = New-ItemProperty -Path "$KeyPath" -Name "LicenseDir" -Value "${ENV:ProgramFiles(x86)}\Common Files\LANSA" -PropertyType String -Force
+    Write-Host( "LicenseDir = $LicenseDir" )
+
+    $ApplName = 'WebServer'
+    Write-Host( "$(Log-Date) Configuring web plugin options for WebServer - all lansa applications")
+    & "$script:IncludeDir\webconfig.ps1" -MaxConnections $MaxConnections -ApplName $ApplName -DBName $ApplName -Reset $true $CommonParams
 
 } catch {
      $_
