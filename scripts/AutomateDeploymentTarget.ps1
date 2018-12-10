@@ -1,7 +1,7 @@
 # Specify empty Database Password to use Windows Authentication to connect to the database
 param(
     [Parameter(Mandatory=$false)]
-    [String] $DatabaseUser='lansadb',
+    [String] $DatabaseUser='lansa',
 
     [Parameter(Mandatory=$true)]
     [SecureString] $DatabasePassword,
@@ -97,50 +97,52 @@ Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
 try {
      if ( 1 ){
-            Write-Host( "$(Log-Date) Configure IIS...")
+        Write-Host( "$(Log-Date) Configure IIS...")
 
-            # Windows 10 IIS Features
-            $required_IIS_features = @(
-                "IIS-WebServerRole",
-                "IIS-WebServer",
-                "IIS-WebServerManagementTools",
-                "IIS-ManagementConsole",
-                "IIS-CommonHttpFeatures",
-                "IIS-HttpErrors",
-                "IIS-ApplicationDevelopment",
+        # Windows 10 IIS Features
+        $required_IIS_features = @(
+            "IIS-WebServerRole",
+            "IIS-WebServer",
+            "IIS-WebServerManagementTools",
+            "IIS-ManagementConsole",
+            "IIS-CommonHttpFeatures",
+            "IIS-HttpErrors",
 
-                "IIS-NetFxExtensibility",
-                "NetFx4Extended-ASPNET45",
-                "IIS-NetFxExtensibility45",
+            "IIS-ApplicationDevelopment",
+            "IIS-ASPNET",
+            "IIS-NetFxExtensibility",
+            "IIS-ASPNET45",
+            "IIS-NetFxExtensibility45",
+            "NetFx4Extended-ASPNET45",
 
-                "IIS-HealthAndDiagnostics",
-                "IIS-LoggingLibraries",
-                "IIS-RequestMonitor",
-                "IIS-HttpTracing",
-                "IIS-Security",
-                "IIS-RequestFiltering",
-                "IIS-Performance",
-                "IIS-WebServerManagementTools",
-                "IIS-ManagementConsole",
-                "IIS-StaticContent",
-                "IIS-DefaultDocument",
-                "IIS-DirectoryBrowsing",
-                "IIS-ISAPIExtensions",
-                "IIS-ISAPIFilter",
-                "IIS-HttpCompressionStatic",
-                "IIS-ASPNET",
-                "IIS-ASPNET45",
-                "IIS-CGI"
-            )
-            $required_IIS_results = @(Get-WindowsOptionalFeature -FeatureName IIS* -Online | Where-Object {$_.FeatureName -in $required_IIS_features -and $_.state -eq "Disabled"} | foreach-object {"$($_.FeatureName)"})
-            if ( $required_IIS_results.Length -gt 0) {
-                $required_IIS_results
-                Write-Host( Enable-WindowsOptionalFeature -Online -FeatureName $required_IIS_results | format-list | Out-String )
+            "IIS-HealthAndDiagnostics",
+            "IIS-LoggingLibraries",
+            "IIS-RequestMonitor",
+            "IIS-HttpTracing",
+            "IIS-Security",
+            "IIS-RequestFiltering",
+            "IIS-Performance",
+            "IIS-WebServerManagementTools",
+            "IIS-ManagementConsole",
+            "IIS-StaticContent",
+            "IIS-DefaultDocument",
+            "IIS-DirectoryBrowsing",
+            "IIS-ISAPIExtensions",
+            "IIS-ISAPIFilter",
+            "IIS-HttpCompressionStatic",
+            "IIS-CGI"
+        )
+        foreach ($feature in $required_IIS_features) {
+            $FeatureState = Get-WindowsOptionalFeature -FeatureName $feature -Online
+            if ( $FeatureState -and ($FeatureState.state -eq "Disabled") ) {
+                Write-Host( "$(Log-Date) Enabling $Feature" )
+                Write-Host( Enable-WindowsOptionalFeature -All -Online -FeatureName $feature | format-list | Out-String )
             } else {
-                Write-Host( "$(Log-Date) IIS is already configured" )
+                Write-Host( "$(Log-Date) $Feature is already configured" )
             }
+        }
 
-          Write-Host( "$(Log-Date) IIS Configuration complete")
+        Write-Host( "$(Log-Date) IIS Configuration complete")
      }
 
     $DBCredentials = New-Object System.Management.Automation.PSCredential `
@@ -170,7 +172,7 @@ try {
     cmd /c exit 0
 
     $CommonParams = @("-server_name $($ENV:COMPUTERNAME)", "-dbut MSSQLS", "-dbuser $DatabaseUser", "-dbpassword `"$($DBCredentials.GetNetworkCredential().Password)`"", "-webuser $WebUser", "-webpassword $($WebCredentials.GetNetworkCredential().Password)", "-f32bit $f32bit", "-HTTPPortNumber 80", "-HTTPPortNumberHub 8101", "-HostRoutePortNumber 4540", "-JSMPortNumber 4561", "-JSMAdminPortNumber 4581", "-SUDB 1", "-UPGD false")
-    $Arguments = $CommonParams + @("-MSIUri $BaseMSIuri/WEBSERVR_v1.0.0_en-us.msi", "-ApplName $ApplName", "-dbname webserver", "-gitrepourl git@github.com:lansa/webserver.git", "-DisableSQLServer 0")
+    $Arguments = $CommonParams + @("-MSIUri $BaseMSIuri/WEBSERVR_v1.0.0_en-us.msi", "-ApplName $ApplName", "-dbname webserver", "-gitrepourl https://github.com/lansa/webserver.git", "-DisableSQLServer 0")
     $Arguments
     Invoke-Expression "& $script:IncludeDir\install-lansa-msi.ps1 $Arguments"
 
