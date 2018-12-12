@@ -16,7 +16,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [ValidateNotNullOrEmpty()]
-    [String] $SystemBranch='debug/paas',     # The branch to use for the LANSA system git repositories
+    [String] $SystemBranch='patch/paas',     # The branch to use for the LANSA system git repositories
 
     [Parameter(Mandatory=$false)]
     [ValidateNotNullOrEmpty()]
@@ -96,6 +96,10 @@ if ($f32bit) {
 Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
 try {
+    Write-Host( "$(Log-Date) Link the 32-bit and 64-bit registry hives." )
+
+    &"$script:IncludeDir\lansa64reginit.exe"
+
      if ( 1 ){
         Write-Host( "$(Log-Date) Configure IIS...")
 
