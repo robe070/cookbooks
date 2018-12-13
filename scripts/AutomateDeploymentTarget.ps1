@@ -11,7 +11,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [ValidateNotNullOrEmpty()]
-    [String] $WebUser='pcxuser2',
+    [String] $WebUser='pcxuser3',
 
     [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
@@ -181,7 +181,7 @@ try {
     cmd /c exit 0
 
     $CommonParams = @("-server_name $DatabaseServer", "-dbut MSSQLS", "-dbuser $DatabaseUser", "-dbpassword `"$($DBCredentials.GetNetworkCredential().Password)`"", "-webuser $WebUser", "-webpassword $($WebCredentials.GetNetworkCredential().Password)", "-f32bit $f32bit", "-HTTPPortNumber 80", "-HTTPPortNumberHub 8101", "-HostRoutePortNumber 4540", "-JSMPortNumber 4561", "-JSMAdminPortNumber 4581", "-SUDB 1", "-UPGD false")
-    $Arguments = $CommonParams + @("-MSIUri $BaseMSIuri/WEBSERVR_v1.0.0_en-us.msi", "-ApplName $ApplName", "-dbname webserverauto", "-gitrepourl https://github.com/lansa/webserver.git", "-DisableSQLServer 0")
+    $Arguments = $CommonParams + @("-MSIUri $BaseMSIuri/WEBSERVR_v1.0.0_en-us.msi", "-ApplName $ApplName", "-dbname webserver", "-gitrepourl https://github.com/lansa/webserver.git", "-DisableSQLServer 0")
     $Arguments
     Invoke-Expression "& $script:IncludeDir\install-lansa-msi.ps1 $Arguments"
 
