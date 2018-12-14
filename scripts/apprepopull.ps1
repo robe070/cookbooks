@@ -64,7 +64,7 @@ function Checkout-GitRepo
     } else {
         cmd /C git pull '2>&1' | Write-Host
         if ($LASTEXITCODE -ne 0) {
-            # There may be local changes or untracked files not allowing the merge, so attempt it this way
+            Write-Host("$(Log-Date) There may be local changes or untracked files not allowing the merge, so attempt it the brute force way")
             cmd /c exit 0    #Set $LASTEXITCODE
             cmd /C git fetch -q --all '2>&1' | Write-Host
             cmd /C git reset --hard origin/$GitRepoBranch '2>&1' | Write-Host
@@ -74,7 +74,11 @@ function Checkout-GitRepo
                 } else {
                     throw ("$RepoPath Git pull failed")
                 }
+            } else {
+                Write-Host("$(Log-Date) Check Out successful")
             }
+        } else {
+            Write-Host("$(Log-Date) Check Out successful")
         }
     }
 }
