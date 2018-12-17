@@ -46,12 +46,29 @@ function Checkout-GitRepo
     $gitcurrentbranch = Get-Content $gitbranchfile -First 1
     Write-Host( "$(Log-Date) Current branch is $gitcurrentbranch" )
 
+    # Don't perform a pull because the MSI install may leave DLLs in a modified state, in which
+    # case the pull will always fail, unless a checkout is performed which will
+    # still leave the old DLLs in place with new DLLs which cannot work.
+
+    cmd /C git fetch -q --all '2>&1' | Write-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw ("$RepoPath Git fetch failed")
+    }
+
+    Write-Host( "$(Log-Date) Resetting to the origin's state in order to overwrite any modified DLLs")
+    cmd /C git reset --hard origin/$GitRepoBranch '2>&1' | Write-Host
+    if ($LASTEXITCODE -ne 0) {
+        if ( $IgnoreError ) {
+            Write-Warning ("$RepoPath Git pull failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this pull") | Write-Host
+        } else {
+            throw ("$RepoPath Git reset failed")
+        }
+    } else {
+        Write-Host("$(Log-Date) Git reset successful")
+    }
+
     if ( $gitcurrentbranch -ne $GitRepoBranch ) {
         Write-Host( "$(Log-Date) Checking out new branch $GitRepoBranch" )
-        cmd /C git fetch -q '2>&1' | Write-Host
-        if ($LASTEXITCODE -ne 0) {
-            throw ("$RepoPath Git fetch failed")
-        }
 
         cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
         if ($LASTEXITCODE -ne 0) {
@@ -60,25 +77,6 @@ function Checkout-GitRepo
             } else {
                 throw ("$RepoPath Git checkout failed")
             }
-        }
-    } else {
-        cmd /C git pull '2>&1' | Write-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host("$(Log-Date) There may be local changes or untracked files not allowing the merge, so attempt it the brute force way")
-            cmd /c exit 0    #Set $LASTEXITCODE
-            cmd /C git fetch -q --all '2>&1' | Write-Host
-            cmd /C git reset --hard origin/$GitRepoBranch '2>&1' | Write-Host
-            if ($LASTEXITCODE -ne 0) {
-                if ( $IgnoreError ) {
-                    Write-Warning ("$RepoPath Git pull failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this pull") | Write-Host
-                } else {
-                    throw ("$RepoPath Git pull failed")
-                }
-            } else {
-                Write-Host("$(Log-Date) Check Out successful")
-            }
-        } else {
-            Write-Host("$(Log-Date) Check Out successful")
         }
     }
 }
