@@ -35,6 +35,14 @@ Write-Host "$($a.ToUniversalTime()) UTC"
 # Generate random  number to ensure (almost) a difference when updating the stack
 $Random = Get-Random
 try {
+    if ($Stack -lt 1 -or ($Stack -gt 40)) {
+        throw "Stack number $stack is not between 1 and 40"
+    }
+
+    if ($App -lt 1 -or ($App -gt 10)) {
+        throw "Application number $app is not between 1 and 10"
+    }
+
     $Region = 'us-east-1'
 
     & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $Stack
