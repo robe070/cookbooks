@@ -40,7 +40,8 @@ try {
         throw "git remote get-url origin LASTEXITCODE = $LASTEXITCODE"
     }
 
-    # Reset to the origin rather than pull in order to overwrite whatever is currently in this directory
+    # Fetch and Reset to the origin rather than pull in order to overwrite whatever is currently in this directory
+    Git fetch *>&1 | Write-Host
     $branch = git rev-parse --abbrev-ref HEAD
     git reset --hard origin/$branch *>&1
     if ( $LASTEXITCODE -ne 0) {
