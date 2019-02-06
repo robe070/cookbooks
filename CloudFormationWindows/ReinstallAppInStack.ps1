@@ -45,6 +45,18 @@ try {
 
     $Region = 'us-east-1'
 
+    Write-GreenOutput( "Only allow one execution of this script at a time, this allows multiple stacks to be requested to be updated and they will wait here, if there is already an operation occurring on that stack, until the previous script has completed...") | Write-Host
+    $Mutex = New-Object -TypeName System.Threading.Mutex -ArgumentList $false, "Global\ReinstallAppInStack$Stack"
+    if ( -not $Mutex ) {
+        throw "Failed to create mutex"
+    }
+
+    # Wait 20 mins for exclusive access to the mutex
+    if ( -not $Mutex.WaitOne(1200*1000) ) {
+        $Mutex = $null
+        throw "Timed out waiting for exclusive access to ReinstallAppInStack script"
+    }
+
     & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $Stack
 
     Write-GreenOutput( "$(Get-Date) Re-installing Application $App in stack $stack") | Write-Host
@@ -54,10 +66,9 @@ try {
     ParameterKey=22AppToReinstall,UsePreviousValue=false,ParameterValue=$App `
     ParameterKey=22TriggerAppRepoPull,UsePreviousValue=true `
     ParameterKey=22TriggerAppReinstall,UsePreviousValue=false,ParameterValue=$Random `
-    ParameterKey=22TriggerAppUpdate,UsePreviousValue=true ParameterKey=22TriggerCakeUpdate,UsePreviousValue=true ParameterKey=23TriggerChefUpdate,UsePreviousValue=true ParameterKey=24TriggerWinUpdate,UsePreviousValue=true ParameterKey=25TriggerWebConfig,UsePreviousValue=true ParameterKey=26TriggerIcingUpdate,UsePreviousValue=true ParameterKey=01LansaMSI,UsePreviousValue=true ParameterKey=02LansaMSIBitness,UsePreviousValue=true ParameterKey=03ApplMSIuri,UsePreviousValue=true ParameterKey=17UserScriptHook,UsePreviousValue=true ParameterKey=19HostRoutePortNumber,UsePreviousValue=true ParameterKey=19HTTPPortNumber,UsePreviousValue=true ParameterKey=19HTTPPortNumberHub,UsePreviousValue=true ParameterKey=19JSMAdminPortNumber,UsePreviousValue=true ParameterKey=19JSMPortNumber,UsePreviousValue=true ParameterKey=21ELBTimeout,UsePreviousValue=true ParameterKey=27TriggerPatchInstall,UsePreviousValue=true ParameterKey=28PatchBucketName,UsePreviousValue=true ParameterKey=29PatchFolderName,UsePreviousValue=true ParameterKey=SSLCertificateARN,UsePreviousValue=true `
-    ParameterKey=TraceSettings,UsePreviousValue=true | Out-Default | Write-Host
+    ParameterKey=22TriggerAppUpdate,UsePreviousValue=true ParameterKey=22TriggerCakeUpdate,UsePreviousValue=true ParameterKey=23TriggerChefUpdate,UsePreviousValue=true ParameterKey=24TriggerWinUpdate,UsePreviousValue=true ParameterKey=25TriggerWebConfig,UsePreviousValue=true ParameterKey=26TriggerIcingUpdate,UsePreviousValue=true ParameterKey=01LansaMSI,UsePreviousValue=true ParameterKey=02LansaMSIBitness,UsePreviousValue=true ParameterKey=03ApplMSIuri,UsePreviousValue=true ParameterKey=17UserScriptHook,UsePreviousValue=true ParameterKey=19HostRoutePortNumber,UsePreviousValue=true ParameterKey=19HTTPPortNumber,UsePreviousValue=true ParameterKey=19HTTPPortNumberHub,UsePreviousValue=true ParameterKey=19JSMAdminPortNumber,UsePreviousValue=true ParameterKey=19JSMPortNumber,UsePreviousValue=true ParameterKey=21ELBTimeout,UsePreviousValue=true ParameterKey=27TriggerPatchInstall,UsePreviousValue=true ParameterKey=28PatchBucketName,UsePreviousValue=true ParameterKey=29PatchFolderName,UsePreviousValue=true ParameterKey=SSLCertificateARN,UsePreviousValue=true | Out-Default | Write-Host
     Write-Host( "*********************************************")
-
+    Write-GreenOutput( "$(Get-Date) Note that the trace settings are not specified, as at the time these were new parameters and the default is to not trace which seems appropriate") | Write-Host
     if ( $LASTEXITCODE -ne 0 ) {
         throw
     }
@@ -96,4 +107,8 @@ try {
     cmd /c exit -1 | Out-Default | Write-Host    #Set $LASTEXITCODE
     Write-Host( "LASTEXITCODE $LASTEXITCODE" )
     return
+} finally {
+    if ( $Mutex ) {
+        $Mutex.ReleaseMutex()
+    }
 }

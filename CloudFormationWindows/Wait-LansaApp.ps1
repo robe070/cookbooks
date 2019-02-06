@@ -13,13 +13,13 @@ param(
 [Parameter(Mandatory=$false)]
 [Decimal]$Timeout = 1200,                   # Default to wait 1200 seconds = 20 mins
 
-[Parameter(ParameterSetName='Status')] # Continue indefinitely reporting the status
+[Parameter(ParameterSetName='Status')]      # Continue indefinitely reporting the status
 [switch]$Status,
 
-[Parameter(ParameterSetName='WaitNotReady')] # Wait for ANY httpcode on any instance that is NOT 200
+[Parameter(ParameterSetName='WaitNotReady')]# Wait for ANY httpcode on any instance that is NOT 200
 [switch]$WaitNotReady,
 
-[Parameter(ParameterSetName='WaitReady')] # Wait for 200 on ALL instances in stack
+[Parameter(ParameterSetName='WaitReady')]   # Wait for 200 on ALL instances in stack
 [switch]$WaitReady
 )
 
