@@ -2,10 +2,10 @@
 
 param(
 [Parameter(Mandatory=$true)]
-[String]$Stack,
+[Decimal]$Stack,
 
 [Parameter(Mandatory=$true)]
-[String]$App
+[Decimal]$App
 )
 
 "ReinstallAppInStack.ps1"
