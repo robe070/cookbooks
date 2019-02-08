@@ -355,11 +355,11 @@
          {
            "Label" : { "default":"Database Configuration" },
            "Parameters" : [
-               "13DBInstanceClass", 
-               "14DBName", 
-               "15DBEngine", 
-               "19DBAllocatedStorage", 
-               "20DBIops" 
+               "13DBInstanceClass",
+               "14DBName",
+               "15DBEngine",
+               "19DBAllocatedStorage",
+               "20DBIops"
             ]
          },
          {
@@ -587,7 +587,7 @@
                     "Fn::GetAZs": ""
                 },
                 "CrossZone": "true",
-                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] }, 
+                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] },
                                      {"Fn::GetAtt": [ "LPCSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
@@ -987,7 +987,7 @@
                     },
                     "install-cfn": {
                         "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
+                            "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
@@ -1870,7 +1870,7 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" },
                                     { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
@@ -2031,11 +2031,11 @@
                         "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "run-webconfig", "ready" ]                    },
                     "install-cfn": {
                         "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+                            "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
@@ -2655,7 +2655,7 @@
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
                                             " -StackNumber ",
-                                            { "Ref": "StackNumber" },                                            
+                                            { "Ref": "StackNumber" },
                                             " -ApplNumber ",
                                             { "Ref": "22AppToReinstall" },
                                             " -MSIUri ",
@@ -2915,7 +2915,7 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" },
                                     { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
@@ -3018,7 +3018,7 @@
             }
         }
     },
-      
+
     "Outputs"                  : {
       "WebsiteURL" : {
          "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },
