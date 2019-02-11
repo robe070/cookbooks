@@ -2,14 +2,37 @@
 # E.g. Security Group changes require a new ASG launch configuration
 # List all EC2 instances.
 # This should be done in a controlled manner using ReplaceAllEc2InstancesEvalStacks.ps1. At least one
-# instance is left in service. Use ShowLoadBalancerInstanceHealth.ps1 to check that all instances are 
+# instance is left in service. Use ShowLoadBalancerInstanceHealth.ps1 to check that all instances are
 # In Service before running ReplaceAllEc2InstancesEvalStacks.ps1
+
+Param(
+    [Parameter(Mandatory)]
+        [ValidateSet('Live','Test','Dev')]
+        [string] $StackType
+)
+
 "ReplaceAllEC2InstancesEvalStacks.ps1"
 date
 
 $Region = 'us-east-1'
-$StackStart = 1
-$StackEnd = 10
+
+switch ( $StackType ) {
+    'Live' {
+        $GitRepoBranch = 'support/L4W14200_paas'
+        $StackStart = 1
+        $StackEnd = 10
+    }
+    'Test' {
+        $GitRepoBranch = 'patch/paas'
+        $StackStart = 20
+        $StackEnd = 20
+    }
+    'Dev' {
+        $GitRepoBranch = 'debug/paas'
+        $StackStart = 30
+        $StackEnd = 30
+    }
+}
 
 try {
 
@@ -24,7 +47,7 @@ try {
         $ASGS = @()
 
         # Use a numbered loop so that individual stacks can be updated
-        # Note that ALL instances are ALWAYS terminated. 
+        # Note that ALL instances are ALWAYS terminated.
 
         for ( $i = $StackStart; $i -le $StackEnd; $i++) {
             # Match on stack name too
@@ -61,21 +84,21 @@ try {
         }
 
         # *****************************************************************************
-        # Terminate EC2 instances and wait long enough that the instances are registered 
+        # Terminate EC2 instances and wait long enough that the instances are registered
         # with every ELB then wait for all instances to come into service before proceeding
         # *****************************************************************************
 
         $ASGs = $ASGs | select-object -Unique
 
         Write-Output( "$(date) ASGs to be updated...")
-        $ASGs | Format-Table        
+        $ASGs | Format-Table
         if ( $J -eq 1 ){
             $ASG_DB = $ASGs
         }
         $ELBs = $ELBs | select-object -property LoadBalancerName -Unique
 
         Write-Output( "$(date) ELBs to be monitored...")
-        $ELBs | Format-Table        
+        $ELBs | Format-Table
 
         if ( $ASGs.Length -gt 0) {
             Write-Output( "$(date) Wait 5 minutes to give time for instances to be instantiated and added to the ELBs")
@@ -115,9 +138,9 @@ try {
     }
 } catch {
     $_
-    Write-Output( "$(date) ASG Update failure")  
+    Write-Output( "$(date) ASG Update failure")
     cmd /c exit -1
     exit
 }
-Write-Output( "$(date) ASG Update successful.")  
+Write-Output( "$(date) ASG Update successful.")
 cmd /c exit 0
