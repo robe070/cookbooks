@@ -57,6 +57,8 @@ try {
 
     $StackStart = 1
     $StackEnd = 10
+
+
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
         $stacklist.add($stack) | Out-Null
@@ -98,7 +100,7 @@ try {
                         try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
-                            $response = Invoke-WebRequest -Uri $url
+                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                             $ResponseCode = $response.StatusCode
                         } catch {
                             $StackError = $true
@@ -114,7 +116,7 @@ try {
                             Write-Host -NoNewline " $appl"
                             try {
                                 $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                                $response = Invoke-WebRequest -Uri $url
+                                $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                                 $ResponseCode = $response.StatusCode
                                 switch ($ResponseCode) {
                                     200 { }
