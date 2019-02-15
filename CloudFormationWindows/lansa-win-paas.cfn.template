@@ -255,7 +255,7 @@
         "22TriggerAppRepoPull": {
             "Type": "String",
             "Default": "1",
-            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo. N.B. MUST have re-booted once since LANSA was installed, otherwise the Git security is not setup correctly and the pull fails."
+            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo."
         },
         "22TriggerCakeUpdate": {
             "Type": "String",
@@ -988,10 +988,28 @@
                     "install-cfn": {
                         "files": {
                             "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/lpcprivate5.id_rsa"
+                                        ]
+                                    ]
+                                }
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/ssh_config"
+                                        ]
+                                    ]
+                                }
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
@@ -2032,10 +2050,28 @@
                     "install-cfn": {
                         "files": {
                             "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/lpcprivate5.id_rsa"
+                                        ]
+                                    ]
+                                }
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/ssh_config"
+                                        ]
+                                    ]
+                                }
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
