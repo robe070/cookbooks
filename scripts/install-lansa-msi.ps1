@@ -45,7 +45,8 @@ param(
 [String]$JSMPortNumber = "",
 [String]$JSMAdminPortNumber = "",
 [String]$HTTPPortNumberHub = "",
-[String]$GitRepoUrl = ""
+[String]$GitRepoUrl = "",
+[Boolean]$DisableSQLServer = $true
 )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -127,7 +128,7 @@ try
     }
 
     # ***********************************************************************************
-    if ( (-not $CompanionInstall) ) {
+    if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
         Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
         $service = @(get-service "MSSQLSERVER")
         $count = $($service | Measure-Object).Count
@@ -153,7 +154,7 @@ try
         Copy-Item -Path $MSIUri -Destination $installer_file -Force | Write-Host
     }
 
-    if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS")) ) {
+    if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
@@ -267,7 +268,7 @@ try
 
     # On initial install
 
-    if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker")) {
+    if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
         Write-Host ("$(Log-Date) Disable TCP Offloading" )
         Disable-TcpOffloading
 
@@ -314,7 +315,7 @@ try
         $trusted="NO"
     } else {
         Write-Host( "$(Log-Date) Using trusted connection")
-        $trusted="YES"
+        $trusted="1"
     }
 
     if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )

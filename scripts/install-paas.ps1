@@ -3,13 +3,13 @@
 
 Install a LANSA PaaS.
 
-Installs n Applications app1, app2, ...,appn which configure the Companion system to redirect 
+Installs n Applications app1, app2, ...,appn which configure the Companion system to redirect
 alias requests for app1, app2, ..., appn to the appropriate application.
 
 Requires the LANSA AMI Scalable license
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+# N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -100,12 +100,24 @@ try {
     }
     Write-Output( "$(Log-Date) Companion Install Path $APPA" )
 
+    Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+    if ($trace -eq "Y") {
+        Write-Output ("$(Log-Date) Set tracing on" )
+        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+        $env:X_RUN = $traceSettings
+    } else {
+        Write-Output ("$(Log-Date) Set tracing off" )
+        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+        $env:X_RUN = ''
+    }
+
     # Potentially repeat the webserver configuration for cases where not re-installing webserver and are installing the applications and the webconfig needs to be altered too
     Write-Output( "$(Log-Date) Configuring web options for $ApplName")
     & "$script:IncludeDir\webconfig.ps1" -DBUT $DBUT -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -ApplName $ApplName -MaxConnections $maxconnections -Reset $false
 
     Write-Output( "$(Log-Date) Requested installation count $ApplCount" )
-    
+
     $ApplInstall = $false
     $ApplUninstall = $false
     $CurrentApplCount = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -ErrorAction SilentlyContinue).ApplCount
@@ -119,7 +131,7 @@ try {
         }
     } else {
         Write-Output( "$(Log-Date) Current Installation count 0" )
-        $ApplInstall = $true 
+        $ApplInstall = $true
         $CurrentApplCount = 1
     }
 
@@ -130,12 +142,12 @@ try {
                 $RepoAppIndex = $i
             } else {
                 $RepoAppIndex = 0
-            } 
-            $GitRepoName = "lansaeval$StackNumber$RepoAppIndex"    
-        
+            }
+            $GitRepoName = "lansaeval$StackNumber$RepoAppIndex"
+
             if ( $LASTEXITCODE -eq '0') {
                 Write-Output( "$(Log-Date) Installing App$($i)")
-                & "$script:IncludeDir\install-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/$($GitRepoName).git"    
+                & "$script:IncludeDir\install-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/APP$($i)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/$($GitRepoName).git"
 
                 if ( $LASTEXITCODE -eq 0 ) {
                     $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value $i -PropertyType DWORD -Force | Out-Null
@@ -151,15 +163,15 @@ try {
         Write-Output( "$(Log-Date) Uninstalling applications from $CurrentApplCount to $ApplCount")
         For ( $i = $CurrentApplCount; $i -gt $ApplCount; $i--) {
             if ( $LASTEXITCODE -eq 0) {
-                & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA    
+                & "$script:IncludeDir\uninstall-lansa-msi.ps1" -DBUT $DBUT -server_name $server_name -dbname "APP$($i)" -dbuser $dbuser -dbpassword $dbpassword $webpassword -f32bit $f32bit -SUDB $SUDB -wait $wait -ApplName "app$i" -CompanionInstallPath $APPA
 
                 if ( $LASTEXITCODE -eq 0 ) {
                     $CurrentApplCount = New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'ApplCount' -Value ($i - 1) -PropertyType DWORD -Force | Out-Null
-                }                
+                }
             }
         }
     }
-    
+
     if ($LASTEXITCODE -eq 0 ) {
         iisreset
     } else {
@@ -169,7 +181,7 @@ try {
 } catch {
     $e = $_.Exception
     $e | format-list -force
- 
+
     Write-Output( "PaaS Installation failed" )
     Write-Output( "Raw LASTEXITCODE $LASTEXITCODE" )
     if ( ( -not [ string ]::IsNullOrWhiteSpace( $LASTEXITCODE ) ) -and ( $LASTEXITCODE -ne 0 ) )
@@ -180,7 +192,7 @@ try {
        $ExitCode = $e.HResult
        Write-Output( "ExitCode set to HResult $ExitCode" )
     }
- 
+
     if ( $ExitCode -eq $null -or $ExitCode -eq 0 )
     {
        $ExitCode = -1

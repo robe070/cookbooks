@@ -255,7 +255,7 @@
         "22TriggerAppRepoPull": {
             "Type": "String",
             "Default": "1",
-            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo. N.B. MUST have re-booted once since LANSA was installed, otherwise the Git security is not setup correctly and the pull fails."
+            "Description": "Update Stack: Increment this by one to pull the latest changes from the Application Distribution Repo & GitDeployHub Distribution repo."
         },
         "22TriggerCakeUpdate": {
             "Type": "String",
@@ -314,6 +314,19 @@
             "Type": "String",
             "Default": "arn:aws:acm:us-east-1:775488040364:certificate/1773da1f-5a8c-4e5e-b308-1065002b7121",
             "Description": "ARN of the SSL Certificate. Region & account specific. The default will only work in us-east-1 in the LANSA account"
+         },
+         "Trace":  {
+            "Type":  "String",
+            "Default":  "N",
+            "MinLength": "1",
+            "MaxLength": "1",
+            "AllowedPattern": "[yYnN]",
+            "Description": "Switch tracing On Y/N. Also set Trigger App Update to ensure the settings get re-applied."
+         },
+         "TraceSettings":  {
+            "Type":  "String",
+            "Default":  "ITRO:Y ITRL:4 ITRM:9999999999",
+            "Description": "Trace Settings"
          }
     },
    "Metadata" : {
@@ -342,11 +355,11 @@
          {
            "Label" : { "default":"Database Configuration" },
            "Parameters" : [
-               "13DBInstanceClass", 
-               "14DBName", 
-               "15DBEngine", 
-               "19DBAllocatedStorage", 
-               "20DBIops" 
+               "13DBInstanceClass",
+               "14DBName",
+               "15DBEngine",
+               "19DBAllocatedStorage",
+               "20DBIops"
             ]
          },
          {
@@ -382,10 +395,12 @@
          },
          {
            "Label" : { "default":"Advanced Configuration" },
-           "Parameters" : [ 
-               "21ELBTimeout", 
-               "17UserScriptHook", 
-               "10LansaGitRepoBranch" 
+            "Parameters": [
+               "21ELBTimeout",
+               "17UserScriptHook",
+               "10LansaGitRepoBranch",
+               "Trace",
+               "TraceSettings"
             ]
          }
        ],
@@ -433,7 +448,9 @@
          "29PatchFolderName": { "default": "Patch Folder Name" },
          "21ELBTimeout": { "default": "Load Balancer Timeout" },
          "17UserScriptHook": { "default": "User Script Hook" },
-         "10LansaGitRepoBranch": { "default": "Git Repository Branch" }
+         "10LansaGitRepoBranch": { "default": "Git Repository Branch" },
+         "Trace": { "default": "Switch Tracing On" },
+         "TraceSettings": { "default": "X_RUN Trace Settings" }
       }
      }
    },
@@ -570,7 +587,7 @@
                     "Fn::GetAZs": ""
                 },
                 "CrossZone": "true",
-                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] }, 
+                "SecurityGroups" : [ {"Fn::GetAtt": [ "ELBSecurityGroup", "GroupId" ] },
                                      {"Fn::GetAtt": [ "LPCSecurityGroup", "GroupId" ] } ],
                 "LBCookieStickinessPolicy": [
                     {
@@ -970,11 +987,29 @@
                     },
                     "install-cfn": {
                         "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+                            "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/lpcprivate5.id_rsa"
+                                        ]
+                                    ]
+                                }
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/ssh_config"
+                                        ]
+                                    ]
+                                }
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
@@ -1490,6 +1525,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 1",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -1556,6 +1595,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 1",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -1845,7 +1888,7 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" },
                                     { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
@@ -2006,11 +2049,29 @@
                         "apply-patches": [ "installing", "git-pull", "restart-ifneeded", "install-patches", "run-webconfig", "ready" ]                    },
                     "install-cfn": {
                         "files": {
-                            "c:\\users\\administrator\\.ssh\\lpcprivate5.id_rsa": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/lpcprivate5.id_rsa"
+                            "C:\\Windows\\System32\\config\\systemprofile\\.ssh\\lpcprivate5.id_rsa": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/lpcprivate5.id_rsa"
+                                        ]
+                                    ]
+                                }
                             },
                             "C:\\Program Files\\Git\\etc\\ssh\\ssh_config": {
-                                 "source": "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/ssh_config"
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://s3-ap-southeast-2.amazonaws.com/lansa-secure/",
+                                            { "Ref": "10LansaGitRepoBranch" },
+                                            "/ssh_config"
+                                        ]
+                                    ]
+                                }
                             },
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
@@ -2527,6 +2588,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -2593,6 +2658,10 @@
                                             { "Ref": "19JSMPortNumber" },
                                             " -JSMAdminPortNumber ",
                                             { "Ref": "19JSMAdminPortNumber" },
+                                            " -Trace ",
+                                            { "Ref": "Trace" },
+                                            " -TraceSettings '",
+                                            { "Ref": "TraceSettings" }, "'",
                                             " -SUDB 0",
                                             " -UPGD false",
                                             { "Fn::If": [ "HasUserScript", " -userscripthook ", "" ] },
@@ -2622,7 +2691,7 @@
                                             "@powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {",
                                             "C:\\LANSA\\scripts\\reinstall-app-paas.ps1",
                                             " -StackNumber ",
-                                            { "Ref": "StackNumber" },                                            
+                                            { "Ref": "StackNumber" },
                                             " -ApplNumber ",
                                             { "Ref": "22AppToReinstall" },
                                             " -MSIUri ",
@@ -2882,7 +2951,7 @@
                 },
                 "InstanceType": { "Ref": "11WebServerInstanceTyp" },
                 "IamInstanceProfile": { "Ref": "IAMRoleInstanceProfile" },
-                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" }, 
+                "SecurityGroups": [ { "Ref": "LansaSecurityGroup" },
                                     { "Ref": "LPCSecurityGroup" } ],
                 "KeyName": { "Ref": "07KeyName" },
                 "UserData": {
@@ -2985,7 +3054,7 @@
             }
         }
     },
-      
+
     "Outputs"                  : {
       "WebsiteURL" : {
          "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },

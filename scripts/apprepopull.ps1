@@ -46,12 +46,29 @@ function Checkout-GitRepo
     $gitcurrentbranch = Get-Content $gitbranchfile -First 1
     Write-Host( "$(Log-Date) Current branch is $gitcurrentbranch" )
 
+    # Don't perform a pull because the MSI install may leave DLLs in a modified state, in which
+    # case the pull will always fail, unless a checkout is performed which will
+    # still leave the old DLLs in place with new DLLs which cannot work.
+
+    cmd /C git fetch -q --all '2>&1' | Write-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw ("$RepoPath Git fetch failed")
+    }
+
+    Write-Host( "$(Log-Date) Resetting to the origin's state in order to overwrite any modified DLLs")
+    cmd /C git reset --hard origin/$GitRepoBranch '2>&1' | Write-Host
+    if ($LASTEXITCODE -ne 0) {
+        if ( $IgnoreError ) {
+            Write-Warning ("$RepoPath Git pull failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this pull") | Write-Host
+        } else {
+            throw ("$RepoPath Git reset failed")
+        }
+    } else {
+        Write-Host("$(Log-Date) Git reset successful")
+    }
+
     if ( $gitcurrentbranch -ne $GitRepoBranch ) {
         Write-Host( "$(Log-Date) Checking out new branch $GitRepoBranch" )
-        cmd /C git fetch -q '2>&1' | Write-Host
-        if ($LASTEXITCODE -ne 0) {
-            throw ("$RepoPath Git fetch failed")
-        }
 
         cmd /C git checkout -f $GitRepoBranch '2>&1' | Write-Host
         if ($LASTEXITCODE -ne 0) {
@@ -59,15 +76,6 @@ function Checkout-GitRepo
                 Write-Warning ("$RepoPath Git checkout failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this checkout") | Write-Host
             } else {
                 throw ("$RepoPath Git checkout failed")
-            }
-        }
-    } else {
-        cmd /C git pull '2>&1' | Write-Host
-        if ($LASTEXITCODE -ne 0) {
-            if ( $IgnoreError ) {
-                Write-Warning ("$RepoPath Git pull failed, continuing because this is expected, before running pre-deploy.ps1 which may have been updated by this pull") | Write-Host
-            } else {
-                throw ("$RepoPath Git pull failed")
             }
         }
     }
@@ -101,7 +109,7 @@ try {
 
     # Clean up what we may need to restore in case there is an exception before the new config is saved.
     $GDHSaveConfig = Join-Path $Env:temp 'Web.config'
-    Remove-Item $GDHSaveConfig -Force -ErrorAction SilentlyContinue | Write-Host
+    Write-Host( Remove-Item $GDHSaveConfig -Force -ErrorAction SilentlyContinue | Format-List | Out-String )
 
     if ( [string]::IsNullOrWhiteSpace($APPA) ) {
         throw "MainAppInstallPath registry value is non-existent or empty"
@@ -142,7 +150,7 @@ try {
             } else {
                 $GDHConfig = Join-Path $GDHPath 'Web\Web.config'
                 Write-Host( "$(Log-Date) Save GDH Configuration $GDHConfig to $GDHSaveConfig")
-                copy-item -Path $GDHConfig -Destination $GDHSaveConfig -Force | Write-Host
+                Write-Host( copy-item -Path $GDHConfig -Destination $GDHSaveConfig -Force | Format-List | Out-String )
 
                 Write-Host( "$(Log-Date) Checkout whatever can be updated, especially scripts needed for this install")
                 Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $true
@@ -162,9 +170,9 @@ try {
     Checkout-GitRepo -RepoPath $APPA -GitRepoBranch $GitRepoBranch -IgnoreError $false
     Checkout-GitRepo -RepoPath $GDHPath -GitRepoBranch $GitRepoBranch  -IgnoreError $false
 } catch {
-    $_ | Write-Host
+    Write-Host( $_ | format-list | Out-String )
     $e = $_.Exception
-    $e | format-list -force | Write-Host
+    Write-Host( $e | format-list | Out-String )
 
     Write-Host( "AppRepoPull failed" )
     Write-Host( "Raw LASTEXITCODE $LASTEXITCODE" )
@@ -195,8 +203,8 @@ try {
 
     if ( Test-Path $GDHSaveConfig ) {
         Write-Host( "$(Log-Date) Restore GDH Configuration from $GDHSaveConfig to $GDHConfig")
-        copy-item -Path $GDHSaveConfig -Destination $GDHConfig -Force | Write-Host
-        Remove-Item $GDHSaveConfig -Force -ErrorAction Continue | Write-Host
+        Write-Host( copy-item -Path $GDHSaveConfig -Destination $GDHConfig -Force | Format-List | Out-String )
+        Write-Host( Remove-Item $GDHSaveConfig -Force -ErrorAction Continue | Format-List | Out-String )
     }
 
     & iisreset /start

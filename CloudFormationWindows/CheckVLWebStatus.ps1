@@ -3,6 +3,12 @@
 # Could be improved:
 # 1) Also run the web page too - xvlwebtst
 
+Param(
+    [Parameter(Mandatory)]
+        [ValidateSet('Live','Test','Dev','Custom')]
+        [string] $StackType
+)
+
 'CheckVLWebStatus.ps1'
 
 function Summary {
@@ -54,17 +60,37 @@ Write-Host "$($a.ToUniversalTime()) UTC"
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
+    [Decimal]$StackStart=0
+    [Decimal]$StackEnd=0
+    [Decimal]$Stack=0
 
-    [Decimal]$stack = 0
-    $StackStart = 1
-    $StackEnd = 10
+    switch ( $StackType ) {
+        'Live' {
+            $GitRepoBranch = 'support/L4W14200_paas'
+            $StackStart = 1
+            $StackEnd = 10
+        }
+        'Test' {
+            $GitRepoBranch = 'patch/paas'
+            $StackStart = 20
+            $StackEnd = 20
+        }
+        'Dev' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 30
+            $StackEnd = 30
+        }
+        'Custom' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 2
+            $StackEnd = 2
+        }
+    }
+
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
         $stacklist.add($stack) | Out-Null
     }
-    #$stacklist.add(10) | Out-Null
-    $stacklist.add(20) | Out-Null
-    $stacklist.add(30) | Out-Null
 
     $Loop = 0
     do {
@@ -99,7 +125,7 @@ try {
                         try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
-                            $response = Invoke-WebRequest -Uri $url
+                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                             $ResponseCode = $response.StatusCode
                         } catch {
                             $StackError = $true
@@ -115,7 +141,7 @@ try {
                             Write-Host -NoNewline " $appl"
                             try {
                                 $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                                $response = Invoke-WebRequest -Uri $url
+                                $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                                 $ResponseCode = $response.StatusCode
                                 switch ($ResponseCode) {
                                     200 { }
