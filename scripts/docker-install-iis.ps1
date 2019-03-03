@@ -6,6 +6,9 @@
 try {
     Push-Location
 
+    [Environment]::SetEnvironmentVariable("TMP", "c:\temp", "Process")
+    [Environment]::SetEnvironmentVariable("TEMP", "c:\temp", "Process")
+
     Write-Output "Installing IIS"
     import-module servermanager
     install-windowsfeature web-server
@@ -45,7 +48,7 @@ try {
 
     Remove-Item aepic.dll  -ErrorAction SilentlyContinue
     Remove-Item avifil32.dll  -ErrorAction SilentlyContinue
-    Remove-Item avifil32.dll.mui  -ErrorAction SilentlyContinue 
+    Remove-Item avifil32.dll.mui  -ErrorAction SilentlyContinue
     Remove-Item avrt.dll  -ErrorAction SilentlyContinue
     Remove-Item chakra.dll  -ErrorAction SilentlyContinue
     Remove-Item comppkgsup.dll -ErrorAction SilentlyContinue
