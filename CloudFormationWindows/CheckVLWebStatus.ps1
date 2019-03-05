@@ -3,6 +3,12 @@
 # Could be improved:
 # 1) Also run the web page too - xvlwebtst
 
+Param(
+    [Parameter(Mandatory)]
+        [ValidateSet('Live','Test','Dev','Custom')]
+        [string] $StackType
+)
+
 'CheckVLWebStatus.ps1'
 
 function Summary {
@@ -26,7 +32,7 @@ function Summary {
         if ( $404count -gt 0 ){ Write-RedOutput "404 usually means the Listener is not running this is important to fix ASAP. And its simple to fix. Just re-deploy the app"}
         if ( $500count -gt 0 ){ Write-FormattedOutput "500 usually means Free Trial was installed but no app was deployed. Look at git repo and check that there is just the one commit. If thats the case then this error may be ignored." -ForegroundColor 'yellow'}
         if ( $defaultcount -gt 0 ){ Write-FormattedOutput "Other response codes have unknown cause" -ForegroundColor 'magenta'}
-    }    
+    }
     Write-Host ""
 }
 
@@ -54,16 +60,37 @@ Write-Host "$($a.ToUniversalTime()) UTC"
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
+    [Decimal]$StackStart=0
+    [Decimal]$StackEnd=0
+    [Decimal]$Stack=0
 
-    $StackStart = 1
-    $StackEnd = 2
+    switch ( $StackType ) {
+        'Live' {
+            $GitRepoBranch = 'support/L4W14200_paas'
+            $StackStart = 1
+            $StackEnd = 10
+        }
+        'Test' {
+            $GitRepoBranch = 'patch/paas'
+            $StackStart = 20
+            $StackEnd = 20
+        }
+        'Dev' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 30
+            $StackEnd = 30
+        }
+        'Custom' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 2
+            $StackEnd = 2
+        }
+    }
+
     [System.Collections.ArrayList]$stacklist = @()
     For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-        $stacklist.add($stack) | Out-Null 
+        $stacklist.add($stack) | Out-Null
     }
-    $stacklist.add(10) | Out-Null
-    #$stacklist.add(20) | Out-Null
-    $stacklist.add(30) | Out-Null
 
     $Loop = 0
     do {
@@ -98,34 +125,30 @@ try {
                         try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
-                            $response = Invoke-WebRequest -Uri $url
-                            $ResponseCode = $response.StatusCode                                
+                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing
+                            $ResponseCode = $response.StatusCode
                         } catch {
                             $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
                             Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
                             Start-Sleep 0
-                            break
+                            continue
                         }
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        if ( $stack -eq 20 ) {
-                            $max = 5
-                        } else {
-                            $max = 10
-                        }
+                        $max = 10
                         for ( $appl = 1; $appl -le $max; $appl++ ) {
                             Write-Host -NoNewline " $appl"
                             try {
                                 $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                                $response = Invoke-WebRequest -Uri $url
+                                $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                                 $ResponseCode = $response.StatusCode
                                 switch ($ResponseCode) {
                                     200 { }
                                     404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
                                     500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
                                     default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                                }              
+                                }
                             } catch {
                                 Write-Host ""
                                 $StackError = $true
@@ -134,7 +157,7 @@ try {
                                     404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
                                     500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
                                     default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                                }               
+                                }
                             }
                             if ( $appl -eq 1) {
                                 # Workaround for IIS Plugin not coping with too many requests when first starting up
@@ -142,7 +165,7 @@ try {
                                 # 15 second is too short. Still get failures.
                                 Start-Sleep 0
                             }
-                        }     
+                        }
                         Write-Host ""
                     }
                 }

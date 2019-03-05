@@ -13,13 +13,13 @@ param(
 [Parameter(Mandatory=$false)]
 [Decimal]$Timeout = 1200,                   # Default to wait 1200 seconds = 20 mins
 
-[Parameter(ParameterSetName='Status')] # Continue indefinitely reporting the status
+[Parameter(ParameterSetName='Status')]      # Continue indefinitely reporting the status
 [switch]$Status,
 
-[Parameter(ParameterSetName='WaitNotReady')] # Wait for ANY httpcode on any instance that is NOT 200
+[Parameter(ParameterSetName='WaitNotReady')]# Wait for ANY httpcode on any instance that is NOT 200
 [switch]$WaitNotReady,
 
-[Parameter(ParameterSetName='WaitReady')] # Wait for 200 on ALL instances in stack
+[Parameter(ParameterSetName='WaitReady')]   # Wait for 200 on ALL instances in stack
 [switch]$WaitReady
 )
 
@@ -46,7 +46,7 @@ function Summary {
         if ( $404count -gt 0 ){ Write-RedOutput "404 usually means the Listener is not running this is important to fix ASAP. And its simple to fix. Just re-deploy the app"}
         if ( $500count -gt 0 ){ Write-FormattedOutput "500 usually means Free Trial was installed but no app was deployed. Look at git repo and check that there is just the one commit. If thats the case then this error may be ignored." -ForegroundColor 'yellow'}
         if ( $defaultcount -gt 0 ){ Write-FormattedOutput "Other response codes have unknown cause" -ForegroundColor 'magenta'}
-    }    
+    }
     Write-Host ""
 }
 
@@ -112,38 +112,43 @@ try {
                         try {
                             # HTTP:80/cgi-bin/probe
                             $url = "http://$IPAddress/cgi-bin/probe"
-                            $response = Invoke-WebRequest -Uri $url
+                            $response = Invoke-WebRequest -Uri $url  -UseBasicParsing
                             $ResponseCode = $response.StatusCode
                         } catch {
                             if ( $WaitNotReady ) {
                                 Write-Host( "Stack $StackName App $app is not ready" )
                                 Exit 0
                             }
-
-                            $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
-                            Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
-                            Start-Sleep 0
-                            break
+                            $StackError = $true
+                            if ( ([string]::IsNullOrEmpty($ResponseCode) ) ) {
+                                # Don't expect to throw an error if there is a null response code.
+                                # Happened when running as a service with no IE configuration so output could not be parsed. Added -UseBasicParsing parameter to fix that
+                                $_ | Out-Default | Write-Host
+                            } else {
+                                Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
+                                if ( $WaitReady ) {
+                                    # Waiting for an application to come up so give it some time between calls.
+                                    Start-Sleep -Seconds 5
+                                } else {
+                                    Start-Sleep 0
+                                }
+                                break
+                            }
                         }
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        if ( $stack -eq 20 ) {
-                            $max = 5
-                        } else {
-                            $max = 10
-                        }
                         Write-Host -NoNewline " $app"
                         try {
                             $url = "http://$IPAddress/app$app/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                            $response = Invoke-WebRequest -Uri $url
+                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing
                             $ResponseCode = $response.StatusCode
                             switch ($ResponseCode) {
                                 200 { }
                                 404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
                                 500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
                                 default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $app $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                            }              
+                            }
                         } catch {
                             if ( $WaitNotReady ) {
                                 Write-Host( "Stack $StackName App $app is not ready" )
@@ -157,7 +162,7 @@ try {
                                 404 { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'red' | Out-Host; $404count++ }
                                 500 { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
                                 default { Write-FormattedOutput "$ResponseCode Stack $stack App $app $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                            }               
+                            }
                         }
                         if ( $app -eq 1) {
                             # Workaround for IIS Plugin not coping with too many requests when first starting up
@@ -182,7 +187,7 @@ try {
             if ( $TimeDiff.TotalSeconds -ge $Timeout) {
                 throw "$Timeout second timeout has expired"
             }
-            Start-Sleep 2   
+            Start-Sleep 2
         } else {
             Summary
         }

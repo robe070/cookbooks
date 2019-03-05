@@ -67,7 +67,7 @@ try {
             $ELBInstances = @(Get-ELBInstanceHealth -Region $Region -LoadBalancerName $ELB.LoadBalancerName)
             $AllInService = $true
             foreach ( $Instance in $ELBInstances ) {
-                Write-Output( "$($Instance.InstanceId) is $($Instance.State)")
+                Write-Output( "$($Instance.InstanceId) is '$($Instance.State)'")
                 if ( $Instance.State -ne 'InService') {
                     $AllInService = $false
                     Write-Output("Waiting")
