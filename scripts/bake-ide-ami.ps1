@@ -90,6 +90,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
+    $ManualWinUpd=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
     $UploadInstallationImageChanges=$true,
 
     [Parameter(Mandatory=$false)]

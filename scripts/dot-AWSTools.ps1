@@ -11,8 +11,8 @@ AWS and Internet tools
 function Get-ExternalIP {
     if ( -not $script:externalip )
     {
-        $Ip = (Invoke-WebRequest "http://ipv4.myexternalip.com/raw")
- 
+        $Ip = (Invoke-WebRequest "http://v4.ident.me/")
+
         # strip CR or LF from string and return Ip Address
         $script:externalip = $Ip.content -replace "`t|`n|`r",""
     }

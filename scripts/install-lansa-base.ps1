@@ -162,6 +162,9 @@ try
     # This ensures that only English is installed as installing every language does not pass AWS virus checking
     Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Write-Host
 
+    # Delete a file that fails the AWS virus checker (LANSA EPC142040)
+    Remove-Item 'c:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\plug_ins\pi_brokers\32BitMAPIBroker.exe'
+
     # JRE often fails to download with a 404, so install it explicitly from AWS S3
     # ( Latest choco seems to have fixed this)
     # $jreurl = 'jre-8u172-windows-x64.exe'
