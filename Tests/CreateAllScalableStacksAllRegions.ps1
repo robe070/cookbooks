@@ -18,7 +18,6 @@ ForEach ( $region in $regionList )
 
     try
     {
-        Write-Host "$InstanceType"
         New-CFNStack -region $region `
         -StackName "Scalable" `
         -DisableRollback $True `
@@ -29,7 +28,7 @@ ForEach ( $region in $regionList )
         @{ParameterKey="06WebPassword";ParameterValue="Pcxuser122"}, `
         @{ParameterKey="07KeyName";ParameterValue="RobG_id_rsa"}, `
         @{ParameterKey="08RemoteAccessLocation";ParameterValue="103.231.169.65/32"}, `
-        @{ParameterKey="11WebServerInstanceTyp";ParameterValue="t2.micro"} | Write-Host
+        @{ParameterKey="11WebServerInstanceTyp";ParameterValue="t2.micro"} | Out-Default | Write-Host
     }
     catch
     {
