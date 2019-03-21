@@ -112,3 +112,5 @@ try {
         $Mutex.ReleaseMutex()
     }
 }
+
+cmd /c exit 0 #Set $LASTEXITCODE

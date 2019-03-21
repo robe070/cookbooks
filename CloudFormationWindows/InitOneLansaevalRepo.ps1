@@ -89,4 +89,5 @@ try {
     Pop-Location
 }
 
+cmd /c exit 0 #Set $LASTEXITCODE
 Write-Host( "Configuration succeeded" )
