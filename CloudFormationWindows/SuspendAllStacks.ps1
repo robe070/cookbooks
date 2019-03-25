@@ -10,7 +10,7 @@ Param(
 [System.Collections.ArrayList]$ProcessList = @()
 
 
-switch ( $StackType ) {
+switch ( $ScalingProcesses ) {
     'All' {
         # Do nothing - use empty list
     }
@@ -29,7 +29,7 @@ foreach ( $WebServerGroup in $WebServerGroups ) {
     $WebServerGroup.ResourceId
 
     # Suspend processes which may cause EC2 instance to be terminated
-    Suspend-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId -ScalingProcess @("Terminate", "ReplaceUnhealthy")
+    Suspend-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId -ScalingProcess $ProcessList
 }
 
 Write-Output 'DBWebServerGroup'
@@ -37,5 +37,5 @@ $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Value
 foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
     $DBWebServerGroup.ResourceId
     # Suspend processes which may cause EC2 instance to be terminated
-    Suspend-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess @("Terminate", "ReplaceUnhealthy")
+    Suspend-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess $ProcessList
 }
