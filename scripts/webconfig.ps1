@@ -46,7 +46,7 @@ Write-Verbose ("ApplName = $ApplName")
 
 try
 {
-    
+
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
     {
         $f32bit_bool = $true
@@ -114,7 +114,7 @@ try
     New-ItemProperty -Path $lansawebKey  -Name $regkeyname -Value $MAXFREE -PropertyType String -Force  | Out-Null
 
     #####################################################################################
-    # Change MAXCONNECT to reflect max WAM sessions you want running on a Web Server. 
+    # Change MAXCONNECT to reflect max WAM sessions you want running on a Web Server.
     # i.e webplugin.conf
     # This value is passed from the CloudFormation script and may be changed using a
     # trigger in that script.
@@ -129,14 +129,14 @@ try
         Write-Verbose ("Check if MAXCONNECT exists in file at all")
 
         If (Get-Content $webplugin_file | Select-String -Pattern "MAXCONNECT=") {
-            
+
             Write-Verbose ("It exists so replace it with user setting")
 
             (Get-Content $webplugin_file) |
-            Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  | 
+            Foreach-Object {$_ -replace "MAXCONNECT=[0-9]+","MAXCONNECT=$maxconnections"}  |
             Set-Content ($webplugin_file)
         } else {
-            
+
             Write-Verbose ("Does not exist, append it to file")
 
             Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections"
@@ -144,12 +144,12 @@ try
 
         Write-Output( "Setting Restart Delay to 4 seconds so that an app comes online quicker after a 1-Click deployment")
         (Get-Content $webplugin_file) |
-        Foreach-Object {$_ -replace ";60;",";4;"}  | 
+        Foreach-Object {$_ -replace ";60;",";4;"}  |
         Set-Content ($webplugin_file)
     } else {
         Write-Output( "$webplugin_file does not exist. Presumed there is not a plugin running in this system.")
     }
-    
+
     Write-Output ("Stopping Listener...")
     Write-Verbose ("We only install the 64-bit listener on 64-bit OS")
     if ( $false )
@@ -176,9 +176,10 @@ try
 
     if ( $Reset ) {
         Write-Output ("Resetting iis...")
-        iisreset
+        iisreset /stop
         # Do it twice as sometimes the first fails as it takes too long when there are 11 applications installed and managed by 1 plugin.
-        iisreset
+        iisreset /start
+        iisreset /start
     }
 
     Write-Output ("Webconfig completed successfully")
