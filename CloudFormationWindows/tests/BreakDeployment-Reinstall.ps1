@@ -18,6 +18,6 @@ else
 }
 
 $Reinstall = Join-Path $script:IncludeDir '..\CloudFormationWindows\ReinstallAppInStack.ps1'
-for ( $loop = 1; $loop -le 5; $loop++ ) {
-    & $Reinstall -Stack 30 -App 1 -SuspendStack $false
+for ( $loop = 1; $loop -le 999; $loop++ ) {
+    & $Reinstall -Stack 30 -App 3 -SuspendStack $false
 }
