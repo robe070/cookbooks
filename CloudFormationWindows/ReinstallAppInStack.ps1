@@ -54,8 +54,8 @@ try {
         throw "Failed to create mutex"
     }
 
-    # Wait 20 mins for exclusive access to the mutex
-    if ( -not $Mutex.WaitOne(1200*1000) ) {
+    # Wait 60 mins for exclusive access to the mutex
+    if ( -not $Mutex.WaitOne(3600*1000) ) {
         $Mutex = $null
         throw "Timed out waiting for exclusive access to ReinstallAppInStack script"
     }
