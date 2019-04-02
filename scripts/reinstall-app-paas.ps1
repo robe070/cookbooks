@@ -93,7 +93,7 @@ try {
     Write-Host( "Installing = $($Installing.Installing)" )
     if ( $Installing.Installing -eq 1) {
        Publish-SNSMessage 'arn:aws:sns:us-east-1:775488040364:NotifyMe1' -Message "Stack $StackNumber App $ApplNumber configuration change in progress. Waiting up to 5 minutes for configuration change to complete" -Region 'us-east-1' | Out-Default | Write-Host
-       for ($i = 0; $i -lt 3; $i++ ){
+       for ($i = 0; $i -lt 30; $i++ ){
            Start-Sleep 10
            $Installing = Get-ItemProperty -Path "HKLM:\Software\lansa" -Name 'Installing'
            if ( $Installing.Installing -eq 0) {
