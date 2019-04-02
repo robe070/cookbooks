@@ -974,7 +974,7 @@
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
-                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "run-webconfig", "ready" ],
+                        "reinstall-app": [ "git-pull", "reinstall-app", "run-webconfig" ],
                         "update-app": [ "installing", "git-pull", "update-app", "run-webconfig", "ready" ],
                         "apprepopull": [ "installing", "git-pull", "apprepopull", "run-webconfig", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],
@@ -2037,7 +2037,7 @@
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "cfn-update": [ "installing", "install-cfn", "ready" ],
-                        "reinstall-app": [ "installing", "git-pull", "reinstall-app", "run-webconfig", "ready" ],
+                        "reinstall-app": [ "git-pull", "reinstall-app", "run-webconfig" ],
                         "update-app": [ "installing", "git-pull", "update-app", "run-webconfig", "ready" ],
                         "apprepopull": [ "installing", "git-pull", "apprepopull", "run-webconfig", "ready" ],
                         "icing-install": [ "installing", "install-cfn", "git-pull", "install-logging", "config-windows-update", "install-msi", "install-patches", "install-app", "run-webconfig", "ready" ],

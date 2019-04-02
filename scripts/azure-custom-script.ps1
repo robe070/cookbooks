@@ -7,8 +7,8 @@ First written to be called when deploying or re-deploying an Azure ARM Template 
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+# N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -86,7 +86,9 @@ function ResetWebServer{
     }
 
     Write-Verbose ("Resetting iis...")
-    iisreset
+    iisreset /stop | Out-Default | Write-Host
+    iisreset /start | Out-Default | Write-Host
+    iisreset /start | Out-Default | Write-Host
 
     Write-Verbose ("Starting Listener...")
     Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
@@ -125,7 +127,7 @@ Write-Verbose ("UninstallMSI = $UninstallMSI")
 Write-Verbose ("trace = $trace")
 Write-Verbose ("fixLicense = $fixLicense")
 Write-Verbose ("Password = $dbpassword")
- 
+
 try
 {
     # Make sure we are using the normal file system, not SQLSERVER:\ or some such else.
@@ -209,7 +211,7 @@ try
         ResetWebServer -APPA $APPA
     }
     Write-Verbose ("installMSI = $installMSI")
-            
+
     if ( $uninstallMSI -eq "1" ) {
         [bool] $Success = $true
         if ( $Installed ) {
@@ -249,10 +251,10 @@ try
 
     if ( $installMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Installing...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser "$dbuser" -dbpassword "$dbpassword" -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser "$dbuser" -dbpassword "$dbpassword" -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections
     } elseif ( $updateMSI -eq "1" ) {
         Write-Output ("$(Log-Date) Updating...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -261,7 +263,7 @@ try
 
     if ( $triggerWebConfig -eq "1" ) {
         Write-Output ("$(Log-Date) Configuring Web Server...")
-        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
+        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections
     }
 
     if ( $LASTEXITCODE -ne 0 ) {

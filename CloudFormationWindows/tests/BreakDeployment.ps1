@@ -5,11 +5,11 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Live','Test','Dev','Custom')]
+        [ValidateSet('Test','Dev','Custom')]
         [string] $StackType
 )
 
-'CheckVLWebStatus.ps1'
+'BreakDeployment.ps1'
 
 function Summary {
     If ( !$StackError ) {
@@ -23,7 +23,7 @@ function Summary {
             }
             Write-Host $Stack -NoNewline
         }
-        Write-Host " are in service"
+        Write-Host " deployed"
     } else {
         Write-Output "" | Out-Host
         if ( $404count -gt 0 -or $defaultcount -gt 0  ) {
@@ -43,7 +43,7 @@ if ( !$script:IncludeDir)
 
 	Write-Host "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
-	$script:IncludeDir = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\scripts'
+	$script:IncludeDir = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\..\scripts'
     Write-Host "Include path $script:IncludeDir"
 	. "$script:IncludeDir\Init-Baking-Vars.ps1"
 	. "$script:IncludeDir\Init-Baking-Includes.ps1"
@@ -57,6 +57,8 @@ $a = Get-Date
 Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
+$ProgressPreference = 'SilentlyContinue' # Speed things up by a factor of 10 ref: https://stackoverflow.com/questions/17325293/invoke-webrequest-post-with-parameters
+
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
@@ -65,11 +67,6 @@ try {
     [Decimal]$Stack=0
 
     switch ( $StackType ) {
-        'Live' {
-            $GitRepoBranch = 'support/L4W14200_paas'
-            $StackStart = 1
-            $StackEnd = 10
-        }
         'Test' {
             $GitRepoBranch = 'patch/paas'
             $StackStart = 20
@@ -82,8 +79,8 @@ try {
         }
         'Custom' {
             $GitRepoBranch = 'debug/paas'
-            $StackStart = 5
-            $StackEnd = 5
+            $StackStart = 30
+            $StackEnd = 30
         }
     }
 
@@ -98,6 +95,7 @@ try {
         $FoundInstance = $false
         $404count = 0
         $500count = 0
+        $503count = 0
         $defaultcount = 0
         $Loop++
 
@@ -122,56 +120,40 @@ try {
 
                         $IPAddress = $Ec2Detail[0].Instances[0].PublicIpAddress
 
+                        Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
+                        $appl = 2   # Just test app2
+                        Write-Host -NoNewline " $appl"
                         try {
-                            # HTTP:80/cgi-bin/probe
-                            $url = "http://$IPAddress/cgi-bin/probe"
-                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing
+                            $url = "http://$($IPAddress):8101/Deployment/Start/APP$($appl)"
+                            $response = Invoke-WebRequest -Uri $url -UseBasicParsing -ContentType "application/json" -Method POST -Body "{ 'source':'TestScript' }"
                             $ResponseCode = $response.StatusCode
+                            switch ($ResponseCode) {
+                                200 { Write-Host "";Write-Host "Deployment successful"}
+                                404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
+                                500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
+                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $503count++ }
+                                default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
+                            }
                         } catch {
+                            Write-Host ""
                             $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
-                            Write-FormattedOutput "$ResponseCode Stack $stack Installation in Progress $url" -ForegroundColor 'red'
-                            Start-Sleep 0
-                            continue
+                            switch ($ResponseCode) {
+                                404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
+                                500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
+                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $503count++ }
+                                default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
+                            }
                         }
 
-                        Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        $max = 10
-                        for ( $appl = 1; $appl -le $max; $appl++ ) {
-                            Write-Host -NoNewline " $appl"
-                            try {
-                                $url = "http://$IPAddress/app$appl/lansaweb?w=XVLSMTST&r=GETRESPONSE&vlweb=1&part=dem&lang=ENG"
-                                $response = Invoke-WebRequest -Uri $url -UseBasicParsing
-                                $ResponseCode = $response.StatusCode
-                                switch ($ResponseCode) {
-                                    200 { }
-                                    404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
-                                    500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
-                                    default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
-                                }
-                            } catch {
-                                Write-Host ""
-                                $StackError = $true
-                                $ResponseCode = $_.Exception.Response.StatusCode.Value__
-                                switch ($ResponseCode) {
-                                    404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
-                                    500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                                    default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
-                                }
-                            }
-                            if ( $appl -eq 1) {
-                                # Workaround for IIS Plugin not coping with too many requests when first starting up
-                                # First request causes all the listener connections to be setup
-                                # 15 second is too short. Still get failures.
-                                Start-Sleep 0
-                            }
-                        }
                         Write-Host ""
                     }
                 }
             }
         }
         Summary
+        Write-Host "Waiting for 25 seconds..."
+        Start-Sleep 25  # Deployments usually take in the order of 20 seconds, but sometimes 45 seconds or more
     } while ($Perpetual -and $FoundInstance)
 
     if ( -not $FoundInstance ) {

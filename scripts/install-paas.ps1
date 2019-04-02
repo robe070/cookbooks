@@ -173,7 +173,9 @@ try {
     }
 
     if ($LASTEXITCODE -eq 0 ) {
-        iisreset
+        iisreset /stop | Out-Default | Write-Host
+        iisreset /start | Out-Default | Write-Host
+        iisreset /start | Out-Default | Write-Host
     } else {
         Write-Output( "$(Log-Date) throwing")
         throw
