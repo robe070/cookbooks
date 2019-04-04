@@ -758,12 +758,20 @@ function Test-RegKeyValueIsNotNull {
 }
 
 # Provide a common routine so its easily modified.
-# It will need to be improved as more understanding arises
-# Using iisreset defaults to /stop /start /force
-# This frequentkly causes automatic kills to occur - 3204 in the system event log.
-# What follows a 3204 is always that other services get killed too.
+# Note that this is called to get the Plugin to reset. There may be other ways.
+# iisreset without parameters caused issues as described below when a deployment
+# through Git Deploy Hub had a new vl web runtime, necessitating an iisreset. Be aware
+# that GDH is being run from IIS, so it gets terminated ... THIS routine's thread gets terminated ...
+# but not before the iis /start has successfully completed.
+# Prior issues:
+# Using iisreset defaults to /stop /start /force.
+# This frequently causes automatic kills to occur - Event Id 3204 in the system event log.
+# What follows a 3204 is that other services may get killed too.
 # occassionally iis is not restarted (last time there were 84 resets (42 iterations) before this occurred)
-
+# New behavior:
+# iisrest /stop /noforce changed the behaviour to 0 occurence of iis not starting in 1000 iterations,
+# and returned 0 exit code every time. 5 x 3204 events still recorded in system event log, but that
+# did not cause iis not to start and did not cause any dumps to be produced.
 function Iis-Reset {
     Write-Host( "$(Log-Date) iisreset /stop /noforce..." )
     iisreset /stop /noforce

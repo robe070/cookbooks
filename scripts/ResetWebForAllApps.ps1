@@ -1,5 +1,5 @@
 # Stop iis
-iisreset /Stop
+iisreset /Stop /noforce
 
 # Stop all listeners
 for ( $i = 1; $i -le 10; $i++) {

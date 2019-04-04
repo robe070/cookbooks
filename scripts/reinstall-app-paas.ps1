@@ -136,7 +136,6 @@ try {
 
     if ($LASTEXITCODE -eq 0 ) {
         # No need to perform a reset as the web-alias and port numbers have not changed.
-        # iisreset
     } else {
         Write-Host( "$(Log-Date) throwing")
         throw

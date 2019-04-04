@@ -538,7 +538,7 @@ try
 
 
     if ( -not $CompanionInstall ) {
-        iisreset | Out-Default | Write-Host
+        iis-reset | Out-Default | Write-Host
     }
 
     #####################################################################################
