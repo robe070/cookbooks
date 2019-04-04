@@ -57,6 +57,8 @@ $a = Get-Date
 Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
+$ProgressPreference = 'SilentlyContinue' # Speed things up by a factor of 10 ref: https://stackoverflow.com/questions/17325293/invoke-webrequest-post-with-parameters
+
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
@@ -66,24 +68,20 @@ try {
 
     switch ( $StackType ) {
         'Live' {
-            $GitRepoBranch = 'support/L4W14200_paas'
             $StackStart = 1
             $StackEnd = 10
         }
         'Test' {
-            $GitRepoBranch = 'patch/paas'
             $StackStart = 20
             $StackEnd = 20
         }
         'Dev' {
-            $GitRepoBranch = 'debug/paas'
             $StackStart = 30
             $StackEnd = 30
         }
         'Custom' {
-            $GitRepoBranch = 'debug/paas'
-            $StackStart = 5
-            $StackEnd = 5
+            $StackStart = 4
+            $StackEnd = 4
         }
     }
 
