@@ -159,6 +159,22 @@ try
             Add-Content $webplugin_file "`nMAXCONNECT=$maxconnections" | Out-Default | Write-Host
         }
 
+        Write-Verbose ("Check if ASSUME_AUTOCONFIG_SUPPORT exists in file at all") | Out-Default | Write-Host
+
+        If (Get-Content $webplugin_file | Select-String -Pattern "ASSUME_AUTOCONFIG_SUPPORT=") {
+
+            Write-Verbose ("It exists so set it to Y") | Out-Default | Write-Host
+
+            (Get-Content $webplugin_file) |
+            Foreach-Object {$_ -replace "ASSUME_AUTOCONFIG_SUPPORT=.","ASSUME_AUTOCONFIG_SUPPORT=Y"}  |
+            Set-Content ($webplugin_file)
+        } else {
+
+            Write-Verbose ("Does not exist, append it to file") | Out-Default | Write-Host
+
+            Add-Content $webplugin_file "`nASSUME_AUTOCONFIG_SUPPORT=Y" | Out-Default | Write-Host
+        }
+
         Write-Host( "Setting Restart Delay to 4 seconds so that an app comes online quicker after a 1-Click deployment")
         (Get-Content $webplugin_file) |
         Foreach-Object {$_ -replace ";60;",";4;"}  |
