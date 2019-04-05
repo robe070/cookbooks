@@ -135,7 +135,9 @@ try {
     & "$script:IncludeDir\install-lansa-msi.ps1" -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -wait $wait -ApplName $ApplName -CompanionInstallPath $APPA -MSIuri "$ApplMSIuri/$($ApplName)_v1.0.0_en-us.msi" $HTTPPortNumber -HostRoutePortNumber $HostRoutePortNumber -JSMPortNumber $JSMPortNumber -JSMAdminPortNumber $JSMAdminPortNumber -HTTPPortNumberHub $HTTPPortNumberHub -GitRepoUrl "git@github.com:lansa/$($GitRepoName).git" | Out-Default | Write-Host
 
     if ($LASTEXITCODE -eq 0 ) {
-        # No need to perform a reset as the web-alias and port numbers have not changed.
+        Write-Output( "$(Log-Date) Configuring web options for $ApplName")
+        & "$script:IncludeDir\webconfig.ps1" -DBUT $DBUT -server_name $server_name -dbname $ApplName -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -userscripthook $userscripthook -ApplName $ApplName -MaxConnections $maxconnections -Reset $false
+        # Don't reset because CFN template will call the same script for the WebServer application and IT performs an iisreset
     } else {
         Write-Host( "$(Log-Date) throwing")
         throw
