@@ -107,6 +107,10 @@ try
             New-Item -Path $lansawebKey -ErrorAction 'Stop'  | Out-Default | Write-Host
         }
     }
+
+    Write-Host("Disable Session Locking (WAM_SESSION_LOCK) (N)" )
+    New-ItemProperty -Path $lansawebKey  -Name WAM_SESSION_LOCK -PropertyType String -Value 'N' -Force  | Out-Null
+
     Write-Host("Set Maximum Concurrent Users (MAXUSERS) to Unlimited (0)" )
     New-ItemProperty -Path $lansawebKey  -Name MAXUSERS -PropertyType String -Value '0' -Force  | Out-Null
 
