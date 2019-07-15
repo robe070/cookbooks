@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Live','Test','Dev','Custom')]
+        [ValidateSet('Live','Test','Dev','Custom','All')]
         [string] $StackType
 )
 
@@ -65,29 +65,27 @@ try {
     [Decimal]$StackStart=0
     [Decimal]$StackEnd=0
     [Decimal]$Stack=0
+    [System.Collections.ArrayList]$stacklist = @()
 
-    switch ( $StackType ) {
-        'Live' {
-            $StackStart = 1
-            $StackEnd = 10
-        }
-        'Test' {
-            $StackStart = 20
-            $StackEnd = 20
-        }
-        'Dev' {
-            $StackStart = 30
-            $StackEnd = 30
-        }
-        'Custom' {
-            $StackStart = 4
-            $StackEnd = 4
+    if ( $StackType -eq 'Live' -or $StackType -eq 'All') {
+        $StackStart = 1
+        $StackEnd = 10
+
+        For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
+            $stacklist.add($stack) | Out-Null
         }
     }
 
-    [System.Collections.ArrayList]$stacklist = @()
-    For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-        $stacklist.add($stack) | Out-Null
+    if ( $StackType -eq 'Test' -or $StackType -eq 'All') {
+        $stacklist.add(20)
+    }
+
+    if ( $StackType -eq 'Dev' -or $StackType -eq 'All') {
+        $stacklist.add(30)
+    }
+
+    if ( $StackType -eq 'Custom') {
+        $stacklist.add(4)
     }
 
     $Loop = 0
