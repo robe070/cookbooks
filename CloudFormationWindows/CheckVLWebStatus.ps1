@@ -85,7 +85,7 @@ try {
     }
 
     if ( $StackType -eq 'Custom') {
-        $stacklist.add(4)
+        $stacklist.add(1)
     }
 
     $Loop = 0
