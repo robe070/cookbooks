@@ -7,7 +7,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Test','Dev','Custom')]
+        [ValidateSet('Test','Dev1','Dev2','Custom')]
         [string] $StackType
 )
 
@@ -39,21 +39,27 @@ $ProgressPreference = 'SilentlyContinue' # Speed things up by a factor of 10 ref
 $SeedDir = 'C:\Lansa\lansaeval2'
 $FreeTrialDir = 'C:\Program Files (x86)\LANSA7'
 
-$app = 2
+
 $ParentDir = Split-Path -Parent $MyInvocation.MyCommand.Path | Split-Path -Parent
 
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
     [Decimal]$Stack=0
+    [Decimal]$app = 2
 
     switch ( $StackType ) {
         'Test' {
             $Stack = 20
             $Remote = 'lansaeval200'
         }
-        'Dev' {
+        'Dev1' {
             $Remote = 'lansaeval302'
+            $Stack = 30
+            $app = 1
+        }
+        'Dev2' {
+            $Remote = 'lansaeval301'
             $Stack = 30
         }
         'Custom' {
@@ -90,11 +96,12 @@ try {
             }
 
             Write-Host "$(Log-Date) Wait until application is ready before continuing"
-            Write-Host "Wait at least 30 seconds to ensure that deployment has started and thus the application is offline..."
-            Start-Sleep 30
+            Write-Host "Wait at least 10 seconds to ensure that deployment has started and thus the application is offline..."
+            Start-Sleep 10
 
             Write-GreenOutput( "Wait until Stack eval$($stack) app $app is back online") | Write-Host
-            & "$ParentDir\Wait-LansaApp.ps1" -WaitReady -Region $Region -Stack "eval$stack" -App $app -Timeout 300
+            # Long timeout of 1200 as sometimes this script does not get a chance to deploy befpore another app is being re-installed by the other script
+            & "$ParentDir\Wait-LansaApp.ps1" -WaitReady -Region $Region -Stack "eval$stack" -App $app -Timeout 1200
             Write-GreenOutput( "Stack eval$($stack) app $app deployment using $CurrentDir & remote $remote is fully completed" )
             Write-Host
         }

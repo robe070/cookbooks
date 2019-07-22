@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Test','Dev','Custom')]
+        [ValidateSet('Test','Dev1','Dev2','Custom')]
         [string] $StackType
 )
 
@@ -67,6 +67,7 @@ try {
     [Decimal]$StackStart=0
     [Decimal]$StackEnd=0
     [Decimal]$Stack=0
+    [Decimal]$appl = 2   # Just test app2
 
     switch ( $StackType ) {
         'Test' {
@@ -74,7 +75,13 @@ try {
             $StackStart = 20
             $StackEnd = 20
         }
-        'Dev' {
+        'Dev1' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 30
+            $StackEnd = 30
+            $appl = 1
+        }
+        'Dev2' {
             $GitRepoBranch = 'debug/paas'
             $StackStart = 30
             $StackEnd = 30
@@ -123,7 +130,6 @@ try {
                         $IPAddress = $Ec2Detail[0].Instances[0].PublicIpAddress
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        $appl = 2   # Just test app2
                         Write-Host -NoNewline " $appl"
                         try {
                             $url = "http://$($IPAddress):8101/Deployment/Start/APP$($appl)"
