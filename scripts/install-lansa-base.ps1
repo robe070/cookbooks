@@ -138,7 +138,7 @@ try
     }
 
     Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
-    Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress')  | Write-Host
+    Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 3.1.1')  | Write-Host
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
