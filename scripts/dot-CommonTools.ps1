@@ -135,7 +135,7 @@ function Connect-RemoteSession
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -143,7 +143,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:instanceid remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -153,7 +153,7 @@ function Connect-RemoteSessionUri
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -169,11 +169,7 @@ function ReConnect-Session
     Write-Host "$(Log-Date) Reconnecting session..."
     if ( $Script:session ) { Remove-PSSession $Script:session | Out-Host }
 
-    if ( $Cloud -eq 'AWS' ) {
-        Connect-RemoteSession | Out-Host
-    } elseif ($Cloud -eq 'Azure' ) {
-        Connect-RemoteSessionUri | Out-Host
-    }
+    Connect-RemoteSession | Out-Host
 
     Execute-RemoteInit | Out-Host
     Execute-RemoteInitPostGit | Out-Host

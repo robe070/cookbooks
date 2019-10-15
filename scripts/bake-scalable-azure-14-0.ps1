@@ -34,7 +34,7 @@ Bake-IdeMsi -VersionText 'SCALE-CA4' `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "SQL2014SP2-WS2012R2" `
+            -AmazonAMIName "2012-R2-Datacenter" `
             -GitBranch "support/L4W14200_scalable" `
             -Cloud "Azure" `
             -InstallBaseSoftware $true `
@@ -43,4 +43,6 @@ Bake-IdeMsi -VersionText 'SCALE-CA4' `
             -InstallScalable $true `
             -Win2012 $true `
             -ManualWinUpd $false `
-            -SkipSlowStuff $false
+            -SkipSlowStuff $false `
+            -OnlySaveImage $false `
+            -CreateVM $false

@@ -90,7 +90,16 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $Upgrade=$false
+    $Upgrade=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $OnlySaveImage=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $CreateVM=$false    # Used for speeding up script when debugging, provided the VM already exists!
+
     )
 
     #Requires -RunAsAdministrator
@@ -140,6 +149,7 @@ try
     enable-psremoting -SkipNetworkProfileCheck -force
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
     $VerbosePreference = $VerbosePreferenceSaved
+    $externalip = Get-ExternalIP
 
     if ( $Win2012 -eq $true ) {
         $Platform = 'Win2012'
@@ -210,10 +220,10 @@ try
     } elseif ($Cloud -eq 'Azure' ) {
         #Import-Module Az
         $imageObj = @()
-        $Location = "Australia Southeast"
-        $Publisher = "MicrosoftSQLServer"
-        $SKU = "Express"
-        $ImageObj = Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $AmazonAMIName -SKU $SKU | Sort-Object -Descending Version
+        $Location = "Australia East"
+        $Publisher = "MicrosoftWindowsServer"
+        $Offer = "windowsserver"
+        $ImageObj = Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName | Sort-Object -Descending Version
 
         if ( $imageObj ) {
             $imageObj[0]  | Out-Default | Write-Host
@@ -222,43 +232,64 @@ try
         }
 
         $subscription = "Visual Studio Enterprise with MSDN"
-        $svcName = "bakingMSDN"
+        $StorageAccountName = 'staginglansaauseast'
+        $svcName = "bakingMSDN-aus-east"
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
-        $Script:publicDNS = "bakingpublicdns"
+        $publicDNSName = "bakingpublicdnsauseast"
+
+        if ( $CreateVM -and -not $OnlySaveImage) {
+            Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
+
+            . .\Remove-AzrVirtualMachine.ps1
+            Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $svcName -Wait
+        }
 
         Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
         $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
 
-        $nic = Get-AzNetworkInterface -Name bakingNic -ResourceGroupName $svcName
-        if ( -not $nic ) {
+        $nic = Get-AzNetworkInterface -Name bakingNic -ResourceGroupName $svcName -ErrorAction SilentlyContinue
+        if ( $null -eq $nic ) {
+            Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
+
             # Create a subnet configuration
+            Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
             $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name bakingSubnet -AddressPrefix 192.168.1.0/24
 
             # Create a virtual network
-            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name bakingvNET -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig
+            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name bakingvNET -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
 
             # Create a public IP address and specify a DNS name
-            $pip = New-AzPublicIpAddress -ResourceGroupName $svcName -Location $location -Name $Script:publicDNS -AllocationMethod Static -IdleTimeoutInMinutes 4
+            $pip = New-AzPublicIpAddress -ResourceGroupName $svcName -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleRDP  -Protocol Tcp `
-            -Direction Inbound -Priority 1000 -SourceAddressPrefix * -SourcePortRange * -DestinationAddressPrefix * `
+            -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 3389 -Access Allow
+
+            # Create an inbound network security group rule for port 5985
+            $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleWinRMHttp  -Protocol Tcp `
+            -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+            -DestinationPortRange 5985 -Access Allow
+
+            # Create an inbound network security group rule for port 5986
+            $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleWinRMHttps  -Protocol Tcp `
+            -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+            -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
             $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $svcName -Location $location `
-            -Name bakingNetworkSecurityGroup -SecurityRules $nsgRuleRDP
+            -Name bakingNetworkSecurityGroup -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force
 
             # Create a virtual network card and associate with public IP address and NSG
             $nic = New-AzNetworkInterface -Name bakingNic -ResourceGroupName $svcName -Location $location `
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
 
-        $KeyVault = "bakingVault"
+        $KeyVault = "bakingVaultauseast"
         $certificateName = "bakingWinRMCertificate"
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
         if ( $secret ) {
@@ -291,366 +322,343 @@ $jsonObject = @"
             $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
         }
 
-        if ( $true ) {
-            Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
-            Get-AzVM -ResourceGroupName $svcName -Name $Script:vmname -ErrorAction SilentlyContinue | Remove-AzVM -ErrorAction SilentlyContinue
-
+        if ( $CreateVM -and -not $OnlySaveImage) {
             $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $svcName -VaultName $KeyVault).ResourceId
-            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize | `
-                    Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL | `
-                    Set-AzVMSourceImage -PublisherName $Publisher -Offer $AmazonAMIName -SKU $SKU -Version latest | `
-                    Add-AzVMNetworkInterface -Id $nic.Id | `
-                    Add-AzVMSecret -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
 
-            # $WinRMCertUrl = "http://keyVaultName.vault.azure.net/secrets/secretName/secretVersion"
-            #$VM1 = Set-AzVMOperatingSystem -VM $VM1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $WinRMCertUrl
+            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
+            $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
+            $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
+            $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
+            $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
+            $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
 
             New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
         }
 
-        $vm1 = Get-AzVM -ResourceGroupName $svcName -Name $Script:vmname
-
-        # Install the WinRM Certificate first to access the VM via Remote PS
-        # This REQUIRES PowerShell run Elevated
-        # Also run Unblock-File .\InstallWinRMCertAzureVM.ps1 => Need to close the Powershell session before it will work.
-        # .$script:IncludeDir\InstallWinRMCertAzureVM.ps1 -SubscriptionName $subscription -ServiceName $svcName -Name $Script:vmname
-
-        # Get the RemotePS/WinRM Uri to connect to
-        $uri = Get-AzWinRMUri -ServiceName $svcName -Name $Script:vmname
+        $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName
+        # $uri = $ipAddress.IpAddress
+        $Script:publicDNS =  $ipAddress.IpAddress
     }
 
-    # Remote PowerShell
-    $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-    $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
-    if ( $Cloud -eq 'AWS' ) {
+    if ( -not $OnlySaveImage ) {
+        # Remote PowerShell
+        $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+        $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
         Connect-RemoteSession
-    } elseif ($Cloud -eq 'Azure' ) {
-        Connect-RemoteSessionUri
-    }
 
-    # Simple test of session:
-    # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
+        # Simple test of session:
+        # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
 
-    Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
-    $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
-    if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-        Write-Error "LastExitCode: $remotelastexitcode"
-        throw 1
-    }
-
-    # Setup fundamental variables in remote session
-
-    Execute-RemoteInit
-
-    Execute-RemoteBlock $Script:session {
-        try {
-            Write-Verbose ("Save S3 DVD image url and other global variables in registry") | Out-Default | Write-Host
-            $lansaKey = 'HKLM:\Software\LANSA\'
-            if (!(Test-Path -Path $lansaKey)) {
-                New-Item -Path $lansaKey | Out-Default | Write-Host
-            }
-            New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force | Out-Default | Write-Host
-            New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force | Out-Default | Write-Host
-
-            Write-Verbose "Switch off Internet download security warning" | Out-Default | Write-Host
-            [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine') | Out-Default | Write-Host
-
-            if ( !$using:Upgrade ) {
-                Write-Verbose "Turn on sound from RDP sessions" | Out-Default | Write-Host
-                Get-Service | Where {$_.Name -match "audio"} | format-table -autosize | Out-Default | Write-Host
-                Get-Service | Where {$_.Name -match "audio"} | start-service | Out-Default | Write-Host
-                Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic" | Out-Default | Write-Host
-            }
-        } catch {
-            Write-RedOutput $_ | Out-Default | Write-Host
-            Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-            throw 'Script Block 10'
-        }
-        # Ensure last exit code is 0. (exit by itself will terminate the remote session)
-        cmd /c exit 0
-    }
-
-    # Load up some required tools into remote environment
-
-    # Load basic utils before running anything
-    Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
-
-    if ( $InstallBaseSoftware ) {
-
-        # Install Chocolatey
-
-        Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
-
-        # Then we install git using chocolatey and pull down the rest of the files from git
-
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
-
-        Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
-
-        # Load utilities into Remote Session.
-        # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
-        # Reflect local variables into remote session
-        Execute-RemoteInitPostGit
-
-        # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
-        # Git is a far faster mechansim for transferring files than using RemotePS.
-        # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
-
-        #####################################################################################
-
-        if ( $Cloud -eq 'AWS' ) {
-            Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
-        } else {
-            Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
-            Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-            $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+        Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+        $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
+        if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+            Write-Error "LastExitCode: $remotelastexitcode"
+            throw 1
         }
 
+        # Setup fundamental variables in remote session
 
-        #####################################################################################
-        Write-Host "$(Log-Date) Installing base software"
-        #####################################################################################
-
-        if ( $Cloud -eq 'AWS' ) {
-            $ChefRecipe = "VLWebServer::IDEBase"
-        } elseif ($Cloud -eq 'Azure' ) {
-            $ChefRecipe = "VLWebServer::IDEBaseAzure"
-        }
-
-        # Make sure the session is initialised correctly
-        ReConnect-Session
-
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
-    } else {
-        Execute-RemoteInitPostGit
+        Execute-RemoteInit
 
         Execute-RemoteBlock $Script:session {
-            Write-Verbose "$(Log-Date) Refreshing git tools repo" | Out-Default | Write-Host
-            # Ensure we cope with an existing repo, not just a new clone...
-            cd $using:GitRepoPath
-            # Throw away any working directory changes
-            cmd /c git reset --hard HEAD '2>&1'
-            # Ensure we have all changes
-            cmd /c git fetch --all '2>&1'
-            # Check out a potentially different branch
-            Write-Host "Branch: $using:GitBranch"
-            # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
-            cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
-            if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
-            {
-                throw 'Git checkout failed'
+            try {
+                Write-Verbose ("Save S3 DVD image url and other global variables in registry") | Out-Default | Write-Host
+                $lansaKey = 'HKLM:\Software\LANSA\'
+                if (!(Test-Path -Path $lansaKey)) {
+                    New-Item -Path $lansaKey | Out-Default | Write-Host
+                }
+                New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value $using:Cloud -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'DVDUrl' -PropertyType String -Value $using:S3DVDImageDirectory -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'VisualLANSAUrl' -PropertyType String -Value $using:S3VisualLANSAUpdateDirectory -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'IntegratorUrl' -PropertyType String -Value $using:S3IntegratorUpdateDirectory -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'GitBranch' -PropertyType String -Value $using:GitBranch -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'VersionText' -PropertyType String -Value $using:VersionText -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'VersionMajor' -PropertyType DWord -Value $using:VersionMajor -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force | Out-Default | Write-Host
+
+                Write-Verbose "Switch off Internet download security warning" | Out-Default | Write-Host
+                [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine') | Out-Default | Write-Host
+
+                if ( !$using:Upgrade ) {
+                    Write-Verbose "Turn on sound from RDP sessions" | Out-Default | Write-Host
+                    Get-Service | Where {$_.Name -match "audio"} | format-table -autosize | Out-Default | Write-Host
+                    Get-Service | Where {$_.Name -match "audio"} | start-service | Out-Default | Write-Host
+                    Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic" | Out-Default | Write-Host
+                }
+            } catch {
+                Write-RedOutput $_ | Out-Default | Write-Host
+                Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                throw 'Script Block 10'
             }
-            # Overwrite the origin's current tree onto the branch we really want - the local branch
-            cmd /c git checkout -B $using:GitBranch  '2>&1'
-            if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
-            {
-                throw 'Git checkout failed'
-            }
-        }
-    }
-
-    ReConnect-Session
-
-    if ( $InstallSQLServer ) {
-        #####################################################################################
-        Write-Host "$(Log-Date) Install SQL Server. (Remote execution does not work)"
-        #####################################################################################
-        $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
-
-        #####################################################################################
-        Write-Host "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
-        #####################################################################################
-        Execute-RemoteBlock $Script:session {
-		    Write-Host "$(Log-Date) Restart Required - Restarting..."
-		    Restart-Computer -Force
-
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
 
-        # Session has been lost due to a Windows reboot
-        if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
-        {
-            Write-Host "$(Log-Date) Session lost or not open. Reconnecting..."
-            if ( $Script:session ) { Remove-PSSession $Script:session }
+        # Load up some required tools into remote environment
 
-            if ( $Cloud -eq 'AWS' ) {
-                Connect-RemoteSession
-            } elseif ($Cloud -eq 'Azure' ) {
-                Connect-RemoteSessionUri
-            }
+        # Load basic utils before running anything
+        Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
 
-            Execute-RemoteInit
+
+        if ( $InstallBaseSoftware ) {
+
+            # Install Chocolatey
+
+            Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
+
+            # Then we install git using chocolatey and pull down the rest of the files from git
+
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
+
+            Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
+
+            # Load utilities into Remote Session.
+            # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
+            # Reflect local variables into remote session
             Execute-RemoteInitPostGit
-        }
-    }
 
-    ReConnect-Session
+            # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
+            # Git is a far faster mechansim for transferring files than using RemotePS.
+            # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
 
-    # No harm installing this again if its already installed
-    if ( $InstallIDE -eq $true) {
-        if ( $Win2012 ) {
-            Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!" | Out-Default | Write-Host
-            Write-Verbose "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE" | Out-Default | Write-Host
+            #####################################################################################
 
             if ( $Cloud -eq 'AWS' ) {
-                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
+                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
             } else {
-                $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-                $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
+                Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
+                $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
             }
+
+
+            #####################################################################################
+            Write-Host "$(Log-Date) Installing base software"
+            #####################################################################################
+
+            if ( $Cloud -eq 'AWS' ) {
+                $ChefRecipe = "VLWebServer::IDEBase"
+            } elseif ($Cloud -eq 'Azure' ) {
+                $ChefRecipe = "VLWebServer::IDEBaseAzure"
+            }
+
+            # Make sure the session is initialised correctly
+            ReConnect-Session
+
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
         } else {
+            Execute-RemoteInitPostGit
+
             Execute-RemoteBlock $Script:session {
-                Run-ExitCode 'choco' @('install', 'jdk8', '-y', '--no-progress')
-            }
-        }
-    }
-
-    if ( !$SkipSlowStuff ) {
-        if ( $Cloud -eq 'AWS' ) {
-            # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
-            Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
-            Write-Host "$(Log-Date) Windows Updates complete"
-        } else {
-            $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-            $dummy = MessageBox "Run Windows Updates. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. Keep running Windows Updates until it displays the message 'Done Installing Windows Updates. Restart not required'. Now click OK on this message box"
-        }
-    }
-
-    if ( $ManualWinUpd ) {
-        $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877"
-    }
-
-    ReConnect-Session
-
-    if ( $InstallIDE -eq $true ) {
-
-        #####################################################################################
-        Write-Host "$(Log-Date) Installing License"
-        #####################################################################################
-
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
-        Execute-RemoteBlock $Script:session {
-            CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-            # Errors are thrown out of CreateLicense so no need to catch a throw here.
-            # Let the local script catch it
-        }
-
-        Execute-RemoteBlock $Script:session {
-            try {
-                Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-            } catch {
-                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                Write-RedOutput $_ | Out-Default | Write-Host
-                Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                cmd /c exit 1
-                throw
+                Write-Verbose "$(Log-Date) Refreshing git tools repo" | Out-Default | Write-Host
+                # Ensure we cope with an existing repo, not just a new clone...
+                cd $using:GitRepoPath
+                # Throw away any working directory changes
+                cmd /c git reset --hard HEAD '2>&1'
+                # Ensure we have all changes
+                cmd /c git fetch --all '2>&1'
+                # Check out a potentially different branch
+                Write-Host "Branch: $using:GitBranch"
+                # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
+                cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
+                if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
+                {
+                    throw 'Git checkout failed'
+                }
+                # Overwrite the origin's current tree onto the branch we really want - the local branch
+                cmd /c git checkout -B $using:GitBranch  '2>&1'
+                if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
+                {
+                    throw 'Git checkout failed'
+                }
             }
         }
 
-        Write-Host "$(Log-Date) Installing IDE"
-        PlaySound
+        ReConnect-Session
 
+        if ( $InstallSQLServer ) {
+            #####################################################################################
+            Write-Host "$(Log-Date) Install SQL Server. (Remote execution does not work)"
+            #####################################################################################
+            $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
 
-        if ( $Upgrade -eq $false ) {
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
-        } else {
-            # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
-            # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system
-            Invoke-Command -Session $Script:session {
-                $lastexitcode = 0
+            #####################################################################################
+            Write-Host "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
+            #####################################################################################
+            Execute-RemoteBlock $Script:session {
+                Write-Host "$(Log-Date) Restart Required - Restarting..."
+                Restart-Computer -Force
 
-                c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
-            } -ArgumentList 'true'
+                # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+                cmd /c exit 0
+            }
 
-            $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
-            if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
-                Write-Error "LastExitCode: $remotelastexitcode"
-                throw 1
+            # Session has been lost due to a Windows reboot
+            if ( -not $Script:session -or ($Script:session.State -ne 'Opened') )
+            {
+                Write-Host "$(Log-Date) Session lost or not open. Reconnecting..."
+                if ( $Script:session ) { Remove-PSSession $Script:session }
+
+                Connect-RemoteSession
+                Execute-RemoteInit
+                Execute-RemoteInitPostGit
             }
         }
-    }
 
-    if ( $InstallScalable -eq $true ) {
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+        ReConnect-Session
 
-        # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
-        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
-
-        Write-Host "Test that keys are configured"
-
-        Execute-RemoteBlock $Script:session {
-            try {
-                Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-            } catch {
-                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                Write-RedOutput $_ | Out-Default | Write-Host
-                Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                cmd /c exit 1
-                throw
-            }
-         }
-    }
-
-    # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
-    ReConnect-Session
-
-    Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
-    Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
-
-    if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
-        Invoke-Command -Session $Script:session {
-            Write-Verbose "$(Log-Date) Switch Internet download security warning back on" | Out-Default | Write-Host
-            [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine') | Out-Default | Write-Host
-            # Set-ExecutionPolicy restricted -Scope CurrentUser
-        }
-    }
-
-    Write-Host "Test that keys are still configured"
-    if ( $InstallScalable -eq $true ) {
-        Execute-RemoteBlock $Script:session {
-            try {
-                Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-            } catch {
-                Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                Write-RedOutput $_ | Out-Default | Write-Host
-                Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                cmd /c exit 1
-                throw
-            }
-        }
-    }
-
-    ReConnect-Session
-
-    Write-Host "$(Log-Date) Sysprep"
-    Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error" | Out-Default | Write-Host
-
-    try {
-        if ( $Cloud -eq 'AWS' ) {
+        # No harm installing this again if its already installed
+        if ( $InstallIDE -eq $true) {
             if ( $Win2012 ) {
-                Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
+                Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!" | Out-Default | Write-Host
+                Write-Verbose "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE" | Out-Default | Write-Host
+
+                if ( $Cloud -eq 'AWS' ) {
+                    Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
+                } else {
+                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
+                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                }
             } else {
-                # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-                Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
-                Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+                Execute-RemoteBlock $Script:session {
+                    Run-ExitCode 'choco' @('install', 'jdk8', '-y', '--no-progress')
+                }
             }
-        } elseif ($Cloud -eq 'Azure' ) {
-            $Response = MessageBox "Do you want to run sysprep automatically?" 0x3
-            $Response
-            if ( $response -eq 0x6 ) {
+        }
+
+        if ( !$SkipSlowStuff ) {
+            if ( $Cloud -eq 'AWS' ) {
+                # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
+                Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
+                Write-Host "$(Log-Date) Windows Updates complete"
+            }
+        }
+
+        if ( $ManualWinUpd ) {
+            $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877"
+        }
+
+        ReConnect-Session
+
+        if ( $InstallIDE -eq $true ) {
+
+            #####################################################################################
+            Write-Host "$(Log-Date) Installing License"
+            #####################################################################################
+
+            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx"
+            Execute-RemoteBlock $Script:session {
+                CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+                # Errors are thrown out of CreateLicense so no need to catch a throw here.
+                # Let the local script catch it
+            }
+
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
+                }
+            }
+
+            Write-Host "$(Log-Date) Installing IDE"
+            PlaySound
+
+
+            if ( $Upgrade -eq $false ) {
+                Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-ide.ps1
+            } else {
+                # Need to pass a single parameter (UPGD) which seems to be extremely complicated when you have the script in a file like we have here.
+                # So the simple solution is to use a script block which means the path to the script provided here is relative to the REMOTE system
+                Invoke-Command -Session $Script:session {
+                    $lastexitcode = 0
+
+                    c:\lansa\scripts\install-lansa-ide.ps1 -UPGD 'true' -Wait 'false'
+                } -ArgumentList 'true'
+
+                $remotelastexitcode = invoke-command  -Session $session -ScriptBlock { $lastexitcode}
+                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                    Write-Error "LastExitCode: $remotelastexitcode"
+                    throw 1
+                }
+            }
+        }
+
+        if ( $InstallScalable -eq $true ) {
+            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
+            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+
+            # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+
+            Write-Host "Test that keys are configured"
+
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
+                }
+            }
+        }
+
+        # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
+        ReConnect-Session
+
+        Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
+        Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
+
+        if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
+            Invoke-Command -Session $Script:session {
+                Write-Verbose "$(Log-Date) Switch Internet download security warning back on" | Out-Default | Write-Host
+                [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine') | Out-Default | Write-Host
+                # Set-ExecutionPolicy restricted -Scope CurrentUser
+            }
+        }
+
+        Write-Host "Test that keys are still configured"
+        if ( $InstallScalable -eq $true ) {
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
+                }
+            }
+        }
+
+        ReConnect-Session
+
+        Write-Host "$(Log-Date) Sysprep"
+        Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error" | Out-Default | Write-Host
+
+        try {
+            if ( $Cloud -eq 'AWS' ) {
+                if ( $Win2012 ) {
+                    Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
+                } else {
+                    # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+                    Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                    Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                    Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+                }
+            } elseif ($Cloud -eq 'Azure' ) {
                 Write-Host( "$(Log-Date) Running sysprep automatically")
 
                 # Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
@@ -658,35 +666,42 @@ $jsonObject = @"
                     cd "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
                     cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
                 }
-            } else {
-                $dummy = MessageBox "Run sysprep manually. When complete, click OK on this message box"
+            }
+        } catch {
+            Write-RedOutput $_ | Out-Default | Write-Host
+            $Response = MessageBox "Do you want to continue building the image?" 0x3
+            $Response
+            if ( $response -ne 0x6 ) {
+                throw "Sysprep script failure"
             }
         }
-    } catch {
-        Write-RedOutput $_ | Out-Default | Write-Host
-        $Response = MessageBox "Do you want to continue building the image?" 0x3
-        $Response
-        if ( $response -ne 0x6 ) {
-            throw "Sysprep script failure"
-        }
-    }
 
-    Remove-PSSession $Script:session | Out-Default | Write-Host
+        Remove-PSSession $Script:session | Out-Default | Write-Host
+    } # if -not $OnlySaveImage
 
     # Sysprep will stop the Instance
 
     if ( $Cloud -eq 'Azure' ) {
-        Wait-AzureVMState $svcName $Script:vmname "StoppedVM"
+        Wait-AzureVMState $svcName $Script:vmname "not running"
 
-        Write-Host "$(Log-Date) Creating Azure Image"
+        Write-Host "$(Log-Date) Starting Azure Image Creation"
 
         Write-Verbose "$(Log-Date) Delete image if it already exists" | Out-Default | Write-Host
         $ImageName = "$($VersionText)image"
-        Get-AzureVMImage -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzureVMImage -DeleteVHD -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Save-AzureVMImage -ServiceName $svcName -Name $Script:vmname -ImageName $ImageName -OSState Generalized | Out-Default | Write-Host
+        Get-AzImage -ResourceGroupName $svcName -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
+
+        Write-Host "$(Log-Date) Terminating VM..."
+        Stop-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Force | Out-Default | Write-Host
+
+        Write-Host "$(Log-Date) Creating Actual Image..."
+        Set-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Generalized | Out-Default | Write-Host
+        $vm = Get-AzVM -ResourceGroupName $svcName -Name $Script:vmname
+        $image = New-AzImageConfig -Location $location -SourceVirtualMachineId $vm.Id
+
+        New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ImageName $ImageName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
@@ -763,3 +778,4 @@ function SetUpAccount {
     Select-AzureSubscription -SubscriptionId $subscription
     set-AzureSubscription -SubscriptionId $subscription -CurrentStorageAccount $Storage
 }
+

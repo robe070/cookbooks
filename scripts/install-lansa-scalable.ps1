@@ -6,8 +6,8 @@ Creates a SQL Server Database then installs from the DVD image
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+# N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -57,24 +57,26 @@ else {
 
 try
 {
-    # Ensure that dependencies are installed (weird issue no time to diagnose)
-    # . "$script:IncludeDir\dot-DBTools.ps1" | Out-Host
+    # Check if SQL Server is installed
+    $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
+    If ( $mssql_services ) {
 
-    #####################################################################################
-    Write-Output ("$(Log-Date) Enable Named Pipes on local database") | Out-Host
-    #####################################################################################
+        #####################################################################################
+        Write-Output ("$(Log-Date) Enable Named Pipes on local database") | Out-Host
+        #####################################################################################
 
-    Import-Module “sqlps” -DisableNameChecking | Out-Host
+        Import-Module “sqlps” -DisableNameChecking | Out-Host
 
-    Write-Output( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session") | Out-Host
-    Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
-    Set-Location "c:"
+        Write-Output( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session") | Out-Host
+        Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
+        Set-Location "c:"
 
-    #####################################################################################
-    Write-Output "$(Log-Date) Set local SQL Server to manual" | Out-Host
-    #####################################################################################
+        #####################################################################################
+        Write-Output "$(Log-Date) Set local SQL Server to manual" | Out-Host
+        #####################################################################################
 
-    Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
+        Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
+    }
 
     #####################################################################################
     Write-Output "$(Log-Date) Installing License" | Out-Host
@@ -110,7 +112,7 @@ try
     Add-TrustedSite "*.cloudfront.com" | Out-Host
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    
+
     Write-Output ("$(Log-Date) Installation completed successfully") | Out-Host
 }
 catch

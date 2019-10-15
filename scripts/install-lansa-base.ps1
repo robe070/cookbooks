@@ -36,6 +36,43 @@ param (
 
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Out-Host
 
+function DownloadAndInstallMSI {
+    param (
+        [string] $MSIuri,
+        [string] $installer_file,
+        [string] $log_file
+    )
+    Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Write-Host
+    $downloaded = $false
+    $TotalFailedDownloadAttempts = 0
+    $loops = 0
+    while (-not $Downloaded -and ($Loops -le 10) ) {
+        try {
+            (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Write-Host
+            $downloaded = $true
+        } catch {
+            $TotalFailedDownloadAttempts += 1
+            $loops += 1
+
+            Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
+
+            if ($loops -gt 10) {
+                throw "Failed to download $MSIuri from S3"
+            }
+
+            # Pause for 30 seconds. Maybe that will help it work?
+            Start-Sleep 30
+        }
+    }
+
+    $p = Start-Process -FilePath $installer_file -ArgumentList @('/qn', "/lv*x $log_file") -Wait -PassThru
+    if ( $p.ExitCode -ne 0 ) {
+        $ExitCode = $p.ExitCode
+        $ErrorMessage = "MSI Install of $MSIuri returned error code $($p.ExitCode)."
+        throw $ErrorMessage
+    }
+}
+
 try
 {
     if ( !(test-path $TempPath) ) {
@@ -44,6 +81,15 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+
+    # Check if SQL Server is already installed
+    $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
+    If ( $null -eq $mssql_services -and ( -not $InstallSQLServer ) ) {
+        # So SQL Server not installed and we are not planning on installing it, so install whats required to use the sqlps module
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SQLSysClrTypes.msi' -installer_file (Join-Path $temppath 'SQLSysClrTypes.msi') -log_file (Join-Path $temppath 'SQLSysClrTypes.log')
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SharedManagementObjects.msi' -installer_file (Join-Path $temppath 'SharedManagementObjects.msi') -log_file (Join-Path $temppath 'SharedManagementObjects.log')
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log')
+    }
 
     Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Host
 
@@ -129,7 +175,7 @@ try
     }
 
     Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Out-Host
-    Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 3.1.1')  | Out-Host # v3.2 failed to install
+    # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
     Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Out-Host
     Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Out-Host
@@ -146,7 +192,10 @@ try
     # See this link for full help on passing msiexec params through choco:
     # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
     # This ensures that only English is installed as installing every language does not pass AWS virus checking
-    Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
+    # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
+
+    # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
+    Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress' )  | Out-Host
 
     # JRE often fails to download with a 404, so install it explicitly from AWS S3
     # ( Latest choco seems to have fixed this)
