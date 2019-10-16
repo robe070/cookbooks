@@ -158,10 +158,15 @@ try
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Default | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
-        $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
+        $Item = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue
+        If ( $Item ) {
+            Write-Verbose "$(Log-Date) TotalFailedDownloadAttempts registry value Found"
+            $TotalFailedDownloadAttempts = $item.TotalFailedDownloadAttempts
+        }
         $loops = 0
         while (-not $Downloaded -and ($Loops -le 10) ) {
             try {
+                Write-Host ("$(Log-Date) Attempting download")
                 (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Default | Write-Host
                 $downloaded = $true
             } catch {
