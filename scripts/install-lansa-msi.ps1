@@ -396,7 +396,7 @@ try
     }
 
 
-    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=$($ApplName)", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=$SUDB",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
+    [String[]] $Arguments = @( "/quiet /lv*x $install_log", "SHOWCODES=1", "USEEXISTINGWEBSITE=1", "REQUIRES_ELEVATION=1", "DBUT=$DBUT", "DBII=$($ApplName)", "DBSV=$server_name", "DBAS=$dbname", "TRUSTED_CONNECTION=$trusted", "SUDB=1",  "USERIDFORSERVICE=$webuser", "PASSWORDFORSERVICE=$webpassword")
 
     # Arguments to pass only if they have a value
     if ( $CompanionInstallPath.Length -gt 0) {
