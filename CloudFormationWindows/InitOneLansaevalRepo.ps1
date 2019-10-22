@@ -34,19 +34,19 @@ try {
     set-location $Directory
     pwd | Write-Host
 
-    Write-Host( "Getting latest changes...")
-    git remote get-url origin *>&1 | Write-Host
-    if ( $LASTEXITCODE -ne 0) {
-        throw "git remote get-url origin LASTEXITCODE = $LASTEXITCODE"
-    }
+    Write-Host( "Presume latest changes have already been pulled...")
+    # git remote get-url origin *>&1 | Write-Host
+    # if ( $LASTEXITCODE -ne 0) {
+    #     throw "git remote get-url origin LASTEXITCODE = $LASTEXITCODE"
+    # }
 
-    # Fetch and Reset to the origin rather than pull in order to overwrite whatever is currently in this directory
-    Git fetch *>&1 | Write-Host
-    $branch = git rev-parse --abbrev-ref HEAD
-    git reset --hard origin/$branch *>&1
-    if ( $LASTEXITCODE -ne 0) {
-        throw "git pull LASTEXITCODE = $LASTEXITCODE"
-    }
+    # # Fetch and Reset to the origin rather than pull in order to overwrite whatever is currently in this directory
+    # Git fetch *>&1 | Write-Host
+    # $branch = git rev-parse --abbrev-ref HEAD
+    # git reset --hard origin/$branch *>&1
+    # if ( $LASTEXITCODE -ne 0) {
+    #     throw "git pull LASTEXITCODE = $LASTEXITCODE"
+    # }
 
     Write-Host( "Adding a reference to the remote...")
 
@@ -89,4 +89,5 @@ try {
     Pop-Location
 }
 
+cmd /c exit 0 #Set $LASTEXITCODE
 Write-Host( "Configuration succeeded" )

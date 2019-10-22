@@ -1,4 +1,4 @@
-# Update all evaluation stacks to resume scaling. Make sure all ELBs have all instances InService BEFORE running this!
+# Update all evaluation stacks to suspend scaling. Make sure all ELBs have all instances InService BEFORE running this!
 Param(
     [Parameter(Mandatory)]
         [ValidateSet('All', 'Live','Test','Dev')]
@@ -61,14 +61,14 @@ foreach ( $stack in $stacklist) {
     foreach ( $WebServerGroup in $WebServerGroups ) {
         $WebServerGroup.ResourceId
 
-        # Resume all processes
-        Resume-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId $ProcessList
+        # Suspend all processes
+        Suspend-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId $ProcessList
     }
 
     $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'DBWebServerGroup' -and ($_.ResourceId -like "eval$stack-*")}
     foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
         $DBWebServerGroup.ResourceId
-        # Resume all processes
-        Resume-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId $ProcessList
+        # Suspend all processes
+        Suspend-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId $ProcessList
     }
 }

@@ -7,8 +7,8 @@ First written to be called when deploying or re-deploying an Azure ARM Template 
 
 Requires the environment that a LANSA Cake provides, particularly an AMI license.
 
-# N.B. It is vital that the user id and password supplied pass the password rules. 
-E.g. The password is sufficiently complex and the userid is not duplicated in the password. 
+# N.B. It is vital that the user id and password supplied pass the password rules.
+E.g. The password is sufficiently complex and the userid is not duplicated in the password.
 i.e. UID=PCXUSER and PWD=PCXUSER@#$%^&* is invalid as the password starts with the entire user id "PCXUSER".
 
 .EXAMPLE
@@ -50,33 +50,33 @@ function StopWebJobs{
    Param (
 	   [string]$APPA
    )
-    Write-Verbose ("APPA = $APPA")
+    Write-Verbose ("APPA = $APPA") | Out-Default | Write-Host
 
     # If apps not installed just return
 
-    Write-Verbose ("Stopping Listener...")
+    Write-Verbose ("Stopping Listener...") | Out-Default | Write-Host
     if ( (Test-Path "$APPA\connect64\lcolist.exe") ) {
-        Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait
+        Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstop" -Wait | Out-Default | Write-Host
     } else {
         throw
     }
 
-    Write-Verbose ("Stopping all web jobs...")
+    Write-Verbose ("Stopping all web jobs...") | Out-Default | Write-Host
     if ( (Test-Path "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe") ) {
-        Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait
+        Start-Process -FilePath "$APPA\X_Win95\X_Lansa\Execute\w3_p2200.exe" -ArgumentList "*FORINSTALL" -Wait | Out-Default | Write-Host
     } else {
         throw
     }
 
-    Write-Verbose ("Stopping iis...")
-    iisreset /stop
+    Write-Verbose ("Stopping iis...") | Out-Default | Write-Host
+    iisreset /stop /noforce | Out-Default | Write-Host
 }
 
 function ResetWebServer{
    Param (
 	   [string]$APPA
    )
-    Write-Verbose ("APPA = $APPA")
+    Write-Verbose ("APPA = $APPA") | Out-Default | Write-Host
 
     try {
         StopWebJobs -APPA $APPA
@@ -85,14 +85,14 @@ function ResetWebServer{
         return
     }
 
-    Write-Verbose ("Resetting iis...")
-    iisreset
+    Write-Verbose ("Resetting iis...") | Out-Default | Write-Host
+    iis-reset | Out-Default | Write-Host
 
-    Write-Verbose ("Starting Listener...")
-    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait
+    Write-Verbose ("Starting Listener...") | Out-Default | Write-Host
+    Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait | Out-Default | Write-Host
 }
 
-Set-StrictMode -Version Latest
+Set-StrictMode -Version Latest | Out-Default | Write-Host
 
 $VerbosePreference = "Continue"
 
@@ -101,35 +101,35 @@ if ( -not (Test-Path variable:script:IncludeDir) )
 {
     # Log-Date can't be used yet as Framework has not been loaded
 
-	Write-Output "Initialising environment - presumed not running through RemotePS"
-	$MyInvocation.MyCommand.Path
+	Write-Host "Initialising environment - presumed not running through RemotePS"
+	$MyInvocation.MyCommand.Path | Out-Default | Write-Host
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-	. "$script:IncludeDir\Init-Baking-Vars.ps1"
-	. "$script:IncludeDir\Init-Baking-Includes.ps1"
+	. "$script:IncludeDir\Init-Baking-Vars.ps1" | Out-Default | Write-Host
+	. "$script:IncludeDir\Init-Baking-Includes.ps1" | Out-Default | Write-Host
 }
 else
 {
-	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+	Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
 
 # Put first output on a new line in log file
-Write-Output ("`r`n")
+Write-Host ("`r`n")
 
-Write-Verbose ("maxconnections = $maxconnections")
-Write-Verbose ("installMSI = $installMSI")
-Write-Verbose ("updateMSI = $updateMSI")
-Write-Verbose ("triggerWebConfig = $triggerWebConfig")
-Write-Verbose ("UninstallMSI = $UninstallMSI")
-Write-Verbose ("trace = $trace")
-Write-Verbose ("fixLicense = $fixLicense")
-Write-Verbose ("Password = $dbpassword")
- 
+Write-Verbose ("maxconnections = $maxconnections") | Out-Default | Write-Host
+Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
+Write-Verbose ("updateMSI = $updateMSI") | Out-Default | Write-Host
+Write-Verbose ("triggerWebConfig = $triggerWebConfig") | Out-Default | Write-Host
+Write-Verbose ("UninstallMSI = $UninstallMSI") | Out-Default | Write-Host
+Write-Verbose ("trace = $trace") | Out-Default | Write-Host
+Write-Verbose ("fixLicense = $fixLicense") | Out-Default | Write-Host
+Write-Verbose ("Password = $dbpassword") | Out-Default | Write-Host
+
 try
 {
     # Make sure we are using the normal file system, not SQLSERVER:\ or some such else.
-    cd "c:"
+    cd "c:" | Out-Default | Write-Host
     cmd /c exit 0              # Ensure $LASTEXITCODE is cleared
 
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
@@ -161,59 +161,59 @@ try
 
     # Flag to anyone who needs to know that we are installing. Particularly the Load Balancer probe
 
-    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1
+    Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1 | Out-Default | Write-Host
 
-    Write-Output ("$(Log-Date) Test if this is the first install")
+    Write-Host ("$(Log-Date) Test if this is the first install")
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
     $Installed = $false
     if (-not (Test-Path $installer_file) ) {
         if ( $installMSI -eq "0" -and $triggerWebConfig -eq "0" -and $uninstallMSI -eq "0" ) {
-            Write-Output ("$(Log-Date) There is no installation file and no other options specified, so defaulting to install the MSI and setup Web Configuration")
+            Write-Host ("$(Log-Date) There is no installation file and no other options specified, so defaulting to install the MSI and setup Web Configuration")
             # Note that an Uninstall might be being done for all instances where some maybe installed and others not, so we don't want to be installing then
             # The idea is that if an explicit option is set, then honour that, no defaulting.
             $installMSI = "1"
             $triggerWebConfig = "1"
-            Write-Verbose ("installMSI = $installMSI")
-            Write-Verbose ("triggerWebConfig = $triggerWebConfig")
+            Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
+            Write-Verbose ("triggerWebConfig = $triggerWebConfig") | Out-Default | Write-Host
         }
     } else {
         $Installed = $true
     }
 
-    Write-Verbose ("installMSI = $installMSI")
+    Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 
     if ( $Installed ) {
-        Write-Output ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
-        Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete")
-        Start-Sleep -s 40
+        Write-Host ("$(Log-Date) Wait for Load Balancer to get the message from the Probe that we are offline")
+        Write-Verbose ("$(Log-Date) The probe is currently set to a 31 second timeout. Allow another 9 seconds for current transactions to complete") | Out-Default | Write-Host
+        Start-Sleep -s 40 | Out-Default | Write-Host
     }
-    Write-Verbose ("installMSI = $installMSI")
+    Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 
-    Write-Output ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+    Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
     if ($trace -eq "Y") {
-        Write-Output ("$(Log-Date) Set tracing on" )
-        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine")
+        Write-Host ("$(Log-Date) Set tracing on" )
+        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
         $env:X_RUN = $traceSettings
     } else {
-        Write-Output ("$(Log-Date) Set tracing off" )
-        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine")
+        Write-Host ("$(Log-Date) Set tracing off" )
+        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
         $env:X_RUN = ''
     }
-    Write-Verbose ("installMSI = $installMSI")
+    Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 
-    Write-Output ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
+    Write-Host ("$(Log-Date) Restart web server if not already planned to be done by a later script, so that tracing is on")
 
     if ( $Installed -and $installMSI -eq "0" -and $updateMSI -eq "0" -and $triggerWebConfig -eq "0" ) {
         ResetWebServer -APPA $APPA
     }
-    Write-Verbose ("installMSI = $installMSI")
-            
+    Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
+
     if ( $uninstallMSI -eq "1" ) {
         [bool] $Success = $true
         if ( $Installed ) {
-            Write-Output ("$(Log-Date) Uninstalling...")
+            Write-Host ("$(Log-Date) Uninstalling...")
 
             # Make sure LANSA is absolutely not executing anything
             try {
@@ -221,11 +221,11 @@ try
             }
             catch {
                 $Success = $false
-                Write-Output ("$(Log-Date) Skipping uninstaller as it seems LANSA is not actually installed...")
+                Write-Host ("$(Log-Date) Skipping uninstaller as it seems LANSA is not actually installed...")
             }
 
             if ( $Success ) {
-                Write-Output ("$(Log-Date) Starting the uninstaller...")
+                Write-Host ("$(Log-Date) Starting the uninstaller...")
                 $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "MyAppUninstall.log" )
                 [String[]] $Arguments = @( "/x $installer_file ", "/quiet", "/lv*x $install_log")
                 $p = Start-Process -FilePath msiexec.exe -ArgumentList $Arguments -Wait -PassThru
@@ -236,10 +236,10 @@ try
                 }
             }
 
-            Write-Output ("$(Log-Date) Deleting installer file $installer_file...")
-            Remove-Item $installer_file -Force -ErrorAction Continue
+            Write-Host ("$(Log-Date) Deleting installer file $installer_file...")
+            Remove-Item $installer_file -Force -ErrorAction Continue | Out-Default | Write-Host
          } else {
-            Write-Output ("$(Log-Date) Uninstall requested but app is not installed...")
+            Write-Host ("$(Log-Date) Uninstall requested but app is not installed...")
          }
     }
 
@@ -248,11 +248,11 @@ try
     }
 
     if ( $installMSI -eq "1" ) {
-        Write-Output ("$(Log-Date) Installing...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser "$dbuser" -dbpassword "$dbpassword" -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        Write-Host ("$(Log-Date) Installing...")
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser "$dbuser" -dbpassword "$dbpassword" -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "0" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections
     } elseif ( $updateMSI -eq "1" ) {
-        Write-Output ("$(Log-Date) Updating...")
-        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections 
+        Write-Host ("$(Log-Date) Updating...")
+        .$script:IncludeDir\install-lansa-msi.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD "1" -MSIuri $MSIuri -trace $trace -tracesettings $traceSettings -maxconnections $maxconnections
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -260,8 +260,8 @@ try
     }
 
     if ( $triggerWebConfig -eq "1" ) {
-        Write-Output ("$(Log-Date) Configuring Web Server...")
-        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections 
+        Write-Host ("$(Log-Date) Configuring Web Server...")
+        .$script:IncludeDir\webconfig.ps1 -server_name $server_name -DBUT $DBUT -dbname $dbname -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -f32bit $f32bit -SUDB $SUDB -UPGD $UPGD -maxconnections $maxconnections
     }
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -269,10 +269,10 @@ try
     }
 
     if ( $fixLicense -eq "1" ) {
-        Write-Output ("$(Log-Date) Fixing licenses...")
-	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser
-	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser
-	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser
+        Write-Host ("$(Log-Date) Fixing licenses...")
+	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser | Out-Default | Write-Host
+	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser | Out-Default | Write-Host
+	    Map-LicenseToUser "LANSA Development License" "DevelopmentLicensePrivateKey" $webuser | Out-Default | Write-Host
         ResetWebServer -APPA $APPA
     }
 
@@ -290,8 +290,8 @@ catch
     }
 
     if ( ($installMSI -eq "1") -and (Test-Path $installer_file) ) {
-        Write-Output ("$(Log-Date) Deleting $installer_file so that an install will occur by default next time...")
-        Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
+        Write-Host ("$(Log-Date) Deleting $installer_file so that an install will occur by default next time...")
+        Remove-Item $installer_file -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
 
     return
@@ -299,16 +299,16 @@ catch
 finally
 {
     # Repeat the basic request params as Azure truncates the log file
-    Write-Verbose ("maxconnections = $maxconnections")
-    Write-Verbose ("installMSI = $installMSI")
-    Write-Verbose ("updateMSI = $updateMSI")
-    Write-Verbose ("triggerWebConfig = $triggerWebConfig")
-    Write-Verbose ("UninstallMSI = $UninstallMSI")
-    Write-Verbose ("trace = $trace")
-    Write-Verbose ("fixLicense = $fixLicense")
+    Write-Verbose ("maxconnections = $maxconnections") | Out-Default | Write-Host
+    Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
+    Write-Verbose ("updateMSI = $updateMSI") | Out-Default | Write-Host
+    Write-Verbose ("triggerWebConfig = $triggerWebConfig") | Out-Default | Write-Host
+    Write-Verbose ("UninstallMSI = $UninstallMSI") | Out-Default | Write-Host
+    Write-Verbose ("trace = $trace") | Out-Default | Write-Host
+    Write-Verbose ("fixLicense = $fixLicense") | Out-Default | Write-Host
 }
 
 Write-Verbose ("$(Log-Date) Only switch off Installing flag when successful. Thus LB Probe will continue to fail if this script fails and indicate to the LB that it should not be used.")
-Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0
+Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 0 | Out-Default | Write-Host
 
 cmd /c exit 0

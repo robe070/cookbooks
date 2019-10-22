@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Live','Test','Dev','Custom')]
+        [ValidateSet('Live','Test','Dev','Custom','All')]
         [string] $StackType
 )
 
@@ -57,39 +57,35 @@ $a = Get-Date
 Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
+$ProgressPreference = 'SilentlyContinue' # Speed things up by a factor of 10 ref: https://stackoverflow.com/questions/17325293/invoke-webrequest-post-with-parameters
+
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
     [Decimal]$StackStart=0
     [Decimal]$StackEnd=0
     [Decimal]$Stack=0
+    [System.Collections.ArrayList]$stacklist = @()
 
-    switch ( $StackType ) {
-        'Live' {
-            $GitRepoBranch = 'support/L4W14200_paas'
-            $StackStart = 1
-            $StackEnd = 10
-        }
-        'Test' {
-            $GitRepoBranch = 'patch/paas'
-            $StackStart = 20
-            $StackEnd = 20
-        }
-        'Dev' {
-            $GitRepoBranch = 'debug/paas'
-            $StackStart = 30
-            $StackEnd = 30
-        }
-        'Custom' {
-            $GitRepoBranch = 'debug/paas'
-            $StackStart = 2
-            $StackEnd = 2
+    if ( $StackType -eq 'Live' -or $StackType -eq 'All') {
+        $StackStart = 1
+        $StackEnd = 10
+
+        For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
+            $stacklist.add($stack) | Out-Null
         }
     }
 
-    [System.Collections.ArrayList]$stacklist = @()
-    For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-        $stacklist.add($stack) | Out-Null
+    if ( $StackType -eq 'Test' -or $StackType -eq 'All') {
+        $stacklist.add(20)
+    }
+
+    if ( $StackType -eq 'Dev' -or $StackType -eq 'All') {
+        $stacklist.add(30)
+    }
+
+    if ( $StackType -eq 'Custom') {
+        $stacklist.add(1)
     }
 
     $Loop = 0

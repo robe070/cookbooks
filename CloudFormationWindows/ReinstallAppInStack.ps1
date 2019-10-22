@@ -5,7 +5,10 @@ param(
 [Decimal]$Stack,
 
 [Parameter(Mandatory=$true)]
-[Decimal]$App
+[Decimal]$App,
+
+[Parameter(Mandatory=$false)]
+[boolean]$SuspendStack = $true
 )
 
 "ReinstallAppInStack.ps1"
@@ -51,13 +54,15 @@ try {
         throw "Failed to create mutex"
     }
 
-    # Wait 20 mins for exclusive access to the mutex
-    if ( -not $Mutex.WaitOne(1200*1000) ) {
+    # Wait 60 mins for exclusive access to the mutex
+    if ( -not $Mutex.WaitOne(3600*1000) ) {
         $Mutex = $null
         throw "Timed out waiting for exclusive access to ReinstallAppInStack script"
     }
 
-    & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $Stack
+    if ( $SuspendStack ) {
+        & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "SuspendStack.ps1") -Stack $Stack
+    }
 
     Write-GreenOutput( "$(Get-Date) Re-installing Application $App in stack $stack") | Write-Host
 
@@ -93,7 +98,9 @@ try {
     Write-GreenOutput( "Wait until Stack eval$($stack) app $app is back online") | Write-Host
     & "$script:InvocationDir\Wait-LansaApp.ps1" -WaitReady -Region $Region -Stack "eval$stack" -App $app -Timeout 1200
 
-    & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "ResumeStack.ps1") -Stack $Stack
+    if ( $SuspendStack ) {
+        & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "ResumeStack.ps1") -Stack $Stack
+    }
 
     Write-GreenOutput( "Stack eval$($stack) app $app reinstall is fully completed" ) | Write-Host
 } catch {
@@ -112,3 +119,5 @@ try {
         $Mutex.ReleaseMutex()
     }
 }
+
+cmd /c exit 0 #Set $LASTEXITCODE

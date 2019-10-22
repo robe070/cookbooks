@@ -163,7 +163,7 @@ try {
     & $predeploy
 
     Write-Host( "$(Log-Date) Stop IIS entirely so GitDeployHub may be updated")
-    & iisreset /stop
+    & iisreset /stop /noforce
 
     Write-Host( "$(Log-Date) Perform full checkout now that everything has been stopped")
 

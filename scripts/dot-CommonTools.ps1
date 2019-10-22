@@ -143,7 +143,7 @@ function Connect-RemoteSession
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -151,7 +151,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:instanceid remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -161,7 +161,7 @@ function Connect-RemoteSessionUri
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -177,11 +177,7 @@ function ReConnect-Session
     Write-Host "$(Log-Date) Reconnecting session..."
     if ( $Script:session ) { Remove-PSSession $Script:session | Out-Host }
 
-    if ( $Cloud -eq 'AWS' ) {
-        Connect-RemoteSession | Out-Host
-    } elseif ($Cloud -eq 'Azure' ) {
-        Connect-RemoteSessionUri | Out-Host
-    }
+    Connect-RemoteSession | Out-Host
 
     Execute-RemoteInit | Out-Host
     Execute-RemoteInitPostGit | Out-Host
@@ -190,7 +186,7 @@ function ReConnect-Session
 function Reboot-Session
 {
     # Execute Restart-Computer through remote session as executing from local machine is blocked
-    Execute-RemoteBlock $Script:session { 
+    Execute-RemoteBlock $Script:session {
         Restart-Computer -force
     }
     # Allow computer to stop before attempting a connection
@@ -762,5 +758,49 @@ function Test-RegKeyValueIsNotNull {
         throw "$RegKey is empty"
     } else {
         Write-Host( "$RegKey has value '$($RegKeyValue.$RegKey)'" )
+    }
+}
+
+# Provide a common routine so its easily modified.
+# Note that this is called to get the Plugin to reset. There may be other ways.
+# iisreset without parameters caused issues as described below when a deployment
+# through Git Deploy Hub had a new vl web runtime, necessitating an iisreset. Be aware
+# that GDH is being run from IIS, so it gets terminated ... THIS routine's thread gets terminated ...
+# but not before the iis /start has successfully completed.
+# Prior issues:
+# Using iisreset defaults to /stop /start /force.
+# This frequently causes automatic kills to occur - Event Id 3204 in the system event log.
+# What follows a 3204 is that other services may get killed too.
+# occassionally iis is not restarted (last time there were 84 resets (42 iterations) before this occurred)
+# New behavior:
+# iisrest /stop /noforce changed the behaviour to 0 occurence of iis not starting in 1000 iterations,
+# and returned 0 exit code every time. 5 x 3204 events still recorded in system event log, but that
+# did not cause iis not to start and did not cause any dumps to be produced.
+function Iis-Reset {
+    Write-Host( "$(Log-Date) iisreset /stop /noforce..." )
+    iisreset /stop /noforce
+    if ( $LASTEXITCODE -ne 0 ) {
+        Write-Host( "$(Log-Date) iisreset /stop /noforce resulted in exit code $LASTEXITCODE" )
+
+        Write-Host( "$(Log-Date) iisreset /kill..." )
+        iisreset /kill
+        if ( $LASTEXITCODE -ne 0 ) {
+            Write-Host( "$(Log-Date) iisreset /kill resulted in exit code $LASTEXITCODE" )
+            iisreset /kill
+
+            Write-Host( "$(Log-Date) Pause 10s to allow IIS to 'recover'..." )
+            Start-Sleep 10
+        }
+    }
+
+    Write-Host( "$(Log-Date) iisreset /start..." )
+    iisreset /start
+    if ( $LASTEXITCODE -ne 0 ) {
+        Write-Host( "$(Log-Date) iisreset /start resulted in exit code $LASTEXITCODE" )
+        Write-Host( "$(Log-Date) iisreset /start again..." )
+        iisreset /start
+        if ( $LASTEXITCODE -ne 0 ) {
+            Write-Host( "$(Log-Date) iisreset /start resulted in exit code $LASTEXITCODE" )
+        }
     }
 }

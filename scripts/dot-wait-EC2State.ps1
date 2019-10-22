@@ -15,7 +15,7 @@ Wait for an EC2 instance to reach a desired state.
 function Wait-EC2State {
 Param (
 [parameter(Mandatory=$true)]    [string]$instanceid,
-[parameter(Mandatory=$true)]    
+[parameter(Mandatory=$true)]
     [ValidateSet('pending', 'running', 'stopping', 'stopped', 'shutting down','terminated')]
                                 [string]$desiredstate,
 [parameter(Mandatory=$false)]   [string]$region
@@ -46,7 +46,7 @@ Param (
             $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
 
-        # Give AWS time to actually crfteate the instance before testing to see if its running yet, otherwise 
+        # Give AWS time to actually crfteate the instance before testing to see if its running yet, otherwise
         # an error will occur trying to locate the instance-id
 
         if ( $desiredstate -eq 'running' -or $desiredstate -eq 'pending')
@@ -91,30 +91,50 @@ function Wait-AzureVMState {
 Param (
 [parameter(Mandatory=$true)]    [string]$servicename,
 [parameter(Mandatory=$true)]    [string]$instanceid,
-[parameter(Mandatory=$true)]    
-    [ValidateSet('provisioning', 'readyrole', 'stoppeddeallocated', 'stoppedvm', 'creatingvm')]
+[parameter(Mandatory=$true)]
+    [ValidateSet('pending', 'running', 'stopping', 'stopped', 'shutting down','terminated','not running')]
                                 [string]$desiredstate,
 [parameter(Mandatory=$false)]   [string]$region
 )
 
     try
     {
-        # Give Azure time to actually create the instance before testing to see if its running yet, otherwise 
+        # [ValidateSet('PowerState/Stopped', 'PowerState/Running', 'PowerState/Deallocating', 'PowerState/Deallocated')]
+        $RealState = $null
+        $Not = $false
+        # Note: checking for Stopped is actually checking for not running.
+        switch  ($desiredstate) {
+            'pending' {$RealState = 'PowerState/pending'; break}
+            'running' {$RealState = 'PowerState/running'; break}
+            'stopping' {$RealState = 'PowerState/stopping'; break}
+            'stopped' {$RealState = 'PowerState/stopped'; break}
+            'not running' {$RealState = 'PowerState/running';$Not = $true; break}
+            'shutting down' {$RealState = 'PowerState/Deallocating'; break}
+            'terminated' {$RealState = 'PowerState/Deallocated'; break}
+        }
+
+        # Give Azure time to actually create the instance before testing to see if its running yet, otherwise
         # an error will occur trying to locate the instance-id
 
-        if ( $desiredstate -eq 'readyrole')
+        if ( -not $Not -and ($RealState -eq 'PowerState/Running') )
         {
             Sleep -Seconds 10
         }
 
         while ($true)
         {
-            $instance = Get-AzureVM -ServiceName $servicename -Name $instanceid
-            if ($instance.InstanceStatus -eq $desiredstate)
+            $instance = Get-AzVM -ResourceGroupName $servicename -Name $instanceid -Status
+            foreach ($Status in $Instance.Statuses )
             {
-                break;
+                if ( $Not ) {
+                    if ( $Status.Code -ne $RealState) {
+                        return
+                    }
+                } elseif ($Status.Code -eq $RealState){
+                    return
+                }
             }
-            "$(Log-Date) Current State = $($instance.InstanceStatus), Waiting for Desired State = $desiredstate"
+            "$(Log-Date) Current State = $($Instance.Statuses[1].Code), Waiting for Desired State = $desiredstate"
             Sleep -Seconds 10
         }
     }
