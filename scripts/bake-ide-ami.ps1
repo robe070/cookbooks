@@ -586,7 +586,7 @@ $jsonObject = @"
 
             Execute-RemoteBlock $Script:session {
                 CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-            CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+                CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
                 # Errors are thrown out of CreateLicense so no need to catch a throw here.
                 # Let the local script catch it
             }
@@ -594,7 +594,7 @@ $jsonObject = @"
             Execute-RemoteBlock $Script:session {
                 try {
                     Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
                 } catch {
                     Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
                     Write-RedOutput $_ | Out-Default | Write-Host
@@ -665,7 +665,7 @@ $jsonObject = @"
         }
 
         if ( $InstallScalable -eq $true ) {
-           Write-Host "Test that license keys are still configured"
+            Write-Host "Test that license keys are still configured"
             Execute-RemoteBlock $Script:session {
                 try {
                     Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
@@ -675,9 +675,22 @@ $jsonObject = @"
                     Write-RedOutput $_ | Out-Default | Write-Host
                     Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
                    cmd /c exit 1
+                   throw
+                }
+            }
+        }
 
-       if ( $InstallIDE -eq $true ) {
-                   cmd /c exit 1
+        if ( $InstallIDE -eq $true ) {
+            Write-Host "Test that license keys are still configured"
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
                     throw
                 }
             }

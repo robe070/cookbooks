@@ -27,7 +27,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'SCALE-CA4' `
+Bake-IdeMsi -VersionText 'SCALE-CA5' `
             -VersionMajor 14 `
             -VersionMinor 2 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
@@ -45,4 +45,4 @@ Bake-IdeMsi -VersionText 'SCALE-CA4' `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
-            -CreateVM $false
+            -CreateVM $true
