@@ -9,6 +9,35 @@ try {
     [Environment]::SetEnvironmentVariable("TMP", "c:\temp", "Process")
     [Environment]::SetEnvironmentVariable("TEMP", "c:\temp", "Process")
 
+    # If environment not yet set up, it should be running locally, not through Remote PS
+    if ( -not $script:IncludeDir)
+    {
+        # Log-Date can't be used yet as Framework has not been loaded
+
+        Write-Host "Initialising environment - presumed not running through RemotePS"
+        $MyInvocation.MyCommand.Path
+        $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+        . "$script:IncludeDir\Init-Baking-Vars.ps1"
+        . "$script:IncludeDir\Init-Baking-Includes.ps1"
+    }
+    else
+    {
+        Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+    }
+
+    Write-Host ("Install Visual C Runtime 32-bit for VS 2015, 2017, 2019")
+    start-process -FilePath "$script:IncludeDir\..\installs\vc_redist\vcredist_x86.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait
+
+    Write-Host ("Install Visual C Runtime 64-bit for VS 2015, 2017, 2019")
+    start-process -FilePath "$script:IncludeDir\..\installs\vc_redist\vcredist_x64.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait
+
+    Write-Host ("Install Visual C Runtime 32-bit for VS 2013")
+    start-process -FilePath "$script:IncludeDir\..\installs\vc_redist\vcredist_x86_2013.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait
+
+    Write-Host ("Install Visual C Runtime 64-bit for VS 2013")
+    start-process -FilePath "$script:IncludeDir\..\installs\vc_redist\vcredist_x64_2013.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait
+
     Write-Output "Installing IIS"
     import-module servermanager
     install-windowsfeature web-server
@@ -18,7 +47,6 @@ try {
     Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\WebManagement\Server -Name EnableRemoteManagement -Value 1
     Set-Service -name WMSVC -StartupType Automatic
     Start-service WMSVC
-
 
     Write-Output "Turning off complex password requirements"
     secedit /export /cfg c:\secpol.cfg
@@ -37,7 +65,9 @@ try {
     }
     New-ItemProperty -Path $lansaKey  -Name 'Cloud' -PropertyType String -Value 'Docker' -Force
 
-    add-odbcdsn -name trunk -DriverName "ODBC Driver 13 for SQL Server" -setPropertyValue @("Server=robgw10","Trusted_Connection=No", "Database=Trunk") -Platform "32-bit" -DsnType "System"
+    # add-odbcdsn -name trunk -DriverName "ODBC Driver 13 for SQL Server" -setPropertyValue @("Server=robgw10","Trusted_Connection=No", "Database=Trunk") -Platform "32-bit" -DsnType "System"
+
+    .\install-lansa-base.ps1 'dummy' $ENV:TEMP 'dummy' 'dummy'
 
     # New-Item -ItemType directory -Path C:\lansa -Force
 
@@ -86,7 +116,7 @@ try {
         Remove-Item tapi32.dll  -ErrorAction SilentlyContinue
     }
 
-    Set-Location c:\HostSystem
+    # Set-Location c:\HostSystem
 
     if ( $false -eq $true) {
         # lansa.wix.customactions.dll
@@ -158,6 +188,7 @@ try {
        Copy-Item tapi32.dll c:\windows\syswow64
     }
 } catch {
+    $_ | Out-default | Write-Host
     Write-Error ("Failed")
 } finally {
     Pop-Location

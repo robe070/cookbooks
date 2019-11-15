@@ -42,13 +42,13 @@ function DownloadAndInstallMSI {
         [string] $installer_file,
         [string] $log_file
     )
-    Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Write-Host
+    Write-Host ("$(Log-Date) Downloading $MSIuri to $installer_file")
     $downloaded = $false
     $TotalFailedDownloadAttempts = 0
     $loops = 0
     while (-not $Downloaded -and ($Loops -le 10) ) {
         try {
-            (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Write-Host
+            (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Default | Write-Host
             $downloaded = $true
         } catch {
             $TotalFailedDownloadAttempts += 1
@@ -75,12 +75,30 @@ function DownloadAndInstallMSI {
 
 try
 {
+    # If environment not yet set up, it should be running locally, not through Remote PS
+    if ( -not $script:IncludeDir)
+    {
+        # Log-Date can't be used yet as Framework has not been loaded
+
+        Write-Host "Initialising environment - presumed not running through RemotePS"
+        $MyInvocation.MyCommand.Path
+        $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+        . "$script:IncludeDir\Init-Baking-Vars.ps1"
+        . "$script:IncludeDir\Init-Baking-Includes.ps1"
+    }
+    else
+    {
+        Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+    }
+
     if ( !(test-path $TempPath) ) {
-        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Write-Host
+        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer').InstallSQLServer
+    $InstallSQLServer = $false
+    $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer' -ErrorAction SilentlyContinue).InstallSQLServer
 
     # Check if SQL Server is already installed
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
@@ -91,35 +109,37 @@ try
         DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log')
     }
 
-    Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
+    if ( $Cloud -ne "Docker" ) {
+        Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
 
-    Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
-    $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
-    Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
+        $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
+        Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
 
-    Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-    Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Write-Host
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-    Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Write-Host
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-    Write-Debug $ENV:PATH | Write-Host
-    cd "$GitRepoPath\Cookbooks" | Write-Host
+        Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Default | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Out-Default | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        Write-Debug $ENV:PATH | Write-Host
+        cd "$GitRepoPath\Cookbooks" | Out-Default | Write-Host
 
-    chef-client -z -o $ChefRecipe | Write-Host
-    if ( $LASTEXITCODE -ne 0 )
-    {
-        throw "Chef-Client exit code = $LASTEXITCODE."
+        chef-client -z -o $ChefRecipe | Out-Default | Write-Host
+        if ( $LASTEXITCODE -ne 0 )
+        {
+            throw "Chef-Client exit code = $LASTEXITCODE."
+        }
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+
+        # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
+        Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Write-Host
+
+        Write-Debug $ENV:PATH | Write-Host
     }
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-
-    # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-    Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Write-Host
-    Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Write-Host
-
-    Write-Debug $ENV:PATH | Write-Host
 
     if ( $Cloud -eq "AWS" ) {
         Write-GreenOutput("$(Log-Date) Installing CloudWatch Agent") | Write-Host
@@ -133,7 +153,7 @@ try
         $loops = 0
         while (-not $Downloaded -and ($Loops -le 10) ) {
             try {
-                (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Write-Host
+                (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Default | Write-Host
                 $downloaded = $true
             } catch {
                 $TotalFailedDownloadAttempts += 1
@@ -170,7 +190,7 @@ try
 
         # Installer file MUST be executed with the current directory set to the installer directory
         $InstallerScript = '.\install.ps1'
-        Set-Location $InstallerDirectory | Write-Host
+        Set-Location $InstallerDirectory | Out-Default | Write-Host
         & $InstallerScript | Write-Host
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
@@ -178,89 +198,91 @@ try
         .\amazon-cloudwatch-agent-ctl.ps1 -a start -s
 
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
-        set-service -Name AmazonCloudWatchAgent -StartupType Manual | Write-Host
-        stop-service -Name AmazonCloudWatchAgent | Write-Host
-        get-service AmazonCloudWatchAgent | SELECT-OBJECT Name, StartType, Status | Write-Host
+        set-service -Name AmazonCloudWatchAgent -StartupType Manual | Out-Default | Write-Host
+        stop-service -Name AmazonCloudWatchAgent | Out-Default | Write-Host
+        get-service AmazonCloudWatchAgent | SELECT-OBJECT Name, StartType, Status | Out-Default | Write-Host
     }
 
-    Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
-    # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
-    Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
-    Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
-    Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
-    try {
-        # Don't install sysinternals because the license expressly forbids installing it on hosting services
-        # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Write-Host
-    } catch {
-        # This was temporary and left in as an example of working around hashes not matching. BUT, its probably best to not
-        # circumvent the check - its probably been hacked. This issue was actually addressed the day that I reported it.
-        # Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Write-Host
-        # Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Write-Host
-        # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Write-Host
-        $_
-        throw
-    }
-
-
-    # the --% is so that the rest of the line can use simpler quoting
-    # See this link for full help on passing msiexec params through choco:
-    # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
-    # This ensures that only English is installed as installing every language does not pass AWS virus checking
-    # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
-
-    # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
-    Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress' )  | Out-Host
-
-    # JRE often fails to download with a 404, so install it explicitly from AWS S3
-    # ( Latest choco seems to have fixed this)
-    # $jreurl = 'jre-8u172-windows-x64.exe'
-    # $jretarget = 'jre-8u172-windows-x64.exe'
-    # Run-ExitCode $jre @( '/s' ) | Write-Host
-
-    New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Write-Host
-
-    if ( $Cloud -eq "AWS" ) {
-        Write-GreenOutput "$(Log-Date) Installing AWS SDK" | Write-Host
-        &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-        Propagate-EnvironmentUpdate | Write-Host
-
-        Write-GreenOutput "$(Log-Date) Installing AWS CLI" | Write-Host
-        &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-        Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI" | Write-Host
+    if ( $Cloud -ne "Docker" ) {
+        Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
+        # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
+        Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+        Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+        Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
+        try {
+            # Don't install sysinternals because the license expressly forbids installing it on hosting services
+            # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Write-Host
+        } catch {
+            # This was temporary and left in as an example of working around hashes not matching. BUT, its probably best to not
+            # circumvent the check - its probably been hacked. This issue was actually addressed the day that I reported it.
+            # Write-Warning( "$(Log-Date) 8th August 2018 All sysinternals versions fail with checksum error" ) | Write-Host
+            # Write-Warning( "$(Log-Date) Running install ignoring checksums" ) | Write-Host
+            # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress', '--ignore-checksums' ) | Write-Host
+            $_
+            throw
         }
 
-    if ( $Cloud -eq "Azure" ) {
-        Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
-        &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Write-Host
-    }
 
-    Write-Output "$(Log-Date) Running scheduleTasks.ps1" | Write-Host
-    &"$Script:IncludeDir\scheduleTasks.ps1" | Write-Host
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # the --% is so that the rest of the line can use simpler quoting
+        # See this link for full help on passing msiexec params through choco:
+        # https://chocolatey.org/docs/commands-reference#how-to-pass-options-switches
+        # This ensures that only English is installed as installing every language does not pass AWS virus checking
+        # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
-    Write-Output "$(Log-Date) Running Get-StartupCmds.ps1" | Write-Host
-    &"$Script:IncludeDir\Get-StartupCmds.ps1" | Write-Host
+        # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
+        Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress' )  | Out-Host
 
-    Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Write-Host
-    Disable-InternetExplorerESC | Write-Host
+        # JRE often fails to download with a 404, so install it explicitly from AWS S3
+        # ( Latest choco seems to have fixed this)
+        # $jreurl = 'jre-8u172-windows-x64.exe'
+        # $jretarget = 'jre-8u172-windows-x64.exe'
+        # Run-ExitCode $jre @( '/s' ) | Write-Host
 
-     if ( $Cloud -eq "AWS" ) {
-        # Delete file which causes AWS to falsely detect that there is a virus
-        # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
-        Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
-        Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
-    }
+        New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
-    if ( 0 )
-    {
-        # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
-        # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
-        Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
-        &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-        Write-Output "$(Log-Date) Running win-updates.ps1"
-        &"$Script:IncludeDir\win-updates.ps1"
+        if ( $Cloud -eq "AWS" ) {
+            Write-GreenOutput "$(Log-Date) Installing AWS SDK" | Write-Host
+            &"$Script:IncludeDir\installAwsSdk.ps1" $TempPath | Out-Default | Write-Host
+            Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+            Propagate-EnvironmentUpdate | Out-Default | Write-Host
+
+            Write-GreenOutput "$(Log-Date) Installing AWS CLI" | Write-Host
+            &"$Script:IncludeDir\installAwsCli.ps1" $TempPath | Out-Default | Write-Host
+            Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+            Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI" | Out-Default | Write-Host
+            }
+
+        if ( $Cloud -eq "Azure" ) {
+            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
+            &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
+        }
+
+        Write-Output "$(Log-Date) Running scheduleTasks.ps1" | Write-Host
+        &"$Script:IncludeDir\scheduleTasks.ps1" | Out-Default | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+
+        Write-Output "$(Log-Date) Running Get-StartupCmds.ps1" | Write-Host
+        &"$Script:IncludeDir\Get-StartupCmds.ps1" | Out-Default | Write-Host
+
+        Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Write-Host
+        Disable-InternetExplorerESC | Out-Default | Write-Host
+
+        if ( $Cloud -eq "AWS" ) {
+            # Delete file which causes AWS to falsely detect that there is a virus
+            # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
+            Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
+            Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
+        }
+
+        if ( 0 )
+        {
+            # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
+            # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
+            Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
+            &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
+            Write-Output "$(Log-Date) Running win-updates.ps1"
+            &"$Script:IncludeDir\win-updates.ps1"
+        }
     }
 }
 catch
@@ -271,7 +293,9 @@ catch
     throw
 }
 
-PlaySound
+if ( $Cloud -ne "Docker" ) {
+    PlaySound
+}
 
 # Ensure last exit code is 0. (exit by itself will terminate the remote session)
 cmd /c exit 0
