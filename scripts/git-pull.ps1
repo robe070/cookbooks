@@ -27,4 +27,6 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error ('Git pull failed');
     exit $LastExitCode;
 }
+
+cmd /C exit 0
 exit 0

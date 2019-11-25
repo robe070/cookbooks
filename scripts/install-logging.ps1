@@ -37,9 +37,9 @@ else
 # $DebugPreference = "Continue"
 # $VerbosePreference = "Continue"
 
-Write-Debug ("Stack = $Stack") | Out-Host
-Write-Debug ("Region = $Region") | Out-Host
-Write-Debug ("32bit = $f32bit") | Out-Host
+Write-Debug ("Stack = $Stack") | Write-Host
+Write-Debug ("Region = $Region") | Write-Host
+Write-Debug ("32bit = $f32bit") | Write-Host
 
 try
 {
@@ -60,7 +60,7 @@ try
 
         $CWAController = Join-Path $CWAProgramFiles -ChildPath 'amazon-cloudwatch-agent-ctl.ps1'
         # if ( Test-Path $CWAController ) {
-        #     & $CWAController -a stop | Out-Host
+        #     & $CWAController -a stop | Write-Host
         # }
 
         Write-Host ("$(Log-Date) Configuring CloudWatch Agent")
@@ -74,11 +74,11 @@ try
 
         Write-Host( "$(Log-Date) Replace LANSA-specific replacement variables")
 
-        (Get-Content $CWAConfig) | Foreach-Object {$_ -replace "{stack_id}","$Stack"}  | Set-Content ($CWAConfig) 
+        (Get-Content $CWAConfig) | Foreach-Object {$_ -replace "{stack_id}","$Stack"}  | Set-Content ($CWAConfig)
 
-        Write-Host( "$(Log-Date) Apply new configuration file $CWAConfig")
+        Write-Host( "$(Log-Date) Apply new configuration file $CWAConfig, but DO NOT START IT. Use Systems Manager when you need to troubleshoot")
 
-        & $CWAController -a fetch-config -m ec2 -c file:$CWAConfig -s | Out-Host
+        & $CWAController -a fetch-config -m ec2 -c file:$CWAConfig | Write-Host
     }
 }
 catch

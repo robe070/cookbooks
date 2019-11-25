@@ -130,16 +130,21 @@ try
     # ***********************************************************************************
     if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
         Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
-        $service = @(get-service "MSSQLSERVER")
-        $count = $($service | Measure-Object).Count
-        if ( $Count -ne 1 ) {
-            $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
-            throw "Should only be one MSSQLSERVER service"
-        }
-        stop-service $service[0] -Force | Out-Default | Write-Host
-        set-service $Service[0].Name -StartupType Disabled | Out-Default | Write-Host
 
-        @(get-service "MSSQLSERVER") | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+        # Check if SQL Server is installed
+        $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
+        If ( $null -ne $mssql_services ) {
+            $service = @(get-service "MSSQLSERVER")
+            $count = $($service | Measure-Object).Count
+            if ( $Count -ne 1 ) {
+                $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+                throw "Should only be one MSSQLSERVER service"
+            }
+            stop-service $service[0] -Force | Out-Default | Write-Host
+            set-service $Service[0].Name -StartupType Disabled | Out-Default | Write-Host
+
+            @(get-service "MSSQLSERVER") | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+        }
     }
     # ***********************************************************************************
 
@@ -158,10 +163,15 @@ try
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Default | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
-        $TotalFailedDownloadAttempts = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue).TotalFailedDownloadAttempts
+        $Item = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -ErrorAction SilentlyContinue
+        If ( $Item ) {
+            Write-Verbose "$(Log-Date) TotalFailedDownloadAttempts registry value Found"
+            $TotalFailedDownloadAttempts = $item.TotalFailedDownloadAttempts
+        }
         $loops = 0
         while (-not $Downloaded -and ($Loops -le 10) ) {
             try {
+                Write-Host ("$(Log-Date) Attempting download")
                 (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Default | Write-Host
                 $downloaded = $true
             } catch {
@@ -538,7 +548,7 @@ try
 
 
     if ( -not $CompanionInstall ) {
-        iisreset | Out-Default | Write-Host
+        iis-reset | Out-Default | Write-Host
     }
 
     #####################################################################################

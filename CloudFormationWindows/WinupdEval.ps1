@@ -62,9 +62,9 @@ try {
     Write-Output("Wait for Load Balancers to be InService")
     foreach ( $ELB in $ELBs ) {
         Write-Output("ELB $($ELB.LoadBalancerName)")
-        $ELBInstances = @(Get-ELBInstanceHealth -Region $Region -LoadBalancerName $ELB.LoadBalancerName)
         $AllInService = $false
         while ( -not $AllInService ) {
+            $ELBInstances = @(Get-ELBInstanceHealth -Region $Region -LoadBalancerName $ELB.LoadBalancerName)
             $AllInService = $true
             foreach ( $Instance in $ELBInstances ) {
                 Write-Output( "$($Instance.InstanceId) is '$($Instance.State)'")

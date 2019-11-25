@@ -1,6 +1,12 @@
 # Add all apps to evaluation stacks - to add them all back in with different settings
 # Possibly with a change of application.msi
-"AddAllAppsToStacks.ps1"
+Param(
+    [Parameter(Mandatory)]
+        [ValidateSet('Live','Test','Dev','Custom')]
+        [string] $StackType
+)
+
+$MyInvocation.MyCommand.Name | Out-Default | Write-Host
 
 $script:IncludeDir = $null
 if ( !$script:IncludeDir)
@@ -23,17 +29,40 @@ $a = Get-Date
 Write-Host "$($a.ToLocalTime()) Local Time"
 Write-Host "$($a.ToUniversalTime()) UTC"
 
+switch ( $StackType ) {
+    'Live' {
+        $GitRepoBranch = 'support/L4W14200_paas'
+        $S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-live'
+        $StackStart = 1
+        $StackEnd = 10
+    }
+    'Test' {
+        $GitRepoBranch = 'patch/paas'
+        $S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-test'
+        $StackStart = 20
+        $StackEnd = 20
+    }
+    'Dev' {
+        $GitRepoBranch = 'debug/paas'
+        $S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-test'
+        $StackStart = 30
+        $StackEnd = 30
+    }
+    'Custom' {
+        $GitRepoBranch = 'debug/paas'
+        $S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-test'
+        $StackStart = 5
+        $StackEnd = 5
+    }
+}
+
 $ApplCount = 10
 $WebserverOSVersion = 'win2016'
 $WebServerMaxConnec = 10
-$GitRepoBranch = 'support/L4W14200_paas'
 $S3TemplateUrl = "https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$GitRepoBranch/lansa-win-paas.cfn.template"
-$S3BaseUrl = 'https://s3.amazonaws.com/lansa-us-east-1/app/paas-live'
 $LansaMSI = $S3BaseUrl + '/WEBSERVR_v1.0.0_en-us.msi'
 $ApplMSIuri = $S3BaseUrl
 
-$StackStart = 1
-$StackEnd = 3
 $Region = 'us-east-1'
 For ( $i = $StackStart; $i -le $StackEnd; $i++) {
     Write-Host("stack-name eval$($i)")

@@ -1,14 +1,45 @@
-# Suspen all evaluation stacks to suspend scaling.
+# Update all evaluation stacks to suspend scaling. Make sure all ELBs have all instances InService BEFORE running this!
 Param(
+    [Parameter(Mandatory)]
+        [ValidateSet('All', 'Live','Test','Dev')]
+        [string] $StackType,
     [Parameter(Mandatory)]
         [ValidateSet('All','KeepAlive','Custom')]
         [string] $ScalingProcesses
 )
+$MyInvocation.MyCommand.Name | Out-Default | Write-Host
 
-"SuspendAllstacks.ps1"
+[System.Collections.ArrayList]$stacklist = @()
+switch ( $StackType ) {
+    'All' {
+        $StackStart = 1
+        $StackEnd = 10
+        $stacklist.add(20) | Out-Null
+        $stacklist.add(30) | Out-Null
+    }
+    'Live' {
+        $StackStart = 1
+        $StackEnd = 10
+    }
+    'Test' {
+        $StackStart = 20
+        $StackEnd = 20
+    }
+    'Dev' {
+        $StackStart = 30
+        $StackEnd = 30
+    }
+    'Custom' {
+        $StackStart = 9
+        $StackEnd = 9
+    }
+}
+
+For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
+    $stacklist.add($stack) | Out-Null
+}
 
 [System.Collections.ArrayList]$ProcessList = @()
-
 
 switch ( $ScalingProcesses ) {
     'All' {
@@ -24,18 +55,20 @@ switch ( $ScalingProcesses ) {
 }
 
 $Region = 'us-east-1'
-$WebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'WebServerGroup'}
-foreach ( $WebServerGroup in $WebServerGroups ) {
-    $WebServerGroup.ResourceId
 
-    # Suspend processes which may cause EC2 instance to be terminated
-    Suspend-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId -ScalingProcess $ProcessList
-}
+foreach ( $stack in $stacklist) {
+    $WebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'WebServerGroup' -and ($_.ResourceId -like "eval$stack-*")}
+    foreach ( $WebServerGroup in $WebServerGroups ) {
+        $WebServerGroup.ResourceId
 
-Write-Output 'DBWebServerGroup'
-$DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'DBWebServerGroup'}
-foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
-    $DBWebServerGroup.ResourceId
-    # Suspend processes which may cause EC2 instance to be terminated
-    Suspend-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId -ScalingProcess $ProcessList
+        # Suspend all processes
+        Suspend-ASProcess -Region $Region -AutoScalingGroupName $WebServerGroup.ResourceId $ProcessList
+    }
+
+    $DBWebServerGroups = @(Get-ASTag -Region $Region -Filter @( @{ Name="key"; Values=@("aws:cloudformation:logical-id") } )) | Where-Object {$_.Value -eq 'DBWebServerGroup' -and ($_.ResourceId -like "eval$stack-*")}
+    foreach ( $DBWebServerGroup in $DBWebServerGroups ) {
+        $DBWebServerGroup.ResourceId
+        # Suspend all processes
+        Suspend-ASProcess -Region $Region -AutoScalingGroupName $DBWebServerGroup.ResourceId $ProcessList
+    }
 }

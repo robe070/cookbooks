@@ -14,7 +14,7 @@ function Write-FormattedOutput
          [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object,
          [Parameter(Mandatory=$False)][ConsoleColor] $BackgroundColor,
          [Parameter(Mandatory=$False)][ConsoleColor] $ForegroundColor
-    )    
+    )
 
     # save the current color
     $bc = $host.UI.RawUI.BackgroundColor
@@ -22,7 +22,7 @@ function Write-FormattedOutput
 
     # set the new color
     if($BackgroundColor -ne $null)
-    { 
+    {
        $host.UI.RawUI.BackgroundColor = $BackgroundColor
     }
 
@@ -32,7 +32,7 @@ function Write-FormattedOutput
     }
 
     Write-Host $Object
-  
+
     # restore the original color
     $host.UI.RawUI.BackgroundColor = $bc
     $host.UI.RawUI.ForegroundColor = $fc
@@ -43,7 +43,7 @@ function Write-RedOutput
     [CmdletBinding()]
     Param(
          [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
-    ) 
+    )
 
     Write-FormattedOutput $Object -ForegroundColor 'Red'
 }
@@ -53,13 +53,21 @@ function Write-GreenOutput
     [CmdletBinding()]
     Param(
          [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
-    ) 
+    )
 
     Write-FormattedOutput $Object -ForegroundColor 'Green'
 }
-function Log-Date 
+function Log-Date
 {
     ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
+}
+
+# Gets the current machine path and user path and makes it the current process path
+function SyncRegistryPathToCurentProcess {
+    $pathMachine = [System.Environment]::GetEnvironmentVariable('path', 'machine')
+    $pathUser = [System.Environment]::GetEnvironmentVariable('path', 'user')
+    [System.Environment]::SetEnvironmentVariable('path', $pathMachine + ';' + $pathUser ) | Write-Host
+    $env:path | Write-Host
 }
 
 function Propagate-EnvironmentUpdate
@@ -108,7 +116,7 @@ param (
 
     $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
     $match = '*' + $Directory + '*'
-    $replace = $oldPath + ';' + $Directory 
+    $replace = $oldPath + ';' + $Directory
     Write-Debug "OldPath = $Oldpath" | Out-Host
     Write-Debug "match = $match" | Out-Host
     Write-Debug "replace = $replace" | Out-Host
@@ -135,7 +143,7 @@ function Connect-RemoteSession
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -143,7 +151,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:instanceid remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -153,7 +161,7 @@ function Connect-RemoteSessionUri
     {
         "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
-        if ($Script:session -ne $null)
+        if ($null -ne $Script:session)
         {
             break
         }
@@ -169,11 +177,7 @@ function ReConnect-Session
     Write-Host "$(Log-Date) Reconnecting session..."
     if ( $Script:session ) { Remove-PSSession $Script:session | Out-Host }
 
-    if ( $Cloud -eq 'AWS' ) {
-        Connect-RemoteSession | Out-Host
-    } elseif ($Cloud -eq 'Azure' ) {
-        Connect-RemoteSessionUri | Out-Host
-    }
+    Connect-RemoteSession | Out-Host
 
     Execute-RemoteInit | Out-Host
     Execute-RemoteInitPostGit | Out-Host
@@ -182,7 +186,7 @@ function ReConnect-Session
 function Reboot-Session
 {
     # Execute Restart-Computer through remote session as executing from local machine is blocked
-    Execute-RemoteBlock $Script:session { 
+    Execute-RemoteBlock $Script:session {
         Restart-Computer -force
     }
     # Allow computer to stop before attempting a connection
@@ -374,7 +378,7 @@ IntegratorPortNumber=4560
 IntegratorAdminPortNumber=4561
 UseridActionForJSM=0
 UseridForJSM=PCXUSER2
-.PasswordForJSM=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053 
+.PasswordForJSM=161106219029123027150220095009114001171004042063034006087198091041059125101248041226025151149053
 JavaVersionForIntegrator=1.8
 OpenTranslationTableLansaProvided=1
 OpenTranslationTable=1140
@@ -421,7 +425,7 @@ function New-Shortcut {
 .DESCRIPTION
 	The New-Shortcut script creates a shortcut pointing at the target in the location you specify.  You may specify the location as a folder path (which must exist), with a name for the new file (ending in .lnk), or you may specify one of the "SpecialFolder" names like "QuickLaunch" or "CommonDesktop" followed by the name.
 	If you specify the path for the link file without a .lnk extension, the path is assumed to be a folder.
-	
+
 .EXAMPLE
 	New-Shortcut C:\Windows\Notepad.exe
 		Will make a shortcut to notepad in the current folder named "Notepad.lnk"
@@ -476,14 +480,14 @@ function New-ShortCutFile {
 	if(-not ($TargetPath.Contains("://") -or (Test-Path (Split-Path (Resolve-Path $TargetPath) -parent)))) {
 		Throw "Cannot create Shortcut: Parent folder does not exist"
 	}
-	if(-not (Test-Path variable:\global:WshShell)) { 
-		$global:WshShell = New-Object -com "WScript.Shell" 
+	if(-not (Test-Path variable:\global:WshShell)) {
+		$global:WshShell = New-Object -com "WScript.Shell"
 	}
 
-	
+
 	$Link = $global:WshShell.CreateShortcut($LinkPath)
 	$Link.TargetPath = $TargetPath
-	
+
 	[IO.FileInfo]$LinkInfo = $LinkPath
 
 	## Properties for file shortcuts only
@@ -497,16 +501,16 @@ function New-ShortCutFile {
 			if( $WindowStyle -like "Normal" ) { $WindowStyle = 1 }
 			if( $WindowStyle -like "Maximized" ) { $WindowStyle = 3 }
 			if( $WindowStyle -like "Minimized" ) { $WindowStyle = 7 }
-		} 
+		}
 
 		if( $WindowStyle -ne 1 -and $WindowStyle -ne 3 -and $WindowStyle -ne 7) { $WindowStyle = 1 }
 		$Link.WindowStyle = $WindowStyle
-	
+
 		if($Hotkey.Length -gt 0 ) { $Link.HotKey = $Hotkey }
 		if($Arguments.Length -gt 0 ) { $Link.Arguments = $Arguments }
 		if($Description.Length -gt 0 ) { $Link.Description = $Description }
 		if($IconLocation.Length -gt 0 ) { $Link.IconLocation = $IconLocation }
-		
+
 	}
 
   $Link.Save()
@@ -516,12 +520,12 @@ function New-ShortCutFile {
 
 ## If they didn't explicitly specify a folder
 if($Folder.Length -eq 0) {
-	if($LinkPath.Length -gt 0) { 
-		$path = Split-Path $LinkPath -parent 
+	if($LinkPath.Length -gt 0) {
+		$path = Split-Path $LinkPath -parent
 		[IO.FileInfo]$LinkInfo = $LinkPath
 		if( $LinkInfo.Extension.Length -eq 0 ) {
 			$Folder = $LinkPath
-		} else {	
+		} else {
 			# If the LinkPath is just a single word with no \ or extension...
 			if($path.Length -eq 0) {
 				$Folder = $Pwd
@@ -530,7 +534,7 @@ if($Folder.Length -eq 0) {
 			}
 		}
 	}
-	else 
+	else
 	{ $Folder = $Pwd }
 }
 
@@ -572,16 +576,16 @@ New-ShortCutFile $TargetPath $LinkPath $Arguments $WorkingDirectory $WindowStyle
 
 ###############################################################################
 ## Get-SpecialPath Function (should be an external function in your profile, really)
-##   This is an enhancement of [Environment]::GetFolderPath($folder) to add 
-##   support for 8 additional folders, including QuickLaunch, and the common 
+##   This is an enhancement of [Environment]::GetFolderPath($folder) to add
+##   support for 8 additional folders, including QuickLaunch, and the common
 ##   or "All Users" folders... while still supporting My Documents, Startup, etc.
 ##
-function Get-SpecialPath 
+function Get-SpecialPath
 {
    param([string]$folder)
    BEGIN {
-      if ($folder.Length -gt 0) { 
-         return $folder | &($MyInvocation.InvocationName); 
+      if ($folder.Length -gt 0) {
+         return $folder | &($MyInvocation.InvocationName);
       } else {
          $WshShellFolders=@{CommonDesktop=0;CommonStartMenu=1;CommonPrograms=2;CommonStartup=3;PrintHood=6;Fonts=8;NetHood=9};
       }
@@ -618,15 +622,15 @@ function Add-TrustedSite
 {
 param(
     [Parameter(Mandatory=$true)]
-    [String] 
+    [String]
     $SiteName,
 
     [Parameter(Mandatory=$false)]
-    [String] 
+    [String]
     $Hive="HKLM",
 
     [Parameter(Mandatory=$false)]
-    [String] 
+    [String]
     $urlType="http"
 )
     $TrustedKey = "${Hive}:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains\"
@@ -653,7 +657,7 @@ function Enable-InternetExplorerESC {
 
 function Disable-UserAccessControl {
     Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -Value 00000000
-    Write-Host "User Access Control (UAC) has been disabled." -ForegroundColor Green    
+    Write-Host "User Access Control (UAC) has been disabled." -ForegroundColor Green
 }
 
 # PlaySound will also play from an RDP session, unlike System.Media.SystemSounds
@@ -720,28 +724,28 @@ function Run-SSMCommand {
         Sleep -Seconds $Sleep
         $CmdStatus = Get-SSMCommandInvocation -InstanceId $instanceid -CommandId $runPSCommand.CommandId
     } while ($CmdStatus.Status -eq "Pending" -or $CmdStatus.Status -eq "InProgress")
-    
+
     Write-Host "$(Log-Date) Command completed. Status"
     Out-Default -InputObject $CmdStatus.Status
-    
+
     # Output the result
     $Output = Get-SSMCommandInvocation -CommandId $runPSCommand.CommandId -Details $true -InstanceId $instanceid | select -ExpandProperty CommandPlugins
     Out-Default -InputObject $output.Output
-    
+
     $DebugPreference = "Continue"
 
     # Its expected that the Command will throw an error and thus the command will be flagged as 'failed'. Powershell scripts we run all throw when there is an error.
-    if ( $CmdStatus.Status -eq "Failed" ) { 
+    if ( $CmdStatus.Status -eq "Failed" ) {
         cmd /c exit 1
         throw "Run-SSMCommand"
     }
 }
 
-function Get-CurrentLineNumber { 
-    $MyInvocation.ScriptLineNumber 
+function Get-CurrentLineNumber {
+    $MyInvocation.ScriptLineNumber
 }
-function Get-CurrentFileName { 
-    $MyInvocation.ScriptName 
+function Get-CurrentFileName {
+    $MyInvocation.ScriptName
 }
 
 function Test-RegKeyValueIsNotNull {
@@ -754,5 +758,49 @@ function Test-RegKeyValueIsNotNull {
         throw "$RegKey is empty"
     } else {
         Write-Host( "$RegKey has value '$($RegKeyValue.$RegKey)'" )
+    }
+}
+
+# Provide a common routine so its easily modified.
+# Note that this is called to get the Plugin to reset. There may be other ways.
+# iisreset without parameters caused issues as described below when a deployment
+# through Git Deploy Hub had a new vl web runtime, necessitating an iisreset. Be aware
+# that GDH is being run from IIS, so it gets terminated ... THIS routine's thread gets terminated ...
+# but not before the iis /start has successfully completed.
+# Prior issues:
+# Using iisreset defaults to /stop /start /force.
+# This frequently causes automatic kills to occur - Event Id 3204 in the system event log.
+# What follows a 3204 is that other services may get killed too.
+# occassionally iis is not restarted (last time there were 84 resets (42 iterations) before this occurred)
+# New behavior:
+# iisrest /stop /noforce changed the behaviour to 0 occurence of iis not starting in 1000 iterations,
+# and returned 0 exit code every time. 5 x 3204 events still recorded in system event log, but that
+# did not cause iis not to start and did not cause any dumps to be produced.
+function Iis-Reset {
+    Write-Host( "$(Log-Date) iisreset /stop /noforce..." )
+    iisreset /stop /noforce
+    if ( $LASTEXITCODE -ne 0 ) {
+        Write-Host( "$(Log-Date) iisreset /stop /noforce resulted in exit code $LASTEXITCODE" )
+
+        Write-Host( "$(Log-Date) iisreset /kill..." )
+        iisreset /kill
+        if ( $LASTEXITCODE -ne 0 ) {
+            Write-Host( "$(Log-Date) iisreset /kill resulted in exit code $LASTEXITCODE" )
+            iisreset /kill
+
+            Write-Host( "$(Log-Date) Pause 10s to allow IIS to 'recover'..." )
+            Start-Sleep 10
+        }
+    }
+
+    Write-Host( "$(Log-Date) iisreset /start..." )
+    iisreset /start
+    if ( $LASTEXITCODE -ne 0 ) {
+        Write-Host( "$(Log-Date) iisreset /start resulted in exit code $LASTEXITCODE" )
+        Write-Host( "$(Log-Date) iisreset /start again..." )
+        iisreset /start
+        if ( $LASTEXITCODE -ne 0 ) {
+            Write-Host( "$(Log-Date) iisreset /start resulted in exit code $LASTEXITCODE" )
+        }
     }
 }

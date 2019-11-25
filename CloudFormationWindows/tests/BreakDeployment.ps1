@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Test','Dev','Custom')]
+        [ValidateSet('Test','Dev1','Dev2','Custom')]
         [string] $StackType
 )
 
@@ -25,9 +25,9 @@ function Summary {
         }
         Write-Host " deployed"
     } else {
-        Write-Output "" | Out-Host
+        Write-Output "" | Out-Default | Write-Host
         if ( $404count -gt 0 -or $defaultcount -gt 0  ) {
-            Write-RedOutput "Test failed"  | Out-Host
+            Write-RedOutput "Test failed"  | Out-Default | Write-Host
         }
         if ( $404count -gt 0 ){ Write-RedOutput "404 usually means the Listener is not running this is important to fix ASAP. And its simple to fix. Just re-deploy the app"}
         if ( $500count -gt 0 ){ Write-FormattedOutput "500 usually means Free Trial was installed but no app was deployed. Look at git repo and check that there is just the one commit. If thats the case then this error may be ignored." -ForegroundColor 'yellow'}
@@ -59,12 +59,15 @@ Write-Host "$($a.ToUniversalTime()) UTC"
 
 $ProgressPreference = 'SilentlyContinue' # Speed things up by a factor of 10 ref: https://stackoverflow.com/questions/17325293/invoke-webrequest-post-with-parameters
 
+$ParentDir = Split-Path -Parent $MyInvocation.MyCommand.Path | Split-Path -Parent
+
 try {
     $Region = 'us-east-1'
     $Perpetual = $true
     [Decimal]$StackStart=0
     [Decimal]$StackEnd=0
     [Decimal]$Stack=0
+    [Decimal]$appl = 2   # Just test app2
 
     switch ( $StackType ) {
         'Test' {
@@ -72,7 +75,13 @@ try {
             $StackStart = 20
             $StackEnd = 20
         }
-        'Dev' {
+        'Dev1' {
+            $GitRepoBranch = 'debug/paas'
+            $StackStart = 30
+            $StackEnd = 30
+            $appl = 1
+        }
+        'Dev2' {
             $GitRepoBranch = 'debug/paas'
             $StackStart = 30
             $StackEnd = 30
@@ -110,7 +119,7 @@ try {
                     $match = "eval$stack-Web*"
                 }
 
-                Write-GreenOutput $match | Out-Host
+                Write-GreenOutput $match | Out-Default | Write-Host
                 $StackInstances = @(Get-ASAutoScalingInstance -Region $Region | where-object {$_.AutoScalingGroupName -like $match } )
 
                 if ( $StackInstances){
@@ -121,7 +130,6 @@ try {
                         $IPAddress = $Ec2Detail[0].Instances[0].PublicIpAddress
 
                         Write-Host "$Loop $($(Get-Date).ToLocalTime()) Local Time EC2 $($Ec2Detail[0].Instances[0].InstanceId) $IPAddress" -NoNewline
-                        $appl = 2   # Just test app2
                         Write-Host -NoNewline " $appl"
                         try {
                             $url = "http://$($IPAddress):8101/Deployment/Start/APP$($appl)"
@@ -129,20 +137,20 @@ try {
                             $ResponseCode = $response.StatusCode
                             switch ($ResponseCode) {
                                 200 { Write-Host "";Write-Host "Deployment successful"}
-                                404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $StackError = $true; $404count++ }
-                                500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $500count++ }
-                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $503count++ }
-                                default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $StackError = $true; $defaultcount++ }
+                                404 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Default | Write-Host; $StackError = $true; $404count++ }
+                                500 { Write-Host "";Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Default | Write-Host; $StackError = $true; $500count++ }
+                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Default | Write-Host; $StackError = $true; $503count++ }
+                                default { Write-Host "";Write-FormattedOutput"$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Default | Write-Host; $StackError = $true; $defaultcount++ }
                             }
                         } catch {
                             Write-Host ""
                             $StackError = $true
                             $ResponseCode = $_.Exception.Response.StatusCode.Value__
                             switch ($ResponseCode) {
-                                404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Host; $404count++ }
-                                500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $500count++ }
-                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Host; $StackError = $true; $503count++ }
-                                default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Host; $defaultcount++ }
+                                404 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'red' | Out-Default | Write-Host; $404count++ }
+                                500 { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Default | Write-Host; $500count++ }
+                                503 { Write-Host "";Write-FormattedOutput "Installation in progress. $ResponseCode Stack $stack App $appl $url" -ForegroundColor 'yellow' | Out-Default | Write-Host; $StackError = $true; $503count++ }
+                                default { Write-FormattedOutput "$ResponseCode Stack $stack App $appl $url" -ForegroundColor 'Magenta' | Out-Default | Write-Host; $defaultcount++ }
                             }
                         }
 
@@ -152,13 +160,20 @@ try {
             }
         }
         Summary
-        Write-Host "Waiting for 25 seconds..."
-        Start-Sleep 25  # Deployments usually take in the order of 20 seconds, but sometimes 45 seconds or more
+
+        Write-Host "$(Log-Date) Wait until application is ready before continuing"
+        Write-Host "Wait at least 10 seconds to ensure that deployment has started and thus the application is offline..."
+        Start-Sleep 10
+
+        Write-GreenOutput( "Wait until Stack eval$($stack) app $appl is back online") | Write-Host
+        & "$ParentDir\Wait-LansaApp.ps1" -WaitReady -Region $Region -Stack "eval$stack" -App $appl -Timeout 300
+        Write-GreenOutput( "Stack eval$($stack) app $appl deployment using direct GitDeployHub $url is fully completed" )
+        Write-Host
     } while ($Perpetual -and $FoundInstance)
 
     if ( -not $FoundInstance ) {
         $StackError = $true
-        Write-RedOutput "Test failed"  | Out-Host
+        Write-RedOutput "Test failed"  | Out-Default | Write-Host
         throw "No EC2 instances found"
     }
 } catch {

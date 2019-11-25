@@ -148,7 +148,7 @@ exports.handler = (event, context, callback) => {
     // Check that sender is a GitHub server
     // 192.168.196.186 is the ip address of the test server
     // 103.231.169.65/32 is the ip address of LPC
-    if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','103.231.169.65/32','192.168.196.186']) ) {
+    if ( !ipRangeCheck( event.requestContext.identity.sourceIp, ['185.199.108.0/22', '192.30.252.0/22','140.82.112.0/20','103.231.169.65/32','192.168.196.186']) ) {
         returnAPIError( repository,  403, "Source ip " + event.requestContext.identity.sourceIp + ' is not from a github server', callback, context);
         return;
     }

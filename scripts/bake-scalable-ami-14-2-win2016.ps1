@@ -26,7 +26,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText '14.2 EPC142010' `
+Bake-IdeMsi -VersionText '14.2 EPC142060' `
             -VersionMajor 14 `
             -VersionMinor 2 `
             -LocalDVDImageDirectory "n\a" `
@@ -40,5 +40,7 @@ Bake-IdeMsi -VersionText '14.2 EPC142010' `
             -InstallIDE $false `
             -InstallScalable $true `
             -Win2012 $false `
-            -ManualWinUpd $true `
+            -ManualWinUpd $false `
             -SkipSlowStuff $true
+
+            # Note Skipping slow stuff skips DVD upload and Windows updates, neither of which is needed when Scalable and its a new AWS image
