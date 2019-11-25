@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Live','Test','Dev','Custom','All')]
+        [ValidateSet('Live','Test','Dev','All', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '30')]
         [string] $StackType
 )
 
@@ -84,8 +84,8 @@ try {
         $stacklist.add(30)
     }
 
-    if ( $StackType -eq 'Custom') {
-        $stacklist.add(1)
+    if ( $StackType -ge '1' -and $StackType -le '10') {
+        $stacklist.add($StackType)
     }
 
     $Loop = 0
