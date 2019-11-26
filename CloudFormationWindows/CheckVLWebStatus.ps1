@@ -67,26 +67,34 @@ try {
     [Decimal]$Stack=0
     [System.Collections.ArrayList]$stacklist = @()
 
-    if ( $StackType -eq 'Live' -or $StackType -eq 'All') {
-        $StackStart = 1
-        $StackEnd = 10
+    switch ( $StackType ) {
+        {$_ -eq 'Live' -or $_ -eq 'All'} {
+            $StackStart = 1
+            $StackEnd = 10
 
-        For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-            $stacklist.add($stack) | Out-Null
+            For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
+                $stacklist.add($stack) | Out-Null
+            }
+        }
+        {$_ -eq 'Test' -or $_ -eq 'All'} {
+            $stacklist.add(20) | Out-Null
+        }
+        {$_ -eq 'Dev' -or $_ -eq 'All'} {
+            $stacklist.add(30) | Out-Null
+        }
+        # Handle numeric entry
+        Default {
+            $StackNum = [Decimal] $_
+            $stacklist.add($StackNum) | Out-Null
         }
     }
 
-    if ( $StackType -eq 'Test' -or $StackType -eq 'All') {
-        $stacklist.add(20)
+    if ( $stacklist.Count -eq 0 ) {
+        throw "There are no stacks requested"
     }
 
-    if ( $StackType -eq 'Dev' -or $StackType -eq 'All') {
-        $stacklist.add(30)
-    }
-
-    if ( $StackType -ge '1' -and $StackType -le '10') {
-        $stacklist.add($StackType)
-    }
+    Write-Host( "Stack List:")
+    $Stacklist
 
     $Loop = 0
     do {
