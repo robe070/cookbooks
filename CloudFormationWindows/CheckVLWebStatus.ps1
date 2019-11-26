@@ -93,8 +93,7 @@ try {
         throw "There are no stacks requested"
     }
 
-    Write-Host( "Stack List:")
-    $Stacklist
+    Write-Host( "Stack List: $($Stacklist -join ',')")
 
     $Loop = 0
     do {

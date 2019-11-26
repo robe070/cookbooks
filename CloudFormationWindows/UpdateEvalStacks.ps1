@@ -67,8 +67,7 @@ if ( $stacklist.Count -eq 0 ) {
     throw "There are no stacks requested"
 }
 
-Write-Host( "Stack List:")
-$Stacklist
+Write-Host( "Stack List: $($Stacklist -join ',')")
 
 $S3TemplateUrl = "https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$GitRepoBranch/lansa-win-paas.cfn.template"
 $22TriggerAppRepoPull=Get-Random
