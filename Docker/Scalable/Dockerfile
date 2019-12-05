@@ -75,5 +75,4 @@ RUN Set-WebConfigurationProperty -p 'MACHINE/WEBROOT/APPHOST' -fi 'system.applic
 #      else {return 1}; `
 #     } catch { return 1 }
 
-# COPY bootstrap.ps1 C:\
-# ENTRYPOINT ["powershell", "C:\\bootstrap.ps1"]
+ENTRYPOINT ["powershell", "C:\\bootstrap.ps1"]
