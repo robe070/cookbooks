@@ -12,6 +12,13 @@ param (
     $ClearCache
 )
 
+Write-Host ("Copy seed scripts that are required to get the cookbooks git repo installed in the image")
+
+$ScriptDir = '..\..\scripts'
+Copy-Item $(Join-Path $ScriptDir 'dot-CommonTools.ps1') . -Force -verbose
+Copy-Item $(Join-Path $ScriptDir 'getchoco.ps1') . -Force -verbose
+Copy-Item $(Join-Path $ScriptDir 'installGit.ps1') . -Force -verbose
+
 $ClearCacheCmd = ""
 if ( $ClearCache ) {
     $ClearCacheCmd = "--no-cache=true"
