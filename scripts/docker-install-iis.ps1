@@ -9,22 +9,22 @@ try {
     [Environment]::SetEnvironmentVariable("TMP", "c:\temp", "Process")
     [Environment]::SetEnvironmentVariable("TEMP", "c:\temp", "Process")
 
-    # If environment not yet set up, it should be running locally, not through Remote PS
-    if ( -not $script:IncludeDir)
-    {
-        # Log-Date can't be used yet as Framework has not been loaded
+    # # If environment not yet set up, it should be running locally, not through Remote PS
+    # if ( -not $script:IncludeDir)
+    # {
+    #     # Log-Date can't be used yet as Framework has not been loaded
 
-        Write-Host "Initialising environment - presumed not running through RemotePS"
-        $MyInvocation.MyCommand.Path
-        $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+    #     Write-Host "Initialising environment - presumed not running through RemotePS"
+    #     $MyInvocation.MyCommand.Path
+    #     $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-        . "$script:IncludeDir\Init-Baking-Vars.ps1"
-        . "$script:IncludeDir\Init-Baking-Includes.ps1"
-    }
-    else
-    {
-        Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
-    }
+    #     . "$script:IncludeDir\Init-Baking-Vars.ps1"
+    #     . "$script:IncludeDir\Init-Baking-Includes.ps1"
+    # }
+    # else
+    # {
+    #     Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+    # }
 
 
 
@@ -37,17 +37,6 @@ try {
     # Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\WebManagement\Server -Name EnableRemoteManagement -Value 1
     # Set-Service -name WMSVC -StartupType Automatic
     # Start-service WMSVC
-
-    Write-Output "Turning off complex password requirements"
-    secedit /export /cfg c:\secpol.cfg
-    return
-    (Get-Content C:\secpol.cfg).replace("PasswordComplexity = 1", "PasswordComplexity = 0") | Out-File C:\secpol.cfg
-    secedit /configure /db c:\windows\security\local.sdb /cfg c:\secpol.cfg /areas SECURITYPOLICY
-    Remove-Item -force c:\secpol.cfg -confirm:$false
-
-    Write-Output "Create local user test (pwd=test)"
-    NET USER test "test" /ADD
-    NET LOCALGROUP "Administrators" "test" /ADD
 
     Write-Output "Set LANSA Cloud registry entries"
     $lansaKey = 'HKLM:\Software\LANSA\'
