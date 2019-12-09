@@ -364,14 +364,18 @@ try
             Start-WebAppPool -Name "DefaultAppPool" | Out-Default | Write-Host
         }
 
-        Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+        # The docker operator can easily set command line variables when creating the container, so get out of the way!
+        if ( $Cloud -ne 'Docker') {
 
-        if ($trace -eq "Y") {
-            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
-            $env:X_RUN = $traceSettings
-        } else {
-            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
-            $env:X_RUN = ''
+            Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+            if ($trace -eq "Y") {
+                [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
+                $env:X_RUN = $traceSettings
+            } else {
+                [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
+                $env:X_RUN = ''
+            }
         }
     }
 
