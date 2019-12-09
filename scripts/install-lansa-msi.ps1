@@ -155,9 +155,9 @@ try
 
     # Docker passes in a local path to the MSI which is mapped to a host volume
     # Just copy it to the standard name - its used to determine if an upgrade or not.
-    if ( $Cloud -eq "Docker") {
-        Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Default | Write-Host
-    }
+    # if ( $Cloud -eq "Docker") {
+    #     Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Default | Write-Host
+    # }
 
     # if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
     if ( $MSIuri.Length -gt 0 ) {
