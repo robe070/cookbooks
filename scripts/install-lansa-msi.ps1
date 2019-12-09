@@ -159,7 +159,8 @@ try
         Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Default | Write-Host
     }
 
-    if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
+    # if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
+    if ( $MSIuri.Length -gt 0 ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Default | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
