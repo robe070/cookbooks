@@ -643,6 +643,9 @@ finally
 
     Write-Host( "$(Log-Date) Attempt to ensure that IIS is running by starting it. (Should already be started)")
     iisreset /start | Out-Default | Write-Host
+
+    # iisreset resets $LASTEXITCODE
+    cmd /c exit $ExitCode    #Set $LASTEXITCODE
 }
 
 # Successful completion so set Last Exit Code to 0
