@@ -75,4 +75,7 @@ RUN Set-WebConfigurationProperty -p 'MACHINE/WEBROOT/APPHOST' -fi 'system.applic
 #      else {return 1}; `
 #     } catch { return 1 }
 
+# Set the working directory back to the Docker default
+WORKDIR c:\
+
 ENTRYPOINT ["powershell", "C:\\bootstrap.ps1"]
