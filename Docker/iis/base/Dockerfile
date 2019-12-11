@@ -23,6 +23,8 @@ RUN . '.\dot-CommonTools.ps1'; `
 WORKDIR ${GITREPOPATH}
 RUN DIR
 
+RUN .\scripts\lansa64reginit.exe
+
 #Verbose output is not captured in the log, so don't use it!
 #RUN $VerbosePreference = 'Continue'; Write-Verbose 'Test verbose'
 # Debug is.
