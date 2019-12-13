@@ -23,7 +23,8 @@ RUN . '.\dot-CommonTools.ps1'; `
 WORKDIR ${GITREPOPATH}
 RUN DIR
 
-RUN .\scripts\lansa64reginit.exe
+# Should run this here but does not work in a Docker image
+# RUN .\scripts\lansa64reginit.exe
 
 #Verbose output is not captured in the log, so don't use it!
 #RUN $VerbosePreference = 'Continue'; Write-Verbose 'Test verbose'
@@ -44,15 +45,15 @@ RUN Write-Host 'Install Visual C Runtime 32-bit for VS 2013'; `
 RUN Write-Host 'Install Visual C Runtime 64-bit for VS 2013'; `
     start-process -FilePath '.\installs\vc_redist\vcredist_x64_2013.exe' -ArgumentList '/install', '/quiet', '/norestart' -Wait
 
-RUN  Write-Output 'Turning off complex password requirements'; `
-    secedit /export /cfg 'c:\secpol.cfg'; `
-    (Get-Content C:\secpol.cfg).replace('PasswordComplexity = 1', 'PasswordComplexity = 0') | Out-File C:\secpol.cfg; `
-    secedit /configure /db c:\windows\security\local.sdb /cfg c:\secpol.cfg /areas SECURITYPOLICY; `
-    Remove-Item -force c:\secpol.cfg -confirm:$false
+# RUN  Write-Output 'Turning off complex password requirements'; `
+#     secedit /export /cfg 'c:\secpol.cfg'; `
+#     (Get-Content C:\secpol.cfg).replace('PasswordComplexity = 1', 'PasswordComplexity = 0') | Out-File C:\secpol.cfg; `
+#     secedit /configure /db c:\windows\security\local.sdb /cfg c:\secpol.cfg /areas SECURITYPOLICY; `
+#     Remove-Item -force c:\secpol.cfg -confirm:$false
 
-RUN Write-Output 'Create local user test (pwd=test)'; `
-    NET USER test 'test' /ADD; `
-    NET LOCALGROUP 'Administrators' 'test' /ADD
+# RUN Write-Output 'Create local user test (pwd=test)'; `
+#     NET USER test 'test' /ADD; `
+#     NET LOCALGROUP 'Administrators' 'test' /ADD
 
 RUN .\scripts\docker-install-iis.ps1
 

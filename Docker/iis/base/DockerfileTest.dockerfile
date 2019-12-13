@@ -1,6 +1,6 @@
 # escape=`
 # Allow this Dockerfile to be called multiple times with different base OS as there will need to be multiple constructed to support all the Windows OS variants
-ARG WINDOWS_VERSION=windowsservercore-1903
+ARG WINDOWS_VERSION=windowsservercore-1909
 FROM mcr.microsoft.com/windows/servercore/iis:${WINDOWS_VERSION}
 
 # Global settings for the Container
@@ -13,10 +13,10 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 RUN Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine
 
 COPY .\*.ps1 .\
+COPY .\*.exe .\
 
-RUN  Write-Output 'Turning off complex password requirements'; `
-    secedit /export /cfg 'c:\secpol.cfg'; `
-    (Get-Content C:\secpol.cfg).replace('PasswordComplexity = 1', 'PasswordComplexity = 0') | Out-File C:\secpol.cfg; `
-    secedit /configure /db c:\windows\security\local.sdb /cfg c:\secpol.cfg /areas SECURITYPOLICY; `
-    Remove-Item -force c:\secpol.cfg -confirm:$false
 
+RUN reg add HKEY_LOCAL_MACHINE\Software\WOW6432Node\LANSA; `
+    reg query HKEY_LOCAL_MACHINE\Software\WOW6432Node\LANSA; `
+    .\x64SoftwareKeyLink.exe LANSA; `
+    reg query HKEY_LOCAL_MACHINE\Software\LANSA
