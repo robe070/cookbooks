@@ -1,7 +1,7 @@
 # escape=`
 # Allow this Dockerfile to be called multiple times with different base OS as there will need to be multiple constructed to support all the Windows OS variants
 ARG BASE_TAG=windowsservercore-1903-14.99
-FROM lansalpc/iis/base:${BASE_TAG}
+FROM lansalpc/iis/webserver:${BASE_TAG}
 
 # Global settings for the Container
 ARG GITREPO=lansa

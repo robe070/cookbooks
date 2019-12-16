@@ -48,6 +48,7 @@ foreach($key in [System.Environment]::GetEnvironmentVariables('Process').Keys) {
         $value = [System.Environment]::GetEnvironmentVariable($key, 'Process')
         [System.Environment]::SetEnvironmentVariable($key, $value, 'Machine')
 }
+
 try {
     if ( $f32bit -eq 'true' -or $f32bit -eq '1')
     {
@@ -65,19 +66,7 @@ try {
     # Should be OK.
     New-Item -Path HKLM:\Software\WOW6432Node  -Name 'LANSA' -Force
     New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranchWebServr' -Value $GitBranchWebServer -PropertyType String -Force
     New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'GitBranchWebServr' -Value $GitBranchWebServer -PropertyType String -Force
-
-    # $CommonParams = -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit 1 -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
-
-    Write-Host("Webserver Install...")
-    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -MSIUri https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi -ApplName WebServer  -dbname webserver -gitrepourl https://github.com/lansa/webserver.git  `
-    -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit $f32bit_bool -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
-
-    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-        throw
-    }
 
     # Last Exit Code to 0
     cmd /c exit 0 | Out-Default | Write-Host
