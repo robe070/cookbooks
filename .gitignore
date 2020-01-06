@@ -85,3 +85,6 @@ UpgradeLog.htm
 *.VC.db
 scripts/.vscode/launch.json
 */.vscode/*
+/Docker/iis/base/dot-CommonTools.ps1
+/Docker/iis/base/getchoco.ps1
+/Docker/iis/base/installGit.ps1
