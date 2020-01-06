@@ -104,9 +104,9 @@ try
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $null -eq $mssql_services -and ( -not $InstallSQLServer ) ) {
         # So SQL Server not installed and we are not planning on installing it, so install whats required to use the sqlps module
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SQLSysClrTypes.msi' -installer_file (Join-Path $temppath 'SQLSysClrTypes.msi') -log_file (Join-Path $temppath 'SQLSysClrTypes.log')
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SharedManagementObjects.msi' -installer_file (Join-Path $temppath 'SharedManagementObjects.msi') -log_file (Join-Path $temppath 'SharedManagementObjects.log')
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log')
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SQLSysClrTypes.msi' -installer_file (Join-Path $temppath 'SQLSysClrTypes.msi') -log_file (Join-Path $temppath 'SQLSysClrTypes.log');
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SharedManagementObjects.msi' -installer_file (Join-Path $temppath 'SharedManagementObjects.msi') -log_file (Join-Path $temppath 'SharedManagementObjects.log');
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log');
     }
 
     # Chef installation
