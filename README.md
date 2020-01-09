@@ -25,13 +25,15 @@ Clone the repo, of course!
 The Scalable image is baked using `scripts/bake-scalable-ami.ps1`, and you can follow that through. 
 
 ### Entrypoint scripts for baking
-Cloud | Platform | Type | Initial Bake | Update Bake
-- | - | - | - | -
-AWS | Win2012 | IDE | bake-ide-ami-14-1-win2012.ps1 | Update-ide-ami.ps1
-AWS | Win2016 | IDE | bake-ide-ami-14-1-win2016.ps1 | Update-ide-ami.ps1
-AWS | Win2012 | Scalable | bake-scalable-ami-14-1-win2012.ps1 | Update-scalable-ami.ps1
-Azure | Win2012 | IDE | bake-ide-azure-14-1.ps1 | Update-ide-azure.ps1
-Azure | Win2012 | Scalable | bake-scalable-azure-14-0.ps1 | none
+
+| Cloud | Platform | Type | Initial Bake | Update Bake | Status
+| - | - | - | - | - | -
+| AWS | Win2012 | IDE | bake-ide-ami-14-1-win2012.ps1 | Update-ide-ami.ps1 | Deprecated
+| AWS | Win2016 | IDE | bake-ide-ami-14-1-win2016.ps1 | Update-ide-ami.ps1 | Deprecated
+| AWS | Win2012 | Scalable | bake-scalable-ami-14-1-win2012.ps1 | none | Live
+| AWS | Win2016 | Scalable | bake-scalable-ami-14-2-win2016.ps1 | none | On Hold
+| Azure | Win2012 | IDE | bake-ide-azure-14-1.ps1 | Update-ide-azure.ps1 | Deprecated
+| Azure | Win2012 | Scalable | bake-scalable-azure-14-0.ps1 | none | Live
 
 The Update scripts are designed to build all images for the Cloud and Type in one script as hands free as possible using the last image created to create the next image. 
 
