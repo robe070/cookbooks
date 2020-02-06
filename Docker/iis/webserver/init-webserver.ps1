@@ -61,10 +61,11 @@ try {
     }
 
     # Registry Symbolic Links do not work on Server Core, so explicitly specify them.
-    # VL Runtime makes no use of 32-bit regisatry AFAIK.
+    # VL Runtime makes no use of 32-bit registry AFAIK.
     # Integrator and Web Server are entirely 64 bit.
-    # Does 1200 use teh 32-bit registry hive?
+    # Does 1200 use the 32-bit registry hive?
     # Should be OK.
+
     New-Item -Path HKLM:\Software\WOW6432Node  -Name 'LANSA' -Force
     New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
     New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranchWebServr' -Value $GitBranchWebServer -PropertyType String -Force

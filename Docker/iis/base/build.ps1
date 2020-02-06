@@ -49,7 +49,7 @@ try {
         $HypervCmd = '--isolation=hyperv'
     }
 
-    docker image build --build-arg WINDOWS_VERSION=$WINDOWS_VERSION $ClearCacheCmd $HypervCmd --tag lansalpc/iis/base:$WINDOWS_VERSION-$ImageVersion .
+    docker image build --build-arg WINDOWS_VERSION=$WINDOWS_VERSION $ClearCacheCmd $HypervCmd --tag lansalpc/iis/base:$ImageVersion-$WINDOWS_VERSION .
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw

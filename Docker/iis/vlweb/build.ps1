@@ -31,7 +31,7 @@ try {
     Write-Host("a Windows version 10.0.18363-based image is incompatible with a 10.0.18362 host")
 
     $WINDOWS_VERSION = 'windowsservercore-' + $DockerLabel
-    $BASE_TAG = $WINDOWS_VERSION + '-' + $ImageVersion
+    $BASE_TAG =  $ImageVersion + '-' + $WINDOWS_VERSION
 
     $ClearCacheCmd = ""
     if ( $ClearCache ) {
@@ -43,7 +43,7 @@ try {
         $HypervCmd = '--isolation=hyperv'
     }
 
-    docker image build --build-arg BASE_TAG=$BASE_TAG $ClearCacheCmd $HypervCmd --tag lansalpc/iis/vlweb:$WINDOWS_VERSION-$ImageVersion .
+    docker image build --build-arg BASE_TAG=$BASE_TAG $ClearCacheCmd $HypervCmd --tag lansalpc/iis/vlweb:$ImageVersion-$WINDOWS_VERSION .
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw
     }
