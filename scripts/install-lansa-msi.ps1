@@ -127,6 +127,13 @@ try
         $CompanionInstall = $true
     }
 
+    $InstallDir = Join-Path $(Split-Path -Parent $script:IncludeDir) "Installs\VC_Redist"
+    if (Test-Path $InstallDir) {
+        Write-Host( "$(Log-Date) Installs directory = $InstallDir" )
+    } else {
+        throw "Installs directory $InstallDir does not exist"
+    }
+
     # ***********************************************************************************
     if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
         Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
@@ -313,6 +320,12 @@ try
         if ( $HTTPPortNumberHub.Length -gt 0) {
             New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
         }
+
+        Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
+        start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
+
+        Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
+        start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
     }
 
     #########################################################################################################
@@ -403,6 +416,14 @@ try
             Write-Host("$(Log-Date) Stopping $($Process.ProcessName)")
             Stop-Process $process.id -Force | Out-Default | Write-Host
         }
+
+        $TotalWait = 0
+        do {
+            Start-Sleep -Seconds 2
+            $TotalWait += 2
+            $Processes = @(Get-Process | Where-Object {$_.Path -like "*\msiexec.exe" })
+        } while ($Processes.Count -gt 0 -and ($TotalWait -lt 120) )
+        Write-Host("$(Log-Date) Waited $TotalWait seconds for msiexec.exe to be terminated. Maximum wait 120 seconds")
     }
 
 
