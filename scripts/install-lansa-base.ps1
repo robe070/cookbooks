@@ -109,6 +109,11 @@ try
         DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log');
     }
 
+    Write-Host "Clear the UTF-8 system locale option. If already switched off this code has no effect"
+    $Locale =  Get-WinSystemLocale
+    Write-Host "Current Locale = $($Locale.name)"
+    Set-WinSystemLocale $Locale.Name
+
     # Chef installation
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host

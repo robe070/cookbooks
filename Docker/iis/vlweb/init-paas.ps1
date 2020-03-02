@@ -111,11 +111,6 @@ try {
     }
     Write-Host "Using MSI from $MSIuri"
 
-    Write-Host "Clearing the UTF-8 system local option"
-    $Locale =  Get-WinSystemLocale
-    Write-Host "Current Locale = $Locale.Name"
-    Set-WinSystemLocale $Locale.Name
-
     # Registry Symbolic Links do not work on Server Core, so explicitly specify them.
     # VL Runtime makes no use of 32-bit regisatry AFAIK.
     # Integrator and Web Server are entirely 64 bit.
