@@ -28,9 +28,10 @@ try {
 
 
 
-    # Write-Output "Installing IIS"
-    # import-module servermanager
-    # install-windowsfeature web-server
+    Write-Host "Adding features to IIS"
+    Enable-WindowsOptionalFeature -online -FeatureName NetFx4Extended-ASPNET45
+    Enable-WindowsOptionalFeature -Online -FeatureName IIS-NetFxExtensibility45
+    Enable-WindowsOptionalFeature -Online -FeatureName IIS-ASPNET45
 
     # Write-Output "Enabling Remote IIS Management"
     # install-windowsfeature web-mgmt-service
@@ -38,7 +39,7 @@ try {
     # Set-Service -name WMSVC -StartupType Automatic
     # Start-service WMSVC
 
-    Write-Output "Set LANSA Cloud registry entries"
+    Write-Host "Set LANSA Cloud registry entries"
     $lansaKey = 'HKLM:\Software\LANSA\'
     if (!(Test-Path -Path $lansaKey)) {
        New-Item -Path $lansaKey
@@ -52,5 +53,5 @@ try {
     Write-Error ("Failed")
 } finally {
     Pop-Location
-    Write-Output ("Finished")
+    Write-Host ("Finished")
 }
