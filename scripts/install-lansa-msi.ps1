@@ -46,6 +46,7 @@ param(
 [String]$JSMAdminPortNumber = "",
 [String]$HTTPPortNumberHub = "",
 [String]$GitRepoUrl = "",
+[String]$GitRepoBranch = "",
 [Boolean]$DisableSQLServer = $true
 )
 
@@ -460,6 +461,10 @@ try
 
     if ( $GitRepoUrl.Length -gt 0) {
         $Arguments += "GITREPOURL=$GitRepoUrl"
+    }
+
+    if ( $GitRepoBranch.Length -gt 0) {
+        $Arguments += "GITREPOBRANCH=$GitRepoBranch"
     }
 
     Write-Host ("$(Log-Date) Arguments = $Arguments")
