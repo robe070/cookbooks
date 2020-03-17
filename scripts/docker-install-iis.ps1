@@ -6,8 +6,8 @@
 try {
     Push-Location
 
-    [Environment]::SetEnvironmentVariable("TMP", "c:\temp", "Process")
-    [Environment]::SetEnvironmentVariable("TEMP", "c:\temp", "Process")
+    # [Environment]::SetEnvironmentVariable("TMP", "c:\temp", "Process")
+    # [Environment]::SetEnvironmentVariable("TEMP", "c:\temp", "Process")
 
     # # If environment not yet set up, it should be running locally, not through Remote PS
     # if ( -not $script:IncludeDir)
