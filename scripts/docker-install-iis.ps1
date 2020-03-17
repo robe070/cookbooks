@@ -29,9 +29,17 @@ try {
 
 
     Write-Host "Adding features to IIS"
+    Write-Host "IIS-ApplicationDevelopment"
     Enable-WindowsOptionalFeature -online -FeatureName IIS-ApplicationDevelopment
+    Write-Host "NetFx4Extended-ASPNET45"
     Enable-WindowsOptionalFeature -online -FeatureName NetFx4Extended-ASPNET45
+    Write-Host "IIS-NetFxExtensibility45"
     Enable-WindowsOptionalFeature -Online -FeatureName IIS-NetFxExtensibility45
+    Write-Host "IIS-ISAPIExtensions"
+    Enable-WindowsOptionalFeature -Online -FeatureName IIS-ISAPIExtensions
+    Write-Host "IIS-ISAPIFilter"
+    Enable-WindowsOptionalFeature -Online -FeatureName IIS-ISAPIFilter
+    Write-Host "IIS-ASPNET45"
     Enable-WindowsOptionalFeature -Online -FeatureName IIS-ASPNET45
 
     # Write-Output "Enabling Remote IIS Management"
