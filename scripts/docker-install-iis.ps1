@@ -29,6 +29,7 @@ try {
 
 
     Write-Host "Adding features to IIS"
+    Enable-WindowsOptionalFeature -online -FeatureName IIS-ApplicationDevelopment
     Enable-WindowsOptionalFeature -online -FeatureName NetFx4Extended-ASPNET45
     Enable-WindowsOptionalFeature -Online -FeatureName IIS-NetFxExtensibility45
     Enable-WindowsOptionalFeature -Online -FeatureName IIS-ASPNET45
