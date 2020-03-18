@@ -49,6 +49,10 @@ try {
         $HypervCmd = '--isolation=hyperv'
     }
 
+    Write-Host ("Ensure we have the latest Windows image")
+    docker image pull  mcr.microsoft.com/windows/servercore/iis:$WINDOWS_VERSION
+
+    Write-Host( "Build the new Docker image")
     docker image build --build-arg WINDOWS_VERSION=$WINDOWS_VERSION $ClearCacheCmd $HypervCmd --tag lansalpc/iis/base:$ImageVersion-$WINDOWS_VERSION .
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {

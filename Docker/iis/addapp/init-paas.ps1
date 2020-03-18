@@ -1,12 +1,11 @@
 param(
-    [String]$ApplName = 'Docker',
     [String]$server_name='xrobertpc\sqlserver2012',
     [String]$dbname='test1',
-    [String]$dbuser,
-    [String]$dbpassword,
+    [String]$dbuser = 'admin',
+    [String]$dbpassword = 'password',
     [String]$dbpasswordpath,    # Optional location of Docker Secret
-    [String]$webuser,
-    [String]$webpassword,
+    [String]$webuser = 'PCXUSER2',
+    [String]$webpassword = 'PCXUSER@122',
     [String]$webpasswordpath,   # Optional location of Docker Secret
     [Switch]$64bit,             # Need to default to 32 bit so change to a 64 bit switch flag
     [String]$SUDB = '1',
@@ -17,8 +16,7 @@ param(
     [String]$MSIuri,
     [String]$sshkeypath,        # Optional location of Docker Secret
     [String]$GitBranch='debug/paas',
-    [String]$GitAppBranch='master',
-    [String]$GitAppUrl,
+    [String]$GitRepoUrl,
     [Switch]$Dbug
 )
 
@@ -49,13 +47,6 @@ foreach($key in [System.Environment]::GetEnvironmentVariables('Process').Keys) {
 }
 
 try {
-    Write-Host "Get latest build repo into Container"
-    Get-ChildItem c:\
-    Write-Host "GITREPOPATH: $ENV:GITREPOPATH";
-    Set-Location $ENV:GITREPOPATH
-    Get-ChildItem
-    git pull
-
     # Copy ssh_config from where Dockerfile put it to the git dir
     # Did not put in Dockerfile becasuse could not work out how to escape the space in 'program files'. [] did not work. Backtick did not work.
     Copy-Item c:\ssh_config "$ENV:ProgramW6432\Git\etc\ssh\ssh_config"
@@ -121,24 +112,29 @@ try {
     Write-Host "Using MSI from $MSIuri"
 
     # Registry Symbolic Links do not work on Server Core, so explicitly specify them.
-    # VL Runtime makes no use of 32-bit registry AFAIK.
+    # VL Runtime makes no use of 32-bit regisatry AFAIK.
     # Integrator and Web Server are entirely 64 bit.
     # Does 1200 use the 32-bit registry hive?
     # Should be OK.
-
     New-Item -Path HKLM:\Software\WOW6432Node  -Name 'LANSA' -Force
     New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    #New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name "GitBranch$ApplName" -Value $GitAppBranch -PropertyType String -Force
     New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    # New-ItemProperty -Path HKLM:\Software\LANSA  -Name "GitBranch$ApplName" -Value $GitAppBranch -PropertyType String -Force
 
     # Last Exit Code to 0
     cmd /c exit 0 | Out-Default | Write-Host
 
     Write-Host("ApplicationInstall")
+    $ApplName = "WebServer"
+    if (!$64bit) {
+        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
+    } else {
+        $APPA = "${ENV:ProgramW6432}\$($ApplName)"
+    }
 
-    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -dbname $dbName -userscripthook $userscripthook -ApplName $ApplName -MSIuri $MSIuri  -GitRepoUrl $GitAppUrl -GitRepoBranch $GitAppBranch `
-    -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit $(!$64bit) -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4545 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
+    $ApplicationName = 'APP1'
+
+    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -dbname $ApplicationName -userscripthook $userscripthook -ApplName $ApplicationName -CompanionInstallPath $APPA -MSIuri $MSIuri  -GitRepoUrl $GitRepoUrl `
+    -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit $(!$64bit) -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw
@@ -146,9 +142,9 @@ try {
 
     Write-Host("Update TPTH = %TEMP% and INST = NO in x_lansa.pro")
     if (!$64bit) {
-        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
+        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplicationName)"
     } else {
-        $APPA = "${ENV:ProgramW6432}\$($ApplName)"
+        $APPA = "${ENV:ProgramW6432}\$($ApplicationName)"
     }
 
     Add-Content "$APPA\x_win95\x_lansa\x_lansa.pro" "`nTPTH=${ENV:TEMP}`nINST=NO`n"
