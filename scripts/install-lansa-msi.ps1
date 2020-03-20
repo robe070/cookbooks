@@ -472,7 +472,7 @@ try
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
-    if ( ($SUDB -ne '1'  -and ($Cloud -ne "Docker") ) {
+    if ( $SUDB -ne '1' -and ($Cloud -ne "Docker") ) {
         Write-Host ("$(Log-Date) Waiting for Database tables to be created...")
         Start-Sleep -s 60
     }
