@@ -33,6 +33,8 @@ WORKDIR ${GITREPOPATH}
 # -v C:\progra~1\lansa\X_WIN95\X_LANSA\X_APPS\DOCKER:c:\msi -e MSIURI=c:\msi\DOCKER_v1.0.0_en-us.msi
 # Thus the MSI may be built and the container constructed without needing to copy the MSI to a separate location.
 
+# To debug container execution, pass -e DEBUG=Y
+
 ENV APPLNAME="Docker" `
     GITREPOPATH=$GITREPOPATH `
     GITBRANCH=$GITBRANCH `
@@ -46,7 +48,9 @@ ENV APPLNAME="Docker" `
     DBPASSWORDPATH="c:\secrets\db-password.txt" `
     WEBUSER="PCXUSER2" `
     WEBPASSWORD="password" `
-    WEBPASSWORDPATH="c:\secrets\web-password.txt"
+    WEBPASSWORDPATH="c:\secrets\web-password.txt" `
+    DEBUG=N `
+    SUDB=1
 
 # ...and ssh key in container's c:\temp\id_rsa
 
@@ -60,7 +64,7 @@ EXPOSE 4545
 # Note that the MSIuri parameter will work with local paths or an S3 url. And any uri that delivers an MSI as a file.
 # The default value for MSIuri is not set on the command line by default as its in the TEMP directory which is changed in the script.
 
-CMD c:\init-paas.ps1 -ApplName $ENV:APPLNAME -server_name $ENV:SERVERNAME -dbname $ENV:DBNAME -dbuser $ENV:DBUSER -dbpassword $ENV:DBPASSWORD -dbpasswordpath $ENV:DBPASSWORDPATH -webuser $ENV:WEBUSER -webpassword $ENV:WEBPASSWORD -webpasswordpath $ENV:WEBPASSWORDPATH -sshkeypath $ENV:SSHKEYPATH -GitAppUrl $ENV:GITAPPURL -GitAppBranch $ENV:GITAPPBRANCH -GitBranch $ENV:GITBRANCH -MSIuri $ENV:MSIuri -dbug
+CMD c:\init-paas.ps1 -ApplName $ENV:APPLNAME -SUDB $ENV:SUDB -server_name $ENV:SERVERNAME -dbname $ENV:DBNAME -dbuser $ENV:DBUSER -dbpassword $ENV:DBPASSWORD -dbpasswordpath $ENV:DBPASSWORDPATH -webuser $ENV:WEBUSER -webpassword $ENV:WEBPASSWORD -webpasswordpath $ENV:WEBPASSWORDPATH -sshkeypath $ENV:SSHKEYPATH -GitAppUrl $ENV:GITAPPURL -GitAppBranch $ENV:GITAPPBRANCH -GitBranch $ENV:GITBRANCH -MSIuri $ENV:MSIuri -DebugFlag $ENV:DEBUG
 
 # HEALTHCHECK --interval=5s `
 #  CMD powershell -command `

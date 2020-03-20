@@ -19,9 +19,12 @@ param(
     [String]$GitBranch='debug/paas',
     [String]$GitAppBranch='master',
     [String]$GitAppUrl,
-    [Switch]$Dbug
+    [String]$DebugFlag='N'
 )
 
+if ($DebugFlag -ne 'N' ) {
+    $Dbug = $true
+}
 if ( $Dbug ) { Write-Host("Debugging")}
 
 # Change the tempdir to the host volume so log files can be seen on the host
@@ -128,12 +131,43 @@ try {
 
     New-Item -Path HKLM:\Software\WOW6432Node  -Name 'LANSA' -Force
     New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    #New-ItemProperty -Path HKLM:\Software\WOW6432Node\LANSA  -Name "GitBranch$ApplName" -Value $GitAppBranch -PropertyType String -Force
     New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'GitBranch' -Value $GitBranch -PropertyType String -Force
-    # New-ItemProperty -Path HKLM:\Software\LANSA  -Name "GitBranch$ApplName" -Value $GitAppBranch -PropertyType String -Force
 
     # Last Exit Code to 0
     cmd /c exit 0 | Out-Default | Write-Host
+
+    if (!$64bit) {
+        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
+    } else {
+        $APPA = "${ENV:ProgramW6432}\$($ApplName)"
+    }
+
+    Write-Host "APPA = $APPA"
+
+    Write-Host "Switch webserver.conf logging on"
+
+    Add-Type -AssemblyName System.Web
+    # First replace all the special characters
+    $APPAEncoded = [System.Web.HttpUtility]::UrlEncode($APPA)
+    # And then fix it: The ':' was mistakenly changed, so change it back '%3a' => ':'
+    $APPAEncoded = $APPAEncoded -replace '%3a', ':'
+    # then replace '+' with %20
+    $APPAEncoded = $APPAEncoded -replace '\+', '%20'
+
+    Write-Host "APPAEncoded = $APPAEncoded"
+
+    $LogLevel = 'ERROR'
+    if ( $Dbug ) {
+         $LogLevel = 'DEBUG'
+    }
+    New-Item -Path "HKLM:\Software\LANSA\$($APPAEncoded)" -Name 'LANSAWEB' -Force
+    New-ItemProperty -Path "HKLM:\Software\LANSA\$($APPAEncoded)\LANSAWEB"  -Name 'WEBCFG_LOG' -Value $LogLevel -PropertyType String -Force
+    New-Item -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)" -Name 'LANSAWEB' -Force
+    New-ItemProperty -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)\LANSAWEB"  -Name 'WEBCFG_LOG' -Value $LogLevel -PropertyType String -Force
+
+    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+        throw
+    }
 
     Write-Host("ApplicationInstall")
 
@@ -145,12 +179,6 @@ try {
     }
 
     Write-Host("Update TPTH = %TEMP% and INST = NO in x_lansa.pro")
-    if (!$64bit) {
-        $APPA = "${ENV:ProgramFiles(x86)}\$($ApplName)"
-    } else {
-        $APPA = "${ENV:ProgramW6432}\$($ApplName)"
-    }
-
     Add-Content "$APPA\x_win95\x_lansa\x_lansa.pro" "`nTPTH=${ENV:TEMP}`nINST=NO`n"
 
     & "C:\\bootstrap.ps1"
