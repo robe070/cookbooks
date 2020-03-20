@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019', 'ltsc2016')]
+    [ValidateSet('1903', '1909', 'ltsc2019' )]
     [string]
     $DockerLabel='1909',
 
