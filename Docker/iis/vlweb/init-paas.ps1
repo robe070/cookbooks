@@ -119,7 +119,12 @@ try {
     }
 
     if (-not $MSIuri) {
-        $MSIuri = "$ENV:TEMP\\lansa.msi"
+        Write-Host "Pull down the default docker msi image from AWS S3 based on the git branch being used"
+        switch ($GitBranch) {
+            'debug/paas' { $MSIuri = 'https://lansa-us-east-1.s3.amazonaws.com/app/paas-debug/DOCKER_v1.0.0_en-us.msi' }
+            'patch/paas' { $MSIuri = 'https://lansa-us-east-1.s3.amazonaws.com/app/paas-test/DOCKER_v1.0.0_en-us.msi' }
+            Default { $MSIuri = 'https://lansa-us-east-1.s3.amazonaws.com/app/paas-live/DOCKER_v1.0.0_en-us.msi' }
+        }
     }
     Write-Host "Using MSI from $MSIuri"
 
