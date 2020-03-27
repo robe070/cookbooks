@@ -31,13 +31,18 @@ try {
     .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
     Pop-Location -StackName Docker
 
+    Push-Location vlweb -StackName Docker
+    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    Pop-Location -StackName Docker
+
     Push-Location webserver -StackName Docker
     .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
     Pop-Location -StackName Docker
 
-    Push-Location vlweb -StackName Docker
+    Push-Location addapp -StackName Docker
     .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
     Pop-Location -StackName Docker
+
 } catch {
     $_
     Pop-Location -StackName Docker

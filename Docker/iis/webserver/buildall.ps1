@@ -17,7 +17,7 @@ param (
     $ClearCache
 )
 if ( $DockerLabel -eq 'all' ){
-    .\build.ps1 1909 -Hyperv -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\build.ps1 1909 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
     .\build.ps1 ltsc2019 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
     .\build.ps1 1903 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
 } else {
