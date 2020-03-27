@@ -329,46 +329,48 @@ try
         start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
     }
 
-    #########################################################################################################
-    # Database setup
-    # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
-    # The template creates the database so it was conditioned out.
-    #########################################################################################################
+    if ($Cloud -ne "Docker") {
+        #########################################################################################################
+        # Database setup
+        # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
+        # The template creates the database so it was conditioned out.
+        #########################################################################################################
 
-    if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") {
-        Write-Host( "$(Log-Date) Using SQL Authentication")
-        $trusted="NO"
-    } else {
-        Write-Host( "$(Log-Date) Using trusted connection")
-        $trusted="1"
-    }
+        if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") {
+            Write-Host( "$(Log-Date) Using SQL Authentication")
+            $trusted="NO"
+        } else {
+            Write-Host( "$(Log-Date) Using trusted connection")
+            $trusted="1"
+        }
 
-    if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
-    {
-        switch ($DBUT) {
-            "MSSQLS" {
-                Write-Host ("$(Log-Date) Database Setup work...")
+        if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
+        {
+            switch ($DBUT) {
+                "MSSQLS" {
+                    Write-Host ("$(Log-Date) Database Setup work...")
 
-                Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+                    Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Default | Write-Host
+                    Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Default | Write-Host
 
-                Import-Module “sqlps” -DisableNameChecking | Out-Null
+                    Import-Module “sqlps” -DisableNameChecking | Out-Null
 
-                if ( $SUDB -eq '1' -and -not $UPGD_bool)
-                {
-                    if ( $trusted -eq "NO" ) {
-                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Default | Write-Host
-                    } else {
-                        Create-SqlServerDatabase $server_name $dbname | Out-Default | Write-Host
+                    if ( $SUDB -eq '1' -and -not $UPGD_bool)
+                    {
+                        if ( $trusted -eq "NO" ) {
+                            Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Default | Write-Host
+                        } else {
+                            Create-SqlServerDatabase $server_name $dbname | Out-Default | Write-Host
+                        }
                     }
-                }
 
-                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Default | Write-Host
-                cd "c:"
-            }
-            default {
-                Write-Host ("$(Log-Date) Database presumed to exist")
+                    Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Default | Write-Host
+                    cd "c:"
+                }
+                default {
+                    Write-Host ("$(Log-Date) Database presumed to exist")
+                }
             }
         }
     }
