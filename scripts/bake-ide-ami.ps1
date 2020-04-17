@@ -258,7 +258,7 @@ try
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
 
-            . .\Remove-AzrVirtualMachine.ps1
+            . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $svcName -Wait
         }
 
