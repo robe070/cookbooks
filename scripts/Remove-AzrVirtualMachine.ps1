@@ -105,7 +105,8 @@ function Remove-AzrVirtualMachine {
 
 			## Remove the OS disk
 			Write-Verbose -Message 'Removing OS disk...'
-			if ('Uri' -in $vm.StorageProfile.OSDisk.Vhd) {
+			#if ([bool]($($vm.StorageProfile.OSDisk.Vhd).PSobject.Properties.name -match "uri") ) {
+            if (Get-Member -inputobject $vm.StorageProfile.OSDisk.Vhd -name "uri" -Membertype Properties) {
 				## Not managed
 				$osDiskId = $vm.StorageProfile.OSDisk.Vhd.Uri
 				$osDiskContainerName = $osDiskId.Split('/')[-2]
@@ -119,8 +120,13 @@ function Remove-AzrVirtualMachine {
 				$osDiskStorageAcct | Get-AzStorageBlob -Container $osDiskContainerName -Blob "$($vm.Name)*.status" | Remove-AzStorageBlob
 				#endregion
 			} else {
-				## managed
-				Get-AzDisk | where { $_.Name -eq $vm.StorageProfile.OSDisk.Name } | Remove-AzDisk -Force
+                ## managed
+                Write-Verbose( "Removing disk $($vm.StorageProfile.OSDisk.Name)" )
+                $Disk = Get-AzDisk -ResourceGroupName $ResourceGroupName | where { $_.Name -eq $vm.StorageProfile.OSDisk.Name }
+                if ($Disk) {
+                    $Disk | Write-Verbose
+                    Remove-AzDisk $Disk -Force
+                }
 			}
 
 			## Remove any other attached disks
