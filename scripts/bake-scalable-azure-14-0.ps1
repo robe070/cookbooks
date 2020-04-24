@@ -35,7 +35,7 @@ Bake-IdeMsi -VersionText 'SCALE-CA8' `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
             -AmazonAMIName "2012-R2-Datacenter" `
-            -GitBranch "support/L4W14200_scalable" `
+            -GitBranch "debug/paas" `
             -Cloud "Azure" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `

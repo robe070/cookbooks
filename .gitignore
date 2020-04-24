@@ -88,3 +88,5 @@ scripts/.vscode/launch.json
 /Docker/iis/base/dot-CommonTools.ps1
 /Docker/iis/base/getchoco.ps1
 /Docker/iis/base/installGit.ps1
+!/Installs/**
+

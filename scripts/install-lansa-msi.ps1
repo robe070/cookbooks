@@ -46,6 +46,7 @@ param(
 [String]$JSMAdminPortNumber = "",
 [String]$HTTPPortNumberHub = "",
 [String]$GitRepoUrl = "",
+[String]$GitRepoBranch = "",
 [Boolean]$DisableSQLServer = $true
 )
 
@@ -127,6 +128,13 @@ try
         $CompanionInstall = $true
     }
 
+    $InstallDir = Join-Path $(Split-Path -Parent $script:IncludeDir) "Installs\VC_Redist"
+    if (Test-Path $InstallDir) {
+        Write-Host( "$(Log-Date) Installs directory = $InstallDir" )
+    } else {
+        throw "Installs directory $InstallDir does not exist"
+    }
+
     # ***********************************************************************************
     if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
         Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
@@ -155,11 +163,12 @@ try
 
     # Docker passes in a local path to the MSI which is mapped to a host volume
     # Just copy it to the standard name - its used to determine if an upgrade or not.
-    if ( $Cloud -eq "Docker") {
-        Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Default | Write-Host
-    }
+    # if ( $Cloud -eq "Docker") {
+    #     Copy-Item -Path $MSIUri -Destination $installer_file -Force | Out-Default | Write-Host
+    # }
 
-    if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
+    # if ( $MSIuri.Length -gt 0 -and ($Cloud -eq "Azure" -or ($Cloud -eq "AWS") -or ($Cloud -eq "on-premise")) ) {
+    if ( $MSIuri.Length -gt 0 ) {
         Write-Verbose ("$(Log-Date) Downloading $MSIuri to $installer_file") | Out-Default | Write-Host
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
@@ -312,48 +321,56 @@ try
         if ( $HTTPPortNumberHub.Length -gt 0) {
             New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
         }
+
+        Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
+        start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
+
+        Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
+        start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
     }
 
-    #########################################################################################################
-    # Database setup
-    # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
-    # The template creates the database so it was conditioned out.
-    #########################################################################################################
+    if ($Cloud -ne "Docker") {
+        #########################################################################################################
+        # Database setup
+        # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
+        # The template creates the database so it was conditioned out.
+        #########################################################################################################
 
-    if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") {
-        Write-Host( "$(Log-Date) Using SQL Authentication")
-        $trusted="NO"
-    } else {
-        Write-Host( "$(Log-Date) Using trusted connection")
-        $trusted="1"
-    }
+        if ( $dbuser -and $dbuser -ne "" -and $dbpassword -and $dbpassword -ne "") {
+            Write-Host( "$(Log-Date) Using SQL Authentication")
+            $trusted="NO"
+        } else {
+            Write-Host( "$(Log-Date) Using trusted connection")
+            $trusted="1"
+        }
 
-    if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
-    {
-        switch ($DBUT) {
-            "MSSQLS" {
-                Write-Host ("$(Log-Date) Database Setup work...")
+        if ( ($SUDB -eq '1') -and (-not $UPGD_bool) )
+        {
+            switch ($DBUT) {
+                "MSSQLS" {
+                    Write-Host ("$(Log-Date) Database Setup work...")
 
-                Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
+                    Write-Host ("$(Log-Date) Ensure SQL Server Powershell module is loaded.")
 
-                Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Default | Write-Host
+                    Write-Verbose ("$(Log-Date) Loading this module changes the current directory to 'SQLSERVER:\'. It will need to be changed back later") | Out-Default | Write-Host
 
-                Import-Module “sqlps” -DisableNameChecking | Out-Null
+                    Import-Module “sqlps” -DisableNameChecking | Out-Null
 
-                if ( $SUDB -eq '1' -and -not $UPGD_bool)
-                {
-                    if ( $trusted -eq "NO" ) {
-                        Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Default | Write-Host
-                    } else {
-                        Create-SqlServerDatabase $server_name $dbname | Out-Default | Write-Host
+                    if ( $SUDB -eq '1' -and -not $UPGD_bool)
+                    {
+                        if ( $trusted -eq "NO" ) {
+                            Create-SqlServerDatabase $server_name $dbname $dbuser $dbpassword | Out-Default | Write-Host
+                        } else {
+                            Create-SqlServerDatabase $server_name $dbname | Out-Default | Write-Host
+                        }
                     }
-                }
 
-                Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Default | Write-Host
-                cd "c:"
-            }
-            default {
-                Write-Host ("$(Log-Date) Database presumed to exist")
+                    Write-Verbose ("$(Log-Date) Change current directory from 'SQLSERVER:\' back to the file system so that file pathing works properly") | Out-Default | Write-Host
+                    cd "c:"
+                }
+                default {
+                    Write-Host ("$(Log-Date) Database presumed to exist")
+                }
             }
         }
     }
@@ -364,14 +381,18 @@ try
             Start-WebAppPool -Name "DefaultAppPool" | Out-Default | Write-Host
         }
 
-        Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+        # The docker operator can easily set command line variables when creating the container, so get out of the way!
+        if ( $Cloud -ne 'Docker') {
 
-        if ($trace -eq "Y") {
-            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
-            $env:X_RUN = $traceSettings
-        } else {
-            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
-            $env:X_RUN = ''
+            Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+
+            if ($trace -eq "Y") {
+                [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
+                $env:X_RUN = $traceSettings
+            } else {
+                [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
+                $env:X_RUN = ''
+            }
         }
     }
 
@@ -398,6 +419,14 @@ try
             Write-Host("$(Log-Date) Stopping $($Process.ProcessName)")
             Stop-Process $process.id -Force | Out-Default | Write-Host
         }
+
+        $TotalWait = 0
+        do {
+            Start-Sleep -Seconds 2
+            $TotalWait += 2
+            $Processes = @(Get-Process | Where-Object {$_.Path -like "*\msiexec.exe" })
+        } while ($Processes.Count -gt 0 -and ($TotalWait -lt 120) )
+        Write-Host("$(Log-Date) Waited $TotalWait seconds for msiexec.exe to be terminated. Maximum wait 120 seconds")
     }
 
 
@@ -436,12 +465,16 @@ try
         $Arguments += "GITREPOURL=$GitRepoUrl"
     }
 
+    if ( $GitRepoBranch.Length -gt 0) {
+        $Arguments += "GITREPOBRANCH=$GitRepoBranch"
+    }
+
     Write-Host ("$(Log-Date) Arguments = $Arguments")
 
     $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
     Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
-    if ( ($SUDB -ne '1') ) {
+    if ( $SUDB -ne '1' -and ($Cloud -ne "Docker") ) {
         Write-Host ("$(Log-Date) Waiting for Database tables to be created...")
         Start-Sleep -s 60
     }
@@ -638,6 +671,9 @@ finally
 
     Write-Host( "$(Log-Date) Attempt to ensure that IIS is running by starting it. (Should already be started)")
     iisreset /start | Out-Default | Write-Host
+
+    # iisreset resets $LASTEXITCODE
+    cmd /c exit $ExitCode    #Set $LASTEXITCODE
 }
 
 # Successful completion so set Last Exit Code to 0

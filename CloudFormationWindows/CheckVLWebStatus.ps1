@@ -5,7 +5,7 @@
 
 Param(
     [Parameter(Mandatory)]
-        [ValidateSet('Live','Test','Dev','Custom','All')]
+        [ValidateSet('Live','Test','Dev','All', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '30')]
         [string] $StackType
 )
 
@@ -67,26 +67,33 @@ try {
     [Decimal]$Stack=0
     [System.Collections.ArrayList]$stacklist = @()
 
-    if ( $StackType -eq 'Live' -or $StackType -eq 'All') {
-        $StackStart = 1
-        $StackEnd = 10
+    switch ( $StackType ) {
+        {$_ -eq 'Live' -or $_ -eq 'All'} {
+            $StackStart = 1
+            $StackEnd = 10
 
-        For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
-            $stacklist.add($stack) | Out-Null
+            For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
+                $stacklist.add($stack) | Out-Null
+            }
+        }
+        {$_ -eq 'Test' -or $_ -eq 'All'} {
+            $stacklist.add(20) | Out-Null
+        }
+        {$_ -eq 'Dev' -or $_ -eq 'All'} {
+            $stacklist.add(30) | Out-Null
+        }
+        # Handle numeric entry
+        Default {
+            $StackNum = [Decimal] $_
+            $stacklist.add($StackNum) | Out-Null
         }
     }
 
-    if ( $StackType -eq 'Test' -or $StackType -eq 'All') {
-        $stacklist.add(20)
+    if ( $stacklist.Count -eq 0 ) {
+        throw "There are no stacks requested"
     }
 
-    if ( $StackType -eq 'Dev' -or $StackType -eq 'All') {
-        $stacklist.add(30)
-    }
-
-    if ( $StackType -eq 'Custom') {
-        $stacklist.add(1)
-    }
+    Write-Host( "Stack List: $($Stacklist -join ',')")
 
     $Loop = 0
     do {
