@@ -9,18 +9,25 @@ try {
        $tempFolder = $args[0]
     }
 
-    $source = "http://aka.ms/downloadazcopy"
-    $destination = Join-Path -Path $tempFolder -ChildPath "AzCopy.msi"
-    $InstallDir = "${ENV:ProgramFiles(x86)}\Azure"
-    $wc = New-Object system.net.webclient
-    $wc.downloadFile( $source, $destination ) | Write-Output
+    try {
+        # AZCopy link now requires TLS 1.2
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    Run-ExitCode 'msiexec' @('/quiet', '/i', """$destination""", "AZURESTORAGETOOLSFOLDER=""$InstallDir""")
+        $AWSUrl = "https://aka.ms/downloadazcopy"
+        $installer_file = (Join-Path $temppath 'AzCopy.msi')
+        (New-Object System.Net.WebClient).DownloadFile($AWSUrl, $installer_file) | Out-Default | Write-Host
+    } catch {
+        throw "Failed to download $AWSUrl to $installer_file"
+    }
+
+    $InstallDir = "${ENV:ProgramFiles(x86)}\Azure"
+
+    Run-ExitCode 'msiexec' @('/quiet', '/i', """$installer_file""", "AZURESTORAGETOOLSFOLDER=""$InstallDir""")
 
     Add-DirectoryToEnvPathOnce -Directory "$InstallDir\Azcopy"
 
-    Write-Output "$(Log-Date) AzCopy installed"
+    Write-Host "$(Log-Date) AzCopy installed"
 } catch {
-    Write-Error ($_ | format-list | out-string)
-    Write-Output "$(Log-Date) AzCopy failed to install"
+    Write-Host ($_ | format-list | out-string)
+    Write-Host "$(Log-Date) AzCopy failed to install"
 }

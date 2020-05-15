@@ -163,6 +163,9 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\lansa" -Name "Installing" -Value 1 | Out-Default | Write-Host
 
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    Write-Verbose ("$(Log-Date) Running on $Cloud")
+
     Write-Host ("$(Log-Date) Test if this is the first install")
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
@@ -190,16 +193,19 @@ try
     }
     Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 
-    Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
+    # The docker operator can easily set command line variables when creating the container, so get out of the way!
+    if ( $Cloud -ne 'Docker') {
+        Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
-    if ($trace -eq "Y") {
-        Write-Host ("$(Log-Date) Set tracing on" )
-        [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
-        $env:X_RUN = $traceSettings
-    } else {
-        Write-Host ("$(Log-Date) Set tracing off" )
-        [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
-        $env:X_RUN = ''
+        if ($trace -eq "Y") {
+            Write-Host ("$(Log-Date) Set tracing on" )
+            [Environment]::SetEnvironmentVariable("X_RUN", $traceSettings, "Machine") | Out-Default | Write-Host
+            $env:X_RUN = $traceSettings
+        } else {
+            Write-Host ("$(Log-Date) Set tracing off" )
+            [Environment]::SetEnvironmentVariable("X_RUN", $null, "Machine") | Out-Default | Write-Host
+            $env:X_RUN = ''
+        }
     }
     Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 

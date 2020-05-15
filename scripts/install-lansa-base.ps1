@@ -104,11 +104,17 @@ try
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $null -eq $mssql_services -and ( -not $InstallSQLServer ) ) {
         # So SQL Server not installed and we are not planning on installing it, so install whats required to use the sqlps module
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SQLSysClrTypes.msi' -installer_file (Join-Path $temppath 'SQLSysClrTypes.msi') -log_file (Join-Path $temppath 'SQLSysClrTypes.log')
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SharedManagementObjects.msi' -installer_file (Join-Path $temppath 'SharedManagementObjects.msi') -log_file (Join-Path $temppath 'SharedManagementObjects.log')
-        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log')
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SQLSysClrTypes.msi' -installer_file (Join-Path $temppath 'SQLSysClrTypes.msi') -log_file (Join-Path $temppath 'SQLSysClrTypes.log');
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/SharedManagementObjects.msi' -installer_file (Join-Path $temppath 'SharedManagementObjects.msi') -log_file (Join-Path $temppath 'SharedManagementObjects.log');
+        DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log');
     }
 
+    Write-Host "Clear the UTF-8 system locale option. If already switched off this code has no effect"
+    $Locale =  Get-WinSystemLocale
+    Write-Host "Current Locale = $($Locale.name)"
+    Set-WinSystemLocale $Locale.Name
+
+    # Chef installation
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
 
@@ -203,10 +209,13 @@ try
         get-service AmazonCloudWatchAgent | SELECT-OBJECT Name, StartType, Status | Out-Default | Write-Host
     }
 
+    # GUI Application Installation
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
         # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
+        # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
         Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+
         Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
         Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
         try {

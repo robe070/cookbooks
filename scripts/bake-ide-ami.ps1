@@ -253,12 +253,12 @@ try
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
-        $publicDNSName = "bakingpublicdnsauseast"
+        $publicDNSName = "bakingpublicdnsauseast-$($Script:vmname)"
 
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
 
-            . .\Remove-AzrVirtualMachine.ps1
+            . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $svcName -Wait
         }
 
@@ -266,41 +266,49 @@ try
         $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
 
-        $nic = Get-AzNetworkInterface -Name bakingNic -ResourceGroupName $svcName -ErrorAction SilentlyContinue
+        $NicName = "bakingNic-$($Script:vmname)"
+        $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -ErrorAction SilentlyContinue
         if ( $null -eq $nic ) {
             Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
 
+            $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($Script:vmname)"
+            $AzVirtualNetworkName = "bakingvNET-$($Script:vmname)"
+            $AzNetworkSecurityGroupRuleRDPName = "RDPRule-$($Script:vmname)"
+            $AzNetworkSecurityGroupRuleWinRMHttpName = "WinRMHttpRule-$($Script:vmname)"
+            $AzNetworkSecurityGroupRuleWinRMHttpsName = "WinRMHttpsRule-$($Script:vmname)"
+            $AzNetworkSecurityGroupName = "bakingNSG-$($Script:vmname)"
+
             # Create a subnet configuration
             Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
-            $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name bakingSubnet -AddressPrefix 192.168.1.0/24
+            $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $AzVirtualNetworkSubnetConfigName -AddressPrefix 192.168.1.0/24
 
             # Create a virtual network
-            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name bakingvNET -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
+            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
 
             # Create a public IP address and specify a DNS name
             $pip = New-AzPublicIpAddress -ResourceGroupName $svcName -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # Create an inbound network security group rule for port 3389
-            $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleRDP  -Protocol Tcp `
+            $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
             -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 3389 -Access Allow
 
             # Create an inbound network security group rule for port 5985
-            $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleWinRMHttp  -Protocol Tcp `
+            $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
             -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 5985 -Access Allow
 
             # Create an inbound network security group rule for port 5986
-            $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name bakingNetworkSecurityGroupRuleWinRMHttps  -Protocol Tcp `
+            $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
             -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
             $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $svcName -Location $location `
-            -Name bakingNetworkSecurityGroup -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force
+            -Name $AzNetworkSecurityGroupName -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force
 
             # Create a virtual network card and associate with public IP address and NSG
-            $nic = New-AzNetworkInterface -Name bakingNic -ResourceGroupName $svcName -Location $location `
+            $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -Location $location `
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
 
@@ -392,6 +400,7 @@ $jsonObject = @"
                 New-ItemProperty -Path $lansaKey  -Name 'VersionMinor' -PropertyType DWord -Value $using:VersionMinor -Force | Out-Default | Write-Host
                 New-ItemProperty -Path $lansaKey  -Name 'Language' -PropertyType String -Value $using:Language -Force | Out-Default | Write-Host
                 New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force | Out-Default | Write-Host
+                New-ItemProperty -Path $lansaKey  -Name 'Platform' -PropertyType String -Value $using:Platform -Force | Out-Default | Write-Host
 
                 Write-Verbose "Switch off Internet download security warning" | Out-Default | Write-Host
                 [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine') | Out-Default | Write-Host
