@@ -2,7 +2,7 @@
 
 Param(
     [Parameter(Mandatory)]
-    [ValidateSet('Live','Test','Dev', 'All', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '30', '40')]
+    [ValidateSet('Live','Test','Dev', 'All', 'Custom', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '30', '40')]
     [string] $StackType
 )
 
@@ -40,6 +40,11 @@ switch ( $StackType ) {
         For ( $stack = $StackStart; $stack -le $StackEnd; $stack++) {
             $stacklist.add($stack) | Out-Null
         }
+    }
+    {$_ -eq 'Custom'} {
+        $GitRepoBranch = 'support/L4W14200_paas'
+        $ApplMsiFolder = 'paas-live'
+        $stacklist = @(1,2,3,5,6,7,8,9,10)
     }
     {$_ -eq 'Test' -or $_ -eq 'All'} {
         $GitRepoBranch = 'patch/paas'
