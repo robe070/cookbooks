@@ -2,6 +2,8 @@ Param(
     [Parameter(Mandatory)]
         [SecureString] $Pwd
 )
+
+
 $CertPath = 'cert:\localmachine\my'
 $PfxPath = 'c:\appgwcert.pfx'
 Remove-Item $PfxPath

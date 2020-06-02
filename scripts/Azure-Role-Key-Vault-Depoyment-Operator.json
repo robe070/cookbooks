@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "roleName": "Key Vault resource manager template deployment operator",
+        "description": "Lets you deploy a resource manager template with access to the secrets in a Key Vault.",
+        "assignableScopes": [
+            "/subscriptions/edff5157-5735-4ceb-af94-526e2c235e80"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.KeyVault/vaults/deploy/action"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
