@@ -296,25 +296,25 @@ try {
     if ( $Test ){
         Write-Host "$(Log-Date) Compile Tests that must be compiled each time its tested"
 
-        # foreach ($Root in $RootList ){
-        #     if ( $Root -eq $PrimaryPath) {
-        #         continue
-        #     }
+        foreach ($Root in $RootList ){
+            if ( $Root -eq $PrimaryPath) {
+                continue
+            }
 
-        #     Write-Host ("$(Log-Date) Compiling $CompileItem for $Root")
-        #     Compile $Root 'L157726'
-        #     Write-Host ("$(Log-Date) ************************************************************")
-        # }
+            Write-Host ("$(Log-Date) Compiling $CompileItem for $Root")
+            Compile $Root 'L157726'
+            Write-Host ("$(Log-Date) ************************************************************")
+        }
 
         $TestList = @(
-            #("VT157033", "V57033A"),
-            #("VT156118", "V56118A"),
-            # ("VT159821", "V59821A"),
-            # ("VT157722", "V57722A"),
-            #("VT160466", "V60466A"),
-            #("VT156710", "V56710A"), #  defects need to be fixed
-            #("VT161348", "V61348A"), #  defects need to be fixed
-            #("VT157726", "V57726A"),
+            ("VT157033", "V57033A"),
+            ("VT156118", "V56118A"),
+            ("VT159821", "V59821A"),
+            ("VT157722", "V57722A"),
+            ("VT160466", "V60466A"),
+            ("VT156710", "V56710A"),
+            ("VT161348", "V61348A"),
+            ("VT157726", "V57726A"),
             ("VT159434", "V59434A"),
             ("VT159585", "V59585A"),
             ("VT158011", "V58011A"),
