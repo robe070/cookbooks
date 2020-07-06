@@ -1,0 +1,430 @@
+C:\Users\Robert.SYD\Documents\GitHub\cookbooks_scalable\Tests\Database\db-test.ps1
+C:\Users\Robert.SYD\Documents\GitHub\cookbooks_scalable\scripts
+2020-06-24 09:59:37Z Check if directory \\syd6\ccs\tests\Test-Materials exists
+2020-06-24 09:59:37Z Working directory is C:\lansa\TestSecondaryMySQL
+2020-06-24 09:59:37Z Check if this current directory is a Visual LANSA Root Directory
+2020-06-24 09:59:37Z Copy UserLists for compiling
+2020-06-24 09:59:37Z Importing 157033
+2020-06-24 09:59:37Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157033" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157033.log"
+2020-06-24 09:59:43Z Importing 156118
+2020-06-24 09:59:43Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156118" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156118.log"
+2020-06-24 09:59:46Z Importing 159821
+2020-06-24 09:59:46Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\159000-159999\159821" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\159821.log"
+2020-06-24 09:59:49Z Importing 157722
+2020-06-24 09:59:49Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157722" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157722.log"
+2020-06-24 09:59:52Z Importing 160466
+2020-06-24 09:59:52Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\160000-160999\160466" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\160466.log"
+2020-06-24 09:59:54Z Importing 156710
+2020-06-24 09:59:54Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156710" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156710.log"
+2020-06-24 09:59:57Z Importing 161348
+2020-06-24 09:59:57Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\161000-161999\161348" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\161348.log"
+2020-06-24 09:59:59Z Working directory is C:\lansa\TestSecondarySQLAnywhere
+2020-06-24 09:59:59Z Check if this current directory is a Visual LANSA Root Directory
+2020-06-24 09:59:59Z Copy UserLists for compiling
+2020-06-24 09:59:59Z Importing 157033
+2020-06-24 09:59:59Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157033" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157033.log"
+2020-06-24 10:00:04Z Importing 156118
+2020-06-24 10:00:04Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156118" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156118.log"
+2020-06-24 10:00:07Z Importing 159821
+2020-06-24 10:00:07Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\159000-159999\159821" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\159821.log"
+2020-06-24 10:00:10Z Importing 157722
+2020-06-24 10:00:10Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157722" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157722.log"
+2020-06-24 10:00:13Z Importing 160466
+2020-06-24 10:00:13Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\160000-160999\160466" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\160466.log"
+2020-06-24 10:00:16Z Importing 156710
+2020-06-24 10:00:16Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156710" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156710.log"
+2020-06-24 10:00:20Z Importing 161348
+2020-06-24 10:00:20Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\161000-161999\161348" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\161348.log"
+2020-06-24 10:00:23Z Working directory is C:\lansa\TestSecondaryORA
+2020-06-24 10:00:23Z Check if this current directory is a Visual LANSA Root Directory
+2020-06-24 10:00:23Z Copy UserLists for compiling
+2020-06-24 10:00:23Z Importing 157033
+2020-06-24 10:00:24Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157033" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157033.log"
+2020-06-24 10:00:51Z Importing 156118
+2020-06-24 10:00:51Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156118" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156118.log"
+2020-06-24 10:01:02Z Importing 159821
+2020-06-24 10:01:02Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\159000-159999\159821" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\159821.log"
+2020-06-24 10:01:15Z Importing 157722
+2020-06-24 10:01:15Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157722" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157722.log"
+2020-06-24 10:01:25Z Importing 160466
+2020-06-24 10:01:25Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\160000-160999\160466" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\160466.log"
+2020-06-24 10:01:34Z Importing 156710
+2020-06-24 10:01:34Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\156000-156999\156710" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\156710.log"
+2020-06-24 10:01:50Z Importing 161348
+2020-06-24 10:01:50Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\161000-161999\161348" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\161348.log"
+2020-06-24 10:01:59Z Working directory is C:\lansa\TestSecondaryMySQL
+2020-06-24 10:01:59Z Imports that are required every time the test is compiled or tested
+2020-06-24 10:01:59Z Importing 157726
+2020-06-24 10:01:59Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157726" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157726.log"
+2020-06-24 10:02:03Z Working directory is C:\lansa\TestSecondarySQLAnywhere
+2020-06-24 10:02:03Z Imports that are required every time the test is compiled or tested
+2020-06-24 10:02:03Z Importing 157726
+2020-06-24 10:02:03Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157726" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157726.log"
+2020-06-24 10:02:06Z Working directory is C:\lansa\TestSecondaryORA
+2020-06-24 10:02:06Z Imports that are required every time the test is compiled or tested
+2020-06-24 10:02:06Z Importing 157726
+2020-06-24 10:02:06Z Arguments PROC=*LIMPORT INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG DEVF=4114 EXPR="\\syd6\CCS\Tests\157000-157999\157726" EXPM="C:\lansa\TestSecondarySQLAnywhere\tmp\157726.log"
+
+2020-06-24 10:02:17Z Compile all the Secondary Tests
+2020-06-24 10:02:17Z Compiling C:\lansa\TestSecondaryMySQL
+2020-06-24 10:02:17Z Compiling L157033
+2020-06-24 10:02:17Z Arguments /PARTITION=WBP /PROJECT=L157033 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157033,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20021784"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:03:12Z LastExitCode = 0
+2020-06-24 10:03:12Z Compiling L156118
+2020-06-24 10:03:12Z Arguments /PARTITION=WBP /PROJECT=L156118 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156118,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20031316"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:03:43Z LastExitCode = 0
+2020-06-24 10:03:43Z Compiling L159821
+2020-06-24 10:03:43Z Arguments /PARTITION=WBP /PROJECT=L159821 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L159821,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20034380"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:04:03Z LastExitCode = 0
+2020-06-24 10:04:03Z Compiling L157722
+2020-06-24 10:04:03Z Arguments /PARTITION=WBP /PROJECT=L157722 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157722,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20040355"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:04:22Z LastExitCode = 0
+2020-06-24 10:04:22Z Compiling L160466
+2020-06-24 10:04:22Z Arguments /PARTITION=WBP /PROJECT=L160466 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L160466,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20042284"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:04:41Z LastExitCode = 0
+2020-06-24 10:04:41Z Compiling L156710
+2020-06-24 10:04:41Z Arguments /PARTITION=WBP /PROJECT=L156710 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156710,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20044207"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:05:55Z LastExitCode = 0
+2020-06-24 10:05:55Z Compiling L161348
+2020-06-24 10:05:55Z Arguments /PARTITION=WBP /PROJECT=L161348 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L161348,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20055627"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile successful
+2020-06-24 10:06:04Z LastExitCode = 0
+2020-06-24 10:06:04Z Compiling L157726
+2020-06-24 10:06:04Z Arguments /PARTITION=WBP /PROJECT=L157726 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondaryMySQL\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondaryMySQL\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157726,A,N,,RUP TABL
+FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20060552"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:06:36Z LastExitCode = 0
+2020-06-24 10:06:36Z Compiling C:\lansa\TestSecondarySQLAnywhere
+2020-06-24 10:06:36Z Compiling L157033
+2020-06-24 10:06:36Z Arguments /PARTITION=WBP /PROJECT=L157033 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157033,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20063657"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:07:33Z LastExitCode = 0
+2020-06-24 10:07:33Z Compiling L156118
+2020-06-24 10:07:33Z Arguments /PARTITION=WBP /PROJECT=L156118 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156118,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20073419"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:08:06Z LastExitCode = 0
+2020-06-24 10:08:06Z Compiling L159821
+2020-06-24 10:08:06Z Arguments /PARTITION=WBP /PROJECT=L159821 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L159821,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20080661"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:08:27Z LastExitCode = 0
+2020-06-24 10:08:27Z Compiling L157722
+2020-06-24 10:08:27Z Arguments /PARTITION=WBP /PROJECT=L157722 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157722,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20082764"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:08:47Z LastExitCode = 0
+2020-06-24 10:08:47Z Compiling L160466
+2020-06-24 10:08:47Z Arguments /PARTITION=WBP /PROJECT=L160466 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L160466,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20084826"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:09:08Z LastExitCode = 0
+2020-06-24 10:09:08Z Compiling L156710
+2020-06-24 10:09:08Z Arguments /PARTITION=WBP /PROJECT=L156710 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156710,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20090901"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:10:24Z LastExitCode = 0
+2020-06-24 10:10:24Z Compiling L161348
+2020-06-24 10:10:24Z Arguments /PARTITION=WBP /PROJECT=L161348 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L161348,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20102503"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile successful
+2020-06-24 10:10:34Z LastExitCode = 0
+2020-06-24 10:10:34Z Compiling L157726
+2020-06-24 10:10:34Z Arguments /PARTITION=WBP /PROJECT=L157726 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>set arg0dir=C:\Lansa\TestSecondarySQLAnywhere\LANSA\
+
+C:\lansa\TestSecondaryORA>"C:\Lansa\TestSecondarySQLAnywhere\LANSA\..\x_win95\x_lansa\execute\x_run.exe" QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157726,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20103488"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:11:07Z LastExitCode = 0
+2020-06-24 10:11:07Z Compiling C:\lansa\TestSecondaryORA
+2020-06-24 10:11:07Z Compiling L157033
+2020-06-24 10:11:07Z Arguments /PARTITION=WBP /PROJECT=L157033 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157033,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20110729"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:12:40Z LastExitCode = 0
+2020-06-24 10:12:40Z Compiling L156118
+2020-06-24 10:12:40Z Arguments /PARTITION=WBP /PROJECT=L156118 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156118,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20124053"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:51:50Z LastExitCode = 0
+2020-06-24 10:51:50Z Compiling L159821
+2020-06-24 10:51:50Z Arguments /PARTITION=WBP /PROJECT=L159821 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L159821,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20515061"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:52:26Z LastExitCode = 0
+2020-06-24 10:52:26Z Compiling L157722
+2020-06-24 10:52:26Z Arguments /PARTITION=WBP /PROJECT=L157722 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157722,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20522696"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:53:01Z LastExitCode = 0
+2020-06-24 10:53:01Z Compiling L160466
+2020-06-24 10:53:01Z Arguments /PARTITION=WBP /PROJECT=L160466 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L160466,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20530189"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:53:36Z LastExitCode = 0
+2020-06-24 10:53:36Z Compiling L156710
+2020-06-24 10:53:36Z Arguments /PARTITION=WBP /PROJECT=L156710 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L156710,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20533626"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:55:20Z LastExitCode = 0
+2020-06-24 10:55:20Z Compiling L161348
+2020-06-24 10:55:20Z Arguments /PARTITION=WBP /PROJECT=L161348 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L161348,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20552088"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile successful
+2020-06-24 10:55:45Z LastExitCode = 0
+2020-06-24 10:55:45Z Compiling L157726
+2020-06-24 10:55:45Z Arguments /PARTITION=WBP /PROJECT=L157726 /VCONLY=NO /OBJECTS=ALL
+
+C:\lansa\TestSecondaryORA>echo off
+
+C:\lansa\TestSecondaryORA>C:\Lansa\TestSecondaryORA\LANSA\..\x_win95\x_lansa\execute\x_run.exe QUET=Y PROC=xcmdlnbp FUNC=xcmdlb1 PART=WBP LANG=ENG UDEF="P,L157726,A,N,,RUP TABL FORM PROC FUNC THEM SRVM DLG VIEW WEBP WDGT WAM,20200624_20554544"
+
+C:\lansa\TestSecondaryORA>echo off
+Compile failed
+2020-06-24 10:56:34Z LastExitCode = 0
+2020-06-24 10:56:35Z Arguments PROC=VT157033 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:57:23Z Arguments PROC=VT156118 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:57:43Z Arguments PROC=VT159821 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:58:03Z Arguments PROC=VT157722 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:58:28Z Arguments PROC=VT160466 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:58:51Z Arguments PROC=VT156710 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:59:06Z Test VT156710 returned error code -1.
+2020-06-24 10:59:06Z Arguments PROC=VT161348 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 10:59:16Z Test VT161348 returned error code -1.
+2020-06-24 10:59:16Z Arguments PROC=VT157033 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:00:03Z Arguments PROC=VT156118 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:00:22Z Arguments PROC=VT159821 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:00:41Z Arguments PROC=VT157722 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:01:06Z Arguments PROC=VT160466 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:01:30Z Arguments PROC=VT156710 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:01:43Z Test VT156710 returned error code -1.
+2020-06-24 11:01:43Z Arguments PROC=VT161348 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:01:53Z Test VT161348 returned error code -1.
+2020-06-24 11:01:53Z Arguments PROC=VT157726 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:02:25Z Arguments PROC=VT157033 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:03:12Z Arguments PROC=VT156118 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:03:31Z Arguments PROC=VT159821 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:03:52Z Arguments PROC=VT157722 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:04:17Z Arguments PROC=VT160466 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:04:40Z Arguments PROC=VT156710 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:04:53Z Test VT156710 returned error code -1.
+2020-06-24 11:04:53Z Arguments PROC=VT161348 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:05:03Z Test VT161348 returned error code -1.
+2020-06-24 11:05:03Z Arguments PROC=VT157726 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:05:35Z Arguments PROC=VT157033 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:06:21Z Arguments PROC=VT156118 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:06:40Z Arguments PROC=VT159821 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:07:00Z Arguments PROC=VT157722 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:07:25Z Arguments PROC=VT160466 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:07:47Z Arguments PROC=VT156710 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:08:00Z Test VT156710 returned error code -1.
+2020-06-24 11:08:00Z Arguments PROC=VT161348 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:08:10Z Test VT161348 returned error code -1.
+2020-06-24 11:08:10Z Arguments PROC=VT157726 FUNC= INST=NO QUET=Y MODE=B ALSC=NO BPQS=Y LOCK=NO PART=WBP LANG=ENG
+2020-06-24 11:08:42Z Import, Compile and/or test completed successfully
+2020-06-24 09:07:30Z Test returned error code -1.
+
+Completed with 1 testing errors
+Completed with 1 testing errors
+C:\lansa\TestPrimaryMSSQLS
+2020-06-24 09:14:36Z Test VT156118 returned error code -1.
+Completed with 1 testing errors
+C:\lansa\TestPrimaryMSSQLS
+2020-06-24 09:18:29Z Test VT156118 returned error code -1.
+Completed with 1 testing errors
+C:\lansa\TestSecondarySQLAnywhere
+Completed with 1 testing errors
+C:\lansa\TestPrimaryMSSQLS
+2020-06-24 09:25:07Z Test VT156118 returned error code -1.
+Completed with 1 testing errors
+C:\lansa\TestSecondarySQLAnywhere
+C:\lansa\TestSecondarySQLAnywhere\Verifier_Test_Report.txt Does not exist
+
+Total Summary File
+==================
+C:\lansa\TestPrimaryMSSQLS
+2020-06-24 10:59:06Z Test VT156710 returned error code -1.
+2020-06-24 10:59:16Z Test VT161348 returned error code -1.
+2020-06-24 11:01:43Z Test VT156710 returned error code -1.
+2020-06-24 11:01:53Z Test VT161348 returned error code -1.
+2020-06-24 11:04:53Z Test VT156710 returned error code -1.
+2020-06-24 11:05:03Z Test VT161348 returned error code -1.
+2020-06-24 11:08:00Z Test VT156710 returned error code -1.
+2020-06-24 11:08:10Z Test VT161348 returned error code -1.
+Completed with 8 testing errors
+C:\lansa\TestSecondaryMySQL
+C:\lansa\TestSecondaryMySQL\Verifier_Test_Report.txt Does not exist
+C:\lansa\TestSecondarySQLAnywhere
+C:\lansa\TestSecondarySQLAnywhere\Verifier_Test_Report.txt Does not exist
+C:\lansa\TestSecondaryORA
+C:\lansa\TestSecondaryORA\Verifier_Test_Report.txt Does not exist
+
+
+Total errors 15
