@@ -247,13 +247,13 @@ try
         }
 
         $subscription = "Visual Studio Enterprise with MSDN"
-        $StorageAccountName = 'staginglansaauseast'
-        $svcName = "bakingMSDN-aus-east"
+        $StorageAccountName = 'stagingdpauseast'
+        $svcName = "BakingDP"
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
-        $publicDNSName = "bakingpublicdnsauseast-$($Script:vmname)"
+        $publicDNSName = "bakingpublicdnsDP-$($Script:vmname)"
 
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
@@ -312,7 +312,7 @@ try
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
 
-        $KeyVault = "bakingVaultauseast"
+        $KeyVault = "bakingVaultDP"
         $certificateName = "bakingWinRMCertificate"
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
         if ( $secret ) {
