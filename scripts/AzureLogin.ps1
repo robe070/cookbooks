@@ -1,14 +1,20 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('LPC','LANSAInc', 'KeyVault')]
+        [ValidateSet('LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
         [string] $CloudAccount
 )
 
 switch ( $CloudAccount ) {
-    {$_ -eq 'LPC'} {
+    {$_ -eq 'LPC-MSDN'} {
         $TenantName = 'DefaultDirectory'
         $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
         $Subscription = 'edff5157-5735-4ceb-af94-526e2c235e80'
+        $User = 'robert@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'LPC-DP'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
         $User = 'robert@lansacloudlansacom.onmicrosoft.com'
     }
     {$_ -eq 'LANSAInc'} {
@@ -23,6 +29,18 @@ switch ( $CloudAccount ) {
         $Subscription = 'ffe7f8f1-c8cb-425c-ad93-bbd52cffe4ed'
         $User = 'rob.goodridge@lansa.com.au'
     }
+    {$_ -eq 'LPC-AsDP'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'robAsDP@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'LPC-AsBake'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'robAsBake@lansacloudlansacom.onmicrosoft.com'
+    }
 }
 
 Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & subscription $subscription")
@@ -31,6 +49,6 @@ Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & s
 #Connect-AzAccount -SubscriptionId ffe7f8f1-c8cb-425c-ad93-bbd52cffe4ed
 Clear-AzContext -Force
 
-$Credential = Get-Credential
+$Credential = Get-Credential -UserName $user -Message "Enter password for $user"
 Connect-AzAccount -Credential $Credential -Tenant $Tenant -Subscription $Subscription
 Set-AzContext -Tenant $Tenant -SubscriptionId $Subscription
