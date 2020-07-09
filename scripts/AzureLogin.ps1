@@ -1,6 +1,6 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
+        [ValidateSet('HT','RM','AK','SS','AS','PK','LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
         [string] $CloudAccount
 )
 
@@ -40,6 +40,42 @@ switch ( $CloudAccount ) {
         $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
         $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
         $User = 'robAsBake@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'HT'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'HarishThota@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'RM'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'RichaMangalick@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'AK'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'AshutoshKumar1@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'SS'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'ShashikantSharma@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'AS'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'AparnaSathyanarayana@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'PK'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'PravirKarna@lansacloudlansacom.onmicrosoft.com'
     }
 }
 
