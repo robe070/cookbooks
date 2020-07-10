@@ -1,11 +1,6 @@
-$vaultName = "BakingVault1"
-$resourceGroup = "BakingVault1"
+$vaultName = "BakingVaultDP"
+$resourceGroup = "BakingDP"
 $location = "australiaeast"
-
-
-# $vaultName = "bakingVaultindia"
-# $resourceGroup = "BakingMSDN-southindia"
-# $location = "southindia"
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 Get-AzContext
