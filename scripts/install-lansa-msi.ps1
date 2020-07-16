@@ -527,12 +527,12 @@ try
         }
 
         if ( -not [string]::IsNullOrWhiteSpace( $JSMServiceName) ) {
-            if ( $Cloud -eq "Azure" ) {
-                Write-Host "$(Log-Date) Set JSM Service dependencies"
-                Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Default | Write-Host
-                Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Default | Write-Host
-                cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Default | Write-Host
-            }
+            # if ( $Cloud -eq "Azure" ) {
+            #     Write-Host "$(Log-Date) Set JSM Service dependencies"
+            #     Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Default | Write-Host
+            #     Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Default | Write-Host
+            #     cmd /c "sc.exe" "config" $JSMServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Default | Write-Host
+            # }
 
             Write-Host ("$(Log-Date) Restart JSM Service to load the new license")
             cmd /c "sc.exe" "stop" $JSMServiceName | Out-Default | Write-Host
