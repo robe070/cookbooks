@@ -1,6 +1,6 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('HT','RM','AK','SS','AS','PK','LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
+        [ValidateSet('HT','RM','AK','SS','AS','PK', 'UG', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
         [string] $CloudAccount
 )
 
@@ -57,7 +57,7 @@ switch ( $CloudAccount ) {
         $TenantName = 'DefaultDirectory'
         $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
         $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
-        $User = 'AshutoshKumar1@lansacloudlansacom.onmicrosoft.com'
+        $User = 'AshutoshKumar@lansacloudlansacom.onmicrosoft.com'
     }
     {$_ -eq 'SS'} {
         $TenantName = 'DefaultDirectory'
@@ -76,6 +76,12 @@ switch ( $CloudAccount ) {
         $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
         $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
         $User = 'PravirKarna@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'UG'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'UtkarshGupta@lansacloudlansacom.onmicrosoft.com'
     }
 }
 
