@@ -28,6 +28,7 @@ $ErrorActionPreference = 'Stop'
 
 try {
     #####################################################################################
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $temppath = 'c:\temp'
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-File $OutputFile -Append
@@ -99,10 +100,15 @@ Finally {
     # have been captured by AWS Run Command before all this captured information is output. So, do not presume
     # that the Result Code is on the first line of the output.
     Write-Host "$(Log-Date) Result Code = $LASTEXITCODE"
-    Write-Host "$(Log-Date) Logging messages are re-ordered for errors first. So check time."
+    Write-Host "$(Log-Date) Logging messages are re-ordered for AWS as errors first. So check time."
 
-    Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
-    Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+    if ( $Cloud -eq 'AWS' ) {
+        Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
+        Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+    } else {
+        Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+        Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
+    }
     $LASTEXITCODE | Out-File $ResultFile
 }
 

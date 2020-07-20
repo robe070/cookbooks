@@ -454,7 +454,8 @@ $jsonObject = @"
             } else {
                 Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
                 Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-                $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                # Cmdlet to remotely execute the script install-base-sql-server.ps1
+                Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $Script:vmname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\install-base-sql-server.ps1" | Out-Default | Write-Host
             }
 
             #####################################################################################
