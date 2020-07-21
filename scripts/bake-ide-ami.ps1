@@ -472,48 +472,28 @@ $jsonObject = @"
             # Make sure the session is initialised correctly
             ReConnect-Session
 
-            # set the license key password
-            $script:licensekeypassword = $Script:password;
+            # 163204: Generate PFX using secret from Azure Vault
+            if ( $Cloud -eq 'Azure' ) {
+                # ensures that the PFX Certificates are present in the license key path
+                $vmPfxCertificates = @{IntegratorLicensePrivateKey = "LANSAIntegratorLicense"; ScalableLicensePrivateKey = "LANSAScalableLicense"};
+                foreach ($certificateName in $vmPfxCertificates.Keys) {
+                    $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
+                    if ( $secret ) {
+                        # Write to a file
+                        Write-Verbose "$(Log-Date) Create a PFX File for $certificateName Certificate"
     
-            # ensures that the PFX Certificates are present in the license key path
-            $vmPfxCertificates = @{IntegratorLicensePrivateKey = "LANSAIntegratorLicense"; ScalableLicensePrivateKey = "LANSAScalableLicense"};
-            foreach ($certificateName in $vmPfxCertificates.Keys) {
-                $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
-                if ( $secret ) {
-                    # Write to a file
-                    Write-Verbose "$(Log-Date) Create a PFX File for $certificateName Certificate"
-
-                    # contains the JSON object with data, password and data type
-                    $certData = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($secret.SecretValueText))| ConvertFrom-Json
-    
-                    $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2
-                    $pfx.Import([System.Convert]::FromBase64String($certData.data), $certData.password, [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable + [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet)
-                    $pfxProtectedBytes = $pfx.Export([Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $Script:password)
-                    [System.IO.File]::WriteAllBytes("$Script:LicenseKeyPath\$($vmPfxCertificates[$certificateName]).pfx", $pfxProtectedBytes)
-                } else {
-                    Write-Verbose "$(Log-Date) Create $certificateName Certificate"    
-                    $thumbprint = (New-SelfSignedCertificate -DnsName $certificateName -CertStoreLocation Cert:\CurrentUser\My -KeySpec KeyExchange).Thumbprint
-                    $cert = (Get-ChildItem -Path cert:\CurrentUser\My\$thumbprint)        
-                    $fileName = "$Script:LicenseKeyPath\$certificateName.pfx"
-                    Export-PfxCertificate -Cert $cert -FilePath $fileName -Password $SecurePassword
+                        # contains the JSON object with data, password and data type
+                        $certData = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($secret.SecretValueText))| ConvertFrom-Json
         
-                    $fileContentBytes = Get-Content $fileName -Encoding Byte
-                    $fileContentEncoded = [System.Convert]::ToBase64String($fileContentBytes)
-    
-$jsonObject = @"
-{
-"data" : "$filecontentencoded",
-"dataType" :"pfx",
-"password": "$Script:password"
-}
-"@
-                    $jsonObjectBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonObject)
-                    $jsonEncoded = [System.Convert]::ToBase64String($jsonObjectBytes)
-        
-                    $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText –Force
-                    $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
-                }
-            }    
+                        $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2
+                        $pfx.Import([System.Convert]::FromBase64String($certData.data), $certData.password, [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable + [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet)
+                        $pfxProtectedBytes = $pfx.Export([Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $Script:password)
+                        [System.IO.File]::WriteAllBytes("$Script:LicenseKeyPath\$($vmPfxCertificates[$certificateName]).pfx", $pfxProtectedBytes)
+                    } else {
+                        throw 'Certificate $certificateName not found in the Key Vault $KeyVault'
+                    }
+                }    
+            }
 
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
