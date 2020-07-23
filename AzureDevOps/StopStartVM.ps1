@@ -1,8 +1,8 @@
 <#PSScriptInfo
 
-.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment. If the VM is tagged with ShutdownPolicy = Excluded, the VM is not stopped. VMs are also not stopped if it is already managed by a schedule.
+.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment. If the VM is tagged with ShutdownPolicy = Excluded, the VM is not stopped. VMs are also not stopped if it is already managed by a schedule. Requires an Azure Automation account with an Azure Run As account credential.
 
-.VERSION 1.0.0
+.VERSION 1.0.2
 
 .GUID 81441e5f-d154-4666-97cf-b8f3decb9341
 
@@ -18,7 +18,7 @@
 
 .ICONURI
 
-.EXTERNALMODULEDEPENDENCIES An Azure Automation account with an Azure Run As account credential.
+.EXTERNALMODULEDEPENDENCIES
 
 .REQUIREDSCRIPTS
 
@@ -26,18 +26,13 @@
 
 .RELEASENOTES
 1.0.1: - Add initial version
+1.0.2: - Gallery text changes
 
 #>
 
 <#
 .SYNOPSIS
 Stop or start all Virtual Machines in the current subscription or in a specific Resource Group
-
-.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group.
-Useful for dev and test environments.
-Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment.
-
-Prerequisite: an Azure Automation account with an Azure Run As account credential.
 
 .PARAMETER ResourceGroupName
 The Azure resource group name or leave empty to target ALL VMs in the current subscription

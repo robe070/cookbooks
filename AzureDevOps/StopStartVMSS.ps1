@@ -1,8 +1,8 @@
 <#PSScriptInfo
 
-.DESCRIPTION Azure Automation Workflow Runbook to stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group.
+.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when a VMSS is finished with for the moment. Requires an Azure Automation account with an Azure Run As account credential.
 
-.VERSION 1.0.1
+.VERSION 1.0.2
 
 .GUID 5b97ae2e-b40a-458c-b34d-eda0e4d1f0d1
 
@@ -10,7 +10,7 @@
 
 .COPYRIGHT (c) 2020 Rob Goodridge. All rights reserved.
 
-.TAGS Azure Automation Cloud AzureAutomation AzureDevOps DevOps AzureRM Workflow Runbook
+.TAGS Azure Automation Cloud AzureAutomation AzureDevOps DevOps AzureRM Workflow Runbook VMSS
 
 .LICENSEURI
 
@@ -26,19 +26,13 @@
 
 .RELEASENOTES
 1.0.1: - Add initial version
+1.0.2: - Gallery text changes
 
 #>
 
 <#
 .SYNOPSIS
 Stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group
-
-.DESCRIPTION
-Azure Automation Workflow Runbook Script to stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group.
-Useful for dev and test environments.
-Written to be used as either a scheduled job at the close of business or ad hoc when a VMSS is finished with for the moment.
-
-Prerequisite: an Azure Automation account with an Azure Run As account credential.
 
 .PARAMETER ResourceGroupName
 The Azure resource group name or leave empty to target ALL VMSS in the current subscription
