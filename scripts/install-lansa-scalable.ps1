@@ -106,7 +106,9 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
 
-    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    if ($Cloud -eq "AWS") {
+        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    }
 
     Add-TrustedSite "lansa.com" | Out-Host
     Add-TrustedSite "google-analytics.com" | Out-Host
@@ -116,8 +118,9 @@ try
     Add-TrustedSite "*.lansa.myabsorb.com" | Out-Host
     Add-TrustedSite "*.cloudfront.com" | Out-Host
 
-    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-
+    if ($Cloud -eq "AWS") {
+        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    }
     Write-Output ("$(Log-Date) Installation completed successfully") | Out-Host
 }
 catch
