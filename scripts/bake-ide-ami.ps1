@@ -662,11 +662,13 @@ $jsonObject = @"
             if ($Cloud -eq 'AWS') {
                 Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
                 Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+            }
+            
+            # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
-                # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
-                Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
-
-                Write-Host "Test that keys are configured"
+            if ($Cloud -eq 'AWS') {
+                    Write-Host "Test that keys are configured"
 
                 Execute-RemoteBlock $Script:session {
                     try {
