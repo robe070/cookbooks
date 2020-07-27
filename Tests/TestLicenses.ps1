@@ -8,13 +8,11 @@ IMPORTANT:" To be run in a new instance created from the baked image, NOT while 
 .EXAMPLE
 
 #>
+. "c:\lansa\scripts\dot-CommonTools.ps1"
 
 if ( -not $script:IncludeDir)
 {
-    $script:IncludeDir = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\scripts'
-
-	. "$script:IncludeDir\Init-Baking-Vars.ps1"
-	. "$script:IncludeDir\Init-Baking-Includes.ps1"
+	$script:IncludeDir = 'c:\lansa\scripts'
 }
 else
 {

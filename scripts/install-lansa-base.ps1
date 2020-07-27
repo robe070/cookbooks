@@ -25,7 +25,6 @@ param (
     [string]
     $TempPath,
 
-    [Parameter(Mandatory=$true)]
     [string]
     $LicenseKeyPassword,
 
