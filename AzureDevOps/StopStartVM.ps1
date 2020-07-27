@@ -2,7 +2,7 @@
 
 .DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment. If the VM is tagged with ShutdownPolicy = Excluded, the VM is not stopped. VMs are also not stopped if it is already managed by a schedule. Requires an Azure Automation account with an Azure Run As account credential.
 
-.VERSION 1.0.2
+.VERSION 1.0.4
 
 .GUID 81441e5f-d154-4666-97cf-b8f3decb9341
 
@@ -27,6 +27,8 @@
 .RELEASENOTES
 1.0.1: - Add initial version
 1.0.2: - Gallery text changes
+1.0.3: - Use Connect-AzureAutomation module
+1.0.4: - Deal with 0 VMs
 
 #>
 
@@ -40,6 +42,9 @@ The Azure resource group name or leave empty to target ALL VMs in the current su
 .PARAMETER Action
 Specify either 'stop' or 'start' to stop or start the VMs.
 #>
+
+#Requires -Modules Connect-AzureAutomation
+
 workflow StopStartVM
 {
     Param
@@ -48,27 +53,7 @@ workflow StopStartVM
 	    [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action
     )
 
-    $connectionName = "AzureRunAsConnection"
-    try {
-        Write-Output "Get the connection 'AzureRunAsConnection'"
-        $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName
-
-        "Logging in to Azure..."
-        Add-AzureRmAccount `
-            -ServicePrincipal `
-            -TenantId $servicePrincipalConnection.TenantId `
-            -ApplicationId $servicePrincipalConnection.ApplicationId `
-            -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint
-    } catch {
-        if (!$servicePrincipalConnection)
-        {
-            $ErrorMessage = "Connection $connectionName not found."
-            throw $ErrorMessage
-        } else{
-            Write-Error -Message $_.Exception
-            throw $_.Exception
-        }
-    }
+    Connect-AzureAutomation
 
     $DevTestLabs = Get-AzureRmResource | Where-Object {$_.ResourceType -eq "Microsoft.DevTestLab/schedules"}
     if ( $AzureResourceGroup ) {
@@ -77,34 +62,38 @@ workflow StopStartVM
         $VMs = @(Get-AzureRmVM -Status | Select-Object ResourceGroupName,Name,Location, tags, @{ label = “VMStatus”; Expression = { $_.PowerState } })
     }
 
-    $VMs
+    if ( $VMs ) {
+        $VMs.Name
 
-    if ( $Action -eq "Stop")
-    {
-        Write-Output "Stopping VMs"
-        foreach -parallel ($vm in ($VMs) )
+        if ( $Action -eq "Stop")
         {
-            $ShutDownName = "shutdown-computevm-{0}" -f $vm.Name
+            Write-Output "Stopping VMs"
+            foreach -parallel ($vm in ($VMs) )
+            {
+                $ShutDownName = "shutdown-computevm-{0}" -f $vm.Name
 
-            if ($vm.VMStatus -eq "VM running" -and $vm.Tags["ShutdownPolicy"] -ne "Excluded" -and (-not $DevTestLabs -or ($DevTestLabs.Name -notcontains $ShutdownName) )) {
-                Write-Output "Stopping VM '$($vm.ResourceGroupName)/$($vm.name)'"
-                Stop-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Force -Verbose
-            } else {
-                Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                if ($vm.VMStatus -eq "VM running" -and $vm.Tags["ShutdownPolicy"] -ne "Excluded" -and (-not $DevTestLabs -or ($DevTestLabs.Name -notcontains $ShutdownName) )) {
+                    Write-Output "Stopping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                    Stop-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Force -Verbose
+                } else {
+                    Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                }
             }
         }
-    }
-    else
-    {
-        Write-Output "Starting VMs"
-        foreach -parallel ($vm in ($VMs) )
+        else
         {
-            if ($vm.VMStatus -ne "VM running") {
-                Write-Output "Starting VM '$($vm.ResourceGroupName)/$($vm.name)'"
-                Start-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Verbose
-            } else {
-                Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+            Write-Output "Starting VMs"
+            foreach -parallel ($vm in ($VMs) )
+            {
+                if ($vm.VMStatus -ne "VM running") {
+                    Write-Output "Starting VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                    Start-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Verbose
+                } else {
+                    Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                }
             }
         }
+    } else {
+        Write-Output "There are 0 VMs matching the criteria"
     }
 }
