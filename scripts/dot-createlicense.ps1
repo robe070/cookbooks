@@ -15,7 +15,7 @@ function CreateLicence {
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     # Check if license file is available to be installed
-    if ( Test-Path $licenseFile_ -or $Cloud -eq 'Azure' )
+    if ( (Test-Path $licenseFile_) -or ($Cloud -eq 'Azure') )
     {
         try {
             if ($Cloud -eq 'AWS') {
