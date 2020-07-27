@@ -1,11 +1,14 @@
-$ImgName = Read-Host -Prompt 'Input the image name to create VM from'
-$CloudName = Read-Host -Prompt 'Input the cloud name'
+# Image name using which the VM will be created and the cloud name must be provided as input parameters
+Param(
+    [Parameter(Mandatory=$true)] [String] $ImgName,
+    [Parameter(Mandatory=$true)] [ValidateSet("Azure","AWS")] [String] $CloudName
+)
+
 $VMname = "TestImageVM"
 if ( -not $script:IncludeDir)
 {
     $MyInvocation.MyCommand.Path
     $script:IncludeDir = Join-Path -Path ((Split-Path -Parent $MyInvocation.MyCommand.Path).TrimEnd("Tests")) -ChildPath "scripts"
-    $script:IncludeDir | Out-Default | Write-Host
 }
 if($CloudName -eq 'Azure') {
     $Location = "Australia East"
@@ -17,7 +20,6 @@ if($CloudName -eq 'Azure') {
         $publicDNSName = "bakingpublicdnsDP-$($VMname)"
 
         . "$script:IncludeDir\Init-Baking-Includes.ps1"
-        . "$script:IncludeDir\dot-CommonTools.ps1"
 
         Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
         . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
