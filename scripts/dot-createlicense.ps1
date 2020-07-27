@@ -13,16 +13,19 @@ function CreateLicence {
         [string]$registryValue_
     )
 
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     # Check if license file is available to be installed
-    if ( Test-Path $licenseFile_ )
+    if ( Test-Path $licenseFile_ -or $Cloud -eq 'Azure' )
     {
         try {
+            if ($Cloud -eq 'AWS') {
             #####################################################################################
             Write-Host "$(Log-Date) $dnsName_ : install license"
             #####################################################################################
 
             $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
             Import-PfxCertificate -FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd | Write-Host
+            }
 
             #####################################################################################
             Write-Host "$(Log-Date) $dnsName_ : Save private key filename & current Machine Guid to registry"
@@ -50,11 +53,13 @@ function CreateLicence {
             $MachineGuid = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
             New-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid -PropertyType String -Value $MachineGuid.MachineGuid -force | Write-Host
 
+            if ($Cloud -eq 'AWS') {
             # Write any old junk into the license file to obliterate the contents from the disk so it cannot be recovered
             Get-Process | Out-File $licenseFile_
 
             #Now delete it from Explorer
             Remove-Item $licenseFile_ | Write-Host
+            }
          }
          catch {
              $_ | Write-Host

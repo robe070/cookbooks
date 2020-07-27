@@ -607,34 +607,35 @@ $jsonObject = @"
 
         if ( $InstallIDE -eq $true ) {
 
-            if ($Cloud -eq 'AWS') {
-                #####################################################################################
-                Write-Host "$(Log-Date) Installing License"
-                #####################################################################################
+                if ($Cloud -eq 'AWS') {
+            #####################################################################################
+            Write-Host "$(Log-Date) Installing License"
+            #####################################################################################
 
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
 
-                Execute-RemoteBlock $Script:session {
-                    CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-                    CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
-                    # Errors are thrown out of CreateLicense so no need to catch a throw here.
-                    # Let the local script catch it
                 }
+            Execute-RemoteBlock $Script:session {
+                CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+                CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+                # Errors are thrown out of CreateLicense so no need to catch a throw here.
+                # Let the local script catch it
+            }
 
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                        cmd /c exit 1
-                        throw
-                    }
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
                 }
             }
+
             Write-Host "$(Log-Date) Installing IDE"
             PlaySound
 
@@ -660,27 +661,25 @@ $jsonObject = @"
 
         if ( $InstallScalable -eq $true ) {
             if ($Cloud -eq 'AWS') {
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
+            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+
             }
-            
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
-            if ($Cloud -eq 'AWS') {
-                    Write-Host "Test that keys are configured"
+            Write-Host "Test that keys are configured"
 
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                        cmd /c exit 1
-                        throw
-                    }
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
                 }
             }
         }
@@ -700,39 +699,33 @@ $jsonObject = @"
         }
 
         if ( $InstallScalable -eq $true ) {
-            if ( $Cloud -eq 'AWS' )
-            {
-                Write-Host "Test that license keys are still configured"
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                       cmd /c exit 1
-                       throw
-                    }
-                }    
+            Write-Host "Test that license keys are still configured"
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                   cmd /c exit 1
+                   throw
+                }
             }
         }
 
         if ( $InstallIDE -eq $true ) {
-            if ( $Cloud -eq 'AWS' )
-            {
-                Write-Host "Test that license keys are still configured"
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                        cmd /c exit 1
-                        throw
-                    }
+            Write-Host "Test that license keys are still configured"
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
                 }
             }
         }

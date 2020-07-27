@@ -81,16 +81,14 @@ try
         Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
     }
 
-    if ($Cloud -eq "AWS") {
-        #####################################################################################
-        Write-Output "$(Log-Date) Installing License" | Out-Host
-        #####################################################################################
-        Write-Debug "Password: $licensekeypassword_" | Out-Host
-        CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
-        CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Host
-        
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    #####################################################################################
+    Write-Output "$(Log-Date) Installing License" | Out-Host
+    #####################################################################################
+    Write-Debug "Password: $licensekeypassword_" | Out-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Host
+
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     #####################################################################################
     Write-output ("$(Log-Date) Shortcuts") | Out-Host
@@ -106,9 +104,7 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
 
-    if ($Cloud -eq "AWS") {
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     Add-TrustedSite "lansa.com" | Out-Host
     Add-TrustedSite "google-analytics.com" | Out-Host
@@ -118,9 +114,8 @@ try
     Add-TrustedSite "*.lansa.myabsorb.com" | Out-Host
     Add-TrustedSite "*.cloudfront.com" | Out-Host
 
-    if ($Cloud -eq "AWS") {
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+
     Write-Output ("$(Log-Date) Installation completed successfully") | Out-Host
 }
 catch
