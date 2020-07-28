@@ -534,12 +534,12 @@ $jsonObject = @"
 
         ReConnect-Session
 
-    Execute-RemoteBlock $Script:session {
-        SyncRegistryPathToCurentProcess
+        Execute-RemoteBlock $Script:session {
+            SyncRegistryPathToCurentProcess
 
-        # Ensure last exit code is 0. (exit by itself will terminate the remote session)
-        cmd /c exit 0
-    }
+            # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+            cmd /c exit 0
+        }
 
         if ( $InstallSQLServer ) {
             #####################################################################################
@@ -607,15 +607,14 @@ $jsonObject = @"
 
         if ( $InstallIDE -eq $true ) {
 
-                if ($Cloud -eq 'AWS') {
-            #####################################################################################
-            Write-Host "$(Log-Date) Installing License"
-            #####################################################################################
+            if ($Cloud -eq 'AWS') {
+                #####################################################################################
+                Write-Host "$(Log-Date) Installing License"
+                #####################################################################################
 
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
-
-                }
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+            }
             Execute-RemoteBlock $Script:session {
                 CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
                 CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
@@ -661,9 +660,8 @@ $jsonObject = @"
 
         if ( $InstallScalable -eq $true ) {
             if ($Cloud -eq 'AWS') {
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
-
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
             }
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
