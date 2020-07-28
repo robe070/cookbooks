@@ -34,7 +34,7 @@ if ($true) {
     {
         # Log-Date can't be used yet as Framework has not been loaded
 
-	    Write-Host "Initialising environment - presumed not running through RemotePS" | Out-Default | Write-Host
+	    Write-Host "Initialising environment - presumed not running through RemotePS"
 	    $MyInvocation.MyCommand.Path
 	    $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -43,11 +43,11 @@ if ($true) {
     }
     else
     {
-	    Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS" | Out-Default | Write-Host
+	    Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
     }
 }
 else {
-	Write-Host "Initialising environment - presumed not running through RemotePS" | Out-Default | Write-Host
+	Write-Host "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -65,24 +65,24 @@ try
     If ( $mssql_services ) {
 
         #####################################################################################
-        Write-Host ("$(Log-Date) Enable Named Pipes on local database")  | Out-Default | Write-Host
+        Write-Host ("$(Log-Date) Enable Named Pipes on local database")
         #####################################################################################
 
         Import-Module “sqlps” -DisableNameChecking | Out-Host
 
-        Write-Host( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session")  | Out-Default | Write-Host
+        Write-Host( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session")
         Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
         Set-Location "c:"
 
         #####################################################################################
-        Write-Host "$(Log-Date) Set local SQL Server to manual"  | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Set local SQL Server to manual"
         #####################################################################################
 
         Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
     }
 
     #####################################################################################
-    Write-Host "$(Log-Date) Installing License" | Out-Default | Write-Host
+    Write-Host "$(Log-Date) Installing License"
     #####################################################################################
     Write-Debug "Password: $licensekeypassword_" | Out-Host
     CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
@@ -91,7 +91,7 @@ try
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     #####################################################################################
-    Write-Host ("$(Log-Date) Shortcuts")  | Out-Default | Write-Host
+    Write-Host ("$(Log-Date) Shortcuts")
     #####################################################################################
 
     copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
@@ -116,7 +116,7 @@ try
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
-    Write-Host ("$(Log-Date) Installation completed successfully")  | Out-Default | Write-Host
+    Write-Host ("$(Log-Date) Installation completed successfully")
 }
 catch
 {
