@@ -21,18 +21,18 @@ if($CloudName -eq 'Azure') {
 
         . "$script:IncludeDir\Init-Baking-Includes.ps1"
 
-        Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Delete VM if it already exists"
         . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
         Remove-AzrVirtualMachine -Name $VMname -ResourceGroupName $svcName -Wait
     
-        Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Create VM"
         $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
     
         $NicName = "bakingNic-$($VMname)"
         $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -ErrorAction SilentlyContinue
         if ( $null -eq $nic ) {
-            Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
+            Write-Host "$(Log-Date) Create NIC"
             $externalip = Get-ExternalIP
             $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($VMname)"
             $AzVirtualNetworkName = "bakingvNET-$($VMname)"
@@ -84,20 +84,20 @@ if($CloudName -eq 'Azure') {
         $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id
         $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
         New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
-        Write-Verbose "VM created successfully" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) VM created successfully"
     
-        Write-Verbose "Connecting Remote session" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Connecting Remote session"
         $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName
         $Script:publicDNS =  $ipAddress.IpAddress
         $creds = $Credential
         Connect-RemoteSession
     
-        Write-Verbose "Executing Test Script in VM" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Executing Test Script in VM"
         Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" | Out-Default | Write-Host
     } catch {
-        throw "Error occured in TestImage file"
+        throw "$(Log-Date) Error occured in TestImage file"
     } Finally {
-        Write-Verbose "$(Log-Date) Removing VM post test execution" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Removing VM post test execution"
         . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
         Remove-AzrVirtualMachine -Name $VMname -ResourceGroupName $svcName -Wait
     }
