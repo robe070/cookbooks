@@ -1,6 +1,6 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('HT','RM','AK','SS','AS','PK', 'UG', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
+        [ValidateSet('VC','HT','RM','AK','SS','AS','PK', 'UG', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
         [string] $CloudAccount
 )
 
@@ -83,6 +83,12 @@ switch ( $CloudAccount ) {
         $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
         $User = 'UtkarshGupta@lansacloudlansacom.onmicrosoft.com'
     }
+    {$_ -eq 'VC'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'VarunChopra@lansacloudlansacom.onmicrosoft.com'
+    }
 }
 
 Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & subscription $subscription")
@@ -91,6 +97,12 @@ Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & s
 #Connect-AzAccount -SubscriptionId ffe7f8f1-c8cb-425c-ad93-bbd52cffe4ed
 Clear-AzContext -Force
 
-$Credential = Get-Credential -UserName $user -Message "Enter password for $user"
+if ( $clientsecret ) {
+    $secret = ConvertTo-SecureString -String $clientsecret -AsPlainText -Force
+    $Credential = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $user, $secret
+} else {
+    $Credential = Get-Credential -UserName $user -Message "Enter password for $user"
+}
+
 Connect-AzAccount -Credential $Credential -Tenant $Tenant -Subscription $Subscription
 Set-AzContext -Tenant $Tenant -SubscriptionId $Subscription
