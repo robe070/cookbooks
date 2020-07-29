@@ -27,7 +27,11 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'w12r2d-14-2-10' `
+if (-not $bakeScalableAzureVersion) {
+    $bakeScalableAzureVersion = 'w12r2d-14-2-10'
+}
+
+Bake-IdeMsi -VersionText $bakeScalableAzureVersion `
             -VersionMajor 14 `
             -VersionMinor 2 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
