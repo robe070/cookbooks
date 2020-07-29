@@ -1,0 +1,12 @@
+name: Notify assignees when their card moves between columns
+
+on:
+  project_card:
+      types: [moved]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Card Moved Notifier
+        uses: jenschelkopf/project-card-moved-notification-action@1.0
