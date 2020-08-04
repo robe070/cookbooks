@@ -16,13 +16,16 @@ steps:
     arguments: '-CloudAccount $azureUserId'
     workingDirectory: 'scripts\'
 
-- task: PowerShell@2
-  inputs:
-    filePath: 'scripts\bake-scalable-azure-14-0.ps1'
-    workingDirectory: 'scripts\'
+# Needs to input the Resource group and outputs the image name
+#- task: PowerShell@2
+#  inputs:
+#    filePath: 'scripts\bake-scalable-azure-14-0.ps1'
+#    workingDirectory: 'scripts\'
 
-- task: PowerShell@2
-  inputs:
-    filePath: 'Tests\TestImage.ps1'
-    arguments: '-ImgName $bakeScalableAzureVersion -CloudName $CloudName'
-    workingDirectory: 'Tests\'
+# Needs to use hte image name from the previous build task
+# Implement using Pester
+#- task: PowerShell@2
+#  inputs:
+#    filePath: 'Tests\TestImage.ps1'
+#    arguments: '-ImgName "w12r2d-14-2-10" -CloudName $CloudName'
+#    workingDirectory: 'Tests\'
