@@ -1,7 +1,12 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('NS','VR','PKU','VC','HT','RM','AK','SS','AS','PK', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
-        [string] $CloudAccount
+    [ValidateSet('NS','VR','PKU','VC','HT','RM','AK','SS','AS','PK', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
+    [string] $CloudAccount,
+
+    # Parameter help description
+    [Parameter(Mandatory=$false)]
+    [securestring]
+    $CloudSecret
 )
 
 switch ( $CloudAccount ) {
@@ -109,9 +114,8 @@ Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & s
 #Connect-AzAccount -SubscriptionId ffe7f8f1-c8cb-425c-ad93-bbd52cffe4ed
 Clear-AzContext -Force
 
-if ( $clientsecret ) {
-    $secret = ConvertTo-SecureString -String $clientsecret -AsPlainText -Force
-    $Credential = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $user, $secret
+if ( $CloudSecret ) {
+    $Credential = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $user, $CloudSecret
 } else {
     $Credential = Get-Credential -UserName $user -Message "Enter password for $user"
 }
