@@ -104,9 +104,11 @@ param (
     [boolean]
     $OnlySaveImage=$false,
 
+    $CreateVM=$false,    # Used for speeding up script when debugging, provided the VM already exists!
+
     [Parameter(Mandatory=$false)]
-    [boolean]
-    $CreateVM=$false    # Used for speeding up script when debugging, provided the VM already exists!
+    [switch]
+    $Pipeline
 
     )
 
@@ -545,7 +547,7 @@ $jsonObject = @"
             #####################################################################################
             Write-Host "$(Log-Date) Install SQL Server. (Remote execution does not work)"
             #####################################################################################
-            $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
 
             #####################################################################################
             Write-Host "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
@@ -581,8 +583,8 @@ $jsonObject = @"
                 if ( $Cloud -eq 'AWS' ) {
                     Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
                 } else {
-                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)" -Pipeline:$Pipeline
+                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
                 }
             } else {
                 Execute-RemoteBlock $Script:session {
@@ -600,7 +602,7 @@ $jsonObject = @"
         }
 
         if ( $ManualWinUpd ) {
-            $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877"
+            $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877" -Pipeline:$Pipeline
         }
 
         ReConnect-Session
@@ -754,7 +756,7 @@ $jsonObject = @"
             }
         } catch {
             Write-RedOutput $_ | Out-Default | Write-Host
-            $Response = MessageBox "Do you want to continue building the image?" 0x3
+            $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
             $Response
             if ( $response -ne 0x6 ) {
                 throw "Sysprep script failure"
@@ -839,7 +841,7 @@ $jsonObject = @"
         }
     }
 
-    $dummy = MessageBox "Image bake successful" 0
+    $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
 }
 catch
 {
@@ -850,7 +852,7 @@ catch
         Remove-PSSession $Script:session | Out-Default | Write-Host
     }
 
-    $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
+    $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0 -Pipeline:$Pipeline
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 

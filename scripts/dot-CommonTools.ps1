@@ -208,15 +208,23 @@ param (
     $Message,
     [Parameter(Mandatory=$false)]
     [int]
-    $buttons = 0x1  # Ok/Cancel buttons
+    $buttons = 0x1,  # Ok/Cancel buttons
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Pipeline
     )
+
+    # OK and Cancel buttons
+    Write-Host "$(Log-Date) $Message"
+
+    if ($Pipeline) {
+        return
+    }
 
     if ( -not $Script:msgbox ) {
         $Script:msgbox = New-Object -ComObject WScript.Shell
     }
 
-    # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message"
     # Make a Sound, be System Modal
     $Response = $($Script:msgbox).popup( $Message, 0, $Script:DialogTitle, 0x30 + 0x1000 + $buttons)
     # 2 = Cancel
