@@ -254,6 +254,7 @@ try
         $subscription = "Visual Studio Enterprise with MSDN"
         $StorageAccountName = 'stagingdpauseast'
         $svcName = "BakingDP"
+        $keyVaultSvcName = $svcName
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
@@ -373,7 +374,7 @@ $jsonObject = @"
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
-            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $svcName -VaultName $KeyVault).ResourceId
+            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $keyVaultSvcName -VaultName $KeyVault).ResourceId
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
