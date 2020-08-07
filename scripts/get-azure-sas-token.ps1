@@ -21,10 +21,17 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $storageAccountName
+    $storageAccountName,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $StorageResourceGroupName
 )
 
 try {
+    if (!$StorageResourceGroupName) {
+        $StorageResourceGroupName = $ResourceGroupName
+    }
     $NewImage = @(Get-AzImage -ResourceGroupName $ResourceGroupName -ImageName "$ImageName")
     # This is what we need to work with...
     # $NewImage[0].StorageProfile.OsDisk.ManagedDisk.id
@@ -43,7 +50,7 @@ try {
     }
 
     # create the sas token
-    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $storageAccountName
+    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $StorageResourceGroupName -Name $storageAccountName
     $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $accountKeys[0].Value
 
     $startTime = Get-Date

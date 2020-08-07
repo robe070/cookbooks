@@ -802,7 +802,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageResourceGroupName $keyVaultSvcName | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
