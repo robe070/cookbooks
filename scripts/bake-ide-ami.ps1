@@ -265,7 +265,7 @@ try
             $svcName = "$svcName-$VersionText"
 
             # Create or update the resource group using the specified template file and template parameters file
-            New-AzureRmResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
+            New-AzResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
