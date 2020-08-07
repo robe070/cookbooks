@@ -73,5 +73,5 @@ Bake-IdeMsi -VersionText $VersionText `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
-            -CreateVM $true
-            -pipeline:$true | Out-Default | Write-Host | Write-Verbose
+            -CreateVM $true `
+            -Pipeline:$true | Out-Default | Write-Host | Write-Verbose
