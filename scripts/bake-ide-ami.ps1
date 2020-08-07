@@ -257,6 +257,14 @@ try
         $Script:vmname = $VersionText
         $publicDNSName = "bakingpublicdnsDP-$($Script:vmname)"
 
+        # use a separate resource group for easier deletion
+        if ($Pipeline) {
+            $svcName = "$svcName-$VersionText"
+
+            # Create or update the resource group using the specified template file and template parameters file
+            New-AzureRmResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop 
+        }
+
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
 
