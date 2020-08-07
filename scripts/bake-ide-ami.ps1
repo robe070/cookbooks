@@ -842,6 +842,7 @@ $jsonObject = @"
     }
 
     $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
+    return
 }
 catch
 {
