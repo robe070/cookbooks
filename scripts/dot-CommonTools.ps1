@@ -215,10 +215,10 @@ param (
     )
 
     # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message"
+    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Verbose
 
     if ($Pipeline) {
-        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Verbose
         
         # Simulate OK button
         return 1
