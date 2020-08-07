@@ -143,7 +143,7 @@ else
 Set-StrictMode -Version Latest
 
 # Output the Pipeline Switch Status
-Write-Host("$(Log-Date) Pipeline Switch Status- $Pipeline")
+$Pipeline | Out-Default | Write-Host
 
 if ($InstallIDE -eq $true) {
     $Script:DialogTitle = "LANSA IDE"
