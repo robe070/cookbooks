@@ -218,7 +218,10 @@ param (
     Write-Host "$(Log-Date) $Message"
 
     if ($Pipeline) {
-        return
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
+        
+        # Simulate OK button
+        return 1
     }
 
     if ( -not $Script:msgbox ) {
