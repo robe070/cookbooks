@@ -11,8 +11,10 @@ if ( -not $script:IncludeDir)
     $script:IncludeDir = Join-Path -Path ((Split-Path -Parent $MyInvocation.MyCommand.Path).TrimEnd("Tests")) -ChildPath "scripts"
 }
 if($CloudName -eq 'Azure') {
+    $SkuName = $ImgName
+    $ImgName += "image"
     $Location = "Australia East"
-    $svcName = "BakingDP"
+    $svcName = "BakingDP-$SkuName"
     $vmsize="Standard_B4ms"
     $Script:password = "Pcxuser@122"
     $AdminUserName = "PCXUSER2"
@@ -74,7 +76,7 @@ if($CloudName -eq 'Azure') {
             $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -Location $location `
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
-        $image = Get-AzImage -ImageName $ImgName -ResourceGroupName "BAKINGDP"
+        $image = Get-AzImage -ImageName $ImgName -ResourceGroupName $svcName -Verbose
     
         $diskConfig = New-AzDiskConfig -SkuName "Standard_LRS" -Location $location -CreateOption Empty -DiskSizeGB 32
         $dataDisk1 = New-AzDisk -DiskName "$($VMname)" -Disk $diskConfig -ResourceGroupName $svcName
@@ -93,8 +95,9 @@ if($CloudName -eq 'Azure') {
         Connect-RemoteSession
     
         Write-Host "$(Log-Date) Executing Test Script in VM"
-        Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $ImgName} | Out-Default | Write-Host
+        Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} | Out-Default | Write-Host
     } catch {
+        Write-Host $_.Exception | out-default
         throw "$(Log-Date) Error occured in TestImage file"
     } Finally {
         Write-Host "$(Log-Date) Removing VM post test execution"
