@@ -885,6 +885,11 @@ catch
     }
 
     $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0 -Pipeline:$Pipeline
+
+    # Fail the build on exception
+    if ($Pipeline) {
+        throw $_.Exception
+    }
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 

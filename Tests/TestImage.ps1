@@ -93,7 +93,7 @@ if($CloudName -eq 'Azure') {
         Connect-RemoteSession
     
         Write-Host "$(Log-Date) Executing Test Script in VM"
-        Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" | Out-Default | Write-Host
+        Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $ImgName} | Out-Default | Write-Host
     } catch {
         throw "$(Log-Date) Error occured in TestImage file"
     } Finally {
