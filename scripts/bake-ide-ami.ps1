@@ -264,9 +264,16 @@ try
         # use a separate resource group for easier deletion
         if ($Pipeline) {
             $svcName = "$svcName-$VersionText"
+            # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+            $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
 
-            # Create or update the resource group using the specified template file and template parameters file
+            # Create or update the resource group using the specified parameter
             New-AzResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
+
+            # Create or update the storage account using the specified parameter
+            $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
+            New-AzResourceGroupDeployment -ResourceGroupName $svcName -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
+
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
@@ -389,7 +396,19 @@ $jsonObject = @"
             
             $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
 
-            New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+            try {
+                New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+            } catch {
+                Write-YellowOutput $_ | Out-Default | Write-Host
+                $ExceptionCode = $_.Exception
+                if ($_.Exception.ErrorCode -eq "OSProvisioningTimedOut") {
+                    Write-Host "Retrying the New-AZVM command for OSProvisioningTimedOut"
+                    # Retry the New-AZVM operation
+                    New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                } else {
+                    throw $_.Exception
+                }
+            }
         }
 
         $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName
@@ -802,7 +821,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageResourceGroupName $keyVaultSvcName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.

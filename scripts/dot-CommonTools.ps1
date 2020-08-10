@@ -48,6 +48,15 @@ function Write-RedOutput
     Write-FormattedOutput $Object -ForegroundColor 'Red'
 }
 
+function Write-YellowOutput
+{
+    [CmdletBinding()]
+    Param(
+         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
+    )
+
+    Write-FormattedOutput $Object -ForegroundColor 'Yellow'
+}
 function Write-GreenOutput
 {
     [CmdletBinding()]
