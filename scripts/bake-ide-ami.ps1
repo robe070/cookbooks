@@ -388,12 +388,12 @@ $jsonObject = @"
             $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
-            
+
             # 163204: Adds the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) to VM
             foreach ($vmSecret in $vmSecretUrls) {
-                $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret                
+                $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret
             }
-            
+
             $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
 
             try {
@@ -872,7 +872,7 @@ $jsonObject = @"
         }
     }
 
-    $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
+    # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
     return
 }
 catch
