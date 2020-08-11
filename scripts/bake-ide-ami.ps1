@@ -410,7 +410,7 @@ $jsonObject = @"
             } catch {
                 Write-YellowOutput $_ | Out-Default | Write-Host
                 $ExceptionCode = $_.Exception
-                if ($_.Exception.ErrorCode -eq "OSProvisioningTimedOut") {
+                if ($_.Exception.Message -contains "OS Provisioning") {
                     Write-Host "Retrying the New-AZVM command for OSProvisioningTimedOut"
                     # Retry the New-AZVM operation
                     New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
