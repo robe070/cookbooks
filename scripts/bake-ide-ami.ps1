@@ -108,7 +108,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $Pipeline
+    $Pipeline,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $GenerateStorage
 
     )
 
@@ -255,6 +259,7 @@ try
         $StorageAccountName = 'stagingdpauseast'
         $svcName = "BakingDP"
         $keyVaultSvcName = $svcName
+        $storageAccountSvcName = $svcName
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
@@ -264,16 +269,20 @@ try
         # use a separate resource group for easier deletion
         if ($Pipeline) {
             $svcName = "$svcName-$VersionText"
-            # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-            $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
-
             # Create or update the resource group using the specified parameter
             New-AzResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
 
-            # Create or update the storage account using the specified parameter
-            $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
-            New-AzResourceGroupDeployment -ResourceGroupName $svcName -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
-
+            if ($GenerateStorage) {
+                # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+                $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
+                
+                # Set the storage account to use the updated resource group
+                $storageAccountSvcName = $svcName
+                
+                # Create or update the storage account using the specified parameter
+                $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
+                New-AzResourceGroupDeployment -ResourceGroupName $svcName -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
+            }
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
@@ -821,7 +830,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $storageAccountSvcName | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.

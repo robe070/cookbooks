@@ -21,7 +21,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $storageAccountName
+    $StorageAccountName,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $StorageAccountResourceGroup
 )
 
 try {
@@ -43,8 +47,8 @@ try {
     }
 
     # create the sas token
-    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $storageAccountName
-    $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $accountKeys[0].Value
+    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
+    $storageContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $accountKeys[0].Value
 
     $startTime = Get-Date
     $endTime = $startTime.AddDays(30)
