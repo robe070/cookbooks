@@ -108,11 +108,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $Pipeline,
-
-    [Parameter(Mandatory=$false)]
-    [switch]
-    $GenerateStorage
+    $Pipeline
 
     )
 
@@ -256,40 +252,34 @@ try
         }
 
         $subscription = "Visual Studio Enterprise with MSDN"
-        $StorageAccountName = 'stagingdpauseast'
-        $svcName = "BakingDP"
-        $keyVaultSvcName = $svcName
-        $storageAccountSvcName = $svcName
+
+        # used for KeyVault and the images
+        $ImageResourceGroup = "BakingDP"
+
+        # use a separate resource group for easier deletion
+        $VmResourceGroup = "BakingDP-$VersionText"
+
+        # Create or update the resource group using the specified parameter
+        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
+
+        # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+        $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
+        
+        # Create or update the storage account using the specified parameter
+        $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
+        New-AzResourceGroupDeployment -ResourceGroupName $VmResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
+        
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
         $publicDNSName = "bakingpublicdnsDP-$($Script:vmname)"
 
-        # use a separate resource group for easier deletion
-        if ($Pipeline) {
-            $svcName = "$svcName-$VersionText"
-            # Create or update the resource group using the specified parameter
-            New-AzResourceGroup -Name $svcName -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
-
-            if ($GenerateStorage) {
-                # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-                $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
-                
-                # Set the storage account to use the updated resource group
-                $storageAccountSvcName = $svcName
-                
-                # Create or update the storage account using the specified parameter
-                $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
-                New-AzResourceGroupDeployment -ResourceGroupName $svcName -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
-            }
-        }
-
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
 
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
-            Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $svcName -Wait
+            Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
         }
 
         Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
@@ -297,7 +287,7 @@ try
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
 
         $NicName = "bakingNic-$($Script:vmname)"
-        $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -ErrorAction SilentlyContinue
+        $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -ErrorAction SilentlyContinue
         if ( $null -eq $nic ) {
             Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
 
@@ -313,10 +303,10 @@ try
             $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $AzVirtualNetworkSubnetConfigName -AddressPrefix 192.168.1.0/24
 
             # Create a virtual network
-            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
+            $vnet = New-AzVirtualNetwork -ResourceGroupName $VmResourceGroup -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
 
             # Create a public IP address and specify a DNS name
-            $pip = New-AzPublicIpAddress -ResourceGroupName $svcName -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
+            $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
@@ -334,11 +324,11 @@ try
             -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
-            $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $svcName -Location $location `
+            $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $VmResourceGroup -Location $location `
             -Name $AzNetworkSecurityGroupName -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force
 
             # Create a virtual network card and associate with public IP address and NSG
-            $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -Location $location `
+            $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -Location $location `
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
 
@@ -390,7 +380,7 @@ $jsonObject = @"
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
-            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $keyVaultSvcName -VaultName $KeyVault).ResourceId
+            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $ImageResourceGroup -VaultName $KeyVault).ResourceId
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
@@ -406,14 +396,13 @@ $jsonObject = @"
             $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
 
             try {
-                New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
             } catch {
                 Write-YellowOutput $_ | Out-Default | Write-Host
-                $ExceptionCode = $_.Exception
                 if ($_.Exception.Message -contains "OS Provisioning") {
                     Write-Host "Retrying the New-AZVM command for OSProvisioningTimedOut"
                     # Retry the New-AZVM operation
-                    New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                    New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 } else {
                     throw $_.Exception
                 }
@@ -517,7 +506,7 @@ $jsonObject = @"
                 Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
                 Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
                 # Cmdlet to remotely execute the script install-base-sql-server.ps1
-                Invoke-AzVMRunCommand -ResourceGroupName $svcName -Name $Script:vmname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\install-base-sql-server.ps1" | Out-Default | Write-Host
+                Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $Script:vmname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\install-base-sql-server.ps1" | Out-Default | Write-Host
             }
 
             #####################################################################################
@@ -811,26 +800,26 @@ $jsonObject = @"
     Write-Host( "$(Log-Date) Wait for the instance state to be stopped...")
 
     if ( $Cloud -eq 'Azure' ) {
-        Wait-AzureVMState $svcName $Script:vmname "not running"
+        Wait-AzureVMState $VmResourceGroup $Script:vmname "not running"
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 
         Write-Verbose "$(Log-Date) Delete image if it already exists" | Out-Default | Write-Host
         $ImageName = "$($VersionText)image"
-        Get-AzImage -ResourceGroupName $svcName -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Terminating VM..."
-        Stop-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Force | Out-Default | Write-Host
+        Stop-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Force | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Creating Actual Image..."
-        Set-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Generalized | Out-Default | Write-Host
-        $vm = Get-AzVM -ResourceGroupName $svcName -Name $Script:vmname
+        Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
+        $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
         $image = New-AzImageConfig -Location $location -SourceVirtualMachineId $vm.Id
 
-        New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
+        New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $storageAccountSvcName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $VmResourceGroup | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
