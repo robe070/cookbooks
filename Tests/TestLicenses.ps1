@@ -37,9 +37,9 @@ try {
 Write-GreenOutput "All licenses tested successfully" | Out-Default | Write-Host
 
 # Verifies the VersionText Registry with the Image SKU
-$VersionTextValue = Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionText' -ErrorAction | Select-Object -ExpandProperty 'VersionText'
+$VersionTextValue = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionText').VersionText
 Write-YellowOutput "Verifying the Registry entry for VersionText $VersionTextValue and the SKU $ImgName" | Out-Default | Write-Host
 if ($VersionTextValue -ne $ImgName) {
     Write-RedOutput "Registry entry for VersionText $VersionTextValue doesn't match the SKU $ImgName" | Out-Default | Write-Host
-    throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"    
+    throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
 }
