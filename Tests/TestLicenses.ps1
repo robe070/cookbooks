@@ -43,3 +43,4 @@ if ($VersionTextValue -ne $ImgName) {
     Write-RedOutput "Registry entry for VersionText $VersionTextValue doesn't match the SKU $ImgName" | Out-Default | Write-Host
     throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
 }
+Write-GreenOutput "Image SKU tested successfully" | Out-Default | Write-Host
