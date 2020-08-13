@@ -58,8 +58,10 @@ else {
 try
 {
     # read the cloud value
+    $lansaKey = 'HKLM:\Software\LANSA\'
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-
+    $VersionMajor = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMajor').VersionMajor
+    $VersionMinor = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMinor').VersionMinor
     # Check if SQL Server is installed
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $mssql_services ) {
@@ -94,8 +96,13 @@ try
     Write-Host ("$(Log-Date) Shortcuts")
     #####################################################################################
 
+    if ( !$Cloud ){
     copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-
+    }
+    else {
+        
+    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    }
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
 
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
