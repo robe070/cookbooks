@@ -55,6 +55,9 @@ try {
     $startTime = $startTime.AddDays(-1)
     $token = New-AzStorageContainerSASToken -Context $storageContext -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
 
+    # Pipeline uses the ImageUrl variable with value $uri$token
+    Write-Output "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri$token" | Out-Default | Write-Host
+    
     Write-Host "Full url for Azure Publishing: $uri$token"
 } catch {
     $_ | Out-default | Write-Host
