@@ -5,7 +5,7 @@
 Param(
     [string] [Parameter(Mandatory=$true)] $ResourceGroupLocation,
     [string] [Parameter(Mandatory=$true)] $ResourceGroupName,
-    [string] $TemplateFile = '..\..\azure-quickstart-templates\lansa-vmss-windows-autoscale-sql-database\azuredeploy.json',
+    [string] $TemplateFile = '..\..\azure-quickstart-templates\lansa-vmss-windows-autoscale-sql-database\mainTemplate.json',
     [string] $TemplateParameterFile = '.\azuredeploy.parameters.json'
 )
 
