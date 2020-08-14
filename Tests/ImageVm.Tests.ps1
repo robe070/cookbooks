@@ -1,3 +1,8 @@
+<#
+This script is used to test the image from the Image Build Pipeline using a VM:
+Sample Command:
+Invoke-Pester -Script @{Path = '.\ImageVm.Tests.ps1'; Parameters = @{ImgName = 'w12r2d-14-2-11'; CloudName = 'Azure'}} -OutputFormat  NUnitXml -OutputFile VmTests.xml
+#>
 # Image name using which the VM will be created and the cloud name must be provided as input parameters
 Param(
     [Parameter(Mandatory=$true)] [String] $ImgName,
@@ -110,9 +115,35 @@ if($CloudName -eq 'Azure') {
         # Used in the Connect-RemoteSession
         $creds = $Credential
         Connect-RemoteSession
-    
-        Write-Host "$(Log-Date) Executing Test Script in VM"
-        Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+
+        # Define Pester Tests
+        Describe "VM Tests" {
+            Context "License" {
+                It 'Activates the licenses properly' {
+                    $errorThrown = $false;
+                    try{
+                        Write-Host "$(Log-Date) Executing Licenses Test Script in VM"
+                        Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                    } catch {
+                        $errorThrown = $true
+                    }
+                    $errorThrown | Should Be $false
+                }
+            }
+
+            Context "Version" {
+                It 'Matches the Version text' {
+                    try{
+                        Write-Host "$(Log-Date) Executing Image Version Test Script in VM"
+                        Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                    } catch {
+                        $errorThrown = $true
+                    }
+                    $errorThrown | Should Be $false
+                }
+            }
+        }
+
     } catch {
         Write-Host $_.Exception | out-default
         throw "$(Log-Date) Error occured in TestImage file"
