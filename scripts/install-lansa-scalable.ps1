@@ -58,8 +58,13 @@ else {
 try
 {
     # read the cloud value
-    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $lansaKey = 'HKLM:\Software\LANSA\'
 
+    $Cloud = (Get-ItemProperty -Path $lansaKey -Name 'Cloud').Cloud
+   
+    $VersionMajor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMajor').VersionMajor
+    $VersionMinor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMinor').VersionMinor
+   
     # Check if SQL Server is installed
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $mssql_services ) {
@@ -94,8 +99,21 @@ try
     Write-Host ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    if ( $Cloud -eq "Azure" ) {
+        #if ([System.IO.File]::Exists($Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor)) {
+            if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
+    #copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+  
+  }
+     else {
+    #copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+ 
+}
 
+  }
+  
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
 
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
