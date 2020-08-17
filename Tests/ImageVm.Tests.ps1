@@ -24,6 +24,7 @@ if ( -not $script:IncludeDir)
 
     . "$script:IncludeDir\Init-Baking-Vars.ps1"
     . "$script:IncludeDir\Init-Baking-Includes.ps1"
+    . "$script:IncludeDir\dot-CommonTools.ps1"
 }
 else
 {
