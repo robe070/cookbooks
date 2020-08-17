@@ -102,6 +102,7 @@ if($CloudName -eq 'Azure') {
         $diskConfig = New-AzDiskConfig -SkuName "Standard_LRS" -Location $location -CreateOption Empty -DiskSizeGB 32 -Verbose
         $dataDisk1 = New-AzDisk -DiskName "$($VMname)" -Disk $diskConfig -ResourceGroupName $VmResourceGroup -Verbose
         $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
+        $Script:vmname = $VMname
         $vm1 = Add-AzVMDataDisk -VM $vm1 -Name "$Script:vmname" -CreateOption Attach -ManagedDiskId $dataDisk1.Id -Lun 1 -Verbose
         $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
         $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id -Verbose
