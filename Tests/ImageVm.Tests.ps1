@@ -122,12 +122,13 @@ if($CloudName -eq 'Azure') {
         Describe "VM Tests" {
             Context "License" {
                 It 'Activates the licenses properly' {
-                    $errorThrown = $false;
+                    $errorThrown = $false
                     try{
                         Write-Host "$(Log-Date) Executing Licenses Test Script in VM"
                         Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
                     } catch {
                         $errorThrown = $true
+                        Write-Host $_.Exception | out-default
                     }
                     $errorThrown | Should Be $false
                 }
@@ -135,10 +136,12 @@ if($CloudName -eq 'Azure') {
 
             Context "Version" {
                 It 'Matches the Version text' {
+                    $errorThrown = $false
                     try{
                         Write-Host "$(Log-Date) Executing Image Version Test Script in VM"
                         Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
                     } catch {
+                        Write-Host $_.Exception | out-default
                         $errorThrown = $true
                     }
                     $errorThrown | Should Be $false
