@@ -255,6 +255,7 @@ try
 
         # used for KeyVault and the images
         $ImageResourceGroup = "BakingDP"
+        $ImageStorageAccountName = 'stagingdpauseast'
 
         # use a separate resource group for easier deletion
         $VmResourceGroup = "BakingDP-$VersionText"
@@ -819,7 +820,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $VmResourceGroup | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $ImageStorageAccountName -StorageAccountResourceGroup $ImageResourceGroup | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
