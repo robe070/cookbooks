@@ -1,13 +1,15 @@
 <#
 This script is used to test the image from the Image Build Pipeline using a VM:
 Sample Command:
-Invoke-Pester -Script @{Path = '.\ImageVm.Tests.ps1'; Parameters = @{ImgName = 'w12r2d-14-2-11'; CloudName = 'Azure'}} -OutputFormat  NUnitXml -OutputFile VmTests.xml
+Invoke-Pester -Path '.\ImageVm.Tests.ps1' -OutputFormat  NUnitXml -OutputFile VmTests.xml
 #>
-# Image name using which the VM will be created and the cloud name must be provided as input parameters
-Param(
-    [Parameter(Mandatory=$true)] [String] $ImgName,
-    [Parameter(Mandatory=$true)] [ValidateSet("Azure","AWS")] [String] $CloudName
-)
+# Image name using which the VM will be created and the cloud name must be provided as environment variables
+# Environment variables are set before running the tests
+$ImgName = $env:TestImageName
+$ImgName | Out-Default | Write-Host
+
+$CloudName = $env:TestCloudName
+$CloudName | Out-Default | Write-Host
 
 $VMname = "TestImageVM"
 
