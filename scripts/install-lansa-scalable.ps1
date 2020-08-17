@@ -59,9 +59,8 @@ try
 {
     # read the cloud value
     $lansaKey = 'HKLM:\Software\LANSA\'
-
     $Cloud = (Get-ItemProperty -Path $lansaKey -Name 'Cloud').Cloud
-   
+    # read the Version Major and Minor value
     $VersionMajor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMajor').VersionMajor
     $VersionMinor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMinor').VersionMinor
    
@@ -99,20 +98,13 @@ try
     Write-Host ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    if ( $Cloud -eq "Azure" ) {
-        #if ([System.IO.File]::Exists($Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor)) {
-            if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
-    #copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-  
-  }
-     else {
-    #copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
- 
-}
-
-  }
+    # Verify if the ScalableStartHere.htm is present for the Lansa Version
+    if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
+        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    }
+    else {
+        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    }
   
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
 
