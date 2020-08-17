@@ -255,20 +255,13 @@ try
 
         # used for KeyVault and the images
         $ImageResourceGroup = "BakingDP"
-        $ImageStorageAccountName = 'stagingdpauseast'
+        $StorageAccountName = 'stagingdpauseast'
 
         # use a separate resource group for easier deletion
         $VmResourceGroup = "BakingDP-$VersionText"
 
         # Create or update the resource group using the specified parameter
         New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
-
-        # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-        $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
-        
-        # Create or update the storage account using the specified parameter
-        $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
-        New-AzResourceGroupDeployment -ResourceGroupName $VmResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
         
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
@@ -820,7 +813,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $ImageStorageAccountName -StorageAccountResourceGroup $ImageResourceGroup | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $ImageResourceGroup | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
