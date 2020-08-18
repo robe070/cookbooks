@@ -144,7 +144,7 @@ Describe "VM Tests" {
                 $errorThrown = $true
                 Write-Host $_.Exception | out-default
             }
-            $errorThrown | Should Be $false
+            $errorThrown | Should -Be $false
         }
     }
 
@@ -158,7 +158,7 @@ Describe "VM Tests" {
                 Write-Host $_.Exception | out-default
                 $errorThrown = $true
             }
-            $errorThrown | Should Be $false
+            $errorThrown | Should -Be $false
         }
     }
 }
