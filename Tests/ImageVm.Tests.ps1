@@ -68,7 +68,6 @@ Describe "VM Tests" {
                     Write-Host "$(Log-Date) Create NIC"
                     $externalip = Get-ExternalIP
                     $externalip | Out-Default | Write-Host
-                    $externalip = "*"
                     $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($VMname)"
                     $AzVirtualNetworkName = "bakingvNET-$($VMname)"
                     $AzNetworkSecurityGroupRuleRDPName = "RDPRule-$($VMname)"
@@ -126,7 +125,7 @@ Describe "VM Tests" {
 
                 # Used in the Connect-RemoteSession
                 $creds = $Credential
-                Connect-RemoteSession
+                #Connect-RemoteSession
             } catch {
                 Write-Host $_.Exception | out-default
                 throw "$(Log-Date) Error occured in TestImage file"
