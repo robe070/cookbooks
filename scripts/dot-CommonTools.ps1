@@ -150,7 +150,7 @@ function Connect-RemoteSession
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection"
+        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host | Write-Verbose
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
@@ -160,7 +160,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Verbose
 }
 
 function Connect-RemoteSessionUri
