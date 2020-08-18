@@ -120,6 +120,27 @@ if($CloudName -eq 'Azure') {
         $creds = $Credential
         Connect-RemoteSession
 
+        # Setup the Pester environment
+        BeforeAll {
+            # set up environment if not yet setup
+            if ( -not $script:IncludeDir)
+            {
+                # Log-Date can't be used yet as Framework has not been loaded
+
+                Write-Host "Initialising environment - presumed not running through RemotePS"
+                $MyInvocation.MyCommand.Path
+                $script:IncludeDir = Join-Path -Path ((Split-Path -Parent $MyInvocation.MyCommand.Path).TrimEnd("Tests")) -ChildPath "scripts"
+
+                . "$script:IncludeDir\Init-Baking-Vars.ps1"
+                . "$script:IncludeDir\Init-Baking-Includes.ps1"
+                . "$script:IncludeDir\dot-CommonTools.ps1"
+            }
+            else
+            {
+                Write-Host "$(Log-Date) Environment already initialised"
+            }
+        }
+
         # Define Pester Tests
         Describe "VM Tests" {
             Context "License" {
