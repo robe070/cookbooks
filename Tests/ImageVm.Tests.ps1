@@ -67,6 +67,8 @@ Describe "VM Tests" {
                 if ( $null -eq $nic ) {
                     Write-Host "$(Log-Date) Create NIC"
                     $externalip = Get-ExternalIP
+                    $externalip | Out-Default | Write-Host
+                    $externalip = "*"
                     $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($VMname)"
                     $AzVirtualNetworkName = "bakingvNET-$($VMname)"
                     $AzNetworkSecurityGroupRuleRDPName = "RDPRule-$($VMname)"
