@@ -109,8 +109,6 @@ Describe "VM Tests" {
                 }
                 $image = Get-AzImage -ImageName $ImgName -ResourceGroupName $ImageResourceGroup -Verbose
             
-                $diskConfig = New-AzDiskConfig -SkuName "Premium_LRS" -Location $location -CreateOption Empty -DiskSizeGB 127 -Verbose
-                $dataDisk1 = New-AzDisk -DiskName "$($VMname)" -Disk $diskConfig -ResourceGroupName $VmResourceGroup -Verbose
                 $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
                 $Script:vmname = $VMname
                 $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
