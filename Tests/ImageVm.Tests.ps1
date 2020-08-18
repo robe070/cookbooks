@@ -20,7 +20,7 @@ Describe "VM Tests" {
         if ($env:TestVmName) {
             $VMname = $env:TestVmName
         }
-        $VMname = | Out-Default | Write-Host
+        $VMname | Out-Default | Write-Host
 
         # set up environment if not yet setup
         if ( -not $script:IncludeDir)
