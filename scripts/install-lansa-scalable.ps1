@@ -34,7 +34,7 @@ if ($true) {
     {
         # Log-Date can't be used yet as Framework has not been loaded
 
-	    Write-Output "Initialising environment - presumed not running through RemotePS"
+	    Write-Host "Initialising environment - presumed not running through RemotePS"
 	    $MyInvocation.MyCommand.Path
 	    $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -43,11 +43,11 @@ if ($true) {
     }
     else
     {
-	    Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+	    Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
     }
 }
 else {
-	Write-Output "Initialising environment - presumed not running through RemotePS"
+	Write-Host "Initialising environment - presumed not running through RemotePS"
 	$MyInvocation.MyCommand.Path
 	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -57,29 +57,36 @@ else {
 
 try
 {
+    # read the cloud value
+    $lansaKey = 'HKLM:\Software\LANSA\'
+    $Cloud = (Get-ItemProperty -Path $lansaKey -Name 'Cloud').Cloud
+    # read the Version Major and Minor value
+    $VersionMajor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMajor').VersionMajor
+    $VersionMinor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMinor').VersionMinor
+   
     # Check if SQL Server is installed
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $mssql_services ) {
 
         #####################################################################################
-        Write-Output ("$(Log-Date) Enable Named Pipes on local database") | Out-Host
+        Write-Host ("$(Log-Date) Enable Named Pipes on local database")
         #####################################################################################
 
         Import-Module “sqlps” -DisableNameChecking | Out-Host
 
-        Write-Output( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session") | Out-Host
+        Write-Host( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session")
         Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
         Set-Location "c:"
 
         #####################################################################################
-        Write-Output "$(Log-Date) Set local SQL Server to manual" | Out-Host
+        Write-Host "$(Log-Date) Set local SQL Server to manual"
         #####################################################################################
 
         Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
     }
 
     #####################################################################################
-    Write-Output "$(Log-Date) Installing License" | Out-Host
+    Write-Host "$(Log-Date) Installing License"
     #####################################################################################
     Write-Debug "Password: $licensekeypassword_" | Out-Host
     CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
@@ -88,11 +95,17 @@ try
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     #####################################################################################
-    Write-output ("$(Log-Date) Shortcuts") | Out-Host
+    Write-Host ("$(Log-Date) Shortcuts")
     #####################################################################################
 
-    copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
-
+    # Verify if the ScalableStartHere.htm is present for the Lansa Version
+    if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
+        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    }
+    else {
+        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+    }
+  
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
 
     New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
@@ -113,7 +126,7 @@ try
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
-    Write-Output ("$(Log-Date) Installation completed successfully") | Out-Host
+    Write-Host ("$(Log-Date) Installation completed successfully")
 }
 catch
 {

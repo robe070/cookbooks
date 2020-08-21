@@ -25,7 +25,6 @@ param (
     [string]
     $TempPath,
 
-    [Parameter(Mandatory=$true)]
     [string]
     $LicenseKeyPassword,
 
@@ -216,7 +215,18 @@ try
         # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
         Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
 
-        Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+        try {
+            Start-Sleep -Seconds 20
+            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host | Write-Verbose
+            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+        }
+        catch {
+            Write-Host "$(Log-Date) Add a 300s sleep before retry installing kdiff3 from choco" | Out-Default
+            Write-Host $_ | Out-Default
+            Start-Sleep -Seconds 300
+            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+        }
+
         Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
         try {
             # Don't install sysinternals because the license expressly forbids installing it on hosting services

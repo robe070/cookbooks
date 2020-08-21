@@ -48,6 +48,15 @@ function Write-RedOutput
     Write-FormattedOutput $Object -ForegroundColor 'Red'
 }
 
+function Write-YellowOutput
+{
+    [CmdletBinding()]
+    Param(
+         [Parameter(Mandatory=$True,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)][Object] $Object
+    )
+
+    Write-FormattedOutput $Object -ForegroundColor 'Yellow'
+}
 function Write-GreenOutput
 {
     [CmdletBinding()]
@@ -141,7 +150,7 @@ function Connect-RemoteSession
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection"
+        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host | Write-Verbose
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
@@ -151,7 +160,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Verbose
 }
 
 function Connect-RemoteSessionUri
@@ -208,15 +217,26 @@ param (
     $Message,
     [Parameter(Mandatory=$false)]
     [int]
-    $buttons = 0x1  # Ok/Cancel buttons
+    $buttons = 0x1,  # Ok/Cancel buttons
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Pipeline
     )
+
+    # OK and Cancel buttons
+    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Verbose
+
+    if ($Pipeline) {
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Verbose
+        
+        # Simulate OK button
+        return 1
+    }
 
     if ( -not $Script:msgbox ) {
         $Script:msgbox = New-Object -ComObject WScript.Shell
     }
 
-    # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message"
     # Make a Sound, be System Modal
     $Response = $($Script:msgbox).popup( $Message, 0, $Script:DialogTitle, 0x30 + 0x1000 + $buttons)
     # 2 = Cancel

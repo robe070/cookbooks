@@ -11,6 +11,8 @@ Required because this cannot be executed remotely. It must be executed directly 
 
 #>
 
+. "c:\lansa\scripts\dot-CommonTools.ps1"
+
 $OutputFile = "$ENV:TEMP\output1.txt"
 $ErrorFile = "$ENV:TEMP\error1.txt"
 $ResultFile = "$ENV:TEMP\resultcode1.txt"
@@ -18,25 +20,15 @@ Remove-Item -Path $OutputFile -ErrorAction SilentlyContinue
 Remove-Item -Path $ErrorFile -ErrorAction SilentlyContinue
 Remove-Item -Path $ResultFile -ErrorAction SilentlyContinue
 
-# If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir) {
-    # Log-Date can't be used yet as Framework has not been loaded
-
-	Write-Output "Initialising environment - presumed not running through RemotePS"
-	$MyInvocation.MyCommand.Path
-	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-
-	. "$script:IncludeDir\Init-Baking-Vars.ps1"
-	. "$script:IncludeDir\Init-Baking-Includes.ps1"
-}
-else {
-	Write-Output "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+	$script:IncludeDir = 'c:\lansa\scripts'
 }
 
 $ErrorActionPreference = 'Stop'
 
 try {
     #####################################################################################
+    $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $temppath = 'c:\temp'
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-File $OutputFile -Append
@@ -44,7 +36,7 @@ try {
 
     Write-Output ("$(Log-Date) Installing IIS-NetFxExtensibility") | Out-File $OutputFile -Append
 
-    C:\Windows\system32\dism.exe /online /enable-feature /featurename:IIS-NetFxExtensibility /norestart  /All | Out-File $OutputFile -Append
+    Run-ExitCode "C:\Windows\system32\dism.exe" @('/online', '/enable-feature', '/featurename:IIS-NetFxExtensibility', '/norestart', '/All')  | Out-File $OutputFile -Append
 
     Write-Output ("$(Log-Date) Modifying Group Policy")  | Out-File $OutputFile -Append
 
@@ -108,10 +100,15 @@ Finally {
     # have been captured by AWS Run Command before all this captured information is output. So, do not presume
     # that the Result Code is on the first line of the output.
     Write-Host "$(Log-Date) Result Code = $LASTEXITCODE"
-    Write-Host "$(Log-Date) Logging messages are re-ordered for errors first. So check time."
+    Write-Host "$(Log-Date) Logging messages are re-ordered for AWS as errors first. So check time."
 
-    Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
-    Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+    if ( $Cloud -eq 'AWS' ) {
+        Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
+        Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+    } else {
+        Get-Content $OutputFile -ErrorAction SilentlyContinue | Out-Host
+        Get-Content $ErrorFile -ErrorAction SilentlyContinue | Out-Host
+    }
     $LASTEXITCODE | Out-File $ResultFile
 }
 

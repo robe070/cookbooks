@@ -1,7 +1,12 @@
 ﻿Param(
     [Parameter(mandatory)]
-        [ValidateSet('LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
-        [string] $CloudAccount
+    [ValidateSet('NS','VR','PKU','VC','HT','RM','AK','SS','AS','PK', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault')]
+    [string] $CloudAccount,
+
+    # Parameter help description
+    [Parameter(Mandatory=$false)]
+    [securestring]
+    $CloudSecret
 )
 
 switch ( $CloudAccount ) {
@@ -41,6 +46,66 @@ switch ( $CloudAccount ) {
         $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
         $User = 'robAsBake@lansacloudlansacom.onmicrosoft.com'
     }
+    {$_ -eq 'HT'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'HarishThota@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'RM'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'RichaMangalick@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'AK'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'AshutoshKumar@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'SS'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'ShashikantSharma@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'AS'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'AparnaSathyanarayana@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'PK'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'PravirKarna@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'VC'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'VarunChopra@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'PKU'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'PratapKurapati@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'VR'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'VenkateshRamagiri@lansacloudlansacom.onmicrosoft.com'
+    }
+    {$_ -eq 'NS'} {
+        $TenantName = 'DefaultDirectory'
+        $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+        $Subscription = '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+        $User = 'NagasekharSuryadevara@lansacloudlansacom.onmicrosoft.com'
+    }
 }
 
 Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & subscription $subscription")
@@ -49,6 +114,11 @@ Write-Host( "Connecting $CloudAccount using User $user to Tenant $TenantName & s
 #Connect-AzAccount -SubscriptionId ffe7f8f1-c8cb-425c-ad93-bbd52cffe4ed
 Clear-AzContext -Force
 
-$Credential = Get-Credential -UserName $user -Message "Enter password for $user"
+if ( $CloudSecret ) {
+    $Credential = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $user, $CloudSecret
+} else {
+    $Credential = Get-Credential -UserName $user -Message "Enter password for $user"
+}
+
 Connect-AzAccount -Credential $Credential -Tenant $Tenant -Subscription $Subscription
 Set-AzContext -Tenant $Tenant -SubscriptionId $Subscription

@@ -21,7 +21,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $storageAccountName
+    $StorageAccountName,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $StorageAccountResourceGroup
 )
 
 try {
@@ -43,14 +47,17 @@ try {
     }
 
     # create the sas token
-    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $storageAccountName
-    $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $accountKeys[0].Value
+    $accountKeys = Get-AzStorageAccountKey -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
+    $storageContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $accountKeys[0].Value
 
     $startTime = Get-Date
     $endTime = $startTime.AddDays(30)
     $startTime = $startTime.AddDays(-1)
     $token = New-AzStorageContainerSASToken -Context $storageContext -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
 
+    # Pipeline uses the ImageUrl variable with value $uri$token
+    Write-Output "##vso[task.setvariable variable=ImageUrl;isOutput=true]'$uri$token'" | Out-Default | Write-Host
+    
     Write-Host "Full url for Azure Publishing: $uri$token"
 } catch {
     $_ | Out-default | Write-Host

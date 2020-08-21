@@ -104,13 +104,18 @@ param (
     [boolean]
     $OnlySaveImage=$false,
 
+    $CreateVM=$false,    # Used for speeding up script when debugging, provided the VM already exists!
+
     [Parameter(Mandatory=$false)]
-    [boolean]
-    $CreateVM=$false    # Used for speeding up script when debugging, provided the VM already exists!
+    [switch]
+    $Pipeline
 
     )
 
 #Requires -RunAsAdministrator
+
+# Output the Pipeline Switch Status
+$Pipeline | Out-Default | Write-Host | Write-Verbose
 
 # Backward compatibility
 if ( $SkipSlowStuff ) {
@@ -247,8 +252,17 @@ try
         }
 
         $subscription = "Visual Studio Enterprise with MSDN"
+
+        # used for KeyVault and the images
+        $ImageResourceGroup = "BakingDP"
         $StorageAccountName = 'stagingdpauseast'
-        $svcName = "BakingDP"
+
+        # use a separate resource group for easier deletion
+        $VmResourceGroup = "BakingDP-$VersionText"
+
+        # Create or update the resource group using the specified parameter
+        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
+        
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
@@ -259,7 +273,7 @@ try
             Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
 
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
-            Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $svcName -Wait
+            Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
         }
 
         Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
@@ -267,7 +281,7 @@ try
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
 
         $NicName = "bakingNic-$($Script:vmname)"
-        $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -ErrorAction SilentlyContinue
+        $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -ErrorAction SilentlyContinue
         if ( $null -eq $nic ) {
             Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
 
@@ -283,10 +297,10 @@ try
             $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $AzVirtualNetworkSubnetConfigName -AddressPrefix 192.168.1.0/24
 
             # Create a virtual network
-            $vnet = New-AzVirtualNetwork -ResourceGroupName $svcName -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
+            $vnet = New-AzVirtualNetwork -ResourceGroupName $VmResourceGroup -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force
 
             # Create a public IP address and specify a DNS name
-            $pip = New-AzPublicIpAddress -ResourceGroupName $svcName -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
+            $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
@@ -304,11 +318,11 @@ try
             -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
-            $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $svcName -Location $location `
+            $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $VmResourceGroup -Location $location `
             -Name $AzNetworkSecurityGroupName -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force
 
             # Create a virtual network card and associate with public IP address and NSG
-            $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $svcName -Location $location `
+            $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -Location $location `
             -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
         }
 
@@ -345,17 +359,48 @@ $jsonObject = @"
             $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
         }
 
+        # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
+        $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
+        $vmSecretUrls = @();
+        foreach ($vmCertificateName in $vmSecrets) {
+            $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
+            if ( $secret ) {
+                # Write to a file
+                Write-Verbose "$(Log-Date) Found the secret for $vmCertificateName Certificate"
+                $vmSecretUrls += $secret.id;
+            } else {
+                throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
+            }
+        }
+
         if ( $CreateVM -and -not $OnlySaveImage) {
-            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $svcName -VaultName $KeyVault).ResourceId
+            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $ImageResourceGroup -VaultName $KeyVault).ResourceId
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
             $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
+
+            # 163204: Adds the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) to VM
+            foreach ($vmSecret in $vmSecretUrls) {
+                $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret
+            }
+
             $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
 
-            New-AZVM -ResourceGroupName $svcName -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+            try {
+                New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+            } catch {
+                Write-YellowOutput $_ | Out-Default | Write-Host
+                if ($_.Exception.Message -contains "OS Provisioning") {
+                    Write-Host "Retrying the New-AZVM command for OSProvisioningTimedOut"
+                    # Retry the New-AZVM operation
+                    New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                } else {
+                    throw $_.Exception
+                }
+            }
         }
 
         $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName
@@ -454,7 +499,8 @@ $jsonObject = @"
             } else {
                 Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
                 Write-Host "$(Log-Date) also, workaround for x_err.log 'Code=800703fa. Code meaning=Illegal operation attempted on a registry key that has been marked for deletion.' Application Event Log warning 1530 "
-                $dummy = MessageBox "Run install-base-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                # Cmdlet to remotely execute the script install-base-sql-server.ps1
+                Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $Script:vmname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\install-base-sql-server.ps1" | Out-Default | Write-Host
             }
 
             #####################################################################################
@@ -513,18 +559,18 @@ $jsonObject = @"
 
         ReConnect-Session
 
-    Execute-RemoteBlock $Script:session {
-        SyncRegistryPathToCurentProcess
+        Execute-RemoteBlock $Script:session {
+            SyncRegistryPathToCurentProcess
 
-        # Ensure last exit code is 0. (exit by itself will terminate the remote session)
-        cmd /c exit 0
-    }
+            # Ensure last exit code is 0. (exit by itself will terminate the remote session)
+            cmd /c exit 0
+        }
 
         if ( $InstallSQLServer ) {
             #####################################################################################
             Write-Host "$(Log-Date) Install SQL Server. (Remote execution does not work)"
             #####################################################################################
-            $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+            $dummy = MessageBox "Run install-sql-server.ps1. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
 
             #####################################################################################
             Write-Host "$(Log-Date) Rebooting to ensure the newly installed DesktopExperience feature is ready to have Windows Updates run"
@@ -560,8 +606,8 @@ $jsonObject = @"
                 if ( $Cloud -eq 'AWS' ) {
                     Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
                 } else {
-                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)"
-                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box"
+                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)" -Pipeline:$Pipeline
+                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
                 }
             } else {
                 Execute-RemoteBlock $Script:session {
@@ -579,20 +625,21 @@ $jsonObject = @"
         }
 
         if ( $ManualWinUpd ) {
-            $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877"
+            $dummy = MessageBox "Manually install Windows updates e.g. http://www.catalog.update.microsoft.com/Search.aspx?q=KB4346877" -Pipeline:$Pipeline
         }
 
         ReConnect-Session
 
         if ( $InstallIDE -eq $true ) {
 
-            #####################################################################################
-            Write-Host "$(Log-Date) Installing License"
-            #####################################################################################
+            if ($Cloud -eq 'AWS') {
+                #####################################################################################
+                Write-Host "$(Log-Date) Installing License"
+                #####################################################################################
 
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-        Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
-
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+            }
             Execute-RemoteBlock $Script:session {
                 CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
                 CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
@@ -637,9 +684,10 @@ $jsonObject = @"
         }
 
         if ( $InstallScalable -eq $true ) {
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
-            Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
-
+            if ($Cloud -eq 'AWS') {
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
+            }
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
 
@@ -731,7 +779,7 @@ $jsonObject = @"
             }
         } catch {
             Write-RedOutput $_ | Out-Default | Write-Host
-            $Response = MessageBox "Do you want to continue building the image?" 0x3
+            $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
             $Response
             if ( $response -ne 0x6 ) {
                 throw "Sysprep script failure"
@@ -746,26 +794,26 @@ $jsonObject = @"
     Write-Host( "$(Log-Date) Wait for the instance state to be stopped...")
 
     if ( $Cloud -eq 'Azure' ) {
-        Wait-AzureVMState $svcName $Script:vmname "not running"
+        Wait-AzureVMState $VmResourceGroup $Script:vmname "not running"
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 
         Write-Verbose "$(Log-Date) Delete image if it already exists" | Out-Default | Write-Host
         $ImageName = "$($VersionText)image"
-        Get-AzImage -ResourceGroupName $svcName -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Terminating VM..."
-        Stop-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Force | Out-Default | Write-Host
+        Stop-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Force | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Creating Actual Image..."
-        Set-AzVM -ResourceGroupName $svcName -Name $Script:vmname -Generalized | Out-Default | Write-Host
-        $vm = Get-AzVM -ResourceGroupName $svcName -Name $Script:vmname
+        Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
+        $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
         $image = New-AzImageConfig -Location $location -SourceVirtualMachineId $vm.Id
 
-        New-AzImage -ResourceGroupName $svcName -Image $image -ImageName $ImageName | Out-Default | Write-Host
+        New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $svcName -ImageName $ImageName -StorageAccountName $StorageAccountName | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $ImageResourceGroup | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
@@ -816,7 +864,8 @@ $jsonObject = @"
         }
     }
 
-    $dummy = MessageBox "Image bake successful" 0
+    # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
+    return
 }
 catch
 {
@@ -827,7 +876,12 @@ catch
         Remove-PSSession $Script:session | Out-Default | Write-Host
     }
 
-    $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0
+    $dummy = MessageBox "Image bake failed. Fatal error has occurred. Click OK and look at the console log" 0 -Pipeline:$Pipeline
+
+    # Fail the build on exception
+    if ($Pipeline) {
+        throw $_.Exception
+    }
     return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 
