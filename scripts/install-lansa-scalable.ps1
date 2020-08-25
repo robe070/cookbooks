@@ -101,9 +101,7 @@ try
     # Verify if the ScalableStartHere.htm is present for the Lansa Version
     if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
 
-        throw 'Cloud/version combination does not exist, default will be considered'
-
-        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+        throw "ScalableStartHere.htm for $Cloud\$VersionMajor.$VersionMinor combination does not exist"
     }
     else {
         copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
