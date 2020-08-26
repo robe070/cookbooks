@@ -1,7 +1,7 @@
 # Cookbooks
 Cookbooks for scripting LANSA Stacks
 
-[![Build status](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_apis/build/status/Lansa%20Images%20-%20Cookbooks-CI)](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_build/latest?definitionId=11)
+[![Build status](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_apis/build/status/Lansa%20Images%20-%20Cookbooks-CI)](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_build/latest?definitionId=12)
 
 Cloudformation templates, shell scripts and Powershell scripts for launching Windows and Linux stacks in AWS & Microsoft Azure
 
