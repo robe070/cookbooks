@@ -14,17 +14,17 @@ Set-StrictMode -Version 3
 
 $resourceGroupName = ""
 $location = "Australia East"
-$dirPath = "..\..\azure-quickstart-templates\lansa-vmss-windows-autoscale-sql-database\sqlServerDeploymentTemplates\"
+$dirPath = "..\..\azure-quickstart-templates\lansa-vmss-windows-autoscale-sql-database\DatabaseDeploymentTemplates\"
 $templateFilePath = ""
 $templateParameterFilePath = ""
 
 if ($dbType -eq 'MYSQL') {
-    $templateFilePath = $dirPath + "mysqlServerTemplate.json"
+    $templateFilePath = $dirPath + "mysqlTemplate.json"
     $templateParameterFilePath = $dirPath + "mysqlParameters.json"
     $resourceGroupName = "mysql1Test"
 } else {
-    $templateFilePath = $dirPath + "mssqlServerTemplate.json"
-    $templateParameterFilePath = $dirPath + "mssqlParameters.json"
+    $templateFilePath = $dirPath + "sqlServerTemplate.json"
+    $templateParameterFilePath = $dirPath + "sqlServerParameters.json"
     $resourceGroupName = "mssql1Test"
 }
 
