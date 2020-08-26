@@ -256,6 +256,7 @@ try
         # used for KeyVault and the images
         $ImageResourceGroup = "BakingDP"
         $StorageAccountName = 'stagingdpauseast'
+        $StorageContainer = "vhds"
 
         # use a separate resource group for easier deletion
         $VmResourceGroup = "BakingDP-$VersionText"
@@ -274,6 +275,17 @@ try
 
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
+
+            # Add code to remove the .VHD Blob if exists from the Storage Container
+            $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $ImageResourceGroup -Name $StorageAccountName
+            Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $ImageResourceGroup/$StorageAccountName" | Out-Default
+            if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
+                Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
+                $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host 
+                Write-Host "Deleted the Blob $Script:vmname.vhd successfully" | Out-Default
+            } else {
+                Write-Host "The Blob $Script:vmname.vhd doesn't exists" | Out-Default
+            }
         }
 
         Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
@@ -387,7 +399,7 @@ $jsonObject = @"
                 $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret
             }
 
-            $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/vhds/$($Script:vmname).vhd" -CreateOption FromImage
+            $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage
 
             try {
                 New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
