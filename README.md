@@ -1,6 +1,8 @@
 # Cookbooks
 Cookbooks for scripting LANSA Stacks
 
+[![Build status](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_apis/build/status/Lansa%20Images%20-%20Cookbooks-CI)](https://dev.azure.com/VisualLansa/Lansa%20Azure%20Scalable%20License%20Images/_build/latest?definitionId=11)
+
 Cloudformation templates, shell scripts and Powershell scripts for launching Windows and Linux stacks in AWS & Microsoft Azure
 
 There are two image types built by these scripts. The first is a complete installation of the Visual LANSA IDE and the second is a base image in which to deploy an MSI constructed by the Visual LANSA IDE - called the Scalable image.
