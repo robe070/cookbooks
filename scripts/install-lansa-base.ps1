@@ -36,7 +36,7 @@ param (
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
 
 function ChocoWait([int] $WaitTimeSeconds = 60) {
-    Write-Host "$(Log-Date) Adding Wait of $WaitTimeInSeconds" | Out-Default
+    Write-Host "$(Log-Date) Adding Wait for Choco" | Out-Default
     Start-Sleep -Seconds $WaitTimeSeconds
 }
 function DownloadAndInstallMSI {
