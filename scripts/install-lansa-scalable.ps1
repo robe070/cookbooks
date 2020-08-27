@@ -100,17 +100,32 @@ try
 
     # Verify if the ScalableStartHere.htm is present for the Lansa Version
     if (!(Test-Path -Path "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
-
         throw "ScalableStartHere.htm for $Cloud\$VersionMajor.$VersionMinor combination does not exist"
     }
     else {
         copy-item "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Default | Write-Host
+        copy-item "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "${ENV:ProgramFiles(x86)}\CloudStartHere.htm" | Out-Default | Write-Host
     }
   
-    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
+    try {
+        New-Shortcut "$ENV:ProgramFiles\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
+    } catch {
+        Write-RedOutput $_ | Out-Default | Write-Host
+        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+    
+        Write-RedOutput ("$(Log-Date) Retrying with the Program Files X86 Target Path") | Out-Default | Write-Host
+        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
+    }
 
-    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Default | Write-Host
-
+    try {
+        New-Shortcut "$ENV:ProgramFiles\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Default | Write-Host
+    } catch {
+        Write-RedOutput $_ | Out-Default | Write-Host
+        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+    
+        Write-RedOutput ("$(Log-Date) Retrying with the Program Files X86 Target Path") | Out-Default | Write-Host
+        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
+    }
     Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $GitRepoPath_\scripts\show-start-here.ps1" | Out-Default | Write-Host
