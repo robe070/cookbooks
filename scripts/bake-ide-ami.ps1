@@ -277,7 +277,7 @@ try
         # Create and use the Storage Account in the VM Resource Group
         if ($AtomicBuild) {
             # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-            $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()[0..24] -join ""
+            $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
             
             # Set the storage account to use the updated resource group
             $StorageAccountResourceGroup = $VmResourceGroup
