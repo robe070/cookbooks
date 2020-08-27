@@ -286,14 +286,14 @@ try
             &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
         }
 
-        Write-Output "$(Log-Date) Running scheduleTasks.ps1" | Write-Host
+        Write-Host "$(Log-Date) Running scheduleTasks.ps1" | Write-Host
         &"$Script:IncludeDir\scheduleTasks.ps1" | Out-Default | Write-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
-        Write-Output "$(Log-Date) Running Get-StartupCmds.ps1" | Write-Host
+        Write-Host "$(Log-Date) Running Get-StartupCmds.ps1" | Write-Host
         &"$Script:IncludeDir\Get-StartupCmds.ps1" | Out-Default | Write-Host
 
-        Write-Output "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Write-Host
+        Write-Host "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Write-Host
         Disable-InternetExplorerESC | Out-Default | Write-Host
 
         if ( $Cloud -eq "AWS" ) {
@@ -307,9 +307,9 @@ try
         {
             # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
             # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
-            Write-Output "$(Log-Date) Running windowsUpdatesSettings.ps1"
+            Write-Host "$(Log-Date) Running windowsUpdatesSettings.ps1"
             &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-            Write-Output "$(Log-Date) Running win-updates.ps1"
+            Write-Host "$(Log-Date) Running win-updates.ps1"
             &"$Script:IncludeDir\win-updates.ps1"
         }
     }

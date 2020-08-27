@@ -72,7 +72,7 @@ try
         Write-Host ("$(Log-Date) Enable Named Pipes on local database")
         #####################################################################################
 
-        Import-Module “sqlps” -DisableNameChecking | Out-Host
+        Import-Module “sqlps” -DisableNameChecking | Out-Default | Write-Host
 
         Write-Host( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session")
         Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
@@ -82,15 +82,15 @@ try
         Write-Host "$(Log-Date) Set local SQL Server to manual"
         #####################################################################################
 
-        Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Host
+        Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Default | Write-Host
     }
 
     #####################################################################################
     Write-Host "$(Log-Date) Installing License"
     #####################################################################################
-    Write-Debug "Password: $licensekeypassword_" | Out-Host
-    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Host
-    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Host
+    Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
+    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
