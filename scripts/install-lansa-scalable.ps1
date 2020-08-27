@@ -99,31 +99,31 @@ try
     #####################################################################################
 
     # Verify if the ScalableStartHere.htm is present for the Lansa Version
-    if (!(Test-Path -Path "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
+    if (!(Test-Path -Path "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor"))  {
 
         throw "ScalableStartHere.htm for $Cloud\$VersionMajor.$VersionMinor combination does not exist"
     }
     else {
-        copy-item "$Script:GitRepoPath\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Host
+        copy-item "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Default | Write-Host
     }
   
-    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Host
+    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
 
-    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Host
+    New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Education.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Out-Default | Write-Host
 
     Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
 
-    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Out-Host
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $GitRepoPath_\scripts\show-start-here.ps1" | Out-Default | Write-Host
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
-    Add-TrustedSite "lansa.com" | Out-Host
-    Add-TrustedSite "google-analytics.com" | Out-Host
-    Add-TrustedSite "googleadservices.com" | Out-Host
-    Add-TrustedSite "img.en25.com" | Out-Host
-    Add-TrustedSite "addthis.com" | Out-Host
-    Add-TrustedSite "*.lansa.myabsorb.com" | Out-Host
-    Add-TrustedSite "*.cloudfront.com" | Out-Host
+    Add-TrustedSite "lansa.com" | Out-Default | Write-Host
+    Add-TrustedSite "google-analytics.com" | Out-Default | Write-Host
+    Add-TrustedSite "googleadservices.com" | Out-Default | Write-Host
+    Add-TrustedSite "img.en25.com" | Out-Default | Write-Host
+    Add-TrustedSite "addthis.com" | Out-Default | Write-Host
+    Add-TrustedSite "*.lansa.myabsorb.com" | Out-Default | Write-Host
+    Add-TrustedSite "*.cloudfront.com" | Out-Default | Write-Host
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
@@ -131,12 +131,15 @@ try
 }
 catch
 {
-    Write-RedOutput ("$(Log-Date) Installation error") | Out-Host
+    Write-RedOutput $_ | Out-Default | Write-Host
+    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+
+    Write-RedOutput ("$(Log-Date) Installation error") | Out-Default | Write-Host
 
     $Global:LANSAEXITCODE = $LASTEXITCODE
-    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host
+    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Default | Write-Host
 
-    Write-RedOutput "install-lansa-scalable.ps1 is the <No file> in the stack dump below" | Out-Host
+    Write-RedOutput "install-lansa-scalable.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
     throw
 }
 
