@@ -35,6 +35,10 @@ param (
 
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
 
+function ChocoWait([int] $WaitTimeSeconds = 60) {
+    Write-Host "$(Log-Date) Adding Wait of $WaitTimeInSeconds" | Out-Default
+    Start-Sleep -Seconds $WaitTimeSeconds
+}
 function DownloadAndInstallMSI {
     param (
         [string] $MSIuri,
@@ -211,23 +215,28 @@ try
     # GUI Application Installation
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
+        ChocoWait
         # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
         # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
         Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+        ChocoWait
 
         try {
             Start-Sleep -Seconds 20
             "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host | Write-Verbose
             Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+            ChocoWait
         }
         catch {
             Write-Host "$(Log-Date) Add a 300s sleep before retry installing kdiff3 from choco" | Out-Default
             Write-Host $_ | Out-Default
-            Start-Sleep -Seconds 300
+            ChocoWait 300
             Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+            ChocoWait
         }
 
         Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
+        ChocoWait
         try {
             # Don't install sysinternals because the license expressly forbids installing it on hosting services
             # Run-ExitCode 'choco' @( 'install', 'sysinternals', '-y', '--no-progress' ) | Write-Host
@@ -250,6 +259,7 @@ try
 
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
         Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress' )  | Out-Host
+        ChocoWait
 
         # JRE often fails to download with a 404, so install it explicitly from AWS S3
         # ( Latest choco seems to have fixed this)
