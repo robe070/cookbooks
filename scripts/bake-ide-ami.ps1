@@ -263,7 +263,8 @@ try
         $subscription = "Visual Studio Enterprise with MSDN"
 
         # used for KeyVault and the images
-        $ImageResourceGroup = "BakingDP"
+        $KeyVaultResourceGroup = "BakingDP"
+        $ImageResourceGroup = $KeyVaultResourceGroup
         $StorageAccountName = 'stagingdpauseast'
         $StorageAccountResourceGroup = $ImageResourceGroup
         $StorageContainer = "vhds"
@@ -412,7 +413,7 @@ $jsonObject = @"
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
-            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $ImageResourceGroup -VaultName $KeyVault).ResourceId
+            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $KeyVaultResourceGroup -VaultName $KeyVault).ResourceId
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
