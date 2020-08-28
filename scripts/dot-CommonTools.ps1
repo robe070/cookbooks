@@ -160,7 +160,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Host
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -224,10 +224,10 @@ param (
     )
 
     # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Host
+    Write-Host "$(Log-Date) $Message"
 
     if ($Pipeline) {
-        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
         
         # Simulate OK button
         return 1
