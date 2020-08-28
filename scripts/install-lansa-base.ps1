@@ -223,7 +223,7 @@ try
 
         try {
             Start-Sleep -Seconds 20
-            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Write-Host
+            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host
             Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
             ChocoWait
         }

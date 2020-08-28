@@ -120,11 +120,11 @@ param (
 
 # Output the Pipeline Switch Status
 Write-Host "Pipeline Switch"
-$Pipeline | Write-Host
+$Pipeline |Out-Default | Write-Host
 
 # Output the AtomicBuild Switch Status
 Write-Host "AtomicBuild Switch"
-$AtomicBuild | Write-Host
+$AtomicBuild |Out-Default | Write-Host
 
 # Backward compatibility
 if ( $SkipSlowStuff ) {
@@ -272,7 +272,7 @@ try
         $VmResourceGroup = "BakingDP-$VersionText"
 
         # Create or update the resource group using the specified parameter
-        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Write-Host
+        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host
 
         # Create and use the Storage Account in the VM Resource Group
         if ($AtomicBuild) {
