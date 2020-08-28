@@ -28,7 +28,7 @@ Describe "VM Tests" {
             # Log-Date can't be used yet as Framework has not been loaded
 
             Write-Host "Initialising environment - presumed not running through RemotePS"
-            Write-Host $PSCommandPath | out-default | write-verbose
+            Write-Host $PSCommandPath | out-default | write-Host
             $script:IncludeDir = Join-Path -Path ((Split-Path -Parent $PSCommandPath).TrimEnd("Tests")) -ChildPath "scripts"
 
             . "$script:IncludeDir\Init-Baking-Vars.ps1"

@@ -150,7 +150,7 @@ function Connect-RemoteSession
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host | Write-Verbose
+        "$(Log-Date) Waiting for remote PS connection" | Write-Host
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
@@ -160,7 +160,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Verbose
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Host
 }
 
 function Connect-RemoteSessionUri
@@ -224,10 +224,10 @@ param (
     )
 
     # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Verbose
+    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Host
 
     if ($Pipeline) {
-        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Verbose
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Host
         
         # Simulate OK button
         return 1
