@@ -279,8 +279,11 @@ try
             # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
             $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
             
-            # Set the storage account to use the updated resource group
+            # Sets the storage account to use the updated resource group
             $StorageAccountResourceGroup = $VmResourceGroup
+
+            # Sets the image resource group
+            $ImageResourceGroup = $VmResourceGroup
             
             # Create or update the storage account using the specified parameter
             $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
