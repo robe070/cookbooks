@@ -36,7 +36,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $Win2012=$true
+    $Win2012=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $AtomicBuild=$false
     )
 
 # $DebugPreference = "Continue"
@@ -74,4 +78,5 @@ Bake-IdeMsi -VersionText $VersionText `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
             -CreateVM $true `
-            -Pipeline:$true | Out-Default | Write-Host | Write-Verbose
+            -Pipeline:$true `
+            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host | Write-Verbose

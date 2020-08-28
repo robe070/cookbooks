@@ -108,14 +108,23 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $Pipeline
+    $Pipeline,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $AtomicBuild
 
     )
 
 #Requires -RunAsAdministrator
 
 # Output the Pipeline Switch Status
+Write-Host "Pipeline Switch"
 $Pipeline | Out-Default | Write-Host | Write-Verbose
+
+# Output the AtomicBuild Switch Status
+Write-Host "AtomicBuild Switch"
+$AtomicBuild | Out-Default | Write-Host | Write-Verbose
 
 # Backward compatibility
 if ( $SkipSlowStuff ) {
@@ -254,8 +263,10 @@ try
         $subscription = "Visual Studio Enterprise with MSDN"
 
         # used for KeyVault and the images
-        $ImageResourceGroup = "BakingDP"
+        $KeyVaultResourceGroup = "BakingDP"
+        $ImageResourceGroup = $KeyVaultResourceGroup
         $StorageAccountName = 'stagingdpauseast'
+        $StorageAccountResourceGroup = $ImageResourceGroup
         $StorageContainer = "vhds"
 
         # use a separate resource group for easier deletion
@@ -263,7 +274,23 @@ try
 
         # Create or update the resource group using the specified parameter
         New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
-        
+
+        # Create and use the Storage Account in the VM Resource Group
+        if ($AtomicBuild) {
+            # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+            $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
+            
+            # Sets the storage account to use the updated resource group
+            $StorageAccountResourceGroup = $VmResourceGroup
+
+            # Sets the image resource group
+            $ImageResourceGroup = $VmResourceGroup
+            
+            # Create or update the storage account using the specified parameter
+            $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
+            New-AzResourceGroupDeployment -ResourceGroupName $StorageAccountResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
+        }
+
         $vmsize="Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
@@ -277,8 +304,8 @@ try
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
 
             # Add code to remove the .VHD Blob if exists from the Storage Container
-            $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $ImageResourceGroup -Name $StorageAccountName
-            Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $ImageResourceGroup/$StorageAccountName" | Out-Default
+            $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
+            Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $StorageAccountResourceGroup/$StorageAccountName" | Out-Default
             if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
                 Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
                 $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host 
@@ -386,7 +413,7 @@ $jsonObject = @"
         }
 
         if ( $CreateVM -and -not $OnlySaveImage) {
-            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $ImageResourceGroup -VaultName $KeyVault).ResourceId
+            $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $KeyVaultResourceGroup -VaultName $KeyVault).ResourceId
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
@@ -825,7 +852,7 @@ $jsonObject = @"
         New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $ImageResourceGroup | Out-Default | Write-Host
+        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup | Out-Default | Write-Host
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
