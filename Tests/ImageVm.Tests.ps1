@@ -20,6 +20,11 @@ Describe "VM Tests" {
         if ($env:TestVmName) {
             $VMname = $env:TestVmName
         }
+        $AtomicBuild = $false
+        if ($env:AtomicBuild -eq "True") {
+            $AtomicBuild = $true
+        }
+
         $VMname | Out-Default | Write-Host
 
         # set up environment if not yet setup
@@ -46,6 +51,9 @@ Describe "VM Tests" {
             $Location = "Australia East"
             $VmResourceGroup = "BakingDP-$SkuName"
             $ImageResourceGroup = "BakingDP"
+            if ($AtomicBuild) {
+                $ImageResourceGroup = $VmResourceGroup
+            }
             $vmsize="Standard_B4ms"
             $Script:password = "Pcxuser@122robg"
             $AdminUserName = "PCXUSER2"
