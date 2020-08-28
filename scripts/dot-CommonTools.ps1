@@ -126,20 +126,20 @@ param (
     $oldPath = [Environment]::GetEnvironmentVariable($EnvVarToSet, 'Machine')
     $match = '*' + $Directory + '*'
     $replace = $oldPath + ';' + $Directory
-    Write-Debug "OldPath = $Oldpath" | Out-Host
-    Write-Debug "match = $match" | Out-Host
-    Write-Debug "replace = $replace" | Out-Host
+    Write-Debug "OldPath = $Oldpath" | Out-Default | Write-Host
+    Write-Debug "match = $match" | Out-Default | Write-Host
+    Write-Debug "replace = $replace" | Out-Default | Write-Host
     if ( $oldpath -notlike $match )
     {
         [Environment]::SetEnvironmentVariable($EnvVarToSet, $replace, 'Machine')
-        Write-Debug "Machine $EnvVarToSet updated" | Out-Host
+        Write-Debug "Machine $EnvVarToSet updated" | Out-Default | Write-Host
     }
 
     # System Path may be different to remote PS starting environment, so check it separately
     if ( $env:Path -notlike $match )
     {
         $env:Path += ';' + $Directory
-        Write-Debug "local Path updated" | Out-Host
+        Write-Debug "local Path updated" | Out-Default | Write-Host
     }
 
     Propagate-EnvironmentUpdate
@@ -150,7 +150,7 @@ function Connect-RemoteSession
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host | Write-Verbose
+        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
@@ -160,7 +160,7 @@ function Connect-RemoteSession
         Sleep -Seconds 10
     }
 
-    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained" | Out-Default | Write-Verbose
+    Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
 }
 
 function Connect-RemoteSessionUri
@@ -184,12 +184,12 @@ function Connect-RemoteSessionUri
 function ReConnect-Session
 {
     Write-Host "$(Log-Date) Reconnecting session..."
-    if ( $Script:session ) { Remove-PSSession $Script:session | Out-Host }
+    if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
 
-    Connect-RemoteSession | Out-Host
+    Connect-RemoteSession | Out-Default | Write-Host
 
-    Execute-RemoteInit | Out-Host
-    Execute-RemoteInitPostGit | Out-Host
+    Execute-RemoteInit | Out-Default | Write-Host
+    Execute-RemoteInitPostGit | Out-Default | Write-Host
 }
 
 function Reboot-Session
@@ -224,10 +224,10 @@ param (
     )
 
     # OK and Cancel buttons
-    Write-Host "$(Log-Date) $Message" | Out-Default | Write-Verbose
+    Write-Host "$(Log-Date) $Message"
 
     if ($Pipeline) {
-        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline" | Out-Default | Write-Verbose
+        Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
         
         # Simulate OK button
         return 1
@@ -431,9 +431,9 @@ CompilerSdkDirectory=" | Add-Content $SettingsFile
     # Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait
     # Piping output to anywhere causes powershell to wait until the process completes execution
     if ( $VersionMajor -lt 14 ) {
-        &$installer_file """$SettingsPassword""" """$SettingsFile""" | Out-Host
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" | Out-Default | Write-Host
     } else {
-        &$installer_file """$SettingsPassword""" """$SettingsFile""" """E""" | Out-Host
+        &$installer_file """$SettingsPassword""" """$SettingsFile""" """E""" | Out-Default | Write-Host
     }
 }
 

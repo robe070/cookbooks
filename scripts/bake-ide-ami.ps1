@@ -120,11 +120,11 @@ param (
 
 # Output the Pipeline Switch Status
 Write-Host "Pipeline Switch"
-$Pipeline | Out-Default | Write-Host | Write-Verbose
+$Pipeline | Out-Default | Write-Host
 
 # Output the AtomicBuild Switch Status
 Write-Host "AtomicBuild Switch"
-$AtomicBuild | Out-Default | Write-Host | Write-Verbose
+$AtomicBuild | Out-Default | Write-Host
 
 # Backward compatibility
 if ( $SkipSlowStuff ) {
@@ -187,7 +187,7 @@ try
     if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
 
-        Write-Verbose ("Test if source of DVD image exists") | Out-Default | Write-Host
+        Write-Host ("Test if source of DVD image exists")
         if ( !(Test-Path -Path $LocalDVDImageDirectory) )
         {
             throw "LocalDVDImageDirectory '$LocalDVDImageDirectory' does not exist."
@@ -233,7 +233,7 @@ try
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
 
-    Write-Verbose ("Locate image Name $AmazonAMIName") | Out-Default | Write-Host
+    Write-Host ("Locate image Name $AmazonAMIName")
 
     if ( $Cloud -eq 'AWS' ) {
         $AdminUserName = "administrator"
@@ -273,7 +273,7 @@ try
         $VmResourceGroup = "BakingDP-$VersionText"
 
         # Create or update the resource group using the specified parameter
-        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host | Write-Verbose
+        New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host
 
         # Create and use the Storage Account in the VM Resource Group
         if ($AtomicBuild) {
@@ -288,7 +288,7 @@ try
             
             # Create or update the storage account using the specified parameter
             $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
-            New-AzResourceGroupDeployment -ResourceGroupName $StorageAccountResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host | Write-Verbose
+            New-AzResourceGroupDeployment -ResourceGroupName $StorageAccountResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host
         }
 
         $vmsize="Standard_B4ms"
@@ -298,7 +298,7 @@ try
         $publicDNSName = "bakingpublicdnsDP-$($Script:vmname)"
 
         if ( $CreateVM -and -not $OnlySaveImage) {
-            Write-Verbose "$(Log-Date) Delete VM if it already exists" | Out-Default | Write-Host
+            Write-Host "$(Log-Date) Delete VM if it already exists"
 
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
@@ -315,14 +315,14 @@ try
             }
         }
 
-        Write-Verbose "$(Log-Date) Create VM" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Create VM"
         $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
 
         $NicName = "bakingNic-$($Script:vmname)"
         $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -ErrorAction SilentlyContinue
         if ( $null -eq $nic ) {
-            Write-Verbose "$(Log-Date) Create NIC" | Out-Default | Write-Host
+            Write-Host "$(Log-Date) Create NIC"
 
             $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($Script:vmname)"
             $AzVirtualNetworkName = "bakingvNET-$($Script:vmname)"
@@ -371,7 +371,7 @@ try
         if ( $secret ) {
             $SecretURL = $secret.id
         } else {
-            Write-Verbose "$(Log-Date) Create WinRM Certificate"
+            Write-Host "$(Log-Date) Create WinRM Certificate"
 
             $thumbprint = (New-SelfSignedCertificate -DnsName $certificateName -CertStoreLocation Cert:\CurrentUser\My -KeySpec KeyExchange).Thumbprint
 
@@ -405,7 +405,7 @@ $jsonObject = @"
             $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
             if ( $secret ) {
                 # Write to a file
-                Write-Verbose "$(Log-Date) Found the secret for $vmCertificateName Certificate"
+                Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
                 $vmSecretUrls += $secret.id;
             } else {
                 throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
@@ -469,7 +469,7 @@ $jsonObject = @"
 
         Execute-RemoteBlock $Script:session {
             try {
-                Write-Verbose ("Save S3 DVD image url and other global variables in registry") | Out-Default | Write-Host
+                Write-Host ("Save S3 DVD image url and other global variables in registry")
                 $lansaKey = 'HKLM:\Software\LANSA\'
                 if (!(Test-Path -Path $lansaKey)) {
                     New-Item -Path $lansaKey | Out-Default | Write-Host
@@ -486,11 +486,11 @@ $jsonObject = @"
                 New-ItemProperty -Path $lansaKey  -Name 'InstallSQLServer' -PropertyType DWord -Value $using:InstallSQLServer -Force | Out-Default | Write-Host
                 New-ItemProperty -Path $lansaKey  -Name 'Platform' -PropertyType String -Value $using:Platform -Force | Out-Default | Write-Host
 
-                Write-Verbose "Switch off Internet download security warning" | Out-Default | Write-Host
+                Write-Host "Switch off Internet download security warning"
                 [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '1', 'Machine') | Out-Default | Write-Host
 
                 if ( !$using:Upgrade ) {
-                    Write-Verbose "Turn on sound from RDP sessions" | Out-Default | Write-Host
+                    Write-Host "Turn on sound from RDP sessions"
                     Get-Service | Where {$_.Name -match "audio"} | format-table -autosize | Out-Default | Write-Host
                     Get-Service | Where {$_.Name -match "audio"} | start-service | Out-Default | Write-Host
                     Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic" | Out-Default | Write-Host
@@ -572,7 +572,7 @@ $jsonObject = @"
             Execute-RemoteInitPostGit
 
             Execute-RemoteBlock $Script:session {
-                Write-Verbose "$(Log-Date) Refreshing git tools repo" | Out-Default | Write-Host
+                Write-Host "$(Log-Date) Refreshing git tools repo"
                 # Ensure we cope with an existing repo, not just a new clone...
                 cd $using:GitRepoPath
                 # Throw away any working directory changes
@@ -639,8 +639,8 @@ $jsonObject = @"
         # No harm installing this again if its already installed
         if ( $InstallIDE -eq $true) {
             if ( $Win2012 ) {
-                Write-Verbose "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!" | Out-Default | Write-Host
-                Write-Verbose "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE" | Out-Default | Write-Host
+                Write-Host "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
+                Write-Host "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE"
 
                 if ( $Cloud -eq 'AWS' ) {
                     Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
@@ -754,7 +754,7 @@ $jsonObject = @"
 
         if ( $InstallIDE -or ($InstallSQLServer -eq -$false) ) {
             Invoke-Command -Session $Script:session {
-                Write-Verbose "$(Log-Date) Switch Internet download security warning back on" | Out-Default | Write-Host
+                Write-Host "$(Log-Date) Switch Internet download security warning back on"
                 [Environment]::SetEnvironmentVariable('SEE_MASK_NOZONECHECKS', '0', 'Machine') | Out-Default | Write-Host
                 # Set-ExecutionPolicy restricted -Scope CurrentUser
             }
@@ -795,7 +795,7 @@ $jsonObject = @"
         ReConnect-Session
 
         Write-Host "$(Log-Date) Sysprep"
-        Write-Verbose "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error" | Out-Default | Write-Host
+        Write-Host "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
 
         try {
             if ( $Cloud -eq 'AWS' ) {
@@ -837,7 +837,7 @@ $jsonObject = @"
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 
-        Write-Verbose "$(Log-Date) Delete image if it already exists" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Delete image if it already exists"
         $ImageName = "$($VersionText)image"
         Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
