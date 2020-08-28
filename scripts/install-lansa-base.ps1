@@ -223,7 +223,7 @@ try
 
         try {
             Start-Sleep -Seconds 20
-            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host | Write-Verbose
+            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host
             Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
             ChocoWait
         }
@@ -282,18 +282,18 @@ try
             }
 
         if ( $Cloud -eq "Azure" ) {
-            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
+            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Out-Default | Write-Host
             &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
         }
 
-        Write-Host "$(Log-Date) Running scheduleTasks.ps1" | Write-Host
+        Write-Host "$(Log-Date) Running scheduleTasks.ps1"
         &"$Script:IncludeDir\scheduleTasks.ps1" | Out-Default | Write-Host
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
-        Write-Host "$(Log-Date) Running Get-StartupCmds.ps1" | Write-Host
+        Write-Host "$(Log-Date) Running Get-StartupCmds.ps1"
         &"$Script:IncludeDir\Get-StartupCmds.ps1" | Out-Default | Write-Host
 
-        Write-Host "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning" | Write-Host
+        Write-Host "$(Log-Date) Disable IE Enhanced Security Configuration so that Flash executes OK in LANSA eLearning"
         Disable-InternetExplorerESC | Out-Default | Write-Host
 
         if ( $Cloud -eq "AWS" ) {

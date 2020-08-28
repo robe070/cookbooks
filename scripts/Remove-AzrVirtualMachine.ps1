@@ -55,7 +55,7 @@ function Remove-AzrVirtualMachine {
 
 			#region Remove the boot diagnostics disk
 			if ($vm.DiagnosticsProfile.bootDiagnostics) {
-				Write-Verbose -Message 'Removing boot diagnostics storage container...'
+				Write-Host -Message 'Removing boot diagnostics storage container...'
                 $diagSa = [regex]::match($vm.DiagnosticsProfile.bootDiagnostics.storageUri, '^http[s]?://(.+?)\.').groups[1].value
 
                 $VMNameMangled = $vm.Name
@@ -88,15 +88,15 @@ function Remove-AzrVirtualMachine {
 			}
 			#endregion
 
-			Write-Verbose -Message 'Removing the Azure VM...'
+			Write-Host -Message 'Removing the Azure VM...'
 			$null = $vm | Remove-AzVM -Force
-			Write-Verbose -Message 'Removing the Azure network interface...'
+			Write-Host -Message 'Removing the Azure network interface...'
 			foreach($nicUri in $vm.NetworkProfile.NetworkInterfaces.Id) {
 				$nic = Get-AzNetworkInterface -ResourceGroupName $vm.ResourceGroupName -Name $nicUri.Split('/')[-1]
 				Remove-AzNetworkInterface -Name $nic.Name -ResourceGroupName $vm.ResourceGroupName -Force
 				foreach($ipConfig in $nic.IpConfigurations) {
 					if($ipConfig.PublicIpAddress -ne $null) {
-						Write-Verbose -Message 'Removing the Public IP Address...'
+						Write-Host -Message 'Removing the Public IP Address...'
 						Remove-AzPublicIpAddress -ResourceGroupName $vm.ResourceGroupName -Name $ipConfig.PublicIpAddress.Id.Split('/')[-1] -Force
 					}
 				}
@@ -104,7 +104,7 @@ function Remove-AzrVirtualMachine {
 
 
 			## Remove the OS disk
-			Write-Verbose -Message 'Removing OS disk...'
+			Write-Host -Message 'Removing OS disk...'
 			#if ([bool]($($vm.StorageProfile.OSDisk.Vhd).PSobject.Properties.name -match "uri") ) {
             if ($vm.StorageProfile.OSDisk.Vhd -and (Get-Member -inputobject $vm.StorageProfile.OSDisk.Vhd -name "uri" -Membertype Properties)) {
 				## Not managed
@@ -116,12 +116,12 @@ function Remove-AzrVirtualMachine {
 				$osDiskStorageAcct | Remove-AzStorageBlob -Container $osDiskContainerName -Blob $osDiskId.Split('/')[-1]
 
 				#region Remove the status blob
-				Write-Verbose -Message 'Removing the OS disk status blob...'
+				Write-Host -Message 'Removing the OS disk status blob...'
 				$osDiskStorageAcct | Get-AzStorageBlob -Container $osDiskContainerName -Blob "$($vm.Name)*.status" | Remove-AzStorageBlob
 				#endregion
 			} else {
                 ## managed
-                Write-Verbose( "Removing disk $($vm.StorageProfile.OSDisk.Name)" )
+                Write-Host( "Removing disk $($vm.StorageProfile.OSDisk.Name)" )
                 $Disk = Get-AzDisk -ResourceGroupName $ResourceGroupName | where { $_.Name -eq $vm.StorageProfile.OSDisk.Name }
                 if ($Disk) {
 					$Disk | Out-Default | Write-Host
@@ -132,7 +132,7 @@ function Remove-AzrVirtualMachine {
 
 			## Remove any other attached disks
 			if ('DataDiskNames' -in $vm.PSObject.Properties.Name -and @($vm.DataDiskNames).Count -gt 0) {
-				Write-Verbose -Message 'Removing data disks...'
+				Write-Host -Message 'Removing data disks...'
 				foreach ($uri in $vm.StorageProfile.DataDisks.Vhd.Uri) {
 					$dataDiskStorageAcct = Get-AzStorageAccount -Name $uri.Split('/')[2].Split('.')[0]
 					$dataDiskStorageAcct | Remove-AzStorageBlob -Container $uri.Split('/')[-2] -Blob $uri.Split('/')[-1]

@@ -79,4 +79,4 @@ Bake-IdeMsi -VersionText $VersionText `
             -OnlySaveImage $false `
             -CreateVM $true `
             -Pipeline:$true `
-            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host | Write-Verbose
+            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host
