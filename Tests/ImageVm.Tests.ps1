@@ -124,7 +124,18 @@ Describe "VM Tests" {
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id -Verbose
                 $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id -Verbose
                 Write-Host "$(Log-Date) VM creation started"
-                New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                try {
+                    New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                } catch {
+                    Write-Host $_ | Out-Default
+                    Write-Host $_.Exception | Out-Default
+                    if ($_.Exception.Message -contains "OS Provisioning") {
+                        Write-Host "Adding Sleep for OSProvisioningTimedOut"
+                        Start-Sleep -Seconds 1800
+                    } else {
+                        throw $_.Exception
+                    }
+                }
                 Write-Host "$(Log-Date) VM created successfully"
             
                 Write-Host "$(Log-Date) Connecting Remote session"
