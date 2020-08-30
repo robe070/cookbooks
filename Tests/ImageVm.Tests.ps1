@@ -128,7 +128,9 @@ Describe "VM Tests" {
                     New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 } catch {
                     Write-Host $_ | Out-Default
-                    Write-Host $_.Exception | Out-Default
+                    Write-Host "Print Error Message"
+                    Write-Host $_.Exception.Message | Out-Default
+                    Write-Host "Printed Error Message"
                     if ($_.Exception.Message -contains "OS Provisioning") {
                         Write-Host "Adding Sleep for OSProvisioningTimedOut"
                         Start-Sleep -Seconds 1800
