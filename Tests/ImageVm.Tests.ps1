@@ -123,6 +123,10 @@ Describe "VM Tests" {
                 $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id -Verbose
                 $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id -Verbose
+                # Initial Wait
+                Write-Host "$(Log-Date) Adding Initial Wait of 120 seconds"
+                Start-Sleep -Seconds 120
+
                 Write-Host "$(Log-Date) VM creation started"
                 try {
                     New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
@@ -131,7 +135,7 @@ Describe "VM Tests" {
                     Write-Host "Print Error Message"
                     Write-Host $_.Exception.Message | Out-Default
                     Write-Host "Printed Error Message"
-                    if ($_.Exception.Message -contains "OS Provisioning") {
+                    if ($_.Exception.Message.ErrorCode -eq "OSProvisioningTimedOut") {
                         Write-Host "Adding Sleep for OSProvisioningTimedOut"
                         Start-Sleep -Seconds 1800
                     } else {
