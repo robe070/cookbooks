@@ -128,20 +128,7 @@ Describe "VM Tests" {
                 Start-Sleep -Seconds 120
 
                 Write-Host "$(Log-Date) VM creation started"
-                try {
-                    New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
-                } catch {
-                    Write-Host $_ | Out-Default
-                    Write-Host "Print Error Message"
-                    Write-Host $_.Exception.Message | Out-Default
-                    Write-Host "Printed Error Message"
-                    if ($_.Exception.Message.ErrorCode -eq "OSProvisioningTimedOut") {
-                        Write-Host "Adding Sleep for OSProvisioningTimedOut"
-                        Start-Sleep -Seconds 1800
-                    } else {
-                        throw $_.Exception
-                    }
-                }
+                New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 Write-Host "$(Log-Date) VM created successfully"
             
                 Write-Host "$(Log-Date) Connecting Remote session"
