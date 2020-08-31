@@ -123,6 +123,7 @@ Describe "VM Tests" {
                 $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id -Verbose
                 $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id -Verbose
+
                 Write-Host "$(Log-Date) VM creation started"
                 New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 Write-Host "$(Log-Date) VM created successfully"
