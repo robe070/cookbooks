@@ -2,7 +2,7 @@
 
 .VERSION 1.0.0
 
-.GUID
+.GUID 28cf793b-4081-48c6-8da4-b5fdd0f09046
 
 .AUTHOR Rob Goodridge
 
