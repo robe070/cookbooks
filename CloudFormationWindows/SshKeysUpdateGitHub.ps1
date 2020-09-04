@@ -1,10 +1,7 @@
 try
 {
    $envId = $args[0]
-   $pwd = $args[1]
-   #$sshKeyFileLocation = $args[2]
-   #$envId = 207
-   #$pwd = "xxxx"
+
    $sshKeyFileLocation = "C:\LANSA Internal System\PaaS\Keys"
    $keyName = "lansaeval122"
    $keyId = ""
@@ -34,15 +31,26 @@ try
    #ssh-keygen.exe --% -t rsa -b 4096 -C "lansaeval207@lansa.com" -N "" -f "lansaeval122_rsa"
    ssh-keygen.exe --% -t rsa -b 4096 -C lansaeval$envId@lansa.com -N "" -f lansaeval122_rsa
    Write-Output "Key Gen completed"
-   $credentials = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($userid + ":" + $pwd))
+
+   $PasswordPath = '\\lansasrvnewer\lansa\FreeTrialGitHubPasswords.csv'
+   Write-Host("Get the password from $PasswordPath")
+   $PasswordFile = Import-Csv ($PasswordPath)
+
+   $PasswordMap = @{}
+   $PasswordFile | foreach { $PasswordMap[$_.repo] = $_.pat }
+   $password = $passwordMap[$userid]
+
+   $credentials = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($userid + ":" + $password))
    $headers = @{ 'Authorization' = "Basic $credentials" }
-   #Get the key's id. Need it for the DELETE. Be nice if you could just give the name which to my knowledge is unique.
    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
    Write-Output "Get keys list"
-   # curl -u "lansaeval207:LanSA(122)" https://api.github.com/user/keys
+   # curl -u "userid:password" https://api.github.com/user
    $response = Invoke-WebRequest -uri "https://api.github.com/user/keys" -Headers $headers -UseBasicParsing
    $responseX = $response.content | Out-String | ConvertFrom-Json
+   $responseX | Out-Default | Write-Host
    Write-Output "Get keys list completed"
+
    foreach ( $keyValues in $responseX )
    {
       if ( $keyValues.title = $keyName )
