@@ -2,6 +2,10 @@ try
 {
    $envId = $args[0]
 
+   Push-Location
+
+   Write-Host("*** GitHub access is using Personal Access Tokens (PAT) ***")
+
    $sshKeyFileLocation = "C:\LANSA Internal System\PaaS\Keys"
    $keyName = "lansaeval122"
    $keyId = ""
@@ -13,7 +17,7 @@ try
    $backupDir = "${sshKeyDirectory}_$chgDate"
    if ( -not (Test-Path $backupDir ) )
    {
-      Rename-Item -path $sshKeyDirectory -newName $backupDir
+      Rename-Item -path $sshKeyDirectory -newName $backupDir -ErrorAction SilentlyContinue
    }
 
    if ( -not (Test-Path $sshKeyDirectory ) )
@@ -65,7 +69,7 @@ try
       # curl -u "lansaeval%%N:LanSA(122)" -X "DELETE" https://api.github.com/user/keys/%PUBKEYID%
       $url = "https://api.github.com/user/keys/" + $keyId
       $response = Invoke-WebRequest -Method DELETE -uri $url -Headers $headers -UseBasicParsing
-      $responseX = $response.content | Out-String
+      $response.content | Out-String | ConvertFrom-Json | Out-Default | Write-Host
    }
    # Add the key
    Write-Output "Add key"
@@ -73,16 +77,16 @@ try
    $key = Get-Content $sshKeyFile -Raw
    $body = @{"title"="lansaeval122"; "key"="$key"} | ConvertTo-Json
    $response = Invoke-WebRequest -uri "https://api.github.com/user/keys" -Headers $headers -Method POST -ContentType "application/json" -Body $body -UseBasicParsing
-   $responseX = $response.content | Out-String
-}
-catch
-{
-   $_ | Write-Host
+   $response.content | Out-String | ConvertFrom-Json | Out-Default | Write-Host
+} catch {
+   $_ | Out-Default | Write-Host
    $e = $_.Exception
-   $e | format-list -force | Write-Host
-   Write-Host( "Configuration failed" )
+   $e | format-list -force | Out-Default | Write-Host
+   Write-Host( "Configuration of $userid failed" )
    cmd /c exit -1 | Write-Host    #Set $LASTEXITCODE
    Write-Host( "LASTEXITCODE $LASTEXITCODE" )
    return
+} finally {
+    Pop-Location
 }
-Write-Host( "Configuration succeeded" )
+Write-Host( "Configuration of $userid succeeded" )
