@@ -44,7 +44,12 @@ try
     $PasswordMap = @{}
     $PasswordFile | foreach { $PasswordMap[$_.repo] = $_.pat }
 
-    $password = $passwordMap[$userid]
+    if ( $passwordMap.ContainsKey( $userid) ) {
+        $password = $passwordMap[$userid]
+    } else {
+        Write-Host( "Warning: PAT does not exist for $userid. Defaulting to old password")
+        $password = $oldPassword
+    }
 
     $credentials = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($userid + ":" + $password))
     $headers = @{ 'Authorization' = "Basic $credentials" }
