@@ -38,10 +38,7 @@ try {
     Git fetch *>&1 | Write-Host
     $branch = git rev-parse --abbrev-ref HEAD
     git reset --hard origin/$branch *>&1
-    if ( $LASTEXITCODE -eq 128) {
-        # This error ignored because couldn't explain why the first pull works and the second fails with 128, with the same username and the same powershell version and the same cmd prompt version
-        Write-Host("WARNING: git pull LASTEXITCODE = $LASTEXITCODE")
-    } elseif ( $LASTEXITCODE -ne 0) {
+    if ( $LASTEXITCODE -ne 0) {
         throw "git pull LASTEXITCODE = $LASTEXITCODE"
     }
 } catch {
