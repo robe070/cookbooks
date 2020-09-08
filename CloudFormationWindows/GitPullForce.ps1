@@ -5,6 +5,8 @@ param(
 [String]$Directory
 )
 "GitPullForce.ps1" | Write-Host
+Write-Host("cmd version = $env:comspec")
+Write-Host("User = $env:userdomain\$env:username")
 
 cmd /c exit 0 #Set $LASTEXITCODE
 
