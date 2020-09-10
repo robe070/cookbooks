@@ -31,10 +31,13 @@ try
     }
     # Set the current directory so the key gets generated straight into the correct directory
     Set-Location -Path $sshKeyDirectory
-    # Need "--%" otherwise it will get a "Too many arguments" error.
-    # https://github.com/PowerShell/Win32-OpenSSH/issues/1017
-    #ssh-keygen.exe --% -t rsa -b 4096 -C "lansaeval207@lansa.com" -N "" -f "lansaeval122_rsa"
-    ssh-keygen.exe --% -t rsa -b 4096 -C lansaeval$envId@lansa.com -N "" -f lansaeval122_rsa
+
+    # Changed to start-process so that email address is parsed correctly
+    $Arguments = @("-t rsa", "-b 4096", "-C lansaeval$($envId)@lansa.com", '-N ""', "-f lansaeval122_rsa")
+    $p = Start-Process -FilePath ssh-keygen -nonewwindow -ArgumentList $Arguments -Wait -PassThru
+    if ( $p.ExitCode -ne 0 ) {
+        throw "ssh-keygen LASTEXITCODE = $($p.ExitCode)"
+    }
     Write-Output "Key Gen completed"
 
     $PasswordPath = '\\lansasrvnewer\lansa\FreeTrialGitHubPasswords.csv'
