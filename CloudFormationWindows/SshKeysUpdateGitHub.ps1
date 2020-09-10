@@ -99,4 +99,5 @@ try
 } finally {
     Pop-Location
 }
+cmd /c exit 0 # Set $LASTEXITCODE
 Write-Host( "Configuration of $userid succeeded" )
