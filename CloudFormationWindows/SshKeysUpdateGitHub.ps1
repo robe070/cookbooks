@@ -3,7 +3,7 @@ try
     $envId = $args[0]
     $oldPassword = $args[1]
 
-    Push-Location
+    Push-Location | Out-default | Write-Host
 
     Write-Host("*** GitHub access is using Personal Access Tokens (PAT) ***")
 
@@ -18,24 +18,26 @@ try
     $backupDir = "${sshKeyDirectory}_$chgDate"
     if ( -not (Test-Path $backupDir ) )
     {
-        Rename-Item -path $sshKeyDirectory -newName $backupDir -ErrorAction SilentlyContinue
+        Rename-Item -path $sshKeyDirectory -newName $backupDir -ErrorAction SilentlyContinue | Out-default | Write-Host
     }
 
     if ( -not (Test-Path $sshKeyDirectory ) )
     {
-        New-Item -ItemType Directory -Force -Path $sshKeyDirectory
+        New-Item -ItemType Directory -Force -Path $sshKeyDirectory | Out-default | Write-Host
     }
     else
     {
-        Remove-Item -path $sshKeyDirectory\lansaeval122_rsa*
+        Remove-Item -path $sshKeyDirectory\lansaeval122_rsa* | Out-default | Write-Host
     }
     # Set the current directory so the key gets generated straight into the correct directory
-    Set-Location -Path $sshKeyDirectory
+    Set-Location -Path $sshKeyDirectory | Out-default | Write-Host
 
     # Changed to start-process so that email address is parsed correctly
-    $Arguments = @("-t rsa", "-b 4096", "-C lansaeval$($envId)@lansa.com", '-N ""', "-f lansaeval122_rsa")
-    $p = Start-Process -FilePath ssh-keygen -nonewwindow -ArgumentList $Arguments -Wait -PassThru
-    if ( $p.ExitCode -ne 0 ) {
+    # $Arguments = @("-t rsa", "-b 4096", "-C lansaeval$($envId)@lansa.com", '-N ""', "-f lansaeval122_rsa")
+    # $p = Start-Process -FilePath ssh-keygen -nonewwindow -ArgumentList $Arguments -Wait -PassThru
+    $p = start-process -wait -PassThru -nonewwindow ssh-keygen -argumentlist "-t rsa -b 4096 -C lansaeval$envId@lansa.com -N `"`" -f lansaeval122_rsa"
+    if ( -not [string]::IsNullOrEmpty($p.ExitCode) -and ($p.ExitCode -ne 0) )
+    {
         throw "ssh-keygen LASTEXITCODE = $($p.ExitCode)"
     }
     Write-Output "Key Gen completed"
@@ -97,7 +99,7 @@ try
     Write-Host( "LASTEXITCODE $LASTEXITCODE" )
     return
 } finally {
-    Pop-Location
+    Pop-Location | Out-default | Write-Host
 }
 cmd /c exit 0 # Set $LASTEXITCODE
 Write-Host( "Configuration of $userid succeeded" )
