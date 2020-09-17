@@ -3,8 +3,9 @@
 # LanSA(122)
 Param(
     [Parameter(Mandatory=$false)]
-        [ValidateSet('Live','Test','Dev','All', '207')]
-        [string] $StackType = 'All'
+        [ValidateSet('Live','Test','Dev','All', '207', '302', '304')]
+        [string] $StackType = 'All',
+        [switch] $SendMail
 )
 
 function TestGitHubPATAccess{
@@ -27,8 +28,13 @@ function TestGitHubPATAccess{
     $response = Invoke-WebRequest -uri "https://api.github.com/user/keys" -Headers $headers -UseBasicParsing
 
     $responseX = $response.content | Out-String | ConvertFrom-Json
-    $responseX | out-default | Write-Host
+    if ( $null -eq $responseX) {
+        throw "$userid has no keys"
+    } else {
+        $responseX | out-default | Write-Host
+    }
 }
+
 try
 {
     $PasswordPath = '\\lansasrvnewer\lansa\FreeTrialGitHubPasswords.csv'
@@ -37,6 +43,7 @@ try
 
     if ( $StackType -eq 'All' ) {
         Foreach ($passwordEntry in $PasswordFile) {
+            $passwordEntry.repo  | Write-Host
             TestGitHubPATAccess $passwordEntry.repo $passwordEntry.pat
         }
     } else {
@@ -79,9 +86,9 @@ try
         $PasswordMap = @{}
         $PasswordFile | foreach { $PasswordMap[$_.repo] = $_.pat }
 
-
         foreach ($Environment in $Environmentlist) {
             $userid = "lansaeval" + $Environment
+            $userid | Write-Host
             if ( $passwordMap.ContainsKey( $userid) ) {
                 $password = $passwordMap[$userid]
                 TestGitHubPATAccess $userid $password
@@ -94,12 +101,21 @@ try
 }
 catch
 {
-   $_ | Out-Default | Write-Host
-   $e = $_.Exception
-   $e | format-list | Out-Default | Write-Host
-   Write-Host( "Refresh failed" )
-   cmd /c exit -1
-   Write-Host( "LASTEXITCODE $LASTEXITCODE" )
-   return
+    $_ | Out-Default | Write-Host
+    $e = $_.Exception
+    $e | format-list | Out-Default | Write-Host
+
+    Write-Host( "Refresh of PAT access failed for StackType = $StackType" )
+    cmd /c exit -1
+    Write-Host( "LASTEXITCODE $LASTEXITCODE" )
+    if ( $SendMail -eq $true) {
+        Send-MailMessage -To lansapaasadmin@lansa.com -from robert.goodridge@lansa.com.au -Subject "Refresh of PAT access for $userid failed (RefreshGitHubPatTimeout.ps1)" -Body $e -SmtpServer 10.2.0.200
+        Write-Host "email sent"
+    }
+    return
 }
-Write-Host( "Refresh of PAT access succeeded" )
+Write-Host( "Refresh of PAT access succeeded for StackType = $StackType" )
+if ( $SendMail  -eq $true) {
+    Send-MailMessage -To lansapaasadmin@lansa.com -from robert.goodridge@lansa.com.au -Subject "Refresh of PAT access succeeded for StackType = $StackType (RefreshGitHubPatTimeout.ps1)"  -SmtpServer 10.2.0.200
+    Write-Host "email sent"
+}
