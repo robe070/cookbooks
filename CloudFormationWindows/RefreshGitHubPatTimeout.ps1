@@ -4,7 +4,7 @@
 Param(
     [Parameter(Mandatory=$false)]
         [ValidateSet('Live','Test','Dev','All', '207', '302', '305')]
-        [string] $StackType = '305',
+        [string] $StackType = 'All',
         [switch] $SendMail
 )
 
@@ -119,3 +119,4 @@ if ( $SendMail  -eq $true) {
     Send-MailMessage -To lansapaasadmin@lansa.com -from robert.goodridge@lansa.com.au -Subject "Refresh of PAT access succeeded for StackType = $StackType (RefreshGitHubPatTimeout.ps1)"  -SmtpServer 10.2.0.200
     Write-Host "email sent"
 }
+cmd /c exit 0
