@@ -3,8 +3,8 @@
 # LanSA(122)
 Param(
     [Parameter(Mandatory=$false)]
-        [ValidateSet('Live','Test','Dev','All', '207', '302', '304')]
-        [string] $StackType = 'All',
+        [ValidateSet('Live','Test','Dev','All', '207', '302', '305')]
+        [string] $StackType = '305',
         [switch] $SendMail
 )
 
@@ -28,7 +28,7 @@ function TestGitHubPATAccess{
     $response = Invoke-WebRequest -uri "https://api.github.com/user/keys" -Headers $headers -UseBasicParsing
 
     $responseX = $response.content | Out-String | ConvertFrom-Json
-    if ( $null -eq $responseX) {
+    if ( $null -eq $responseX -or ($responseX.Length -eq 0)) {
         throw "$userid has no keys"
     } else {
         $responseX | out-default | Write-Host
