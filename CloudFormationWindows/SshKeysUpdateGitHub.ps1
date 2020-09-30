@@ -52,8 +52,7 @@ try
     if ( $passwordMap.ContainsKey( $userid) ) {
         $password = $passwordMap[$userid]
     } else {
-        Write-Host( "Warning: PAT does not exist for $userid. Defaulting to old password")
-        $password = $oldPassword
+        throw "PAT does not exist for $userid"
     }
 
     $credentials = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($userid + ":" + $password))
