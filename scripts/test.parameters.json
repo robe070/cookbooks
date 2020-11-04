@@ -6,16 +6,16 @@
             "value": "script"
         },
         "msiURL": {
-            "value": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.2.20715_en-us.msi"
+            "value": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v15.0.0_en-us.msi"
         },
         "osName": {
-            "value": "Windows Server 2012"
+            "value": "Windows Server 2019"
         },
         "lansaVersion": {
-            "value": "V14 SP2"
+            "value": "V15 GA"
         },
         "imageReleaseState": {
-            "value": "Preview"
+            "value": "Production"
         },
         "imageSource": {
             "value": "Marketplace"
@@ -30,7 +30,13 @@
             "value": "Pcxuser@122robg"
         },
         "databaseNewOrExisting": {
-            "value": "new"
+            "value": "existing"
+        },
+        "databaseServerName": {
+            "value": "testsrv-dp.database.windows.net"
+        },
+        "databaseName":{
+            "value": "test-rg"
         },
         "databaseLogin": {
             "value": "testsrv-dp"
