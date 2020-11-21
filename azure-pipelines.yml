@@ -1,4 +1,15 @@
 # Starter pipeline
+- task: AWSPowerShellModuleScript@1
+  inputs:
+    regionName: 'ap-southeast-2'
+    scriptType: 'inline'
+    inlineScript: |
+      Install-Module -Name AWSPowerShell
+      Set-AWSCredential `
+                       -AccessKey AKIA3JDVQNWWPTHZWM6O `
+                       -SecretKey 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 `
+                       -StoreAs default
+      Get-AWSCredential -ListProfileDetail
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
