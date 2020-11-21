@@ -36,7 +36,7 @@ param (
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
 
 function ChocoWait([int] $WaitTimeSeconds = 60) {
-    Write-Host "$(Log-Date) Adding Wait for Choco" | Out-Default
+    Write-Host "$(Log-Date) Adding Wait for Choco" | Write-Host
     Start-Sleep -Seconds $WaitTimeSeconds
 }
 function DownloadAndInstallMSI {
@@ -96,7 +96,7 @@ try
     }
 
     if ( !(test-path $TempPath) ) {
-        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Write-Host
     }
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
@@ -144,8 +144,8 @@ try
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
         # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-        Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Write-Host
-        Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Default | Write-Host
 
         Write-Debug $ENV:PATH | Write-Host
     }
@@ -185,7 +185,7 @@ try
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Write-Host
 
-        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Write-Host
+        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Out-Default | Write-Host
         $filePath = $installer_file
         $shell = New-Object -ComObject Shell.Application
         $zipFile = $shell.NameSpace($filePath)
@@ -200,7 +200,7 @@ try
         # Installer file MUST be executed with the current directory set to the installer directory
         $InstallerScript = '.\install.ps1'
         Set-Location $InstallerDirectory | Out-Default | Write-Host
-        & $InstallerScript | Write-Host
+        & $InstallerScript | Out-Default | Write-Host
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
         # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
@@ -223,7 +223,7 @@ try
 
         try {
             Start-Sleep -Seconds 20
-            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host
+            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Write-Host
             Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress',  '-s choco' ) | Write-Host
             ChocoWait
         }
@@ -282,7 +282,7 @@ try
             }
 
         if ( $Cloud -eq "Azure" ) {
-            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Out-Default | Write-Host
+            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
             &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
         }
 
@@ -299,19 +299,10 @@ try
         if ( $Cloud -eq "AWS" ) {
             # Delete file which causes AWS to falsely detect that there is a virus
             # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
-            Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
-            Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
+            Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Out-Default | Write-Host
+            Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Out-Default | Write-Host
         }
 
-        if ( 0 )
-        {
-            # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
-            # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
-            Write-Host "$(Log-Date) Running windowsUpdatesSettings.ps1"
-            &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-            Write-Host "$(Log-Date) Running win-updates.ps1"
-            &"$Script:IncludeDir\win-updates.ps1"
-        }
     }
 }
 catch
