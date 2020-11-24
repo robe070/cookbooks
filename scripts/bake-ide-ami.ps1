@@ -236,7 +236,7 @@ try
     Write-Host ("Locate image Name $AmazonAMIName")
 
     if ( $Cloud -eq 'AWS' ) {
-        $AdminUserName = "administrator"
+        $AdminUserName = "Administrator"
         $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
         $ImageName = $AmazonImage[0].Name
         $Script:Imageid = $AmazonImage[0].ImageId
