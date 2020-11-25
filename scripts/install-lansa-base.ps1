@@ -181,7 +181,7 @@ try
         }
 
         $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
-        New-Item $InstallerDirectory -ItemType directory -Force
+        New-Item $InstallerDirectory -ItemType directory -Force | Out-Default  | Write-Host
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Write-Host
 
@@ -195,7 +195,7 @@ try
         $copyFlags += 0x04 # Hide progress dialogs
         $copyFlags += 0x10 # Overwrite existing files
 
-        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags)
+        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags) | Out-Default | Write-Host
 
         # Installer file MUST be executed with the current directory set to the installer directory
         $InstallerScript = '.\install.ps1'
@@ -204,7 +204,7 @@ try
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
         # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
-        .\amazon-cloudwatch-agent-ctl.ps1 -a start -s
+        .\amazon-cloudwatch-agent-ctl.ps1 -a start -s | Out-Default | Write-Host
 
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
         set-service -Name AmazonCloudWatchAgent -StartupType Manual | Out-Default | Write-Host
