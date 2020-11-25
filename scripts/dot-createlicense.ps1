@@ -14,6 +14,14 @@ function CreateLicence {
     )
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
+    $LicenseName = Split-Path $licenseFile_ -leaf
+    if (($Cloud -eq 'AWS') -and ($LicenseName -in @('LANSAScalableLicense.pfx','LANSAIntegratorLicense.pfx'))) {
+
+        $ReconstitutedFile="c:\temp\$LicenseName"
+        $Parameter = get-ssmparameter -Name $LicenseName -WithDecryption $true
+        [IO.File]::WriteAllBytes($ReconstitutedFile, [Convert]::FromBase64String($Parameter.Value))
+    }
+
     # Check if license file is available to be installed
     if ( (Test-Path $licenseFile_) -or ($Cloud -eq 'Azure') )
     {
@@ -22,8 +30,13 @@ function CreateLicence {
             #####################################################################################
             Write-Host "$(Log-Date) $dnsName_ : install license"
             #####################################################################################
-
-            $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
+            $mypwd = $null
+            if ($LicenseName -in @('LANSAScalableLicense.pfx','LANSAIntegratorLicense.pfx')) {
+                $mypwd = get-ssmparameter -Name 'LicensePrivateKeyPassword' -WithDecryption $true
+            }
+            else {
+                $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
+            }    
             Import-PfxCertificate -FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd | Write-Host
             }
 
