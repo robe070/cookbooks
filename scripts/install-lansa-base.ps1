@@ -36,7 +36,7 @@ param (
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
 
 function ChocoWait([int] $WaitTimeSeconds = 60) {
-    Write-Host "$(Log-Date) Adding Wait for Choco" | Write-Host
+    Write-Host "$(Log-Date) Adding Wait for Choco"
     Start-Sleep -Seconds $WaitTimeSeconds
 }
 function DownloadAndInstallMSI {
@@ -96,7 +96,7 @@ try
     }
 
     if ( !(test-path $TempPath) ) {
-        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Write-Host
+        New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
@@ -185,7 +185,7 @@ try
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Write-Host
 
-        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Out-Default | Write-Host
+        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Write-Host
         $filePath = $installer_file
         $shell = New-Object -ComObject Shell.Application
         $zipFile = $shell.NameSpace($filePath)
@@ -258,7 +258,7 @@ try
         # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
-        Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress', '-s choco' )  | Out-Host
+        Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress', '-s choco' )  | Write-Host
         ChocoWait
 
         # JRE often fails to download with a 404, so install it explicitly from AWS S3
