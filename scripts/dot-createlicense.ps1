@@ -27,7 +27,8 @@ function CreateLicence {
                 Write-Host "$(Log-Date) $dnsName : install license"
                 #####################################################################################
            
-                $mypwd = get-ssmparameter -Name 'LicensePrivateKeyPassword' -WithDecryption $true
+                $awspwd = get-ssmparameter -Name 'LicensePrivateKeyPassword' -WithDecryption $true
+                $mypwd= ConvertTo-SecureString -String $awspwd.Value -AsPlainText -Force
                 Import-PfxCertificate -FilePath $licenseFile cert:\\localMachine\\my -Password $mypwd | Write-Host
                 
             }
