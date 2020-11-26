@@ -54,7 +54,7 @@ function CreateLicence {
             Write-Host("$(Log-Date) keyName: $keyName" )
 
             New-Item -Path HKLM:\Software\LANSA -ErrorAction SilentlyContinue | Write-Host
-            New-ItemProperty -Path HKLM:\Software\LANSA  -Name $registryValue_ -PropertyType String -Value $keyName -Force | Write-Host
+            New-ItemProperty -Path HKLM:\Software\LANSA  -Name $registryValue -PropertyType String -Value $keyName -Force | Write-Host
 
             $MachineGuid = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
             New-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid -PropertyType String -Value $MachineGuid.MachineGuid -force | Write-Host
