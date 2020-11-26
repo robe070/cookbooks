@@ -6,42 +6,34 @@
 #  3. Private Key registry value name
 ########################################################################
 function CreateLicence {
-    Param (
-        [string]$licenseFile_,
-        [string]$password_,
-        [string]$dnsName_,
-        [string]$registryValue_
+    param (
+        [string]$awsParameterStoreName,
+        [string]$dnsName,
+        [string]$registryValue
     )
-
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    $LicenseName = Split-Path $licenseFile_ -leaf
-    if (($Cloud -eq 'AWS') -and ($LicenseName -in @('LANSAScalableLicense.pfx','LANSAIntegratorLicense.pfx'))) {
-
-        $ReconstitutedFile="c:\temp\$LicenseName"
-        $Parameter = get-ssmparameter -Name $LicenseName -WithDecryption $true
+    if ($Cloud -eq 'AWS') {
+        $ReconstitutedFile = "c:\temp\$awsParameterStoreName"
+        $Parameter = get-ssmparameter -Name $awsParameterStoreName -WithDecryption $true
         [IO.File]::WriteAllBytes($ReconstitutedFile, [Convert]::FromBase64String($Parameter.Value))
     }
-
+    $licenseFile = "c:\temp\$awsParameterStoreName"
     # Check if license file is available to be installed
-    if ( (Test-Path $licenseFile_) -or ($Cloud -eq 'Azure') )
+    if ( (Test-Path $licenseFile) -or ($Cloud -eq 'Azure') )
     {
         try {
             if ($Cloud -eq 'AWS') {
-            #####################################################################################
-            Write-Host "$(Log-Date) $dnsName_ : install license"
-            #####################################################################################
-            $mypwd = $null
-            if ($LicenseName -in @('LANSAScalableLicense.pfx','LANSAIntegratorLicense.pfx')) {
+                #####################################################################################
+                Write-Host "$(Log-Date) $dnsName : install license"
+                #####################################################################################
+           
                 $mypwd = get-ssmparameter -Name 'LicensePrivateKeyPassword' -WithDecryption $true
-            }
-            else {
-                $mypwd = ConvertTo-SecureString -String $password_ -Force -AsPlainText
-            }    
-            Import-PfxCertificate -FilePath $licenseFile_ cert:\\localMachine\\my -Password $mypwd | Write-Host
+                Import-PfxCertificate -FilePath $licenseFile cert:\\localMachine\\my -Password $mypwd | Write-Host
+                
             }
 
             #####################################################################################
-            Write-Host "$(Log-Date) $dnsName_ : Save private key filename & current Machine Guid to registry"
+            Write-Host "$(Log-Date) $dnsName : Save private key filename & current Machine Guid to registry"
             #####################################################################################
 
             # This call is unreliable and is presumed to be a timing issue as when there is a failure, running this script again works.
@@ -49,7 +41,7 @@ function CreateLicence {
             while ( [string]::IsNullOrEmpty($getCert.Thumbprint) ) {
                 Start-Sleep -Milliseconds 100
                 Write-Host("$(Log-Date) Read certificate attempt..." )
-                $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $dnsName_
+                $getCert = Get-ChildItem  -path "Cert:\LocalMachine\My" -DNSName $dnsName
                 $Thumbprint = $getCert.Thumbprint
                 Write-Host("$(Log-Date) Thumbprint: $Thumbprint" )
             }
@@ -68,20 +60,20 @@ function CreateLicence {
 
             if ($Cloud -eq 'AWS') {
             # Write any old junk into the license file to obliterate the contents from the disk so it cannot be recovered
-            Get-Process | Out-File $licenseFile_
+            Get-Process | Out-File "a"
 
             #Now delete it from Explorer
-            Remove-Item $licenseFile_ | Write-Host
+            Remove-Item $licenseFile | Write-Host
             }
-         }
-         catch {
-             $_ | Write-Host
-             throw ("$(Log-Date) License installation error")
-         }
-         Write-Host "$(Log-Date) License installation succeeded."
-     }
-     else
-     {
-         Write-Host "$(Log-Date) $LicenseFile_ does not exist. Presume its already installed."
-     }
- }
+        }
+        catch {
+            $_ | Write-Host
+            throw ("$(Log-Date) License installation error")
+        }
+        Write-Host "$(Log-Date) License installation succeeded."
+    }
+    else
+    {
+        Write-Host "$(Log-Date) $licenseFile does not exist. Presume its already installed."
+    }
+}

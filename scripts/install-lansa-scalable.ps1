@@ -21,11 +21,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $TempPath_,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $LicenseKeyPassword_
+    $TempPath_
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -43,7 +39,7 @@ if ($true) {
     }
     else
     {
-	    Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
+        Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
     }
 }
 else {
@@ -88,9 +84,9 @@ try
     #####################################################################################
     Write-Host "$(Log-Date) Installing License"
     #####################################################################################
-    Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
-    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAScalableLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
-    CreateLicence -licenseFile "$Script:ScriptTempPath\LANSAIntegratorLicense.pfx" -password $LicenseKeyPassword_ -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+    # Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
+    CreateLicence "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
+    CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
 
     Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
