@@ -29,7 +29,7 @@ function CreateLicence {
            
                 $awspwd = get-ssmparameter -Name 'LicensePrivateKeyPassword' -WithDecryption $true
                 $mypwd= ConvertTo-SecureString -String $awspwd.Value -AsPlainText -Force
-                Import-PfxCertificate -FilePath $licenseFile cert:\\localMachine\\my -Password $mypwd | Write-Host
+                Import-PfxCertificate -FilePath $licenseFile cert:\\localMachine\\my -Password $mypwd | Out-Default | Write-Host
                 
             }
 
@@ -53,15 +53,15 @@ function CreateLicence {
             }
             Write-Host("$(Log-Date) keyName: $keyName" )
 
-            New-Item -Path HKLM:\Software\LANSA -ErrorAction SilentlyContinue | Write-Host
-            New-ItemProperty -Path HKLM:\Software\LANSA  -Name $registryValue -PropertyType String -Value $keyName -Force | Write-Host
+            New-Item -Path HKLM:\Software\LANSA -ErrorAction SilentlyContinue | Out-Default | Write-Host
+            New-ItemProperty -Path HKLM:\Software\LANSA  -Name $registryValue -PropertyType String -Value $keyName -Force | Out-Default | Write-Host
 
             $MachineGuid = Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Cryptography  -Name MachineGuid
-            New-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid -PropertyType String -Value $MachineGuid.MachineGuid -force | Write-Host
+            New-ItemProperty -Path HKLM:\Software\LANSA  -Name PriorMachineGuid -PropertyType String -Value $MachineGuid.MachineGuid -force | Out-Default | Write-Host
 
             if ($Cloud -eq 'AWS') {
             # Write any old junk into the license file to obliterate the contents from the disk so it cannot be recovered
-            Get-Process | Out-File "a"
+            Get-Process | Out-File "$linceseFile"
 
             #Now delete it from Explorer
             Remove-Item $licenseFile | Write-Host
