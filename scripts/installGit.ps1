@@ -11,6 +11,10 @@ param (
     [string]
     $Branch,
 
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitUserName,
+
     [boolean]
     $CalledUsingRemotePS = $false,
 
@@ -41,7 +45,7 @@ try {
 
         Set-Location \ | Out-Host
         # cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
-        Run-ExitCode 'git' @('clone', 'https://github.com/praveen-acc/cookbooks.git', $GitRepo) | Out-Host
+        Run-ExitCode 'git' @('clone', "https://github.com/$GitUserName/cookbooks.git", $GitRepo) | Out-Host
     }
     else
     {

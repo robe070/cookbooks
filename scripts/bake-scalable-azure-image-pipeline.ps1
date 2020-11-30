@@ -40,7 +40,19 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $AtomicBuild=$false
+    $AtomicBuild=$false,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $KeyPairName="RobG_id_rsa",
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $KeyPairPath="$ENV:USERPROFILE\\.ssh\\id_rsa",
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $GitUserName="robe070"
     )
 
 # $DebugPreference = "Continue"
@@ -79,4 +91,8 @@ Bake-IdeMsi -VersionText $VersionText `
             -OnlySaveImage $false `
             -CreateVM $true `
             -Pipeline:$true `
-            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host
+            -KeyPairName $KeyPairName `
+            -KeyPairPath $KeyPairPath `
+            -GitUserName $GitUserName `
+            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host 
+            

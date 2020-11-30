@@ -61,10 +61,10 @@ function CreateLicence {
 
             if ($Cloud -eq 'AWS') {
             # Write any old junk into the license file to obliterate the contents from the disk so it cannot be recovered
-            Get-Process | Out-File "$linceseFile"
+            Get-Process | Out-File $linceseFile
 
             #Now delete it from Explorer
-            Remove-Item $licenseFile | Write-Host
+            Remove-Item $licenseFile | Out-Default | Write-Host
             }
         }
         catch {

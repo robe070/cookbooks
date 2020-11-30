@@ -15,9 +15,9 @@ Initialise the baking environment
 
 $script:SG = "$script:VersionText"
 $script:externalip = $null
-$script:keypair = "Praveen"
-$script:keypairfile = "$ENV:USERPROFILE\\Downloads\\Praveen.pem"
-$script:licensekeypassword = "nothing"
+$script:keypair = "$script:KeyPairName"
+$script:keypairfile = "$script:KeyPairPath"
+$script:licensekeypassword = $ENV:cloud_license_key
 $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
 $Script:GitRepo = 'lansa'
 $Script:GitRepoPath = "c:\$Script:GitRepo"
