@@ -802,7 +802,7 @@ $jsonObject = @"
                     $CleanupState = 2
                     $GeneralizationState = 7
                     Write-Host ("Save VM SysprepStatus - CleanupState to $CleanupState and GlobalizationState to $GeneralizationState in registry")
-                    $sysPrepStatusKey = HKLM:\Setup\Status\SysprepStatus
+                    $sysPrepStatusKey = "HKLM:\SYSTEM\Setup\Status\SysprepStatus"
                     New-Item -Path $sysPrepStatusKey -Force | Write-Host    
                     New-ItemProperty -Path $sysPrepStatusKey -Name 'CleanupState' -PropertyType DWord -Value $CleanupState -Force | Out-Default | Write-Host
                     New-ItemProperty -Path $sysPrepStatusKey -Name 'GeneralizationState' -PropertyType DWord -Value $GeneralizationState -Force | Out-Default | Write-Host
