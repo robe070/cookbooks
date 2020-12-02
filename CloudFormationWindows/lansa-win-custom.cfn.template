@@ -662,6 +662,7 @@
                 "DesiredCapacity": "1",
                 "HealthCheckType": "ELB",
                 "HealthCheckGracePeriod": 2400,
+                "MaxInstanceLifetime": 5270400,
                 "LoadBalancerNames": [ { "Ref": "WebServerELB" } ],
                 "Tags": [
                     {
@@ -1367,6 +1368,7 @@
                 "DesiredCapacity": { "Ref": "18WebServerCapacity" },
                 "HealthCheckType": "ELB",
                 "HealthCheckGracePeriod": 2400,
+                "MaxInstanceLifetime": 5788800,
                 "LoadBalancerNames": [ { "Ref": "WebServerELB" } ],
                 "Tags": [
                     {
