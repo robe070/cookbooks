@@ -129,6 +129,7 @@ param (
 
 #Requires -RunAsAdministrator
 
+Write-Host "##vso[task.setvariable variable=amiID;isOutput=true]'$VersionText'"
 # Output the Pipeline Switch Status
 Write-Host "Pipeline Switch"
 $Pipeline | Out-Default | Write-Host
