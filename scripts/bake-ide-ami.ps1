@@ -158,8 +158,7 @@ else
 {
 	Write-Host "$(Log-Date) Environment already initialised"
 }
-Write-Host "$script:VersionText"
-return
+
 ###############################################################################
 # Main program logic
 ###############################################################################
