@@ -239,7 +239,7 @@ try {
     $toolsFolder = Join-Path $tempDir "tools"
     $chocInstallPS1 = Join-Path $toolsFolder "chocolateyInstall.ps1"
 
-    & $chocInstallPS1 | Out-Host
+    & $chocInstallPS1 | Out-Default | Write-Host
 
     Write-Host 'Ensuring chocolatey commands are on the path'
     $chocInstallVariableName = "ChocolateyInstall"
@@ -264,17 +264,20 @@ try {
     if (![System.IO.Directory]::Exists($chocoPkgDir)) {
          [System.IO.Directory]::CreateDirectory($chocoPkgDir); 
     }
-    Copy-Item "$file" "$nupkg" -Force -ErrorAction SilentlyContinue | Out-Host
+    Copy-Item "$file" "$nupkg" -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 } catch {
     "getchoco.ps1: Error during choco install"
     $_
-    $PSItem.ScriptStackTrace | Out-Host
+    $PSItem.ScriptStackTrace | Out-Default | Write-Host
     cmd /c exit 1
     return 
 }
 
 # Answer yes to all prompts
-choco feature enable --name=allowGlobalConfirmation | Out-Host
+choco feature enable --name=allowGlobalConfirmation | Out-Default | Write-Host
+choco source add -n=choco `
+-s="https://pkgs.dev.azure.com/VisualLansa/_packaging/choco/nuget/v2" `
+-u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="266tdaklo47lhxfvaz7pgqagpyz72uoeahjyg7mkpaxtwdzmkp6a"
 
 # update chocolatey to the latest version
 #Write-Host "Updating chocolatey to the latest version"

@@ -1,4 +1,4 @@
-﻿
+
 <#
 .SYNOPSIS
 
@@ -36,7 +36,7 @@ param (
 Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
 
 function ChocoWait([int] $WaitTimeSeconds = 60) {
-    Write-Host "$(Log-Date) Adding Wait for Choco" | Out-Default
+    Write-Host "$(Log-Date) Adding Wait for Choco"
     Start-Sleep -Seconds $WaitTimeSeconds
 }
 function DownloadAndInstallMSI {
@@ -144,8 +144,8 @@ try
         Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
         # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
-        Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Write-Host
-        Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
+        Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Default | Write-Host
 
         Write-Debug $ENV:PATH | Write-Host
     }
@@ -181,7 +181,7 @@ try
         }
 
         $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
-        New-Item $InstallerDirectory -ItemType directory -Force
+        New-Item $InstallerDirectory -ItemType directory -Force | Out-Default  | Write-Host
 
         # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Write-Host
 
@@ -195,15 +195,16 @@ try
         $copyFlags += 0x04 # Hide progress dialogs
         $copyFlags += 0x10 # Overwrite existing files
 
-        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags)
+        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags) | Out-Default | Write-Host
 
         # Installer file MUST be executed with the current directory set to the installer directory
         $InstallerScript = '.\install.ps1'
         Set-Location $InstallerDirectory | Out-Default | Write-Host
-        & $InstallerScript | Write-Host
+        & $InstallerScript | Out-Default | Write-Host
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
         # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
+
         . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
 
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
@@ -214,28 +215,28 @@ try
 
     # GUI Application Installation
     if ( $Cloud -ne "Docker" ) {
-        Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress' ) | Write-Host
+        Run-ExitCode 'choco' @( 'install', 'googlechrome', '-y', '--no-progress','--ignore-checksums', '-s choco' ) | Write-Host
         ChocoWait
         # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
         # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
-        Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+        Run-ExitCode 'choco' @( 'install', 'jre8', '-y', '--no-progress', '-PackageParameters "/exclude:32"', '-s choco' ) | Write-Host
         ChocoWait
 
         try {
             Start-Sleep -Seconds 20
-            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Out-Default | Write-Host
-            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+            "$(Log-Date) Add a 20s sleep before installing kdiff3 from choco" | Write-Host
+            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress',  '-s choco' ) | Write-Host
             ChocoWait
         }
         catch {
             Write-Host "$(Log-Date) Add a 300s sleep before retry installing kdiff3 from choco" | Out-Default
             Write-Host $_ | Out-Default
             ChocoWait 300
-            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress' ) | Write-Host
+            Run-ExitCode 'choco' @( 'install', 'kdiff3', '-y', '--no-progress', '-s choco' ) | Write-Host
             ChocoWait
         }
 
-        Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress' ) | Write-Host
+        Run-ExitCode 'choco' @( 'install', 'vscode', '-y', '--no-progress', '-s choco' ) | Write-Host
         ChocoWait
         try {
             # Don't install sysinternals because the license expressly forbids installing it on hosting services
@@ -258,7 +259,7 @@ try
         # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
-        Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress' )  | Out-Host
+        Run-ExitCode 'choco' @( 'install', 'foxitreader', '-y', '--no-progress', '-s choco' )  | Write-Host
         ChocoWait
 
         # JRE often fails to download with a 404, so install it explicitly from AWS S3
@@ -282,7 +283,7 @@ try
             }
 
         if ( $Cloud -eq "Azure" ) {
-            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Out-Default | Write-Host
+            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
             &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
         }
 
@@ -299,19 +300,10 @@ try
         if ( $Cloud -eq "AWS" ) {
             # Delete file which causes AWS to falsely detect that there is a virus
             # Conditioned on AWS as do not know the user name on Azure, and Azure does not complain. After all, its not a real virus!
-            Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
-            Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Write-Host
+            Remove-Item c:\Users\Administrator\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Out-Default | Write-Host
+            Remove-Item c:\Users\Default\.chef\local-mode-cache\cache\vcredist2013_x64.exe -Confirm:$false -Force -ErrorAction:SilentlyContinue | Out-Default | Write-Host
         }
 
-        if ( 0 )
-        {
-            # Windows Updates cannot be run remotely on AWS using Remote PS. Note that ssh server CAN run it!
-            # On Azure it starts the check, but once it attempts the download of the updates it gets errors.
-            Write-Host "$(Log-Date) Running windowsUpdatesSettings.ps1"
-            &"$Script:IncludeDir\windowsUpdatesSettings.ps1"
-            Write-Host "$(Log-Date) Running win-updates.ps1"
-            &"$Script:IncludeDir\win-updates.ps1"
-        }
     }
 }
 catch
