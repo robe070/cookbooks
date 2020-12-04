@@ -22,8 +22,8 @@ param (
     $InstallGit = $true
     )
 
-Write-Debug "GitRepo = $GitRepo" | Out-Default | Write-Host
-Write-Debug "GitRepoPath = $GitRepoPath" | Out-Default | Write-Host
+Write-Debug "GitRepo = $GitRepo" | Write-Host
+Write-Debug "GitRepoPath = $GitRepoPath" | Write-Host
 
 $Update = $false
 
@@ -31,17 +31,17 @@ try {
     # Git outputs almost all normal messages to stderr. powershell interprets that as an error and 
     # displays the error text. To stop that stderr is redirected to stdout on the git commands.
 
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
     if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     {
-        Write-Host "Installing Git" | Out-Default | Write-Host
+        Write-Host "Installing Git"
         Run-ExitCode 'choco' @('install', 'git', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
         refreshenv | Out-Default | Write-Host
 
         # Note, the Git install overwrites the current environment so need to modify path here
         Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
         Set-Location \ | Out-Default | Write-Host
         # cmd /C git clone https://github.com/robe070/cookbooks.git $GitRepo '2>&1'
@@ -52,12 +52,12 @@ try {
         # Make sure Git is in the path
         # Note, the Git install overwrites the current environment so need to modify path here
         Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host
+        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
         $Update = $true
     }
-    Write-Host "Git installed" | Out-Default | Write-Host
+    Write-Host "Git installed" 
 
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
     # Ensure we cope with an existing repo, not just a new clone...
     Set-Location $GitRepoPath | Out-Default | Write-Host
@@ -66,7 +66,7 @@ try {
     # Ensure we have all changes
     cmd /c git fetch --all '2>&1' | Out-Default | Write-Host
     # Check out a potentially different branch
-    Write-Host "Branch: $Branch" | Out-Default | Write-Host
+    Write-Host "Branch: $Branch"
     cmd /c git checkout -f $Branch  '2>&1' | Out-Default | Write-Host
     if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128) 
     {
@@ -76,7 +76,7 @@ try {
     # Finally make sure the current branch matches the origin
     cmd /c git pull '2>&1' | Out-Default | Write-Host
 
-    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host
+    Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 } catch {
     $_
     Write-Host "installGit.ps1 is the <No file> in the stack dump below"
