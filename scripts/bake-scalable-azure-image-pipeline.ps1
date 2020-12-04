@@ -93,6 +93,6 @@ Bake-IdeMsi -VersionText $VersionText `
             -Pipeline:$true `
             -KeyPairName $KeyPairName `
             -KeyPairPath $KeyPairPath `
-            -GitUserName $GitUserName `
+            -GitUserName 'praveen-acc' `
             -AtomicBuild:$AtomicBuild | Out-Default | Write-Host 
             
