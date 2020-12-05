@@ -11,7 +11,7 @@ function CreateLicence {
         [string]$dnsName,
         [string]$registryValue
     )
-    Write-Host "Entered Create License"
+    
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     if ($Cloud -eq 'AWS') {
         $ReconstitutedFile = "c:\temp\$awsParameterStoreName"
