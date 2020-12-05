@@ -19,7 +19,7 @@ function CreateLicence {
         [IO.File]::WriteAllBytes($ReconstitutedFile, [Convert]::FromBase64String($Parameter.Value))
     }
     $licenseFile = "c:\temp\$awsParameterStoreName"
-    Write-Host "License File path- $licenseFile"
+    Write-Host "License File $awsParameterStoreName is created in path- $licenseFile"
     # Check if license file is available to be installed
     if ( (Test-Path $licenseFile) -or ($Cloud -eq 'Azure') )
     {
