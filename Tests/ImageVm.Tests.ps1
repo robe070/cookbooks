@@ -144,7 +144,7 @@ Describe "VM Tests" {
         elseif ($CloudName -eq 'AWS') {
             $imageId = $ImgName
             $script:instancename = " $VMName LANSA Scalable License installed on $(Log-Date)"
-            . "$script:IncludeDir\dot-createEC2Instacne.ps1"
+            . "$script:IncludeDir\dot-Create-EC2Instacne.ps1"
             Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
             $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
