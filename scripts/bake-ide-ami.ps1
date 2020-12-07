@@ -112,12 +112,24 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $AtomicBuild
+    $AtomicBuild,
 
+    [Parameter(Mandatory=$true)]
+    [string]
+    $KeyPairName,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $KeyPairPath,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitUserName
     )
 
 #Requires -RunAsAdministrator
 
+Write-Host "##vso[task.setvariable variable=amiID;isOutput=true]'$VersionText'"
 # Output the Pipeline Switch Status
 Write-Host "Pipeline Switch"
 $Pipeline | Out-Default | Write-Host
@@ -236,7 +248,7 @@ try
     Write-Host ("Locate image Name $AmazonAMIName")
 
     if ( $Cloud -eq 'AWS' ) {
-        $AdminUserName = "administrator"
+        $AdminUserName = "Administrator"
         $AmazonImage = @(Get-EC2Image -Filters @{Name = "name"; Values = $AmazonAMIName} | Sort-Object -Descending CreationDate)
         $ImageName = $AmazonImage[0].Name
         $Script:Imageid = $AmazonImage[0].ImageId
@@ -518,7 +530,7 @@ $jsonObject = @"
 
             # Then we install git using chocolatey and pull down the rest of the files from git
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $GitUserName, $true)
 
             Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
 
@@ -723,12 +735,9 @@ $jsonObject = @"
         }
 
         if ( $InstallScalable -eq $true ) {
-            if ($Cloud -eq 'AWS') {
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" "$Script:LicenseKeyPath\LANSAScalableLicense.pfx" | Out-Default | Write-Host
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Out-Default | Write-Host
-            }
+            
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
 
             Write-Host "Test that keys are configured"
 
@@ -890,6 +899,7 @@ $jsonObject = @"
             Sleep -Seconds 10
         }
         Write-Host "$(Log-Date) AMI $amiID is available"
+        Write-Host "##vso[task.setvariable variable=amiID;isOutput=true]'$amiID'"
 
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 

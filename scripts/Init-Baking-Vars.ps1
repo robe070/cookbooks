@@ -13,11 +13,11 @@ Initialise the baking environment
 #>
 
 
-$script:SG = "bake-ami"
+$script:SG = "$script:VersionText"
 $script:externalip = $null
-$script:keypair = "RobG_id_rsa"
-$script:keypairfile = "$ENV:USERPROFILE\\.ssh\\id_rsa"
-$script:licensekeypassword = $ENV:cloud_license_key
+$script:keypair = "$script:KeyPairName"
+$script:keypairfile = "$script:KeyPairPath"
+$script:licensekeypassword = "nothing"
 $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
 $Script:GitRepo = 'lansa'
 $Script:GitRepoPath = "c:\$Script:GitRepo"
