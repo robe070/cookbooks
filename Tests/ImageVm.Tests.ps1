@@ -141,6 +141,16 @@ Describe "VM Tests" {
             }
             # Remove the VM after the test passed using Pipeline Task
         }
+        elseif ($CloudName -eq 'AWS') {
+            $imageId = $ImgName
+            $script:instancename = " $VMName LANSA Scalable License installed on $(Log-Date)"
+            . "$script:IncludeDir\dot-createEC2Instacne.ps1"
+            Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
+            $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+            $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
+            Connect-RemoteSession
+
+        }
     }
 
     Context "License" {
@@ -148,7 +158,13 @@ Describe "VM Tests" {
             $errorThrown = $false
             try{
                 Write-Host "$(Log-Date) Executing Licenses Test Script in VM"
-                Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                if($CloudName -eq 'Azure') {
+                    Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                }
+                elseif($CloudName -eq 'AWS'){
+                    . "$script:InclueDir\dot-Execute-RemoteScript.ps1"
+                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestLicenses.ps1 -ArgumentList @($imageId)
+                }
             } catch {
                 $errorThrown = $true
                 Write-Host $_.Exception | out-default
