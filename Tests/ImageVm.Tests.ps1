@@ -143,6 +143,7 @@ Describe "VM Tests" {
         }
         elseif ($CloudName -eq 'AWS') {
             $imageId = $ImgName
+            $script:keypairfile = $env:keypairpath
             $script:instancename = " $VMName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
             Create-EC2Instance $imageId $env:keypair $env:SG -InstanceType 't2.large'
