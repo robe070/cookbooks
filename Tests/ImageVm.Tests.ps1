@@ -14,8 +14,7 @@ Describe "VM Tests" {
         $ImgName = $env:TestImageName
         $ImgName | Out-Default | Write-Host
 
-        #$CloudName = $env:TestCloudName
-        $CloudName = "AWS"
+        $CloudName = $env:TestCloudName
         $CloudName | Out-Default | Write-Host
 
         $VMname = "TestImageVM"
@@ -151,15 +150,14 @@ Describe "VM Tests" {
             enable-psremoting -SkipNetworkProfileCheck -force
             set-item wsman:\localhost\Client\TrustedHosts -value * -force
             $VerbosePreference = $VerbosePreferenceSaved
-            #$imageId = $ImgName
-            $imageId = "ami-093075401ba5b44c4"
-            #$script:keypairfile = $env:keypairpath
-            #$script:keypair = $env:keypair
-            $script:keypairfile = "C:\Users\ADMIN\Downloads\Praveen.pem"
-            $script:keypair = 'Praveen'
+            $imageId = $ImgName
+            $script:keypairfile = $env:keypairpath
+            $script:keypair = $env:keypair
+            #$script:keypairfile = "C:\Users\ADMIN\Downloads\Praveen.pem"
+            #$script:keypair = 'Praveen'
             . "$script:IncludeDir\dot-AWSTools.ps1"
-            #$script:SG = $env:SG
-            $script:SG = "w12rd2-14-2-Test-DP"
+            $script:SG = $env:SG
+            #$script:SG = "w12rd2-14-2-Test-DP"
             Create-Ec2SecurityGroup
 
             $script:instancename = " Praveen Test LANSA Scalable License installed on $(Log-Date)"
