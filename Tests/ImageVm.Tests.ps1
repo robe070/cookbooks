@@ -177,7 +177,7 @@ Describe "VM Tests" {
                     Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
                 }
                 elseif($CloudName -eq 'AWS'){
-                    . "$script:InclueDir\dot-Execute-RemoteScript.ps1"
+                    . "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
                     Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestLicenses.ps1 -ArgumentList @($imageId)
                 }
             } catch {
