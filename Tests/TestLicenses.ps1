@@ -32,7 +32,7 @@ try {
     elseif ($cloud -eq "AWS") {
         $WebUser = 'Administrator'
     }
-    Write-Host "Image Name is $Imgname"
+   
     Write-Host "Webuser is $WebUser"
     Write-GreenOutput "Note: MUST create the user $WebUser manually before running this script AND add to local Administrators group" | Write-Host
 

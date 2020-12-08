@@ -150,19 +150,20 @@ Describe "VM Tests" {
             enable-psremoting -SkipNetworkProfileCheck -force
             set-item wsman:\localhost\Client\TrustedHosts -value * -force
             $VerbosePreference = $VerbosePreferenceSaved
+
             $imageId = $ImgName
             $script:keypairfile = $env:keypairpath
             $script:keypair = $env:keypair
-            #$script:keypairfile = "C:\Users\ADMIN\Downloads\Praveen.pem"
-            #$script:keypair = 'Praveen'
-            . "$script:IncludeDir\dot-AWSTools.ps1"
             $script:SG = $env:SG
-            #$script:SG = "w12rd2-14-2-Test-DP"
+
+            . "$script:IncludeDir\dot-AWSTools.ps1"
             Create-Ec2SecurityGroup
 
-            $script:instancename = " Praveen Test LANSA Scalable License installed on $(Log-Date)"
+            $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
             Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
+            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]'$script:instanceid'"
+
             Write-Host "Password is $script:password"
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
             $AdminUserName = "Administrator"
