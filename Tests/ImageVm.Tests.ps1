@@ -144,9 +144,13 @@ Describe "VM Tests" {
         elseif ($CloudName -eq 'AWS') {
             $imageId = $ImgName
             $script:keypairfile = $env:keypairpath
+            . "$script:IncludeDir\dot-AWSTools.ps1"
+            $script:SG = $env:SG
+            Create-Ec2SecurityGroup
+
             $script:instancename = " $VMName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
-            Create-EC2Instance $imageId $env:keypair $env:SG -InstanceType 't2.large'
+            Create-EC2Instance $imageId $env:keypair $script:SG -InstanceType 't2.large'
             Write-Host "Password is $script:password"
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
             $AdminUserName = "Administrator"
