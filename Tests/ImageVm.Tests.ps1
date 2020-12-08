@@ -5,6 +5,7 @@ Invoke-Pester -Path '.\ImageVm.Tests.ps1' -OutputFormat  NUnitXml -OutputFile Vm
 #>
 
 # Define Pester Tests
+#Requires -RunAsAdministrator
 Describe "VM Tests" {
     # Setup the Pester environment
     BeforeAll {
@@ -142,6 +143,13 @@ Describe "VM Tests" {
             # Remove the VM after the test passed using Pipeline Task
         }
         elseif ($CloudName -eq 'AWS') {
+            $Script:msgbox = $null
+            Write-Host ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
+            $VerbosePreferenceSaved = $VerbosePreference
+            $VerbosePreference = "SilentlyContinue"
+            enable-psremoting -SkipNetworkProfileCheck -force
+            set-item wsman:\localhost\Client\TrustedHosts -value * -force
+            $VerbosePreference = $VerbosePreferenceSaved
             $imageId = $ImgName
             $script:keypairfile = $env:keypairpath
             . "$script:IncludeDir\dot-AWSTools.ps1"
