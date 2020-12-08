@@ -899,8 +899,8 @@ $jsonObject = @"
         }
         Write-Host "$(Log-Date) AMI $amiID is available"
         if($Pipeline) {
-            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]'$instanceid'"
-            Write-Host "##vso[task.setvariable variable=amiID;isOutput=true]'$amiID'"
+            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]$instanceid"
+            Write-Host "##vso[task.setvariable variable=amiID;isOutput=true]$amiID"
         }
 
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
