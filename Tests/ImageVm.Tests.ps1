@@ -148,6 +148,7 @@ Describe "VM Tests" {
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
             Create-EC2Instance $imageId $env:keypair $env:SG -InstanceType 't2.large'
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+            $AdminUserName = "Administrator"
             $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
             Connect-RemoteSession
 
