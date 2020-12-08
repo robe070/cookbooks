@@ -15,6 +15,7 @@ Describe "VM Tests" {
         $ImgName | Out-Default | Write-Host
 
         $CloudName = $env:TestCloudName
+        #$CloudName = "AWS"
         $CloudName | Out-Default | Write-Host
 
         $VMname = "TestImageVM"
@@ -151,14 +152,19 @@ Describe "VM Tests" {
             set-item wsman:\localhost\Client\TrustedHosts -value * -force
             $VerbosePreference = $VerbosePreferenceSaved
             $imageId = $ImgName
+            #$imageId = "ami-093075401ba5b44c4"
             $script:keypairfile = $env:keypairpath
+            $script:keypair = $env:keypair
+            #$script:keypairfile = "C:\Users\ADMIN\Downloads\Praveen.pem"
+            #$script:keypair = 'Praveen'
             . "$script:IncludeDir\dot-AWSTools.ps1"
             $script:SG = $env:SG
+            #$script:SG = "w12rd2-14-2-Test-DP"
             Create-Ec2SecurityGroup
 
-            $script:instancename = " $VMName LANSA Scalable License installed on $(Log-Date)"
+            $script:instancename = " Praveen Test LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
-            Create-EC2Instance $imageId $env:keypair $script:SG -InstanceType 't2.large'
+            Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
             Write-Host "Password is $script:password"
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
             $AdminUserName = "Administrator"
@@ -174,11 +180,11 @@ Describe "VM Tests" {
             try{
                 Write-Host "$(Log-Date) Executing Licenses Test Script in VM"
                 if($CloudName -eq 'Azure') {
-                    Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                    Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName;cloud =$CloudName} -Verbose | Out-Default | Write-Host
                 }
                 elseif($CloudName -eq 'AWS'){
                     . "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
-                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestLicenses.ps1 -ArgumentList @($imageId)
+                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestLicenses.ps1 -ArgumentList @($imageId,$CloudName)
                 }
             } catch {
                 $errorThrown = $true
@@ -187,7 +193,7 @@ Describe "VM Tests" {
             $errorThrown | Should -Be $false
         }
     }
-
+<#
     Context "Version" {
         It 'Matches the Version text' {
             $errorThrown = $false
@@ -201,4 +207,5 @@ Describe "VM Tests" {
             $errorThrown | Should -Be $false
         }
     }
+   #> 
 }

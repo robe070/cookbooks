@@ -15,6 +15,7 @@ param(
 # Log-Date can't be used yet as Framework has not been loaded
 
 Write-Output "Initialising environment - presumed not running through RemotePS"
+Write-Host "WebUser in activate-all-licenses is $webuser"
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 

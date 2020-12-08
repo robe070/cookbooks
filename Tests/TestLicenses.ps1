@@ -9,7 +9,8 @@ IMPORTANT:" To be run in a new instance created from the baked image, NOT while 
 
 #>
 Param(
-    [Parameter(Mandatory=$true)] [String] $ImgName
+    [Parameter(Mandatory=$true)] [String] $ImgName,
+    [Parameter(Mandatory=$true)] [String] $cloud
 )
 . "c:\lansa\scripts\dot-CommonTools.ps1"
 
@@ -25,10 +26,17 @@ else
 try {
     cd "$Script:IncludeDir\..\tests"
 
-    $WebUser = 'PCXUSER2'
-    Write-GreenOutput "Note: MUST create the user $webuser manually before running this script AND add to local Administrators group" | Out-Default | Write-Host
+    if($cloud -eq 'Azure') {
+        $WebUser = 'PCXUSER2'
+    }
+    elseif ($cloud -eq "AWS") {
+        $WebUser = 'Administrator'
+    }
+    Write-Host "Image Name is $Imgname"
+    Write-Host "Webuser is $WebUser"
+    Write-GreenOutput "Note: MUST create the user $WebUser manually before running this script AND add to local Administrators group" | Write-Host
 
-    &"$Script:IncludeDir\activate-all-licenses.ps1"  $webuser
+    &"$Script:IncludeDir\activate-all-licenses.ps1"  $WebUser
 
 } catch {
     Write-RedOutput $_ | Out-Default | Write-Host
