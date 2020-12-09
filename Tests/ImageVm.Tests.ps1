@@ -162,7 +162,7 @@ Describe "VM Tests" {
             $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
             Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
-            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]'$script:instanceid'"
+            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]$script:instanceid"
 
             Write-Host "Password is $script:password"
             $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
