@@ -5,6 +5,7 @@ Invoke-Pester -Path '.\ImageVm.Tests.ps1' -OutputFormat  NUnitXml -OutputFile Vm
 #>
 
 # Define Pester Tests
+#Requires -RunAsAdministrator
 Describe "VM Tests" {
     # Setup the Pester environment
     BeforeAll {
@@ -141,6 +142,35 @@ Describe "VM Tests" {
             }
             # Remove the VM after the test passed using Pipeline Task
         }
+        elseif ($CloudName -eq 'AWS') {
+            $Script:msgbox = $null
+            Write-Host ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
+            $VerbosePreferenceSaved = $VerbosePreference
+            $VerbosePreference = "SilentlyContinue"
+            enable-psremoting -SkipNetworkProfileCheck -force
+            set-item wsman:\localhost\Client\TrustedHosts -value * -force
+            $VerbosePreference = $VerbosePreferenceSaved
+
+            $imageId = $ImgName
+            $script:keypairfile = $env:keypairpath
+            $script:keypair = $env:keypair
+            $script:SG = $env:SG
+
+            . "$script:IncludeDir\dot-AWSTools.ps1"
+            Create-Ec2SecurityGroup
+
+            $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
+            . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
+            Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
+            Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]$script:instanceid"
+
+            Write-Host "Password is $script:password"
+            $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+            $AdminUserName = "Administrator"
+            $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
+            Connect-RemoteSession
+
+        }
     }
 
     Context "License" {
@@ -148,7 +178,13 @@ Describe "VM Tests" {
             $errorThrown = $false
             try{
                 Write-Host "$(Log-Date) Executing Licenses Test Script in VM"
-                Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                if($CloudName -eq 'Azure') {
+                    Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestLicenses.ps1" -Parameter @{ImgName = $SkuName;cloud =$CloudName} -Verbose | Out-Default | Write-Host
+                }
+                elseif($CloudName -eq 'AWS'){
+                    . "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
+                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestLicenses.ps1 -ArgumentList @($imageId,$CloudName)
+                }
             } catch {
                 $errorThrown = $true
                 Write-Host $_.Exception | out-default
@@ -162,7 +198,13 @@ Describe "VM Tests" {
             $errorThrown = $false
             try{
                 Write-Host "$(Log-Date) Executing Image Version Test Script in VM"
-                Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                if($CloudName -eq 'Azure') {
+                    Invoke-AzVMRunCommand -ResourceGroupName $VmResourceGroup -Name $VMname -CommandId 'RunPowerShellScript' -ScriptPath "$script:IncludeDir\..\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName} -Verbose | Out-Default | Write-Host
+                }
+                elseif($CloudName -eq 'AWS'){
+                    . "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
+                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestImageVersion.ps1 -ArgumentList @($env:VersionText)
+                }
             } catch {
                 Write-Host $_.Exception | out-default
                 $errorThrown = $true
@@ -170,4 +212,5 @@ Describe "VM Tests" {
             $errorThrown | Should -Be $false
         }
     }
+    
 }
