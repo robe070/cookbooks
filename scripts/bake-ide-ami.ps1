@@ -916,7 +916,7 @@ $jsonObject = @"
     }
 
     # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
-    return
+    return "Success"
 }
 catch
 {
@@ -933,7 +933,7 @@ catch
     if ($Pipeline) {
         throw $_.Exception
     }
-    return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
+    return "Failure"# 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 
 }
