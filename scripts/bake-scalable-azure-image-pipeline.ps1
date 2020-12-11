@@ -101,7 +101,7 @@ while($count -ne 0 ) {
                             -KeyPairName $KeyPairName `
                             -KeyPairPath $KeyPairPath `
                             -GitUserName $GitUserName `
-                            -AtomicBuild:$AtomicBuild | Out-Default | Write-Host 
+                            -AtomicBuild:$AtomicBuild  
     }
     catch{
         $count = $count -1
