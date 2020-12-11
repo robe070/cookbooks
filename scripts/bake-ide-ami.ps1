@@ -931,6 +931,11 @@ catch
 
     # Fail the build on exception
     if ($Pipeline) {
+        #In AWS, if image bake fails , retry functionality is implemented. So failed instance need  to be removed 
+        if($Cloud -eq 'AWS'){
+            Remove-EC2Instance -InstanceId $instanceid -Force
+            Start-Sleep -Seconds 150
+        }
         throw $_.Exception
     }
     return "Failure"# 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
