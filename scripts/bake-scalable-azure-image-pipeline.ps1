@@ -104,6 +104,7 @@ while($count -ne 0 ) {
                             -AtomicBuild:$AtomicBuild  
     }
     catch{
+        $PSitem | Out-Default | Write-Host
         $count = $count -1
         if($count -eq 0){
             Write-Host "Image Bake failed even after $MaxRetry retries"
