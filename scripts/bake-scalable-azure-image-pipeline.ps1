@@ -76,6 +76,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 $count =  $MaxRetry
+$result = $null
 while($count -ne 0 ) {
     try {
         $result = Bake-IdeMsi -VersionText $VersionText `
