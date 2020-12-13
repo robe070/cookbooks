@@ -56,7 +56,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry =5
+    $MaxRetry =10
     )
 
 # $DebugPreference = "Continue"
@@ -112,7 +112,7 @@ while($count -ne 0 ) {
             break
         }
         elseif ($Cloud -eq 'AWS'){
-            Write-Host "Image bake failed. Retry number : $count"
+            Write-Host "Image bake failed. Retry number : $($MaxRetry - $count + 1)"
         }
     }
     if($result -eq "Success") {
