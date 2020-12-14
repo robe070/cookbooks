@@ -12,11 +12,23 @@ Initialise the baking environment
 
 #>
 
+# Note that this script is called from other functions than bake-ide-ami.ps1, so don't presume values exist - test them first.
+# And strict mode is on, so you need to use test-path to test for its existence.
+# Like this...
+if (test-path variable:\script:VersionText) {
+    $script:SG = $script:VersionText
+}
 
-$script:SG = "$script:VersionText"
 $script:externalip = $null
-$script:keypair = "$script:KeyPairName"
-$script:keypairfile = "$script:KeyPairPath"
+
+if ( test-path variable:\script:KeyPairName) ) {
+    $script:keypair = $script:KeyPairName
+}
+
+if ( test-path variable:\script:KeyPairPath) ) {
+    $script:keypairfile = $script:KeyPairPath
+}
+
 $script:licensekeypassword = "nothing"
 $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
 $Script:GitRepo = 'lansa'
