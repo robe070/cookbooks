@@ -116,7 +116,7 @@ while($count -ne 0 ) {
         }
     }
     if($result -eq "Success") {
-        Write-Host "Image bake succesful"
+        Write-Host "Image bake succesful: Retry number : $($MaxRetry - $count + 1)"
         break
     }
     if($Cloud -eq 'Azure'){

@@ -103,13 +103,14 @@ try
         "$(Log-Date) Waiting for Password Data to be available"
         try
         {
-            $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
+            Start-Sleep -Seconds 10
+            $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt            
         }
         catch
         {
             # The exception is [System.InvalidOperationException] when the instance is not ready, 
             # which is a very generic erorr so we cannot be specific and just ignore the expected state
-            Sleep -Seconds 10
+            $_ | Out-Default | Write-Host
         }
     }
     Write-Output "$(Log-Date) $instanceid password successfully obtained - '$Script:password'"
