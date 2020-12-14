@@ -21,16 +21,18 @@ if (test-path variable:\script:VersionText) {
 
 $script:externalip = $null
 
-if ( test-path variable:\script:KeyPairName) ) {
+if ( test-path variable:\script:KeyPairName) {
     $script:keypair = $script:KeyPairName
 }
 
-if ( test-path variable:\script:KeyPairPath) ) {
+if ( test-path variable:\script:KeyPairPath) {
     $script:keypairfile = $script:KeyPairPath
 }
 
 $script:licensekeypassword = "nothing"
-$script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
+if ( test-path variable:\script:IncludeDir) {
+    $script:ChefRecipeLocation = "$script:IncludeDir\..\ChefCookbooks"
+}
 $Script:GitRepo = 'lansa'
 $Script:GitRepoPath = "c:\$Script:GitRepo"
 $Script:ScriptTempPath = "c:\temp"
