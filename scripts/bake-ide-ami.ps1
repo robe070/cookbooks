@@ -916,7 +916,7 @@ $jsonObject = @"
     }
 
     # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
-    return
+    return "Success"
 }
 catch
 {
@@ -931,9 +931,14 @@ catch
 
     # Fail the build on exception
     if ($Pipeline) {
+        #In AWS, if image bake fails , retry functionality is implemented. So failed instance need  to be removed 
+        if($Cloud -eq 'AWS'){
+            Remove-EC2Instance -InstanceId $instanceid -Force
+            Start-Sleep -Seconds 150
+        }
         throw $_.Exception
     }
-    return # 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
+    return "Failure"# 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 
 }
