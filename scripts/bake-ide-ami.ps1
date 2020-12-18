@@ -189,10 +189,12 @@ try
     $VerbosePreference = $VerbosePreferenceSaved
     $externalip = Get-ExternalIP
 
-    if ( $Win2012 -eq $true ) {
+    if ( $VersionText -like "w12*" ) {
         $Platform = 'Win2012'
-    } else {
+    } elseif ($VersionText -like "w16*") {
         $Platform = 'Win2016'
+    } elseif ($VersionText -like "w19*"){
+        $Platform= 'Win2019'
     }
 
     if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
