@@ -33,7 +33,8 @@ function Create-Ec2SecurityGroup
     }
 
     if ( $groupExists ) {
-        Remove-EC2SecurityGroup -GroupId $Groups.GroupId | Out-Default | Write-Host
+        Write-Host( "GroupId = $Groups.GroupId")
+        Remove-EC2SecurityGroup -GroupId $Groups.GroupId -Force | Out-Default | Write-Host
     }
 
     $externalip = Get-ExternalIP

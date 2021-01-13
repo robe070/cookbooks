@@ -255,7 +255,7 @@ try
         $Script:Imageid = $AmazonImage[0].ImageId
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
-        Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't2.large'
+        Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
 
         $Script:vmname="Bake $Script:instancename"
 
