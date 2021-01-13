@@ -16,7 +16,7 @@ function Get-ExternalIP {
         # strip CR or LF from string and return Ip Address
         $script:externalip = $Ip.content -replace "`t|`n|`r",""
     }
-    $script:externalip
+    $script:externalip | Out-Default | Write-Host
 }
 
 function Create-Ec2SecurityGroup
@@ -38,9 +38,8 @@ function Create-Ec2SecurityGroup
 
     $externalip = Get-ExternalIP
     $iprange = @("$externalip/32")
-
-    New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami" | Out-Default | Write-Host
-    Get-EC2SecurityGroup -GroupNames $script:SG | Out-Default | Write-Host
+    $GroupId = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
+    Get-EC2SecurityGroup -GroupId $GroupId | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange} | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
