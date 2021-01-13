@@ -913,7 +913,7 @@ $jsonObject = @"
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
 
-        Wait-EC2State $instanceid "Stopped" | Out-Default | Write-Host
+        Wait-EC2State $instanceid "Stopped" -timeout 180 | Out-Default | Write-Host     # Should take 40 seconds or less to stop
 
         # Refer to Azure code above as to why this is necessary for Azure. It may make a difference for the failures we see in AWS too.
         try {
