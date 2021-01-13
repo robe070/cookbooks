@@ -813,6 +813,21 @@ $jsonObject = @"
                     Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
                 } else {
                     # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+                    Invoke-Command -Session $Script:session {
+                        Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                        $filename = "unattend.xml"
+                        if (Test-Path $filename)
+                        {
+                            Write-Host( "$(Log-Date) Deleting $filename")
+                            Remove-Item $filename | Out-Default | Write-Host;
+                        }
+                        $filename = "WaSetup.xml"
+                        if (Test-Path $filename )
+                        {
+                            Write-Host( "$(Log-Date) Deleting $filename")
+                            Remove-Item $filename | Out-Default | Write-Host;
+                        }
+                    }
                     Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
