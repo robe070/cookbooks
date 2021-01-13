@@ -148,16 +148,24 @@ param (
 function Connect-RemoteSession
 {
     # Wait until PSSession is available
+    $Retry = 10     # retry every 10 seconds. Typically takes about 10 seconds in this loop
+    $Timeout = 60   # 1 minute timeout in seconds
+    $RetryCount = $Timeout / $Retry
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection" | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Waiting for remote PS connection"
+        $RetryCount -= 1
+        if ($RetryCount -le 0 ) {
+            throw "$(Log-Date) Timeout connecting to remote PS"
+        }
+
         $Script:session = New-PSSession $Script:publicDNS -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
             break
         }
 
-        Sleep -Seconds 10
+        Sleep -Seconds $retry
     }
 
     Write-Host "$(Log-Date) $Script:publicDNS remote PS connection obtained"
@@ -168,7 +176,7 @@ function Connect-RemoteSessionUri
     # Wait until PSSession is available
     while ($true)
     {
-        "$(Log-Date) Waiting for remote PS connection"
+        Write-Host "$(Log-Date) Waiting for remote PS connection"
         $Script:session = New-PSSession -ConnectionUri $uri -Credential $creds -ErrorAction SilentlyContinue
         if ($null -ne $Script:session)
         {
@@ -228,7 +236,7 @@ param (
 
     if ($Pipeline) {
         Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
-        
+
         # Simulate OK button
         return 1
     }
