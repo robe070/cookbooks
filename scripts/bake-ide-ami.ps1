@@ -292,13 +292,13 @@ try
         if ($AtomicBuild) {
             # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
             $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
-            
+
             # Sets the storage account to use the updated resource group
             $StorageAccountResourceGroup = $VmResourceGroup
 
             # Sets the image resource group
             $ImageResourceGroup = $VmResourceGroup
-            
+
             # Create or update the storage account using the specified parameter
             $templateUri = "$(Split-Path -Parent $script:IncludeDir)\ARM\storage-account\stagingdp.json"
             New-AzResourceGroupDeployment -ResourceGroupName $StorageAccountResourceGroup -TemplateFile $templateUri -TemplateParameterObject @{name = $StorageAccountName} | Out-Default | Write-Host
@@ -321,7 +321,7 @@ try
             Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $StorageAccountResourceGroup/$StorageAccountName" | Out-Default
             if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
                 Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
-                $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host 
+                $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host
                 Write-Host "Deleted the Blob $Script:vmname.vhd successfully" | Out-Default
             } else {
                 Write-Host "The Blob $Script:vmname.vhd doesn't exists" | Out-Default
@@ -736,7 +736,7 @@ $jsonObject = @"
         }
 
         if ( $InstallScalable -eq $true ) {
-            
+
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
 
@@ -820,9 +820,21 @@ $jsonObject = @"
             } elseif ($Cloud -eq 'Azure' ) {
                 Write-Host( "$(Log-Date) Running sysprep automatically")
 
-                # Invoke-Command -Session $Script:session {cd "$env:SystemRoot\system32\sysprep"}
                 Invoke-Command -Session $Script:session {
-                    cd "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
+                    Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                    $filename = "unattend.xml"
+                    if (Test-Path $filename)
+                    {
+                        Write-Host( "$(Log-Date) Deleting $filename")
+                        Remove-Item $filename | Out-Default | Write-Host;
+                    }
+                    $filename = "WaSetup.xml"
+                    if (Test-Path $filename )
+                    {
+                        Write-Host( "$(Log-Date) Deleting $filename")
+                        Remove-Item $filename | Out-Default | Write-Host;
+                    }
+                    Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
                     cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
                 }
             }
@@ -835,7 +847,6 @@ $jsonObject = @"
             }
         }
 
-        Remove-PSSession $Script:session | Out-Default | Write-Host
     } # if -not $OnlySaveImage
 
     # Sysprep will stop the Instance
@@ -844,6 +855,26 @@ $jsonObject = @"
 
     if ( $Cloud -eq 'Azure' ) {
         Wait-AzureVMState $VmResourceGroup $Script:vmname "not running"
+
+        # There was a defect whereby the registry state of the image ended up as IMAGE_STATE_COMPLETE.
+        # It should be IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE.
+        # And this value should be in the registry HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\State).ImageState
+        # and in the file state.ini
+        # This was presumed to be caused by terminating the VM too soon. The fact Azure reports it is not running is not sufficient.
+        # Must wait until its not possible to invoke a command on the VM
+        try {
+            while ($true) {
+                Write-Host "$(Log-Date) (from Host) Waiting for VM to be fully stopped..."
+                Start-Sleep -Seconds 5
+                Invoke-Command -Session $Script:session {
+                    Write-Host "$(Log-Date) (from VM) VM is still running..."
+                }
+            }
+        } catch {
+            # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
+            Write-Host "$(Log-Date) VM has fully stopped"
+        }
+        Remove-PSSession $Script:session | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 
@@ -868,6 +899,21 @@ $jsonObject = @"
         # Wait for the instance state to be stopped.
 
         Wait-EC2State $instanceid "Stopped" | Out-Default | Write-Host
+
+        # Refer to Azure code above as to why this is necessary for Azure. It may make a difference for the failures we see in AWS too.
+        try {
+            while ($true) {
+                Write-Host "$(Log-Date) (from Host) Waiting for VM to be fully stopped..."
+                Start-Sleep -Seconds 5
+                Invoke-Command -Session $Script:session {
+                    Write-Host "$(Log-Date) (from VM) VM is still running..."
+                }
+            }
+        } catch {
+            # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
+            Write-Host "$(Log-Date) VM has fully stopped"
+        }
+        Remove-PSSession $Script:session | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Creating AMI"
 
@@ -933,7 +979,7 @@ catch
 
     # Fail the build on exception
     if ($Pipeline) {
-        #In AWS, if image bake fails , retry functionality is implemented. So failed instance need  to be removed 
+        #In AWS, if image bake fails , retry functionality is implemented. So failed instance need  to be removed
         if($Cloud -eq 'AWS'){
             Remove-EC2Instance -InstanceId $instanceid -Force
             Start-Sleep -Seconds 150
