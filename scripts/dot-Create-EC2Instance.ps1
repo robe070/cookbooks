@@ -63,6 +63,14 @@ try
     #apply the tag to the instance
     New-EC2Tag -ResourceID $instanceID -Tag $tag | Out-Default | Write-Host
 
+    # Tag it so its easily deleted
+    $Tag = New-Object amazon.EC2.Model.Tag
+    $Tag.Key = 'BakeVersion'
+    $Tag.Value = $VersionText
+
+    #apply the tag to the instance
+    New-EC2Tag -ResourceID $instanceID -Tag $tag | Out-Default | Write-Host
+
     Write-Host "$(Log-Date) $instanceid is Running"
 
     $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
