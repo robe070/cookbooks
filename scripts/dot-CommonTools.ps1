@@ -148,12 +148,11 @@ param (
 function Connect-RemoteSession
 {
     # Wait until PSSession is available
-    $Retry = 10     # retry every 10 seconds. Typically takes about 10 seconds in this loop
-    $Timeout = 60   # 1 minute timeout in seconds
-    $RetryCount = $Timeout / $Retry
+    $Retry = 10     # retry every 10 seconds. Typically takes 1 attempt in this loop. But had repeated failures when 6 attempts was the limit.
+    $RetryCount = 30
     while ($true)
     {
-        Write-Host "$(Log-Date) Waiting for remote PS connection"
+        Write-Host "$(Log-Date) Waiting $retry seconds plus cmdlet timeout for remote PS connection"
         $RetryCount -= 1
         if ($RetryCount -le 0 ) {
             throw "$(Log-Date) Timeout connecting to remote PS"
