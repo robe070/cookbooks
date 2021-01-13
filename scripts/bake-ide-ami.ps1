@@ -668,7 +668,7 @@ $jsonObject = @"
             }
         }
 
-        if ( !$SkipSlowStuff ) {
+        if ( !$SkipSlowStuff -and $RunWindowsUpdates ) {
             if ( $Cloud -eq 'AWS' ) {
                 # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
                 Run-SSMCommand -InstanceId $instanceid -DocumentName AWS-InstallWindowsUpdates -TimeoutSecond 3600 -Sleep 10 -Comment 'Run Windows Updates' -Parameter @{'Action'='Install'}
