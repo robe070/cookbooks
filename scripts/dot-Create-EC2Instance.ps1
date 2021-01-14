@@ -28,7 +28,7 @@ try
 
     # By default, Windows Firewall restricts PS remoting to local subnet only.
     # Set-NetFirewallRule is executed via userdata section to open this up to the script-runner's external IP Address.
-    $userdata = "<powershell>Set-NetFirewallRule -Name WINRM-HTTP-In-TCP-PUBLIC -RemoteAddress  $(Get-ExternalIP)</powershell>"
+    $userdata = "<powershell>Enable-NetFirewallRule WINRM-HTTP-In-TCP-PUBLIC; Set-NetFirewallRule -Name WINRM-HTTP-In-TCP-PUBLIC -RemoteAddress Any</powershell>"
 
     #Userdata has to be base64 encoded
     $userdataBase64Encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($userdata))
@@ -56,19 +56,11 @@ try
     Wait-EC2State $instanceid "Running"
 
     # Name our instance
-    $Tag = New-Object amazon.EC2.Model.Tag
-    $Tag.Key = 'Name'
-    $Tag.Value = "Bake $Script:instancename"
-
-    #apply the tag to the instance
+    $Tag = [Amazon.EC2.Model.Tag]::new('Name', "Bake $Script:instancename")
     New-EC2Tag -ResourceID $instanceID -Tag $tag | Out-Default | Write-Host
 
     # Tag it so its easily deleted
-    $Tag = New-Object amazon.EC2.Model.Tag
-    $Tag.Key = 'BakeVersion'
-    $Tag.Value = $VersionText
-
-    #apply the tag to the instance
+    $Tag = [Amazon.EC2.Model.Tag]::new('BakeVersion', $VersionText)
     New-EC2Tag -ResourceID $instanceID -Tag $tag | Out-Default | Write-Host
 
     Write-Host "$(Log-Date) $instanceid is Running"

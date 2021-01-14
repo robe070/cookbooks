@@ -143,20 +143,21 @@ if ( $SkipSlowStuff ) {
 }
 
 # set up environment if not yet setup
-if ( -not $script:IncludeDir)
+if ( (Test-Path variable:IncludeDir))
 {
     # Log-Date can't be used yet as Framework has not been loaded
 
-	Write-Host "Initialising environment - presumed not running through RemotePS"
-	$MyInvocation.MyCommand.Path
-	$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+    Write-Host "Initialising environment - presumed not running through RemotePS"
+
+    # $MyInvocation.MyCommand.Path
+	# $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 	. "$script:IncludeDir\Init-Baking-Vars.ps1"
 	. "$script:IncludeDir\Init-Baking-Includes.ps1"
 }
 else
 {
-	Write-Host "$(Log-Date) Environment already initialised"
+	throw '$IncludeDir must be set up by the caller'
 }
 
 ###############################################################################
@@ -241,6 +242,7 @@ try
         }
     }
 
+    Write-Host( "Security group = $($script:SG)")
     if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
 
     # First image found is presumed to be the latest image.
@@ -462,6 +464,7 @@ $jsonObject = @"
 
     if ( -not $OnlySaveImage ) {
         # Remote PowerShell
+        Write-Host( "$(Log-Date) User Id:$AdminUserName Password: $Script:password")
         $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
         $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
         Connect-RemoteSession

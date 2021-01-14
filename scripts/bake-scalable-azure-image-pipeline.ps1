@@ -65,9 +65,6 @@ $VerbosePreference = "Continue"
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-. "$script:IncludeDir\Init-Baking-Vars.ps1"
-. "$script:IncludeDir\Init-Baking-Includes.ps1"
-
 . "$Script:IncludeDir\bake-ide-ami.ps1"
 
 ###############################################################################
@@ -102,7 +99,7 @@ while($count -ne 0 ) {
                             -KeyPairName $KeyPairName `
                             -KeyPairPath $KeyPairPath `
                             -GitUserName $GitUserName `
-                            -AtomicBuild:$AtomicBuild  
+                            -AtomicBuild:$AtomicBuild
     }
     catch{
         $PSitem | Out-Default | Write-Host
@@ -124,7 +121,7 @@ while($count -ne 0 ) {
         break
     }
 
-    
-    
+
+
 }
-            
+
