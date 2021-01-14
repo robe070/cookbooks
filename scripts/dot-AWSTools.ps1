@@ -37,11 +37,9 @@ function Create-Ec2SecurityGroup
         Remove-EC2SecurityGroup -GroupId $Groups.GroupId -Force | Out-Default | Write-Host
     }
 
-    $externalip = Get-ExternalIP
-    $iprange = @("$externalip/32")
     $GroupId = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
     Get-EC2SecurityGroup -GroupId $GroupId | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange} | Out-Default | Write-Host
+    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
