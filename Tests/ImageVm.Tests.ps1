@@ -66,11 +66,11 @@ Describe "VM Tests" {
                 Write-Host "$(Log-Date) Delete VM if it already exists"
                 . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
                 Remove-AzrVirtualMachine -Name $VMname -ResourceGroupName $VmResourceGroup -Wait
-            
+
                 Write-Host "$(Log-Date) Create VM"
                 $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
                 $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
-            
+
                 $NicName = "bakingNic-$($VMname)"
                 $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -ErrorAction SilentlyContinue
                 if ( $null -eq $nic ) {
@@ -83,42 +83,42 @@ Describe "VM Tests" {
                     $AzNetworkSecurityGroupRuleWinRMHttpName = "WinRMHttpRule-$($VMname)"
                     $AzNetworkSecurityGroupRuleWinRMHttpsName = "WinRMHttpsRule-$($VMname)"
                     $AzNetworkSecurityGroupName = "bakingNSG-$($VMname)"
-            
+
                     # Create a subnet configuration
                     Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
                     $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $AzVirtualNetworkSubnetConfigName -AddressPrefix 192.168.1.0/24 -Verbose
-            
+
                     # Create a virtual network
                     $vnet = New-AzVirtualNetwork -ResourceGroupName $VmResourceGroup -Location $location -Name $AzVirtualNetworkName -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig -Force  -Verbose
-            
+
                     # Create a public IP address and specify a DNS name
                     $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force -Verbose
-            
+
                     # Create an inbound network security group rule for port 3389
                     $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
                     -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 3389 -Access Allow -Verbose
-            
+
                     # Create an inbound network security group rule for port 5985
                     $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
                     -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 5985 -Access Allow -Verbose
-            
+
                     # Create an inbound network security group rule for port 5986
                     $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
                     -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 5986 -Access Allow -Verbose
-            
+
                     # Create a network security group
                     $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $VmResourceGroup -Location $location `
                     -Name $AzNetworkSecurityGroupName -SecurityRules $nsgRuleRDP, $nsgRuleWinRMHttp, $nsgRuleWinRMHttps -Force -Verbose
-            
+
                     # Create a virtual network card and associate with public IP address and NSG
                     $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -Location $location `
                     -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id -Verbose
                 }
                 $image = Get-AzImage -ImageName $ImgName -ResourceGroupName $ImageResourceGroup -Verbose
-            
+
                 $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
                 $Script:vmname = $VMname
                 $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
@@ -128,7 +128,7 @@ Describe "VM Tests" {
                 Write-Host "$(Log-Date) VM creation started"
                 New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 Write-Host "$(Log-Date) VM created successfully"
-            
+
                 Write-Host "$(Log-Date) Connecting Remote session"
                 $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName -Verbose
                 $Script:publicDNS =  $ipAddress.IpAddress
@@ -161,7 +161,7 @@ Describe "VM Tests" {
 
             $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
-            Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't2.large'
+            Create-EC2Instance $imageId $script:keypair $script:SG -InstanceType 't3.large'
             Write-Host "##vso[task.setvariable variable=instanceID;isOutput=true]$script:instanceid"
 
             Write-Host "Password is $script:password"
@@ -212,5 +212,5 @@ Describe "VM Tests" {
             $errorThrown | Should -Be $false
         }
     }
-    
+
 }
