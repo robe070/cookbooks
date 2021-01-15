@@ -991,6 +991,7 @@ $jsonObject = @"
 
         Write-Host( "$(Log-Date) Terminating VM")
         Remove-EC2Instance -InstanceId $instanceid -Force | Out-Default | Write-Host
+        Wait-EC2State $TaggedInstance.ResourceId "Terminated"
     }
 
     # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
