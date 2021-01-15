@@ -242,8 +242,17 @@ try
         }
     }
 
-    Write-Host( "Security group = $($script:SG)")
-    if ( $Cloud -eq 'AWS' ) { Create-Ec2SecurityGroup }
+    if ( $Cloud -eq 'AWS' ) {
+        Write-Host( "$(Log-Date) Removing existing instance that would be using the security group")
+        $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
+        foreach ($TaggedInstance in $TaggedInstances) {
+            $TaggedInstance.ResourceId | Out-Default | Write-Host
+            Remove-EC2Instance -InstanceId $TaggedInstance.ResourceId -Force
+            Wait-EC2State $TaggedInstance.ResourceId "Terminated"
+        }
+        Write-Host( "Security group = $($script:SG)")
+        Create-Ec2SecurityGroup
+    }
 
     # First image found is presumed to be the latest image.
     # Force it into a list so that if one image is returned the variable may be used identically.
@@ -979,6 +988,9 @@ $jsonObject = @"
                 New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
             }
         }
+
+        Write-Host( "$(Log-Date) Terminating VM")
+        Remove-EC2Instance -InstanceId $instanceid -Force | Out-Default | Write-Host
     }
 
     # $dummy = MessageBox "Image bake successful" 0 -Pipeline:$Pipeline
