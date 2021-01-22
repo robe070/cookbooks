@@ -16,7 +16,7 @@ function Get-ExternalIP {
         # strip CR or LF from string and return Ip Address
         $script:externalip = $Ip.content -replace "`t|`n|`r",""
     }
-    $script:externalip | Out-Default | Write-Host
+    $script:externalip # Return value of function
 }
 
 function Create-Ec2SecurityGroup
