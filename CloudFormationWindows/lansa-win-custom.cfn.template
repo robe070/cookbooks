@@ -186,24 +186,26 @@
             "Default": 20
         },
         "13DBInstanceClass": {
-            "Default": "db.t2.small",
+            "Default": "db.t3.small",
             "Description": "A valid database instance class. See http://aws.amazon.com/rds/details/ for more information.",
             "Type": "String",
             "AllowedValues": [
-                "db.m4.large",
-                "db.m4.xlarge",
-                "db.m4.2xlarge",
-                "db.m4.4xlarge",
-                "db.m4.10xlarge",
+                "db.m5.large",
+                "db.m5.xlarge",
+                "db.m5.2xlarge",
+                "db.m5.4xlarge",
+                "db.m5.10xlarge",
                 "db.r3.large",
                 "db.r3.xlarge",
                 "db.r3.2xlarge",
                 "db.r3.4xlarge",
                 "db.r3.8xlarge",
-                "db.t2.micro",
-                "db.t2.small",
-                "db.t2.medium",
-                "db.t2.large"
+                "db.t3.micro",
+                "db.t3.small",
+                "db.t3.medium",
+                "db.t3.large",
+                "db.t3.xlarge",
+                "db.t3.2xlarge"
             ]
         },
         "14DBName": {
@@ -302,55 +304,55 @@
        "ParameterGroups" : [
          {
            "Label" : { "default" : "Essential Parameters" },
-           "Parameters" : [ 
-               "01LansaMSI", 
-               "02LansaMSIBitness", 
-               "03DBUsername", 
-               "04DBPassword", 
-               "05WebUser", 
-               "06WebPassword", 
-               "07KeyName", 
-               "08RemoteAccessLocation" 
+           "Parameters" : [
+               "01LansaMSI",
+               "02LansaMSIBitness",
+               "03DBUsername",
+               "04DBPassword",
+               "05WebUser",
+               "06WebPassword",
+               "07KeyName",
+               "08RemoteAccessLocation"
             ]
          },
          {
            "Label" : { "default":"Database Configuration" },
            "Parameters" : [
-               "13DBInstanceClass", 
-               "14DBName", 
-               "15DBEngine", 
-               "19DBAllocatedStorage", 
-               "20DBIops" 
+               "13DBInstanceClass",
+               "14DBName",
+               "15DBEngine",
+               "19DBAllocatedStorage",
+               "20DBIops"
             ]
          },
          {
            "Label" : { "default":"Web Server Configuration" },
-           "Parameters" : [ 
+           "Parameters" : [
                "11WebserverOSVersion",
-               "11WebServerInstanceTyp", 
-               "12WebServerMaxConnec", 
-               "18WebServerCapacity" 
+               "11WebServerInstanceTyp",
+               "12WebServerMaxConnec",
+               "18WebServerCapacity"
             ]
          },
          {
            "Label" : { "default":"Stack Maintenance" },
-           "Parameters" : [ 
-               "22TriggerCakeUpdate", 
-               "23TriggerChefUpdate", 
-               "24TriggerWinUpdate", 
-               "25TriggerWebConfig", 
-               "26TriggerIcingUpdate", 
-               "27TriggerPatchInstall", 
-               "28PatchBucketName", 
-               "29PatchFolderName" 
+           "Parameters" : [
+               "22TriggerCakeUpdate",
+               "23TriggerChefUpdate",
+               "24TriggerWinUpdate",
+               "25TriggerWebConfig",
+               "26TriggerIcingUpdate",
+               "27TriggerPatchInstall",
+               "28PatchBucketName",
+               "29PatchFolderName"
             ]
          },
          {
            "Label" : { "default":"Advanced Configuration" },
-           "Parameters" : [ 
-               "21ELBTimeout", 
-               "17UserScriptHook", 
-               "10LansaGitRepoBranch" 
+           "Parameters" : [
+               "21ELBTimeout",
+               "17UserScriptHook",
+               "10LansaGitRepoBranch"
             ]
          }
        ],
@@ -389,22 +391,24 @@
    "Mappings"                 : {
       "AWSRegionArch2AMI": {
          "Metadata": { "Comment1": "This mapping is updated whenever a new AMI is submitted to Marketplace" },
-         "us-east-1": { "win2012": "ami-0e595def70f14bbe4", "win2016" : "" },
-         "us-east-2": { "win2012": "ami-058af61789274bb95", "win2016" : "" },
-         "us-west-1": { "win2012": "ami-097ce131f533d28ed", "win2016" : "" },
-         "us-west-2": { "win2012": "ami-069f525710ebdd472", "win2016" : "" },
-         "ca-central-1": { "win2012": "ami-04d7f1932b8d66bfd", "win2016" : "" },
-         "eu-central-1": { "win2012": "ami-082bfe59e157a402e", "win2016" : "" },
-         "eu-west-1": { "win2012": "ami-0b752c2d057fb001a", "win2016" : "" },
-         "eu-west-2": { "win2012": "ami-00a8a2f24f010c624", "win2016" : "" },
-         "eu-west-3": { "win2012": "ami-0c6066ea9e07aeaa2", "win2016" : "" },
-		   "eu-north-1": { "win2012": "ami-d270f9ac", "win2016" : "" },
-         "ap-southeast-1": { "win2012": "ami-0a606cfbd7dc17e53", "win2016" : "" },
-         "ap-southeast-2": { "win2012": "ami-09509d8e30a702bc6", "win2016" : "ami-063c84b9992a58aea" },
-         "ap-south-1": { "win2012": "ami-0e1a7a4677a06a03f", "win2016" : "" },
-         "ap-northeast-1": { "win2012": "ami-01debc7e21503586d", "win2016" : "" },
-         "ap-northeast-2": { "win2012": "ami-00fda912916e5aa4e", "win2016" : "" },
-         "sa-east-1": { "win2012": "ami-0531a6656fd4cf471", "win2016" : "" }
+         "us-east-1": { "win2012": "ami-050cb9fd1e2eb74c6", "win2016" : "" },
+         "us-east-2": { "win2012": "ami-02366bd9194b87cc5", "win2016" : "" },
+         "us-west-1": { "win2012": "ami-0c14c23f2adeadc23", "win2016" : "" },
+         "us-west-2": { "win2012": "ami-0dc75ecfd7e7a05c7", "win2016" : "" },
+         "ca-central-1": { "win2012": "ami-05e2f8d1dabc1cc2f", "win2016" : "" },
+         "eu-central-1": { "win2012": "ami-0c66607fb80fbbcd5", "win2016" : "" },
+         "eu-west-1": { "win2012": "ami-03de455fab73770f3", "win2016" : "" },
+         "eu-west-2": { "win2012": "ami-09c2fbdfafede072a", "win2016" : "" },
+         "eu-west-3": { "win2012": "ami-066b55bd4f12fa01c", "win2016" : "" },
+		 "eu-north-1": { "win2012": "ami-0862fe8c4b4f39c56", "win2016" : "" },
+         "ap-southeast-1": { "win2012": "ami-0b3de5f35bbd6f95c", "win2016" : "" },
+         "ap-southeast-2": { "win2012": "ami-04089a6fb6e67be43", "win2016" : "" },
+         "ap-south-1": { "win2012": "ami-00ce5eaedbd8d56eb", "win2016" : "" },
+         "ap-northeast-1": { "win2012": "ami-0d4eaa56325113676", "win2016" : "" },
+         "ap-northeast-2": { "win2012": "ami-07b197e2e0932eba3", "win2016" : "" },
+         "ap-east-1": { "win2012": "ami-0dbe8ccdaf32a3175", "win2016" : "" },
+         "sa-east-1": { "win2012": "ami-08004b5aed6df14a5", "win2016" : "" },
+         "me-south-1": { "win2012": "ami-098a0a4b88afd08ec", "win2016" : "" }
       },
       "Region2Principal" : {
          "us-east-1"      : { "EC2Principal" : "ec2.amazonaws.com", "OpsWorksPrincipal" : "opsworks.amazonaws.com" },
@@ -2060,7 +2064,7 @@
             }
         }
     },
-      
+
     "Outputs"                  : {
       "WebsiteURL" : {
          "Value" : { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "WebServerELB", "DNSName" ]  } ] ] },
