@@ -104,7 +104,7 @@ try
         }
     }
 
-    Clear-AWSCredentials -StoredCredentials lansa
+    # Clear-AWSCredentials -StoredCredentials lansa
 
     if ( $InstalledPatchCount -gt 0 )
     {
