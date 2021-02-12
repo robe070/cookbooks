@@ -559,6 +559,8 @@ $jsonObject = @"
             #####################################################################################
 
             if ( $Cloud -eq 'AWS' ) {
+                Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Explicitly updating SSM Agent'
+                $dummy = MessageBox "Check SSM Update" -Pipeline:$Pipeline
                 Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing workarounds' -Parameter @{'commands'=@("c:\lansa\scripts\install-base-sql-server.ps1")}
             } else {
                 Write-Host "$(Log-Date) workaround which must be done before Chef is installed. Has to be run through RDP too!"
