@@ -192,10 +192,13 @@ try
 
     if ( $VersionText -like "w12*" ) {
         $Platform = 'Win2012'
+        $Win2012 = $true
     } elseif ($VersionText -like "w16*") {
         $Platform = 'Win2016'
+        $Win2012 = $false
     } elseif ($VersionText -like "w19*"){
         $Platform= 'Win2019'
+        $Win2012 = $false
     }
 
     if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
