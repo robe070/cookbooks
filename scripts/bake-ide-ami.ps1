@@ -824,8 +824,10 @@ $jsonObject = @"
         try {
             if ( $Cloud -eq 'AWS' ) {
                 if ( $Win2012 ) {
+                    Write-Host "$(Log-Date) AWS sysprep for Win2012"
                     Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
                 } else {
+                    Write-Host "$(Log-Date) AWS sysprep for Win2016+"
                     # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
                     Invoke-Command -Session $Script:session {
                         Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
