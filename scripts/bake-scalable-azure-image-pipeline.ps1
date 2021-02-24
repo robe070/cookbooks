@@ -56,7 +56,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry =10
+    $MaxRetry =10,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $RunWindowsUpdates  =$false
     )
 
 # $DebugPreference = "Continue"
@@ -99,7 +103,8 @@ while($count -ne 0 ) {
                             -KeyPairName $KeyPairName `
                             -KeyPairPath $KeyPairPath `
                             -GitUserName $GitUserName `
-                            -AtomicBuild:$AtomicBuild
+                            -AtomicBuild:$AtomicBuild `
+                            -RunWindowsUpdates
     }
     catch{
         $PSitem | Out-Default | Write-Host
