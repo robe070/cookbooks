@@ -56,11 +56,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry =10,
+    $MaxRetry=10,
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $RunWindowsUpdates  =$false
+    $RunWindowsUpdates=$false
     )
 
 # $DebugPreference = "Continue"
