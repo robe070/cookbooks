@@ -262,7 +262,7 @@ try {
     $chocoPkgDir = Join-Path $chocoPath 'lib\chocolatey'
     $nupkg = Join-Path $chocoPkgDir 'chocolatey.nupkg'
     if (![System.IO.Directory]::Exists($chocoPkgDir)) {
-         [System.IO.Directory]::CreateDirectory($chocoPkgDir); 
+         [System.IO.Directory]::CreateDirectory($chocoPkgDir);
     }
     Copy-Item "$file" "$nupkg" -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 } catch {
@@ -270,14 +270,14 @@ try {
     $_
     $PSItem.ScriptStackTrace | Out-Default | Write-Host
     cmd /c exit 1
-    return 
+    return
 }
 
 # Answer yes to all prompts
 choco feature enable --name=allowGlobalConfirmation | Out-Default | Write-Host
 choco source add -n=choco `
 -s="https://pkgs.dev.azure.com/VisualLansa/_packaging/choco/nuget/v2" `
--u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="266tdaklo47lhxfvaz7pgqagpyz72uoeahjyg7mkpaxtwdzmkp6a"
+-u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="tconk2mxtrqxgp7xbd3k3qmo7yltlcpit2h2jhfvx24s32hgwqxa"  | Out-Default | Write-Host
 
 # update chocolatey to the latest version
 #Write-Host "Updating chocolatey to the latest version"
