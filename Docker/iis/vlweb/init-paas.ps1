@@ -183,7 +183,7 @@ try {
         throw
     }
 
-    Write-Host("Update TPTH = %TEMP% and INST = NO in x_lansa.pro")
+    Write-Host("Update TPTH = $($env:temp) and INST = NO in x_lansa.pro")
     Add-Content "$APPA\x_win95\x_lansa\x_lansa.pro" "`nTPTH=${ENV:TEMP}`nINST=NO`n"
 
     & "C:\\bootstrap.ps1"
