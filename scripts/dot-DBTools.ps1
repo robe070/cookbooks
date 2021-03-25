@@ -37,31 +37,37 @@ function Disable-TcpOffloading
     $NicName = $NicSettings[0].Name
 
     Write-Host ("Disable TCP Offloading on NIC $NICName")
+    [Console]::Out.Flush()
 
     # Display valid values
-    Get-NetAdapterAdvancedProperty $NICName | Out-Host
+    Get-NetAdapterAdvancedProperty $NICName | Out-Default | Write-Host
     $VerbosePreference = $CurrentVerbosePreference
 
     # Display existing settings:
-    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue | Out-Host
+    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue | Out-Default | Write-Host
     # Set all the settings required to switch off TCP IPv4 offloading to fix SQL Server connection dropouts in high connection, high transaction environment:
 
     Write-Verbose ("Note that RDP connection to instance will drop out momentarily")
+    [Console]::Out.Flush()
 
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart | Out-Host
-    Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart | Out-Host
+    Set-NetAdapterAdvancedProperty $NICName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled" -NoRestart | Out-Default | Write-Host
+    Set-NetAdapterAdvancedProperty $NICName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled" -NoRestart | Out-Default | Write-Host
+    [Console]::Out.Flush()
 
     if ( $Cloud -eq "AWS" ) {
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"  -NoRestart | Out-Host
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" | Out-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Receive Offload (IPv4)" -DisplayValue "Disabled"  -NoRestart -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled" | Out-Default | Write-Host
     } elseif ( $Cloud -eq "Azure" ) {
-        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled" | Out-Host
+        Set-NetAdapterAdvancedProperty $NICName -DisplayName "Large Send Offload Version 2 (IPv4)" -DisplayValue "Disabled" | Out-Default | Write-Host
     }
+    [Console]::Out.Flush()
 
     # Check its worked
-    Get-NetAdapterAdvancedProperty $NICName | ft DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue  | Out-Host
+    Get-NetAdapterAdvancedProperty $NICName | Format-Table DisplayName , DisplayValue , RegistryKeyword ,    RegistryValue  | Out-Default | Write-Host
+    [Console]::Out.Flush()
 
     Write-Host ("TCP Offloading disabled")
+    [Console]::Out.Flush()
 }
 
 function Create-SqlServerDatabase {
