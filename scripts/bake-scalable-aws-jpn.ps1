@@ -16,7 +16,7 @@ $VerbosePreference = "Continue"
 $MyInvocation.MyCommand.Path
 $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-. "$Script:IncludeDir\bake-jpn-ami.ps1"
+. "$Script:IncludeDir\bake-ide-ami.ps1"
 
 ###############################################################################
 # Main program logic
@@ -26,21 +26,21 @@ Set-StrictMode -Version Latest
 
 # Note that the first 3 characters of VersionText are important. w12, w16 or w19 to match the Windows version
 
-Bake-IdeMsi -VersionText 'w12jpn' `
+Bake-IdeMsi -VersionText 'w16jpn' `
             -VersionMajor 1 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "ignore" `
             -S3DVDImageDirectory "ignore" `
             -S3VisualLANSAUpdateDirectory "ignore" `
             -S3IntegratorUpdateDirectory "ignore" `
-            -AmazonAMIName "LANSA Scalable License  w12r2d*" `
-            -GitBranch "support/scalable" `
+            -AmazonAMIName "Windows_Server-2016-Japanese-Full-SQL_2016_SP2_Express*" `
+            -GitBranch "debug/paas" `
             -Cloud "AWS" `
-            -InstallBaseSoftware $false `
+            -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $false `
             -InstallScalable $true `
-            -Win2012 $true `
+            -Win2012 $false `
             -RunWindowsUpdates $false `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
