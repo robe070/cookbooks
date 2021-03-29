@@ -242,3 +242,25 @@ function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){
     }
     return $false
 }
+
+##################################################################
+# Function to get the SQL Server instance name
+# Defaults to using MSSQLSERVER, if it exists
+##################################################################
+function Get-SqlServerInstanceName($server){
+
+    $smo = 'Microsoft.SqlServer.Management.Smo.'
+
+    $wmi = new-object ($smo + 'Wmi.ManagedComputer')
+
+    $singleWmi = $wmi | where {$_.Name -eq $server}
+    $singleWmi | Out-Default | Write-Host
+
+    foreach ($Instance in $SingleWmi.ServerInstances) {
+        if ( $Instance.Name -eq 'MSSQLSERVER') {
+            return 'MSSQLSERVER'
+        }
+    }
+    # If not found, return the first server instance
+    return $SingleWmi.ServerInstances[0].Name
+}

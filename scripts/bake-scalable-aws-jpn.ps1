@@ -34,7 +34,7 @@ Bake-IdeMsi -VersionText 'w16jpn' `
             -S3VisualLANSAUpdateDirectory "ignore" `
             -S3IntegratorUpdateDirectory "ignore" `
             -AmazonAMIName "Windows_Server-2016-Japanese-Full-SQL_2016_SP2_Express*" `
-            -GitBranch "debug/paas" `
+            -GitBranch "debug/jpn" `
             -Cloud "AWS" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
