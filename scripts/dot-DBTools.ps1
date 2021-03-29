@@ -213,10 +213,22 @@ function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){
     $wmi = new-object ($smo + 'Wmi.ManagedComputer')
 
     $singleWmi = $wmi | where {$_.Name -eq $server}
+    $singleWmi | Out-Default | Write-Host
 
-    $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$instance']/ServerProtocol[@Name='$protocol']"
-
-    $protocol = $singleWmi.GetSmoObject($uri)
+    try {
+        $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$instance']/ServerProtocol[@Name='$protocol']"
+        $protocol = $singleWmi.GetSmoObject($uri)
+    } catch {
+        Write-Host( "Error using $instance. Retrying with first instance in the WMI object - $($SingleWmi.ServerInstances[0].Name)")
+        $SavedException = $_
+        try {
+            $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$($SingleWmi.ServerInstances[0].Name)']/ServerProtocol[@Name='$protocol']"
+            $protocol = $singleWmi.GetSmoObject($uri)
+        } catch {
+            Write-Host( "Throwing original exception")
+            throw $SavedException
+        }
+    }
 
     if ( $protocol.IsEnabled -ne $enable )
     {
