@@ -70,6 +70,7 @@ try
 
         Import-Module “sqlps” -DisableNameChecking | Out-Default | Write-Host
         $InstanceName = Get-SqlServerInstanceName -server $env:COMPUTERNAME
+        $ServiceName = Get-SqlServerServiceName -server $env:COMPUTERNAME
         Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance $InstanceName -protocol "NP" -enable $true
         Set-Location "c:"
 
@@ -77,7 +78,7 @@ try
         Write-Host "$(Log-Date) Set local SQL Server to manual"
         #####################################################################################
 
-        Set-Service $InstanceName -startuptype "manual" | Out-Default | Write-Host
+        Set-Service $ServiceName -startuptype "manual" | Out-Default | Write-Host
     }
 
     #####################################################################################
