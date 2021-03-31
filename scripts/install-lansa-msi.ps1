@@ -67,9 +67,11 @@ else
 	Write-Host "$(Log-Date) Environment already initialised - presumed running through RemotePS"
 }
 
-
 # Put first output on a new line in cfn_init log file
 Write-Host ("`r`n")
+
+Write-Host( "$(Log-Date) capture of DBCS Write-Host messages - change output encoding to utf8" )
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $DebugPreference = "SilentlyContinue"
 $ProgressPreference = "SilentlyContinue" # Speeds up some cmdlets
@@ -117,6 +119,12 @@ try
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("$(Log-Date) Running on $Cloud")
+
+    # if ( $Cloud -eq "AWS") {
+    #     Write-Host "$(Log-Date) Fix for Japanese. Maybe required on other Cloud platformss too. Change output encoding to utf-8 as thats what cfn-init expects (AWS CloudFormation)"
+
+    #     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    # }
 
     [boolean]$CompanionInstall = $false
 
