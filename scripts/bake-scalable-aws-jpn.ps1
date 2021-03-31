@@ -16,7 +16,7 @@ $VerbosePreference = "Continue"
 $MyInvocation.MyCommand.Path
 $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-. "$Script:IncludeDir\bake-ide-ami.ps1"
+. "$Script:IncludeDir\bake-jpn-ami.ps1"
 
 ###############################################################################
 # Main program logic
@@ -46,6 +46,7 @@ Bake-IdeMsi -VersionText 'w16jpn' `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
             -CreateVM $true `
-            -KeyPairName 'RobG_id_rsa' `
-            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
+            -KeyPairName 'LJtest' `
+            -KeyPairPath "C:\VCS\AWS\.ssh\id_rsa" `
+#           -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
             -GitUserName 'robe070'

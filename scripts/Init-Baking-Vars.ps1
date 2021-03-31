@@ -26,7 +26,7 @@ if ( test-path variable:KeyPairName) {
 }
 
 if ( test-path variable:KeyPairPath) {
-    $script:keypairfile = $KeyPairPath
+    $script:keypairfile = "$KeyPairPath\$KeyPairName.pem"
 }
 
 $script:licensekeypassword = "nothing"
@@ -37,7 +37,8 @@ $Script:GitRepo = 'lansa'
 $Script:GitRepoPath = "c:\$Script:GitRepo"
 $Script:ScriptTempPath = "c:\temp"
 $Script:LicenseKeyPath = $Script:ScriptTempPath
-$Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
+$Script:InstanceProfileArn = "arn:aws:iam::980354602661:instance-profile/LansaInstalls_ec2"
+# $Script:InstanceProfileArn = "arn:aws:iam::775488040364:instance-profile/LansaInstalls_ec2"
 $Script:DVDDir = 'c:\LanDvdCut'
 
 # Make non-terminating errors into terminating errors. That is, the script will throw an exception so we know its gone wrong
