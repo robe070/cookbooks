@@ -70,8 +70,8 @@ else
 # Put first output on a new line in cfn_init log file
 Write-Host ("`r`n")
 
-Write-Host( "$(Log-Date) capture of DBCS Write-Host messages - change output encoding to utf8" )
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+# Write-Host( "$(Log-Date) capture of DBCS Write-Host messages - change output encoding to utf8" )
+# [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $DebugPreference = "SilentlyContinue"
 $ProgressPreference = "SilentlyContinue" # Speeds up some cmdlets
@@ -143,7 +143,7 @@ try
         throw "Installs directory $InstallDir does not exist"
     }
 
-    if ($false) {
+    if ($true) {
         # ***********************************************************************************
         if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
             Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
