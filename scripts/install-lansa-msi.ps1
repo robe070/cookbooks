@@ -70,9 +70,6 @@ else
 # Put first output on a new line in cfn_init log file
 Write-Host ("`r`n")
 
-Write-Host( "$(Log-Date) capture of DBCS Write-Host messages - change output encoding to utf8" )
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
 $DebugPreference = "SilentlyContinue"
 $ProgressPreference = "SilentlyContinue" # Speeds up some cmdlets
 $VerbosePreference = "Continue"
@@ -120,12 +117,6 @@ try
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("$(Log-Date) Running on $Cloud")
 
-    # if ( $Cloud -eq "AWS") {
-    #     Write-Host "$(Log-Date) Fix for Japanese. Maybe required on other Cloud platformss too. Change output encoding to utf-8 as thats what cfn-init expects (AWS CloudFormation)"
-
-    #     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-    # }
-
     [boolean]$CompanionInstall = $false
 
     if ( $CompanionInstallPath.Length -gt 0) {
@@ -143,24 +134,29 @@ try
         throw "Installs directory $InstallDir does not exist"
     }
 
-    if ($false) {
+    if ($true) {
         # ***********************************************************************************
         if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
             Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
 
             # Check if SQL Server is installed
-            $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
+            $mssql_services = @(Get-WmiObject win32_service | where-object name -like 'MSSQL*')
             If ( $null -ne $mssql_services ) {
-                $service = @(get-service "MSSQLSERVER")
+                if ( $mssql_services.Count -ne 1) {
+                    $ServiceName = "MSSQLSERVER"
+                } else {
+                    $ServiceName = $mssql_services[0].Name
+                }
+                $service = @(get-service $ServiceName)
                 $count = $($service | Measure-Object).Count
                 if ( $Count -ne 1 ) {
                     $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
-                    throw "Should only be one MSSQLSERVER service"
+                    throw "Should only be one $ServiceName service"
                 }
                 stop-service $service[0] -Force | Out-Default | Write-Host
-                set-service $Service[0].Name -StartupType Disabled | Out-Default | Write-Host
+                set-service $ServiceName -StartupType Disabled | Out-Default | Write-Host
 
-                @(get-service "MSSQLSERVER") | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+                @(get-service $ServiceName) | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
             }
         }
         # ***********************************************************************************
@@ -297,10 +293,8 @@ try
         # On initial install
 
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
-            if ( $false ) {
-                Write-Host ("$(Log-Date) Disable TCP Offloading" )
-                Disable-TcpOffloading
-            }
+            Write-Host ("$(Log-Date) Disable TCP Offloading" )
+            Disable-TcpOffloading
 
             # When installing through cloudformation the current user is systemprofile.
             # When GitDeployHub receives a webhook it may be running as administrator

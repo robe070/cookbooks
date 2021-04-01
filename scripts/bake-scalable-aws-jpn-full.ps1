@@ -16,7 +16,7 @@ $VerbosePreference = "Continue"
 $MyInvocation.MyCommand.Path
 $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-. "$Script:IncludeDir\bake-jpn-ami.ps1"
+. "$Script:IncludeDir\bake-ide-ami.ps1"
 
 ###############################################################################
 # Main program logic
@@ -25,28 +25,29 @@ $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-StrictMode -Version Latest
 
 # Note that the first 3 characters of VersionText are important. w12, w16 or w19 to match the Windows version
+# When InstallScalable = $true, VersionMajor & VersionMinor Must be 14.2 or 15.0. These values are important in locating the "start here" html page
 
-Bake-IdeMsi -VersionText 'w12jpn' `
-            -VersionMajor 1 `
-            -VersionMinor 0 `
+Bake-IdeMsi -VersionText 'w16dxx-14-2-xxj' `
+            -VersionMajor 14 `
+            -VersionMinor 2 `
             -LocalDVDImageDirectory "ignore" `
             -S3DVDImageDirectory "ignore" `
             -S3VisualLANSAUpdateDirectory "ignore" `
             -S3IntegratorUpdateDirectory "ignore" `
-            -AmazonAMIName "LANSA Scalable License  w12r2d*" `
+            -AmazonAMIName "Windows_Server-2016-Japanese-Full-SQL_2016_SP2_Express*" `
+            -Language 'JPN' `
             -GitBranch "debug/jpn" `
             -Cloud "AWS" `
-            -InstallBaseSoftware $false `
+            -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $false `
             -InstallScalable $true `
-            -Win2012 $true `
+            -Win2012 $false `
             -RunWindowsUpdates $false `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
             -CreateVM $true `
-            -KeyPairName 'LJtest' `
-            -KeyPairPath "C:\VCS\AWS\.ssh\id_rsa" `
-#           -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
+            -KeyPairName 'RobG_id_rsa' `
+            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
             -GitUserName 'robe070'
