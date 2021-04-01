@@ -149,18 +149,23 @@ try
             Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
 
             # Check if SQL Server is installed
-            $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
+            $mssql_services = @(Get-WmiObject win32_service | where-object name -like 'MSSQL*')
             If ( $null -ne $mssql_services ) {
-                $service = @(get-service "MSSQLSERVER")
+                if ( $mssql_services.Count -ne 1) {
+                    $ServiceName = "MSSQLSERVER"
+                } else {
+                    $ServiceName = $mssql_services[0].Name
+                }
+                $service = @(get-service $ServiceName)
                 $count = $($service | Measure-Object).Count
                 if ( $Count -ne 1 ) {
                     $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
-                    throw "Should only be one MSSQLSERVER service"
+                    throw "Should only be one $ServiceName service"
                 }
                 stop-service $service[0] -Force | Out-Default | Write-Host
-                set-service $Service[0].Name -StartupType Disabled | Out-Default | Write-Host
+                set-service $ServiceName -StartupType Disabled | Out-Default | Write-Host
 
-                @(get-service "MSSQLSERVER") | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+                @(get-service $ServiceName) | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
             }
         }
         # ***********************************************************************************
