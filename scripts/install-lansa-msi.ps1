@@ -208,7 +208,7 @@ try
 
         $DownloadODBCDriver = $true
         if ( (-not $CompanionInstall) ) {
-            if (  ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
+            if (  ($Cloud -eq "AWS"  -or $Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
                 # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
                 Write-Host ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
