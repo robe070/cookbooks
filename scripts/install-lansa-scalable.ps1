@@ -59,7 +59,7 @@ try
     # read the Version Major and Minor value
     $VersionMajor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMajor').VersionMajor
     $VersionMinor = (Get-ItemProperty -Path $lansaKey -Name 'VersionMinor').VersionMinor
-   
+
     # Check if SQL Server is installed
     $mssql_services = Get-WmiObject win32_service | where-object name -like 'MSSQL*'
     If ( $mssql_services ) {
@@ -69,16 +69,16 @@ try
         #####################################################################################
 
         Import-Module “sqlps” -DisableNameChecking | Out-Default | Write-Host
-
-        Write-Host( "$(Log-Date) Comment out adding named pipe support to local database because it switches off output in this remote session")
-        Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance "MSSQLSERVER" -protocol "NP" -enable $true
+        $InstanceName = Get-SqlServerInstanceName -server $env:COMPUTERNAME
+        $ServiceName = Get-SqlServerServiceName -server $env:COMPUTERNAME
+        Change-SQLProtocolStatus -server $env:COMPUTERNAME -instance $InstanceName -protocol "NP" -enable $true
         Set-Location "c:"
 
         #####################################################################################
         Write-Host "$(Log-Date) Set local SQL Server to manual"
         #####################################################################################
 
-        Set-Service "MSSQLSERVER" -startuptype "manual" | Out-Default | Write-Host
+        Set-Service $ServiceName -startuptype "manual" | Out-Default | Write-Host
     }
 
     #####################################################################################
@@ -102,13 +102,13 @@ try
         copy-item "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "$ENV:ProgramFiles\CloudStartHere.htm" | Out-Default | Write-Host
         copy-item "$GitRepoPath_\Marketplace\LANSA Scalable License\$Cloud\$VersionMajor.$VersionMinor\ScalableStartHere.htm" "${ENV:ProgramFiles(x86)}\CloudStartHere.htm" | Out-Default | Write-Host
     }
-  
+
     try {
         New-Shortcut "$ENV:ProgramFiles\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
     } catch {
         Write-RedOutput $_ | Out-Default | Write-Host
         Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-    
+
         Write-RedOutput ("$(Log-Date) Retrying with the Program Files X86 Target Path") | Out-Default | Write-Host
         New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
     }
@@ -118,7 +118,7 @@ try
     } catch {
         Write-RedOutput $_ | Out-Default | Write-Host
         Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-    
+
         Write-RedOutput ("$(Log-Date) Retrying with the Program Files X86 Target Path") | Out-Default | Write-Host
         New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\Start Here.lnk" -Description "Start Here"  -Arguments "`"file://$ENV:ProgramFiles/CloudStartHere.htm`"" -WindowStyle "Maximized" | Out-Default | Write-Host
     }

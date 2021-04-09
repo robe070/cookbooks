@@ -213,10 +213,22 @@ function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){
     $wmi = new-object ($smo + 'Wmi.ManagedComputer')
 
     $singleWmi = $wmi | where {$_.Name -eq $server}
+    $singleWmi | Out-Default | Write-Host
 
-    $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$instance']/ServerProtocol[@Name='$protocol']"
-
-    $protocol = $singleWmi.GetSmoObject($uri)
+    try {
+        $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$instance']/ServerProtocol[@Name='$protocol']"
+        $protocol = $singleWmi.GetSmoObject($uri)
+    } catch {
+        Write-Host( "Error using $instance. Retrying with first instance in the WMI object - $($SingleWmi.ServerInstances[0].Name)")
+        $SavedException = $_
+        try {
+            $uri = "ManagedComputer[@Name='$server']/ServerInstance[@Name='$($SingleWmi.ServerInstances[0].Name)']/ServerProtocol[@Name='$protocol']"
+            $protocol = $singleWmi.GetSmoObject($uri)
+        } catch {
+            Write-Host( "Throwing original exception")
+            throw $SavedException
+        }
+    }
 
     if ( $protocol.IsEnabled -ne $enable )
     {
@@ -229,4 +241,48 @@ function Change-SQLProtocolStatus($server,$instance,$protocol,$enable){
         return $true
     }
     return $false
+}
+
+##################################################################
+# Function to get the SQL Server instance name
+# Defaults to using MSSQLSERVER, if it exists
+##################################################################
+function Get-SqlServerInstanceName($server){
+
+    $smo = 'Microsoft.SqlServer.Management.Smo.'
+
+    $wmi = new-object ($smo + 'Wmi.ManagedComputer')
+
+    $singleWmi = $wmi | where {$_.Name -eq $server}
+    $singleWmi | Out-Default | Write-Host
+
+    foreach ($Instance in $SingleWmi.ServerInstances) {
+        if ( $Instance.Name -eq 'MSSQLSERVER') {
+            return 'MSSQLSERVER'
+        }
+    }
+    # If not found, return the first server instance
+    return "SQLEXPRESS"
+}
+
+##################################################################
+# Function to get the SQL Server Service name
+# Defaults to using MSSQLSERVER, if it exists
+##################################################################
+function Get-SqlServerServiceName($server){
+
+    $smo = 'Microsoft.SqlServer.Management.Smo.'
+
+    $wmi = new-object ($smo + 'Wmi.ManagedComputer')
+
+    $singleWmi = $wmi | where {$_.Name -eq $server}
+    $singleWmi | Out-Default | Write-Host
+
+    foreach ($Instance in $SingleWmi.ServerInstances) {
+        if ( $Instance.Name -eq 'MSSQLSERVER') {
+            return 'MSSQLSERVER'
+        }
+    }
+    # If not found,
+    return 'MSSQL$SQLEXPRESS'
 }
