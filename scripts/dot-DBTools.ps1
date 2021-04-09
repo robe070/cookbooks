@@ -280,7 +280,7 @@ function Get-SqlServerServiceName($server){
 
     foreach ($Instance in $SingleWmi.ServerInstances) {
         if ( $Instance.Name -eq 'MSSQLSERVER') {
-            return MSSQLSERVER
+            return 'MSSQLSERVER'
         }
     }
     # If not found,
