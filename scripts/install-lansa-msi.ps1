@@ -141,7 +141,7 @@ try
 
             # Check if SQL Server is installed
             $mssql_services = @(Get-WmiObject win32_service | where-object name -like 'MSSQL*')
-            If ( $null -ne $mssql_services ) {
+            If ( $mssql_services.count -ne 0  ) {
                 if ( $mssql_services.Count -ne 1) {
                     $ServiceName = "MSSQLSERVER"
                 } else {
