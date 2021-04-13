@@ -141,7 +141,7 @@ try
 
             # Check if SQL Server is installed
             $mssql_services = @(Get-WmiObject win32_service | where-object name -like 'MSSQL*')
-            If ( $null -ne $mssql_services ) {
+            If ( $mssql_services.count -ne 0  ) {
                 if ( $mssql_services.Count -ne 1) {
                     $ServiceName = "MSSQLSERVER"
                 } else {
@@ -208,7 +208,7 @@ try
 
         $DownloadODBCDriver = $true
         if ( (-not $CompanionInstall) ) {
-            if (  ($Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
+            if (  ($Cloud -eq "AWS"  -or $Cloud -eq "Azure"  -or $Cloud -eq "Docker") ) {
                 # ODBC Driver originally installed due to SQLAZURE driver needing to be updated because of C00001A5 exceptions caused by SqlDriverConnect
                 Write-Host ("$(Log-Date) Checking ODBC driver for Database Type $DBUT")
 
