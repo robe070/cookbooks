@@ -190,6 +190,9 @@ try
     $VerbosePreference = $VerbosePreferenceSaved
     $externalip = Get-ExternalIP
 
+    Write-Host( "$(Log-Date) Host machine WinRM settings:")
+    winrm get winrm/config/winrs
+
     if ( $VersionText -like "w12*" ) {
         $Platform = 'Win2012'
         $Win2012 = $true
@@ -286,8 +289,6 @@ try
         } else {
             throw "Image not found"  | Out-Default | Write-Host
         }
-
-        $subscription = "Visual Studio Enterprise with MSDN"
 
         # used for KeyVault and the images
         $KeyVaultResourceGroup = "BakingDP"
@@ -497,6 +498,9 @@ $jsonObject = @"
 
         Execute-RemoteBlock $Script:session {
             try {
+                Write-Host( "Target VM WinRM settings:")
+                winrm get winrm/config/winrs  | Out-Default | Write-Host
+
                 Write-Host ("Save S3 DVD image url and other global variables in registry")
                 $lansaKey = 'HKLM:\Software\LANSA\'
                 if (!(Test-Path -Path $lansaKey)) {
@@ -524,8 +528,8 @@ $jsonObject = @"
                     Get-Service | Where {$_.Name -match "audio"} | set-service -StartupType "Automatic" | Out-Default | Write-Host
                 }
             } catch {
-                Write-RedOutput $_ | Out-Default | Write-Host
-                Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                $_ | Out-Default | Write-Host
+                $PSItem.ScriptStackTrace | Out-Default | Write-Host
                 throw 'Script Block 10'
             }
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
@@ -871,8 +875,12 @@ $jsonObject = @"
                     cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
                 }
             }
+        } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
+            Write-Host( "$(Log-Date) Ignore the exception 'The I/O operation has been aborted because of either a thread exit or an application request', presuming that its just an artifact of the syprep terminating the instance")
         } catch {
             Write-RedOutput $_ | Out-Default | Write-Host
+            Write-RedOutput $_.exception | Out-Default | Write-Host
+            Write-RedOutput $_.exception.GetType().fullname | Out-Default | Write-Host
             $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
             $Response
             if ( $response -ne 0x6 ) {
