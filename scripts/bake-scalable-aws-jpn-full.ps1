@@ -27,16 +27,16 @@ Set-StrictMode -Version Latest
 # Note that the first 3 characters of VersionText are important. w12, w16 or w19 to match the Windows version
 # When InstallScalable = $true, VersionMajor & VersionMinor Must be 14.2 or 15.0. These values are important in locating the "start here" html page
 
-Bake-IdeMsi -VersionText 'w16dxx-14-2-xxj' `
-            -VersionMajor 14 `
-            -VersionMinor 2 `
+Bake-IdeMsi -VersionText 'w19d-15-0-xxj' `
+            -VersionMajor 15 `
+            -VersionMinor 0 `
             -LocalDVDImageDirectory "ignore" `
             -S3DVDImageDirectory "ignore" `
             -S3VisualLANSAUpdateDirectory "ignore" `
             -S3IntegratorUpdateDirectory "ignore" `
-            -AmazonAMIName "Windows_Server-2016-Japanese-Full-SQL_2016_SP2_Express*" `
+            -AmazonAMIName "Windows_Server-2019-Japanese-Full-Base*" `
             -Language 'JPN' `
-            -GitBranch "debug/jpn" `
+            -GitBranch "debug/paas" `
             -Cloud "AWS" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
