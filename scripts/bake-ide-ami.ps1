@@ -202,6 +202,8 @@ try
     } elseif ($VersionText -like "w19*"){
         $Platform= 'Win2019'
         $Win2012 = $false
+    } else {
+        throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
 
     if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
@@ -277,15 +279,18 @@ try
         $Script:vmname="Bake $Script:instancename"
 
     } elseif ($Cloud -eq 'Azure' ) {
-        #Import-Module Az
-        $imageObj = @()
         $Location = "Australia East"
         $Publisher = "MicrosoftWindowsServer"
         $Offer = "windowsserver"
-        $ImageObj = Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName | Sort-Object -Descending Version
+        switch ($Platform) {
+            'Win2012' { $AzImageVersion = '9600*'  }
+            'Win2016' { $AzImageVersion = '14393*'  }
+            'Win2019' { $AzImageVersion = '17763*'  }
+        }
+        $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version )
 
         if ( $imageObj ) {
-            $imageObj[0]  | Out-Default | Write-Host
+            $imageObj[0] | format-list * | Out-Default | Write-Host
         } else {
             throw "Image not found"  | Out-Default | Write-Host
         }
