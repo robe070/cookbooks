@@ -1,0 +1,1 @@
+﻿JPTEST	V0000009	Japanese Test	1.0.0	RUN	VERSION

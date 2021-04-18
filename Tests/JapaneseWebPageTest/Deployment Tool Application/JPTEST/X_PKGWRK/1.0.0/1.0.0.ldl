@@ -1,0 +1,73 @@
+CB	150000
+DF	JPTST     MJapanese Test                                                                           NNYYNNNNNN          N
+EV	X_DOLLAR_SIGN_CHAR  $
+EV	X_HASH_SIGN_CHAR    #
+EV	X_AT_SIGN_CHAR      @
+EV	X_GEN_AT_SIGN_CHAR  @
+FD	JPNTEST   V15RUNDTA ITest Japanese text                      NPARTDTALIB                           NNNNNNNNNN          Y                   D
+IP	                    NO NO                                   Elevated                                YES
+IP	                    NO NO                                   Language
+IP	                    NO NO                                   ProcessName                             *licenses
+IP	                    NO NO                                   FunctionName
+IP	                    NO NO                                   FormName
+IP	                    NO NO                                   PartitionName
+IP	                    NO NO                                   USER
+IP	                    NO NO                                   CreateXStartShortcuts                   YES
+IP	                    NO NO                                   UpgradeOption                           NO
+IP	                    NO NO                                   UPSI                                    YES
+IP	                    NO NO                                   ASLU
+IP	                    NO NO                                   ASUS
+IP	                    NO NO                                   ASPW
+IP	                    NO NO                                   ASCT
+IP	                    NO NO                                   ASST
+IP	                    NO NO                                   UPCF                                    PROMPT
+IP	                    NO NO                                   UPDF                                    PROMPT
+IP	                    NO NO                                   ASTC                                    NO
+IP	                    YESNO                                   DBSetup                                 YES
+IP	                    YESNO                                   DBMSType                                MSSQLS
+IP	                    YESNO                                   DSN                                     JPTEST
+IP	                    YESNO                                   DBUID
+IP	                    YESNO                                   DBPWD
+IP	                    YESNO                                   DBServer                                .\SQLSERVER
+IP	                    YESNO                                   DBDBaseName                             JPTEST
+IP	                    NO NO                                   UseTrustedConnection                    YES
+IP	                    NO NO                                   InstallListener                         YES
+IP	                    NO NO                                   InstallWebAdministrator                 YES
+IP	                    NO NO                                   InstallIISPlugin                        YES
+IP	                    NO NO                                   InstallWebImages                        YES
+IP	                    NO NO                                   InstallJSM                              NO
+IP	                    NO NO                                   InstallIntStudio                        NO
+IP	                    NO NO                                   InstallLongRange                        NO
+IP	                    NO NO                                   InstallGitDeployHub                     NO
+IP	                    NO NO                                   PSTY                                    *OTHER
+IP	                    NO NO                                   PSLU                                    JPTEST
+IP	                    NO NO                                   PSUS
+IP	                    NO NO                                   PSPW
+IP	                    NO NO                                   PSEA
+IP	                    NO NO                                   PSCC
+IP	                    NO NO                                   PSDB
+IP	                    NO NO                                   PSDL
+IP	                    NO NO                                   PSWM
+IP	                    NO NO                                   PSEP
+IP	                    NO NO                                   PSCT
+IP	                    NO NO                                   PSST
+IP	                    NO NO                                   PSTC                                    NO
+IP	                    NO NO                                   CreateCommsAdminShtcut                  YES
+IP	                    NO NO                                   CreateODBCAdminShtcut                   NO
+IP	                    NO NO                                   DisplayApplicationDialog                YES
+IP	                    NO NO                                   DisplayDBDialog                         YES
+IP	                    NO NO                                   DisplayServerSetupDialog                NO
+IP	                    NO NO                                   DisplayServerSetup2Dialog               NO
+IP	                    NO NO                                   QuietInstall                            NO
+PL	JPN
+PO	                                                            DEFSYS
+PO	                                                            DEFPRT
+PO	                                                            BASEDB
+PO	                                                            WEB
+PO	                                                            COMMS
+PO	                                                            SERVER
+PT	VERSION
+SV	*LANGUAGE           Current language code
+SV	*PARTITION          Current partition
+TM	XVLWAPP
+TP	W32
