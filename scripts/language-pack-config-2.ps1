@@ -27,10 +27,6 @@ switch ( $Platform) {
 
                 Write-Host( "Leave timezone as UTC")
                 # Set-TimeZone -Id "Tokyo Standard Time"
-
-                # Ignore errors as it seems a shutdown is in progress anyway, possibly due to setting the System Locale.
-                # "Failed to restart the computer EC2AMAZ-1J2TNAU with the following error message: A system shutdown is in progress"
-                Restart-Computer -ErrorAction SilentlyContinue
             }
         }
     }
@@ -52,10 +48,6 @@ switch ( $Platform) {
 
                 Write-Host( "Leave timezone as UTC")
                 # Set-TimeZone -Id "Tokyo Standard Time"
-
-                # Ignore errors as it seems a shutdown is in progress anyway, possibly due to setting the System Locale.
-                # "Failed to restart the computer EC2AMAZ-1J2TNAU with the following error message: A system shutdown is in progress"
-                Restart-Computer -ErrorAction SilentlyContinue
             }
         }
     }
