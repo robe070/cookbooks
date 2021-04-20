@@ -124,7 +124,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitUserName
+    $GitUserName,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $InstallLanguagePack
     )
 
 #Requires -RunAsAdministrator
@@ -170,11 +174,14 @@ if ($InstallIDE -eq $true) {
     $Script:DialogTitle = "LANSA IDE"
     $script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
 }
-
-
 if ($InstallScalable -eq $true) {
     $Script:DialogTitle = "LANSA Scalable License "
     $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
+}
+
+if ($InstallLanguagePack) {
+    $Script:DialogTitle = "LANSA Scalable License $Language"
+    $script:instancename = "LANSA Scalable License $Language $VersionText installed on $(Log-Date)"
 }
 
 try
@@ -206,7 +213,7 @@ try
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
 
-    if ( $UploadInstallationImageChanges -and !$InstallScalable ) {
+    if ( $UploadInstallationImageChanges -and $InstallIDE) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
 
         Write-Host ("Test if source of DVD image exists")
@@ -693,6 +700,19 @@ $jsonObject = @"
             }
         }
 
+        if ( $InstallLanguagePack ) {
+            Write-Host( "$(Log-Date) Install language pack")
+            Write-Host( "Each of the 3 steps requires a reboot in betweenhence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
+            Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-download-install.ps1" -ArgumentList  @($Language, $Platform)
+            ReConnect-Session
+
+            Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-config-1.ps1" -ArgumentList  @($Language, $Platform)
+            ReConnect-Session
+
+            Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-config-2.ps1" -ArgumentList  @($Language, $Platform)
+            ReConnect-Session
+        }
+
         if ( !$SkipSlowStuff -and $RunWindowsUpdates ) {
             if ( $Cloud -eq 'AWS' ) {
                 # Windows Updates can take quite a while to run if there are multiple re-boots, so set timeout to 1 hour
@@ -972,8 +992,8 @@ $jsonObject = @"
             $FinalDescription = $SimpleDesc.substring( 0, $index - 1 )
         }
 
-        $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $VersionText installed on $(Log-Date)"
-        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
+        $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $Language $VersionText installed on $(Log-Date)"
+        $AmiName = "$Script:DialogTitle $Language $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
