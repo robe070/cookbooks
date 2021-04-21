@@ -25,8 +25,8 @@ switch ( $Platform) {
                 Write-Host( "Set the system locale to Japan")
                 Set-WinSystemLocale -SystemLocale ja-JP
 
-                Write-Host( "Leave timezone as UTC")
-                # Set-TimeZone -Id "Tokyo Standard Time"
+                Write-Host( "Set timezone to Tokyo time")
+                Set-TimeZone -Id "Tokyo Standard Time"
             }
         }
     }
@@ -46,8 +46,8 @@ switch ( $Platform) {
                 Write-Host( "Set the system locale to Japan")
                 Set-WinSystemLocale -SystemLocale ja-JP
 
-                Write-Host( "Leave timezone as UTC")
-                # Set-TimeZone -Id "Tokyo Standard Time"
+                Write-Host( "Set timezone to Tokyo time")
+                Set-TimeZone -Id "Tokyo Standard Time"
             }
         }
     }
