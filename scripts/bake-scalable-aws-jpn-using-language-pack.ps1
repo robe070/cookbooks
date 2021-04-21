@@ -46,7 +46,7 @@ Bake-IdeMsi -VersionText 'w19d-15-0-tst' `
             -InstallScalable $false `
             -InstallLanguagePack `
             -Win2012 $false `
-            -RunWindowsUpdates $true `
+            -RunWindowsUpdates $false `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
