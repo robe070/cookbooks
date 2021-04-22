@@ -7,7 +7,7 @@ param(
     [String]
     $Platform
 )
-Write-Host("Configure Japanese localization settings")
+Write-Host("Configure Japanese localization settings Step 2 $Language $Platform")
 switch ( $Platform) {
     "win2016" {
         switch ( $Language ) {
@@ -55,4 +55,5 @@ switch ( $Platform) {
 
 # Ignore errors as it seems a shutdown is in progress anyway, possibly due to setting the System Locale.
 # "Failed to restart the computer EC2AMAZ-1J2TNAU with the following error message: A system shutdown is in progress"
+Start-Sleep -Seconds 30
 Restart-Computer -ErrorAction SilentlyContinue

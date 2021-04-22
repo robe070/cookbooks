@@ -7,6 +7,7 @@ param(
     [String]
     $Platform
 )
+Write-Host("Configure Japanese localization settings Step 1 $Language $Platform")
 switch ( $Platform) {
     "win2016" {
         switch ( $Language ) {
@@ -38,5 +39,5 @@ switch ( $Platform) {
         }
     }
 }
-
-Restart-Computer
+Start-Sleep -Seconds 30
+Restart-Computer -ErrorAction SilentlyContinue

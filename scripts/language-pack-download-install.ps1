@@ -29,5 +29,9 @@ $lppath = "$ENV:temp\lang-pack.cab"
 Write-Host( "Download $lpurl to $lppath")
 Invoke-WebRequest -Uri $lpurl -OutFile $lppath
 
-Write-Host( "Install the Japanese language Pack using the Lpksetup.exe command. Forces a reboot after installation" )
-C:\windows\system32\Lpksetup.exe /i $langcode /f /s /p $lppath
+# Write-Host( "Install the Japanese language Pack using the Lpksetup.exe command. Forces a reboot after installation" )
+# C:\windows\system32\Lpksetup.exe /i $langcode /f /s /p $lppath
+Write-Host( "Install the Japanese language Pack using dism.exe command. It does not force a reboot after installation so do it explicitly" )
+dism.exe /Online /Add-Package /PackagePath:$lppath
+Start-Sleep -Seconds 30
+Restart-Computer

@@ -184,6 +184,11 @@ if ($InstallLanguagePack) {
     $script:instancename = "LANSA Scalable License $Language $VersionText installed on $(Log-Date)"
 }
 
+if ($OnlySaveImage) {
+    $Script:DialogTitle = "LANSA Scalable License Only Save Image"
+    $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
+}
+
 try
 {
     # Clear out the msgbox object in case its been run already
@@ -258,15 +263,34 @@ try
     }
 
     if ( $Cloud -eq 'AWS' ) {
-        Write-Host( "$(Log-Date) Removing existing instance that would be using the security group")
-        $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
-        foreach ($TaggedInstance in $TaggedInstances) {
-            $TaggedInstance.ResourceId | Out-Default | Write-Host
-            Remove-EC2Instance -InstanceId $TaggedInstance.ResourceId -Force
-            Wait-EC2State $TaggedInstance.ResourceId "Terminated"
+        if ( $OnlySaveImage ) {
+            Write-Host( "$(Log-Date) Locating existing instance...")
+            $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
+            $TaggedInstances[0] | Format-List *
+            if ( $TaggedInstances.Count -eq 1 ) {
+                $InstanceId = $TaggedInstances[0].ResourceId
+                $Script:instanceid = $InstanceId
+                Write-Host( "$(Log-Date) Using Instance Id = $instanceId")
+                $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
+
+                $a = Get-EC2Instance -Filter @{Name = "instance-id"; Values = $instanceid}
+                $Script:publicDNS = $a.Instances[0].PublicDnsName
+
+                Write-Host( "$(Log-Date) Using PublicDnsName = $Script:publicDNS")
+            } else {
+                throw "There are $TaggedInstances.Count instances - either 0 or more than 1. Cannot 'Only Save Image'"
+            }
+        } else {
+            Write-Host( "$(Log-Date) Removing existing instance that would be using the security group")
+            $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
+            foreach ($TaggedInstance in $TaggedInstances) {
+                $TaggedInstance.ResourceId | Out-Default | Write-Host
+                Remove-EC2Instance -InstanceId $TaggedInstance.ResourceId -Force
+                Wait-EC2State $TaggedInstance.ResourceId "Terminated"
+                Write-Host( "Security group = $($script:SG)")
+                Create-Ec2SecurityGroup
+            }
         }
-        Write-Host( "Security group = $($script:SG)")
-        Create-Ec2SecurityGroup
     }
 
     # First image found is presumed to be the latest image.
@@ -281,7 +305,9 @@ try
         $Script:Imageid = $AmazonImage[0].ImageId
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
-        Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
+        if ( -not $OnlySaveImage) {
+            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
+        }
 
         $Script:vmname="Bake $Script:instancename"
 
@@ -487,12 +513,13 @@ $jsonObject = @"
         $Script:publicDNS =  $ipAddress.IpAddress
     }
 
+    # Remote PowerShell
+    Write-Host( "$(Log-Date) User Id:$AdminUserName Password: $Script:password")
+    $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+    $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
+    Connect-RemoteSession
+
     if ( -not $OnlySaveImage ) {
-        # Remote PowerShell
-        Write-Host( "$(Log-Date) User Id:$AdminUserName Password: $Script:password")
-        $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-        $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
-        Connect-RemoteSession
 
         # Simple test of session:
         # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
@@ -702,14 +729,20 @@ $jsonObject = @"
 
         if ( $InstallLanguagePack ) {
             Write-Host( "$(Log-Date) Install language pack")
-            Write-Host( "Each of the 3 steps requires a reboot in betweenhence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
+            Write-Host( "Each of the 3 steps requires a reboot in between. Hence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-download-install.ps1" -ArgumentList  @($Language, $Platform)
+            # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
+            Start-Sleep -Seconds 10
             ReConnect-Session
 
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-config-1.ps1" -ArgumentList  @($Language, $Platform)
+            # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
+            Start-Sleep -Seconds 10
             ReConnect-Session
 
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-config-2.ps1" -ArgumentList  @($Language, $Platform)
+            # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
+            Start-Sleep -Seconds 10
             ReConnect-Session
         }
 
@@ -847,41 +880,21 @@ $jsonObject = @"
             }
         }
 
-        ReConnect-Session
+    } # if -not $OnlySaveImage
 
-        Write-Host "$(Log-Date) Sysprep"
-        Write-Host "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
+    ReConnect-Session
 
-        try {
-            if ( $Cloud -eq 'AWS' ) {
-                if ( $Win2012 ) {
-                    Write-Host "$(Log-Date) AWS sysprep for Win2012"
-                    Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
-                } else {
-                    Write-Host "$(Log-Date) AWS sysprep for Win2016+"
-                    # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-                    Invoke-Command -Session $Script:session {
-                        Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
-                        $filename = "unattend.xml"
-                        if (Test-Path $filename)
-                        {
-                            Write-Host( "$(Log-Date) Deleting $filename")
-                            Remove-Item $filename | Out-Default | Write-Host;
-                        }
-                        $filename = "WaSetup.xml"
-                        if (Test-Path $filename )
-                        {
-                            Write-Host( "$(Log-Date) Deleting $filename")
-                            Remove-Item $filename | Out-Default | Write-Host;
-                        }
-                    }
-                    Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
-                }
-            } elseif ($Cloud -eq 'Azure' ) {
-                Write-Host( "$(Log-Date) Running sysprep automatically")
+    Write-Host "$(Log-Date) Sysprep"
+    Write-Host "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
 
+    try {
+        if ( $Cloud -eq 'AWS' ) {
+            if ( $Win2012 ) {
+                Write-Host "$(Log-Date) AWS sysprep for Win2012"
+                Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
+            } else {
+                Write-Host "$(Log-Date) AWS sysprep for Win2016+"
+                # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
                 Invoke-Command -Session $Script:session {
                     Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
                     $filename = "unattend.xml"
@@ -896,24 +909,44 @@ $jsonObject = @"
                         Write-Host( "$(Log-Date) Deleting $filename")
                         Remove-Item $filename | Out-Default | Write-Host;
                     }
-                    Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
-                    cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
                 }
+                Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
             }
-        } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
-            Write-Host( "$(Log-Date) Ignore the exception 'The I/O operation has been aborted because of either a thread exit or an application request', presuming that its just an artifact of the syprep terminating the instance")
-        } catch {
-            Write-RedOutput $_ | Out-Default | Write-Host
-            Write-RedOutput $_.exception | Out-Default | Write-Host
-            Write-RedOutput $_.exception.GetType().fullname | Out-Default | Write-Host
-            $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
-            $Response
-            if ( $response -ne 0x6 ) {
-                throw "Sysprep script failure"
+        } elseif ($Cloud -eq 'Azure' ) {
+            Write-Host( "$(Log-Date) Running sysprep automatically")
+
+            Invoke-Command -Session $Script:session {
+                Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                $filename = "unattend.xml"
+                if (Test-Path $filename)
+                {
+                    Write-Host( "$(Log-Date) Deleting $filename")
+                    Remove-Item $filename | Out-Default | Write-Host;
+                }
+                $filename = "WaSetup.xml"
+                if (Test-Path $filename )
+                {
+                    Write-Host( "$(Log-Date) Deleting $filename")
+                    Remove-Item $filename | Out-Default | Write-Host;
+                }
+                Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
+                cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
             }
         }
-
-    } # if -not $OnlySaveImage
+    } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
+        Write-Host( "$(Log-Date) Ignore the exception 'The I/O operation has been aborted because of either a thread exit or an application request', presuming that its just an artifact of the sysprep terminating the instance")
+    } catch {
+        Write-RedOutput $_ | Out-Default | Write-Host
+        Write-RedOutput $_.exception | Out-Default | Write-Host
+        Write-RedOutput $_.exception.GetType().fullname | Out-Default | Write-Host
+        $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
+        $Response
+        if ( $response -ne 0x6 ) {
+            throw "Sysprep script failure"
+        }
+    }
 
     # Sysprep will stop the Instance
 
@@ -964,7 +997,7 @@ $jsonObject = @"
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
 
-        Wait-EC2State $instanceid "Stopped" -timeout 180 | Out-Default | Write-Host     # Should take 40 seconds or less to stop
+        Wait-EC2State $instanceid "Stopped" -timeout 300 | Out-Default | Write-Host     # Should take 40 seconds or less to stop
 
         # Refer to Azure code above as to why this is necessary for Azure. It may make a difference for the failures we see in AWS too.
         try {
