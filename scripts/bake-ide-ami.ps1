@@ -744,6 +744,12 @@ $jsonObject = @"
             # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
             Start-Sleep -Seconds 10
             ReConnect-Session
+
+            # Get-WinSystemLocale
+            Execute-RemoteBlock $Script:session {
+                $SystemLocale = Get-WinSystemLocale
+                Write-Host("SystemLocale after reboot is $SystemLocale")
+            }
         }
 
         if ( !$SkipSlowStuff -and $RunWindowsUpdates ) {
@@ -1026,7 +1032,7 @@ $jsonObject = @"
         }
 
         $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $Language $VersionText installed on $(Log-Date)"
-        $AmiName = "$Script:DialogTitle $Language $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
+        $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
