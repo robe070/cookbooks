@@ -44,6 +44,8 @@ try
     $DeviceMapping.DeviceName = '/dev/sda1'
     $DeviceMapping.Ebs = $volume
 
+    Write-Host( "$(Log-Date) Security Group = $securityGroup")
+
     # Use at least a 2 CPU instance so that multiple processes may run concurrently.
     $a = New-EC2Instance -ImageId $imageid -MinCount 1 -MaxCount 1 -InstanceType $instanceType -KeyName $keypair `
             -SecurityGroups $securityGroup -UserData $userdataBase64Encoded -Monitoring_Enabled $true `

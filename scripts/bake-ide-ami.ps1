@@ -288,8 +288,8 @@ try
                 Remove-EC2Instance -InstanceId $TaggedInstance.ResourceId -Force
                 Wait-EC2State $TaggedInstance.ResourceId "Terminated"
                 Write-Host( "Security group = $($script:SG)")
-                Create-Ec2SecurityGroup
             }
+            Create-Ec2SecurityGroup
         }
     }
 
