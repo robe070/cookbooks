@@ -17,9 +17,6 @@ switch ( $Platform) {
 
                 Write-Host( "Overwrite the input language with Japanese" )
                 Set-WinDefaultInputMethodOverride -InputTip "0411:00000411"
-
-                Write-Host( "Set the input method to MS-IME.")
-                Set-WinLanguageBarOption -UseLegacySwitchMode -UseLegacyLanguageBar
             }
         }
     }
