@@ -4,7 +4,7 @@
 
 Param(
     [string] [Parameter(Mandatory=$false)] [alias("Location")]$ResourceGroupLocation = 'Australia East',
-    [string] [Parameter(Mandatory=$false)] [alias("Name")] $ResourceGroupName,
+    [string] [Parameter(Mandatory=$false)] [alias("Name")] $ResourceGroupName = 'test',
     [string] $TemplateFile = '..\..\azure-quickstart-templates\lansa-vmss-windows-autoscale-sql-database\mainTemplate.json',
     [string] $TemplateParameterFile = '.\test.parameters.json',
     [switch] $RobG,

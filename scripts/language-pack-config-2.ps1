@@ -49,14 +49,21 @@ Set-WinSystemLocale -SystemLocale $LangCode
 Write-Host( "Set timezone to Tokyo time")
 Set-TimeZone -Id $Timezone
 
+Write-Host( "Make sysprep set the language & timezone correctly")
 
 $filename = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 if ( Test-Path $filename) {
-    Write-Host( "Make sysprep set the language & timezone correctly")
+    Write-Host( "Presuming AWS image")
     $Doc = Get-Content $filename
     $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $filename
+} else {
+    # Write-Host( "Presuming Azure image")
+    # $filename = "c:\lansa\scripts\AzureLanguageUnattend.xml"
+    # mkdir "c:\lansa\sysprep" -ErrorAction SilentlyContinue
+    # $Target = "c:\lansa\sysprep\AzureLanguageUnattend.xml"
+    # $Doc = Get-Content $filename
+    # $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $Target
 }
-# Ignore errors as it seems a shutdown is in progress anyway, possibly due to setting the System Locale.
-# "Failed to restart the computer EC2AMAZ-1J2TNAU with the following error message: A system shutdown is in progress"
+
 Start-Sleep -Seconds 30
 Restart-Computer -ErrorAction SilentlyContinue
