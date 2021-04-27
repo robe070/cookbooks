@@ -40,9 +40,13 @@ param (
     [string]
     $S3IntegratorUpdateDirectory,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $AmazonAMIName,
+
+    [Parameter(Mandatory=$false)]
+    [PSCustomObject]
+    $AzureImage,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -313,12 +317,20 @@ try
 
     } elseif ($Cloud -eq 'Azure' ) {
         $Location = "Australia East"
-        $Publisher = "MicrosoftWindowsServer"
-        $Offer = "windowsserver"
-        switch ($Platform) {
-            'Win2012' { $AzImageVersion = '9600*'  }
-            'Win2016' { $AzImageVersion = '14393*'  }
-            'Win2019' { $AzImageVersion = '17763*'  }
+
+        if ($AzureImage) {
+            $Publisher = $AzureImage.Publisher
+            $Offer = $AzureImage.Offer
+            $AmazonAMIName = $AzureIMage.SKU
+            $AzImageVersion = $AzureImage.Version
+        } else {
+            $Publisher = "MicrosoftWindowsServer"
+            $Offer = "windowsserver"
+            switch ($Platform) {
+                'Win2012' { $AzImageVersion = '9600*'  }
+                'Win2016' { $AzImageVersion = '14393*'  }
+                'Win2019' { $AzImageVersion = '17763*'  }
+            }
         }
         $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version )
 
@@ -938,7 +950,12 @@ $jsonObject = @"
                     Remove-Item $filename | Out-Default | Write-Host;
                 }
                 Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
-                cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
+                $unattend = 'c:\lansa\sysprep\AzureLanguageUnattend.xml'
+                if ( Test-Path $unattend) {
+                    cmd /c sysprep /oobe /generalize /shutdown /unattend:$unattend | Out-Default | Write-Host;
+                } else {
+                    cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
+                }
             }
         }
     } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
