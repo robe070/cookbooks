@@ -57,12 +57,12 @@ if ( Test-Path $filename) {
     $Doc = Get-Content $filename
     $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $filename
 } else {
-    # Write-Host( "Presuming Azure image")
-    # $filename = "c:\lansa\scripts\AzureLanguageUnattend.xml"
-    # mkdir "c:\lansa\sysprep" -ErrorAction SilentlyContinue
-    # $Target = "c:\lansa\sysprep\AzureLanguageUnattend.xml"
-    # $Doc = Get-Content $filename
-    # $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $Target
+    Write-Host( "Presuming Azure image")
+    $filename = "c:\lansa\scripts\AzureLanguageUnattend.xml"
+    mkdir "c:\lansa\sysprep" -ErrorAction SilentlyContinue
+    $Target = "c:\lansa\sysprep\AzureLanguageUnattend.xml"
+    $Doc = Get-Content $filename
+    $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $Target
 }
 
 Start-Sleep -Seconds 30

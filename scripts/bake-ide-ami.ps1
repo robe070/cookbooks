@@ -48,6 +48,10 @@ param (
     [PSCustomObject]
     $AzureImage,
 
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AzureImageUri,
+
     [Parameter(Mandatory=$true)]
     [string]
     $GitBranch,
@@ -319,11 +323,15 @@ try
         $Location = "Australia East"
 
         if ($AzureImage) {
+            Write-Host( "$(Log-Date) Using non-Microsoft MP image")
             $Publisher = $AzureImage.Publisher
             $Offer = $AzureImage.Offer
             $AmazonAMIName = $AzureIMage.SKU
             $AzImageVersion = $AzureImage.Version
+        } elseif ($AzureImageUri) {
+            Write-Host( "$(Log-Date) Using Image Uri")
         } else {
+            Write-Host( "$(Log-Date) Using Microsoft MP image")
             $Publisher = "MicrosoftWindowsServer"
             $Offer = "windowsserver"
             switch ($Platform) {
@@ -332,12 +340,15 @@ try
                 'Win2019' { $AzImageVersion = '17763*'  }
             }
         }
-        $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version )
 
-        if ( $imageObj ) {
-            $imageObj[0] | format-list * | Out-Default | Write-Host
-        } else {
-            throw "Image not found"  | Out-Default | Write-Host
+        if ( -not $AzureImageUri ) {
+            $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version )
+
+            if ( $imageObj ) {
+                $imageObj[0] | format-list * | Out-Default | Write-Host
+            } else {
+                throw "Image not found"  | Out-Default | Write-Host
+            }
         }
 
         # used for KeyVault and the images
@@ -495,7 +506,13 @@ $jsonObject = @"
 
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
-            $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
+            if ( $AzureImageUri ) {
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows
+            } else {
+                $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage
+            }
+
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
 
@@ -503,8 +520,6 @@ $jsonObject = @"
             foreach ($vmSecret in $vmSecretUrls) {
                 $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret
             }
-
-            $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage
 
             try {
                 New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
@@ -952,8 +967,10 @@ $jsonObject = @"
                 Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
                 $unattend = 'c:\lansa\sysprep\AzureLanguageUnattend.xml'
                 if ( Test-Path $unattend) {
+                    Write-Host( "$(Log-Date) sysprep using language unattend file")
                     cmd /c sysprep /oobe /generalize /shutdown /unattend:$unattend | Out-Default | Write-Host;
                 } else {
+                    Write-Host( "$(Log-Date) sysprep WITHOUT unattend file")
                     cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
                 }
             }

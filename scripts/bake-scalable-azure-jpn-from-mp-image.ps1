@@ -29,14 +29,14 @@ Set-StrictMode -Version Latest
 
 #[PSCustomObject] $AzureImage = @{'Publisher' = 'lansa';'Offer' = 'lansa-scalable-license';'SKU' = 'w19d-15-0';'Version' = '*'}
 
-Bake-IdeMsi -VersionText 'w19d-15-0-unatt' `
+Bake-IdeMsi -VersionText 'w19d-15-0-lpc' `
             -VersionMajor 15 `
             -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AzureImageUri 'https://stagingdpauseast.blob.core.windows.net/vhds/w19d-15-0-7.vhd' `
+            -AzureImage @{'Publisher' = 'lansa';'Offer' = 'lansa-scalable-license';'SKU' = 'w19d-15-0';'Version' = '*'} `
             -Language 'JPN' `
             -GitBranch "debug/paas" `
             -Cloud "Azure" `
