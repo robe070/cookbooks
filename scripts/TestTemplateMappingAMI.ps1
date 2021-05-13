@@ -50,12 +50,12 @@ if ( $TemplateJson ) {
                 $First = $true
                 foreach( $AMI in @($AMI142.$Region.$win, $AMI15.$Region.$win)) {
                     try {
+                        $Result = "Failed"
                         $AMIDetails = Get-Ec2Image $AMI -Region $Region -ErrorAction SilentlyContinue
+                        if ($AMIDetails){
+                            $Result = "Success"
+                        }
                     } catch {}
-                    $Result = "Failed"
-                    if ($AMIDetails){
-                        $Result = "Success"
-                    }
 
                     if ( $First) {
                         Write-Host( "$AMI $win V14.2 $Result")
