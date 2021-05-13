@@ -540,7 +540,11 @@ try
                 # }
 
                 Write-Host ("$(Log-Date) Restart JSM Service to load the new license")
+                Write-Host ( "$(Log-Date) Stopping...")
                 cmd /c "sc.exe" "stop" $JSMServiceName | Out-Default | Write-Host
+                Write-Host( "Pause for 30 seconds to ensure its properly stopped")
+                Start-Sleep 30
+                Write-Host ( "$(Log-Date) Starting...")
                 cmd /c "sc.exe" "start" $JSMServiceName | Out-Default | Write-Host
             } else {
                 throw "JSM service is not installed correctly in $JSMpath"
