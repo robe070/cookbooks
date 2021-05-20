@@ -46,6 +46,7 @@ Bake-IdeMsi -VersionText 'w12jpn' `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
             -CreateVM $true `
-            -KeyPairName 'RobG_id_rsa' `
-            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
+            -KeyPairName 'LJtest' `
+            -KeyPairPath "C:\VCS\AWS\.ssh\id_rsa" `
+#           -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
             -GitUserName 'robe070'

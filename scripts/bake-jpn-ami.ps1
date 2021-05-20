@@ -54,7 +54,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Language='ENG',
+    $Language='JPN',
 
     [Parameter(Mandatory=$false)]
     [boolean]
@@ -616,6 +616,7 @@ $jsonObject = @"
 
         # ****************** Put JPN configuration code here **************
         # E.g. Windows language pack & locale
+        # https://dev.classmethod.jp/articles/windowsserver2019_to_japanese/
         # *****************************************************************
 
         # No harm installing this again if its already installed
