@@ -27,21 +27,21 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'w12r2d142rjg' `
-            -VersionMajor 14 `
-            -VersionMinor 2 `
+Bake-IdeMsi -VersionText 'w19d150rjg' `
+            -VersionMajor 15 `
+            -VersionMinor 0 `
             -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
             -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "2012-R2-Datacenter" `
+            -AmazonAMIName "2019-Datacenter" `
             -GitBranch "debug/paas" `
             -Cloud "Azure" `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `
             -InstallIDE $false `
             -InstallScalable $true `
-            -Win2012 $true `
+            -Win2012 $false `
             -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `

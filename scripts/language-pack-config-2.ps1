@@ -60,7 +60,7 @@ if ( Test-Path $filename) {
     Write-Host( "Presuming Azure image")
     $filename = "c:\lansa\scripts\AzureLanguageUnattend.xml"
     mkdir "c:\lansa\sysprep" -ErrorAction SilentlyContinue
-    $Target = "c:\lansa\sysprep\AzureLanguageUnattend.xml"
+    $Target = "c:\lansa\sysprep\Unattend.xml"
     $Doc = Get-Content $filename
     $Doc | % { $_.Replace("en-US", $LangCode) } | % { $_.Replace("UTC", $Timezone) } | Set-Content $Target
 }

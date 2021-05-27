@@ -693,6 +693,7 @@ $jsonObject = @"
                     throw 'Git checkout failed'
                 }
             }
+            # $dummy = MessageBox "Check that git repo is the latest. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
         }
 
         ReConnect-Session
@@ -965,9 +966,10 @@ $jsonObject = @"
                     Remove-Item $filename | Out-Default | Write-Host;
                 }
                 Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
-                $unattend = 'c:\lansa\sysprep\AzureLanguageUnattend.xml'
+                $unattend = 'c:\lansa\sysprep\Unattend.xml'
                 if ( Test-Path $unattend) {
                     Write-Host( "$(Log-Date) sysprep using language unattend file")
+                    Get-Content $unattend | Out-default | Write-Host
                     cmd /c sysprep /oobe /generalize /shutdown /unattend:$unattend | Out-Default | Write-Host;
                 } else {
                     Write-Host( "$(Log-Date) sysprep WITHOUT unattend file")
