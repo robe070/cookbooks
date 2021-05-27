@@ -24,5 +24,4 @@
             <LayeredDriver>1</LayeredDriver>
         </component>
     </settings>
-    <cpi:offlineImage cpi:source="wim://robgw10/cunattend/install.wim#Windows Server 2019 SERVERDATACENTER" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>
