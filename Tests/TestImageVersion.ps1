@@ -27,8 +27,8 @@ $VersionTextValue = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Version
 Write-YellowOutput "Verifying the Registry entry for VersionText $VersionTextValue and the SKU $ImgName" | Out-Default | Write-Host
 if ($VersionTextValue -ne $ImgName) {
     Write-RedOutput "Registry entry for VersionText $VersionTextValue doesn't match the SKU $ImgName" | Out-Default | Write-Host
-    Write-RedOutput "Set LASTEXITCODE = 1" | Out-Default | Write-Host
-    cmd /c exit 1    #Set $LASTEXITCODE
-    throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
+    Write-RedOutput "Return Exit 1" | Out-Default | Write-Host
+    exit 1
+    # throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
 }
 Write-GreenOutput "Image SKU tested successfully" | Out-Default | Write-Host
