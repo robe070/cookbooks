@@ -48,19 +48,19 @@ if ( $TemplateJson ) {
                 if ( Get-Member -inputobject $AMI142.$Region -name "$win") {
                     $AMIList += $AMI142.$Region.$win
                 } else {
-                    Write-Host( "                      $win V14.2 There is no AMI for $win")
+                    Write-Host( "                      $win V14.2 The template has no AMI for $win")
                 }
             } else {
-                Write-Host( "                      $win V14.2 There is no AMI in $Region")
+                Write-Host( "                      $win V14.2 The template has no AMI in $Region")
             }
             if ( Get-Member -inputobject $AMI15 -name "$Region" ) {
                 if ( Get-Member -inputobject $AMI15.$Region -name "$win") {
                     $AMIList += $AMI15.$Region.$win
                 } else {
-                    Write-Host( "                      $win V15   There is no AMI for $win")
+                    Write-Host( "                      $win V15   The template has no AMI for $win")
                 }
             } else {
-                Write-Host( "                      $win V15   There is no AMI in $Region")
+                Write-Host( "                      $win V15   The template has no AMI in $Region")
             }
             foreach( $AMI in $AMIList) {
                 try {
