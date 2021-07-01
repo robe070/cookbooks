@@ -30,3 +30,5 @@ if ($VersionTextValue -ne $ImgName) {
     throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
 }
 Write-GreenOutput "Image SKU tested successfully" | Out-Default | Write-Host
+
+.\CheckAWSSSmAgent.ps1
