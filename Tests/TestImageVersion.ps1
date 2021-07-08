@@ -30,4 +30,6 @@ if ($VersionTextValue -ne $ImgName) {
     cmd /c exit 1    #Set $LASTEXITCODE
     throw "$(Log-Date) Registry entry for VersionText $VersionTextValue is invalid"
 }
-Write-Host "$(Log-Date) Image SKU tested successfully"
+Write-GreenOutput "Image SKU tested successfully" | Out-Default | Write-Host
+
+& "$PSScriptRoot\CheckAWSSSmAgent.ps1"
