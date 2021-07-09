@@ -277,7 +277,7 @@ try {
 choco feature enable --name=allowGlobalConfirmation | Out-Default | Write-Host
 choco source add -n=choco `
 -s="https://pkgs.dev.azure.com/VisualLansa/_packaging/choco/nuget/v2" `
--u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="tconk2mxtrqxgp7xbd3k3qmo7yltlcpit2h2jhfvx24s32hgwqxa"  | Out-Default | Write-Host
+-u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="aouaqh7whklasicbnmdhwooutxivnnmhut6upcmk7wyaeqr5ymmq"  | Out-Default | Write-Host
 
 # update chocolatey to the latest version
 #Write-Host "Updating chocolatey to the latest version"
