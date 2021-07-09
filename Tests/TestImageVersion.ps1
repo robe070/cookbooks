@@ -32,4 +32,5 @@ if ($VersionTextValue -ne $ImgName) {
 }
 Write-GreenOutput "Image SKU tested successfully" | Out-Default | Write-Host
 
-& "$PSScriptRoot\CheckAWSSSmAgent.ps1"
+Write-Host ("PSScriptRoot = $PSScriptRoot")
+& "$script:IncludeDir\..\tests\CheckAWSSSmAgent.ps1"
