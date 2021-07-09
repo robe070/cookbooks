@@ -1,6 +1,6 @@
 
-$Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-if (  $Cloud -eq "AWS") {
+$Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA -Name 'Cloud').Cloud
+if ($Cloud -eq "AWS") {
 
     #Check if service Amazon SSM Agent is running or not
     Try {
