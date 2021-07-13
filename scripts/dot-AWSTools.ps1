@@ -22,7 +22,9 @@ function Get-ExternalIP {
 function Create-Ec2SecurityGroup
 {
 <#  .Synopsis      Creates a security group named $script.SG.  .Description Adds firewall exceptions for PowerShell Remoting, Remote Desktop and ICMP. Allowing ICMP enables “ping” to function, helps with debugging. The example below opens up to any IpRange, which means that the EC2 instance can be contacted from anywhere in the world. This is due to Azure DevOps sometimes using a different external ip and allowing a developer to access EC2 instances created by AzureDevOps  #>
+    param([string[]]$ExternalIPAddresses)
     $groupExists = $true
+
     try
     {
         $Groups = Get-EC2SecurityGroup -GroupNames $script:SG -ea SilentlyContinue
@@ -39,9 +41,28 @@ function Create-Ec2SecurityGroup
 
     $GroupId = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
     Get-EC2SecurityGroup -GroupId $GroupId | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
+
+    if ( $ExternalIPAddresses.count -gt 0 ) {
+        foreach ( $iprange in $ExternalIPAddresses ) {
+            Write-Host "Enabling SG for IP $iprange"
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange}
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $iprange}
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $iprange}
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $iprange}
+        }
+    } else {
+        $externalip = Get-ExternalIP
+        $externalipcidr = "$externalip/32"
+
+        Write-Host "Enabling SG for Default IP $externalipcidr"
+
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $externalipcidr}
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr}
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr}
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $externalipcidr}
+
+    }
+
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @("0.0.0.0/0")} | Out-Default | Write-Host
+
 }
