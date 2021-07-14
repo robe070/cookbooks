@@ -60,7 +60,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $RunWindowsUpdates=$false
+    $RunWindowsUpdates=$false,
+
+    [Parameter(Mandatory=$false)]
+    [String[]]
+    $ExternalIPAddresses
     )
 
 # $DebugPreference = "Continue"
@@ -105,7 +109,7 @@ while($count -ne 0 ) {
                             -GitUserName $GitUserName `
                             -AtomicBuild:$AtomicBuild `
                             -RunWindowsUpdates $RunWindowsUpdates `
-                            -ExternalIPAddresses
+                            -ExternalIPAddresses $ExternalIPAddresses
 
     }
     catch{
