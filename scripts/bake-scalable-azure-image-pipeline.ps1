@@ -104,7 +104,9 @@ while($count -ne 0 ) {
                             -KeyPairPath $KeyPairPath `
                             -GitUserName $GitUserName `
                             -AtomicBuild:$AtomicBuild `
-                            -RunWindowsUpdates $RunWindowsUpdates
+                            -RunWindowsUpdates $RunWindowsUpdates `
+                            -ExternalIPAddresses
+
     }
     catch{
         $PSitem | Out-Default | Write-Host
