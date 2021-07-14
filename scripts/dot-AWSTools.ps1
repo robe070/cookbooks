@@ -44,7 +44,9 @@ function Create-Ec2SecurityGroup
 
     if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
         $ipsplit = $ExternalIPAddresses.split(",")
+        Write-Host "ipsplit: $ipsplit"
         foreach ( $iprange in $ipsplit ) {
+            $iprange = $iprange.replace(' ','')
             Write-Host "Enabling SG for IP $iprange"
             Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange}
             Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $iprange}
