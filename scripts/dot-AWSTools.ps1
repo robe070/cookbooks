@@ -42,7 +42,7 @@ function Create-Ec2SecurityGroup
     $GroupId = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
     Get-EC2SecurityGroup -GroupId $GroupId | Out-Default | Write-Host
 
-    if ( $ExternalIPAddresses.count -gt 0 ) {
+    if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
         foreach ( $iprange in $ExternalIPAddresses ) {
             Write-Host "Enabling SG for IP $iprange"
             Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange}

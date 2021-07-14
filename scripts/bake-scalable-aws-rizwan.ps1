@@ -45,6 +45,6 @@ Bake-IdeMsi -VersionText 'w19-base-ra' `
             -OnlySaveImage $false `
             -CreateVM $true `
             -KeyPairName 'riz_test1' `
-            -KeyPairPath "C:\DevOps\Lansa-AWS\Key" `
-            -GitUserName 'CelestialSystems' `
-            -ExternalIPAddresses 192.168.10.10/32, 10.10.1.1/32, 224.23.2.2/32
+            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\riz_test1.pem" `
+            -GitUserName 'CelestialSystem' `
+            -ExternalIPAddresses 192.168.10.10/32, 10.10.1.1/32, 224.23.2.2/32, 106.211.132.182/32
