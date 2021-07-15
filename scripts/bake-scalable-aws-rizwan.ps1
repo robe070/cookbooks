@@ -47,4 +47,4 @@ Bake-IdeMsi -VersionText 'w19-base-ra' `
             -KeyPairName 'riz_test1' `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\riz_test1.pem" `
             -GitUserName 'CelestialSystem' `
-            -ExternalIPAddresses "192.168.10.10/32, 10.10.1.1/32, 224.23.2.2/32,106.211.132.182/32,   176.211.132.182/32"
+            -ExternalIPAddresses "103.231.169.65/32, 103.110.171.121/32, 106.211.132.182/32, 103.109.109.25/32"
