@@ -60,7 +60,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $RunWindowsUpdates=$false
+    $RunWindowsUpdates=$false,
+
+    [Parameter(Mandatory=$false)]
+    [String[]]
+    $ExternalIPAddresses
     )
 
 # $DebugPreference = "Continue"
@@ -104,7 +108,9 @@ while($count -ne 0 ) {
                             -KeyPairPath $KeyPairPath `
                             -GitUserName $GitUserName `
                             -AtomicBuild:$AtomicBuild `
-                            -RunWindowsUpdates $RunWindowsUpdates
+                            -RunWindowsUpdates $RunWindowsUpdates `
+                            -ExternalIPAddresses $ExternalIPAddresses
+
     }
     catch{
         $PSitem | Out-Default | Write-Host

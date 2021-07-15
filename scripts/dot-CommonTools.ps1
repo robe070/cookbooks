@@ -148,7 +148,7 @@ param (
 function Connect-RemoteSession
 {
     # Wait until PSSession is available
-    $Retry = 10     # retry every 10 seconds + about 20 seconds for the timeout inherent in failing to create a new session. Typically takes 1 attempt in this loop.
+    $Retry = 30     # retry every 30 seconds + about 20 seconds for the timeout inherent in failing to create a new session. Typically takes 1 attempt in this loop.
     $RetryCount = 6
     while ($true)
     {
