@@ -440,7 +440,7 @@ try
             $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # ADD inbound rule for IP addresses passed along  with command line
-            if ( $ExternalIPAddresses.count -gt 0 ) {
+            if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
 
                 # Create an inbound network security group rule for port 3389
                 $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
@@ -457,25 +457,24 @@ try
                 -Direction Inbound -Priority 1020 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
                 -DestinationPortRange 5986 -Access Allow
 
-            } else {
-
-                $externalipcidr = "$externalip/32"
-                Write-Host "Adding External IP $externalipcidr"
-                # Create an inbound network security group rule for port 3389
-                $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
-                -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 3389 -Access Allow
-
-                # Create an inbound network security group rule for port 5985
-                $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
-                -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 5985 -Access Allow
-
-                # Create an inbound network security group rule for port 5986
-                $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
-                -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 5986 -Access Allow
             }
+
+            $externalipcidr = "$externalip/32"
+            Write-Host "Adding External IP $externalipcidr"
+            # Create an inbound network security group rule for port 3389
+            $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
+            -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
+            -DestinationPortRange 3389 -Access Allow
+
+            # Create an inbound network security group rule for port 5985
+            $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
+            -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
+            -DestinationPortRange 5985 -Access Allow
+
+            # Create an inbound network security group rule for port 5986
+            $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
+            -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
+            -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
             $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $VmResourceGroup -Location $location `
