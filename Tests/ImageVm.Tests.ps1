@@ -77,6 +77,10 @@ Describe "VM Tests" {
                     Write-Host "$(Log-Date) Create NIC"
                     $externalip = Get-ExternalIP
                     $externalip | Out-Default | Write-Host
+
+                    $ExternalIPAddresses = $env:ExternalIPAddresses
+                    $ExternalIPAddresses | Out-Default | Write-Host
+
                     $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($VMname)"
                     $AzVirtualNetworkName = "bakingvNET-$($VMname)"
                     $AzNetworkSecurityGroupRuleRDPName = "RDPRule-$($VMname)"
@@ -95,18 +99,36 @@ Describe "VM Tests" {
                     $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force -Verbose
 
                     # Create an inbound network security group rule for port 3389
+                    if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
+                        $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
+                        -Direction Inbound -Priority 1000 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                        -DestinationPortRange 3389 -Access Allow -Verbose
+
+                        # Create an inbound network security group rule for port 5985
+                        $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
+                        -Direction Inbound -Priority 1010 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                        -DestinationPortRange 5985 -Access Allow -Verbose
+
+                        # Create an inbound network security group rule for port 5986
+                        $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
+                        -Direction Inbound -Priority 1020 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                        -DestinationPortRange 5986 -Access Allow -Verbose
+                    }
+
+                    $externalipcidr = "$externalip/32"
+                    Write-Host "Adding External IP $externalipcidr"
                     $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
-                    -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+                    -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 3389 -Access Allow -Verbose
 
                     # Create an inbound network security group rule for port 5985
                     $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
-                    -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+                    -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 5985 -Access Allow -Verbose
 
                     # Create an inbound network security group rule for port 5986
                     $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
-                    -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+                    -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
                     -DestinationPortRange 5986 -Access Allow -Verbose
 
                     # Create a network security group
@@ -157,7 +179,7 @@ Describe "VM Tests" {
             $script:SG = $env:SG
 
             . "$script:IncludeDir\dot-AWSTools.ps1"
-            Create-Ec2SecurityGroup
+            Create-Ec2SecurityGroup $env:ExternalIPAddresses
 
             $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
             . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
