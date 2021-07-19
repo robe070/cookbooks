@@ -136,10 +136,19 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $InstallLanguagePack
+    $InstallLanguagePack,
+
+    [Parameter(Mandatory=$false)]
+    [String[]]
+    $ExternalIPAddresses
     )
 
 #Requires -RunAsAdministrator
+
+foreach ( $iprange in $ExternalIPAddresses ) {
+    Write-Host "IP : $iprange"
+}
+Write-Host "Cloud: $Cloud"
 
 # Output the Pipeline Switch Status
 Write-Host "Pipeline Switch"
@@ -297,7 +306,7 @@ try
                 Wait-EC2State $TaggedInstance.ResourceId "Terminated"
                 Write-Host( "Security group = $($script:SG)")
             }
-            Create-Ec2SecurityGroup
+            Create-Ec2SecurityGroup $ExternalIPAddresses
         }
     }
 
@@ -430,19 +439,41 @@ try
             # Create a public IP address and specify a DNS name
             $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
+            # ADD inbound rule for IP addresses passed along  with command line
+            if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
+
+                # Create an inbound network security group rule for port 3389
+                $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
+                -Direction Inbound -Priority 1000 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                -DestinationPortRange 3389 -Access Allow
+
+                # Create an inbound network security group rule for port 5985
+                $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
+                -Direction Inbound -Priority 1010 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                -DestinationPortRange 5985 -Access Allow
+
+                # Create an inbound network security group rule for port 5986
+                $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
+                -Direction Inbound -Priority 1020 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
+                -DestinationPortRange 5986 -Access Allow
+
+            }
+
+            $externalipcidr = "$externalip/32"
+            Write-Host "Adding External IP $externalipcidr"
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
-            -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+            -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 3389 -Access Allow
 
             # Create an inbound network security group rule for port 5985
             $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
-            -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+            -Direction Inbound -Priority 1010 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 5985 -Access Allow
 
             # Create an inbound network security group rule for port 5986
             $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
-            -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalip -SourcePortRange * -DestinationAddressPrefix * `
+            -Direction Inbound -Priority 1020 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
             -DestinationPortRange 5986 -Access Allow
 
             # Create a network security group
