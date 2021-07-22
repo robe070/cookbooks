@@ -196,7 +196,7 @@ if ($InstallScalable -eq $true) {
     $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
 }
 
-if ($InstallLanguagePack) {
+if ($InstallLanguagePack -or ($Language -ne 'ENG') ) {
     $Script:DialogTitle = "LANSA Scalable License $Language"
     $script:instancename = "LANSA Scalable License $Language $VersionText installed on $(Log-Date)"
 }
