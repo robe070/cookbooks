@@ -1,16 +1,16 @@
 # Terminating the Instance
-if('$($env:TerminateInstance)' -eq 'True') {
-   Write-Host "Removing the instance $($env:BuildImage.InstanceID) "
-    Remove-EC2Instance -InstanceId $($env:BuildImage.InstanceID) -Force
+if('$($env:TERMINATEINSTANCE)' -eq 'True') {
+   Write-Host "Removing the instance $($env:BUILDIMAGE_INSTANCEID) "
+    Remove-EC2Instance -InstanceId $($env:BUILDIMAGE_INSTANCEID) -Force
 }
 #Removing Vm
 Write-Host "Removing the Vm"
-Remove-EC2Instance -InstanceId  $($env:Vmtest.instanceID) -Force
+Remove-EC2Instance -InstanceId  $($env:VMTEST_INSTANCEID) -Force
 
 # Deleting the Security Group
 Write-Host "Deleting the security group"
 Start-Sleep -Seconds 180
- Remove-EC2SecurityGroup -GroupName 'w19d-15-0j$($env:VersionText-w19d-15-0j)$($env:Build_BuildNumber)' -Force
+ Remove-EC2SecurityGroup -GroupName 'w19d-15-0j$($env:VERSIONTEXT-w19d-15-0j)$($env:BUILD_BUILDNUMBER)' -Force
 
 #Deregister ami and delete snapshot Id
 $ami = "$($env:BuildImage_amiID)"
