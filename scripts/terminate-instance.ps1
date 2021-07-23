@@ -13,7 +13,7 @@ Start-Sleep -Seconds 180
  Remove-EC2SecurityGroup -GroupName 'w19d-15-0j$($env:VERSIONTEXT-w19d-15-0j)$($env:BUILD_BUILDNUMBER)' -Force
 
 #Deregister ami and delete snapshot Id
-$ami = "$($env:BuildImage_amiID)"
+$ami = "$($env:BUILDIMAGE_AMIID)"
 $snapshot = (Get-EC2Snapshot -owner self | Where-Object {$_.Description -like "*$ami*"}).SnapshotId
 Write-Host "Deregistering the AMI"
 Unregister-EC2Image -ImageId $ami -Force
