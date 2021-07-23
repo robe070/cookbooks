@@ -2,7 +2,11 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $versionText
+    $versionText,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $version
   )
 
 
@@ -17,7 +21,7 @@ Remove-EC2Instance -InstanceId  "$($env:VMTEST_INSTANCEID)" -Force
 # Deleting the Security Group
 Write-Host "Deleting the security group"
 Start-Sleep -Seconds 180
- Remove-EC2SecurityGroup -GroupName "w19d-15-0j$($versionText)$($env:BUILD_BUILDNUMBER)" -Force
+ Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)$($env:BUILD_BUILDNUMBER)" -Force
 
 #Deregister ami and delete snapshot Id
 $ami = "$($env:BUILDIMAGE_AMIID)"
