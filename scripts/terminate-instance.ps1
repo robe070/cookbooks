@@ -10,7 +10,7 @@ Remove-EC2Instance -InstanceId  $($env:VMTEST_INSTANCEID) -Force
 # Deleting the Security Group
 Write-Host "Deleting the security group"
 Start-Sleep -Seconds 180
- Remove-EC2SecurityGroup -GroupName 'w19d-15-0j$($env:VERSIONTEXT-w19d-15-0j)$($env:BUILD_BUILDNUMBER)' -Force
+ Remove-EC2SecurityGroup -GroupName 'w19d-15-0j$($env:VERSIONTEXT-W19D-15-0J)$($env:BUILD_BUILDNUMBER)' -Force
 
 #Deregister ami and delete snapshot Id
 $ami = "$($env:BUILDIMAGE_AMIID)"
