@@ -326,7 +326,10 @@ try
             Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
         }
 
-        $Script:vmname="Bake $Script:instancename"
+        $Script:vmname = "Bake $Script:instancename"
+
+        New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
+
 
     } elseif ($Cloud -eq 'Azure' ) {
         $Location = "Australia East"
@@ -1104,7 +1107,7 @@ $jsonObject = @"
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
 
-        New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} # Add tags to new AMI | Out-Default | Write-Host
+        New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} | Out-Default
 
         while ( $true )
         {
