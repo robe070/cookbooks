@@ -29,7 +29,7 @@ if ( $DeleteSnapShot -eq $true ) {
    Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)$($env:BUILD_BUILDNUMBER)" -Force
 } else {
   Start-Sleep -Seconds 180
-   Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)" -Force
+   Remove-EC2SecurityGroup -GroupName "$($version)-$($versionText)" -Force
 }
 
 
