@@ -10,7 +10,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $DeleteSnapShot=$false
+    $DeleteAMI=$false
   )
 
 
@@ -24,7 +24,7 @@ Remove-EC2Instance -InstanceId  "$($env:VMTEST_INSTANCEID)" -Force
 
 # Deleting the Security Group
 Write-Host "Deleting the security group"
-if ( $DeleteSnapShot -eq $true ) {
+if ( $DeleteAMI -eq $true ) {
   Start-Sleep -Seconds 180
    Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)$($env:BUILD_BUILDNUMBER)" -Force
 } else {
@@ -33,7 +33,7 @@ if ( $DeleteSnapShot -eq $true ) {
 }
 
 
-if ( $DeleteSnapShot -eq $true ) {
+if ( $DeleteAMI -eq $true ) {
   #Deregister ami and delete snapshot Id
   $ami = "$($env:BUILDIMAGE_AMIID)"
   $snapshot = (Get-EC2Snapshot -owner self | Where-Object {$_.Description -like "*$ami*"}).SnapshotId
