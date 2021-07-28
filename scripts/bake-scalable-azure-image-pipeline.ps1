@@ -64,8 +64,12 @@ param (
 
     [Parameter(Mandatory=$false)]
     [String[]]
-    $ExternalIPAddresses
-    )
+    $ExternalIPAddresses,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Language="ENG"
+  )
 
 # $DebugPreference = "Continue"
 $VerbosePreference = "Continue"
@@ -109,7 +113,8 @@ while($count -ne 0 ) {
                             -GitUserName $GitUserName `
                             -AtomicBuild:$AtomicBuild `
                             -RunWindowsUpdates $RunWindowsUpdates `
-                            -ExternalIPAddresses $ExternalIPAddresses
+                            -ExternalIPAddresses $ExternalIPAddresses `
+                            -Language $Language
 
     }
     catch{
@@ -135,4 +140,3 @@ while($count -ne 0 ) {
 
 
 }
-
