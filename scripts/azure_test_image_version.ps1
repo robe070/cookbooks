@@ -13,8 +13,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $TestVersionPrev
+    $TestVersionPrev,
 
+    [Parameter(Mandatory=$true)]
+    [string]
+    $deploymentOutput
 )
 
 
@@ -22,11 +25,11 @@ Install-Module -Name Az.Compute -AllowClobber -Force
 if ("$($env:IMAGERELEASESTATE)" -eq "Production") {
     $SkuName = "$($Version)-$($TestVersion)"
 } else {
-    $SkuName = ""$($Version)-$($TestVersionPrev)""
+    $SkuName = "$($Version)-$($TestVersionPrev)"
 }
 Write-Host $SkuName | Out-Default
 
-$var=ConvertFrom-Json "$($env:DEPLOYMENTOUTPUT)"
+$var=ConvertFrom-Json $deploymentOutput
 
 # Download TestImageVersion PS Script
 New-Item -Path "$($env:COOKBOOKSSOURCE)\Tests\Tests" -ItemType Directory -verbose
