@@ -1049,7 +1049,12 @@ $jsonObject = @"
             # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
             Write-Host "$(Log-Date) VM has fully stopped"
         }
-        Remove-PSSession $Script:session | Out-Default | Write-Host
+
+        try {
+            Remove-PSSession $Script:session | Out-Default | Write-Host
+        } catch {
+            Write-Host "$(Log-Date) Ignoring error when removing connection to VM after Sysprep"
+        }
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 

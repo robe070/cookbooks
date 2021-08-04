@@ -22,9 +22,13 @@ param (
     [int]
     $VersionMinor,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $AmazonAMIName,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AzureImageUri,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -96,6 +100,7 @@ while($count -ne 0 ) {
                             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
                             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
                             -AmazonAMIName $AmazonAMIName `
+                            -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
                             -InstallBaseSoftware $true `
