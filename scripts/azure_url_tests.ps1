@@ -1,5 +1,11 @@
+param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $deploymentOutput
+)
+
 # Use the deployment output to extract the IpAddress
-$sqlazureDeploymentOutput=ConvertFrom-Json '$($env:DEPLOYMENTOUTPUT)'
+$sqlazureDeploymentOutput=ConvertFrom-Json '$($deploymentOutput)'
 $IpAddress = $sqlazureDeploymentOutput.lbFqdn.value
 $url1 = "$IpAddress/cgi-bin/probe"
 $url2 = "$IpAddress/cgi-bin/lansaweb?about"
