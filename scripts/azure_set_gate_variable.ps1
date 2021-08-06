@@ -1,15 +1,7 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $Version,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $SubscriptionId,
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    $ResourceGroupName
+    $Version
    )
 
 
@@ -24,7 +16,7 @@ if (Test-Path $path) {
     $sku = $Matches[0]
     Write-Host $sku | Out-Default | Write-Verbose
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku" | Out-Default | Write-Verbose
-    $uri = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Compute/images/$($Matches[0])image"
+    $uri = "/subscriptions/$env:SUBSCRIPTIONID/resourceGroups/$env:RESOURCEGROUPNAME/providers/Microsoft.Compute/images/$($Matches[0])image"
     # Set Variables
     Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri" | Out-Default | Write-Verbose
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True" | Out-Default | Write-Verbose
