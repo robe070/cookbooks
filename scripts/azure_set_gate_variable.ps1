@@ -9,12 +9,12 @@ Write-Host "version is - $Version"
 $path = "$($env:System_DefaultWorkingDirectory)/_Lansa Images - Cookbooks/$Version/$Version.txt"
 if (Test-Path $path) {
     $rawUri = Get-Content -Path $path -Raw
-    Write-Host "Uri is $rawUri"
+    Write-Host "ImageUrl is $rawUri"
     $rawUri -match '[\w-]+\.vhd'
-    Write-Host "Matches[0] value $Matches[0]"
+    Write-Host "ImageName value is $Matches[0]"
     $Matches[0] -match '[^.]+'
     $sku = $Matches[0]
-    Write-Host "Sku is $sku"
+    Write-Host "SKU is $sku"
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku"
     $uri = "/subscriptions/$env:SUBSCRIPTIONID/resourceGroups/$env:RESOURCEGROUPNAME/providers/Microsoft.Compute/images/$($Matches[0])image"
     # Set Variables
