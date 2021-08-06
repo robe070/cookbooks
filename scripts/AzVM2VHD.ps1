@@ -9,10 +9,10 @@ try {
     $resourceGroupName='BakingDP'
     $resourceGroupName_VM='BakingJPN'
 
-    $vmName = '19srvjpnvm2'
+    $vmName = '16srvjpnvm'
 
     #Provide the snapshot name
-    $snapshotName='w19-jpn-base2'
+    $snapshotName='w16-jpn-base'
 
     #Provide Shared Access Signature (SAS) expiry duration in seconds (such as 3600)
     #Know more about SAS here: https://docs.microsoft.com/azure/storage/storage-dotnet-shared-access-signature-part-1
@@ -30,7 +30,7 @@ try {
     $storageAccountKey = $key.value
 
     #Give a name to the destination VHD file to which the VHD will be copied.
-    $destinationVHDFileName="$($snapshotName)2.vhd"
+    $destinationVHDFileName="$($snapshotName).vhd"
 
     Write-Host "Create a snapshot of the OS (and optionally data disks) from the generalized VM"
     $vm = Get-AzVM -ResourceGroupName $resourceGroupName_VM -Name $vmName
@@ -42,7 +42,6 @@ try {
     New-AzSnapshot -ResourceGroupName $resourceGroupName -Snapshot $snapshot -SnapshotName $snapshotName
 
     az account set --subscription $subscriptionId
-
 
     Write-Host "Obtaining Snapshot SAS uri..."
     $sas = $(az snapshot grant-access --resource-group $resourceGroupName --name $snapshotName --duration-in-seconds $sasExpiryDuration --query [accessSas] -o tsv)
