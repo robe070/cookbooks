@@ -7,10 +7,6 @@ param (
     [string]
     $Version,
 
-    [Parameter(Mandatory=$true)]
-    [string]
-    $ResourceGroup,
-
     [Parameter(Mandatory=$false)]
     [string]
     $TestVersionPrev,
@@ -40,7 +36,7 @@ Write-Host $vmssName | Out-Default
 
  # Execute the TestImageVersion PS Script
 Write-Host "Test the image version $SkuName by executing the script in the VMSS $vmssName" | Out-Default | Write-Verbose
-$result = Invoke-AzVmssVMRunCommand -ResourceGroupName "$($ResourceGroup)" -VMScaleSetName $vmssName -InstanceId '0' -CommandId 'RunPowerShellScript' -ScriptPath "$($env:COOKBOOKSSOURCE)\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName}
+$result = Invoke-AzVmssVMRunCommand -ResourceGroupName "$env:RESOURCEGROUP" -VMScaleSetName $vmssName -InstanceId '0' -CommandId 'RunPowerShellScript' -ScriptPath "$($env:COOKBOOKSSOURCE)\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName}
 $result | Out-Default | Write-Host
 if($result.Value[1].message -eq "") {
     Write-Host "Tested the image version in the VMSS successfully."
