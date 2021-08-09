@@ -1,15 +1,7 @@
 param (
-    [Parameter(Mandatory=$false)]
-    [string]
-    $TestVersion,
-
     [Parameter(Mandatory=$true)]
     [string]
-    $Version,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $TestVersionPrev,
+    $SkuName,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -17,12 +9,6 @@ param (
 )
 
 
-Install-Module -Name Az.Compute -AllowClobber -Force
-if ("$($env:IMAGERELEASESTATE)" -eq "Production") {
-    $SkuName = "$($Version)-$($TestVersion)"
-} else {
-    $SkuName = "$($Version)-$($TestVersionPrev)"
-}
 Write-Host $SkuName | Out-Default
 
 $var=ConvertFrom-Json $deploymentOutput
