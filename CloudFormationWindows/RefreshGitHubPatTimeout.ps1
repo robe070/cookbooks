@@ -44,6 +44,7 @@ try
     if ( $StackType -eq 'All' ) {
         Foreach ($passwordEntry in $PasswordFile) {
             $passwordEntry.repo  | Write-Host
+            $userid = $passwordEntry.repo # Used for logging purposes
             TestGitHubPATAccess $passwordEntry.repo $passwordEntry.pat
         }
     } else {
