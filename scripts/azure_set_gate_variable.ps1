@@ -1,7 +1,11 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $Version
+    $Version,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $osName
    )
 
 Write-Host "version is - $Version"
@@ -20,6 +24,7 @@ if (Test-Path $path) {
     # Set Variables
     Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri"
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
+    Write-Host "##vso[task.setvariable variable=osName;isOutput=true]$osName"
     Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $uri"
 } else {
     Write-Host "Artifact path does NOT exist for $Version"

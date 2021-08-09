@@ -19,4 +19,4 @@ if ($result.Value[1].message -eq "") {
     Write-Host "Tested the image version in the VMSS successfully."
 } else {
     throw $result.Value[1].message
-
+}
