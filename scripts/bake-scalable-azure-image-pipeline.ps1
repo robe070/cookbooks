@@ -72,7 +72,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Language="ENG"
+    $Language="ENG",
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $InstallLanguagePack=$false
   )
 
 # $DebugPreference = "Continue"
@@ -119,7 +123,8 @@ while($count -ne 0 ) {
                             -AtomicBuild:$AtomicBuild `
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
-                            -Language $Language
+                            -Language $Language `
+                            InstallLanguagePack $InstallLanguagePack
 
     }
     catch{
