@@ -75,7 +75,7 @@ param (
     $Language="ENG",
 
     [Parameter(Mandatory=$false)]
-    [string]
+    [switch]
     $InstallLanguagePack=$false
   )
 
