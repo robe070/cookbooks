@@ -124,7 +124,7 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
-                            -InstallLanguagePack $InstallLanguagePack
+                            -InstallLanguagePack:$InstallLanguagePack
 
     }
     catch{
