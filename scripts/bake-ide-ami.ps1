@@ -158,6 +158,8 @@ $Pipeline | Out-Default | Write-Host
 Write-Host "AtomicBuild Switch"
 $AtomicBuild | Out-Default | Write-Host
 
+Write-Host "Language = $Language, Platform = $Platform"
+
 # Backward compatibility
 if ( $SkipSlowStuff ) {
     $UploadInstallationImageChanges = $false
@@ -205,6 +207,8 @@ if ($OnlySaveImage) {
     $Script:DialogTitle = "LANSA Scalable License Only Save Image"
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
+
+Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
 
 try
 {
@@ -792,6 +796,8 @@ $jsonObject = @"
         if ( $InstallLanguagePack ) {
             Write-Host( "$(Log-Date) Install language pack")
             Write-Host( "Each of the 3 steps requires a reboot in between. Hence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
+            Write-Host "Language = $Language, Platform = $Platform"
+
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-download-install.ps1" -ArgumentList  @($Language, $Platform)
             # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
             Start-Sleep -Seconds 10
