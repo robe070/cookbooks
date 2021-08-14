@@ -80,7 +80,7 @@ param (
   )
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "ContinueSilently"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path

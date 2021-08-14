@@ -158,8 +158,6 @@ $Pipeline | Out-Default | Write-Host
 Write-Host "AtomicBuild Switch"
 $AtomicBuild | Out-Default | Write-Host
 
-Write-Host "Language = $Language, Platform = $Platform"
-
 # Backward compatibility
 if ( $SkipSlowStuff ) {
     $UploadInstallationImageChanges = $false
@@ -238,6 +236,8 @@ try
     } else {
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
+
+    Write-Host "Language = $Language, Platform = $Platform"
 
     if ( $UploadInstallationImageChanges -and $InstallIDE) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
