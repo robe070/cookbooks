@@ -553,6 +553,46 @@ try
             Write-Warning( "$(Log-Date) $JSMpath is not installed") | Out-Default | Write-Host
         }
 
+        Write-Host( "$(Log-Date) It was noticed that occasionally on Japanese systems running on Azure that the Listener was stopped. It was postulated that it may be because it starts too soon after booting. So this code changes the Listener to perform a delayed start when booting." )
+
+        $ListenerPath = Join-Path $APPA '\connect64\lcolist.exe'
+        if ( (test-path $ListenerPath) ) {
+            $Listener = @(Get-WmiObject win32_service | ?{$_.Name -like 'LConnect Services*'} | select Name, DisplayName, State, PathName )
+            $Listener | Out-Default
+
+            $ListenerServiceName = $null
+            foreach ( $ListenerInstance in $Listener) {
+                # $ListenerInstance.PathName
+                if ( $ListenerInstance.PathName -eq $ListenerPath) {
+                    Write-Host( "$(Log-Date) Listener Service details:")
+                    $ListenerInstance | format-list | Out-Host
+                    $ListenerServiceName = $ListenerInstance.Name
+                    Write-Host( "$(Log-Date) Listener Service name is $ListenerServiceName")
+                    break
+                }
+            }
+
+            if ( -not [string]::IsNullOrWhiteSpace( $ListenerServiceName) ) {
+                # if ( $Cloud -eq "Azure" ) {
+                #     Write-Host "$(Log-Date) Set Listener Service dependencies"
+                #     Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Default | Write-Host
+                #     Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Default | Write-Host
+                #     cmd /c "sc.exe" "config" $ListenerServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Default | Write-Host
+                # }
+
+                Write-Host ("$(Log-Date) Configure Listener Service for Delayed Start")
+                cmd /c "sc.exe" "stop" "$ListenerServiceName" | Out-Default | Write-Host
+                Write-Host ( "$(Log-Date) Configuring...")
+                cmd /c "sc.exe" "config" "$ListenerServiceName" "start=" "delayed-auto" | Out-Default
+                Write-Host ( "$(Log-Date) Starting...")
+                cmd /c "sc.exe" "start" "$ListenerServiceName" | Out-Default | Write-Host
+            } else {
+                throw "Listener service is not installed correctly in $ListenerPath"
+            }
+        } else {
+            Write-Warning( "$(Log-Date) $ListenerPath is not installed") | Out-Default | Write-Host
+        }
+
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
             Write-Host ("$(Log-Date) Switch off Sentinel ")
             New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null
