@@ -1,22 +1,47 @@
 param(
     [Parameter(Mandatory=$false)]
     [String]
-    $TemplateUrl = 'http://awsmp-fulfillment-cf-templates-prod.s3.amazonaws.com/6724eab5-8d5f-425c-9270-357e7aaaa9ae/7390b444-261d-48bd-8d2c-eb4c7d8fb0d2/c13f8f1d95ab4f738f23462def221275.template',
+    $TemplateUrl = 'https://awsmp-fulfillment-cf-templates-prod.s3-external-1.amazonaws.com/6724eab5-8d5f-425c-9270-357e7aaaa9ae/a4ddec808b5a42848614dab72bf09b25.template',
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $ActualTemplate,
 
     [Parameter(Mandatory=$false)]
     [array]
     $RegionsRequested
 )
 
+Write-Host( "Requested URL to check is $TemplateUrl")
+
+$ActualUrl = $TemplateUrl
+
+Write-Host( "Default behaviour is to presume that the url provided is the Stack Type template and the Master template url must be derived from within it" )
+if ( -not $ActualTemplate ) {
+    # Ensures that Invoke-WebRequest uses TLS 1.2
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $TemplateJson = Invoke-WebRequest $TemplateUrl | ConvertFrom-Json
+
+    if ( $TemplateJson ) {
+        Write-Host("JSON loaded`n" )
+
+        $ActualUrl = $TemplateJson.Resources.MasterStackApp.Properties.TemplateURL
+        Write-Host( "Actual TemplateUrl = $ActualUrl" )
+    } else {
+        throw "Error loading $(TemplateUrl)"
+    }
+
+}
+
 if ( $RegionsRequested ) {
-    Write-Host("Check that AMIs in $TemplateUrl for Regions $RegionsRequested are valid")
+    Write-Host("Check that AMIs in $ActualUrl for Regions $RegionsRequested are valid")
 } else {
-    Write-Host("Check that all AMIs in $TemplateUrl are valid for all regions")
+    Write-Host("Check that all AMIs in $ActualUrl are valid for all regions")
 }
 
 # Ensures that Invoke-WebRequest uses TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$TemplateJson = Invoke-WebRequest $TemplateUrl | ConvertFrom-Json
+$TemplateJson = Invoke-WebRequest $ActualUrl | ConvertFrom-Json
 
 if ( $TemplateJson ) {
     Write-Host("JSON loaded`n" )
@@ -89,3 +114,5 @@ if ( $TemplateJson ) {
 } else {
     throw "Error loading $(TemplateUrl)"
 }
+
+Write-Host( "All AMIs in the template are accessible in the appropriate region")
