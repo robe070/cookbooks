@@ -56,7 +56,11 @@ try
     }
 
     if ( $Cloud -eq "Azure " -and ($Language -ne 'ENG') ) {
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $GitRepoPath_\scripts\recover-language-pack.ps1" | Out-Default
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "ConfigureLanguage" -Value "powershell -executionpolicy Bypass -file $GitRepoPath\scripts\recover-language-pack.ps1" | Out-Default
+
+        # $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy unrestricted -file $GitRepoPath\scripts\recover-language-pack.ps1"
+        # $trigger1 = New-ScheduledTaskTrigger -AtStartup
+        # Register-ScheduledTask -Action $action -Trigger $trigger1 -TaskName "Set $Language language settings" -RunLevel Highest -user System -TaskPath "\"
     }
 }
 catch
