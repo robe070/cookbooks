@@ -13,6 +13,13 @@ cd "$($env:System_DefaultWorkingDirectory)/$($GitRepoName)"
 Write-Host( "Tagging the current HEAD")
 git status
 
+Write-Host( "Remove tags from the remote repo")
+foreach ($tag in $Tags) {
+    Write-Host ("Removing Tag $tag")
+    git push origin ":refs/tags/$tag"
+    # Ignore errors
+}
+
 Write-Host("git tag")
 foreach ($tag in $Tags) {
     Write-Host ("Tag $tag")
@@ -24,8 +31,11 @@ foreach ($tag in $Tags) {
 }
 
 Write-Host("git push tags")
-git push --tags
-if (-not $?) {
-  Write-Host(" git push --tags failed");
-  exit 1
+foreach ($tag in $Tags) {
+    Write-Host ("Push $tag")
+    git push origin $tag
+    if (-not $?) {
+      Write-Host(" git push tag failed");
+      exit 1
+    }
 }
