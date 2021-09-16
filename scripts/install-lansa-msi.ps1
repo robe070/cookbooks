@@ -214,17 +214,17 @@ try
 
                 switch -regex ($DBUT) {
                     "SQLAZURE|MSSQL" {
-                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
+                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/msodbcsqlx64.msi"
                         [String[]] $Arguments = @( "/quiet", "/lv*x $( Join-Path -Path $ENV:TEMP -ChildPath "odbc.log" )", "IACCEPTMSODBCSQLLICENSETERMS=YES")
                     }
                     "MYSQL" {
-                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     "ODBCORACLE" {
-                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     default {
@@ -244,13 +244,13 @@ try
                         $DownloadODBCDriver = $false
                     }
                     "MYSQL" {
-                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     "ODBCORACLE" {
-                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     default {
