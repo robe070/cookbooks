@@ -6,5 +6,5 @@ foreach ($Region in $Regions) {
         Write-Host( "Skipping $Region")
         Continue
     }
-    Get-CFNStackSummary -Region $Region -StackStatusFilter @("CREATE_COMPLETE", "CREATE_FAILED", "DELETE_FAILED") | Where-Object {$_.ParentId -eq $null} | select-Object -Property StackName, StackStatus | Format-Table
+    Get-CFNStackSummary -Region $Region -StackStatusFilter @("CREATE_COMPLETE", "CREATE_FAILED", "DELETE_FAILED", "UPDATE_FAILED") | Where-Object {$_.ParentId -eq $null} | select-Object -Property StackName, StackStatus | Format-Table
 }
