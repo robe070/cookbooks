@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$false)]
     [String]
-    $TemplateUrl = 'https://awsmp-fulfillment-cf-templates-prod.s3-external-1.amazonaws.com/6724eab5-8d5f-425c-9270-357e7aaaa9ae/a4ddec808b5a42848614dab72bf09b25.template',
+    $TemplateUrl = 'https://awsmp-fulfillment-cf-templates-prod.s3-external-1.amazonaws.com/f462ff15-792b-412d-b5e6-84640bfb702d/b2b0ecd4-d0b0-4720-b6b4-217c9c8df176/cd15324a00ce40699a3f1742a2762bde.template',
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -65,7 +65,7 @@ if ( $TemplateJson ) {
     }
     foreach ($Region in $Regions) {
         Write-Host("$Region")
-        foreach ($win in @("win2012", "win2016", "win2019")) {
+        foreach ($win in @("win2016", "win2019","win2016jpn", "win2019jpn")) {
             $First = $true
             $AMIList = @()
             # Check whether an AMI exists in the template for this Region/Win version
@@ -98,10 +98,15 @@ if ( $TemplateJson ) {
                     }
                 } catch {}
 
+                $Spacing = "   "
+                if ( $win -eq "win2016jpn" -or ($win -eq "win2019jpn") ) {
+                    $Spacing = ""
+                }
+
                 if ( $First) {
-                    Write-Host( "$AMI $win V14.2 $Result")
+                    Write-Host( "$AMI $win $Spacing V14.2 $Result")
                 } else {
-                    Write-Host( "$AMI $win V15   $Result")
+                    Write-Host( "$AMI $win $Spacing V15   $Result")
                 }
                 $First = $false
             }
