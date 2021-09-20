@@ -135,6 +135,50 @@ try
     }
 
     if ($true) {
+        # On initial install
+
+        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
+            Write-Host ("$(Log-Date) Disable TCP Offloading" )
+            Disable-TcpOffloading
+
+            # When installing through cloudformation the current user is systemprofile.
+            # When GitDeployHub receives a webhook it may be running as administrator
+
+            Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
+            $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
+            if ( -not (test-path $KnownHostsDir)) {
+                mkdir $KnownHostsDir
+            }
+            Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
+            Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+
+            # If there is an adminstrator user, create the known hosts there too.
+            $KnownHostsDir = "c:\users\administrator"
+            if ( (test-path $KnownHostsDir)) {
+                $KnownHostsDir = "$KnownHostsDir\.ssh"
+                if ( -not (test-path $KnownHostsDir)) {
+                    mkdir $KnownHostsDir
+                }
+                Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
+                Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+            }
+
+            Write-Host ("$(Log-Date) Open Windows Firewall for HTTP ports...")
+            Write-Host ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
+            if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
+                New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
+            }
+            if ( $HTTPPortNumberHub.Length -gt 0) {
+                New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
+            }
+
+            Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
+            start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
+
+            Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
+            start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
+        }
+
         # ***********************************************************************************
         if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
             Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
@@ -288,50 +332,6 @@ try
                     }
                 }
             }
-        }
-
-        # On initial install
-
-        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
-            Write-Host ("$(Log-Date) Disable TCP Offloading" )
-            Disable-TcpOffloading
-
-            # When installing through cloudformation the current user is systemprofile.
-            # When GitDeployHub receives a webhook it may be running as administrator
-
-            Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
-            $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
-            if ( -not (test-path $KnownHostsDir)) {
-                mkdir $KnownHostsDir
-            }
-            Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
-            Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
-
-            # If there is an adminstrator user, create the known hosts there too.
-            $KnownHostsDir = "c:\users\administrator"
-            if ( (test-path $KnownHostsDir)) {
-                $KnownHostsDir = "$KnownHostsDir\.ssh"
-                if ( -not (test-path $KnownHostsDir)) {
-                    mkdir $KnownHostsDir
-                }
-                Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
-                Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
-            }
-
-            Write-Host ("$(Log-Date) Open Windows Firewall for HTTP ports...")
-            Write-Host ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
-            if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
-                New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
-            }
-            if ( $HTTPPortNumberHub.Length -gt 0) {
-                New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
-            }
-
-            Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
-            start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
-
-            Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
-            start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
         }
 
         if ($Cloud -ne "Docker") {
