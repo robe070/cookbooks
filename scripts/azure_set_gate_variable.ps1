@@ -25,6 +25,7 @@ if (Test-Path $path) {
     Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri"
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
     Write-Host "##vso[task.setvariable variable=osName;isOutput=true]$osName"
+    Write-Host "##vso[task.setvariable variable=Version;isOutput=true]$Version"
     Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $uri"
 } else {
     Write-Host "Artifact path does NOT exist for $Version"
