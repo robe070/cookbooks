@@ -14,7 +14,7 @@ $path = "$($env:System_DefaultWorkingDirectory)/_Lansa Images - Cookbooks/$Versi
 if (Test-Path $path) {
     # Remove characters from Version so reduce length to less than 9 and which are not compatible with resource ids in the template.
     # In particular, the VM base name in a Scale Set and
-    $VersionClean = -replace '[-]',''
+    $VersionClean = $Version -replace '[-]',''
 
     $rawUri = Get-Content -Path $path -Raw
     Write-Host "ImageUrl is $rawUri"
