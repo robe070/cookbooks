@@ -12,6 +12,10 @@ Write-Host "version is - $Version"
 # Set the Gate variable if the file exists
 $path = "$($env:System_DefaultWorkingDirectory)/_Lansa Images - Cookbooks/$Version/$Version.txt"
 if (Test-Path $path) {
+    # Remove characters from Version so reduce length to less than 9 and which are not compatible with resource ids in the template.
+    # In particular, the VM base name in a Scale Set and
+    $VersionClean = -replace '[-]',''
+
     $rawUri = Get-Content -Path $path -Raw
     Write-Host "ImageUrl is $rawUri"
     $rawUri -match '[\w-]+\.vhd'
@@ -26,6 +30,7 @@ if (Test-Path $path) {
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
     Write-Host "##vso[task.setvariable variable=osName;isOutput=true]$osName"
     Write-Host "##vso[task.setvariable variable=Version;isOutput=true]$Version"
+    Write-Host "##vso[task.setvariable variable=VersionClean;isOutput=true]$VersionClean"
     Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $uri"
 } else {
     Write-Host "Artifact path does NOT exist for $Version"
