@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$false)]
     [String]
-    $TemplateUrl = 'https://awsmp-fulfillment-cf-templates-prod.s3-external-1.amazonaws.com/f462ff15-792b-412d-b5e6-84640bfb702d/b2b0ecd4-d0b0-4720-b6b4-217c9c8df176/cd15324a00ce40699a3f1742a2762bde.template',
+    $TemplateUrl = 'https://awsmp-fulfillment-cf-templates-prod.s3-external-1.amazonaws.com/f462ff15-792b-412d-b5e6-84640bfb702d/a8668dcd-c1e8-4f70-94ff-205965c6e514/a935c13a5b70498889550e501de68671.template',
 
     [Parameter(Mandatory=$false)]
     [switch]
