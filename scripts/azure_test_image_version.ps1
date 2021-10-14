@@ -27,7 +27,7 @@ $vmssName = $var.scalesetName.value
 Write-Host $vmssName
 
 Write-Host "Wait 10 minutes for the Azure Agent to potentially be updated"
-#Start-Sleep 600
+Start-Sleep 600
 
  # Execute the TestImageVersion PS Script
 Write-Host "Test the image version $SkuName by executing the script in the VMSS $vmssName"
