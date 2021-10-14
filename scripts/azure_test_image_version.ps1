@@ -26,8 +26,8 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/robe070/cookbooks/$($e
 $vmssName = $var.scalesetName.value
 Write-Host $vmssName
 
-Write-Host "Wait 5 minutes for the Azure Agent to potentially be updated"
-Start-Sleep 300
+Write-Host "Wait 20 minutes for the Azure Agent to potentially be updated"
+Start-Sleep 1200
 
  # Execute the TestImageVersion PS Script
 Write-Host "Test the image version $SkuName by executing the script in the VMSS $vmssName"
