@@ -81,14 +81,17 @@ try
         Set-Service $ServiceName -startuptype "manual" | Out-Default | Write-Host
     }
 
-    #####################################################################################
-    Write-Host "$(Log-Date) Installing License"
-    #####################################################################################
-    # Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
-    CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
-    CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+    if ( -Not $script:InstallCloudAccountLicense ) {
 
-    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+        #####################################################################################
+        Write-Host "$(Log-Date) Installing License"
+        #####################################################################################
+        # Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
+        CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
+        CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+
+        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    }
 
     #####################################################################################
     Write-Host ("$(Log-Date) Shortcuts")

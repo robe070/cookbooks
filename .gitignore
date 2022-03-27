@@ -59,7 +59,6 @@ _sgbak
 ~*
 x_usertrace*
 x_trace*
-x_lic*
 liil/liil.h
 lp/src/axambien.h
 lp/src/LpComComponentServer.h

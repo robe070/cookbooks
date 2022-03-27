@@ -144,7 +144,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Title
+    $Title,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $InstallCloudAccountLicense
     )
 
 #Requires -RunAsAdministrator
@@ -207,6 +211,8 @@ if ( $Title ) {
     $Script:DialogTitle = "LANSA Scalable License Only Save Image"
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
+
+$script:InstallCloudAccountLicense = $InstallCloudAccountLicense
 
 Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
 
@@ -544,17 +550,19 @@ $jsonObject = @"
             $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
         }
 
-        # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
-        $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
         $vmSecretUrls = @();
-        foreach ($vmCertificateName in $vmSecrets) {
-            $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
-            if ( $secret ) {
-                # Write to a file
-                Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
-                $vmSecretUrls += $secret.id;
-            } else {
-                throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
+        if (-Not $InstallCloudAccountLicense) {
+            # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
+            $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
+            foreach ($vmCertificateName in $vmSecrets) {
+                $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
+                if ( $secret ) {
+                    # Write to a file
+                    Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
+                    $vmSecretUrls += $secret.id;
+                } else {
+                    throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
+                }
             }
         }
 
@@ -854,35 +862,35 @@ $jsonObject = @"
         ReConnect-Session
 
         if ( $InstallIDE -eq $true ) {
+            if ( -Not $InstallCloudAccountLicense ) {
+                if ($Cloud -eq 'AWS') {
+                    #####################################################################################
+                    Write-Host "$(Log-Date) Installing License"
+                    #####################################################################################
 
-            if ($Cloud -eq 'AWS') {
-                #####################################################################################
-                Write-Host "$(Log-Date) Installing License"
-                #####################################################################################
+                    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+                    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+                }
+                Execute-RemoteBlock $Script:session {
+                    CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+                    CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+                    # Errors are thrown out of CreateLicense so no need to catch a throw here.
+                    # Let the local script catch it
+                }
 
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
-            }
-            Execute-RemoteBlock $Script:session {
-                CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-                CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
-                # Errors are thrown out of CreateLicense so no need to catch a throw here.
-                # Let the local script catch it
-            }
-
-            Execute-RemoteBlock $Script:session {
-                try {
-                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                } catch {
-                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                    Write-RedOutput $_ | Out-Default | Write-Host
-                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                    cmd /c exit 1
-                    throw
+                Execute-RemoteBlock $Script:session {
+                    try {
+                        Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                    } catch {
+                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                        Write-RedOutput $_ | Out-Default | Write-Host
+                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                        cmd /c exit 1
+                        throw
+                    }
                 }
             }
-
             Write-Host "$(Log-Date) Installing IDE"
             PlaySound
 
@@ -911,23 +919,33 @@ $jsonObject = @"
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
 
-            Write-Host "Test that keys are configured"
+            if ( -Not $InstallCloudAccountLicense ) {
 
-            Execute-RemoteBlock $Script:session {
-                try {
-                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                } catch {
-                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                    Write-RedOutput $_ | Out-Default | Write-Host
-                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                    cmd /c exit 1
-                    throw
+                Write-Host "Test that keys are configured"
+
+                Execute-RemoteBlock $Script:session {
+                    try {
+                        Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                    } catch {
+                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                        Write-RedOutput $_ | Out-Default | Write-Host
+                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                        cmd /c exit 1
+                        throw
+                    }
                 }
             }
         }
 
         # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
+        ReConnect-Session
+        if ( $InstallCloudAccountLicense ) {
+            Write-Host "$(Log-Date) Installing Cloud Account Id License"
+
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @()
+        }
+
         ReConnect-Session
 
         Write-Host "$(Log-Date) Completing installation steps, except for sysprep"

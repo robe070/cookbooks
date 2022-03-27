@@ -51,4 +51,5 @@ Bake-IdeMsi -VersionText 'w19d-15-0-ID' `
             -KeyPairName 'RobG_id_rsa' `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
             -GitUserName 'robe070' `
-            -Title 'LANSA Cloud Account Id License'
+            -Title 'LANSA Cloud Account Id License' `
+            -InstallCloudAccountLicense
