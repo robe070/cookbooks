@@ -140,7 +140,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [String[]]
-    $ExternalIPAddresses
+    $ExternalIPAddresses,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Title
     )
 
 #Requires -RunAsAdministrator
@@ -187,21 +191,19 @@ else
 
 Set-StrictMode -Version Latest
 
-if ($InstallIDE -eq $true) {
+if ( $Title ) {
+    $Script:DialogTitle = $Title
+    $script:instancename = "$Title $VersionText installed on $(Log-Date)"
+} elseif ($InstallIDE -eq $true) {
     $Script:DialogTitle = "LANSA IDE"
     $script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
-}
-if ($InstallScalable -eq $true) {
+} elseif ($InstallScalable -eq $true) {
     $Script:DialogTitle = "LANSA Scalable License "
     $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
-}
-
-if ($InstallLanguagePack -or ($Language -ne 'ENG') ) {
+} elseif ($InstallLanguagePack -or ($Language -ne 'ENG') ) {
     $Script:DialogTitle = "LANSA Scalable License $Language"
     $script:instancename = "LANSA Scalable License $Language $VersionText installed on $(Log-Date)"
-}
-
-if ($OnlySaveImage) {
+} elseif ($OnlySaveImage) {
     $Script:DialogTitle = "LANSA Scalable License Only Save Image"
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
@@ -345,7 +347,7 @@ try
             $AmazonAMIName = $AzureIMage.SKU
             $AzImageVersion = $AzureImage.Version
         } elseif ($AzureImageUri) {
-            Write-Host( "$(Log-Date) Using Image Uri")
+            Write-Host( "$(Log-Date) Using Image Uri $AzureImageUri")
         } else {
             Write-Host( "$(Log-Date) Using Microsoft MP image")
             $Publisher = "MicrosoftWindowsServer"
@@ -405,12 +407,20 @@ try
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Host "$(Log-Date) Delete VM if it already exists"
 
+            $VerbosePreference = "SilentlyContinue"
+
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
 
             # Add code to remove the .VHD Blob if exists from the Storage Container
             $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
+
+            $VerbosePreference = "Continue"
+
             Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $StorageAccountResourceGroup/$StorageAccountName" | Out-Default
+
+            $VerbosePreference = "SilentlyContinue"
+
             if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
                 Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
                 $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host
@@ -418,6 +428,8 @@ try
             } else {
                 Write-Host "The Blob $Script:vmname.vhd doesn't exists" | Out-Default
             }
+            $VerbosePreference = "Continue"
+
         }
 
         Write-Host "$(Log-Date) Create VM"
@@ -468,6 +480,7 @@ try
 
             $externalipcidr = "$externalip/32"
             Write-Host "Adding External IP $externalipcidr"
+
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
             -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
@@ -494,7 +507,13 @@ try
 
         $KeyVault = "bakingVaultDP"
         $certificateName = "bakingWinRMCertificate"
+
+        $VerbosePreference = "SilentlyContinue"
+
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
+
+        $VerbosePreference = "Continue"
+
         if ( $secret ) {
             $SecretURL = $secret.id
         } else {
