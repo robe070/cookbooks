@@ -44,7 +44,7 @@ Bake-IdeMsi -VersionText 'w19d-15-0-ID' `
             -InstallScalable $false `
             -Win2012 $false `
             -RunWindowsUpdates $false `
-            -ManualWinUpd $true `
+            -ManualWinUpd $false `
             -SkipSlowStuff $false `
             -OnlySaveImage $false `
             -CreateVM $true `

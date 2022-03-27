@@ -17,7 +17,7 @@ param (
 
 try
 {
-    Write-Host( "$(Log-Date) Remove the Scalable license registry entrys")
+    Write-Host( "Remove the Scalable license registry entrys")
 
     # Removing these keys means that when installing the LANSA msi they won't be found and the scalable license will not be activated.
 
@@ -34,12 +34,12 @@ try
     Set-ItemProperty -Path HKLM:\Software\lansa\Common -Name 'LicenseDir' -Value $LicenseDir | Out-Default | Write-Host
     Copy-Item -Path "c:\lansa\scripts\x_lic*.lic" -Destination $LicenseDir
 
-    Write-Host( "$(Log-Date) Successfuly setup the Cloud Account License")
+    Write-Host( "Successfuly setup the Cloud Account License")
 }
 catch
 {
     $Global:LANSAEXITCODE = $LASTEXITCODE
-    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Default
-    Write-RedOutput "install-cloud-account-id-license.ps1 is the <No file> in the stack dump below" | Out-Default
+    Write-Host "Remote-Script LASTEXITCODE = $LASTEXITCODE"
+    Write-Host "install-cloud-account-id-license.ps1 is the <No file> in the stack dump below"
     throw
 }
