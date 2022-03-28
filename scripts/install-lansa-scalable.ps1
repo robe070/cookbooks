@@ -21,7 +21,12 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $TempPath_
+    $TempPath_,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $CloudAccountLicense
+
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -81,7 +86,7 @@ try
         Set-Service $ServiceName -startuptype "manual" | Out-Default | Write-Host
     }
 
-    if ( -Not $script:InstallCloudAccountLicense ) {
+    if ( -Not $CloudAccountLicense ) {
 
         #####################################################################################
         Write-Host "$(Log-Date) Installing License"

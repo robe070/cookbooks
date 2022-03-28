@@ -212,8 +212,6 @@ if ( $Title ) {
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
 
-$script:CloudAccountLicense = $CloudAccountLicense
-
 Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
 
 try
@@ -632,8 +630,6 @@ $jsonObject = @"
                 Write-Host( "Target VM WinRM settings:")
                 winrm get winrm/config/winrs  | Out-Default | Write-Host
 
-                $script:CloudAccountLicense = $using:CloudAccountLicense
-
                 Write-Host ("Save S3 DVD image url and other global variables in registry")
                 $lansaKey = 'HKLM:\Software\LANSA\'
                 if (!(Test-Path -Path $lansaKey)) {
@@ -919,7 +915,7 @@ $jsonObject = @"
         if ( $InstallScalable -eq $true ) {
 
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $CloudAccountLicense)
 
             if ( -Not $CloudAccountLicense ) {
 
@@ -945,7 +941,7 @@ $jsonObject = @"
         if ( $CloudAccountLicense ) {
             Write-Host "$(Log-Date) Installing Cloud Account Id License"
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @($Script:GitRepoPath)
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @($Script:GitRepoPath, $CloudAccountLicense)
         }
 
         ReConnect-Session
