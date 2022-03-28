@@ -13,6 +13,9 @@ These tasks must all occur after Windows Updates. If they can be applied earlier
 #>
 
 param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $GitRepoPath
     )
 
 try
@@ -32,7 +35,9 @@ try
     New-Item $LicenseDir -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
     New-Item -Path HKLM:\Software\lansa -Name Common –Force
     Set-ItemProperty -Path HKLM:\Software\lansa\Common -Name 'LicenseDir' -Value $LicenseDir | Out-Default | Write-Host
-    Copy-Item -Path "c:\lansa\scripts\x_lic*.lic" -Destination $LicenseDir
+    $LicenseSource = "$GitRepoPath\scripts\${$script:CloudAccountLicense}"
+    Write-Host( "Copying licenses from $LicenseSource...")
+    Copy-Item -Path $LicenseSource -Destination $LicenseDir -Verbose | Write-Host
 
     Write-Host( "Successfuly setup the Cloud Account License")
 }

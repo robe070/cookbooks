@@ -11,7 +11,7 @@ Bake a LANSA image with Cloud Account Id license and WITHOUT Scalable License fo
 #>
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -51,5 +51,5 @@ Bake-IdeMsi -VersionText 'w19d-15-0-ID' `
             -KeyPairName 'RobG_id_rsa' `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
             -GitUserName 'robe070' `
-            -Title 'LANSA Cloud Account Id License' `
-            -InstallCloudAccountLicense
+            -Title 'LANSA Cloud Account Id Old License' `
+            -CloudAccountLicense 'x_lic_7754*.5.lic'

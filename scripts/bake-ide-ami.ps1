@@ -147,8 +147,8 @@ param (
     $Title,
 
     [Parameter(Mandatory=$false)]
-    [switch]
-    $InstallCloudAccountLicense
+    [string]
+    $CloudAccountLicense
     )
 
 #Requires -RunAsAdministrator
@@ -212,7 +212,7 @@ if ( $Title ) {
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
 
-$script:InstallCloudAccountLicense = $InstallCloudAccountLicense
+$script:CloudAccountLicense = $CloudAccountLicense
 
 Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
 
@@ -551,7 +551,7 @@ $jsonObject = @"
         }
 
         $vmSecretUrls = @();
-        if (-Not $InstallCloudAccountLicense) {
+        if (-Not $CloudAccountLicense) {
             # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
             $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
             foreach ($vmCertificateName in $vmSecrets) {
@@ -631,6 +631,8 @@ $jsonObject = @"
             try {
                 Write-Host( "Target VM WinRM settings:")
                 winrm get winrm/config/winrs  | Out-Default | Write-Host
+
+                $script:CloudAccountLicense = $using:CloudAccountLicense
 
                 Write-Host ("Save S3 DVD image url and other global variables in registry")
                 $lansaKey = 'HKLM:\Software\LANSA\'
@@ -862,7 +864,7 @@ $jsonObject = @"
         ReConnect-Session
 
         if ( $InstallIDE -eq $true ) {
-            if ( -Not $InstallCloudAccountLicense ) {
+            if ( -Not $CloudAccountLicense ) {
                 if ($Cloud -eq 'AWS') {
                     #####################################################################################
                     Write-Host "$(Log-Date) Installing License"
@@ -919,7 +921,7 @@ $jsonObject = @"
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
 
-            if ( -Not $InstallCloudAccountLicense ) {
+            if ( -Not $CloudAccountLicense ) {
 
                 Write-Host "Test that keys are configured"
 
@@ -940,10 +942,10 @@ $jsonObject = @"
 
         # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
         ReConnect-Session
-        if ( $InstallCloudAccountLicense ) {
+        if ( $CloudAccountLicense ) {
             Write-Host "$(Log-Date) Installing Cloud Account Id License"
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @()
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @($Script:GitRepoPath)
         }
 
         ReConnect-Session
