@@ -76,7 +76,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $InstallLanguagePack=$false
+    $InstallLanguagePack=$false,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $CloudAccountLicense
   )
 
 # $DebugPreference = "Continue"
@@ -124,7 +128,8 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
-                            -InstallLanguagePack:$InstallLanguagePack
+                            -InstallLanguagePack:$InstallLanguagePack `
+                            -CloudAccountLicense $CloudAccountLicense
 
     }
     catch{

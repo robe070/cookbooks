@@ -4,7 +4,7 @@ param (
     [string]
     $versionText,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $version,
 
