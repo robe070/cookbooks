@@ -84,6 +84,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
+    $Title,
+
+    [Parameter(Mandatory=$false)]
+    [string]
     $CloudAccountLicense
   )
 
@@ -133,6 +137,7 @@ while($count -ne 0 ) {
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
                             -InstallLanguagePack:$InstallLanguagePack `
+                            -Title $Title `
                             -CloudAccountLicense $CloudAccountLicense
 
     }
