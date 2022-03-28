@@ -79,6 +79,10 @@ param (
     $InstallLanguagePack=$false,
 
     [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallScalable=$false,
+
+    [Parameter(Mandatory=$false)]
     [string]
     $CloudAccountLicense
   )
