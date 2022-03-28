@@ -80,7 +80,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $InstallScalable=$false,
+    $InstallScalable=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallBaseSoftware=$true,
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -119,10 +123,10 @@ while($count -ne 0 ) {
                             -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
-                            -InstallBaseSoftware $true `
+                            -InstallBaseSoftware $InstallBaseSoftware `
+                            -InstallScalable $InstallScalable `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
-                            -InstallScalable $InstallScalable `
                             -Win2012 $Win2012 `
                             -ManualWinUpd $false `
                             -SkipSlowStuff $false `
