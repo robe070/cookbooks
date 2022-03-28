@@ -118,7 +118,7 @@ while($count -ne 0 ) {
                             -InstallBaseSoftware $true `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
-                            -InstallScalable $true `
+                            -InstallScalable $InstallScalable `
                             -Win2012 $Win2012 `
                             -ManualWinUpd $false `
                             -SkipSlowStuff $false `
