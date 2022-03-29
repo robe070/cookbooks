@@ -14,7 +14,7 @@ param(
 
 # Log-Date can't be used yet as Framework has not been loaded
 
-Write-Output "Initialising environment - presumed not running through RemotePS"
+Write-Host "Initialising environment - presumed not running through RemotePS"
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -22,13 +22,13 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . "$script:IncludeDir\Init-Baking-Includes.ps1"
 
 # Put first output on a new line in cfn_init log file
-Write-Output ("`r`n")
+Write-Host ("`r`n")
 
-Write-Debug ("webuser = $webuser")
+Write-Host ("webuser = $webuser")
 
 try
 {
-	Write-output ("Remap licenses to new instance Guid and set permissions so that $webuser may access them" )
+	Write-Host ("Remap licenses to new instance Guid and set permissions so that $webuser may access them" )
 
     $LicenseCount = 0
 
@@ -50,23 +50,26 @@ try
         Write-Host( "No scalable licenses found. Look for Cloud Account Id licenses..." )
         $LicenseDir = (Get-ItemProperty -Path HKLM:\Software\lansa\Common -Name 'LicenseDir' -ErrorAction Continue).LicenseDir
         if ( -not $LicenseDir ) {
-            throw "The LicenseDir registry entry does not exist"
+            Write-Host "The LicenseDir registry entry does not exist"
+            throw
         }
 
         if ( Test-Path $LicenseDir ) {
             if ( Test-Path "$LicenseDir\x_lic*.5.lic" ) {
                 Write-Host "List the Cloud Account Id licenses..."
-                Get-ChildItem "$LicenseDir\x_lic*.5.lic"
+                Get-ChildItem "$LicenseDir\x_lic*.5.lic" | Out-Default | Write-Host
             } else {
-                throw "There are no cloud account id licenses"
+                Write-Host "There are no cloud account id licenses"
+                throw
             }
         } else {
-            throw "The Cloud Account Id license directory $LicenseDir does not exist"
+            Write-Host "The Cloud Account Id license directory $LicenseDir does not exist"
+            throw
         }
         Write-Host( "Cloud Account Id license(s) exist")
     }
 
-    Write-Output ("License activation completed successfully")
+    Write-Host ("License activation completed successfully")
 }
 catch
 {

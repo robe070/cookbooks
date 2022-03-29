@@ -1,6 +1,6 @@
 # Terminating the Instance
 param (
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $versionText,
 
