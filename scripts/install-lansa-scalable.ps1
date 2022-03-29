@@ -134,7 +134,9 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $GitRepoPath_\scripts\show-start-here.ps1" | Out-Default | Write-Host
 
-    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    if ( -Not $CloudAccountLicense ) {
+        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    }
 
     Add-TrustedSite "lansa.com" | Out-Default | Write-Host
     Add-TrustedSite "google-analytics.com" | Out-Default | Write-Host
