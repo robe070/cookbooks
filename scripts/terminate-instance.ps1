@@ -27,10 +27,10 @@ Write-Host "Deleting the security group"
 # Ensure EC2 instance has stopped
 Start-Sleep -Seconds 180
 if ( $DeleteAMI -eq $true ) {
-    Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)$($env:BUILD_BUILDNUMBER)" -Force -ErrorAction Continue
+    try{Remove-EC2SecurityGroup -GroupName "$($version)$($versionText)$($env:BUILD_BUILDNUMBER)" -Force -ErrorAction Continue} catch{}
 }
-Remove-EC2SecurityGroup -GroupName "$($version)-$($versionText)" -Force -ErrorAction Continue
-Remove-EC2SecurityGroup -GroupName "$($version)" -Force -ErrorAction Continue
+try{Remove-EC2SecurityGroup -GroupName "$($version)-$($versionText)" -Force -ErrorAction Continue} catch{}
+try{Remove-EC2SecurityGroup -GroupName "$($version)" -Force -ErrorAction Continue} catch {}
 
 if ( $DeleteAMI -eq $true ) {
   #Deregister ami and delete snapshot Id
