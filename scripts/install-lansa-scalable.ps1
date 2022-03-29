@@ -144,7 +144,9 @@ try
     Add-TrustedSite "*.lansa.myabsorb.com" | Out-Default | Write-Host
     Add-TrustedSite "*.cloudfront.com" | Out-Default | Write-Host
 
-    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    if ( -Not $CloudAccountLicense ) {
+        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+    }
 
     Write-Host ("$(Log-Date) Installation completed successfully")
 }
