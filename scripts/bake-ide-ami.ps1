@@ -308,7 +308,7 @@ try
                 throw "There are $TaggedInstances.Count instances - either 0 or more than 1. Cannot 'Only Save Image'"
             }
         } else {
-            Write-Host( "$(Log-Date) Removing existing instance that would be using the security group")
+            Write-Host( "$(Log-Date) Removing existing instance that would be using the security group, search using tag:BakeVersion;Value=$VersionText")
             $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
             foreach ($TaggedInstance in $TaggedInstances) {
                 $TaggedInstance.ResourceId | Out-Default | Write-Host
