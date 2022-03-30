@@ -876,16 +876,18 @@ $jsonObject = @"
                     # Let the local script catch it
                 }
 
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                        cmd /c exit 1
-                        throw
+                if ( -not $CloudAccountLicense ) {
+                    Execute-RemoteBlock $Script:session {
+                        try {
+                            Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                            Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                        } catch {
+                            Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                            Write-RedOutput $_ | Out-Default | Write-Host
+                            Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                            cmd /c exit 1
+                            throw
+                        }
                     }
                 }
             }
@@ -957,7 +959,7 @@ $jsonObject = @"
             }
         }
 
-        if ( $InstallScalable -eq $true ) {
+        if ( $InstallScalable -eq $true -and (-not $CloudAccountLicense ) ) {
             Write-Host "Test that license keys are still configured"
             Execute-RemoteBlock $Script:session {
                 try {
@@ -973,7 +975,7 @@ $jsonObject = @"
             }
         }
 
-        if ( $InstallIDE -eq $true ) {
+        if ( $InstallIDE -eq $true -and (-not $CloudAccountLicense ) ) {
             Write-Host "Test that license keys are still configured"
             Execute-RemoteBlock $Script:session {
                 try {
