@@ -333,12 +333,12 @@ try
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         if ( -not $OnlySaveImage) {
-            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
+            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
         }
 
         $Script:vmname = "Bake $Script:instancename"
 
-        New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
+        # New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
 
 
     } elseif ($Cloud -eq 'Azure' ) {
