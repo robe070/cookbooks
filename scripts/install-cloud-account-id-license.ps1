@@ -29,14 +29,19 @@ try
 
     [string[][]]$Keys = @(@("LANSA Scalable License", "ScalableLicensePrivateKey"), @("LANSA Integrator License", "IntegratorLicensePrivateKey"), @("LANSA Development License", "DevelopmentLicensePrivateKey") )
     foreach ( $LicensePrivateKey in $Keys ) {
-        $LicensePrivateKey[0]
-        $LicensePrivateKey[1]
+        $LicensePrivateKey[0] | Write-Host
+        $LicensePrivateKey[1] | Write-Host
         Remove-ItemProperty -Path HKLM:\Software\LANSA  -Name $LicensePrivateKey[1] -Force -ErrorAction SilentlyContinue | Out-Null
     }
 
     $LicenseDir =  "${env:ProgramFiles(x86)}\Common Files\LANSA"
-    New-Item $LicenseDir -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-    New-Item -Path HKLM:\Software\lansa -Name Common –Force
+    Write-Host( "Creating directory $LicenseDir")
+    New-Item $LicenseDir -ItemType Directory -ErrorAction SilentlyContinue  | Out-Default | Write-Host
+
+    Write-Host( "Creating registry entry HKLM:\Software\lansa\Common")
+    New-Item -Path HKLM:\Software\lansa -Name Common –Force | Out-Default | Write-Host
+
+    Write-Host( "Creating registry value LicenseDir")
     Set-ItemProperty -Path HKLM:\Software\lansa\Common -Name 'LicenseDir' -Value $LicenseDir | Out-Default | Write-Host
     $LicenseSource = "$GitRepoPath\scripts\$CloudAccountLicense"
     Write-Host( "Copying licenses from $LicenseSource...")
