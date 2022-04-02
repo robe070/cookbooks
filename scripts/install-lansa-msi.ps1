@@ -50,6 +50,24 @@ param(
 [Boolean]$DisableSQLServer = $true
 )
 
+function Test-RegistryValue {
+    param (
+        [parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]$Path,
+
+        [parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]$Value
+    )
+
+    try {
+        Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+
+}
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -699,6 +717,24 @@ try
         default {
             $ErrorMessage = "Unknown error code"
         }
+    }
+
+    Write-Host( "The MSI Install overwrites the Common Files directory registry entry.")
+    Write-Host( "So ensure it is still set up correctly so that Cloud Account Id licenses will work")
+    $RegKey = "HKLM:\Software\lansa\Common"
+    $RegProperty = "LicenseDir"
+    if ( -not (Test-RegistryValue $RegKey $RegProperty)) {
+        if ( -not (Test-Path $RegKey) ) {
+            Write-Host( "Creating registry entry $RegKey")
+            New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
+        } else {
+            Write-Host( "$RegKey already exists")
+        }
+
+        $RegProperty = "LicenseDir"
+        $LicenseDir =  "${env:ProgramFiles(x86)}\Common Files\LANSA"
+        Write-Host( "Creating registry value $RegProperty")
+        Set-ItemProperty -Path $RegKey -Name $RegProperty -Value $LicenseDir | Out-Default | Write-Host
     }
 
     Write-Host ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")

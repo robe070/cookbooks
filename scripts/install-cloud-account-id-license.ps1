@@ -35,14 +35,25 @@ try
     }
 
     $LicenseDir =  "${env:ProgramFiles(x86)}\Common Files\LANSA"
-    Write-Host( "Creating directory $LicenseDir")
-    New-Item $LicenseDir -ItemType Directory -ErrorAction SilentlyContinue  | Out-Default | Write-Host
+    if ( -not (Test-Path $LicenseDir)) {
+        Write-Host( "Creating directory $LicenseDir")
+        New-Item $LicenseDir -ItemType Directory -ErrorAction SilentlyContinue  | Out-Default | Write-Host
+    } else {
+        Write-Host( "$LicenseDir already exists")
+    }
 
-    Write-Host( "Creating registry entry HKLM:\Software\lansa\Common")
-    New-Item -Path HKLM:\Software\lansa -Name Common –Force | Out-Default | Write-Host
+    $RegKey = "HKLM:\Software\lansa\Common"
+    if ( -not (Test-Path $RegKey) ) {
+        Write-Host( "Creating registry entry $RegKey")
+        New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
+    } else {
+        Write-Host( "$RegKey already exists")
+    }
 
-    Write-Host( "Creating registry value LicenseDir")
-    Set-ItemProperty -Path HKLM:\Software\lansa\Common -Name 'LicenseDir' -Value $LicenseDir | Out-Default | Write-Host
+    $RegProperty = "LicenseDir"
+    Write-Host( "Creating registry value $RegProperty")
+    Set-ItemProperty -Path $RegKey -Name $RegProperty -Value $LicenseDir | Out-Default | Write-Host
+
     $LicenseSource = "$GitRepoPath\scripts\$CloudAccountLicense"
     Write-Host( "Copying licenses from $LicenseSource...")
     Copy-Item -Path $LicenseSource -Destination $LicenseDir -Verbose | Write-Host
