@@ -613,8 +613,17 @@ try
 
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
             Write-Host ("$(Log-Date) Switch off Sentinel ")
-            New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null
-            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null
+
+            $RegKey = "HKLM:\Software\lansa\Common"
+            $RegProperty = "UseSentinelLicence"
+            if ( -not (Test-Path $RegKey) ) {
+                Write-Host( "Creating registry entry $RegKey")
+                New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
+            } else {
+                Write-Host( "$RegKey already exists")
+            }
+
+            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name $RegProperty -Value 0 -PropertyType DWORD -Force | Out-Null
 
             [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Out-Default | Write-Host
         }
@@ -651,7 +660,7 @@ try
             iis-reset | Out-Default | Write-Host
         }
 
-        #####################################################################################
+         #####################################################################################
         # Test if post install x_run processing had any fatal errors
         # Performed at the end as errors may occur due to the loadbalancer probe executing
         # before LANSA has completed installing.
@@ -717,24 +726,6 @@ try
         default {
             $ErrorMessage = "Unknown error code"
         }
-    }
-
-    Write-Host( "The MSI Install overwrites the Common Files directory registry entry.")
-    Write-Host( "So ensure it is still set up correctly so that Cloud Account Id licenses will work")
-    $RegKey = "HKLM:\Software\lansa\Common"
-    $RegProperty = "LicenseDir"
-    if ( -not (Test-RegistryValue $RegKey $RegProperty)) {
-        if ( -not (Test-Path $RegKey) ) {
-            Write-Host( "Creating registry entry $RegKey")
-            New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
-        } else {
-            Write-Host( "$RegKey already exists")
-        }
-
-        $RegProperty = "LicenseDir"
-        $LicenseDir =  "${env:ProgramFiles(x86)}\Common Files\LANSA"
-        Write-Host( "Creating registry value $RegProperty")
-        Set-ItemProperty -Path $RegKey -Name $RegProperty -Value $LicenseDir | Out-Default | Write-Host
     }
 
     Write-Host ("$(Log-Date) State Before returning: ExitCode=$($ExitCode) : $ErrorMessage")
