@@ -23,6 +23,9 @@ if (Test-Path $path) {
     }
     Write-Host "Clean version = $VersionClean"
 
+    $stackname = "$env:RESOURCEGROUPNAME-$env:SYSTEM_STAGEDISPLAYNAME-$env:SYSTEM_JOBDISPLAYNAME"
+    Write-Host "StackName is $stackname"
+
     $rawUri = Get-Content -Path $path -Raw
     Write-Host "ImageUrl is $rawUri"
     $rawUri -match '[\w-]+\.vhd'
@@ -33,6 +36,7 @@ if (Test-Path $path) {
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku"
     $uri = "/subscriptions/$env:SUBSCRIPTIONID/resourceGroups/$env:RESOURCEGROUPNAME/providers/Microsoft.Compute/images/$($Matches[0])image"
     # Set Variables
+    Write-Host "##vso[task.setvariable variable=StackName;isOutput=true]$stackname"
     Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri"
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
     Write-Host "##vso[task.setvariable variable=osName;isOutput=true]$osName"
