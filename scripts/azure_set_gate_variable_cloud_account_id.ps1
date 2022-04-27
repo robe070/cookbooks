@@ -13,12 +13,12 @@ Write-Host "version is - $Version"
 $path = "$($env:System_DefaultWorkingDirectory)/_Build Cloud Account Id Artefacts/$Version/$Version.txt"
 if (Test-Path $path) {
     # Remove characters from Version to reduce length to less than 9 and which are not compatible with resource ids in the template.
-    # In particular, the VM base name in a Scale Set and
-    # $VersionClean = $Version -replace '[-]',''
+    # In particular, the VM base name in a Scale Set
+    $VersionClean = $Version -replace '[-]',''
+    # $VersionClean = ""
     # Randomize the Version because its being used as an ID that is causing duplicates if just use the version number.
-    $VersionClean = ""
     1..7 | ForEach {
-        $code = Get-Random -Minimum 65 -Maximum 90 # Upper case letters only
+        $code = Get-Random -Minimum 97 -Maximum 122 # Lower case letters only
         $VersionClean = $VersionClean + [char]$code
     }
     Write-Host "Clean version = $VersionClean"
