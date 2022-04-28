@@ -29,10 +29,13 @@ if (Test-Path $path) {
     $rawUri = Get-Content -Path $path -Raw
     Write-Host "ImageUrl is $rawUri"
     $rawUri -match '[\w-]+\.vhd'
-    Write-Host "ImageName value is $Matches[0]"
+    $ImageName = $Matches[0]
+    Write-Host "ImageName value is $ImageName"
+
     $Matches[0] -match '[^.]+'
     $sku = $Matches[0]
     Write-Host "SKU is $sku"
+
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku"
     $uri = "/subscriptions/$env:SUBSCRIPTIONID/resourceGroups/$env:RESOURCEGROUPNAME/providers/Microsoft.Compute/images/$($Matches[0])image"
     # Set Variables
