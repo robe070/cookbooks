@@ -153,7 +153,7 @@ try
     if ( $Cloud -eq "AWS" ) {
         Write-GreenOutput("$(Log-Date) Installing CloudWatch Agent") | Write-Host
 
-        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.msi'
+        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
         $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.msi' )
         Write-Host ("$(Log-Date) Downloading $CWASetup to $installer_file")
         $downloaded = $false
