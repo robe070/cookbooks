@@ -153,8 +153,8 @@ try
     if ( $Cloud -eq "AWS" ) {
         Write-GreenOutput("$(Log-Date) Installing CloudWatch Agent") | Write-Host
 
-        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip'
-        $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.zip' )
+        $CWASetup = 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.msi'
+        $installer_file = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent.msi' )
         Write-Host ("$(Log-Date) Downloading $CWASetup to $installer_file")
         $downloaded = $false
         $TotalFailedDownloadAttempts = 0
@@ -180,27 +180,7 @@ try
             }
         }
 
-        $InstallerDirectory = ( Join-Path -Path $env:temp -ChildPath 'AmazonCloudWatchAgent' )
-        New-Item $InstallerDirectory -ItemType directory -Force | Out-Default  | Write-Host
-
-        # Expand-Archive $installer_file -DestinationPath $InstallerDirectory -Force | Write-Host
-
-        Write-GreenOutput( "$(Log-Date) Unzipping $installer_file to $InstallerDirectory") | Write-Host
-        $filePath = $installer_file
-        $shell = New-Object -ComObject Shell.Application
-        $zipFile = $shell.NameSpace($filePath)
-        $destinationFolder = $shell.NameSpace($InstallerDirectory)
-
-        $copyFlags = 0x00
-        $copyFlags += 0x04 # Hide progress dialogs
-        $copyFlags += 0x10 # Overwrite existing files
-
-        $destinationFolder.CopyHere($zipFile.Items(), $copyFlags) | Out-Default | Write-Host
-
-        # Installer file MUST be executed with the current directory set to the installer directory
-        $InstallerScript = '.\install.ps1'
-        Set-Location $InstallerDirectory | Out-Default | Write-Host
-        & $InstallerScript | Out-Default | Write-Host
+        msiexec /i $installer_file
 
         # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
         # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
