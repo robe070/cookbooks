@@ -180,10 +180,20 @@ try
             }
         }
 
-        msiexec /i $installer_file
+        Write-Host( "$(Log-Date) Installing CloudWatch Agent..." )
+        $install_log = ( Join-Path -Path $ENV:TEMP -ChildPath "CloudWatchAgent.log" )
+        [String[]] $Arguments = @( "/quiet /lv*x $install_log" )
+        $p = Start-Process -FilePath $installer_file -ArgumentList $Arguments -Wait -PassThru
+        if ( $p.ExitCode -ne 0 ) {
+            # Set $LASTEXITCODE
+            cmd /c exit $p.ExitCode
+            $ErrorMessage = "MSI Install returned error code $($p.ExitCode)."
+            Write-Error $ErrorMessage -Category NotInstalled
+            throw $ErrorMessage
+        }
 
-        # Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!
-        # CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager
+        Write-Host( "$(Log-Date) Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!" )
+        Write-Host( "$(Log-Date) CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager" )
 
         . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
 
