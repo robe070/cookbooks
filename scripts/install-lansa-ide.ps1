@@ -294,10 +294,14 @@ try
             }
         }
 
-        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/scripts/$StartHereHtm" -WindowStyle "Maximized" | Write-Host
-        New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Write-Host
-        New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config" | Write-Host
-        New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true""" | Write-Host
+        Write-Host( "$(Log-Date) GitRepoPath = '$Script:GitRepoPath'")
+        Write-Host( "$(Log-Date) DvdDir = '$Script:DvdDir'")
+
+        # New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$StartHereLink.lnk" -Description "Start Here"  -Arguments "file://$Script:GitRepoPath/
+        # scripts/$StartHereHtm" -WindowStyle "Maximized" | Write-Host
+        # New-Shortcut "${ENV:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe" "CommonDesktop\$EducationLink.lnk" -Description "Education"  -Arguments "http://www.lansa.com/education/" -WindowStyle "Maximized" | Write-Host
+        # New-Shortcut "$Script:DvdDir\setup\LansaQuickConfig.exe" "CommonDesktop\$QuickConfigLink.lnk" -Description "Quick Config" | Write-Host
+        # New-Shortcut "$ENV:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe" "CommonDesktop\$InstallEPCsLink.lnk" -Description "Install EPCs" -Arguments "-ExecutionPolicy Bypass -Command ""c:\lansa\Scripts\install-lansa-ide.ps1 -upgd true""" | Write-Host
 
         if ( $Cloud -eq "AWS" ) {
             # In AWS the administrator user name is known and same as current user so we can launch when administrator user logs in
@@ -309,7 +313,7 @@ try
         }
 
         Remove-ItemProperty -Path HKLM:\Software\LANSA -Name StartHereShown –Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Write-Host
+        # Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $Script:GitRepoPath\scripts\show-start-here.ps1" | Write-Host
 
         PlaySound
 
