@@ -717,19 +717,18 @@ $jsonObject = @"
             # Make sure the session is initialised correctly
             ReConnect-Session
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
 
-        if ( $InstallScalable ) {
+            if ( $InstallScalable ) {
 
-            if ( -not $Win2012 ) {
-                Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
-                Write-Host( "$(Log-Date) Only Windows 2016 because the api requires powershell 5.x" )
-                Execute-RemoteBlock $Script:session {
-                    Add-MpPreference -ExclusionPath ("${ENV:ProgramFiles(x86)}\Lansa","${ENV:ProgramFiles(x86)}\webserver","${ENV:ProgramFiles(x86)}\app1","${ENV:ProgramFiles(x86)}\app2","${ENV:ProgramFiles(x86)}\app3","${ENV:ProgramFiles(x86)}\app4","${ENV:ProgramFiles(x86)}\app5","${ENV:ProgramFiles(x86)}\app6","${ENV:ProgramFiles(x86)}\app7","${ENV:ProgramFiles(x86)}\app8","${ENV:ProgramFiles(x86)}\app9","${ENV:ProgramFiles(x86)}\app10")
+                if ( -not $Win2012 ) {
+                    Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
+                    Write-Host( "$(Log-Date) Only Windows 2016 and later because the api requires powershell 5.x" )
+                    Execute-RemoteBlock $Script:session {
+                        Add-MpPreference -ExclusionPath ("${ENV:ProgramFiles(x86)}\Lansa","${ENV:ProgramFiles(x86)}\webserver","${ENV:ProgramFiles(x86)}\app1","${ENV:ProgramFiles(x86)}\app2","${ENV:ProgramFiles(x86)}\app3","${ENV:ProgramFiles(x86)}\app4","${ENV:ProgramFiles(x86)}\app5","${ENV:ProgramFiles(x86)}\app6","${ENV:ProgramFiles(x86)}\app7","${ENV:ProgramFiles(x86)}\app8","${ENV:ProgramFiles(x86)}\app9","${ENV:ProgramFiles(x86)}\app10")
+                    }
                 }
             }
-        }
-
         } else {
             Execute-RemoteInitPostGit
 
@@ -861,17 +860,25 @@ $jsonObject = @"
 
         if ( $InstallIDE -eq $true ) {
             if ( -Not $CloudAccountLicense ) {
-                if ($Cloud -eq 'AWS') {
-                    #####################################################################################
-                    Write-Host "$(Log-Date) Installing License"
-                    #####################################################################################
+                # if ($Cloud -eq 'AWS') {
+                #     #####################################################################################
+                #     Write-Host "$(Log-Date) Installing License"
+                #     #####################################################################################
 
-                    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-                    Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
-                }
+                #     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+                #     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+                # }
+                #####################################################################################
+                Write-Host "$(Log-Date) Installing Licenses"
+                #####################################################################################
+
                 Execute-RemoteBlock $Script:session {
-                    CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-                    CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+                    CreateLicence -awsParameterStoreName "LANSADevelopmentLicense.pfx"  -dnsName "LANSA Development License" -registryValue "DevelopmentLicensePrivateKey" | Out-Default | Write-Host
+                    CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+
+                    # CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+                    # CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+
                     # Errors are thrown out of CreateLicense so no need to catch a throw here.
                     # Let the local script catch it
                 }
@@ -912,6 +919,7 @@ $jsonObject = @"
                     throw 1
                 }
             }
+            $dummy = MessageBox "Manually install any other software" -Pipeline:$Pipeline
         }
 
         if ( $InstallScalable -eq $true ) {

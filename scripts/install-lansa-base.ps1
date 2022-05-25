@@ -112,6 +112,9 @@ try
         DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/PowerShellTools.MSI' -installer_file (Join-Path $temppath 'PowerShellTools.msi') -log_file (Join-Path $temppath 'PowerShellTools.log');
     }
 
+    Write-Host "$(Log-Date) Install AWS CLI"
+    DownloadAndInstallMSI -MSIuri 'https://awscli.amazonaws.com/AWSCLIV2.msi' -installer_file (Join-Path $temppath 'AWSCLIV2.msi') -log_file (Join-Path $temppath 'AWSCLI.log');
+
     Write-Host "Clear the UTF-8 system locale option. If already switched off this code has no effect"
     $Locale =  Get-WinSystemLocale
     Write-Host "Current Locale = $($Locale.name)"
@@ -195,18 +198,10 @@ try
         Write-Host( "$(Log-Date) Start CloudWatchAgent so that the service gets installed, so that it can be stopped and set to manual!!" )
         Write-Host( "$(Log-Date) CF template then configures it but does not start it. Its intended to only be enabled through Systems Manager" )
 
-        Write-Host( "$(Log-Date) The try/catch block MUST be removed if setting the erroractionpreference fixes the exception. So that real exceptions are properly trapped." )
-        try {
-            # The following script issues Error Message so allow it to continue because the baking scripts make all errors fatals.
-            $ErrorActionPreference = Continue
-            . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
-        } catch {
-            $_
-            if ( $LASTEXITCODE -ne 0 ) {
-                throw
-            }
-            Write-Host( "$(Log-Date) Ignoring exception with 0 exit code")
-        }
+
+        # The following script issues Error Message so allow it to continue because the baking scripts make all errors fatals.
+        $ErrorActionPreference = Continue
+        . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
         $ErrorActionPreference = Stop
 
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
