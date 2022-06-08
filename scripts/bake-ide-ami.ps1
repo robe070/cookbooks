@@ -74,6 +74,10 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
+    $InstallScalableLicense=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
     $InstallScalable=$false,
 
     [Parameter(Mandatory=$false)]
@@ -691,7 +695,6 @@ $jsonObject = @"
             # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
             # Git is a far faster mechansim for transferring files than using RemotePS.
             # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
-
             #####################################################################################
 
             if ( $Cloud -eq 'AWS' ) {
@@ -875,6 +878,11 @@ $jsonObject = @"
                 Execute-RemoteBlock $Script:session {
                     CreateLicence -awsParameterStoreName "LANSADevelopmentLicense.pfx"  -dnsName "LANSA Development License" -registryValue "DevelopmentLicensePrivateKey" | Out-Default | Write-Host
                     CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+
+                    if ( $Using:InstallScalableLicense ) {
+                        CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
+
+                    }
 
                     # CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
                     # CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
