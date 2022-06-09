@@ -34,7 +34,7 @@ Bake-IdeMsi -VersionText 'w19d-15-0-DBTST' `
             -S3VisualLANSAUpdateDirectory "s3://lansa/releasedbuilds/v15/VisualLANSA_L4W15000_latest" `
             -S3IntegratorUpdateDirectory "s3://lansa/releasedbuilds/v15/Integrator_L4W15000_latest" `
             -AmazonAMIName "Windows_Server-2019-English-Full-SQL_2019_Express*" `
-            -GitBranch "debug/paas"`
+            -GitBranch "debug/paas" `
             -UploadInstallationImageChanges $false `
             -InstallBaseSoftware $true `
             -InstallSQLServer $false `

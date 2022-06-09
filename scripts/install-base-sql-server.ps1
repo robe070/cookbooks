@@ -35,11 +35,11 @@ try {
     }
 
     #####################################################################################
-    Write-Output ("$(Log-Date) Fix Windows Server 2019 error 0x800f0950 – Enable .NET 3.5 (error code -2146498224). First occurred 8th June 2022 on AWS. Required for IIS-NetFxExtensibility") | Out-File $OutputFile -Append
-    Run-ExitCode "C:\Windows\system32\dism.exe" @('/online', '/enable-feature', '/featurename:NetFX3', '/norestart', '/All')  | Out-File $OutputFile -Append
+    # Write-Output ("$(Log-Date) Fix Windows Server 2019 error 0x800f0950 – Enable .NET 3.5 (error code -2146498224). First occurred 8th June 2022 on AWS. Required for IIS-NetFxExtensibility") | Out-File $OutputFile -Append
+    # Run-ExitCode "C:\Windows\system32\dism.exe" @('/online', '/enable-feature', '/featurename:NetFX3', '/norestart', '/All')  | Out-File $OutputFile -Append
 
-    Write-Output ("$(Log-Date) Installing IIS-NetFxExtensibility") | Out-File $OutputFile -Append
-    Run-ExitCode "C:\Windows\system32\dism.exe" @('/online', '/enable-feature', '/featurename:IIS-NetFxExtensibility', '/norestart', '/All')  | Out-File $OutputFile -Append
+    # Write-Output ("$(Log-Date) Installing IIS-NetFxExtensibility") | Out-File $OutputFile -Append
+    # Run-ExitCode "C:\Windows\system32\dism.exe" @('/online', '/enable-feature', '/featurename:IIS-NetFxExtensibility', '/norestart', '/All')  | Out-File $OutputFile -Append
 
     Write-Output ("$(Log-Date) Modifying Group Policy")  | Out-File $OutputFile -Append
     Run-ExitCode "$Script:IncludeDir\lgpo.exe" @('/m', "$Script:IncludeDir\lansa.pol")  | Out-File $OutputFile -Append
