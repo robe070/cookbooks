@@ -133,7 +133,7 @@ try
 
     if ( $Cloud -eq 'AWS' ) {
         Write-Host( "$(Log-Date) Locating existing instance...")
-        $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
+        $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Values=$VersionText} | Where-Object ResourceType -eq "instance")
         if ( $TaggedInstances ) {
             $TaggedInstances[0] | Format-List *
             if ( $TaggedInstances.Count -eq 1 ) {
