@@ -17,6 +17,10 @@ param (
     $VersionText,
 
     [Parameter(Mandatory=$true)]
+    [string]
+    $LansaVersion,
+
+    [Parameter(Mandatory=$true)]
     [int]
     $VersionMajor,
 
@@ -282,7 +286,7 @@ try
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
 
-        New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} | Out-Default
+        New-EC2Tag -Resources $amiID -Tags @( @{ Key = "Name" ; Value = $amiName}, @{ Key = "LansaVersion"; Value = $LansaVersion } ) | Out-Default | Write-Host
 
         while ( $true )
         {
@@ -308,7 +312,7 @@ try
         ForEach-Object -Process {
             if ( $_ -and $_.SnapshotID )
             {
-                New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
+                New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc }, @{ Key = "LansaVersion"; Value = $LansaVersion } )  | Out-Default | Write-Host
             }
         }
 
