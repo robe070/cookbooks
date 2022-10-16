@@ -4,7 +4,7 @@
 Param(
     [Parameter(Mandatory=$false)]
         [ValidateSet('Live','Test','Dev','All', '207', '302', '305', '57')]
-        [string] $StackType = 'All',
+        [string] $StackType = 'Live',
         [switch] $SendMail
 )
 
