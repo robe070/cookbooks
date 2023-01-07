@@ -30,6 +30,8 @@ Bake-RunningAMI -VersionText 'w19d-15-0-DBTST' `
             -LansaVersion '150050' `
             -VersionMajor 15 `
             -VersionMinor 0 `
-            -KeyPairName 'RobG_id_rsa' `
-            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa" `
+            -KeyPairPath "$ENV:USERPROFILE\\.ssh\\AzureDevOps.pem" `
             -Title 'Database Regression Test'
+
+
+# -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa.pem" `

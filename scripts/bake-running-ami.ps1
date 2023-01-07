@@ -50,10 +50,6 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $KeyPairName,
-
-    [Parameter(Mandatory=$true)]
-    [string]
     $KeyPairPath,
 
     [Parameter(Mandatory=$false)]
