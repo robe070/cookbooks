@@ -23,7 +23,7 @@ param (
     [string]
     $TempPath_,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $CloudAccountLicense
 
