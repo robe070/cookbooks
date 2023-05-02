@@ -1,6 +1,6 @@
 ﻿Param(
     [Parameter(mandatory)]
-    [ValidateSet('RC','SP','NS','VR','PKU','VC','HT','RM','AK','SS','AS','PK', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault', 'RA')]
+    [ValidateSet('ServicePrincipal','RC','SP','NS','VR','PKU','VC','HT','RM','AK','SS','AS','PK', 'LPC','LPC-DP','LPC-AsDP','LPC-AsBake','LANSAInc', 'KeyVault', 'RA')]
     [string] $CloudAccount,
 
     # Parameter help description
@@ -10,11 +10,19 @@
 )
 
 switch ( $CloudAccount ) {
-    {$_ -eq 'LPC-MSDN'} {
+    {$_ -eq 'ServicePrincipal'} {
         $TenantName = 'DefaultDirectory'
         $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
         $Subscription = 'edff5157-5735-4ceb-af94-526e2c235e80'
-        $User = 'robert@lansacloudlansacom.onmicrosoft.com'
+        $User = '165a4c36-501f-4c3b-8828-8e812ef1041f'
+    }
+    {$_ -eq 'LPC-MSDN'} {
+      $TenantName = 'DefaultDirectory'
+      $Tenant = '17e16064-c148-4c9b-9892-bb00e9589aa5'
+      $Subscription = 'edff5157-5735-4ceb-af94-526e2c235e80'
+      $User = 'robert@lansacloudlansacom.onmicrosoft.com'
+      # See LastPass Azure Script Login password for CloudSecret
+      # Use ConvertTo-SecureString on the password to use for CloudSecret parameter
     }
     {$_ -eq 'LPC-DP'} {
         $TenantName = 'DefaultDirectory'
