@@ -119,6 +119,8 @@ try
 
     [boolean]$CompanionInstall = $false
 
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
     if ( $CompanionInstallPath.Length -gt 0) {
         if ( -not (test-path $CompanionInstallPath)) {
             Write-Error ("CompanionInstallPath '$CompanionInstallPath' does not exist")
