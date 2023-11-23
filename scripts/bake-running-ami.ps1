@@ -62,7 +62,6 @@ param (
 
 
 Write-Host "Cloud: $Cloud"
-[boolean] $EC2LaunchV2 = $True
 
 # set up environment if not yet setup
 if ( (Test-Path variable:IncludeDir))
@@ -179,7 +178,8 @@ try
                 Write-Host "$(Log-Date) AWS sysprep for Win2012"
                 Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
             } else {
-               if ($EC2LaunchV2) {
+               $EC2LaunchV1Path = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
+               if ( -not (Test-Path $EC2LaunchV1Path )) {
                   Write-Host "$(Log-Date) EC2 Launch V2 AWS sysprep for Win2016+"
                   # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
                   Invoke-Command -Session $Script:session {
@@ -216,7 +216,7 @@ try
                            Remove-Item $filename | Out-Default | Write-Host;
                      }
                   }
-                  Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                  Invoke-Command -Session $Script:session {cd $EC2LaunchV1Path | Out-Default | Write-Host}
                   Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
                   Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
                }
