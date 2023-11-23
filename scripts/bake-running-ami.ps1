@@ -197,7 +197,7 @@ try
                            Remove-Item $filename | Out-Default | Write-Host;
                      }
                   }
-                  Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" sysprep --shutdown=true | Out-Default | Write-Host}
+                  Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" sysprep --shutdown=true --clean=true | Out-Default | Write-Host}
                } else {
                   Write-Host "$(Log-Date) EC2 Launch V1 AWS sysprep for Win2016+"
                   # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
