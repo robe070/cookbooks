@@ -27,7 +27,7 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-StrictMode -Version Latest
 
 Bake-RunningAMI -VersionText 'w19d-15-0-DBTST' `
-            -LansaVersion '150050' `
+            -LansaVersion '150060' `
             -VersionMajor 15 `
             -VersionMinor 0 `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\AzureDevOps.pem" `

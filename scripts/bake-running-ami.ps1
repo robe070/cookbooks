@@ -62,6 +62,7 @@ param (
 
 
 Write-Host "Cloud: $Cloud"
+[boolean] $EC2LaunchV2 = $True
 
 # set up environment if not yet setup
 if ( (Test-Path variable:IncludeDir))
@@ -178,26 +179,47 @@ try
                 Write-Host "$(Log-Date) AWS sysprep for Win2012"
                 Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
             } else {
-                Write-Host "$(Log-Date) AWS sysprep for Win2016+"
-                # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-                Invoke-Command -Session $Script:session {
-                    Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
-                    $filename = "unattend.xml"
-                    if (Test-Path $filename)
-                    {
-                        Write-Host( "$(Log-Date) Deleting $filename")
-                        Remove-Item $filename | Out-Default | Write-Host;
-                    }
-                    $filename = "WaSetup.xml"
-                    if (Test-Path $filename )
-                    {
-                        Write-Host( "$(Log-Date) Deleting $filename")
-                        Remove-Item $filename | Out-Default | Write-Host;
-                    }
-                }
-                Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
-                Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+               if ($EC2LaunchV2) {
+                  Write-Host "$(Log-Date) EC2 Launch V2 AWS sysprep for Win2016+"
+                  # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+                  Invoke-Command -Session $Script:session {
+                     Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                     $filename = "unattend.xml"
+                     if (Test-Path $filename)
+                     {
+                           Write-Host( "$(Log-Date) Deleting $filename")
+                           Remove-Item $filename | Out-Default | Write-Host;
+                     }
+                     $filename = "WaSetup.xml"
+                     if (Test-Path $filename )
+                     {
+                           Write-Host( "$(Log-Date) Deleting $filename")
+                           Remove-Item $filename | Out-Default | Write-Host;
+                     }
+                  }
+                  Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" sysprep --shutdown=true | Out-Default | Write-Host}
+               } else {
+                  Write-Host "$(Log-Date) EC2 Launch V1 AWS sysprep for Win2016+"
+                  # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+                  Invoke-Command -Session $Script:session {
+                     Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                     $filename = "unattend.xml"
+                     if (Test-Path $filename)
+                     {
+                           Write-Host( "$(Log-Date) Deleting $filename")
+                           Remove-Item $filename | Out-Default | Write-Host;
+                     }
+                     $filename = "WaSetup.xml"
+                     if (Test-Path $filename )
+                     {
+                           Write-Host( "$(Log-Date) Deleting $filename")
+                           Remove-Item $filename | Out-Default | Write-Host;
+                     }
+                  }
+                  Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                  Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                  Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+               }
             }
         } elseif ($Cloud -eq 'Azure' ) {
             Write-Host( "$(Log-Date) Running sysprep automatically")
