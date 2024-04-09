@@ -118,7 +118,15 @@ try
     Write-Host ("$(Log-Date) Allow Remote Powershell session to any host. If it fails you are not running as Administrator!")
     $VerbosePreferenceSaved = $VerbosePreference
     $VerbosePreference = "SilentlyContinue"
-    enable-psremoting -SkipNetworkProfileCheck -force
+    # Requires a try/catch block due to error in WMI on ROBG notebook thats unfixable, or at least extremely problematic to solve according to Internet forums.
+    # -ErrorAction 'Continue' is not sufficient. Exception is still thrown.
+    try {
+        enable-psremoting -SkipNetworkProfileCheck -force
+    } catch {
+        Write-Host ("$(Log-Date) Ignoring this error.")
+        $_ | Out-Default | Write-Host
+    }
+
     set-item wsman:\localhost\Client\TrustedHosts -value * -force
     $VerbosePreference = $VerbosePreferenceSaved
     $externalip = Get-ExternalIP
