@@ -9,6 +9,11 @@ Bake an AMI thats running
 
 
 #>
+Function IIf($If, $Then, $Else) {
+   If ($If -IsNot "Boolean") {$_ = $If}
+   If ($If) {If ($Then -is "ScriptBlock") {&$Then} Else {$Then}}
+   Else {If ($Else -is "ScriptBlock") {&$Else} Else {$Else}}
+}
 
 function bake-RunningAMI {
 param (
@@ -54,8 +59,15 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $Pipeline
+    $Pipeline,
 
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $NoSysprep,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $EC2Password
     )
 
 #Requires -RunAsAdministrator
@@ -88,14 +100,15 @@ else
 Set-StrictMode -Version Latest
 
 if ( $Title ) {
-    $Script:DialogTitle = $Title
-    $script:instancename = "$Title $VersionText installed on $(Log-Date)"
+    $Script:DialogTitle = $Title + $(IIf $NoSysprep ' NoSysprep' ' Sysprep')
+    $script:instancename = "$Title $(IIf $NoSysprep ' NoSysprep' ' Sysprep') $VersionText installed on $(Log-Date)"
 } else {
-    $Script:DialogTitle = "LANSA Save Image"
-    $script:instancename = "LANSA Save Image $VersionText installed on $(Log-Date)"
+    $Script:DialogTitle = "LANSA Save Image" + $(IIf $NoSysprep ' NoSysprep' ' Sysprep')
+    $script:instancename = "LANSA Save Image $(IIf $NoSysprep ' NoSysprep' ' Sysprep') $VersionText installed on $(Log-Date)"
 }
 
-Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
+Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle)")
+Write-Host ("$(Log-Date) instancename = $($Script:instancename)")
 
 try
 {
@@ -141,7 +154,16 @@ try
                 $InstanceId = $TaggedInstances[0].ResourceId
                 $Script:instanceid = $InstanceId
                 Write-Host( "$(Log-Date) Using Instance Id = $instanceId")
-                $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
+                $Script:password = $null
+                if ( [string]::IsNullOrEmpty($EC2Password) ) {
+                  $Script:password = Get-EC2PasswordData -InstanceId $instanceid -PemFile $script:keypairfile -Decrypt
+                } else {
+                  $Script:password = $EC2Password
+                }
+
+                if ( [string]::IsNullOrEmpty($Script:password ) ) {
+                  throw "A password is required to execute remote commands on the instance. EC2Launch password does not exist. Specify -EC2Password on this command line"
+                }
 
                 $a = (Get-EC2Instance -InstanceID $instanceid)
                 $Script:publicDNS = $a.Instances[0].PublicDnsName
@@ -163,107 +185,116 @@ try
         throw Script does not support baking an Azure image
     }
 
-    # Remote PowerShell
-    Write-Host( "$(Log-Date) User Id:$AdminUserName Password: $Script:password")
-    $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-    $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
-    Connect-RemoteSession
 
-    Write-Host "$(Log-Date) Sysprep"
-    Write-Host "Use Invoke-Command as the Sysprep will terminate the instance and thus Execute-RemoteBlock will return a fatal error"
+   # Remote PowerShell
+   Write-Host( "$(Log-Date) User Id:$AdminUserName Password: $Script:password")
+   $securepassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
+   $creds = New-Object System.Management.Automation.PSCredential ($AdminUserName, $securepassword)
+   Connect-RemoteSession
 
-    try {
-        if ( $Cloud -eq 'AWS' ) {
+   if ($NoSysprep){
+      Write-Host "$(Log-Date) Prepare for image, no Sysprep"
+   } else {
+      Write-Host "$(Log-Date) Prepare for image, with Sysprep"
+   }
+   Write-Host "$(Log-Date) Use Invoke-Command as preparation will stop the instance and thus Execute-RemoteBlock will return a fatal error"
+
+   try {
+      if ( $Cloud -eq 'AWS' ) {
             if ( $Win2012 ) {
-                Write-Host "$(Log-Date) AWS sysprep for Win2012"
-                Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
+               Write-Host "$(Log-Date) AWS sysprep for Win2012"
+               Invoke-Command -Session $Script:session {cmd /c "$ENV:ProgramFiles\Amazon\Ec2ConfigService\ec2config.exe" -sysprep  | Out-Default | Write-Host}
             } else {
+               Write-Host "$(Log-Date) AWS EC2 Launch for Win2016+"
+               Invoke-Command -Session $Script:session {
+                  Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+                  $filename = "unattend.xml"
+                  if (Test-Path $filename)
+                  {
+                        Write-Host( "$(Log-Date) Deleting $filename")
+                        Remove-Item $filename | Out-Default | Write-Host;
+                  }
+                  $filename = "WaSetup.xml"
+                  if (Test-Path $filename )
+                  {
+                        Write-Host( "$(Log-Date) Deleting $filename")
+                        Remove-Item $filename | Out-Default | Write-Host;
+                  }
+               }
+
                $EC2LaunchV1Path = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
                if ( -not (Test-Path $EC2LaunchV1Path )) {
-                  Write-Host "$(Log-Date) EC2 Launch V2 AWS sysprep for Win2016+"
+                  Write-Host "$(Log-Date) EC2 Launch V2"
                   # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-                  Invoke-Command -Session $Script:session {
-                     Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
-                     $filename = "unattend.xml"
-                     if (Test-Path $filename)
-                     {
-                           Write-Host( "$(Log-Date) Deleting $filename")
-                           Remove-Item $filename | Out-Default | Write-Host;
-                     }
-                     $filename = "WaSetup.xml"
-                     if (Test-Path $filename )
-                     {
-                           Write-Host( "$(Log-Date) Deleting $filename")
-                           Remove-Item $filename | Out-Default | Write-Host;
-                     }
+
+                  if ( $NoSysprep ) {
+                     Write-Host "$(Log-Date) Reset EC2 Launch V2"
+                     Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" reset --clean=true | Out-Default | Write-Host}
+
+                     Write-Host( "$(Log-Date) Wait for EC2 Launch configuration to complete ")
+                     Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" status -b | Out-Default | Write-Host}
+
+                     Write-Host( "$(Log-Date) Stopping VM")
+                     Stop-EC2Instance -InstanceId $instanceid -Force | Out-Default | Write-Host
+                  } else {
+                     Write-Host "$(Log-Date) Sysprep EC2 Launch V2"
+                     Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" sysprep --shutdown=true --clean=true | Out-Default | Write-Host}
                   }
-                  Invoke-Command -Session $Script:session {. "$ENV:programfiles\amazon\ec2launch\ec2launch.exe" sysprep --shutdown=true --clean=true | Out-Default | Write-Host}
                } else {
-                  Write-Host "$(Log-Date) EC2 Launch V1 AWS sysprep for Win2016+"
+                  Write-Host "$(Log-Date) EC2 Launch V1"
                   # See here for doco - http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-                  Invoke-Command -Session $Script:session {
-                     Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
-                     $filename = "unattend.xml"
-                     if (Test-Path $filename)
-                     {
-                           Write-Host( "$(Log-Date) Deleting $filename")
-                           Remove-Item $filename | Out-Default | Write-Host;
-                     }
-                     $filename = "WaSetup.xml"
-                     if (Test-Path $filename )
-                     {
-                           Write-Host( "$(Log-Date) Deleting $filename")
-                           Remove-Item $filename | Out-Default | Write-Host;
-                     }
+
+                  if ( $NoSysprep ) {
+                     throw "EC2 Launch V1 not coded to support No Sysprep"
+                  } else {
+                     Invoke-Command -Session $Script:session {cd $EC2LaunchV1Path | Out-Default | Write-Host}
+                     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
                   }
-                  Invoke-Command -Session $Script:session {cd $EC2LaunchV1Path | Out-Default | Write-Host}
-                  Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                  Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
                }
             }
-        } elseif ($Cloud -eq 'Azure' ) {
+      } elseif ($Cloud -eq 'Azure' ) {
             Write-Host( "$(Log-Date) Running sysprep automatically")
 
             Invoke-Command -Session $Script:session {
-                Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
-                $filename = "unattend.xml"
-                if (Test-Path $filename)
-                {
-                    Write-Host( "$(Log-Date) Deleting $filename")
-                    Remove-Item $filename | Out-Default | Write-Host;
-                }
-                $filename = "WaSetup.xml"
-                if (Test-Path $filename )
-                {
-                    Write-Host( "$(Log-Date) Deleting $filename")
-                    Remove-Item $filename | Out-Default | Write-Host;
-                }
-                Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
-                $unattend = 'c:\lansa\sysprep\Unattend.xml'
-                if ( Test-Path $unattend) {
-                    Write-Host( "$(Log-Date) sysprep using language unattend file")
-                    Get-Content $unattend | Out-default | Write-Host
-                    cmd /c sysprep /oobe /generalize /shutdown /unattend:$unattend | Out-Default | Write-Host;
-                } else {
-                    Write-Host( "$(Log-Date) sysprep WITHOUT unattend file")
-                    cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
-                }
+               Set-Location "$env:SystemRoot\panther"  | Out-Default | Write-Host;
+               $filename = "unattend.xml"
+               if (Test-Path $filename)
+               {
+                  Write-Host( "$(Log-Date) Deleting $filename")
+                  Remove-Item $filename | Out-Default | Write-Host;
+               }
+               $filename = "WaSetup.xml"
+               if (Test-Path $filename )
+               {
+                  Write-Host( "$(Log-Date) Deleting $filename")
+                  Remove-Item $filename | Out-Default | Write-Host;
+               }
+               Set-Location "$env:SystemRoot\system32\sysprep"  | Out-Default | Write-Host;
+               $unattend = 'c:\lansa\sysprep\Unattend.xml'
+               if ( Test-Path $unattend) {
+                  Write-Host( "$(Log-Date) sysprep using language unattend file")
+                  Get-Content $unattend | Out-default | Write-Host
+                  cmd /c sysprep /oobe /generalize /shutdown /unattend:$unattend | Out-Default | Write-Host;
+               } else {
+                  Write-Host( "$(Log-Date) sysprep WITHOUT unattend file")
+                  cmd /c sysprep /oobe /generalize /shutdown | Out-Default | Write-Host;
+               }
             }
-        }
-    } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
-        Write-Host( "$(Log-Date) Ignore the exception 'The I/O operation has been aborted because of either a thread exit or an application request', presuming that its just an artifact of the sysprep terminating the instance")
-    } catch {
-        Write-RedOutput $_ | Out-Default | Write-Host
-        Write-RedOutput $_.exception | Out-Default | Write-Host
-        Write-RedOutput $_.exception.GetType().fullname | Out-Default | Write-Host
-        $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
-        $Response
-        if ( $response -ne 0x6 ) {
+      }
+   } catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
+      Write-Host( "$(Log-Date) Ignore the exception 'The I/O operation has been aborted because of either a thread exit or an application request', presuming that its just an artifact of the sysprep terminating the instance")
+   } catch {
+      Write-RedOutput $_ | Out-Default | Write-Host
+      Write-RedOutput $_.exception | Out-Default | Write-Host
+      Write-RedOutput $_.exception.GetType().fullname | Out-Default | Write-Host
+      $Response = MessageBox "Do you want to continue building the image?" 0x3 -Pipeline:$Pipeline
+      $Response
+      if ( $response -ne 0x6 ) {
             throw "Sysprep script failure"
-        }
-    }
-
-    # Sysprep will stop the Instance
+      }
+   }
+   # Sysprep will stop the Instance
 
     Write-Host( "$(Log-Date) Wait for the instance state to be stopped...")
 
@@ -285,11 +316,16 @@ try
             # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
             Write-Host "$(Log-Date) VM has fully stopped"
         }
-        Remove-PSSession $Script:session | Out-Default | Write-Host
+
+        if ( Test-Path variable:Script:session ) {
+            Remove-PSSession $Script:session | Out-Default | Write-Host
+        }
 
         Write-Host "$(Log-Date) Creating AMI"
 
         # Updates already have LANSA-appended text so strip it off if its there
+        Write-Host( "$AmazonImage[0]...") | Write-Host
+        $AmazonImage[0] | Out-Default | Write-Host
         $SimpleDesc = $($AmazonImage[0].Description)
         $Index = $SimpleDesc.IndexOf( "created on" )
         if ( $index -eq -1 ) {
@@ -300,7 +336,8 @@ try
 
         $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $Language $VersionText installed on $(Log-Date)"
         $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
-        $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
+        $drives = @{DeviceName = '/dev/sda1';Ebs = @{DeleteOnTermination='true'}}
+        $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc -BlockDeviceMapping $drives
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
 

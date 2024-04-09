@@ -31,7 +31,8 @@ Bake-RunningAMI -VersionText 'w19d-15-0-DBTST' `
             -VersionMajor 15 `
             -VersionMinor 0 `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\AzureDevOps.pem" `
-            -Title 'Database Regression Test'
+            -Title 'Database Regression Test' `
+            -NoSysprep
 
 
 # -KeyPairPath "$ENV:USERPROFILE\\.ssh\\id_rsa.pem" `
