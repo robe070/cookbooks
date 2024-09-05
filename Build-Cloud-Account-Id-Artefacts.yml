@@ -34,7 +34,7 @@ jobs:
   - name: quickstart-scripts
     value: '$(Agent.BuildDirectory)\test'
   - name: ConnectedServiceName
-    value: 'Azure Baking Images'
+    value: e61ac796-c298-4e1f-a8dc-98fb50faa590
   pool:
     vmImage: windows-2019
   steps:
