@@ -73,4 +73,5 @@ if ($ServicePrincipal) {
 } else {
    Connect-AzAccount -Credential $Credential -Tenant $Tenant -Subscription $Subscription
 }
+
 Set-AzContext -Tenant $Tenant -SubscriptionId $Subscription
