@@ -8,14 +8,22 @@ variables:
 - group: 'External IP Addresses'
 - group: 'Image Names'
 - group: 'Azure Logins'
-  azureUserId: AzureProjectSP
-  Build-all: true
-  Build-w19d-15-ID: false
-  GitBranch: $(Build.SourceBranch)
-  GitBranchPR: 'debug/paas'
-  JpnLanguage: JPN
-  quickstart-scripts: '$(Agent.BuildDirectory)\test'
-  ConnectedServiceName: 'Azure Baking Images'
+- name: azureUserId
+  value: AzureProjectSP
+- name: Build-all
+  value: true
+- name: Build-w19d-15-ID
+  value: false
+- name: GitBranch
+  value: $(Build.SourceBranch)
+- name: GitBranchPR
+  value: 'debug/paas'
+- name: JpnLanguage
+  value: JPN
+- name: quickstart-scripts
+  value: '$(Agent.BuildDirectory)\test'
+- name: ConnectedServiceName
+  value: 'Azure Baking Images'
 
 resources:
   repositories:
