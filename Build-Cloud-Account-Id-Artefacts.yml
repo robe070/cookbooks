@@ -4,27 +4,6 @@ trigger: none
 
 pr: none
 
-variables:
-- group: 'External IP Addresses'
-- group: 'Image Names'
-- group: 'Azure Logins'
-- name: azureUserId
-  value: AzureProjectSP
-- name: Build-all
-  value: true
-- name: Build-w19d-15-ID
-  value: false
-- name: GitBranch
-  value: $(Build.SourceBranch)
-- name: GitBranchPR
-  value: 'debug/paas'
-- name: JpnLanguage
-  value: JPN
-- name: quickstart-scripts
-  value: '$(Agent.BuildDirectory)\test'
-- name: ConnectedServiceName
-  value: 'Azure Baking Images'
-
 resources:
   repositories:
   - repository: self
@@ -36,6 +15,26 @@ jobs:
   displayName: w19d-15-ID
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
+  variables:
+  - group: 'External IP Addresses'
+  - group: 'Image Names'
+  - group: 'Azure Logins'
+  - name: azureUserId
+    value: AzureProjectSP
+  - name: Build-all
+    value: true
+  - name: Build-w19d-15-ID
+    value: false
+  - name: GitBranch
+    value: $(Build.SourceBranch)
+  - name: GitBranchPR
+    value: 'debug/paas'
+  - name: JpnLanguage
+    value: JPN
+  - name: quickstart-scripts
+    value: '$(Agent.BuildDirectory)\test'
+  - name: ConnectedServiceName
+    value: 'Azure Baking Images'
   pool:
     vmImage: windows-2019
   steps:
@@ -50,7 +49,7 @@ jobs:
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
-      arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+      arguments: -CloudAccount $(azureUserId) -CloudSecret $(ConvertTo-SecureString $(clientSecret) -AsPlainText -force)
       workingDirectory: scripts
   - task: PowerShell@2
     name: BuildImage
