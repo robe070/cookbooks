@@ -36,7 +36,7 @@
 # Variable 'Windows-2019-AMI-JPN' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 
-variables:
+# variables:
   # - atomic-build: $(atomic-build)
   # - atomic-build-ps: $(atomic-build-ps)
   # - Build-all: $(Build-all)
