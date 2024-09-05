@@ -59,14 +59,14 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText '$(System.JobDisplayName)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AZR*.5.lic'
       workingDirectory: scripts
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
-    inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-$(System.JobDisplayName)
-      Key: Usage
-      Value: test-temp
+  # - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  #   displayName: Azure Resource Group Tagging
+  #   continueOnError: true
+  #   inputs:
+  #     ConnectedServiceName: $(ConnectedServiceName)
+  #     ResourceGroupName: BakingDP-$(System.JobDisplayName)
+  #     Key: Usage
+  #     Value: test-temp
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -94,11 +94,11 @@ jobs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/$(System.JobDisplayName).txt
       ArtifactName: $(System.JobDisplayName)
       FileCopyOptions: ''
-  - task: AzureResourceManagerTemplateDeployment@3
-    displayName: Delete Resource Group
-    inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
-      subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
-      action: DeleteRG
-      resourceGroupName: BakingDP-$(System.JobDisplayName)
+  # - task: AzureResourceManagerTemplateDeployment@3
+  #   displayName: Delete Resource Group
+  #   inputs:
+  #     ConnectedServiceName: $(ConnectedServiceName)
+  #     subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
+  #     action: DeleteRG
+  #     resourceGroupName: BakingDP-$(System.JobDisplayName)
 
