@@ -52,7 +52,7 @@ variables:
   # - Build-w19d-15-0j: $(Build-w19d-15-0j)
   # - GitBranch: $(GitBranch)
   # - GitBranchPR: $(GitBranchPR)
-  # - GitUserName: $(GitUserName)
+    - GitUserName: $(GitUserName)
   # - JpnLanguage: $(JpnLanguage)
   # - KeypairName: $(KeypairName)
   # - quickstart-scripts: $(quickstart-scripts)
@@ -78,7 +78,7 @@ variables:
   # - Windows-2019-AMI: $(Windows-2019-AMI)
   # - Windows-2019-AMI-JPN: $(Windows-2019-AMI-JPN)
   # - windows-2022-AMI: $(windows-2022-AMI)
-  - windows-2022-AMI-JPN: $(windows-2022-AMI-JPN)
+  # - windows-2022-AMI-JPN: $(windows-2022-AMI-JPN)
   
 
 resources:
@@ -93,8 +93,8 @@ jobs:
        vmImage: $(vmImage)
      steps:
      - script: |
-         echo "The value of myVariable is: $(windows-2022-AMI-JPN)"
-       displayName: 'Print windows-2022-AMI-JPN'
+         echo "The value of git username is: $(GitUserName)"
+       displayName: 'Print GitUserName'
 # - job: Job_1
 #   displayName: 'Agent job : w12r2d-14-2'
 #   timeoutInMinutes: 120
