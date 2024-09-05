@@ -24,7 +24,7 @@ resources:
     ref: feature/nkhl-classic2YAML
 
 jobs:
-- job: w19d-15-ID
+- job: w19d_15_ID
   displayName: w19d-15-ID
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
