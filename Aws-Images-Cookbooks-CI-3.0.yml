@@ -52,7 +52,7 @@ variables:
   # - Build-w19d-15-0j: $(Build-w19d-15-0j)
   # - GitBranch: $(GitBranch)
   # - GitBranchPR: $(GitBranchPR)
-    - GitUserName: $(GitUserName)
+  - GitUserName: $(GitUserName)
   # - JpnLanguage: $(JpnLanguage)
   # - KeypairName: $(KeypairName)
   # - quickstart-scripts: $(quickstart-scripts)
