@@ -20,7 +20,7 @@ jobs:
   - group: 'Image Names'
   - group: 'Azure Logins'
   - name: azureUserId
-    value: AzureProjectSP
+    value: LPC-AsBake
   - name: Build-all
     value: true
   - name: Build-w19d-15-ID
