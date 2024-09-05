@@ -1,4 +1,4 @@
-name: Build-Cloud-Account-Id-Artefacts-$(Build.BuildId)
+name: Build-Cloud-Account-Id-Artefacts-3.0-$(Build.BuildId)
 
 trigger: none
 
@@ -34,11 +34,12 @@ jobs:
   - name: quickstart-scripts
     value: '$(Agent.BuildDirectory)\test'
   - name: ConnectedServiceName
-    value: e61ac796-c298-4e1f-a8dc-98fb50faa590
+    value: 'Azure Baking Images'
   pool:
     vmImage: windows-2019
   steps:
   - checkout: self
+  - pwsh: Write-Host $(ConnectedServiceName)
   - task: PowerShell@2
     displayName: Install PS Module
     condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
