@@ -15,7 +15,7 @@ variables:
   quickstart-scripts: '$(Agent.BuildDirectory)\test'
   ExternalIPAddresses: '103.231.169.65/32,103.110.171.121/32,106.211.132.182/32,103.109.109.25/32'
   Windows-2019-IMAGE-NAME: 2019-Datacenter
-  ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+  ConnectedServiceName: 'Azure Baking Images'
 
 resources:
   repositories:
