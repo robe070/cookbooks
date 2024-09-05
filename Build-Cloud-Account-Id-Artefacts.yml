@@ -5,16 +5,16 @@ trigger: none
 pr: none
 
 variables:
-  azureUserId: LPC-AsBake
+- group: 'External IP Addresses'
+- group: 'Image Names'
+- group: 'Azure Logins'
+  azureUserId: AzureProjectSP
   Build-all: true
   Build-w19d-15-ID: false
-  # clientsecret: 
   GitBranch: $(Build.SourceBranch)
   GitBranchPR: 'debug/paas'
   JpnLanguage: JPN
   quickstart-scripts: '$(Agent.BuildDirectory)\test'
-  ExternalIPAddresses: '103.231.169.65/32,103.110.171.121/32,106.211.132.182/32,103.109.109.25/32'
-  Windows-2019-IMAGE-NAME: 2019-Datacenter
   ConnectedServiceName: 'Azure Baking Images'
 
 resources:
