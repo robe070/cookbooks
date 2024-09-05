@@ -19,7 +19,7 @@ resources:
   repositories:
   - repository: self
     type: git
-    ref: refs/heads/debug/paas
+    ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
 jobs:
 - job: Job_2
   displayName: w19d-15-ID-OLD
