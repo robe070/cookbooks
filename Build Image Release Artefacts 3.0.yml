@@ -1575,7 +1575,7 @@ variables:
   Build-w19d-15-0: 'False'
   Build-w19d-15-0j: 'True'
   GitBranch: '$(Build.SourceBranch)'
-  GitBranchPR: 'debug/paas'
+  GitBranchPR: 'feature/Build-Image-Release-Artefacts-3.0'
   GitUserName: 'robe070'
   JpnLanguage: 'JPN'
   KeypairName: 'AzureDevOps'
@@ -1598,6 +1598,6 @@ variables:
   Windows-2019-AMI: 'Windows_Server-2019-English-Full-SQL_2019_Express*'
   Windows-2019-AMI-JPN: 'Windows_Server-2019-Japanese-Full-Base*'
   Windows-2022-AMI: 'Windows_Server-2022-English-Full-SQL_2022_Express*'
-  Windows-2019-AMI-JPN: 'Windows_Server-2022-Japanese-Full-Base*'
+  Windows-2022-AMI-JPN: 'Windows_Server-2022-Japanese-Full-Base*'
 
 ...
