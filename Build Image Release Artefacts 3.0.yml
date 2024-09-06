@@ -36,8 +36,8 @@
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 
 variables:
-  group: 'External IP Addresses'
-  
+  - group: "External IP Addresses"
+
 resources:
   repositories:
   - repository: self
