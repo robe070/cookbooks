@@ -105,8 +105,9 @@ jobs:
       arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       workingDirectory: scripts
-    env:
-      BuildImage.amiID: $(amiID)
+    script: |
+        echo $amiID
+        echo "##vso[task.setvariable variable=amiID]$BuildImage.amiID"
         
   - task: PowerShell@2
     name: ''
