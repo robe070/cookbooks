@@ -46,13 +46,13 @@ resources:
     ref: feature/AWS-Images-Cookbooks-CI-3.0
 jobs:
 - job: CheckVariables
-     displayName: 'Check Variable Values'
-     pool:
-       vmImage: $(vmImage)
-     steps:
-     - script: |
-         echo "The value of git username is: $(GitUserName)"
-       displayName: 'Print GitUserName'
+  displayName: 'Check Variable Values'
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - script: |
+      echo "The value of git username is: $(GitUserName)"
+    displayName: 'Print GitUserName'
 # - job: Job_1
 #   displayName: 'Agent job : w12r2d-14-2'
 #   timeoutInMinutes: 120
