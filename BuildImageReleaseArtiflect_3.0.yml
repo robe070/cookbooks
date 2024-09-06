@@ -243,33 +243,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w12r2d-14-2-$(VersionText-w12r2d-14-2)
-# - job: Job_5
-#   displayName: 'Agent job : w12r2d-15-0'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_5
+  displayName: 'Agent job : w222d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
