@@ -103,11 +103,9 @@ jobs:
     inputs:
       targetType: inline
       script: >-
-        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
-        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+          Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+          Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+          Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
@@ -229,11 +227,9 @@ jobs:
     inputs:
       targetType: inline
       script: >-
-        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
-        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
@@ -336,9 +332,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -465,9 +459,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -531,7 +523,7 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-- job: Job_7
+- job: Job_8
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -591,9 +583,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -657,7 +647,7 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-- job: Job_8
+- job: Job_7
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -717,9 +707,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -843,9 +831,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -971,9 +957,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -1097,9 +1081,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -1226,9 +1208,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -1292,7 +1272,7 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
-- job: Job_11
+- job: Job_12
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -1352,9 +1332,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -1418,7 +1396,7 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
-- job: Job_12
+- job: Job_11
   displayName: 'Agent job : w22d-14-2j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -1478,9 +1456,7 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
-
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
