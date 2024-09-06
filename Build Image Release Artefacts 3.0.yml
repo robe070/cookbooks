@@ -34,6 +34,10 @@
 # Variable 'Windows-2019-AMI-JPN' was defined in the Variables tab
 # Variable Group 'ImageVersion' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
+
+variables:
+  group: 'External IP Addresses'
+  
 resources:
   repositories:
   - repository: self
@@ -1540,9 +1544,5 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
-# Define a pipeline-level variable
-variables:
-  group: 'External IP Addresses'
-  #group: 'ImageVersion - New'
 
 ...
