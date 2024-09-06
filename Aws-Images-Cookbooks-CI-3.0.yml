@@ -29,11 +29,12 @@
 # Variable 'VersionText-w19d-14-2j' was defined in the Variables tab
 # Variable 'VersionText-w19d-15-0' was defined in the Variables tab
 # Variable 'VersionText-w19d-15-0j' was defined in the Variables tab
-# Variable 'Windows-2012-AMI' was defined in the Variables tab
 # Variable 'Windows-2016-AMI' was defined in the Variables tab
 # Variable 'Windows-2016-AMI-JPN' was defined in the Variables tab
 # Variable 'Windows-2019-AMI' was defined in the Variables tab
 # Variable 'Windows-2019-AMI-JPN' was defined in the Variables tab
+# Variable 'Windows-2022-AMI' was defined in the Variables tab
+# Variable 'Windows-2022-AMI-JPN' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 
 variables:
@@ -101,7 +102,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2012-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       workingDirectory: scripts
   - task: PowerShell@2
