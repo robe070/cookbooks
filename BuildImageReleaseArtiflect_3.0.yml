@@ -27,7 +27,7 @@
 # Variable 'VersionText-w19d-15-0j' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 # Variable Group 'Image Names' was defined in the Variables tab
-variables:
+#variables:
  # azureUserId: $(azureUserId) #LPC-AsBake
  - imagetype: windows-2022
  - Build-all : $(Build-all) #True
@@ -62,12 +62,21 @@ variables:
  - VersionText-w19d-15-0j : $(VersionText-w19d-15-0j) #16
  - imagetype : $(image)
 
+- job: CheckVariables
+  displayName: 'Check Variable Values'
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - script: |
+      echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
+    displayName: 'Print ExternalIPAddresses'
+
 resources:
   repositories:
   - repository: self
     type: git
     ref: debug/paas
-jobs:
+#jobs:
 - job: Job_1
   displayName: 'Agent job : w12r2d-14-2'
   timeoutInMinutes: 120
