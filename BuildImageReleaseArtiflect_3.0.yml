@@ -72,41 +72,41 @@ jobs:
       echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
     displayName: 'Print ExternalIPAddresses'
 
-# resources:
-#   repositories:
-#   - repository: self
-#     type: git
-#     ref: debug/paas
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: debug/paas
     
-# jobs:
-# - job: Job_1
-#   displayName: 'Agent job : w12r2d-14-2'
-#   timeoutInMinutes: 120
-#   condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2022
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     name: ''
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+jobs:
+- job: Job_1
+  displayName: 'Agent job : w222d-14-2'
+  timeoutInMinutes: 120
+  condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2022
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    name: ''
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
