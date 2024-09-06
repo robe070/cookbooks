@@ -72,11 +72,11 @@ jobs:
       echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
     displayName: 'Print ExternalIPAddresses'
 
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: debug/paas
+# resources:
+#   repositories:
+#   - repository: self
+#     type: git
+#     ref: debug/paas
     
 # jobs:
 # - job: Job_1
