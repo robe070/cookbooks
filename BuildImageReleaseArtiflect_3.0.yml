@@ -29,6 +29,7 @@
 # Variable Group 'Image Names' was defined in the Variables tab
 variables:
  # azureUserId: $(azureUserId) #LPC-AsBake
+ - imagepe: windows-2022
  - Build-all : $(Build-all) #True
  - Build-w12r2d-14-2 :  $(Build-w12r2d-14-2) #False
  - Build-w12r2d-15-0 : $(Build-w12r2d-15-0) #False
