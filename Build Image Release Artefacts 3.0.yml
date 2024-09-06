@@ -1559,7 +1559,7 @@ jobs:
 # Define a pipeline-level variable
 variables:
   group: 'External IP Addresses'
-  group: 'ImageVersion - New'
+  #group: 'ImageVersion - New'
   atomic-build: '$false'
   atomic-build-ps: '$false'
   azureUserId: 'VC'
