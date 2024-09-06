@@ -905,8 +905,7 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-
- job: Job_4
+job: Job_4
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
