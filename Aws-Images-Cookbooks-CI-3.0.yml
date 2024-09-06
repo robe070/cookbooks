@@ -110,7 +110,7 @@ jobs:
     name: ''
     displayName: 'Generate: AMI Id'
     env:
-      SET_VALUE:: $(BuildImage.amiID)
+      BuildImage.amiID:: $(BuildImage.amiID)
     # enabled: False
     inputs:
       targetType: inline
@@ -265,7 +265,7 @@ jobs:
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
     env:
-      SET_VALUE:: $(BuildImage.amiID)
+      BuildImage.amiID:: $(BuildImage.amiID)
     # enabled: False
     inputs:
       targetType: inline
