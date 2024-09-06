@@ -50,36 +50,36 @@ jobs:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
-    inputs:
-      awsCredentials: $(awsCredentials)
-      regionName: $(regionName)
-      filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+    # inputs:
+    #   awsCredentials: $(awsCredentials)
+    #   regionName: $(regionName)
+    #   filePath: scripts/install-powershell-modules.ps1
+    #   inlineScript: >+
+    #     if ("$(GitBranch)".Contains("refs/heads")) {
+    #         $branch ="$(GitBranch)".replace("refs/heads/", "")
+    #     } else {
+    #         $branch = "$(GitBranchPR)"
+    #     }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+    #     $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+    #     Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+    #     if ($Env:PsModuleInstalled -eq 'True') {
+    #         Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+    #         return;
+    #     }
 
-        # Pester for Testing
+    #     # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+    #     Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+    #     Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+    #     Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+    #     $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -180,32 +180,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -286,32 +286,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -415,32 +415,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -527,9 +527,6 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-
-
-
 - job: Job_7
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -544,32 +541,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -656,9 +653,6 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-
-
-
 - job: Job_8
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
@@ -673,32 +667,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -785,9 +779,6 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
-
-
-
 - job: Job_3
   displayName: 'Agent job : w16d-14-2j'
   timeoutInMinutes: 360
@@ -802,32 +793,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -915,9 +906,7 @@ jobs:
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
 
-
-
-- job: Job_4
+ job: Job_4
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -1057,32 +1046,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1186,32 +1175,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1298,9 +1287,6 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
-
-
-
 - job: Job_11
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
@@ -1315,32 +1301,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1427,9 +1413,6 @@ jobs:
 
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
-
-
-
 - job: Job_12
   displayName: 'Agent job : w22d-14-2j'
   timeoutInMinutes: 360
@@ -1444,32 +1427,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
