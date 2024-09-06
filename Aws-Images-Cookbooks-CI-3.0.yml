@@ -91,13 +91,13 @@ jobs:
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download Keypair
-    enabled: False
+    # enabled: False
     inputs:
       secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
-    enabled: False
+    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -107,7 +107,7 @@ jobs:
   - task: PowerShell@2
     name: ''
     displayName: 'Generate: AMI Id'
-    enabled: False
+    # enabled: False
     inputs:
       targetType: inline
       script: >-
@@ -119,7 +119,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM test
-    enabled: False
+    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -142,7 +142,7 @@ jobs:
   - task: PublishTestResults@2
     name: ''
     displayName: Publish Test Results **/Test-*.xml
-    enabled: False
+    # enabled: False
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
@@ -150,14 +150,14 @@ jobs:
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
-    enabled: False
+    # enabled: False
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
       ArtifactName: aws-w22d-14-2
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
-    enabled: False
+    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -246,13 +246,13 @@ jobs:
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download KeyPair
-    enabled: False
+    # enabled: False
     inputs:
       secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
-    enabled: False
+    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -260,7 +260,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
-    enabled: False
+    # enabled: False
     inputs:
       targetType: inline
       script: >-
@@ -272,7 +272,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-    enabled: False
+    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -294,21 +294,21 @@ jobs:
         }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
-    enabled: False
+    # enabled: False
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-15-0
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
-    enabled: False
+    #enabled: False
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
       ArtifactName: aws-w22d-15-0
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
-    enabled: False
+    # #enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
