@@ -1,6 +1,6 @@
 name: Azure-Images-Cookbooks-CI-3.0-$(Build.BuildId)
 
-triggers: none
+trigger: none
 
 pr: none
 
@@ -46,7 +46,7 @@ jobs:
     value: True
   - name: Build-w19d-15-0j
     value: False
-  - # name: clientsecret
+  # - name: clientsecret
     # value: ********
   - name: GitBranch
     value: $(Build.SourceBranch)
