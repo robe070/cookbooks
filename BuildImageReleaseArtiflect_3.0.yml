@@ -62,21 +62,21 @@
 #  - VersionText-w19d-15-0j : $(VersionText-w19d-15-0j) #16
 #  - imagetype : $(image)
 
-jobs:
-- job: CheckVariables
-  displayName: 'Check Variable Values'
-  pool:
-    vmImage: windows-2022
-  steps:
-  - script: |
-      echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
-    displayName: 'Print ExternalIPAddresses'
+# jobs:
+# - job: CheckVariables
+#   displayName: 'Check Variable Values'
+#   pool:
+#     vmImage: windows-2022
+#   steps:
+#   - script: |
+#       echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
+#     displayName: 'Print ExternalIPAddresses'
 
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: debug/paas
+# resources:
+#   repositories:
+#   - repository: self
+#     type: git
+#     ref: debug/paas
     
 jobs:
 - job: Job_1
