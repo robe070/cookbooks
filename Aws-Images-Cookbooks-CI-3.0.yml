@@ -364,32 +364,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
