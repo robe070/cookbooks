@@ -20,7 +20,7 @@ jobs:
   - group: 'Image Names'
   - group: 'Azure Logins'
   - name: azureUserId
-    value: LPC-AsBake
+    value: PowershellScriptsSP
   - name: Build-all
     value: true
   - name: Build-w19d-15-ID
@@ -34,7 +34,7 @@ jobs:
   - name: quickstart-scripts
     value: '$(Agent.BuildDirectory)\test'
   - name: ConnectedServiceName
-    value: 'Azure Baking Images'
+    value: 'Azure Baking Images 2'
   pool:
     vmImage: windows-2019
   steps:
