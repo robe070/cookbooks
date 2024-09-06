@@ -84,7 +84,7 @@ jobs:
   timeoutInMinutes: 120
   condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2022
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
