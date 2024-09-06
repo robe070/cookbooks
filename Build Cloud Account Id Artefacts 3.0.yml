@@ -15,6 +15,10 @@
 # Variable 'TerminateInstance' was defined in the Variables tab
 # Variable 'Windows-2019-AMI' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
+
+variables:
+  - group: "External IP Addresses"
+
 resources:
   repositories:
   - repository: self
@@ -32,47 +36,47 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      wsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download Keypair
     inputs:
-      secureFile: de96349f-469d-4409-a90e-b60d7baf804a
+      secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      wsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
@@ -89,8 +93,8 @@ jobs:
     name: Vmtest
     displayName: VM Tests
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
@@ -122,8 +126,8 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       arguments: -version "$(System.JobDisplayName)"
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
@@ -161,47 +165,47 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
+      # inlineScript: >+
+      #   if ("$(GitBranch)".Contains("refs/heads")) {
+      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
+      #   } else {
+      #       $branch = "$(GitBranchPR)"
+      #   }
 
-        $branch | Write-Host | Out-Default | Write-Verbose
+      #   $branch | Write-Host | Out-Default | Write-Verbose
 
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
+      #   if ($Env:PsModuleInstalled -eq 'True') {
+      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+      #       return;
+      #   }
 
-        # Pester for Testing
+      #   # Pester for Testing
 
-        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      #   $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download KeyPair
     inputs:
-      secureFile: de96349f-469d-4409-a90e-b60d7baf804a
+      secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AWS*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id New License'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
@@ -277,28 +281,6 @@ jobs:
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
 
-
-
-# Define a pipeline-level variable
-variables:
-    group: 'External IP Addresses'
-    atomic-build: '$false'
-    atomic-build-ps: '$false'
-    azureUserId: 'VC'
-    Build-all: 'True'
-    Build-w16d-15-ID-NEW: 'false'
-    Build-w19d-15-ID-OLD: 'True'
-    GitBranchPR: 'debug/paas'
-    GitUserName: 'robe070'
-    JpnLanguage: 'JPN'
-    KeypairName: 'AzureDevOps'
-    RunWindowsUpdates: '$false'
-    #system.collectionId: '556ac44f-caae-4fef-a5b6-d964fed453e6'
-    #system.debug: 'false'
-    #system.definitionId: '34'
-    #system.teamProject: 'Lansa AWS Scalable License Images'
-    TerminateInstance: 'True'
-    Windows-2019-AMI: 'LANSA Scalable License  w19d-15*'
     
 
 ...
