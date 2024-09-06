@@ -54,10 +54,10 @@ jobs:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
-    # inputs:
-    #   awsCredentials: $(awsCredentials)
-    #   regionName: $(regionName)
-    #   filePath: scripts/install-powershell-modules.ps1
+    inputs:
+       awsCredentials: $(awsCredentials)
+       regionName: $(regionName)
+       filePath: scripts/install-powershell-modules.ps1
     #   inlineScript: >+
     #     if ("$(GitBranch)".Contains("refs/heads")) {
     #         $branch ="$(GitBranch)".replace("refs/heads/", "")
