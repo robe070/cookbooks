@@ -105,17 +105,18 @@ jobs:
       arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       workingDirectory: scripts
-    powershell: |
-      Write-Host "##vso[task.setvariable variable=BuildImage.amiID;]amiID"
+    
         
   - task: PowerShell@2
     name: ''
     displayName: 'Generate: AMI Id'
+    env:
+      BuildImage: $(BuildImage)
     # enabled: False
     inputs:
       targetType: inline
       powershell: |
-        Write-Host $(BuildImage.amiID)
+        Write-Host $(BuildImage)
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
