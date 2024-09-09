@@ -81,7 +81,7 @@ resources:
     type: git
     ref: Feature/Debjit #debug/paas
     
-# jobs:
+jobs:
 # - job: Job_1
 #   displayName: 'Agent job : w22d-14-2'
 #   timeoutInMinutes: 120
