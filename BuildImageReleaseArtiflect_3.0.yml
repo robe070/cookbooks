@@ -402,33 +402,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w12r2d-15-0-$(VersionText-w12r2d-15-0)
-# - job: Job_6
-#   displayName: 'Agent job : w16d-14-2'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_6
+  displayName: 'Agent job : w16d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -561,33 +561,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
-# - job: Job_4
-#   displayName: 'Agent job : w16d-15-0'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_4
+  displayName: 'Agent job : w16d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -720,34 +720,34 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
-# - job: Job_3
-#   displayName: 'Agent job : w19d-14-2'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_3
+  displayName: 'Agent job : w19d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -880,33 +880,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
-# - job: Job_2
-#   displayName: 'Agent job : w19d-15-0'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_2
+  displayName: 'Agent job : w19d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -1039,33 +1039,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
-# - job: Job_7
-#   displayName: 'Agent job : w16d-14-2j'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_7
+  displayName: 'Agent job : w16d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -1198,33 +1198,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
-# - job: Job_8
-#   displayName: 'Agent job : w16d-15-0j'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_8
+  displayName: 'Agent job : w16d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -1357,33 +1357,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
-# - job: Job_9
-#   displayName: 'Agent job : w19d-14-2j'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_9
+  displayName: 'Agent job : w19d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
@@ -1517,33 +1517,33 @@ jobs:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
-# - job: Job_10
-#   displayName: 'Agent job : w19d-15-0j'
-#   timeoutInMinutes: 360
-#   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
-#   pool:
-#     vmImage: imagetype #windows-2019
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Install PS Module
-#     inputs:
-#       filePath: scripts/install-powershell-modules-azure.ps1
-#       script: >-
-#         if ("$(GitBranch)".Contains("refs/heads")) {
-#             $branch ="$(GitBranch)".replace("refs/heads/", "")
-#         } else {
-#             $branch = "$(GitBranchPR)"
-#         }
+- job: Job_10
+  displayName: 'Agent job : w19d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: imagetype #windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      script: >-
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-#         $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-#         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-#         if ($Env:PsModuleInstalled -eq 'True') {
-#             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-#             return;
-#         }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
 
 #         Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
