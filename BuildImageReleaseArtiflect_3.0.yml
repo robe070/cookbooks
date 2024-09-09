@@ -493,7 +493,7 @@ jobs:
 #         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+      $(Env:PsModuleInstalled) = 'True'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
