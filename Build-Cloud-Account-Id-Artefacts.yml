@@ -39,7 +39,7 @@ jobs:
     vmImage: windows-2019
   steps:
   - checkout: self
-  - pwsh: Write-Host $(ConnectedServiceName)
+  - pwsh: Write-Host ${{ variables.ConnectedServiceName }}
   - task: PowerShell@2
     displayName: Install PS Module
     condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
@@ -64,7 +64,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
-      ConnectedServiceName: 'Azure Baking Images 2'
+      ConnectedServiceName: '${{ variables.ConnectedServiceName }}'
       ResourceGroupName: BakingDP-$(System.JobDisplayName)
       Key: Usage
       Value: test-temp
@@ -98,7 +98,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: Azure Baking Images 2
+      ConnectedServiceName: '${{ variables.ConnectedServiceName }}'
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-$(System.JobDisplayName)
