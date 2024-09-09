@@ -405,7 +405,7 @@ resources:
 #       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 #       action: DeleteRG
 #       resourceGroupName: BakingDP-w12r2d-15-0-$(VersionText-w12r2d-15-0)
-- job: Job_6
+ - job: Job_6
   displayName: 'Agent job : w16d-14-2'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
