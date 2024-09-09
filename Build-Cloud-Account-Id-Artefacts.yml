@@ -33,8 +33,7 @@ jobs:
     value: JPN
   - name: quickstart-scripts
     value: '$(Agent.BuildDirectory)\test'
-  - name: ConnectedServiceName
-    value: 'Azure Baking Images'
+
   pool:
     vmImage: windows-2019
   steps:
@@ -63,7 +62,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
-      ConnectedServiceName: '${{ variables.ConnectedServiceName }}'
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-$(System.JobDisplayName)
       Key: Usage
       Value: test-temp
@@ -97,7 +96,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: '${{ variables.ConnectedServiceName }}'
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-$(System.JobDisplayName)
