@@ -64,7 +64,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
+      ConnectedServiceName: 'Azure Baking Images 2'
       ResourceGroupName: BakingDP-$(System.JobDisplayName)
       Key: Usage
       Value: test-temp
@@ -98,7 +98,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
+      ConnectedServiceName: Azure Baking Images 2
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-$(System.JobDisplayName)
