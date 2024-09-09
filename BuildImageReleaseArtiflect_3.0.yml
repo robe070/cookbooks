@@ -27,7 +27,10 @@
 # Variable 'VersionText-w19d-15-0j' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 # Variable Group 'Image Names' was defined in the Variables tab
-#variables:
+# variables:
+#   - group : "Azure Logins"
+#   - group : "Image Names"
+#   - group : "External IP Addresses"
  # azureUserId: $(azureUserId) #LPC-AsBake
 #  - imagetype: windows-2022
 #  - Build-all : $(Build-all) #True
@@ -407,7 +410,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -566,7 +569,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -725,7 +728,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -885,7 +888,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -1044,7 +1047,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -1203,7 +1206,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -1362,7 +1365,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -1522,7 +1525,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: imagetype #windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: PowerShell@2
