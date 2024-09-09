@@ -37,6 +37,7 @@
 
 variables:
   - group: "External IP Addresses"
+  - group: "ImageVersion - New"
 
 resources:
   repositories:
