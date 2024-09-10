@@ -27,10 +27,10 @@
 # Variable 'VersionText-w19d-15-0j' was defined in the Variables tab
 # Variable Group 'External IP Addresses' was defined in the Variables tab
 # Variable Group 'Image Names' was defined in the Variables tab
-# variables:
-#   - group : "Azure Logins"
-#   - group : "Image Names"
-#   - group : "External IP Addresses"
+variables:
+  - group : "Azure Logins"
+  - group : "Image Names"
+  - group : "External IP Addresses"
 # azureUserId: $(azureUserId) #LPC-AsBake
 #  - imagetype: windows-2022
 #  - Build-all : $(Build-all) #True
@@ -81,14 +81,6 @@
 #     type: git
 #     ref: Feature/Debjit #debug/paas
 
-variables:
-  - group: 'External IP Addresses'
-  - group: 'Image Names'
-  - group: 'Azure Logins'
-  - name: azureUserId
-    value: PowershellScriptsSP
-  - name: Build-all
-    value: true
    
 jobs:
 - job: Job_1
@@ -201,7 +193,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w12r2d-14-2-$(VersionText-w12r2d-14-2)
       Key: Usage
       Value: test-temp
@@ -251,7 +243,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w12r2d-14-2-$(VersionText-w12r2d-14-2)
@@ -363,7 +355,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w12r2d-15-0-$(VersionText-w12r2d-15-0)
       Key: Usage
       Value: test-temp
@@ -410,7 +402,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w12r2d-15-0-$(VersionText-w12r2d-15-0)
@@ -522,7 +514,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
       Key: Usage
       Value: test-temp
@@ -569,7 +561,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
@@ -681,7 +673,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
       Key: Usage
       Value: test-temp
@@ -728,7 +720,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
@@ -841,7 +833,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
       Key: Usage
       Value: test-temp
@@ -888,7 +880,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
@@ -1000,7 +992,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
       Key: Usage
       Value: test-temp
@@ -1047,7 +1039,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
@@ -1159,7 +1151,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
       Key: Usage
       Value: test-temp
@@ -1206,7 +1198,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
@@ -1318,7 +1310,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
       Key: Usage
       Value: test-temp
@@ -1365,7 +1357,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
@@ -1478,7 +1470,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
       Key: Usage
       Value: test-temp
@@ -1525,7 +1517,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
@@ -1637,7 +1629,7 @@ jobs:
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
       Key: Usage
       Value: test-temp
@@ -1684,7 +1676,7 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
-      ConnectedServiceName: e61ac796-c298-4e1f-a8dc-98fb50faa590
+      ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
