@@ -243,6 +243,9 @@ try
     } elseif ($VersionText -like "w19*"){
         $Platform= 'Win2019'
         $Win2012 = $false
+    } elseif ($VersionText -like "w22*"){
+        $Platform= 'Win2022'
+        $Win2012 = $false
     } else {
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
@@ -364,6 +367,7 @@ try
                 'Win2012' { $AzImageVersion = '9600*'  }
                 'Win2016' { $AzImageVersion = '14393*'  }
                 'Win2019' { $AzImageVersion = '17763*'  }
+                'Win2022' { $AzImageVersion = '20348*'  }
             }
         }
 
