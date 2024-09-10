@@ -28,7 +28,7 @@ jobs:
   - name:  Build-all
     value: False
   - name: Build-w12r2d-14-2
-    value: False
+    value: True
   - name: Build-w12r2d-15-0
     value: False
   - name: Build-w16d-14-2
