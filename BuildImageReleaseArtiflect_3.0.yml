@@ -75,11 +75,11 @@ variables:
 #       echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
 #     displayName: 'Print ExternalIPAddresses'
 
-# resources:
-#   repositories:
-#   - repository: self
-#     type: git
-#     ref: Feature/Debjit #debug/paas
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: Feature/Debjit #debug/paas
 
    
 jobs:
