@@ -58,14 +58,6 @@ jobs:
     value: ENG
   - name: quickstart-scripts
     value: $(Agent.BuildDirectory)\test
-  - name: system.collectionId
-    value: 556ac44f-caae-4fef-a5b6-d964fed453e6
-  - name: system.debug
-    value: false
-  - name: system.definitionId
-    value: 30
-  - name: system.teamProject
-    value: 'Lansa Azure Scalable License Images'
   - name: VersionText-w12r2d-14-2
     value: 0
   - name: VersionText-w12r2d-15-0
