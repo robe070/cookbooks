@@ -60,7 +60,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry=10,
+    $MaxRetry=1,
 
     [Parameter(Mandatory=$false)]
     [boolean]
