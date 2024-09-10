@@ -80,7 +80,16 @@
 #   - repository: self
 #     type: git
 #     ref: Feature/Debjit #debug/paas
-    
+
+variables:
+  - group: 'External IP Addresses'
+  - group: 'Image Names'
+  - group: 'Azure Logins'
+  - name: azureUserId
+    value: PowershellScriptsSP
+  - name: Build-all
+    value: true
+   
 jobs:
 - job: Job_1
   displayName: 'Agent job : w22d-14-2'
