@@ -15,9 +15,9 @@ variables:
   - group: 'Image Names'
   - group: 'Azure Logins'
   - name: atomic-build
-    value: false
+    value: $false
   - name: atomic-build-ps
-    value: false
+    value: $false
   - name: azureUserId
     value: PowershellScriptsSP
   - name:  Build-all
