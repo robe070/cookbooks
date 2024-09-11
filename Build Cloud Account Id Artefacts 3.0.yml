@@ -30,7 +30,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID-OLD'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
