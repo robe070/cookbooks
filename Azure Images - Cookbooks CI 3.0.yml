@@ -72,8 +72,6 @@ variables:
     value: 0
   - name: VersionText-w19d-15-0j
     value: 0
-  - name: ConnectedServiceName
-    value: $(ConnectedServiceName)
 
 jobs:
 - job: Job_1
