@@ -630,6 +630,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
+    continueOnError: false
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
