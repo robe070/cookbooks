@@ -10,12 +10,7 @@ resources:
     type: git
     ref: refs/heads/debug/paas
 
-jobs:
-- job: Job_1
-  displayName: 'Agent job : w12r2d-14-2'
-  timeoutInMinutes: 120
-  condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-  variables: 
+variables: 
   - group: 'External IP Addresses'
   - group: 'Image Names'
   - group: 'Azure Logins'
@@ -24,29 +19,29 @@ jobs:
   - name: atomic-build-ps
     value: false
   - name: azureUserId
-    value: LPC-AsBake
+    value: PowershellScriptsSP
   - name:  Build-all
-    value: False
+    value: false
   - name: Build-w12r2d-14-2
-    value: True
+    value: true
   - name: Build-w12r2d-15-0
-    value: False
+    value: false
   - name: Build-w16d-14-2
-    value: False
+    value: false
   - name: Build-w16d-14-2j
-    value: False
+    value: false
   - name: Build-w16d-15-0
-    value: False
+    value: false
   - name: Build-w16d-15-0j
-    value: False
+    value: false
   - name: Build-w19d-14-2
-    value: False
+    value: false
   - name: Build-w19d-14-2j
-    value: False
+    value: false
   - name: Build-w19d-15-0
-    value: True
+    value: false
   - name: Build-w19d-15-0j
-    value: False
+    value: false
   # - name: clientsecret
     # value: ********
   - name: GitBranch
@@ -80,6 +75,13 @@ jobs:
   - name: ConnectedServiceName
     value: $(ConnectedServiceName)
 
+jobs:
+- job: Job_1
+  displayName: 'Agent job : w12r2d-14-2'
+  timeoutInMinutes: 120
+  condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
+
+
   pool:
     vmImage: windows-2019
     
@@ -102,7 +104,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -167,7 +169,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     name: ''
@@ -244,7 +246,7 @@ jobs:
 - job: Job_5
   displayName: 'Agent job : w12r2d-15-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -265,7 +267,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -330,7 +332,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -348,7 +350,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w12r2d150$(VersionText-w12r2d-15-0)$(Build.BuildNumber)
@@ -404,7 +406,7 @@ jobs:
 - job: Job_6
   displayName: 'Agent job : w16d-14-2'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -425,7 +427,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -490,7 +492,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -508,7 +510,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
@@ -564,7 +566,7 @@ jobs:
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -585,7 +587,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -650,7 +652,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -668,7 +670,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
@@ -724,7 +726,7 @@ jobs:
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -745,7 +747,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -810,7 +812,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -828,7 +830,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
@@ -884,7 +886,7 @@ jobs:
 - job: Job_2
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -905,7 +907,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -970,7 +972,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -988,7 +990,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
@@ -1044,7 +1046,7 @@ jobs:
 - job: Job_7
   displayName: 'Agent job : w16d-14-2j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -1065,7 +1067,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -1130,7 +1132,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -1148,7 +1150,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
@@ -1204,7 +1206,7 @@ jobs:
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -1225,7 +1227,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -1290,7 +1292,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -1308,7 +1310,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
@@ -1364,7 +1366,7 @@ jobs:
 - job: Job_9
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -1385,7 +1387,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -1450,7 +1452,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -1468,7 +1470,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
@@ -1524,7 +1526,7 @@ jobs:
 - job: Job_10
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
     vmImage: windows-2019
   steps:
@@ -1545,7 +1547,7 @@ jobs:
 
         Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-        if ($Env:PsModuleInstalled -eq 'True') {
+        if ($Env:PsModuleInstalled -eq 'true') {
             Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
             return;
         }
@@ -1610,7 +1612,7 @@ jobs:
         Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-        $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
   - task: PowerShell@2
     displayName: Azure Login
@@ -1628,7 +1630,7 @@ jobs:
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
-    continueOnError: True
+    continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
