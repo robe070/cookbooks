@@ -8,7 +8,7 @@ resources:
   repositories:
   - repository: self
     type: git
-    ref: refs/heads/debug/paas
+    ref: feature/priyanka-classic2YAML
 
 variables: 
   - group: 'External IP Addresses'
@@ -182,7 +182,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w12r2d142$(VersionText-w12r2d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w12r2d142$(VersionText-w12r2d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -344,7 +344,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w12r2d150$(VersionText-w12r2d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w12r2d150$(VersionText-w12r2d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -504,7 +504,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -664,7 +664,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps']) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -824,7 +824,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -984,7 +984,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -1144,7 +1144,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -1304,7 +1304,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -1464,7 +1464,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
@@ -1624,7 +1624,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
