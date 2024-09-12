@@ -769,29 +769,29 @@ jobs:
 
   #       $Env:PsModuleInstalled = 'True'
 
-  # - task: DownloadSecureFile@1
-  #   name: keypair
-  #   displayName: Download Keypair
-  #   inputs:
-  #     secureFile: AzureDevOps.pem
-  # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-  #   name: BuildImage
-  #   displayName: Build Image
-  #   inputs:
-  #     awsCredentials: $(awsCredentials)
-  #     regionName: $(regionName)
-  #     arguments: " -VersionText 'w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
-  #     filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-  # - task: PowerShell@2
-  #   displayName: 'Generate: AMI Id'
-  #   inputs:
-  #     targetType: inline
-  #     script: >-
-  #       Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-  #       Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
-  #       Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
