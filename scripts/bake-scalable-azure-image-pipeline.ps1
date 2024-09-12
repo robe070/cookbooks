@@ -71,6 +71,10 @@ param (
     $Language="ENG",
 
     [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallBaseSoftware=$true,
+
+    [Parameter(Mandatory=$false)]
     [string]
     $Title,
 
