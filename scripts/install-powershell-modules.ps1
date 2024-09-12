@@ -10,8 +10,8 @@ if ($Env:PsModuleInstalled -eq 'True') {
     return;
 }
 # Pester for Testing
-Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
-Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 $Env:PsModuleInstalled = 'True'
