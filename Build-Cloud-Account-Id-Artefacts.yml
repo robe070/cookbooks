@@ -21,12 +21,6 @@ jobs:
   - group: 'Azure Logins'
   - name: azureUserId
     value: PowershellScriptsSP
-  # - name: Build-all
-  #   value: true
-  # - name: Build-w19d-15-ID
-  #   value: false
-  # - name: GitBranch
-  #   value: $(Build.SourceBranch)
   - name: GitBranchPR
     value: 'debug/paas'
   - name: JpnLanguage
@@ -40,7 +34,7 @@ jobs:
   - checkout: self
   - task: PowerShell@2
     displayName: Install PS Module
-    condition: and(succeeded(), or(eq($('Build-w19d-14-2'), 'true'), eq($('Build-all'), 'true')))
+    condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
     inputs:
       filePath: scripts/install-powershell-modules-azure.ps1
       errorActionPreference: continue
