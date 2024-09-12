@@ -26,10 +26,6 @@ param (
     [string]
     $AmazonAMIName,
 
-    [Parameter(Mandatory=$false)]
-    [string]
-    $AzureImageUri,
-
     [Parameter(Mandatory=$true)]
     [string]
     $GitBranch,
@@ -74,29 +70,10 @@ param (
     [string]
     $Language="ENG",
 
-    [Parameter(Mandatory=$false)]
-    [switch]
-    $InstallLanguagePack=$false,
-
-    [Parameter(Mandatory=$false)]
-    [boolean]
-    $InstallScalable=$true,
-
-    [Parameter(Mandatory=$false)]
-    [boolean]
-    $InstallBaseSoftware=$true,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $Title,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $CloudAccountLicense
   )
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "SilentlyContinue"
+$VerbosePreference = "Continue"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -123,8 +100,8 @@ while($count -ne 0 ) {
                             -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
-                            -InstallBaseSoftware $InstallBaseSoftware `
-                            -InstallScalable $InstallScalable `
+                            -InstallBaseSoftware $true `
+                            -InstallScalable $true `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
                             -Win2012 $Win2012 `
@@ -140,10 +117,7 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
-                            -InstallLanguagePack:$InstallLanguagePack `
-                            -Title $Title `
-                            -CloudAccountLicense $CloudAccountLicense
-
+                            
     }
     catch{
         $PSitem | Out-Default | Write-Host
