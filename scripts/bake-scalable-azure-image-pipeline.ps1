@@ -26,6 +26,10 @@ param (
     [string]
     $AmazonAMIName,
 
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AzureImageUri,
+
     [Parameter(Mandatory=$true)]
     [string]
     $GitBranch,
@@ -68,11 +72,31 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Language="ENG"
+    $Language="ENG",
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $InstallLanguagePack=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallScalable=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallBaseSoftware=$true,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Title,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $CloudAccountLicense
   )
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -96,12 +120,13 @@ while($count -ne 0 ) {
                             -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
                             -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
                             -AmazonAMIName $AmazonAMIName `
+                            -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
-                            -InstallBaseSoftware $true `
+                            -InstallBaseSoftware $InstallBaseSoftware `
+                            -InstallScalable $InstallScalable `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
-                            -InstallScalable $true `
                             -Win2012 $Win2012 `
                             -ManualWinUpd $false `
                             -SkipSlowStuff $false `
@@ -114,14 +139,17 @@ while($count -ne 0 ) {
                             -AtomicBuild:$AtomicBuild `
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
-                            -Language $Language
+                            -Language $Language `
+                            -InstallLanguagePack:$InstallLanguagePack `
+                            -Title $Title `
+                            -CloudAccountLicense $CloudAccountLicense
 
     }
     catch{
         $PSitem | Out-Default | Write-Host
         $count = $count -1
         if($count -eq 0){
-            Write-Host "Image Bake failed even after $MaxRetry retries"
+            throw "Image Bake failed even after $MaxRetry retries"
             break
         }
         elseif ($Cloud -eq 'AWS'){
@@ -133,7 +161,7 @@ while($count -ne 0 ) {
         break
     }
     if($Cloud -eq 'Azure'){
-        Write-Host "Image bake failed. Retry not enabled in Azure"
+        throw "Image bake failed. Retry not enabled in Azure"
         break
     }
 
