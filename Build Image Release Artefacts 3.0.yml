@@ -494,7 +494,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0.txt
-      ArtifactName: aws
+      ArtifactName: aws-w19d-15-0
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
