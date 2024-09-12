@@ -15,7 +15,7 @@ param (
     [Parameter(Mandatory=$true)]
     [string]
     $VersionText,
-
+    
     [Parameter(Mandatory=$true)]
     [int]
     $VersionMajor,
@@ -78,7 +78,7 @@ try
     $Script:Imageid = $AmazonImage[0].ImageId
     Write-Output "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
-    Create-EC2Instance $Script:Imageid $script:keypair $script:SG -VersionText $VersionText
+    Create-EC2Instance $Script:Imageid $script:keypair $script:SG
 
     # Remote PowerShell
 
@@ -87,7 +87,7 @@ try
 
     Connect-RemoteSession
 
-    # Simple test of session:
+    # Simple test of session: 
     # Invoke-Command -Session $Script:session {(Invoke-WebRequest http://169.254.169.254/latest/user-data).RawContent}
 
     Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
@@ -95,13 +95,13 @@ try
     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
         Write-Error "LastExitCode: $remotelastexitcode"
         throw 1
-    }
+    }    
 
     # Setup fundamental variables in remote session
 
     Execute-RemoteInit
 
-    Execute-RemoteBlock $Script:session {
+    Execute-RemoteBlock $Script:session {  
 
         Write-Verbose ("Save S3 DVD image url and other global variables in registry")
         $lansaKey = 'HKLM:\Software\LANSA\'
@@ -125,7 +125,7 @@ try
     # Install Chocolatey
 
     Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
-
+    
     # Then we install git using chocolatey and pull down the rest of the files from git
 
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $true)
@@ -163,7 +163,7 @@ try
 
     # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword)
-
+        
     Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-post-winupdates.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath )
 
     Invoke-Command -Session $Script:session {Set-ExecutionPolicy restricted -Scope CurrentUser}
@@ -184,11 +184,11 @@ try
     $TagDesc = "$($AmazonImage[0].Description) created on $($AmazonImage[0].CreationDate) with $script:instancename"
     $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss")"     # AMI ID must not contain colons
     $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
-
+ 
     $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
-
+ 
     New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} # Add tags to new AMI
-
+    
     while ( $true )
     {
         Write-Output "$(Log-Date) Waiting for AMI to become available"
@@ -201,7 +201,7 @@ try
         Sleep -Seconds 10
     }
     Write-Output "$(Log-Date) AMI is available"
-
+  
     # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
     $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
@@ -211,8 +211,8 @@ try
         {
             New-EC2Tag -Resources $_.SnapshotID -Tags @( @{ Key = "Name" ; Value = $tagName}, @{ Key = "Description"; Value = $tagDesc } )
         }
-    }
-
+    } 
+    
     [console]::beep(500,1000)
 
     #####################################################################################

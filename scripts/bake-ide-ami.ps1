@@ -74,10 +74,6 @@ param (
 
     [Parameter(Mandatory=$false)]
     [boolean]
-    $InstallScalableLicense=$false,
-
-    [Parameter(Mandatory=$false)]
-    [boolean]
     $InstallScalable=$false,
 
     [Parameter(Mandatory=$false)]
@@ -144,15 +140,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [String[]]
-    $ExternalIPAddresses,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $Title,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $CloudAccountLicense
+    $ExternalIPAddresses
     )
 
 #Requires -RunAsAdministrator
@@ -199,24 +187,24 @@ else
 
 Set-StrictMode -Version Latest
 
-if ( $Title ) {
-    $Script:DialogTitle = $Title
-    $script:instancename = "$Title $VersionText installed on $(Log-Date)"
-} elseif ($InstallIDE -eq $true) {
+if ($InstallIDE -eq $true) {
     $Script:DialogTitle = "LANSA IDE"
     $script:instancename = "LANSA IDE $VersionText installed on $(Log-Date)"
-} elseif ($InstallScalable -eq $true) {
+}
+if ($InstallScalable -eq $true) {
     $Script:DialogTitle = "LANSA Scalable License "
     $script:instancename = "LANSA Scalable License $VersionText installed on $(Log-Date)"
-} elseif ($InstallLanguagePack -or ($Language -ne 'ENG') ) {
+}
+
+if ($InstallLanguagePack -or ($Language -ne 'ENG') ) {
     $Script:DialogTitle = "LANSA Scalable License $Language"
     $script:instancename = "LANSA Scalable License $Language $VersionText installed on $(Log-Date)"
-} elseif ($OnlySaveImage) {
+}
+
+if ($OnlySaveImage) {
     $Script:DialogTitle = "LANSA Scalable License Only Save Image"
     $script:instancename = "LANSA Scalable License Only Save Image $VersionText installed on $(Log-Date)"
 }
-
-Write-Host ("$(Log-Date) DialogTitle = $($Script:DialogTitle) instancename = $($Script:instancename)")
 
 try
 {
@@ -243,14 +231,9 @@ try
     } elseif ($VersionText -like "w19*"){
         $Platform= 'Win2019'
         $Win2012 = $false
-    } elseif ($VersionText -like "w22*"){
-        $Platform= 'Win2022'
-        $Win2012 = $false
     } else {
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
-
-    Write-Host "Language = $Language, Platform = $Platform"
 
     if ( $UploadInstallationImageChanges -and $InstallIDE) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
@@ -315,7 +298,7 @@ try
                 throw "There are $TaggedInstances.Count instances - either 0 or more than 1. Cannot 'Only Save Image'"
             }
         } else {
-            Write-Host( "$(Log-Date) Removing existing instance that would be using the security group, search using tag:BakeVersion;Value=$VersionText")
+            Write-Host( "$(Log-Date) Removing existing instance that would be using the security group")
             $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
             foreach ($TaggedInstance in $TaggedInstances) {
                 $TaggedInstance.ResourceId | Out-Default | Write-Host
@@ -340,12 +323,12 @@ try
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         if ( -not $OnlySaveImage) {
-            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
+            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large'
         }
 
         $Script:vmname = "Bake $Script:instancename"
 
-        # New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
+        New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
 
 
     } elseif ($Cloud -eq 'Azure' ) {
@@ -358,7 +341,7 @@ try
             $AmazonAMIName = $AzureIMage.SKU
             $AzImageVersion = $AzureImage.Version
         } elseif ($AzureImageUri) {
-            Write-Host( "$(Log-Date) Using Image Uri $AzureImageUri")
+            Write-Host( "$(Log-Date) Using Image Uri")
         } else {
             Write-Host( "$(Log-Date) Using Microsoft MP image")
             $Publisher = "MicrosoftWindowsServer"
@@ -367,7 +350,6 @@ try
                 'Win2012' { $AzImageVersion = '9600*'  }
                 'Win2016' { $AzImageVersion = '14393*'  }
                 'Win2019' { $AzImageVersion = '17763*'  }
-                'Win2022' { $AzImageVersion = '20348*'  }
             }
         }
 
@@ -419,20 +401,12 @@ try
         if ( $CreateVM -and -not $OnlySaveImage) {
             Write-Host "$(Log-Date) Delete VM if it already exists"
 
-            $VerbosePreference = "SilentlyContinue"
-
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
 
             # Add code to remove the .VHD Blob if exists from the Storage Container
             $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
-
-            $VerbosePreference = "Continue"
-
             Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $StorageAccountResourceGroup/$StorageAccountName" | Out-Default
-
-            $VerbosePreference = "SilentlyContinue"
-
             if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
                 Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
                 $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host
@@ -440,8 +414,6 @@ try
             } else {
                 Write-Host "The Blob $Script:vmname.vhd doesn't exists" | Out-Default
             }
-            $VerbosePreference = "Continue"
-
         }
 
         Write-Host "$(Log-Date) Create VM"
@@ -492,7 +464,6 @@ try
 
             $externalipcidr = "$externalip/32"
             Write-Host "Adding External IP $externalipcidr"
-
             # Create an inbound network security group rule for port 3389
             $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
             -Direction Inbound -Priority 1000 -SourceAddressPrefix $externalipcidr -SourcePortRange * -DestinationAddressPrefix * `
@@ -519,13 +490,7 @@ try
 
         $KeyVault = "bakingVaultDP"
         $certificateName = "bakingWinRMCertificate"
-
-        $VerbosePreference = "SilentlyContinue"
-
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
-
-        $VerbosePreference = "Continue"
-
         if ( $secret ) {
             $SecretURL = $secret.id
         } else {
@@ -556,19 +521,17 @@ $jsonObject = @"
             $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
         }
 
+        # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
+        $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
         $vmSecretUrls = @();
-        if (-Not $CloudAccountLicense) {
-            # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
-            $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
-            foreach ($vmCertificateName in $vmSecrets) {
-                $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
-                if ( $secret ) {
-                    # Write to a file
-                    Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
-                    $vmSecretUrls += $secret.id;
-                } else {
-                    throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
-                }
+        foreach ($vmCertificateName in $vmSecrets) {
+            $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
+            if ( $secret ) {
+                # Write to a file
+                Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
+                $vmSecretUrls += $secret.id;
+            } else {
+                throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
             }
         }
 
@@ -699,6 +662,7 @@ $jsonObject = @"
             # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
             # Git is a far faster mechansim for transferring files than using RemotePS.
             # From now on we may execute scripts which rely on other scripts to be present from the LANSA Cookbooks git repo
+
             #####################################################################################
 
             if ( $Cloud -eq 'AWS' ) {
@@ -724,18 +688,19 @@ $jsonObject = @"
             # Make sure the session is initialised correctly
             ReConnect-Session
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe )
 
-            if ( $InstallScalable ) {
+        if ( $InstallScalable ) {
 
-                if ( -not $Win2012 ) {
-                    Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
-                    Write-Host( "$(Log-Date) Only Windows 2016 and later because the api requires powershell 5.x" )
-                    Execute-RemoteBlock $Script:session {
-                        Add-MpPreference -ExclusionPath ("${ENV:ProgramFiles(x86)}\Lansa","${ENV:ProgramFiles(x86)}\webserver","${ENV:ProgramFiles(x86)}\app1","${ENV:ProgramFiles(x86)}\app2","${ENV:ProgramFiles(x86)}\app3","${ENV:ProgramFiles(x86)}\app4","${ENV:ProgramFiles(x86)}\app5","${ENV:ProgramFiles(x86)}\app6","${ENV:ProgramFiles(x86)}\app7","${ENV:ProgramFiles(x86)}\app8","${ENV:ProgramFiles(x86)}\app9","${ENV:ProgramFiles(x86)}\app10")
-                    }
+            if ( -not $Win2012 ) {
+                Write-Host( "$(Log-Date) Exclude LANSA directories from Windows Defender. Up to 25% CPU usage on t2.medium AWS instance" )
+                Write-Host( "$(Log-Date) Only Windows 2016 because the api requires powershell 5.x" )
+                Execute-RemoteBlock $Script:session {
+                    Add-MpPreference -ExclusionPath ("${ENV:ProgramFiles(x86)}\Lansa","${ENV:ProgramFiles(x86)}\webserver","${ENV:ProgramFiles(x86)}\app1","${ENV:ProgramFiles(x86)}\app2","${ENV:ProgramFiles(x86)}\app3","${ENV:ProgramFiles(x86)}\app4","${ENV:ProgramFiles(x86)}\app5","${ENV:ProgramFiles(x86)}\app6","${ENV:ProgramFiles(x86)}\app7","${ENV:ProgramFiles(x86)}\app8","${ENV:ProgramFiles(x86)}\app9","${ENV:ProgramFiles(x86)}\app10")
                 }
             }
+        }
+
         } else {
             Execute-RemoteInitPostGit
 
@@ -827,8 +792,6 @@ $jsonObject = @"
         if ( $InstallLanguagePack ) {
             Write-Host( "$(Log-Date) Install language pack")
             Write-Host( "Each of the 3 steps requires a reboot in between. Hence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
-            Write-Host "Language = $Language, Platform = $Platform"
-
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\language-pack-download-install.ps1" -ArgumentList  @($Language, $Platform)
             # Reboot - Wait to ensure the VM has at least shutdown, if not started up again
             Start-Sleep -Seconds 10
@@ -866,50 +829,35 @@ $jsonObject = @"
         ReConnect-Session
 
         if ( $InstallIDE -eq $true ) {
-            if ( -Not $CloudAccountLicense ) {
-                # if ($Cloud -eq 'AWS') {
-                #     #####################################################################################
-                #     Write-Host "$(Log-Date) Installing License"
-                #     #####################################################################################
 
-                #     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
-                #     Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
-                # }
+            if ($Cloud -eq 'AWS') {
                 #####################################################################################
-                Write-Host "$(Log-Date) Installing Licenses"
+                Write-Host "$(Log-Date) Installing License"
                 #####################################################################################
 
-                Execute-RemoteBlock $Script:session {
-                    CreateLicence -awsParameterStoreName "LANSADevelopmentLicense.pfx"  -dnsName "LANSA Development License" -registryValue "DevelopmentLicensePrivateKey" | Out-Default | Write-Host
-                    CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" | Write-Host
+                Send-RemotingFile $Script:session "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" | Write-Host
+            }
+            Execute-RemoteBlock $Script:session {
+                CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
+                CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
+                # Errors are thrown out of CreateLicense so no need to catch a throw here.
+                # Let the local script catch it
+            }
 
-                    if ( $Using:InstallScalableLicense ) {
-                        CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
-
-                    }
-
-                    # CreateLicence "$Script:LicenseKeyPath\LANSADevelopmentLicense.pfx" $Using:LicenseKeyPassword "LANSA Development License" "DevelopmentLicensePrivateKey"
-                    # CreateLicence "$Script:LicenseKeyPath\LANSAIntegratorLicense.pfx" $Using:LicenseKeyPassword "LANSA Integrator License" "IntegratorLicensePrivateKey"
-
-                    # Errors are thrown out of CreateLicense so no need to catch a throw here.
-                    # Let the local script catch it
-                }
-
-                if ( -not $CloudAccountLicense ) {
-                    Execute-RemoteBlock $Script:session {
-                        try {
-                            Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
-                            Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                        } catch {
-                            Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                            Write-RedOutput $_ | Out-Default | Write-Host
-                            Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                            cmd /c exit 1
-                            throw
-                        }
-                    }
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'DevelopmentLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
                 }
             }
+
             Write-Host "$(Log-Date) Installing IDE"
             PlaySound
 
@@ -931,41 +879,30 @@ $jsonObject = @"
                     throw 1
                 }
             }
-            $dummy = MessageBox "Manually install any other software" -Pipeline:$Pipeline
         }
 
         if ( $InstallScalable -eq $true ) {
 
             # Must run install-lansa-scalable.ps1 after Windows Updates as it sets RunOnce after which you must not reboot.
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $CloudAccountLicense)
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-scalable.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath)
 
-            if ( -Not $CloudAccountLicense ) {
+            Write-Host "Test that keys are configured"
 
-                Write-Host "Test that keys are configured"
-
-                Execute-RemoteBlock $Script:session {
-                    try {
-                        Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
-                        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-                    } catch {
-                        Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
-                        Write-RedOutput $_ | Out-Default | Write-Host
-                        Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
-                        cmd /c exit 1
-                        throw
-                    }
+            Execute-RemoteBlock $Script:session {
+                try {
+                    Test-RegKeyValueIsNotNull 'ScalableLicensePrivateKey'
+                    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
+                } catch {
+                    Write-RedOutput "Test-RegKeyValueIsNotNull script block in bake-ide-ami.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
+                    Write-RedOutput $_ | Out-Default | Write-Host
+                    Write-RedOutput $PSItem.ScriptStackTrace | Out-Default | Write-Host
+                    cmd /c exit 1
+                    throw
                 }
             }
         }
 
         # Re-create Session which may have been lost due to a Windows reboot, and do it anyway so its a clean session with output working
-        ReConnect-Session
-        if ( $CloudAccountLicense ) {
-            Write-Host "$(Log-Date) Installing Cloud Account Id License"
-
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-cloud-account-id-license.ps1 -ArgumentList  @($Script:GitRepoPath, $CloudAccountLicense)
-        }
-
         ReConnect-Session
 
         Write-Host "$(Log-Date) Completing installation steps, except for sysprep"
@@ -979,7 +916,7 @@ $jsonObject = @"
             }
         }
 
-        if ( $InstallScalable -eq $true -and (-not $CloudAccountLicense ) ) {
+        if ( $InstallScalable -eq $true ) {
             Write-Host "Test that license keys are still configured"
             Execute-RemoteBlock $Script:session {
                 try {
@@ -995,7 +932,7 @@ $jsonObject = @"
             }
         }
 
-        if ( $InstallIDE -eq $true -and (-not $CloudAccountLicense ) ) {
+        if ( $InstallIDE -eq $true ) {
             Write-Host "Test that license keys are still configured"
             Execute-RemoteBlock $Script:session {
                 try {
@@ -1112,12 +1049,7 @@ $jsonObject = @"
             # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
             Write-Host "$(Log-Date) VM has fully stopped"
         }
-
-        try {
-            Remove-PSSession $Script:session | Out-Default | Write-Host
-        } catch {
-            Write-Host "$(Log-Date) Ignoring error when removing connection to VM after Sysprep"
-        }
+        Remove-PSSession $Script:session | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
 

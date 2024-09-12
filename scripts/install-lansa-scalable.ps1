@@ -21,12 +21,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $TempPath_,
-
-    [Parameter(Mandatory=$false)]
-    [string]
-    $CloudAccountLicense
-
+    $TempPath_
     )
 
 # If environment not yet set up, it should be running locally, not through Remote PS
@@ -86,17 +81,14 @@ try
         Set-Service $ServiceName -startuptype "manual" | Out-Default | Write-Host
     }
 
-    if ( -Not $CloudAccountLicense ) {
+    #####################################################################################
+    Write-Host "$(Log-Date) Installing License"
+    #####################################################################################
+    # Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
+    CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
+    CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
 
-        #####################################################################################
-        Write-Host "$(Log-Date) Installing License"
-        #####################################################################################
-        # Write-Debug "Password: $licensekeypassword_" | Out-Default | Write-Host
-        CreateLicence -awsParameterStoreName "LANSAScalableLicense.pfx"  -dnsName "LANSA Scalable License" -registryValue "ScalableLicensePrivateKey" | Out-Default | Write-Host
-        CreateLicence -awsParameterStoreName "LANSAIntegratorLicense.pfx"  -dnsName "LANSA Integrator License" -registryValue "IntegratorLicensePrivateKey" | Out-Default | Write-Host
-
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     #####################################################################################
     Write-Host ("$(Log-Date) Shortcuts")
@@ -134,9 +126,7 @@ try
 
     Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "StartHere" -Value "powershell -executionpolicy Bypass -file $GitRepoPath_\scripts\show-start-here.ps1" | Out-Default | Write-Host
 
-    if ( -Not $CloudAccountLicense ) {
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     Add-TrustedSite "lansa.com" | Out-Default | Write-Host
     Add-TrustedSite "google-analytics.com" | Out-Default | Write-Host
@@ -146,9 +136,7 @@ try
     Add-TrustedSite "*.lansa.myabsorb.com" | Out-Default | Write-Host
     Add-TrustedSite "*.cloudfront.com" | Out-Default | Write-Host
 
-    if ( -Not $CloudAccountLicense ) {
-        Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
-    }
+    Test-RegKeyValueIsNotNull 'IntegratorLicensePrivateKey'
 
     Write-Host ("$(Log-Date) Installation completed successfully")
 }

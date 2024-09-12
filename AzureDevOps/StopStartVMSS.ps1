@@ -1,8 +1,8 @@
 <#PSScriptInfo
 
-.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when a VMSS is finished with for the moment. If the VMSS is tagged with ShutdownPolicy = Excluded, the VM is not stopped. Requires an Azure Automation Managed Identity account.
+.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when a VMSS is finished with for the moment. If the VMSS is tagged with ShutdownPolicy = Excluded, the VM is not stopped. Requires an Azure Automation account with an Azure Run As account credential.
 
-.VERSION 1.0.7
+.VERSION 1.0.5
 
 .GUID 5b97ae2e-b40a-458c-b34d-eda0e4d1f0d1
 
@@ -30,13 +30,11 @@
 1.0.3: - Use Connect-AzureAutomation module
 1.0.4: - Deal with 0 VMSS
 1.0.5: - Change text
-1.0.6: - Update to Managed Identity and Az Modules
-1.0.7: - Edit synopsis
 #>
 
 <#
 .SYNOPSIS
-Stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group, exclude by tag
+Stop or start all Virtual Machine Scale Sets in the current subscription or in a specific Resource Group
 
 .PARAMETER ResourceGroupName
 The Azure resource group name or leave empty to target ALL VMSS in the current subscription
@@ -45,29 +43,22 @@ The Azure resource group name or leave empty to target ALL VMSS in the current s
 Specify either 'stop' or 'start' to stop or start the VMSS.
 #>
 
+#Requires -Modules Connect-AzureAutomation
 
 workflow StopStartVMSS
 {
     Param
     (
-      [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action,
-      [Parameter(Mandatory=$false)] [String] $AzureResourceGroup
+        [Parameter(Mandatory=$false)] [String] $AzureResourceGroup,
+	    [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action
     )
 
-    try
-    {
-       "Logging in to Azure..."
-       Connect-AzAccount -Identity
-    }
-    catch {
-       Write-Error -Message $_.Exception
-       throw $_.Exception
-    }
+    Connect-AzureAutomation
 
     if ( $AzureResourceGroup ) {
-        $VMSSs = @(Get-AzVmss -ResourceGroupName $AzureResourceGroup)
+        $VMSSs = @(Get-AzureRmVmss -ResourceGroupName $AzureResourceGroup)
     } else {
-        $VMSSs = @(Get-AzVmss)
+        $VMSSs = @(Get-AzureRmVmss)
     }
 
     if ( $VMSSs ) {
@@ -79,7 +70,7 @@ workflow StopStartVMSS
             {
                 if ($VMSS.Tags["ShutdownPolicy"] -ne "Excluded" ) {
                     Write-Output "Stopping VMSS '$($VMSS.ResourceGroupName)/$($VMSS.name)'"
-                    Stop-AzVmss -ResourceGroupName $VMSS.ResourceGroupName -VMScaleSetName $VMSS.name -Force -Verbose
+                    Stop-AzureRmVmss -ResourceGroupName $AzureResourceGroup -VMScaleSetName $VMSS.name -Force -Verbose
                 } else {
                     Write-Output "Skipping Excluded VMSS '$($VMSS.ResourceGroupName)/$($VMSS.name)'"
                 }
@@ -91,7 +82,7 @@ workflow StopStartVMSS
             foreach -parallel ($VMSS in ($VMSSs) )
             {
                 Write-Output "Starting VMSS '$($VMSS.ResourceGroupName)/$($VMSS.name)'"
-                Start-AzVmss -ResourceGroupName $VMSS.ResourceGroupName -VMScaleSetName $VMSS.name -Verbose
+                Start-AzureRmVmss -ResourceGroupName $AzureResourceGroup -VMScaleSetName $VMSS.name -Verbose
             }
         }
     } else {

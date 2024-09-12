@@ -7,8 +7,6 @@ param(
     [String]
     $Platform
 )
-Write-Host "Language = $Language, Platfoprm = $Platform"
-
 switch ( $Platform) {
     "win2016" {
         switch ( $Language ) {

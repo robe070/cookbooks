@@ -1,6 +1,6 @@
 <#PSScriptInfo
 
-.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Application Gateways in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when Application Gateways are finished with for the moment. If the Application Gateway is tagged with ShutdownPolicy = Excluded, the Application Gateway is not stopped. Requires an Azure Automation Managed Identity account.
+.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Application Gateways in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when Application Gateways are finished with for the moment. If the Application Gateway is tagged with ShutdownPolicy = Excluded, the Application Gateway is not stopped. Requires an Azure Automation account with an Azure Run As account credential.
 
 .VERSION 1.0.6
 
@@ -28,14 +28,14 @@
 1.0.1: - Add initial version
 1.0.2: - Gallery text changes
 1.0.3: - Use Connect-AzureAutomation module
-1.0.4: - Update to Managed Identity and Az Modules
-1.0.5: - Edit synopsis
-1.0.6: - Remove dependency
+1.0.4: - Deal with 0 Application Gateways
+1.0.5: - Fix ShutdownPolicy Excluded
+1.0.6: - Reduce log output and detect result of stop/start operation
 #>
 
 <#
 .SYNOPSIS
-Stop or start all Application Gateways in the current subscription or in a specific Resource Group, exclude by tag
+Stop or start all Application Gateways in the current subscription or in a specific Resource Group
 
 .PARAMETER ResourceGroupName
 The Azure resource group name or leave empty to target ALL Application Gateways in the current subscription
@@ -44,58 +44,66 @@ The Azure resource group name or leave empty to target ALL Application Gateways 
 Specify either 'stop' or 'start' to stop or start the Application Gateways.
 #>
 
+#Requires -Modules Connect-AzureAutomation
+# import-module .\Connect-AzureAutomation
+
 workflow StopStartAppGW
 {
     Param
     (
-      [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action,
-      [Parameter(Mandatory=$false)] [String] $AzureResourceGroup
-
+        [Parameter(Mandatory=$false)] [String] $AzureResourceGroup,
+	    [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action
     )
 
-    try
-    {
-       "Logging in to Azure..."
-       Connect-AzAccount -Identity
-    }
-    catch {
-       Write-Error -Message $_.Exception
-       throw $_.Exception
-    }
+    Connect-AzureAutomation
 
     if ( $AzureResourceGroup ) {
-        $AppGWs = @(Get-AzApplicationGateway -ResourceGroupName $AzureResourceGroup)
+        $AppGWs = @(Get-AzureRmApplicationGateway -ResourceGroupName $AzureResourceGroup)
     } else {
-        $AppGWs = @(Get-AzApplicationGateway )
+        $AppGWs = @(Get-AzureRmApplicationGateway )
     }
 
-    $AppGWs.Name
-    $AppGWs.OperationalState
+    if ( $AppGWs ) {
+        $AppGWs.Name
+        $AppGWs.OperationalState
 
-    if ( $Action -eq "Stop")
-    {
-        Write-Output "Stopping Application Gateways"
-        foreach -parallel ($AppGW in ($AppGWs) )
+        if ( $Action -eq "Stop")
         {
-            if ($AppGW.OperationalState -eq "running" -and (-not $AppGW.Tags -or $AppGW.Tags["ShutdownPolicy"] -ne "Excluded" ) ) {
-                Write-Output "Stopping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
-                Stop-AzApplicationGateway -ApplicationGateway $AppGW -Verbose
-            } else {
-                Write-Output "Skipping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+            Write-Output "Stopping Application Gateways"
+            foreach -parallel ($AppGW in ($AppGWs) )
+            {
+                if ($AppGW.OperationalState -eq "running" -and (-not $AppGW.Tag -or $AppGW.Tag["ShutdownPolicy"] -ne "Excluded" ) ) {
+                    Write-Output "Stopping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+                    $StopAG = Stop-AzureRmApplicationGateway -ApplicationGateway $AppGW -Verbose
+                    if ( $StopAG.OperationalState -eq 'Stopped' ) {
+                        Write-Output "$($StopAG.name) successfully stopped"
+                    } else {
+                        Write-Error "$($StopAG.name) failed to stop. Current state = $($StopAG.OperationalState)"
+                    }
+                } else {
+                    Write-Output "Skipping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+                }
             }
         }
-    }
-    else
-    {
-        Write-Output "Starting Application Gateways"
-        foreach -parallel ($AppGW in ($AppGWs) )
+        else
         {
-            if ($AppGW.OperationalState -ne "running") {
-                Write-Output "Starting Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
-                Start-AzApplicationGateway -ApplicationGateway $AppGW -Verbose
-            } else {
-                Write-Output "Skipping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+            Write-Output "Starting Application Gateways"
+            foreach -parallel ($AppGW in ($AppGWs) )
+            {
+                if ($AppGW.OperationalState -ne "running") {
+                    Write-Output "Starting Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+                    Start-AzureRmApplicationGateway -ApplicationGateway $AppGW -Verbose
+                    if ( $StartAG.OperationalState -eq 'Running' ) {
+                        Write-Output "$($StartAG.name) successfully started"
+                    } else {
+                        Write-Error "$($StartAG.name) failed to start. Current state = $($StartAG.OperationalState)"
+                    }
+                } else {
+                    Write-Output "Skipping Application Gateway '$($AppGW.ResourceGroupName)/$($AppGW.name)'"
+                }
             }
         }
+    } else {
+        Write-Output "There are 0 Application Gateways matching the criteria"
     }
 }

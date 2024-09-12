@@ -25,13 +25,11 @@ param (
 try
 {
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
-    $Language = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Language').Language
-
-    Write-Host "$(Log-Date) Updating $Cloud instance, Language $Language"
+    Write-Host "$(Log-Date) Updating $Cloud instance"
 
     Write-Host "$(Log-Date) Synchronise clock"
 
-    cmd /c "sc triggerinfo w32time start/networkon stop/networkoff" | Out-Default
+    cmd /c "sc triggerinfo w32time start/networkon stop/networkoff" | Out-Host
 
     Write-Host "$(Log-Date) Ensure that Framework caching is completed"
 
@@ -41,11 +39,11 @@ try
     if ( $Cloud -eq "AWS" ) {
         if ( Test-Path $ENV:ProgramFiles\Amazon\Ec2ConfigService ) {
             Write-Host "$(Log-Date) Configure EC2 Settings"
-            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath" | Out-Default
-            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt" | Out-Default
+            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath" | Out-Host
+            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt" | Out-Host
         } else {
             # Newer EC2 Launch service
-            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*" | Out-Default
+            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*" | Out-Host
         }
     }
 
@@ -54,19 +52,11 @@ try
     if (Test-Path -Path $TempPath) {
         cmd /c rd /S/Q $TempPath | Out-Host
     }
-
-    if ( $Cloud -eq "Azure " -and ($Language -ne 'ENG') ) {
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "ConfigureLanguage" -Value "powershell -executionpolicy Bypass -file $GitRepoPath\scripts\recover-language-pack.ps1" | Out-Default
-
-        # $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy unrestricted -file $GitRepoPath\scripts\recover-language-pack.ps1"
-        # $trigger1 = New-ScheduledTaskTrigger -AtStartup
-        # Register-ScheduledTask -Action $action -Trigger $trigger1 -TaskName "Set $Language language settings" -RunLevel Highest -user System -TaskPath "\"
-    }
 }
 catch
 {
     $Global:LANSAEXITCODE = $LASTEXITCODE
-    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Default
-    Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Default
+    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Host    
+    Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Host
     throw
 }

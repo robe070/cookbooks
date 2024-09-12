@@ -236,15 +236,8 @@ param (
     if ($Pipeline) {
         Write-Host "$(Log-Date) Skipped the MessageBox for Pipeline"
 
-        # If OK Button on dialog, simulate it
-        if ( $buttons -eq 0x1 -or ($buttons -eq 0)) {
-            return 0x1
-        }
-
-        # if Yes button on dialog, simulate it
-        if ( $buttons -eq 0x3 -or ($buttons -eq 0x4)) {
-            return 0x6
-        }
+        # Simulate OK button
+        return 1
     }
 
     if ( -not $Script:msgbox ) {

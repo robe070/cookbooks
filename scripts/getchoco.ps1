@@ -275,11 +275,9 @@ try {
 
 # Answer yes to all prompts
 choco feature enable --name=allowGlobalConfirmation | Out-Default | Write-Host
-
-Write-Host "Add the lansa public artefact repo in Azure DevOps Visual LANSA/AWS project"
-choco source add -n=lansa `
--s="https://pkgs.dev.azure.com/VisualLansa/a84f5b8d-a4fa-4f6a-89f1-2a47264ee660/_packaging/7b5bc99f-5f6e-4f93-af73-efa179fe5cc2/nuget/v2/" `
- | Out-Default | Write-Host
+choco source add -n=choco `
+-s="https://pkgs.dev.azure.com/VisualLansa/_packaging/choco/nuget/v2" `
+-u="AzureDevOpsArtifacts@lansacloudlansacom.onmicrosoft.com" -p="aouaqh7whklasicbnmdhwooutxivnnmhut6upcmk7wyaeqr5ymmq"  | Out-Default | Write-Host
 
 # update chocolatey to the latest version
 #Write-Host "Updating chocolatey to the latest version"

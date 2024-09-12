@@ -1,8 +1,8 @@
 <#PSScriptInfo
 
-.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment. If the VM is tagged with ShutdownPolicy = Excluded, the VM is not stopped. VMs are also not stopped if it is already managed by a schedule. May exclude VMs using tag. Requires an Azure Automation account using System Managed Identity.
+.DESCRIPTION Azure Automation Workflow Runbook Script to stop or start all Virtual Machines in the current subscription or in a specific Resource Group. Useful for dev and test environments. Written to be used as either a scheduled job at the close of business or ad hoc when VMs are finished with for the moment. If the VM is tagged with ShutdownPolicy = Excluded, the VM is not stopped. VMs are also not stopped if it is already managed by a schedule. Requires an Azure Automation account with an Azure Run As account credential.
 
-.VERSION 1.0.6
+.VERSION 1.0.4
 
 .GUID 81441e5f-d154-4666-97cf-b8f3decb9341
 
@@ -29,14 +29,12 @@
 1.0.2: - Gallery text changes
 1.0.3: - Use Connect-AzureAutomation module
 1.0.4: - Deal with 0 VMs
-1.0.5: - Update to Managed Identity and Az Modules
-1.0.6: - Edit synopsis
 
 #>
 
 <#
 .SYNOPSIS
-Stop or start all Virtual Machines in the current subscription or in a specific Resource Group, exclude by tag
+Stop or start all Virtual Machines in the current subscription or in a specific Resource Group
 
 .PARAMETER ResourceGroupName
 The Azure resource group name or leave empty to target ALL VMs in the current subscription
@@ -45,72 +43,57 @@ The Azure resource group name or leave empty to target ALL VMs in the current su
 Specify either 'stop' or 'start' to stop or start the VMs.
 #>
 
+#Requires -Modules Connect-AzureAutomation
+
 workflow StopStartVM
 {
-   Param
-   (
-      [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action,
-      [Parameter(Mandatory=$false)] [String] $AzureResourceGroup
-   )
+    Param
+    (
+        [Parameter(Mandatory=$false)] [String] $AzureResourceGroup,
+	    [Parameter(Mandatory=$true)] [ValidateSet("Start","Stop")] [String]	$Action
+    )
 
-   try
-   {
-      "Logging in to Azure..."
-      Connect-AzAccount -Identity
-   }
-   catch {
-      Write-Error -Message $_.Exception
-      throw $_.Exception
-   }
+    Connect-AzureAutomation
 
-   $DevTestLabs = Get-AzResource | Where-Object {$_.ResourceType -eq "Microsoft.DevTestLab/schedules"}
+    $DevTestLabs = Get-AzureRmResource | Where-Object {$_.ResourceType -eq "Microsoft.DevTestLab/schedules"}
+    if ( $AzureResourceGroup ) {
+        $VMs = @(Get-AzureRmVM -ResourceGroupName $AzureResourceGroup -Status | Select-Object ResourceGroupName,Name,Location, tags, @{ label = “VMStatus”; Expression = { $_.PowerState } })
+    } else {
+        $VMs = @(Get-AzureRmVM -Status | Select-Object ResourceGroupName,Name,Location, tags, @{ label = “VMStatus”; Expression = { $_.PowerState } })
+    }
 
-   $RGIsNull = [String]::IsNullOrWhiteSpace($AzureResourceGroup)
-   if ( $RGIsNull  ) {
-      "All VMs"
-      $VMs = Get-AzVM -Status
+    if ( $VMs ) {
+        $VMs.Name
 
-      # $VMs = @(Get-AzureRmVM -Status | Select-Object ResourceGroupName,Name,Location, tags, @{ label = "VMStatus"; Expression = { $_.PowerState } })
-   } else {
-      "Resource Group filter $AzureResourceGroup"
-      $VMs = @(Get-AzVM -ResourceGroupName $AzureResourceGroup -Status)
-   }
+        if ( $Action -eq "Stop")
+        {
+            Write-Output "Stopping VMs"
+            foreach -parallel ($vm in ($VMs) )
+            {
+                $ShutDownName = "shutdown-computevm-{0}" -f $vm.Name
 
-   "Processing VMs"
-   if ( $VMs ) {
-      # $VMs
-      if ( $Action -eq "Stop")
-      {
-         Write-Output "Stopping VMs"
-         foreach -parallel ($vm in ($VMs) )
-         {
-            $vm.Name
-            $ShutDownName = "shutdown-computevm-{0}" -f $vm.Name
-
-            if ($vm.PowerState -eq "VM running" -and $vm.Tags["ShutdownPolicy"] -ne "Excluded" -and (-not $DevTestLabs -or ($DevTestLabs.Name -notcontains $ShutdownName) )) {
-               Write-Output "Stopping VM '$($vm.ResourceGroupName)/$($vm.name)'"
-               Stop-AzVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Force -Verbose
-            } else {
-               Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                if ($vm.VMStatus -eq "VM running" -and $vm.Tags["ShutdownPolicy"] -ne "Excluded" -and (-not $DevTestLabs -or ($DevTestLabs.Name -notcontains $ShutdownName) )) {
+                    Write-Output "Stopping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                    Stop-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Force -Verbose
+                } else {
+                    Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                }
             }
-         }
-      }
-      else
-      {
-         Write-Output "Starting VMs"
-         foreach -parallel ($vm in ($VMs) )
-         {
-            $vm.Name
-            if ($vm.PowerState -ne "VM running") {
-               Write-Output "Starting VM '$($vm.ResourceGroupName)/$($vm.name)'"
-               Start-AzVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Verbose
-            } else {
-               Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+        }
+        else
+        {
+            Write-Output "Starting VMs"
+            foreach -parallel ($vm in ($VMs) )
+            {
+                if ($vm.VMStatus -ne "VM running") {
+                    Write-Output "Starting VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                    Start-AzureRmVm -ResourceGroupName $vm.ResourceGroupName -Name $vm.name -Verbose
+                } else {
+                    Write-Output "Skipping VM '$($vm.ResourceGroupName)/$($vm.name)'"
+                }
             }
-         }
-      }
-      "Runbook Complete"
-   } else {
-      Write-Output "There are 0 VMs matching the criteria"
-   }
+        }
+    } else {
+        Write-Output "There are 0 VMs matching the criteria"
+    }
 }

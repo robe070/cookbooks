@@ -50,24 +50,6 @@ param(
 [Boolean]$DisableSQLServer = $true
 )
 
-function Test-RegistryValue {
-    param (
-        [parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]$Path,
-
-        [parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]$Value
-    )
-
-    try {
-        Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
-        return $true
-    } catch {
-        return $false
-    }
-
-}
-
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -137,8 +119,6 @@ try
 
     [boolean]$CompanionInstall = $false
 
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
     if ( $CompanionInstallPath.Length -gt 0) {
         if ( -not (test-path $CompanionInstallPath)) {
             Write-Error ("CompanionInstallPath '$CompanionInstallPath' does not exist")
@@ -155,50 +135,6 @@ try
     }
 
     if ($true) {
-        # On initial install
-
-        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
-            Write-Host ("$(Log-Date) Disable TCP Offloading" )
-            Disable-TcpOffloading
-
-            # When installing through cloudformation the current user is systemprofile.
-            # When GitDeployHub receives a webhook it may be running as administrator
-
-            Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
-            $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
-            if ( -not (test-path $KnownHostsDir)) {
-                mkdir $KnownHostsDir
-            }
-            Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
-            Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
-
-            # If there is an adminstrator user, create the known hosts there too.
-            $KnownHostsDir = "c:\users\administrator"
-            if ( (test-path $KnownHostsDir)) {
-                $KnownHostsDir = "$KnownHostsDir\.ssh"
-                if ( -not (test-path $KnownHostsDir)) {
-                    mkdir $KnownHostsDir
-                }
-                Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
-                Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
-            }
-
-            Write-Host ("$(Log-Date) Open Windows Firewall for HTTP ports...")
-            Write-Host ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
-            if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
-                New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
-            }
-            if ( $HTTPPortNumberHub.Length -gt 0) {
-                New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
-            }
-
-            Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
-            start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
-
-            Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
-            start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
-        }
-
         # ***********************************************************************************
         if ( (-not $CompanionInstall -and $DisableSQLServer ) ) {
             Write-Host( "$(Log-Date) Disable SQL Server service so it doesn't randomly start up" )
@@ -278,17 +214,17 @@ try
 
                 switch -regex ($DBUT) {
                     "SQLAZURE|MSSQL" {
-                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/msodbcsqlx64.msi"
+                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/msodbcsqlx64.msi"
                         [String[]] $Arguments = @( "/quiet", "/lv*x $( Join-Path -Path $ENV:TEMP -ChildPath "odbc.log" )", "IACCEPTMSODBCSQLLICENSETERMS=YES")
                     }
                     "MYSQL" {
-                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     "ODBCORACLE" {
-                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     default {
@@ -308,13 +244,13 @@ try
                         $DownloadODBCDriver = $false
                     }
                     "MYSQL" {
-                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     "ODBCORACLE" {
-                        $DRIVERURL32 = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-win32.msi"
-                        $DRIVERURL = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/mysql-connector-odbc-winx64.msi"
+                        $DRIVERURL32 = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-win32.msi"
+                        $DRIVERURL = "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/mysql-connector-odbc-winx64.msi"
                         [String[]] $Arguments = @( "/quiet")
                     }
                     default {
@@ -352,6 +288,50 @@ try
                     }
                 }
             }
+        }
+
+        # On initial install
+
+        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
+            Write-Host ("$(Log-Date) Disable TCP Offloading" )
+            Disable-TcpOffloading
+
+            # When installing through cloudformation the current user is systemprofile.
+            # When GitDeployHub receives a webhook it may be running as administrator
+
+            Write-Host ("$(Log-Date) Add github.com to known_hosts for current user and for Administrator" )
+            $KnownHostsDir = "$ENV:USERPROFILE\.ssh"
+            if ( -not (test-path $KnownHostsDir)) {
+                mkdir $KnownHostsDir
+            }
+            Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
+            Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+
+            # If there is an adminstrator user, create the known hosts there too.
+            $KnownHostsDir = "c:\users\administrator"
+            if ( (test-path $KnownHostsDir)) {
+                $KnownHostsDir = "$KnownHostsDir\.ssh"
+                if ( -not (test-path $KnownHostsDir)) {
+                    mkdir $KnownHostsDir
+                }
+                Set-AccessControl "Everyone" $KnownHostsDir "ReadAndExecute, Synchronize" "ContainerInherit, ObjectInherit"
+                Get-Content "$script:IncludeDir\github.txt" | out-file  "$KnownHostsDir\known_hosts" -Append -encoding utf8
+            }
+
+            Write-Host ("$(Log-Date) Open Windows Firewall for HTTP ports...")
+            Write-Host ("$(Log-Date) Note that these port numbers are what has been specified on the command line. If they are in use the LANSA Install will find the next available port and use that. So, strictly, should really pick up the port number after the lansa install has been run from the web site itself. For now, we know the environment as its a cloud image that we build.")
+            if ( $HTTPPortNumber.Length -gt 0 -and $HTTPPortNumber -ne "80") {
+                New-NetFirewallRule -DisplayName 'LANSA HTTP Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumber")
+            }
+            if ( $HTTPPortNumberHub.Length -gt 0) {
+                New-NetFirewallRule -DisplayName 'GitDeployHub Inbound'-Direction Inbound -Action Allow -Protocol TCP -LocalPort @("$HTTPPortNumberHub")
+            }
+
+            Write-Host "$(Log-Date) Install Visual C Runtime 32-bit for VS 2015, 2017, 2019"
+            start-process -FilePath "$InstallDir\vcredist_x86.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
+
+            Write-Host "$(Log-Date) Install Visual C Runtime 64-bit for VS 2015, 2017, 2019"
+            start-process -FilePath "$InstallDir\vcredist_x64.exe" -ArgumentList '/install', '/quiet', '/norestart' -Wait
         }
 
         if ($Cloud -ne "Docker") {
@@ -573,59 +553,10 @@ try
             Write-Warning( "$(Log-Date) $JSMpath is not installed") | Out-Default | Write-Host
         }
 
-        Write-Host( "$(Log-Date) It was noticed that occasionally on Japanese systems running on Azure that the Listener was stopped. It was postulated that it may be because it starts too soon after booting. So this code changes the Listener to perform a delayed start when booting." )
-
-        $ListenerPath = Join-Path $APPA '\connect64\lcolist.exe'
-        if ( (test-path $ListenerPath) ) {
-            $Listener = @(Get-WmiObject win32_service | ?{$_.Name -like 'LConnect Services*'} | select Name, DisplayName, State, PathName )
-            $Listener | Out-Default
-
-            $ListenerServiceName = $null
-            foreach ( $ListenerInstance in $Listener) {
-                # $ListenerInstance.PathName
-                if ( $ListenerInstance.PathName -eq $ListenerPath) {
-                    Write-Host( "$(Log-Date) Listener Service details:")
-                    $ListenerInstance | format-list | Out-Host
-                    $ListenerServiceName = $ListenerInstance.Name
-                    Write-Host( "$(Log-Date) Listener Service name is $ListenerServiceName")
-                    break
-                }
-            }
-
-            if ( -not [string]::IsNullOrWhiteSpace( $ListenerServiceName) ) {
-                # if ( $Cloud -eq "Azure" ) {
-                #     Write-Host "$(Log-Date) Set Listener Service dependencies"
-                #     Write-Verbose "$(Log-Date) Integrator Service on Azure requires the Azure services it tests for licensing to be dependencies" | Out-Default | Write-Host
-                #     Write-Verbose "$(Log-Date) so that they are running when the license check is made by the Integrator service." | Out-Default | Write-Host
-                #     cmd /c "sc.exe" "config" $ListenerServiceName "depend=" "WindowsAzureGuestAgent/WindowsAzureTelemetryService" | Out-Default | Write-Host
-                # }
-
-                Write-Host ("$(Log-Date) Configure Listener Service for Delayed Start")
-                cmd /c "sc.exe" "stop" "$ListenerServiceName" | Out-Default | Write-Host
-                Write-Host ( "$(Log-Date) Configuring...")
-                cmd /c "sc.exe" "config" "$ListenerServiceName" "start=" "delayed-auto" | Out-Default
-                Write-Host ( "$(Log-Date) Starting...")
-                cmd /c "sc.exe" "start" "$ListenerServiceName" | Out-Default | Write-Host
-            } else {
-                throw "Listener service is not installed correctly in $ListenerPath"
-            }
-        } else {
-            Write-Warning( "$(Log-Date) $ListenerPath is not installed") | Out-Default | Write-Host
-        }
-
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
             Write-Host ("$(Log-Date) Switch off Sentinel ")
-
-            $RegKey = "HKLM:\Software\lansa\Common"
-            $RegProperty = "UseSentinelLicence"
-            if ( -not (Test-Path $RegKey) ) {
-                Write-Host( "Creating registry entry $RegKey")
-                New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
-            } else {
-                Write-Host( "$RegKey already exists")
-            }
-
-            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name $RegProperty -Value 0 -PropertyType DWORD -Force | Out-Null
+            New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null
+            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null
 
             [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Out-Default | Write-Host
         }
@@ -662,7 +593,7 @@ try
             iis-reset | Out-Default | Write-Host
         }
 
-         #####################################################################################
+        #####################################################################################
         # Test if post install x_run processing had any fatal errors
         # Performed at the end as errors may occur due to the loadbalancer probe executing
         # before LANSA has completed installing.
