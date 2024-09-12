@@ -14,7 +14,8 @@ Param (
 [parameter(Mandatory=$true)]    [string]$keypair,
 [parameter(Mandatory=$true)]    [string]$securityGroup,
 [parameter(Mandatory=$false)]   [string]$region,
-[parameter(Mandatory=$false)]   [string]$instanceType = "t2.medium"
+[parameter(Mandatory=$false)]   [string]$instanceType = "t2.medium",
+[parameter(Mandatory=$false)]   [string]$VersionText
 )
 try
 {

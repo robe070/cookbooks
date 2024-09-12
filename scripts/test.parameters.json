@@ -6,7 +6,7 @@
             "value": "script"
         },
         "msiURL": {
-            "value": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v15.0.0_en-us.msi"
+            "value": "https://stagingdpauseast.blob.core.windows.net/app/test/AWAMAPP_v15.0.21217_en-us.msi"
         },
         "osName": {
             "value": "Windows Server 2019"

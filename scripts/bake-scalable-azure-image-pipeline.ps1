@@ -56,11 +56,11 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $GitUserName="robe070",
+    $GitUserName="priyadishah",
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry=1,
+    $MaxRetry=10,
 
     [Parameter(Mandatory=$false)]
     [boolean]
@@ -88,7 +88,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Title="LANSA Cloud Account Id New License",
+    $Title,
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -141,7 +141,7 @@ while($count -ne 0 ) {
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
                             -InstallLanguagePack:$InstallLanguagePack `
-                            #-Title $Title `
+                            -Title $Title `
                             -CloudAccountLicense $CloudAccountLicense
 
     }

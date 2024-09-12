@@ -3,10 +3,13 @@
 # LanSA(122)
 Param(
     [Parameter(Mandatory=$false)]
-        [ValidateSet('Live','Test','Dev','All', '207', '302', '305')]
-        [string] $StackType = 'All',
+        [ValidateSet('Live','Test','Dev','All', '207', '302', '305', '57')]
+        [string] $StackType = 'Live',
         [switch] $SendMail
 )
+
+$Failures = [System.Collections.ArrayList]@()
+$Global:FailFlag = $false
 
 function TestGitHubPATAccess{
     Param(
@@ -29,7 +32,8 @@ function TestGitHubPATAccess{
 
     $responseX = $response.content | Out-String | ConvertFrom-Json
     if ( $null -eq $responseX -or ($responseX.Length -eq 0)) {
-        throw "$userid has no keys"
+        $Failures.Add($Userid)
+        $global:FailFlag = $true
     } else {
         $responseX | out-default | Write-Host
     }
@@ -44,6 +48,7 @@ try
     if ( $StackType -eq 'All' ) {
         Foreach ($passwordEntry in $PasswordFile) {
             $passwordEntry.repo  | Write-Host
+            $userid = $passwordEntry.repo # Used for logging purposes
             TestGitHubPATAccess $passwordEntry.repo $passwordEntry.pat
         }
     } else {
@@ -97,7 +102,12 @@ try
             }
         }
     }
-
+    if ( $global:FailFlag ) {
+        foreach ($userid in $Failures) {
+            Write-Host "$userid has no keys"
+        }
+        throw "The above list of Userids do not have a key"
+    }
 }
 catch
 {
