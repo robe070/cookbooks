@@ -68,7 +68,15 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Language="ENG"
+    $Language="ENG",
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Title,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $CloudAccountLicense
 
   )
 
@@ -117,6 +125,8 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
+                            -Title $Title `
+                            -CloudAccountLicense $CloudAccountLicense
                             
     }
     catch{
