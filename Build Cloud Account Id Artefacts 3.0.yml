@@ -75,7 +75,7 @@ jobs:
     name: BuildImage
     displayName: Build Image
     inputs:
-      wsCredentials: $(awsCredentials)
+      awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_7754*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id Old License" '
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
@@ -222,8 +222,8 @@ jobs:
     name: Vmtest
     displayName: VM Tests
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
