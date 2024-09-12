@@ -33,7 +33,7 @@ param (
     $ChefRecipe
     )
 
-Write-Debug "script:IncludeDir = $script:IncludeDir" | Write-Host
+Set-StrictMode -Off
 
 function ChocoWait([int] $WaitTimeSeconds = 0) {
     Write-Host "$(Log-Date) Adding Wait for Choco"
@@ -79,7 +79,7 @@ function DownloadAndInstallMSI {
 try
 {
     # If environment not yet set up, it should be running locally, not through Remote PS
-    if ( -not $script:IncludeDir)
+    if ( -not (Test-Path variable:script:IncludeDir))
     {
         # Log-Date can't be used yet as Framework has not been loaded
 
@@ -124,27 +124,27 @@ try
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
 
-      #   Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
-      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
+        # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
-      #   $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
-      #   Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
+        # $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
+        # Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
 
-      #   Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
-      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-      #   Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Default | Write-Host
-      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-      #   Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Out-Default | Write-Host
-      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-      #   Write-Debug $ENV:PATH | Write-Host
-      #   cd "$GitRepoPath\Cookbooks" | Out-Default | Write-Host
+        # Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
+        # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Default | Write-Host
+        # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Out-Default | Write-Host
+        # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # Write-Debug $ENV:PATH | Write-Host
+        # cd "$GitRepoPath\Cookbooks" | Out-Default | Write-Host
 
-      #   chef-client -z -o $ChefRecipe | Out-Default | Write-Host
-      #   if ( $LASTEXITCODE -ne 0 )
-      #   {
-      #       throw "Chef-Client exit code = $LASTEXITCODE."
-      #   }
-      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+        # chef-client -z -o $ChefRecipe | Out-Default | Write-Host
+        # if ( $LASTEXITCODE -ne 0 )
+        # {
+        #     throw "Chef-Client exit code = $LASTEXITCODE."
+        # }
+        # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
         # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
         Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
@@ -200,10 +200,15 @@ try
 
 
         # The following script issues Error Message so allow it to continue because the baking scripts make all errors fatals.
-        $ErrorActionPreference = Continue
-        . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
-        $ErrorActionPreference = Stop
-
+        try {
+            $ErrorActionPreference = 'Continue'
+            . "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a start -s | Out-Default | Write-Host
+        } catch {
+            Write-Host "$(Log-Date) Ignore exception"
+        } finally {
+            Write-Host "Completed CloudWatch agent install"
+            $ErrorActionPreference = 'Stop'
+        }
         Write-Host( "$(Log-Date) Set Cloud Watch Agent Service to manual")
         set-service -Name AmazonCloudWatchAgent -StartupType Manual | Out-Default | Write-Host
         stop-service -Name AmazonCloudWatchAgent | Out-Default | Write-Host
@@ -259,12 +264,6 @@ try
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
         Run-ExitCode 'choco' @( 'install', 'foxitreader', '-s=lansa', '-y', '--no-progress' )  | Write-Host
         ChocoWait
-
-        # JRE often fails to download with a 404, so install it explicitly from AWS S3
-        # ( Latest choco seems to have fixed this)
-        # $jreurl = 'jre-8u172-windows-x64.exe'
-        # $jretarget = 'jre-8u172-windows-x64.exe'
-        # Run-ExitCode $jre @( '/s' ) | Write-Host
 
         New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
