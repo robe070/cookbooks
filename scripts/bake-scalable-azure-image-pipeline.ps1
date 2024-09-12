@@ -22,9 +22,13 @@ param (
     [int]
     $VersionMinor,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]
     $AmazonAMIName,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $AzureImageUri,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -52,7 +56,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $GitUserName="robe070",
+    $GitUserName="priyadishah",
 
     [Parameter(Mandatory=$false)]
     [int]
@@ -71,6 +75,14 @@ param (
     $Language="ENG",
 
     [Parameter(Mandatory=$false)]
+    [switch]
+    $InstallLanguagePack=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallScalable=$true,
+
+    [Parameter(Mandatory=$false)]
     [boolean]
     $InstallBaseSoftware=$true,
 
@@ -81,11 +93,10 @@ param (
     [Parameter(Mandatory=$false)]
     [string]
     $CloudAccountLicense
-
   )
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -112,8 +123,8 @@ while($count -ne 0 ) {
                             -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
-                            -InstallBaseSoftware $true `
-                            -InstallScalable $true `
+                            -InstallBaseSoftware $InstallBaseSoftware `
+                            -InstallScalable $InstallScalable `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
                             -Win2012 $Win2012 `
@@ -129,9 +140,10 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
+                            -InstallLanguagePack:$InstallLanguagePack `
                             -Title $Title `
                             -CloudAccountLicense $CloudAccountLicense
-                            
+
     }
     catch{
         $PSitem | Out-Default | Write-Host
