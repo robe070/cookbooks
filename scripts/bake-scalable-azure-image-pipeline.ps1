@@ -60,7 +60,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $MaxRetry=10,
+    $MaxRetry=1,
 
     [Parameter(Mandatory=$false)]
     [boolean]
@@ -88,7 +88,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $Title,
+    $Title="LANSA Cloud Account Id New License",
 
     [Parameter(Mandatory=$false)]
     [string]
