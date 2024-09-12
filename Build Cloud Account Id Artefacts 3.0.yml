@@ -77,7 +77,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: ' -VersionText w19d-15-ID-OLD" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_7754*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id Old License" '
+      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_7754*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id Old License" '
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -86,7 +86,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-ID-OLD.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "$(System.JobDisplayName).txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -116,11 +116,11 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w19d-15-ID-OLD
+      testRunTitle: $(System.JobDisplayName)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-ID-OLD.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/$(System.JobDisplayName).txt
       ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -128,7 +128,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -version "w19d-15-ID-OLD"
+      arguments: -version "$(System.JobDisplayName)"
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -206,7 +206,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: ' -VersionText "w19d-15-ID-NEW" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_AWS*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id New License" '
+      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_AWS*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id New License" '
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -215,7 +215,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-ID-NEW.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "$(System.JobDisplayName).txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -245,11 +245,11 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w19d-15-ID-NEW
+      testRunTitle: $(System.JobDisplayName)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-ID-NEW.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/$(System.JobDisplayName).txt
       ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -257,7 +257,7 @@ jobs:
     inputs:
       awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
       regionName: ap-southeast-2
-      arguments: -version "w19d-15-ID-NEW"
+      arguments: -version "$(System.JobDisplayName)"
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
