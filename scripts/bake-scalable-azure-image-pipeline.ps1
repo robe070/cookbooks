@@ -149,7 +149,7 @@ while($count -ne 0 ) {
         $PSitem | Out-Default | Write-Host
         $count = $count -1
         if($count -eq 0){
-            Write-Host "Image Bake failed even after $MaxRetry retries"
+            throw "Image Bake failed even after $MaxRetry retries"
             break
         }
         elseif ($Cloud -eq 'AWS'){
@@ -161,7 +161,7 @@ while($count -ne 0 ) {
         break
     }
     if($Cloud -eq 'Azure'){
-        Write-Host "Image bake failed. Retry not enabled in Azure"
+        throw "Image bake failed. Retry not enabled in Azure"
         break
     }
 
