@@ -126,27 +126,27 @@ try
     if ( $Cloud -ne "Docker" ) {
         Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
 
-        Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+      #   Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
+      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
-        $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
-        Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
+      #   $installer_file = "$GitRepoPath\PackerScripts\chef-client-12.1.1-1.msi"
+      #   Run-ExitCode 'msiexec.exe' @( '/i', $installer_file, '/qn' ) | Write-Host
 
-        Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-        Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Default | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-        Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Out-Default | Write-Host
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
-        Write-Debug $ENV:PATH | Write-Host
-        cd "$GitRepoPath\Cookbooks" | Out-Default | Write-Host
+      #   Write-GreenOutput "$(Log-Date) Running Chef" | Write-Host
+      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+      #   Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\bin" | Out-Default | Write-Host
+      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+      #   Add-DirectoryToEnvPathOnce -Directory "c:\opscode\chef\embedded" | Out-Default | Write-Host
+      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+      #   Write-Debug $ENV:PATH | Write-Host
+      #   cd "$GitRepoPath\Cookbooks" | Out-Default | Write-Host
 
-        chef-client -z -o $ChefRecipe | Out-Default | Write-Host
-        if ( $LASTEXITCODE -ne 0 )
-        {
-            throw "Chef-Client exit code = $LASTEXITCODE."
-        }
-        Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
+      #   chef-client -z -o $ChefRecipe | Out-Default | Write-Host
+      #   if ( $LASTEXITCODE -ne 0 )
+      #   {
+      #       throw "Chef-Client exit code = $LASTEXITCODE."
+      #   }
+      #   Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
         # Make sure Git is in the path. Adding it in a prior script it gets 'lost' when Chef Zero is Run in this script
         Add-DirectoryToEnvPathOnce -Directory "C:\Program Files\Git\cmd" | Out-Default | Write-Host
