@@ -341,14 +341,14 @@ jobs:
     name: Vmtest
     displayName: VM Tests
     env:
-        TestImageName: '$(BuildImage.amiID)'
-        TestCloudName: 'AWS'
-        AtomicBuild: '$(atomic-build)'
-        TestVmName: 'Test19142$(VersionText-w19d-14-2)'
-        SG: 'w19d-14-2-$(VersionText-w19d-14-2)'
-        keypair: '$(KeypairName)'
-        keypairpath: '$(keypair.secureFilePath)'
-        VersionText: 'w19d-14-2-$(VersionText-w19d-14-2)'
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        SG: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -385,7 +385,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2'
+      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
