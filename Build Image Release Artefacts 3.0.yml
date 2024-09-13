@@ -345,14 +345,14 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
       env:
-        TestImageName: $(BuildImage.amiID)
-        TestCloudName: AWS
-        AtomicBuild: $(atomic-build)
-        TestVmName: Test19150$(VersionText-w19d-15-0)
-        SG: w19d-15-0-$(VersionText-w19d-15-0)
-        keypair: $(KeypairName)
-        keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0-$(VersionText-w19d-15-0)
+    TestImageName: $(BuildImage.amiID)
+    TestCloudName: AWS
+    AtomicBuild: $(atomic-build)
+    TestVmName: Test19150$(VersionText-w19d-15-0)
+    SG: w19d-15-0-$(VersionText-w19d-15-0)
+    keypair: $(KeypairName)
+    keypairpath: $(keypair.secureFilePath)
+    VersionText: w19d-15-0-$(VersionText-w19d-15-0)
       # inlineScript: >2-
 
       #   # Invoke Pester Tests
