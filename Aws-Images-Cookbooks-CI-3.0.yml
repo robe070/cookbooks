@@ -769,7 +769,7 @@ jobs:
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: $(vmImage)
-    steps:
+  steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
