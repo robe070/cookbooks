@@ -217,21 +217,45 @@ jobs:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
-    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download KeyPair
-    # enabled: False
     inputs:
       secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
-    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -241,7 +265,6 @@ jobs:
     displayName: 'Generate: AMI Id'
     env:
       BuildImage.amiID:: $(amiID)
-    # enabled: False
     inputs:
       targetType: inline
       script: >-
@@ -253,7 +276,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-    # enabled: False
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -275,21 +306,18 @@ jobs:
         }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
-    # enabled: False
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-15-0
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
-    #enabled: False
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
       ArtifactName: aws-w22d-15-0
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
-    # #enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
