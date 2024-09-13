@@ -340,11 +340,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-    inputs:
-      awsCredentials: $(awsCredentials)
-      regionName: $(regionName)
-      filePath: scripts/invoke-pester-tests.ps1
-      env:
+    env:
         TestImageName: '$(BuildImage.amiID)'
         TestCloudName: 'AWS'
         AtomicBuild: '$(atomic-build)'
@@ -353,6 +349,10 @@ jobs:
         keypair: '$(KeypairName)'
         keypairpath: '$(keypair.secureFilePath)'
         VersionText: 'w19d-14-2-$(VersionText-w19d-14-2)'
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
       # inlineScript: >2-
 
       #   # Invoke Pester Tests
