@@ -523,6 +523,7 @@ try
         $VerbosePreference = "SilentlyContinue"
 
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
+        Write-Host "Secret.id = $secret.id"
 
         $VerbosePreference = "Continue"
 
