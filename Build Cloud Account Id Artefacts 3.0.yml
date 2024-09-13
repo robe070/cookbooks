@@ -57,9 +57,9 @@ jobs:
 
       #   # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
       #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
@@ -75,9 +75,9 @@ jobs:
     name: BuildImage
     displayName: Build Image
     inputs:
-      awsCredentials: $(awsCredentials)
+      wsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_7754*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id Old License" '
+      arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -186,9 +186,9 @@ jobs:
 
       #   # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
       #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
@@ -206,7 +206,8 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense ''x_lic_AWS*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title "LANSA Cloud Account Id New License" '
+      #arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AWS*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id New License'"
+      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense ''x_lic_AWS*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title ''LANSA Cloud Account Id New License'''
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -222,8 +223,8 @@ jobs:
     name: Vmtest
     displayName: VM Tests
     inputs:
-      awsCredentials: $(awsCredentials)
-      regionName: $(regionName)
+      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
+      regionName: ap-southeast-2
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
