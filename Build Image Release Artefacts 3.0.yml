@@ -463,7 +463,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -471,30 +471,41 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        SG: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # Invoke Pester Tests
+        # # Invoke Pester Tests
 
-        cd $(System.DefaultWorkingDirectory)\Tests
+        # cd $(System.DefaultWorkingDirectory)\Tests
 
-        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        $result | Out-Default | Write-Host
+        # $result | Out-Default | Write-Host
 
-        if ($result.Result -eq "Failed") {
-            throw "Failed Tests Count: $($result.FailedCount)"
-        } else {
-            Write-Host "Tested the image successfully."
-        }
+        # if ($result.Result -eq "Failed") {
+        #     throw "Failed Tests Count: $($result.FailedCount)"
+        # } else {
+        #     Write-Host "Tested the image successfully."
+        # }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -512,7 +523,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0'
+      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
