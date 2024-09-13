@@ -57,7 +57,6 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: ''
     displayName: Install PowerShell Modules
-    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -92,27 +91,22 @@ jobs:
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download Keypair
-    # enabled: False
     inputs:
       secureFile: AzureDevOps.pem
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: BuildImage
     displayName: Build Image
-    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      workingDirectory: scripts
-    
-        
+      workingDirectory: scripts     
   - task: PowerShell@2
     name: ''
     displayName: 'Generate: AMI Id'
     env:
       BuildImage: $(BuildImage)
-    # enabled: False
     inputs:
       targetType: inline
       powershell: |
@@ -126,7 +120,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM test
-    # enabled: False
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -149,7 +151,6 @@ jobs:
   - task: PublishTestResults@2
     name: ''
     displayName: Publish Test Results **/Test-*.xml
-    # enabled: False
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
@@ -157,14 +158,12 @@ jobs:
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
-    # enabled: False
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
       ArtifactName: aws-w22d-14-2
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
-    # enabled: False
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -526,7 +525,6 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      # arguments: " -VersionText 'w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)"
       arguments: "  -VersionText 'w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
@@ -542,6 +540,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+     env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
