@@ -136,7 +136,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitUserName,
+    $GitUserName="feature/aws-Build-Cloud-Account-Id-Artefacts-3.0",
 
     [Parameter(Mandatory=$false)]
     [switch]
