@@ -1231,6 +1231,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      SG: w16d-14-2j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-14-2j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1350,6 +1359,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      SG: w16d-15-0j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-15-0j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
