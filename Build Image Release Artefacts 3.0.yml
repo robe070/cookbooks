@@ -105,7 +105,9 @@ jobs:
       targetType: inline
       script: >-
           Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
           Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
           Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -162,7 +164,7 @@ jobs:
         # Terminating the Instance
 
         if('$(TerminateInstance)' -eq 'True') {
-           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+           Write-Host "Removing the instance $(BuildImage.InstanceID)"
             Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
         }
 
