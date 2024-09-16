@@ -672,7 +672,7 @@ $jsonObject = @"
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
-
+        shutdown /r
         # Load up some required tools into remote environment
 
         # Load basic utils before running anything
