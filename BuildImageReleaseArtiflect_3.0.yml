@@ -729,7 +729,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: windows-2022
+    vmImage: windows-2019
   steps:
   - checkout: self
   - task: PowerShell@2
