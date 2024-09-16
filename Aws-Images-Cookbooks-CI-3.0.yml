@@ -280,11 +280,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
-      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      TestVmName: Test22150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      SG: w22d-15-0$(VersionText-w22d-15-0)$(Build.BuildNumber)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      VersionText: w22d-15-0$(VersionText-w22d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -572,11 +572,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
-      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      TestVmName: Test16150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      SG: w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      VersionText: w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
