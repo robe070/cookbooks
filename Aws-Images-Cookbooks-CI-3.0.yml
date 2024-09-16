@@ -373,32 +373,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -426,6 +426,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      SG: w16d-14-2$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-14-2$(VersionText-w16d-14-2)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -685,6 +694,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+     env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      SG: w19d-14-2$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-14-2$(VersionText-w19d-14-2)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -957,6 +975,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+     env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      SG: w19d-15-0j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1076,6 +1103,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+     env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      SG: w19d-14-2j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-14-2j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
