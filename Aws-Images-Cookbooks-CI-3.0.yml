@@ -694,7 +694,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-     env:
+    env:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
@@ -975,7 +975,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-     env:
+    env:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
@@ -1103,7 +1103,7 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
-     env:
+    env:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
