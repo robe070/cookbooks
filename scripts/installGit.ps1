@@ -22,14 +22,17 @@ param (
     $InstallGit = $true
     )
 
-Write-Debug "GitRepo = $GitRepo" | Write-Host
-Write-Debug "GitRepoPath = $GitRepoPath" | Write-Host
+# Write-Debug "GitRepo = $GitRepo" | Write-Host
+# Write-Debug "GitRepoPath = $GitRepoPath" | Write-Host
 
 $Update = $false
 
 try {
     # Git outputs almost all normal messages to stderr. powershell interprets that as an error and
     # displays the error text. To stop that stderr is redirected to stdout on the git commands.
+
+    Write-Debug "GitRepo = $GitRepo" | Write-Host
+    Write-Debug "GitRepoPath = $GitRepoPath" | Write-Host
 
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 
