@@ -59,7 +59,7 @@ jobs:
        awsCredentials: $(awsCredentials)
        regionName: $(regionName)
        filePath: scripts/install-powershell-modules.ps1
-      inlineScript: >+
+       inlineScript: >+
         if ("$(GitBranch)".Contains("refs/heads")) {
             $branch ="$(GitBranch)".replace("refs/heads/", "")
         } else {
