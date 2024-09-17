@@ -59,32 +59,32 @@ jobs:
        awsCredentials: $(awsCredentials)
        regionName: $(regionName)
        filePath: scripts/install-powershell-modules.ps1
-    #   inlineScript: >+
-    #     if ("$(GitBranch)".Contains("refs/heads")) {
-    #         $branch ="$(GitBranch)".replace("refs/heads/", "")
-    #     } else {
-    #         $branch = "$(GitBranchPR)"
-    #     }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-    #     $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-    #     Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-    #     if ($Env:PsModuleInstalled -eq 'True') {
-    #         Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-    #         return;
-    #     }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-    #     # Pester for Testing
+        # Pester for Testing
 
-    #     Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-    #     Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-    #     Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-    #     $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -128,19 +128,19 @@ jobs:
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # Invoke Pester Tests
+        Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -195,32 +195,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -263,19 +263,19 @@ jobs:
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # # Invoke Pester Tests
+        # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -333,32 +333,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -399,21 +399,21 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
-      # inlineScript: >2-
+      inlineScript: >2-
 
-      #   # Invoke Pester Tests
+        # Invoke Pester Tests
 
-      #   cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-      #   $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-      #   $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-      #   if ($result.Result -eq "Failed") {
-      #       throw "Failed Tests Count: $($result.FailedCount)"
-      #   } else {
-      #       Write-Host "Tested the image successfully."
-      #   }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -471,32 +471,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -539,18 +539,18 @@ jobs:
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # # Invoke Pester Tests
+        # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
         # }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
@@ -606,32 +606,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -676,17 +676,17 @@ jobs:
 
         # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -741,32 +741,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -811,17 +811,17 @@ jobs:
 
         # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -876,32 +876,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -944,17 +944,17 @@ jobs:
 
         # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -1080,17 +1080,17 @@ jobs:
 
         # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -1145,32 +1145,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1213,19 +1213,19 @@ jobs:
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # # Invoke Pester Tests
+        # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -1283,32 +1283,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1349,19 +1349,19 @@ jobs:
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
-        # # Invoke Pester Tests
+        # Invoke Pester Tests
 
-        # cd $(System.DefaultWorkingDirectory)\Tests
+        cd $(System.DefaultWorkingDirectory)\Tests
 
-        # $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
 
-        # $result | Out-Default | Write-Host
+        $result | Out-Default | Write-Host
 
-        # if ($result.Result -eq "Failed") {
-        #     throw "Failed Tests Count: $($result.FailedCount)"
-        # } else {
-        #     Write-Host "Tested the image successfully."
-        # }
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
@@ -1416,32 +1416,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -1540,32 +1540,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
