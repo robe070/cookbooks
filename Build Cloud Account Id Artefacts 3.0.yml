@@ -36,35 +36,35 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Install PowerShell Modules
     inputs:
-      wsCredentials: $(awsCredentials)
+      awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -77,7 +77,7 @@ jobs:
     inputs:
       wsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
+      arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud "AWS" -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -152,8 +152,6 @@ jobs:
         Start-Sleep -Seconds 180
          Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
 
-
-
 - job: Job_6
   displayName: w19d-15-ID-NEW
   timeoutInMinutes: 360
@@ -168,32 +166,32 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/install-powershell-modules.ps1
-      # inlineScript: >+
-      #   if ("$(GitBranch)".Contains("refs/heads")) {
-      #       $branch ="$(GitBranch)".replace("refs/heads/", "")
-      #   } else {
-      #       $branch = "$(GitBranchPR)"
-      #   }
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
 
-      #   $branch | Write-Host | Out-Default | Write-Verbose
+        $branch | Write-Host | Out-Default | Write-Verbose
 
-      #   Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
 
-      #   if ($Env:PsModuleInstalled -eq 'True') {
-      #       Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-      #       return;
-      #   }
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
 
-      #   # Pester for Testing
+        # Pester for Testing
 
-      #   Write-Host "Installing Module Pester RequiredVersion 5.0.3" | Out-Default | Write-Verbose
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
 
-      #   Install-Module -Name Pester -RequiredVersion 5.0.3 -AllowClobber -Force
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
 
-      #   Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 
-      #   $Env:PsModuleInstalled = 'True'
+        $Env:PsModuleInstalled = 'True'
 
   - task: DownloadSecureFile@1
     name: keypair
@@ -222,9 +220,18 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test$(System.JobDisplayName)
+        SG: $(System.JobDisplayName)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: $(System.JobDisplayName)
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       filePath: scripts/invoke-pester-tests.ps1
       inlineScript: >2-
 
@@ -256,8 +263,8 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
     inputs:
-      awsCredentials: 1e9f2577-9f34-4c81-b87d-93f6acff001d
-      regionName: ap-southeast-2
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
       arguments: -version "$(System.JobDisplayName)"
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
