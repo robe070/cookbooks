@@ -317,7 +317,6 @@ try
         } else {
             Write-Host( "$(Log-Date) Removing existing instance that would be using the security group, search using tag:BakeVersion;Value=$VersionText")
             $TaggedInstances = @(Get-EC2Tag -Filter @{Name="tag:BakeVersion";Value=$VersionText} | Where-Object ResourceType -eq "instance")
-            Write-Host $(TaggedInstance.ResourceId)
             foreach ($TaggedInstance in $TaggedInstances) {
                 $TaggedInstance.ResourceId | Out-Default | Write-Host
                 Remove-EC2Instance -InstanceId $TaggedInstance.ResourceId -Force
