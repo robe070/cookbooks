@@ -98,7 +98,7 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer' -ErrorAction SilentlyContinue).InstallSQLServer
@@ -168,7 +168,13 @@ try
                 (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Default | Write-Host
                 $downloaded = $true
             } catch {
+                $_
                 $TotalFailedDownloadAttempts += 1
+            # try {
+            #     (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Default | Write-Host
+            #     $downloaded = $true
+            # } catch {
+            #     $TotalFailedDownloadAttempts += 1
                 New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
 
