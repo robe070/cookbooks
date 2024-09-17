@@ -136,7 +136,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitUserName="feature/aws-Build-Cloud-Account-Id-Artefacts-3.0",
+    $GitUserName="robe070",
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -751,12 +751,14 @@ $jsonObject = @"
                 Write-Host "Branch: $using:GitBranch"
                 # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
                 cmd /c git branch -d "$using:GitBranch"  '2>&1'
+                Write-host "All branches: $(git branch)"
                 if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
                 {
                     throw "Git branch $using:GitBranch failed with LASTEXITCODE $LASTEXITCODE"
                 }
                 # Overwrite the origin's current tree onto the branch we really want - the local branch
                 cmd /c git checkout -B $using:GitBranch  '2>&1'
+                Write-host "All branches after checkout: $(git branch)"
                 if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
                 {
                     throw "Git checkout $using:GitBranch failed with LASTEXITCODE $LASTEXITCODE"
