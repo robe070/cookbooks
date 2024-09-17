@@ -1,23 +1,8 @@
-# Variable 'atomic-build' was defined in the Variables tab
-# Variable 'atomic-build-ps' was defined in the Variables tab
-# Variable 'azureUserId' was defined in the Variables tab
-# Variable 'Build-all' was defined in the Variables tab
-# Variable 'Build-w16d-15-ID-NEW' was defined in the Variables tab
-# Variable 'Build-w19d-15-ID-OLD' was defined in the Variables tab
-# Variable 'clientsecret' was defined in the Variables tab
-# Variable 'GitBranch' was defined in the Variables tab
-# Variable 'GitBranchPR' was defined in the Variables tab
-# Variable 'GitUserName' was defined in the Variables tab
-# Variable 'JpnLanguage' was defined in the Variables tab
-# Variable 'KeypairName' was defined in the Variables tab
-# Variable 'quickstart-scripts' was defined in the Variables tab
-# Variable 'RunWindowsUpdates' was defined in the Variables tab
-# Variable 'TerminateInstance' was defined in the Variables tab
-# Variable 'Windows-2019-AMI' was defined in the Variables tab
-# Variable Group 'External IP Addresses' was defined in the Variables tab
+name: Build Cloud Accounts Artefacts 3.0-$(Build.BuildId)
 
 variables:
   - group: "External IP Addresses"
+  - group: "Logins"
 
 resources:
   repositories:
@@ -77,7 +62,7 @@ jobs:
     inputs:
       wsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud "AWS" -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
+      arguments: " -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_7754*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id Old License' "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -92,6 +77,15 @@ jobs:
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
     displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test$(System.JobDisplayName)
+        SG: $(System.JobDisplayName)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: $(System.JobDisplayName)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -205,7 +199,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       #arguments: " -VersionText \"$(System.JobDisplayName)\" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName \"$(Windows-2019-AMI)\" -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AWS*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id New License'"
-      arguments: ' -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud ''AWS'' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense ''x_lic_AWS*.5.lic'' -InstallBaseSoftware $false -InstallScalable $false -Title ''LANSA Cloud Account Id New License'''
+      arguments: " -VersionText "$(System.JobDisplayName)" -VersionMajor 15 -VersionMinor 0 -AmazonAMIName "$(Windows-2019-AMI)" -GitBranch "$(GitBranch)" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -CloudAccountLicense 'x_lic_AWS*.5.lic' -InstallBaseSoftware $false -InstallScalable $false -Title 'LANSA Cloud Account Id New License' "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
