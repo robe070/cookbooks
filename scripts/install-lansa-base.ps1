@@ -168,7 +168,8 @@ try
                 (New-Object System.Net.WebClient).DownloadFile($CWASetup, $installer_file) | Out-Default | Write-Host
                 $downloaded = $true
             } catch {
-                $TotalFailedDownloadAttempts += 1
+                $_
+                $TotalFailedDownloadAttempts += 1 
                 New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
 
