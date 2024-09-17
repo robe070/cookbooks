@@ -1,43 +1,23 @@
-# Variable 'atomic-build' was defined in the Variables tab
-# Variable 'atomic-build-ps' was defined in the Variables tab
-# Variable 'azureUserId' was defined in the Variables tab
-# Variable 'Build-all' was defined in the Variables tab
-# Variable 'Build-w12r2d-14-2' was defined in the Variables tab
-# Variable 'Build-w12r2d-15-0' was defined in the Variables tab
-# Variable 'Build-w16d-14-2' was defined in the Variables tab
-# Variable 'Build-w16d-14-2j' was defined in the Variables tab
-# Variable 'Build-w16d-15-0' was defined in the Variables tab
-# Variable 'Build-w16d-15-0j' was defined in the Variables tab
-# Variable 'Build-w19d-14-2' was defined in the Variables tab
-# Variable 'Build-w19d-14-2j' was defined in the Variables tab
-# Variable 'Build-w19d-15-0' was defined in the Variables tab
-# Variable 'Build-w19d-15-0j' was defined in the Variables tab
-# Variable 'clientsecret' was defined in the Variables tab
-# Variable 'GitBranch' was defined in the Variables tab
-# Variable 'GitBranchPR' was defined in the Variables tab
-# Variable 'GitUserName' was defined in the Variables tab
-# Variable 'JpnLanguage' was defined in the Variables tab
-# Variable 'KeypairName' was defined in the Variables tab
-# Variable 'quickstart-scripts' was defined in the Variables tab
-# Variable 'RunWindowsUpdates' was defined in the Variables tab
-# Variable 'TerminateInstance' was defined in the Variables tab
-# Variable 'VersionText-w12r2d-14-2del' was defined in the Variables tab
-# Variable 'VersionText-w12r2d-15-0del' was defined in the Variables tab
-# Variable 'VersionText-w16d-14-2del' was defined in the Variables tab
-# Variable 'VersionText-w16d-15-0del' was defined in the Variables tab
-# Variable 'VersionText-w19d-14-2del' was defined in the Variables tab
-# Variable 'VersionText-w19d-15-0del' was defined in the Variables tab
-# Variable 'Windows-2012-AMI' was defined in the Variables tab
-# Variable 'Windows-2016-AMI' was defined in the Variables tab
-# Variable 'Windows-2016-AMI-JPN' was defined in the Variables tab
-# Variable 'Windows-2019-AMI' was defined in the Variables tab
-# Variable 'Windows-2019-AMI-JPN' was defined in the Variables tab
-# Variable Group 'ImageVersion' was defined in the Variables tab
-# Variable Group 'External IP Addresses' was defined in the Variables tab
+name: Build Image Release Artefacts 3.0-$(Build.BuildId)
 
 variables:
   - group: "External IP Addresses"
   - group: "ImageVersion"
+  - group: "Logins"
+  - name: JpnLanguage
+    value: JPN
+  - name: Windows-2016-AMI
+    value: Windows_Server-2016-English-Full-SQL_2017_Express*
+  - name: Windows-2016-AMI-JPN
+    value: Windows_Server-2016-Japanese-Full-Base*
+  - name: Windows-2019-AMI
+    value: Windows_Server-2019-English-Full-SQL_2019_Express*
+  - name: Windows-2019-AMI-JPN
+    value: Windows_Server-2019-Japanese-Full-Base*
+  - name: Windows-2022-AMI
+    value: Windows_Server-2022-English-Full-SQL_2019_Express*
+  - name: Windows-2022-AMI-JPN
+    value: Windows_Server-2022-Japanese-Full-Base*
 
 resources:
   repositories:
