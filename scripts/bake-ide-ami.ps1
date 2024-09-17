@@ -194,94 +194,51 @@ else
 }
 # Check if the .NET Framework is installed
 
-if
-(!(Get-ItemProperty HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full)) {
+if (!(Get-ItemProperty HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full)) {
 
-    Write-Output
-".NET Framework is not installed"
+    Write-Output ".NET Framework is not installed"
 
 }
 
 # Check the current version of the .NET Framework
 
-$dotNetVersion
-= (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full).Version
+$dotNetVersion = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full).Version
 
-Write-Output
-"Current .NET Framework version:
-$dotNetVersion
-"
-
+Write-Output "Current .NET Framework version: $dotNetVersion"
+ 
 # Check if an update is available
 
-$updateSession
-= New-Object -ComObject Microsoft.Update.Session
+$updateSession = New-Object -ComObject Microsoft.Update.Session
 
-$updateSearcher
-=
-$updateSession
-.CreateUpdateSearcher()
+$updateSearcher = $updateSession.CreateUpdateSearcher()
 
-$searchResult
-=
-$updateSearcher
-.Search(
-"Type='Software' and IsInstalled=0 and DeploymentAction='Installation' and Title='Microsoft .NET Framework 4.8'"
-).Updates
+$searchResult = $updateSearcher.Search("Type='Software' and IsInstalled=0 and DeploymentAction='Installation' and Title='Microsoft .NET Framework 4.8'").Updates
+ 
+if ($searchResult.Count -eq 0) {
 
-if
-(
-$searchResult
-.Count -eq 0) {
+    Write-Output ".NET Framework is up to date"
 
-    Write-Output
-".NET Framework is up to date"
+} else {
 
-}
-else
-{
+    Write-Output "Updating .NET Framework to version 4.8"
+ 
+    # Install the update
 
-    Write-Output
-"Updating .NET Framework to version 4.8"
+    $updateInstaller = $updateSession.CreateUpdateInstaller()
 
-   
-# Install the update
+    $updateInstaller.Updates = $searchResult
 
-   
-$updateInstaller
-=
-$updateSession
-.CreateUpdateInstaller()
+    $installationResult = $updateInstaller.Install()
+ 
+    # Check the result of the installation
 
-   
-$updateInstaller
-.Updates =
-$searchResult
+    if ($installationResult.ResultCode -eq 2) {
 
-   
-$installationResult
-=
-$updateInstaller
-.Install()
+        Write-Output ".NET Framework update successful"
 
-   
-# Check the result of the installation
+    } else {
 
-   
-if
-(
-$installationResult
-.ResultCode -eq 2) {
-
-        Write-Output
-".NET Framework update successful"
-
-    }
-else
-{
-
-        Write-Output
-"Error while updating .NET Framework"
+        Write-Output "Error while updating .NET Framework"
 
     }
 
