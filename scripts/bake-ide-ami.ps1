@@ -685,11 +685,18 @@ $jsonObject = @"
 
             if ( $Cloud -eq 'Azure' ) {
                 Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
+                
                 Execute-RemoteBlock $Script:session {
                    shutdown -r -t 0
                 }
+
                 Start-Sleep -Seconds 10
+
                 ReConnect-Session
+
+                . "$script:IncludeDir\Init-Baking-Vars.ps1"
+                . "$script:IncludeDir\Init-Baking-Includes.ps1"
+                . "$script:IncludeDir\dot-CommonTools.ps1"
              }
             
 
