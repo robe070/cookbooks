@@ -679,10 +679,19 @@ $jsonObject = @"
 
 
         if ( $InstallBaseSoftware ) {
-
+            
             # Install Chocolatey
-
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
+
+            if ( $Cloud -eq 'Azure' ) {
+                Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
+                Execute-RemoteBlock $Script:session {
+                   shutdown -r -t 0
+                }
+                Start-Sleep -Seconds 10
+                ReConnect-Session
+             }
+            
 
             # Then we install git using chocolatey and pull down the rest of the files from git
 
