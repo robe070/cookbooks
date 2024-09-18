@@ -1026,7 +1026,9 @@ jobs:
       targetType: inline
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
@@ -1432,7 +1434,7 @@ jobs:
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
-        
+
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     name: Vmtest
