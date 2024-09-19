@@ -691,11 +691,12 @@ $jsonObject = @"
                 }
                 Start-Sleep -Seconds 30
                 ReConnect-Session
-             }
+                Write-host "Rebooted!"
+            }
             
 
             # Then we install git using chocolatey and pull down the rest of the files from git
-
+            Write-Host "Installing Git!"
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $GitUserName, $true)
 
             Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
@@ -705,8 +706,9 @@ $jsonObject = @"
             # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
             # Reflect local variables into remote session
             Execute-RemoteInitPostGit
-
+            
             if ( $Cloud -eq 'Azure' ) {
+                Write-Host "Installing .Net!"
                 . "$script:IncludeDir\Init-Baking-Vars.ps1"
                 . "$script:IncludeDir\Init-Baking-Includes.ps1"
                 . "$script:IncludeDir\dot-CommonTools.ps1"
