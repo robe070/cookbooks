@@ -56,7 +56,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $GitUserName="robe070",
+    $GitUserName,
 
     [Parameter(Mandatory=$false)]
     [int]
