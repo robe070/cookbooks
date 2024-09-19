@@ -6,6 +6,7 @@ parameters:
     type: string
     default: none
   - name: dependsOn
+    type: object
     default: []
   - name: jobName
     type: string
