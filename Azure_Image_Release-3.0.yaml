@@ -125,13 +125,13 @@ resources:
     name: 'CelestialSystem/azure-quickstart-templates'
 
 stages:
-- template: templates/debjit-stages.yml # Template reference
+- template: templates/stages-template.yml # Template reference
   parameters:
     stageName: 'w12r2d142Aus'
     stagedisplayName: 'w12r2d142 Aus'
     jobName: 'w12r2d142Aus'
  
-- template: templates/debjit-stages.yml # Template reference
+- template: templates/stages-template.yml # Template reference
   parameters:
     stageName: 'w12r2d150Aus'
     stagedisplayName: 'w12r2d150 Aus'
@@ -188,14 +188,14 @@ stages:
           filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
           arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)'''
      
-- template: templates/debjit-stages.yml
+- template: templates/stages-template.yml
   parameters:
     stageName: 'w12r2d142AusEastPreview'
     stagedisplayName: 'w12r2d142 Aus East Preview'
     dependsOn: 'MergePatch_PAASCookbooks'
     jobName: 'w12r2d142AusEastPreview'
  
-- template: templates/debjit-stages.yml
+- template: templates/stages-template.yml
   parameters:
     stageName: 'w12r2d142USEastPreview'
     stagedisplayName: 'w12r2d142 US East Preview'
@@ -283,14 +283,14 @@ stages:
         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
         arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags  ''AzureImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.Sku)'''
  
-- template: templates/debjit-stages.yml
+- template: templates/stages-template.yml
   parameters:
     stageName: 'w12r2d142USEastProduction'
     stagedisplayName: 'w12r2d142 US East Production'
     dependsOn: 'CookbooksMergeAndTag'
     jobName: 'w12r2d142USEastProduction'
  
-- template: templates/debjit-stages.yml
+- template: templates/stages-template.yml
   parameters:
     stageName: 'w12r2d150AsiaEastProduction'
     stagedisplayName: 'w12r2d150 Asia East Production'
