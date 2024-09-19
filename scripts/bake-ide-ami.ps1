@@ -1258,3 +1258,4 @@ function SetUpAccount {
     set-AzureSubscription -SubscriptionId $subscription -CurrentStorageAccount $Storage
 }
 
+}
