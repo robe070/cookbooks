@@ -689,14 +689,8 @@ $jsonObject = @"
                 Execute-RemoteBlock $Script:session {
                    shutdown -r -t 0
                 }
-
                 Start-Sleep -Seconds 10
-
                 ReConnect-Session
-
-                . "$script:IncludeDir\Init-Baking-Vars.ps1"
-                . "$script:IncludeDir\Init-Baking-Includes.ps1"
-                . "$script:IncludeDir\dot-CommonTools.ps1"
              }
             
 
@@ -706,10 +700,18 @@ $jsonObject = @"
 
             Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
 
+
             # Load utilities into Remote Session.
             # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
             # Reflect local variables into remote session
             Execute-RemoteInitPostGit
+
+            if ( $Cloud -eq 'Azure' ) {
+                . "$script:IncludeDir\Init-Baking-Vars.ps1"
+                . "$script:IncludeDir\Init-Baking-Includes.ps1"
+                . "$script:IncludeDir\dot-CommonTools.ps1"
+            }
+
 
             # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
             # Git is a far faster mechansim for transferring files than using RemotePS.
