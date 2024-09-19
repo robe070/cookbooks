@@ -1,0 +1,173 @@
+parameters:
+  - name: stageName
+    type: string
+    default: none
+  - name: dependsOn
+    default: []
+  - name: jobName
+    type: string
+    default: none
+  - name: vmImage
+    type: string
+    default: none
+  - name: resourceGroup
+    type: string
+    default: none
+  - name: version
+    type: string
+    default: none
+  - name: osName
+    type: string
+    default: none
+  - name: lansaVersion
+    type: string
+    default: none 
+  - name: imageId
+    type: string
+    default: none
+  - name: imageSource
+    type: string
+    default: none
+  - name: msiURL
+    type: string
+    default: none
+  - name: stackName
+    type: string
+    default: none
+  - name: certificateBase64Encoded
+    type: string
+    default: none
+  - name: certificatePassword
+    type: string
+    default: none
+  - name: databaseLogin
+    type: string
+    default: none
+  - name: databaseLoginPassword
+    type: string
+    default: none
+  - name: adminUsername
+    type: string
+    default: none
+  - name: adminPassword
+    type: string
+    default: none
+  - name: webUsername
+    type: string
+    default: none
+  - name: webPassword
+    type: string
+    default: none
+  - name: gitBranch
+    type: string
+    default: none
+
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    dependsOn: ${{ parameters.dependsOn }}
+    jobs:
+    - job: ${{ parameters.jobName }}
+      pool: 
+        vmImage: ${{ parameters.vmImage }}
+      steps:
+      - task: PowerShell@2
+        displayName: 'Artifact Check: Set Gate Variable'
+        inputs:
+          targetType: filePath
+          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
+          arguments: '-Version ${{ parameters.version }} -osName ${{ parameters.osName }}'
+        
+
+      #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘Gate.ImageUrl’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘Gate.Sku’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      - powershell: |
+          # Print the Gate variables.
+          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
+        displayName: 'Artifact Check : Output Gate Variable'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+      - task: AzurePowerShell@5
+        displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
+        inputs:
+          azureSubscription: 'Azure Baking Images'
+          ScriptType: InlineScript
+          Inline: |
+            Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
+            Remove-AzResourceGroup -Name ${{ parameters.resourceGroup }} -Force
+            errorActionPreference: silentlyContinue
+            azurePowerShellVersion: LatestVersion
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      #Your build pipeline references an undefined variable named ‘Gate.ImageUrl’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘msiURLv15’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘Gate.VersionClean’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘certificateBase64Encoded’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘certificatePassword’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘databaseLogin’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘databaseLoginPassword’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘adminUsername’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘adminPassword’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘webUsername’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘webPassword’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: 'Deploy ARM Template'
+        inputs:
+          azureResourceManagerConnection: 
+          subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+          resourceGroupName: '$(ResourceGroup)'
+          location: 'Australia East'
+          csmFile: '$(System.DefaultWorkingDirectory)/_lansa_azure-quickstart-templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
+          overrideParameters: '-osName ${{ parameters.osName }} -lansaVersion ${{ parameters.lansaVersion }} -imageId ${{ parameters.imageId }} -imageSource ${{ parameters.imageSource }} -msiURL ${{ parameters.msiURL }} -stackName ${{ parameters.stackName }} -certificateBase64Encoded ${{ parameters.certificateBase64Encoded }} -certificatePassword ${{ parameters.certificatePassword }} -databaseLogin ${{ parameters.databaseLogin }} -databaseLoginPassword ${{ parameters.databaseLoginPassword }} -adminUsername ${{ parameters.adminUsername }} -adminPassword ${{ parameters.adminPassword }} -webUsername ${{ parameters.webUsername }} -webPassword ${{ parameters.webPassword }} -gitBranch ${{ parameters.gitBranch }}'
+          deploymentName: CustomTestTemplate
+          deploymentOutputs: deploymentOutput
+          addSpnToEnvironment: true
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+        displayName: 'Azure Resource Group Tagging'
+        inputs:
+          ConnectedServiceName: 'Azure Baking Images'
+          ResourceGroupName: ${{ parameters.resourceGroup }}
+          Key: Usage
+          Value: 'test-temp'
+        continueOnError: true
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+        #Your build pipeline references an undefined variable named ‘deploymentOutput’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      - powershell: |
+          # Print the Deployment Output
+          Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+          displayName: 'Print Deployment Output'
+          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      #Your build pipeline references an undefined variable named ‘deploymentOutput’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      - task: PowerShell@2
+        displayName: 'Test ARM Deployment: URL Tests'
+        inputs:
+          targetType: filePath
+          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/azure_url_tests.ps1'
+          arguments: '-deploymentOutput none$(deploymentOutput)none'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      #Your build pipeline references an undefined variable named ‘Gate.Sku’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      #Your build pipeline references an undefined variable named ‘deploymentOutput’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+      - task: AzurePowerShell@5
+        displayName: 'Azure PowerShell: Test Image Version'
+        inputs:
+          azureSubscription: 'Azure Baking Images'
+          ScriptPath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/azure_test_image_version.ps1'
+          ScriptArguments: '-SkuName "$(Gate.Sku)" -deploymentOutput none$(deploymentOutput)none '
+          azurePowerShellVersion: LatestVersion
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: 'Delete ResourceGroup'
+        inputs:
+          azureResourceManagerConnection: 
+          subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+          action: DeleteRG
+          resourceGroupName: ${{ parameters.resourceGroup }}
+        continueOnError: true
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
