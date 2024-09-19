@@ -30,25 +30,7 @@ try
     Write-Host "$(Log-Date) Updating $Cloud instance, Language $Language"
 
     Write-Host "$(Log-Date) Synchronise clock"
-    # Define the path to check for EC2-Launch installation
-    $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
-
-    # # Check if the path exists
-    # if (-Not (Test-Path $pathToCheck)) {
-    #     Write-Host "The path '$pathToCheck' does not exist. Executing commands..."
-	
-    # mkdir $env:USERPROFILE\Desktop\EC2Launch
-    # $Url = "https://s3.amazonaws.com/ec2-downloads-windows/EC2Launch/latest/EC2-Windows-Launch.zip"
-    # $DownloadZipFile = "$env:USERPROFILE\Desktop\EC2Launch\" + $(Split-Path -Path $Url -Leaf)
-    # Invoke-WebRequest -Uri $Url -OutFile $DownloadZipFile
-    # $Url = "https://s3.amazonaws.com/ec2-downloads-windows/EC2Launch/latest/install.ps1"
-    # $DownloadZipFile = "$env:USERPROFILE\Desktop\EC2Launch\" + $(Split-Path -Path $Url -Leaf)
-    # Invoke-WebRequest -Uri $Url -OutFile $DownloadZipFile
-    # & $env:USERPROFILE\Desktop\EC2Launch\install.ps1
-
-    # } else {
-    #     Write-Host "The path '$pathToCheck' exists."
-    # }
+    
     cmd /c "sc triggerinfo w32time start/networkon stop/networkoff" | Out-Default
 
     Write-Host "$(Log-Date) Ensure that Framework caching is completed"
