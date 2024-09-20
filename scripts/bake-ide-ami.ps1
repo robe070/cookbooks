@@ -687,10 +687,14 @@ $jsonObject = @"
                 Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
                 
                 Execute-RemoteBlock $Script:session {
-                   shutdown -r -t 0
+                    Restart-Computer -force
                 }
-                Start-Sleep -Seconds 60
-                ReConnect-Session
+                Start-Sleep -Seconds 10
+            
+                Write-Host "$(Log-Date) Reconnecting session..."
+                if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
+            
+                Connect-RemoteSession | Out-Default | Write-Host
                 Write-host "Rebooted!"
             }
             
