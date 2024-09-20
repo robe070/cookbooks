@@ -689,7 +689,7 @@ $jsonObject = @"
                 Execute-RemoteBlock $Script:session {
                    shutdown -r -t 0
                 }
-                Start-Sleep -Seconds 30
+                Start-Sleep -Seconds 60
                 ReConnect-Session
                 Write-host "Rebooted!"
             }
