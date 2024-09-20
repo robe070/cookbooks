@@ -695,7 +695,9 @@ $jsonObject = @"
                 if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
             
                 Connect-RemoteSession | Out-Default | Write-Host
-                Write-host "Rebooted!"
+                Execute-RemoteInit | Out-Default | Write-Host
+                Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
+                Write-host "$(Log-Date) Rebooted!"
             }
             
 
