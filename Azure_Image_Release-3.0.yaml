@@ -75,38 +75,38 @@ variables:
     value : BakingDP-Preview-IC-w16d-14-2
   - name : ResourceGroup
     value : BakingDP-Preview-UW-w19d-15-0
-  # name : ResourceGroup
-  # value : BakingDP-Preview-JW-w16d-14-2j
-  # name : ResourceGroup
-  # value : BakingDP-Preview-KC-w16d-15-0j
-  # name : ResourceGroup
-  # value : BakingDP-Preview-NC-w19d-14-2j
-  # name : ResourceGroup
-  # value : BakingDP-Preview-GW-w19d-15-0j
-  # name : ResourceGroup
-  # value : BakingDP-Prod-UE-w12r2d-14-2
-  # name : ResourceGroup
-  # value : BakingDP-Prod-AE-w12r2d-15-0
-  # name : ResourceGroup
-  # value : BBakingDP-Prod-EW-w16d-14-2
-  # name : ResourceGroup
-  # value : BakingDP-Prod-AE-w16d-15-0
-  # name : ResourceGroup
-  # value : BakingDP-Prod-US-w19d-14-2
-  # name : ResourceGroup
-  #   value : BakingDP-Prod-SA-w19d-15-0
-  # name : ResourceGroup
-  #   value : BakingDP-Prod-UC-w16d-14-2j
-  # name : ResourceGroup
-  #   value : BakingDP-Prod-EN-w16d-15-0j
-  # name : ResourceGroup
-  #   value : BakingDP-Prod-WI-w19d-14-2j
-  # name : ResourceGroup
-  #   value : BakingDP-Prod-SN-w19d-15-0j
-  # name : ResourceGroup
-  #   value : BakingDP
-  # name : SubscriptionId
-  #   value : 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
+  - name : ResourceGroup
+    value : BakingDP-Preview-JW-w16d-14-2j
+  - name : ResourceGroup
+    value : BakingDP-Preview-KC-w16d-15-0j
+  - name : ResourceGroup
+    value : BakingDP-Preview-NC-w19d-14-2j
+  - name : ResourceGroup
+    value : BakingDP-Preview-GW-w19d-15-0j
+  - name : ResourceGroup
+    value : BakingDP-Prod-UE-w12r2d-14-2
+  - name : ResourceGroup
+    value : BakingDP-Prod-AE-w12r2d-15-0
+  - name : ResourceGroup
+    value : BBakingDP-Prod-EW-w16d-14-2
+  - name : ResourceGroup
+    value : BakingDP-Prod-AE-w16d-15-0
+  - name : ResourceGroup
+    value : BakingDP-Prod-US-w19d-14-2
+  - name : ResourceGroup
+    value : BakingDP-Prod-SA-w19d-15-0
+  - name : ResourceGroup
+    value : BakingDP-Prod-UC-w16d-14-2j
+  - name : ResourceGroup
+    value : BakingDP-Prod-EN-w16d-15-0j
+  - name : ResourceGroup
+    value : BakingDP-Prod-WI-w19d-14-2j
+  - name : ResourceGroup
+    value : BakingDP-Prod-SN-w19d-15-0j
+  - name : ResourceGroup
+    value : BakingDP
+  - name : SubscriptionId
+    value : 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
   
 resources:
   pipelines:
