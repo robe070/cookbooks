@@ -39,13 +39,13 @@ resources:
   repositories:
     - repository: _LansaAWSTemplates
       # name: ${{ parameters.awstemplates_repo }}
-      name: nkhl-accolite/aws-templates-nkhl
+      name: aws-templates-nkhl
       type: github
       ref: ${{ parameters.awstemplates_branch }}
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
       # name: ${{ parameters.robe070cookbooks_repo }}
-      name: nkhl-accolite/cookbooks
+      name: cookbooks
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
       endpoint: nkhlLANSA
