@@ -4,9 +4,24 @@ pool:
   vmImage: ubuntu-latest
 
 parameters:
-- name: awstemplates_branch
+- name: awstemplates_repo
+  displayName: 'Source for aws-templates repo'
   type: string
-  default: 'feature/aws-Build-Cloud-Account-Id-Artefacts-3.0'
+  default: 'lansa/aws-templates'
+- name: awstemplates_branch
+  displayName: 'Source for aws-templates branch'
+  type: string
+  default: 'support/scalable'
+- name: robe070cookbooks_repo
+  displayName: 'Source for cookbooks repo'
+  type: string
+  default: 'robe070/cookbooks'
+- name: robe070cookbooks_branch
+  displayName: 'Source for cookbooks branch'
+  type: string
+  default: 'debug/paas'
+
+
 - name: buildcloudaccountidartefacts_branch
   type: string
   default: 'feature/aws-Build-Cloud-Account-Id-Artefacts-3.0'
@@ -23,15 +38,15 @@ resources:
       branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
-      name: aws-templates
+      name: lansa/aws-templates
       type: github
       branch: ${{ parameters.awstemplates_branch }}
-      endpoint: ...
+      # endpoint: ...
     - repository: _Robe070Cookbooks
       name: cookbooks
       type: github
-      branch: ${{ parameters.awstemplates_branch }}
-      endpoint: ...
+      branch: ${{ parameters.robe070cookbooks_branch }}
+      # endpoint: ...
 
 
 stages:
@@ -39,7 +54,6 @@ stages:
   parameters:
     stageName: 'v15'
     stageDisplayname: 'v15'
-    dependsOn: Build
     jobName: 'w19d_15_id'
     jobDisplayname: 'w19d-15-id'
 
@@ -47,7 +61,6 @@ stages:
   parameters:
     stageName: 'v14sp2'
     stageDisplayname: 'v14sp2'
-    dependsOn: Build
     jobName: 'w19d_15_id'
     jobDisplayname: 'w19d-15-id'
 
@@ -55,6 +68,5 @@ stages:
   parameters:
     stageName: 'v13sp2'
     stageDisplayname: 'v13sp2'
-    dependsOn: Build
     jobName: 'w19d_15_id'
     jobDisplayname: 'w19d-15-id'
