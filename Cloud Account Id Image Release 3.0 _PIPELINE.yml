@@ -27,13 +27,13 @@ parameters:
 resources:
   pipelines:
     - pipeline: _BuildCloudAccountIdArtefacts
-      project: Lansa AWS Scalable License Images
+      # project: Lansa AWS Scalable License Images
       source: Build Cloud Account Id Artefacts
-      branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
+      # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
     - pipeline: _BuildImageReleaseArtefacts
-      project: Lansa AWS Scalable License Images
+      # project: Lansa AWS Scalable License Images
       source: Build Image Release Artefacts 2.0
-      branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
+      # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
       name: lansa/aws-templates
