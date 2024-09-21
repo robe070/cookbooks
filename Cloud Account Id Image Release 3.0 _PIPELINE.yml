@@ -36,12 +36,12 @@ resources:
       # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
-      name: lansa/aws-templates
+      name: ${{ parameters.awstemplates_repo }}
       type: github
       ref: ${{ parameters.awstemplates_branch }}
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
-      name: cookbooks
+      name: ${{ parameters.robe070cookbooks_repo }}
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
       endpoint: nkhlLANSA
