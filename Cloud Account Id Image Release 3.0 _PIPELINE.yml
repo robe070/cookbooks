@@ -1,18 +1,41 @@
-# File: azure-pipelines.yml
-trigger:
-- main
+trigger: none
 
 pool:
-  vmImage: 'windows-2022'
+  vmImage: ubuntu-latest
+
+parameters:
+- name: awstemplates_branch
+  type: string
+  default: 'feature/aws-Build-Cloud-Account-Id-Artefacts-3.0'
+- name: buildcloudaccountidartefacts_branch
+  type: string
+  default: 'feature/aws-Build-Cloud-Account-Id-Artefacts-3.0'
+
+resources:
+  pipelines:
+    - pipeline: _BuildCloudAccountIdArtefacts
+      project: Lansa AWS Scalable License Images
+      source: Build Cloud Account Id Artefacts
+      branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
+    - pipeline: _BuildImageReleaseArtefacts
+      project: Lansa AWS Scalable License Images
+      source: Build Image Release Artefacts 2.0
+      branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
+  repositories:
+    - repository: _LansaAWSTemplates
+      name: aws-templates
+      type: github
+      branch: ${{ parameters.awstemplates_branch }}
+      endpoint: ...
+    - repository: _Robe070Cookbooks
+      name: cookbooks
+      type: github
+      branch: ${{ parameters.awstemplates_branch }}
+      endpoint: ...
+
 
 stages:
-- stage: Build
-  jobs: 
-  - job: npminstall
-    steps:
-    - pwsh: Write-Host "BUILD"
-
-- template: templates/Cloud Account Id Image Release 3.0 _STAGES.yml # Template reference
+- template: templates/releaseStages_template.yml # Template reference
   parameters:
     stageName: 'v15'
     stageDisplayname: 'v15'
@@ -20,7 +43,7 @@ stages:
     jobName: 'w19d_15_id'
     jobDisplayname: 'w19d-15-id'
 
-- template: templates/Cloud Account Id Image Release 3.0 _STAGES.yml # Template reference
+- template: templates/releaseStages_template.yml # Template reference
   parameters:
     stageName: 'v14sp2'
     stageDisplayname: 'v14sp2'
@@ -28,7 +51,7 @@ stages:
     jobName: 'w19d_15_id'
     jobDisplayname: 'w19d-15-id'
 
-- template: templates/Cloud Account Id Image Release 3.0 _STAGES.yml # Template reference
+- template: templates/releaseStages_template.yml # Template reference
   parameters:
     stageName: 'v13sp2'
     stageDisplayname: 'v13sp2'
