@@ -50,21 +50,21 @@ resources:
 stages:
 - template: templates/releaseStages_template.yml # Template reference
   parameters:
-    stageName: 'v15'
-    stageDisplayname: 'v15'
-    jobName: 'w19d_15_id'
-    jobDisplayname: 'w19d-15-id'
+    stageName: 'v15idold'
+    stageDisplayname: 'v15-id-old'
+    jobName: 'w19d15idold'
+    jobDisplayname: 'w19d-15-id-old'
 
 - template: templates/releaseStages_template.yml # Template reference
   parameters:
-    stageName: 'v14sp2'
-    stageDisplayname: 'v14sp2'
-    jobName: 'w19d_15_id'
-    jobDisplayname: 'w19d-15-id'
+    stageName: 'v13sp2idnew'
+    stageDisplayname: 'v13sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
 
 - template: templates/releaseStages_template.yml # Template reference
   parameters:
-    stageName: 'v13sp2'
-    stageDisplayname: 'v13sp2'
-    jobName: 'w19d_15_id'
-    jobDisplayname: 'w19d-15-id'
+    stageName: 'v14sp2idnew'
+    stageDisplayname: 'v14sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'

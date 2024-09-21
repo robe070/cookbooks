@@ -25,7 +25,8 @@ stages:
     # dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    - deployment: 'Deployment: ${{ parameters.jobName }}'
+    - deployment: 'Deployment_${{ parameters.jobName }}'
+      displayName: 'Deployment: ${{ parameters.jobName }}'
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
       pool:
