@@ -15,7 +15,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: none
+    default: windows-2022
   - name: deploySQLservertaskname
     type: string
     default: none
@@ -25,17 +25,12 @@ stages:
     dependsOn: []
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    # - deployment: 'Deployment_${{ parameters.jobName }}'
-    - job: 'Deployment_${{ parameters.jobName }}'
-      displayName: 'Deployment: ${{ parameters.jobName }}'
+    - job: 'Job_${{ parameters.jobName }}'
+      displayName: 'Job: ${{ parameters.jobDisplayname }}'
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
       pool:
         vmImage: ${{ parameters.vmImage }}
-      # environment: ${{ parameters.jobName }}
-      # strategy:
-      #   runOnce:
-      #     deploy:
         steps:
             - download: _BuildCloudAccountIdArtefacts
             - download: _BuildImageReleaseArtefacts
