@@ -22,6 +22,9 @@ parameters:
   - name: deploySQLservertaskname
     type: string
     default: none
+  - name: _LansaAWSTemplates
+    type: string
+    default: ''
 
 
 stages:
@@ -44,7 +47,9 @@ stages:
         displayName: Download artifacts from Build Image Release Artefacts 2.0
       - checkout: self
       - checkout: _LansaAWSTemplates
+        displayName: Checking out nkhl-accolite/aws-templates-nkhl
       - checkout: _Robe070Cookbooks
+        displayName: Checking out nkhl-accolite/cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         name: gateVariable
@@ -53,7 +58,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(System.DefaultWorkingDirectory)/$(_LansaAWSTemplates)/scripts/SetGateVariableCloudAccountId.ps1"
       
       #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       #Your build pipeline references an undefined variable named ‘Gate.ImageID’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
