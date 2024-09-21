@@ -27,21 +27,23 @@ parameters:
 resources:
   pipelines:
     - pipeline: _BuildCloudAccountIdArtefacts
-      # project: Lansa AWS Scalable License Images
+      project: Lansa AWS Scalable License Images
       source: Build Cloud Account Id Artefacts
       # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
     - pipeline: _BuildImageReleaseArtefacts
-      # project: Lansa AWS Scalable License Images
+      project: Lansa AWS Scalable License Images
       source: Build Image Release Artefacts 2.0
       # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
-      name: ${{ parameters.awstemplates_repo }}
+      # name: ${{ parameters.awstemplates_repo }} 
+      name: nkhl-accolite/aws-templates-nkhl
       type: github
       ref: ${{ parameters.awstemplates_branch }}
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
-      name: ${{ parameters.robe070cookbooks_repo }}
+      # name: ${{ parameters.robe070cookbooks_repo }}
+      name: nkhl-accolite/cookbooks
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
       endpoint: nkhlLANSA
