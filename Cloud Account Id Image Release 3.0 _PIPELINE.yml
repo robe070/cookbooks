@@ -41,12 +41,12 @@ resources:
       name: lansa/aws-templates
       type: github
       ref: ${{ parameters.awstemplates_branch }}
-      # endpoint: ...
+      endpoint: aws-templates
     - repository: _Robe070Cookbooks
       name: cookbooks
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
-      # endpoint: ...
+      endpoint: cookbooks
 
 
 stages:
