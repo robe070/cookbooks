@@ -31,7 +31,7 @@ stages:
         TemplateS3Namespace: '/image-cd-pipeline'
       pool:
         vmImage: ${{ parameters.vmImage }}
-      environment: ${{ parameters.jobName }}
+      # environment: ${{ parameters.jobName }}
       strategy:
         runOnce:
           deploy:
