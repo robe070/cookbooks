@@ -7,7 +7,8 @@ parameters:
 - name: awstemplates_repo
   displayName: 'Source for aws-templates repo'
   type: string
-  default: 'lansa/aws-templates'
+  # default: 'lansa/aws-templates'
+  default: 'nkhl-accolite/aws-templates-nkhl'
 - name: awstemplates_branch
   displayName: 'Source for aws-templates branch'
   type: string
@@ -15,7 +16,8 @@ parameters:
 - name: robe070cookbooks_repo
   displayName: 'Source for cookbooks repo'
   type: string
-  default: 'robe070/cookbooks'
+  # default: 'robe070/cookbooks'
+  default: 'nkhl-accolite/cookbooks'
 - name: robe070cookbooks_branch
   displayName: 'Source for cookbooks branch'
   type: string
@@ -36,14 +38,12 @@ resources:
       # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
-      # name: ${{ parameters.awstemplates_repo }} 
-      name: nkhl-accolite/aws-templates-nkhl
+      name: ${{ parameters.awstemplates_repo }}
       type: github
       ref: ${{ parameters.awstemplates_branch }}
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
-      # name: ${{ parameters.robe070cookbooks_repo }}
-      name: nkhl-accolite/cookbooks
+      name: ${{ parameters.robe070cookbooks_repo }}
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
       endpoint: nkhlLANSA
