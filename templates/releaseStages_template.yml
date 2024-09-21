@@ -25,17 +25,18 @@ stages:
     # dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    - deployment: 'Deployment_${{ parameters.jobName }}'
+    # - deployment: 'Deployment_${{ parameters.jobName }}'
+    - job: 'Deployment_${{ parameters.jobName }}'
       displayName: 'Deployment: ${{ parameters.jobName }}'
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
       pool:
         vmImage: ${{ parameters.vmImage }}
       # environment: ${{ parameters.jobName }}
-      strategy:
-        runOnce:
-          deploy:
-            steps:
+      # strategy:
+      #   runOnce:
+      #     deploy:
+        steps:
             - download: _BuildCloudAccountIdArtefacts
             - download: _BuildImageReleaseArtefacts
             - checkout: self
