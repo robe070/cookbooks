@@ -32,6 +32,7 @@ stages:
       pool:
         vmImage: ${{ parameters.vmImage }}
         steps:
+        - pwsh: Write-Host "TESTING!"
         - download: _BuildCloudAccountIdArtefacts
         - download: _BuildImageReleaseArtefacts
         # - checkout: self
