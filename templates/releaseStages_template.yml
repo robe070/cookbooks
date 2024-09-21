@@ -22,7 +22,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    # dependsOn: ${{ parameters.dependsOn }}
+    dependsOn: []
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     # - deployment: 'Deployment_${{ parameters.jobName }}'
