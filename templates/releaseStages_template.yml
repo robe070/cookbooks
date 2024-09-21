@@ -39,7 +39,9 @@ stages:
       steps:
       - pwsh: Write-Host "TESTING!"
       - download: _BuildCloudAccountIdArtefacts
+        displayName: Download artifacts from Build Cloud Account Id Artefacts
       - download: _BuildImageReleaseArtefacts
+        displayName: Download artifacts from Build Image Release Artefacts 2.0
       - checkout: self
       - checkout: _LansaAWSTemplates
       - checkout: _Robe070Cookbooks
