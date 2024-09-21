@@ -51,8 +51,8 @@ resources:
       endpoint: nkhlLANSA
 
 variables:
-  _LansaAWSTemplates: $[ resources.repositories._LansaAWSTemplates.name ]
-  _Robe070Cookbooks: $[ resources.repositories._Robe070Cookbooks.name ]
+  _LansaAWSTemplates: aws-templates-nkhl
+  _Robe070Cookbooks: cookbooks
 
 
 stages:
