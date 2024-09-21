@@ -35,8 +35,8 @@ stages:
         - download: _BuildCloudAccountIdArtefacts
         - download: _BuildImageReleaseArtefacts
         # - checkout: self
-        - checkout: _LansaAWSTemplates
-        - checkout: _Robe070Cookbooks
+        # - checkout: _LansaAWSTemplates
+        # - checkout: _Robe070Cookbooks
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Artifact Check: Set Gate Variable'
