@@ -39,7 +39,7 @@ stages:
         steps:
             - download: _BuildCloudAccountIdArtefacts
             - download: _BuildImageReleaseArtefacts
-            - checkout: self
+            # - checkout: self
             - checkout: _LansaAWSTemplates
             - checkout: _Robe070Cookbooks
 
