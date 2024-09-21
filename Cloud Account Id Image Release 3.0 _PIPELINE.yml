@@ -40,12 +40,12 @@ resources:
     - repository: _LansaAWSTemplates
       name: lansa/aws-templates
       type: github
-      branch: ${{ parameters.awstemplates_branch }}
+      ref: ${{ parameters.awstemplates_branch }}
       # endpoint: ...
     - repository: _Robe070Cookbooks
       name: cookbooks
       type: github
-      branch: ${{ parameters.robe070cookbooks_branch }}
+      ref: ${{ parameters.robe070cookbooks_branch }}
       # endpoint: ...
 
 
