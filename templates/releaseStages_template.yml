@@ -50,10 +50,10 @@ stages:
         displayName: Checking out nkhl-accolite/aws-templates-nkhl
       - checkout: _Robe070Cookbooks
         displayName: Checking out nkhl-accolite/cookbooks
-      - pwsh: Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
+      - pwsh: Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]sdfgd"
         name: vartest
       - pwsh: Write-Host 'vartest = $(vartest.IsEnabled)'
-        condition: and(succeeded(), eq(variables['vartest.IsEnabled'], 'true'))
+        condition: and(succeeded(), eq(variables['vartest.IsEnabled'], 'sdfgd'))
       # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
       #   name: gateVariable
       #   displayName: 'Artifact Check: Set Gate Variable'
