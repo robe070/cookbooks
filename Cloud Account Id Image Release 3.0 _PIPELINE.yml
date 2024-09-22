@@ -3,49 +3,19 @@ trigger: none
 pool:
   vmImage: ubuntu-latest
 
-parameters:
-- name: awstemplates_repo
-  displayName: 'Source for aws-templates repo'
-  type: string
-  # default: 'lansa/aws-templates'
-  default: nkhl-accolite/aws-templates-nkhl
-- name: awstemplates_branch
-  displayName: 'Source for aws-templates branch'
-  type: string
-  default: 'support/scalable'
-- name: robe070cookbooks_repo
-  displayName: 'Source for cookbooks repo'
-  type: string
-  # default: 'robe070/cookbooks'
-  default: nkhl-accolite/cookbooks
-- name: robe070cookbooks_branch
-  displayName: 'Source for cookbooks branch'
-  type: string
-  default: 'debug/paas'
-- name: buildcloudaccountidartefacts_branch
-  type: string
-  default: 'feature/aws-Build-Cloud-Account-Id-Artefacts-3.0'
-
 resources:
   pipelines:
     - pipeline: _BuildCloudAccountIdArtefacts
-      # project: Lansa AWS Scalable License Images
       source: Build Cloud Account Id Artefacts
-      # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
     - pipeline: _BuildImageReleaseArtefacts
-      # project: Lansa AWS Scalable License Images
       source: Build Image Release Artefacts 2.0
-      # branch: ${{ parameters.buildcloudaccountidartefacts_branch }}
   repositories:
     - repository: _LansaAWSTemplates
-      # name: ${{ parameters.awstemplates_repo }}
       name: nkhl-accolite/aws-templates-nkhl
       type: github
-      # ref: ${{ parameters.awstemplates_branch }}
       ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
-      # name: ${{ parameters.robe070cookbooks_repo }}
       name: nkhl-accolite/cookbooks
       type: github
       ref: ${{ parameters.robe070cookbooks_branch }}
@@ -67,47 +37,58 @@ stages:
     jobName: 'w19d15idold'
     jobDisplayname: 'w19d-15-id-old'
     jobDemand: DotNetFramework
-    jobcondition: or(eq(variables['Build-V15-OLD'], 'True'), eq(variables['Build-all'], 'True'))
+    jobcondition: or(eq(variables['Build-V15-OLD'], 'true'), eq(variables['Build-all'], 'true'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v13sp2idnew'
-#     stageDisplayname: 'v13sp2-id-new'
-#     jobName: 'w19d15idnew'
-#     jobDisplayname: 'w19d-15-id-new'
-    
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v13sp2idnew'
+    stageDisplayname: 'v13sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V13SP2-NEW'], 'true'), eq(variables['Build-all'], 'true'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v14sp2idnew'
-#     stageDisplayname: 'v14sp2-id-new'
-#     jobName: 'w19d15idnew'
-#     jobDisplayname: 'w19d-15-id-new'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v14sp2idnew'
+    stageDisplayname: 'v14sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V14SP2-NEW'], 'True'), eq(variables['Build-all'], 'True'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v15idnew'
-#     stageDisplayname: 'v15-id-new'
-#     jobName: 'w19d15idnew'
-#     jobDisplayname: 'w19d-15-id-new'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v15idnew'
+    stageDisplayname: 'v15-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V15-NEW'], 'True'), eq(variables['Build-all'], 'True'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v13sp2scalable'
-#     stageDisplayname: 'v13sp2-scalable'
-#     jobName: 'w19d150'
-#     jobDisplayname: 'w19d-15-0'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v13sp2scalable'
+    stageDisplayname: 'v13sp2-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V13SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v14sp2scalable'
-#     stageDisplayname: 'v14sp2-scalable'
-#     jobName: 'w19d150'
-#     jobDisplayname: 'w19d-15-0'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v14sp2scalable'
+    stageDisplayname: 'v14sp2-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
-# - template: templates/releaseStages_template.yml
-#   parameters:
-#     stageName: 'v15scalable'
-#     stageDisplayname: 'v15-scalable'
-#     jobName: 'w19d150'
-#     jobDisplayname: 'w19d-15-0'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v15scalable'
+    stageDisplayname: 'v15-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V15-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
