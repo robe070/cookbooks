@@ -52,8 +52,10 @@ resources:
       endpoint: nkhlLANSA
 
 variables:
-  _LansaAWSTemplates: aws-templates-nkhl
-  _Robe070Cookbooks: cookbooks
+  _LansaAWSTemplates_repo: aws-templates-nkhl
+  _Robe070Cookbooks_repo: cookbooks
+  _BuildCloudAccountIdArtefacts: 
+
 
 
 stages:

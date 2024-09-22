@@ -22,7 +22,7 @@ parameters:
   - name: deploySQLservertaskname
     type: string
     default: none
-  - name: _LansaAWSTemplates
+  - name: _LansaAWSTemplates_repo
     type: string
     default: ''
 
@@ -31,10 +31,10 @@ stages:
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.runStage }}
     dependsOn: []
-    displayName: 'Stage: ${{ parameters.stageDisplayname }}'
+    displayName: '${{ parameters.stageDisplayname }}'
     jobs:
     - job: ${{ parameters.jobName }}
-      displayName: 'Job: ${{ parameters.jobDisplayname }}'
+      displayName: '${{ parameters.jobDisplayname }}'
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
       pool:
@@ -58,7 +58,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/${{ parameters._LansaAWSTemplates }}/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(System.DefaultWorkingDirectory)/${{ parameters._LansaAWSTemplates_repo }}/scripts/SetGateVariableCloudAccountId.ps1"
       
       #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       #Your build pipeline references an undefined variable named ‘Gate.ImageID’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
