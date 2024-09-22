@@ -41,7 +41,8 @@ resources:
       # name: ${{ parameters.awstemplates_repo }}
       name: nkhl-accolite/aws-templates-nkhl
       type: github
-      ref: ${{ parameters.awstemplates_branch }}
+      # ref: ${{ parameters.awstemplates_branch }}
+      ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
       endpoint: nkhlLANSA
     - repository: _Robe070Cookbooks
       # name: ${{ parameters.robe070cookbooks_repo }}
