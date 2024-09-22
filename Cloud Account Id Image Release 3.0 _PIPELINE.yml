@@ -52,8 +52,16 @@ resources:
       endpoint: nkhlLANSA
 
 variables:
-  _LansaAWSTemplates_repo: aws-templates-nkhl
-  _Robe070Cookbooks_repo: cookbooks
+  - group: Template Parameters
+  - group: Default Branch
+  - group: S3 uploads
+  - group: VPC ap-southeast-2
+  - group: VPC us-east-1
+  - group: Git Repos
+  - name: _LansaAWSTemplates_repo
+    value:  aws-templates-nkhl
+  - name: _Robe070Cookbooks_repo
+    value : cookbooks
 
 stages:
 - template: templates/releaseStages_template.yml # Template reference
