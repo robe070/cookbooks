@@ -54,7 +54,6 @@ resources:
 variables:
   _LansaAWSTemplates_repo: aws-templates-nkhl
   _Robe070Cookbooks_repo: cookbooks
-  _BuildCloudAccountIdArtefacts: 
 
 
 
@@ -65,7 +64,7 @@ stages:
     stageDisplayname: 'v15-id-old'
     jobName: 'w19d15idold'
     jobDisplayname: 'w19d-15-id-old'
-    _LansaAWSTemplates_repo: $(_LansaAWSTemplates)
+    _LansaAWSTemplates_repo: $(_LansaAWSTemplates_repo)
 
 # - template: templates/releaseStages_template.yml # Template reference
 #   parameters:
