@@ -75,25 +75,6 @@ stages:
           filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
-      #Your build pipeline references an undefined variable named ‘DBPasswordKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘DBPasswordValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘WebPasswordKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘WebPasswordValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘KeyNameKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘KeyNameValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘RemoteAccessLocationKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘RemoteAccessLocationValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘Gate.ImageID’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘lansaVersion’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘WebserverOSLatestVersionValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘LansaMSIKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘msiURLLatest’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘CurrentVPC’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘AvailabilityZones’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘NumberOfAZs’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘DBSubnetGroupName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘ELBSubnetIds’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘03DBUsername’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
         displayName: 'Deploy AWS template'
         inputs:
@@ -166,7 +147,6 @@ stages:
           timeoutInMins: 120
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
-      #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Print Deployment Output'
         inputs:
@@ -176,7 +156,6 @@ stages:
           filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/PrintDeploymentOutput.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
-      #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Test CFN Deployment: URL tests'
         inputs:
@@ -186,7 +165,6 @@ stages:
           filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
-      #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete Stack'
         inputs:
