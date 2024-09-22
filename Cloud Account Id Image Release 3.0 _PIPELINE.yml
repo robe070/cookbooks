@@ -58,31 +58,53 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
-  - name: _LansaAWSTemplates_repo
-    value:  aws-templates-nkhl
-  - name: _Robe070Cookbooks_repo
-    value : cookbooks
-
 
 stages:
-- template: templates/releaseStages_template.yml # Template reference
+- template: templates/releaseStages_template.yml
   parameters:
     stageName: 'v15idold'
     stageDisplayname: 'v15-id-old'
     jobName: 'w19d15idold'
     jobDisplayname: 'w19d-15-id-old'
-    _LansaAWSTemplates_repo: $(_LansaAWSTemplates_repo)
 
-# - template: templates/releaseStages_template.yml # Template reference
-#   parameters:
-#     stageName: 'v13sp2idnew'
-#     stageDisplayname: 'v13sp2-id-new'
-#     jobName: 'w19d15idnew'
-#     jobDisplayname: 'w19d-15-id-new'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v13sp2idnew'
+    stageDisplayname: 'v13sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
 
-# - template: templates/releaseStages_template.yml # Template reference
-#   parameters:
-#     stageName: 'v14sp2idnew'
-#     stageDisplayname: 'v14sp2-id-new'
-#     jobName: 'w19d15idnew'
-#     jobDisplayname: 'w19d-15-id-new'
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v14sp2idnew'
+    stageDisplayname: 'v14sp2-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
+
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v15idnew'
+    stageDisplayname: 'v15-id-new'
+    jobName: 'w19d15idnew'
+    jobDisplayname: 'w19d-15-id-new'
+
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v13sp2scalable'
+    stageDisplayname: 'v13sp2-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'
+
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v14sp2scalable'
+    stageDisplayname: 'v14sp2-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'
+
+- template: templates/releaseStages_template.yml
+  parameters:
+    stageName: 'v15scalable'
+    stageDisplayname: 'v15-scalable'
+    jobName: 'w19d150'
+    jobDisplayname: 'w19d-15-0'

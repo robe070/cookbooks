@@ -22,9 +22,6 @@ parameters:
   - name: deploySQLservertaskname
     type: string
     default: none
-  - name: _LansaAWSTemplates_repo
-    type: string
-    default: ''
 
 
 stages:
@@ -57,12 +54,11 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/${{ parameters._LansaAWSTemplates_repo }}/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/SetGateVariableCloudAccountId.ps1"
       
       - pwsh: |
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.stack:$(Gate.stack)" | Out-Default
-        
         displayName: 'Artifact Check: Output Gate Variable'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
@@ -72,8 +68,8 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/${{ parameters._LansaAWSTemplates_repo }}/scripts/DeletePreviousFailedStack.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/DeletePreviousFailedStack.ps1'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       #Your build pipeline references an undefined variable named ‘DBPasswordKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       #Your build pipeline references an undefined variable named ‘DBPasswordValue’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
@@ -164,7 +160,7 @@ stages:
           captureStackOutputs: asJSON
           captureAsSecuredVars: false
           timeoutInMins: 120
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -173,8 +169,8 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/PrintDeploymentOutput.ps1'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -183,8 +179,8 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/TestCFNDeployment.ps1'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -193,7 +189,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
         timeoutInMinutes: 240
