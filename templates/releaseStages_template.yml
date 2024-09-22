@@ -68,7 +68,7 @@ stages:
           Write-Host "gateVariable.IsEnabled: $(gateVariable.IsEnabled); gateVariable.ImageID: $(gateVariable.ImageID); gateVariable.stack:$(gateVariable.stack)" | Out-Default
         
         displayName: 'Artifact Check: Output Gate Variable'
-        condition: and(succeeded(), eq('$(gateVariable.IsEnabled)', 'true'))
+        condition: and(succeeded(), eq(dependencies.gateVariable.outputs['gateVariable.IsEnabled'], 'true'))
 
       #Your build pipeline references an undefined variable named ‘Gate.stack’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
