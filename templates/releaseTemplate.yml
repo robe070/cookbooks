@@ -33,6 +33,8 @@ stages:
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     - job: ${{ parameters.jobName }}
+      timeoutInMinutes: 0
+      cancelTimeoutInMinutes: 1
       condition: ${{ parameters. jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
       variables:
