@@ -55,8 +55,6 @@ variables:
   _LansaAWSTemplates_repo: aws-templates-nkhl
   _Robe070Cookbooks_repo: cookbooks
 
-
-
 stages:
 - template: templates/releaseStages_template.yml # Template reference
   parameters:
