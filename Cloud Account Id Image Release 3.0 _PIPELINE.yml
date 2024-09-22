@@ -66,45 +66,48 @@ stages:
     stageDisplayname: 'v15-id-old'
     jobName: 'w19d15idold'
     jobDisplayname: 'w19d-15-id-old'
+    jobDemand: DotNetFramework
+    jobcondition: or(eq(variables['Build-V15-OLD'], 'True'), eq(variables['Build-all'], 'True'))
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v13sp2idnew'
-    stageDisplayname: 'v13sp2-id-new'
-    jobName: 'w19d15idnew'
-    jobDisplayname: 'w19d-15-id-new'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v13sp2idnew'
+#     stageDisplayname: 'v13sp2-id-new'
+#     jobName: 'w19d15idnew'
+#     jobDisplayname: 'w19d-15-id-new'
+    
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v14sp2idnew'
-    stageDisplayname: 'v14sp2-id-new'
-    jobName: 'w19d15idnew'
-    jobDisplayname: 'w19d-15-id-new'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v14sp2idnew'
+#     stageDisplayname: 'v14sp2-id-new'
+#     jobName: 'w19d15idnew'
+#     jobDisplayname: 'w19d-15-id-new'
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v15idnew'
-    stageDisplayname: 'v15-id-new'
-    jobName: 'w19d15idnew'
-    jobDisplayname: 'w19d-15-id-new'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v15idnew'
+#     stageDisplayname: 'v15-id-new'
+#     jobName: 'w19d15idnew'
+#     jobDisplayname: 'w19d-15-id-new'
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v13sp2scalable'
-    stageDisplayname: 'v13sp2-scalable'
-    jobName: 'w19d150'
-    jobDisplayname: 'w19d-15-0'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v13sp2scalable'
+#     stageDisplayname: 'v13sp2-scalable'
+#     jobName: 'w19d150'
+#     jobDisplayname: 'w19d-15-0'
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v14sp2scalable'
-    stageDisplayname: 'v14sp2-scalable'
-    jobName: 'w19d150'
-    jobDisplayname: 'w19d-15-0'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v14sp2scalable'
+#     stageDisplayname: 'v14sp2-scalable'
+#     jobName: 'w19d150'
+#     jobDisplayname: 'w19d-15-0'
 
-- template: templates/releaseStages_template.yml
-  parameters:
-    stageName: 'v15scalable'
-    stageDisplayname: 'v15-scalable'
-    jobName: 'w19d150'
-    jobDisplayname: 'w19d-15-0'
+# - template: templates/releaseStages_template.yml
+#   parameters:
+#     stageName: 'v15scalable'
+#     stageDisplayname: 'v15-scalable'
+#     jobName: 'w19d150'
+#     jobDisplayname: 'w19d-15-0'
