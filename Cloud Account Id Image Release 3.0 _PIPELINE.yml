@@ -18,7 +18,7 @@ resources:
     - repository: _Robe070Cookbooks
       name: nkhl-accolite/cookbooks
       type: github
-      ref: ${{ parameters.robe070cookbooks_branch }}
+      ref: debug/paas
       endpoint: nkhlLANSA
 
 variables:
