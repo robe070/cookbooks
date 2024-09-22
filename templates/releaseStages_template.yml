@@ -53,7 +53,7 @@ stages:
       - pwsh: Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
         name: vartest
       - pwsh: Write-Host 'vartest = $(vartest.IsEnabled)'
-        condition: and(succeeded(), eq(vartest.outputs['vartest.IsEnabled'], 'true')))
+        condition: and(succeeded(), eq(variables['vartest.IsEnabled'], 'true')))
       # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
       #   name: gateVariable
       #   displayName: 'Artifact Check: Set Gate Variable'
