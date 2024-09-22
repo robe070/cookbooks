@@ -65,7 +65,7 @@ stages:
     stageDisplayname: 'v15-id-old'
     jobName: 'w19d15idold'
     jobDisplayname: 'w19d-15-id-old'
-    _LansaAWSTemplates: $(_LansaAWSTemplates)
+    _LansaAWSTemplates_repo: $(_LansaAWSTemplates)
 
 # - template: templates/releaseStages_template.yml # Template reference
 #   parameters:
