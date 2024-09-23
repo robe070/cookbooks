@@ -1041,17 +1041,28 @@ $jsonObject = @"
                         Remove-Item $filename | Out-Default | Write-Host;
                     }
                 }
-                $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
-                if (-Not (Test-Path $pathToCheck))
+                $pathToCheck = "$ENV:ProgramFiles\Amazon\EC2Launch"
+                if (Test-Path $pathToCheck) 
+                {
+                    Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
+                    Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
+                } else 
                 {
                     Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
                 }
-                else {
-                    Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
-                }
+                # $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
+                # if (-Not (Test-Path $pathToCheck))
+                # {
+                #     Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+                # }
+                # else {
+                #     Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
+                # }
             }
         } elseif ($Cloud -eq 'Azure' ) {
             Write-Host( "$(Log-Date) Running sysprep automatically")
