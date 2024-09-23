@@ -1042,22 +1042,23 @@ $jsonObject = @"
                     }
                 }
                 # Set the path you want to check 
-                # Set the path you want to check 
                 $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" # Replace with your desired path
 
                 # Check if the path exists
-                if (Test-Path -Path $pathToCheck -PathType Container) {
+                if (Test-Path -Path "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" -PathType Container) {
                     Write-Host "Executing Windows 2016 & 2019 Scripts"
 
                     Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
 
-                } else {
+                } elseif (Test-Path -Path "$ENV:ProgramFiles\Amazon\EC2Launch" -PathType Container) {
                     Write-Host "Executing Windows 2022 Script"
 
                     Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
                     Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
+                } else { 
+                    Write-Host "Path of ec2-launch doesn't exist"
 
                 }
                 # $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
