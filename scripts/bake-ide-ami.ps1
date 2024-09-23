@@ -698,6 +698,9 @@ $jsonObject = @"
                 Execute-RemoteInit | Out-Default | Write-Host
                 Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
                 Write-host "$(Log-Date) Rebooted!"
+                Execute-RemoteBlock $Script:session {
+                    $ENV:Path | Out-Default | Write-Host
+                 }
             }
             
 
