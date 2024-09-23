@@ -36,7 +36,8 @@ try {
     if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     {
         Write-Host "Installing Git"
-        Run-ExitCode 'choco' @('install', 'git', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
+        # Run-ExitCode 'choco' @('install', 'git', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
+        choco install git -y --no-progress --force
         refreshenv | Out-Default | Write-Host
 
         # Note, the Git install overwrites the current environment so need to modify path here
