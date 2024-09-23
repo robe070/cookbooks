@@ -28,6 +28,16 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
+  - name: CookbooksSource1
+    value: c:\lansa
+  - name: imageReleaseState
+    value: Production
+  - name: jpnLanguage
+    value: JPN
+  - name: stackname
+    value: BakingDP-ImageRelease
+  - name: TemplateS3Namespace
+    value: /image-cd-pipeline
 
 stages:
 - template: templates/releaseTemplate.yml

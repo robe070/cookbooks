@@ -1,5 +1,5 @@
 name: Build Cloud Accounts Artefacts 3.0-$(Build.BuildId)
-
+trigger: none
 variables:
   - group: "External IP Addresses"
   - group: "Logins"
@@ -9,10 +9,6 @@ variables:
     value: $false
   - name: regionName
     value: ap-southeast-2
-  - name: GitBranchPR
-    value: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
-  - name: GitUserName
-    value: priyadishah
   - name: Windows-2019-AMI
     value: LANSA Scalable License  w19d-15*
 
