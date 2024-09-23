@@ -1,5 +1,5 @@
 name: Build Image Release Artefacts 3.0-$(Build.BuildId)
-
+trigger: none
 variables:
   - group: "External IP Addresses"
   - group: "ImageVersion"
