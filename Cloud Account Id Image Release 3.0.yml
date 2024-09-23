@@ -5,9 +5,9 @@ pool:
 
 resources:
   pipelines:
-    - pipeline: _Build Cloud Account Id Artefacts  3.0
+    - pipeline: _BuildCloudAccountIdArtefacts3
       source: Build Cloud Account Id Artefacts 3.0
-    - pipeline: _Build Image Release Artefacts  3.0
+    - pipeline: _BuildImageReleaseArtefacts3
       source: Build Image Release Artefacts 3.0
   repositories:
     - repository: _LansaAWSTemplates
