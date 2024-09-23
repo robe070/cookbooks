@@ -5,10 +5,10 @@ pool:
 
 resources:
   pipelines:
-    - pipeline: _BuildCloudAccountIdArtefacts3
-      source: Build Cloud Account Id Artefacts 3.0
-    - pipeline: _BuildImageReleaseArtefacts3
-      source: Build Image Release Artefacts 3.0
+    - pipeline: _BuildCloudAccountIdArtefacts
+      source: Build Cloud Account Id Artefacts
+    - pipeline: _BuildImageReleaseArtefacts
+      source: Build Image Release Artefacts 2.0
   repositories:
     - repository: _LansaAWSTemplates
       name: nkhl-accolite/aws-templates-nkhl
