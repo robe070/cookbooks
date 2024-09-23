@@ -697,13 +697,12 @@ $jsonObject = @"
                 Connect-RemoteSession | Out-Default | Write-Host
                 Execute-RemoteInit | Out-Default | Write-Host
                 Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
-                Write-host "$(Log-Date) Rebooted!"
-                $ENV:Path += ';C:\ProgramData\chocolatey\'
+                Write-host "$(Log-Date) Rebooted the VM!"
                 Execute-RemoteBlock $Script:session {
 
                     Write-Host( "$(Log-Date) Path before changing it: $ENV:Path ")
   
-                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin" | Out-Default | Write-Host
+                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\" | Out-Default | Write-Host
   
                     Write-Host( "$(Log-Date) Path after changing it: $ENV:Path")
   
