@@ -702,7 +702,7 @@ $jsonObject = @"
 
                     Write-Host( "$(Log-Date) Path before changing it: $ENV:Path ")
   
-                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\" | Out-Default | Write-Host
+                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Default | Write-Host
   
                     Write-Host( "$(Log-Date) Path after changing it: $ENV:Path")
   
