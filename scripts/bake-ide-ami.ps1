@@ -700,7 +700,15 @@ $jsonObject = @"
                 Write-host "$(Log-Date) Rebooted!"
                 $ENV:Path += ';C:\ProgramData\chocolatey\bin'
                 Execute-RemoteBlock $Script:session {
-                    $ENV:Path | Out-Default | Write-Host
+
+                    Write-Host( "$(Log-Date) Path before changing it: $ENV:Path ")
+  
+                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin" | Out-Default | Write-Host
+  
+                    Write-Host( "$(Log-Date) Path after changing it: $ENV:Path")
+  
+                   choco | Out-Default | Write-Host
+  
                  }
             }
             
