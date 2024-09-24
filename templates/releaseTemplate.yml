@@ -46,11 +46,11 @@ stages:
         demands: ${{ parameters.jobDemand }}
 
       steps:
-      - download: _BuildCloudAccountIdArtefacts
-        displayName: Download artifacts from Build Cloud Account Id Artefacts
+      # - download: _BuildCloudAccountIdArtefacts
+      #   displayName: Download artifacts from Build Cloud Account Id Artefacts
 
-      - download: _BuildImageReleaseArtefacts
-        displayName: Download artifacts from Build Image Release Artefacts 2.0
+      # - download: _BuildImageReleaseArtefacts
+      #   displayName: Download artifacts from Build Image Release Artefacts 2.0
 
       - checkout: self
 
