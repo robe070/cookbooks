@@ -1,4 +1,4 @@
-name: Build Cloud Accounts Artefacts 3.0-$(Build.BuildId)
+name: Build Cloud Accounts Artefacts -$(Build.BuildId)
 trigger: none
 variables:
   - group: "External IP Addresses"
