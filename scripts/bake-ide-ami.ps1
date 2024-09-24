@@ -1041,11 +1041,35 @@ $jsonObject = @"
                         Remove-Item $filename | Out-Default | Write-Host;
                     }
                 }
-                Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
-                Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
-                # Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
-                # Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                # Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+               Invoke-Command -Session $Script:session {
+                  # Set the path you want to check
+                  $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" 
+ 
+                  # Check if the path exists
+                  Write-Host("$(Log-Date) Checking if $pathToCheck exists")
+                  if (Test-Path -Path $pathToCheck) {
+                     Write-Host( "$(Log-Date) EC2-Launch path exists")
+                     Write-Host "Executing Windows 2016 & 2019 sysprep"
+ 
+                     cd $pathToCheck | Out-Default | Write-Host
+                     ./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host
+                     ./SysprepInstance.ps1 | Out-Default | Write-Host
+ 
+                  } else {
+                     $pathToCheck = "$ENV:ProgramFiles\Amazon\EC2Launch"
+                     Write-Host("$(Log-Date) Checking if $pathToCheck exists")
+                     if (Test-Path -Path $pathToCheck) {
+                        Write-Host( "$(Log-Date) EC2-Launch path exists")
+                        Write-Host "Executing Windows 2022 sysprep"
+ 
+                        cd $pathToCheck | Out-Default | Write-Host
+                        ./ec2launch.exe sysprep -c -s | Out-Default | Write-Host
+                     } else {
+                        Write-Host "Path of ec2-launch doesn't exist"
+                        throw "Cannot sysprep system"
+                     }
+                  }
+               }
             }
         } elseif ($Cloud -eq 'Azure' ) {
             Write-Host( "$(Log-Date) Running sysprep automatically")

@@ -1,0 +1,148 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  pipelines:
+    - pipeline: _BuildImageReleaseArtefacts
+      source: Build Image Release Artefacts 2.0
+  repositories:
+    - repository: _LansaAWSTemplates
+      name: Divakshi/aws-templates
+      type: github
+      ref: feature/Aws-Image-Release-3.0
+      # endpoint: nkhlLANSA
+    - repository: _Robe070Cookbooks
+      name: Divakshi/cookbooks
+      type: github
+      ref: debug/paas
+      # endpoint: nkhlLANSA
+
+variables:
+  - group: Template Parameters
+  - group: Default Branch
+  - group: S3 uploads
+  - group: VPC ap-southeast-2
+  - group: VPC us-east-1
+  - group: Git Repos
+  - name: CookbooksSource1
+    value: c:\lansa
+  - name: imageReleaseState
+    value: Production
+  - name: jpnLanguage
+    value: JPN
+  - name: stackname
+    value: BakingDP-ImageRelease
+  - name: TemplateS3Namespace
+    value: /image-cd-pipeline
+
+stages:
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w16d142IMGTest'
+    stageDisplayname: 'w16d-14-2 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w16d150IMGTest'
+    stageDisplayname: 'w16d-15-0 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w19d142IMGTest'
+    stageDisplayname: 'w19d-14-2 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w19d150IMGTest'
+    stageDisplayname: 'w19d-15-0 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w22d142IMGTest'
+    stageDisplayname: 'w22d-14-2 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w22d150IMGTest'
+    stageDisplayname: 'w22d-15-0 IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w16d142jIMGTest'
+    stageDisplayname: 'w16d-14-2j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w16d150jIMGTest'
+    stageDisplayname: 'w16d-15-0j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w19d142jIMGTest'
+    stageDisplayname: 'w19d-14-2j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w19d150jIMGTest'
+    stageDisplayname: 'w19d-15-0j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w22d142jIMGTest'
+    stageDisplayname: 'w22d-14-2j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))             
+
+- template: Templates/Image-Release-Stages.yml
+  parameters:
+    stageName: 'w22d150jIMGTest'
+    stageDisplayname: 'w22d-15-0j IMG Test'
+    jobName: 'Agent job'
+    jobDisplayname: 'Agent job'
+    jobDemand: DotNetFramework
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    
