@@ -1,14 +1,8 @@
-name: Build-Cloud-Account-Id-Artefacts-3.0-$(Build.BuildId)
+name: Build-Cloud-Account-Id-Artefacts-$(Build.BuildId)
 
 trigger: none
 
 pr: none
-
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: feature/nkhl-classic2YAML
 
 jobs:
 - job: w19d_15_ID

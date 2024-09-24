@@ -32,7 +32,7 @@
 $url = ''
 
 try {
-    $env:chocolateyVersion = '1.4.0'
+    $env:chocolateyVersion = '1.4.0' # This is being used because the latest version (at the time of this writing) - 2.3.0 - wasn't being installed correctly.
     $chocolateyVersion = $env:chocolateyVersion
     if (![string]::IsNullOrEmpty($chocolateyVersion)){
     Write-Host "Downloading specific version of Chocolatey: $chocolateyVersion"
