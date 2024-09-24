@@ -1,9 +1,9 @@
 resources:
   pipelines: 
   - pipeline: _Build Image Release Artefacts  3.0
-    source: 'Build Image Release Artefacts  3.0'
+    source: 'Build Image Release Artefacts 3.0'
   - pipeline: _Build Cloud Account Id Artefacts  3.0
-    source: 'Build Cloud Account Id Artefacts  3.0'
+    source: 'Build Cloud Account Id Artefacts 3.0'
   repositories:
     - repository: _LansaAWSTemplates
       name: nkhl-accolite/aws-templates-nkhl
