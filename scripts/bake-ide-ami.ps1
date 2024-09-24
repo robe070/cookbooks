@@ -136,7 +136,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitUserName,
+    $GitUserName="robe070",
 
     [Parameter(Mandatory=$false)]
     [switch]
