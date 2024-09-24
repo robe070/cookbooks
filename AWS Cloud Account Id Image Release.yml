@@ -2,12 +2,11 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: 'Build Cloud Account Id Artefacts 3.0'
-      source: 'Build Cloud Account Id Artefacts 3.0'
-      project: Lansa AWS Scalable License Images
-    - pipeline: 'Build Image Release Artefacts 3.0'
-      source: 'Build Image Release Artefacts 3.0'
-      project: Lansa AWS Scalable License Images
+    - pipeline: _BuildCloudAccountIdArtefacts3
+      source: 'Build Cloud Account Id Artefacts  3.0'
+    - pipeline: _BuildImageReleaseArtefacts3
+      source: 'Build Image Release Artefacts  3.0'
+
   repositories:
     - repository: _LansaAWSTemplates
       name: nkhl-accolite/aws-templates-nkhl
