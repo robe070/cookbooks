@@ -686,6 +686,40 @@ $jsonObject = @"
 
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
 
+            if ( $Cloud -eq 'Azure' ) {
+                Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
+                
+                Execute-RemoteBlock $Script:session {
+                    Restart-Computer -force
+                }
+                Start-Sleep -Seconds 10
+            
+                Write-Host "$(Log-Date) Reconnecting session..."
+                if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
+            
+                Connect-RemoteSession | Out-Default | Write-Host
+                Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+                $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
+                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                    Write-Error "LastExitCode: $remotelastexitcode"
+                    throw 1
+                }
+                Execute-RemoteInit | Out-Default | Write-Host
+                Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
+                Write-host "$(Log-Date) Rebooted the VM!"
+                Execute-RemoteBlock $Script:session {
+
+                    Write-Host( "$(Log-Date) Path before changing it: $ENV:Path ")
+  
+                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Default | Write-Host
+  
+                    Write-Host( "$(Log-Date) Path after changing it: $ENV:Path")
+  
+                   choco | Out-Default | Write-Host
+  
+                 }
+            }
+
             # Then we install git using chocolatey and pull down the rest of the files from git
 
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $GitUserName, $true)
