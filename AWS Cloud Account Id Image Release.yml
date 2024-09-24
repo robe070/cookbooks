@@ -5,10 +5,10 @@ pool:
 
 resources:
   pipelines:
-    - pipeline: _BuildCloudAccountIdArtefacts
+    - pipeline: _BuildCloudAccountIdArtefacts3
       source: 'Build Cloud Account Id Artefacts 3.0'
       project: Lansa AWS Scalable License Images
-    - pipeline: _BuildImageReleaseArtefacts
+    - pipeline: _BuildImageReleaseArtefacts3
       source: 'Build Image Release Artefacts 3.0'
       project: Lansa AWS Scalable License Images
   repositories:
