@@ -1041,26 +1041,55 @@ $jsonObject = @"
                         Remove-Item $filename | Out-Default | Write-Host;
                     }
                 }
-                # Set the path you want to check 
-                $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" # Replace with your desired path
+                Invoke-Command -Session $Script:session {
+                    # Set the path you want to check
+                    $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" 
+   
+                    # Check if the path exists
+                    Write-Host("$(Log-Date) Checking if $pathToCheck exists")
+                    if (Test-Path -Path $pathToCheck) {
+                       Write-Host( "$(Log-Date) EC2-Launch path exists")
+                       Write-Host "Executing Windows 2016 & 2019 sysprep"
+   
+                       cd $pathToCheck | Out-Default | Write-Host
+                       ./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host
+                       ./SysprepInstance.ps1 | Out-Default | Write-Host
+   
+                    } else {
+                       $pathToCheck = "$ENV:ProgramFiles\Amazon\EC2Launch"
+                       Write-Host("$(Log-Date) Checking if $pathToCheck exists")
+                       if (Test-Path -Path $pathToCheck) {
+                          Write-Host( "$(Log-Date) EC2-Launch path exists")
+                          Write-Host "Executing Windows 2022 sysprep"
+   
+                          cd $pathToCheck | Out-Default | Write-Host
+                          ./ec2launch.exe sysprep -c -s | Out-Default | Write-Host
+                       } else {
+                          Write-Host "Path of ec2-launch doesn't exist"
+                          throw "Cannot sysprep system"
+                       }
+                    }
+                 }
+                # # Set the path you want to check 
+                # $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" # Replace with your desired path
 
-                # Check if the path exists
-                if (Test-Path -Path "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" -PathType Container) {
-                    Write-Host "Executing Windows 2016 & 2019 Scripts"
+                # # Check if the path exists
+                # if (Test-Path -Path "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" -PathType Container) {
+                #     Write-Host "Executing Windows 2016 & 2019 Scripts"
 
-                    Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {cd $ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./SysprepInstance.ps1 | Out-Default | Write-Host}
 
-                } elseif (Test-Path -Path "$ENV:ProgramFiles\Amazon\EC2Launch" -PathType Container) {
-                    Write-Host "Executing Windows 2022 Script"
+                # } elseif (Test-Path -Path "$ENV:ProgramFiles\Amazon\EC2Launch" -PathType Container) {
+                #     Write-Host "Executing Windows 2022 Script"
 
-                    Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
-                    Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
-                } else { 
-                    Write-Host "Path of ec2-launch doesn't exist"
+                #     Invoke-Command -Session $Script:session {cd $ENV:ProgramFiles\Amazon\EC2Launch | Out-Default | Write-Host}
+                #     Invoke-Command -Session $Script:session {./ec2launch.exe sysprep -c -s | Out-Default | Write-Host}
+                # } else { 
+                #     Write-Host "Path of ec2-launch doesn't exist"
 
-                }
+                # }
                 # $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
                 # if (Test-Path $pathToCheck)
                 # {
