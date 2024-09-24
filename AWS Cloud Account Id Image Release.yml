@@ -7,8 +7,10 @@ resources:
   pipelines:
     - pipeline: _BuildCloudAccountIdArtefacts
       source: 'Build Cloud Account Id Artefacts 3.0'
+      project: Lansa AWS Scalable License Images
     - pipeline: _BuildImageReleaseArtefacts
       source: 'Build Image Release Artefacts 3.0'
+      project: Lansa AWS Scalable License Images
   repositories:
     - repository: _LansaAWSTemplates
       name: nkhl-accolite/aws-templates-nkhl
