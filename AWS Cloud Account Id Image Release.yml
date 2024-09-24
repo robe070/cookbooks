@@ -2,10 +2,10 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: _BuildCloudAccountIdArtefacts
+    - pipeline: 'Build Cloud Account Id Artefacts 3.0'
       source: 'Build Cloud Account Id Artefacts 3.0'
       project: Lansa AWS Scalable License Images
-    - pipeline: _BuildImageReleaseArtefacts
+    - pipeline: 'Build Image Release Artefacts 3.0'
       source: 'Build Image Release Artefacts 3.0'
       project: Lansa AWS Scalable License Images
   repositories:
