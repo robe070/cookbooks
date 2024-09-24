@@ -1,15 +1,10 @@
-trigger: none
-
-pool:
-  vmImage: ubuntu-latest
-
 resources:
   pipelines:
-    - pipeline: _BuildCloudAccountIdArtefacts3
-      source: 'Build Cloud Account Id Artefacts 3.0'
+    - pipeline: _Build Cloud Account Id Artefacts  3.0
+      source: 'Build Cloud Account Id Artefacts  3.0'
       project: Lansa AWS Scalable License Images
-    - pipeline: _BuildImageReleaseArtefacts3
-      source: 'Build Image Release Artefacts 3.0'
+    - pipeline:  _Build Image Release Artefacts  3.0
+      source: 'Build Image Release Artefacts  3.0'
       project: Lansa AWS Scalable License Images
   repositories:
     - repository: _LansaAWSTemplates
@@ -23,6 +18,9 @@ resources:
       ref: debug/paas
       endpoint: nkhlLANSA
 
+pool:
+  vmImage: windows-2022
+      
 variables:
   - group: Template Parameters
   - group: Default Branch
