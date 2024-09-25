@@ -588,7 +588,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
