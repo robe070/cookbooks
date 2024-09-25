@@ -24,11 +24,11 @@ variables:
 
 resources:
   pipelines:
-    - pipeline: $(BuildCloudAccountIdArtefacts)
+    - pipeline: _BuildCloudAccountIdArtefacts3
       project: Lansa AWS Scalable License Images
       # source: 'Build Cloud Account Id Artefacts  3.0'
       source: 'Build Cloud Account Id Artefacts 3.0'
-    - pipeline: $(BuildImageReleaseArtefacts)
+    - pipeline: _BuildImageReleaseArtefacts3
       project: Lansa AWS Scalable License Images
       # source: 'Build Image Release Artefacts  3.0'
       source: 'Build Image Release Artefacts 3.0'
