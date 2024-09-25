@@ -2,13 +2,6 @@ variables:
   - group : "Azure Logins"
   - group : "Image Names"
   - group : "External IP Addresses"
-
-# resources:
-#   repositories:
-#   - repository: self
-#     type: git
-#     ref: Feature/Debjit #debug/paas
-
    
 jobs:
 - job: Job_1
@@ -1133,7 +1126,7 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
 - job: Job_8
-  displayName: 'Agent job : n
+  displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
