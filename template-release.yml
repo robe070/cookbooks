@@ -31,7 +31,7 @@ pool:
     - checkout: hiren_aws-templates
     - checkout: hiren_aws-templates-mp
     - checkout: hiren_cookbooks
-
+ 
 variables:
   - name: CookbooksSource
     value: $(Build.Repository.LocalPath)\cookbooks
