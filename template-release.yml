@@ -1,5 +1,5 @@
 trigger:
-- hihiren/aws-templates-release-3.0
+- hiren/aws-templates-release-3.0
 
 resources:
   pipelines: 
