@@ -1,5 +1,4 @@
-trigger:
-- hiren/aws-templates-release-3.0
+trigger: none
 
 resources:
   pipelines: 
