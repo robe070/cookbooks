@@ -17,21 +17,15 @@ variables:
     value: BakingDP-ImageRelease
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
-  - name: BuildCloudAccountIdArtefacts
-    value: _Build Cloud Account Id Artefacts 3.0
-  - name: BuildImageReleaseArtefacts
-    value: _Build Image Release Artefacts 3.0
 
 resources:
   pipelines:
-    - pipeline: BuildCloudAccountIdArtefacts3
+    - pipeline: _Build Cloud Account Id Artefacts  3.0
       project: Lansa AWS Scalable License Images
-      # source: 'Build Cloud Account Id Artefacts  3.0'
-      source: Build Cloud Account Id Artefacts 3.0
-    - pipeline: BuildImageReleaseArtefacts3
+      source: 'Build Cloud Account Id Artefacts  3.0'
+    - pipeline: _Build Image Release Artefacts  3.0
       project: Lansa AWS Scalable License Images
-      # source: 'Build Image Release Artefacts  3.0'
-      source: Build Image Release Artefacts 3.0
+      source: 'Build Image Release Artefacts  3.0'
 
   repositories:
     - repository: _LansaAWSTemplates
