@@ -23,7 +23,7 @@ resources:
     endpoint: hirendra-singh
     type: github
     name: hirendra-singh/cookbooks
-    ref: debug/paas
+    ref: hiren/aws-template-release-3.0
   
 pool:
   vmImage: windows-2022
