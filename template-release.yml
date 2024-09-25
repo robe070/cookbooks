@@ -1,5 +1,5 @@
-# trigger:
-# - hiren/aws-template-release-3.0
+trigger:
+- hiren/aws-template-release-3.0
 
 resources:
   pipelines: 
@@ -39,22 +39,22 @@ variables:
     value: $(Build.Repository.LocalPath)\cookbooks
   - name: CookbooksSource1
     value: c:\lansa
-  - name: GitAwsTemplateMarketPlaceBranch-del
-    value: support/scalable_marketplace
-  - name: GitAwsTemplatescalableBranch-del
-    value: support/scalable
-  - name: GitCookBooksGitHubName-x
-    value: github.com/robe070/cookbooks
-  - name: GitLansaAwsTemplatesGitHubName-x
-    value: github.com/lansa/aws-templates
-  - name: GitLansaAwsTemplatesPAT-x
-    value: ccc
-  - name: GitLansaAwsTemplatesRepoName-x
-    value: _lansa_aws-templates-mp
-  - name: GitRepoUserEmail-x
-    value: lansacloud@lansa.com.au
-  - name: GitRepoUserName-x
-    value: LansaCloud
+  # - name: GitAwsTemplateMarketPlaceBranch-del
+  #   value: support/scalable_marketplace
+  # - name: GitAwsTemplatescalableBranch-del
+  #   value: support/scalable
+  # - name: GitCookBooksGitHubName-x
+  #   value: github.com/robe070/cookbooks
+  # - name: GitLansaAwsTemplatesGitHubName-x
+  #   value: github.com/lansa/aws-templates
+  # - name: GitLansaAwsTemplatesPAT-x
+  #   value: ccc
+  # - name: GitLansaAwsTemplatesRepoName-x
+  #   value: _lansa_aws-templates-mp
+  # - name: GitRepoUserEmail-x
+  #   value: lansacloud@lansa.com.au
+  # - name: GitRepoUserName-x
+  #   value: LansaCloud
   - name: jpnLanguage
     value: JPN
   - name: LansaReleaseTemplateUrl
