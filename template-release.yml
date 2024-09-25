@@ -1,6 +1,7 @@
 trigger:
 - hiren/aws-templates-release-3.0
 
+
 resources:
   pipelines: 
   - pipeline: _Build Image Release Artefacts  3.0
