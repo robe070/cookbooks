@@ -36,7 +36,7 @@ resources:
     - repository: _priyadishahCookbooks
       name: priyadishah/cookbooks
       type: github
-      ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
+      ref: feature/AWS-Cloud-Account-Id-Image-Release
       endpoint: priyadishah
 
 pool:

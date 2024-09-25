@@ -55,10 +55,10 @@ stages:
       - checkout: self
 
       - checkout: _LansaAWSTemplates
-        displayName: Checkout nkhl-accolite/aws-templates-md
+        displayName: Checkout aws-templates-md
 
       - checkout: _priyadishahCookbooks
-        displayName: Checkout nkhl-accolite/cookbooks
+        displayName: Checkout cookbooks
 
       - task: AWSPowerShellModuleScript@1
         name: Gate
