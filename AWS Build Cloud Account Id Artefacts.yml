@@ -12,11 +12,6 @@ variables:
   - name: Windows-2019-AMI
     value: LANSA Scalable License  w19d-15*
 
-#resources:
-#  repositories:
-#  - repository: self
-#    type: git
-#    ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
 jobs:
 - job: Job_2
   displayName: w19d-15-ID-OLD
