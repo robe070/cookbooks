@@ -1,85 +1,13 @@
-# Variable 'azureUserId' was defined in the Variables tab
-# Variable 'Build-all' was defined in the Variables tab
-# Variable 'Build-w12r2d-14-2' was defined in the Variables tab
-# Variable 'Build-w12r2d-15-0' was defined in the Variables tab
-# Variable 'Build-w16d-14-2' was defined in the Variables tab
-# Variable 'Build-w16d-14-2j' was defined in the Variables tab
-# Variable 'Build-w16d-15-0' was defined in the Variables tab
-# Variable 'Build-w16d-15-0j' was defined in the Variables tab
-# Variable 'Build-w19d-14-2' was defined in the Variables tab
-# Variable 'Build-w19d-14-2j' was defined in the Variables tab
-# Variable 'Build-w19d-15-0' was defined in the Variables tab
-# Variable 'Build-w19d-15-0j' was defined in the Variables tab
-# Variable 'clientsecret' was defined in the Variables tab
-# Variable 'GitBranch' was defined in the Variables tab
-# Variable 'GitBranchPR' was defined in the Variables tab
-# Variable 'JpnLanguage' was defined in the Variables tab
-# Variable 'quickstart-scripts' was defined in the Variables tab
-# Variable 'VersionText-w12r2d-14-2' was defined in the Variables tab
-# Variable 'VersionText-w12r2d-15-0' was defined in the Variables tab
-# Variable 'VersionText-w16d-14-2' was defined in the Variables tab
-# Variable 'VersionText-w16d-14-2j' was defined in the Variables tab
-# Variable 'VersionText-w16d-15-0' was defined in the Variables tab
-# Variable 'VersionText-w16d-15-0j' was defined in the Variables tab
-# Variable 'VersionText-w19d-14-2' was defined in the Variables tab
-# Variable 'VersionText-w19d-14-2j' was defined in the Variables tab
-# Variable 'VersionText-w19d-15-0' was defined in the Variables tab
-# Variable 'VersionText-w19d-15-0j' was defined in the Variables tab
-# Variable Group 'External IP Addresses' was defined in the Variables tab
-# Variable Group 'Image Names' was defined in the Variables tab
 variables:
   - group : "Azure Logins"
   - group : "Image Names"
   - group : "External IP Addresses"
-# azureUserId: $(azureUserId) #LPC-AsBake
-#  - imagetype: windows-2022
-#  - Build-all : $(Build-all) #True
-#  - Build-w12r2d-14-2 :  $(Build-w12r2d-14-2) #False
-#  - Build-w12r2d-15-0 : $(Build-w12r2d-15-0) #False
-#  - Build-w16d-14-2 : $(Build-w16d-14-2) #False
-#  - Build-w16d-14-2j : $(Build-w16d-14-2j) #True
-#  - Build-w16d-15-0 : $(Build-w16d-15-0) #False
-#  - Build-w16d-15-0j : $(Build-w16d-15-0j) #True
-#  - Build-w19d-14-2 : $(Build-w19d-14-2) #False
-#  - Build-w19d-14-2j : $(Build-w19d-14-2j) #True
-#  - Build-w19d-15-0 : $(Build-w19d-15-0) #False
-#  - Build-w19d-15-0j : $(Build-w19d-15-0j) #True
-#  - clientsecret : $(clientsecret) #"********"
-#  - GitBranch : $(Build.SourceBranch)
-#  - GitBranchPR : $(GitBranchPR) #debug/paas
-#  - JpnLanguage : $(JpnLanguage) #JPN
-#  - quickstart-scripts : $(quickstart-scripts) # $(Agent.BuildDirectory)\test
-#  - system.collectionId : $(system.collectionId) # 556ac44f-caae-4fef-a5b6-d964fed453e6
-#  - system.debug :  $(system.debug) #false
-#  - system.definitionId : $(system.definitionId) #31
-#  - system.teamProject : $(system.teamProject) #Lansa Azure Scalable License Images
-#  - VersionText-w12r2d-14-2 : $(VersionText-w12r2d-14-2) #26
-#  - VersionText-w12r2d-15-0 : $(VersionText-w12r2d-15-0) #16
-#  - VersionText-w16d-14-2 : $(VersionText-w16d-14-2) #16
-#  - VersionText-w16d-14-2j : $(VersionText-w16d-14-2j) #16
-#  - VersionText-w16d-15-0 : $(VersionText-w16d-15-0) #16
-#  - VersionText-w16d-15-0j : $(VersionText-w16d-15-0j) #16
-#  - VersionText-w19d-14-2 : $(VersionText-w19d-14-2) #16
-#  - VersionText-w19d-14-2j : $(VersionText-w19d-14-2j) #16
-#  - VersionText-w19d-15-0 : $(VersionText-w19d-15-0) #16
-#  - VersionText-w19d-15-0j : $(VersionText-w19d-15-0j) #16
-#  - imagetype : $(image)
 
-# jobs:
-# - job: CheckVariables
-#   displayName: 'Check Variable Values'
-#   pool:
-#     vmImage: windows-2022
-#   steps:
-#   - script: |
-#       echo "The value of External IP Addresses is: $(ExternalIPAddresses)"
-#     displayName: 'Print ExternalIPAddresses'
-
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: Feature/Debjit #debug/paas
+# resources:
+#   repositories:
+#   - repository: self
+#     type: git
+#     ref: Feature/Debjit #debug/paas
 
    
 jobs:
@@ -1205,7 +1133,7 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
 - job: Job_8
-  displayName: 'Agent job : w16d-15-0j'
+  displayName: 'Agent job : n
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
