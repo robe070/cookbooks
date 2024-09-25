@@ -1,4 +1,5 @@
-trigger: none
+trigger:
+- hihiren/aws-templates-release-3.0
 
 resources:
   pipelines: 
@@ -26,7 +27,6 @@ resources:
 
 pool:
   vmImage: windows-2022
-
 
   steps:
     - checkout: self
