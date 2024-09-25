@@ -11,15 +11,15 @@ resources:
 
   repositories:
     - repository: _LansaAWSTemplates
-      name: nkhl-accolite/aws-templates-nkhl
+      name: priyadishah/aws-templates-md
+      type: github
+      ref: support/scalable
+      endpoint: priyadishah
+    - repository: _priyadishahCookbooks
+      name: priyadishah/cookbooks
       type: github
       ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
-      endpoint: nkhlLANSA
-    - repository: _Robe070Cookbooks
-      name: nkhl-accolite/cookbooks
-      type: github
-      ref: debug/paas
-      endpoint: nkhlLANSA
+      endpoint: priyadishah
 
 pool:
   vmImage: windows-2022

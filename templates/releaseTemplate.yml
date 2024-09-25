@@ -50,14 +50,14 @@ stages:
         displayName: Download artifacts from Build Cloud Account Id Artefacts
 
       - download: _Build Image Release Artefacts  3.0
-        displayName: Download artifacts from Build Image Release Artefacts 2.0
+        displayName: Download artifacts from Build Image Release Artefacts 3.0
 
       - checkout: self
 
       - checkout: _LansaAWSTemplates
-        displayName: Checkout nkhl-accolite/aws-templates-nkhl
+        displayName: Checkout nkhl-accolite/aws-templates-md
 
-      - checkout: _Robe070Cookbooks
+      - checkout: _priyadishahCookbooks
         displayName: Checkout nkhl-accolite/cookbooks
 
       - task: AWSPowerShellModuleScript@1
@@ -67,7 +67,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(System.DefaultWorkingDirectory)/aws-templates-md/scripts/SetGateVariableCloudAccountId.ps1"
       
       - pwsh: |
           # Print the Gate variables.
@@ -81,7 +81,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-md/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       - task: CloudFormationCreateOrUpdateStack@1
@@ -162,7 +162,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/PrintDeploymentOutput.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-md/scripts/PrintDeploymentOutput.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       - task: AWSPowerShellModuleScript@1
@@ -171,7 +171,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/TestCFNDeployment.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-md/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       - task: AWSPowerShellModuleScript@1
@@ -180,7 +180,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-nkhl/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/aws-templates-md/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
         timeoutInMinutes: 240
