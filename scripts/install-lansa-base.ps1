@@ -98,7 +98,9 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-
+    #Enabling tls 1.2 security protocol to establish a secure connection with the server.
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer' -ErrorAction SilentlyContinue).InstallSQLServer
