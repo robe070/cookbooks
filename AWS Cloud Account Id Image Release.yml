@@ -1,29 +1,5 @@
 trigger: none
 
-resources:
-  pipelines:
-    - pipeline: _Build Cloud Account Id Artefacts  3.0
-      project: Lansa AWS Scalable License Images
-      source: 'Build Cloud Account Id Artefacts  3.0'
-    - pipeline: _Build Image Release Artefacts  3.0
-      project: Lansa AWS Scalable License Images
-      source: 'Build Image Release Artefacts  3.0'
-
-  repositories:
-    - repository: _LansaAWSTemplates
-      name: priyadishah/aws-templates-md
-      type: github
-      ref: support/scalable
-      endpoint: priyadishah
-    - repository: _priyadishahCookbooks
-      name: priyadishah/cookbooks
-      type: github
-      ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
-      endpoint: priyadishah
-
-pool:
-  vmImage: windows-2022
-      
 variables:
   - group: Template Parameters
   - group: Default Branch
@@ -41,6 +17,36 @@ variables:
     value: BakingDP-ImageRelease
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
+  - name: BuildCloudAccountIdArtefacts
+    value: _Build Cloud Account Id Artefacts 3.0
+  - name: BuildImageReleaseArtefacts
+    value: _Build Image Release Artefacts 3.0
+
+resources:
+  pipelines:
+    - pipeline: $(BuildCloudAccountIdArtefacts)
+      project: Lansa AWS Scalable License Images
+      # source: 'Build Cloud Account Id Artefacts  3.0'
+      source: 'Build Cloud Account Id Artefacts 3.0'
+    - pipeline: $(BuildImageReleaseArtefacts)
+      project: Lansa AWS Scalable License Images
+      # source: 'Build Image Release Artefacts  3.0'
+      source: 'Build Image Release Artefacts 3.0'
+
+  repositories:
+    - repository: _LansaAWSTemplates
+      name: priyadishah/aws-templates-md
+      type: github
+      ref: support/scalable
+      endpoint: priyadishah
+    - repository: _priyadishahCookbooks
+      name: priyadishah/cookbooks
+      type: github
+      ref: feature/aws-Build-Cloud-Account-Id-Artefacts-3.0
+      endpoint: priyadishah
+
+pool:
+  vmImage: windows-2022
 
 stages:
 - template: templates/releaseTemplate.yml
