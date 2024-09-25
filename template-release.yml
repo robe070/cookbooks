@@ -25,6 +25,7 @@ resources:
 pool:
   vmImage: windows-2022
 
+
   steps:
     - checkout: self
     - checkout: hiren_aws-templates
