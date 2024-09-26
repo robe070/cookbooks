@@ -7,13 +7,13 @@ resources:
     source: 'Build Image Release Artefacts  3.0'
 
   repositories:
-  - repository: hiren_aws-templates
+  - repository: _lansa_aws-templates
     type: github
     endpoint: hirendra-singh
     name: hirendra-singh/aws-templates
     ref: support/scalable
   
-  - repository: hiren_aws-templates-mp
+  - repository: _lansa_aws-templates-mp
     type: github
     endpoint: hirendra-singh
     name: hirendra-singh/aws-templates
@@ -30,9 +30,9 @@ pool:
 
 # steps:
 #   - checkout: self
-#   - checkout: hiren_aws-templates
-#   - checkout: hiren_aws-templates-mp
-#   - checkout: hiren_cookbooks
+#   - checkout: _lansa_aws-templates
+#   - checkout: _lansa_aws-templates-mp
+#   - checkout: _robe070_cookbooks
  
 variables:
   - name: CookbooksSource
@@ -93,20 +93,18 @@ stages:
           vmImage: windows-2022
       steps:     
         - checkout: self
-        - checkout: _robe070_cookbooks
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
+            #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            #filePath: '$(System.DefaultWorkingDirectory)/cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
-            #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
             filePath: './$(System.DefaultWorkingDirectory)/hiren_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
