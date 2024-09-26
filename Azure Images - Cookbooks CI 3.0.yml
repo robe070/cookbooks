@@ -96,89 +96,14 @@ jobs:
   steps:
   - checkout: self
     fetchTags: false
+
   - task: PowerShell@2
     name: ''
     displayName: Install PS Module
     inputs:
       filePath: scripts/install-powershell-modules-azure.ps1
-      script: >-
-        if ("$(GitBranch)".Contains("refs/heads")) {
-            $branch ="$(GitBranch)".replace("refs/heads/", "")
-        } else {
-            $branch = "$(GitBranchPR)"
-        }
-
-        $branch | Write-Host | Out-Default | Write-Verbose
-
-        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
-
-        if ($Env:PsModuleInstalled -eq 'true') {
-            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
-            return;
-        }
-
-
-        Write-Host "Installing Module AzureRM" | Out-Default | Write-Verbose
-
-        Install-Module -Name AzureRM -AllowClobber -Force
-
-        Write-Host "Installed Module AzureRM" | Out-Default | Write-Verbose
-
-
-        Write-Host "Installing Module Az.KeyVault  -RequiredVersion 2.0.0" | Out-Default | Write-Verbose
-
-        Install-Module -Name Az.KeyVault -RequiredVersion 2.0.0 -AllowClobber -Force | Out-Default | Write-Host | Write-Verbose
-
-        Write-Host "Installed Module Az.KeyVault  -RequiredVersion 2.0.0" | Out-Default | Write-Verbose
-
-
-        # Az.Accounts for Get-AzVMImage
-
-        Write-Host "Installing Module Az.Accounts -RequiredVersion 1.9.2" | Out-Default | Write-Verbose
-
-        Install-Module -Name Az.Accounts -RequiredVersion 1.9.2 -Force -AllowClobber | Out-Default | Write-Host | Write-Verbose
-
-        Write-Host "Installed Module Az.Accounts -RequiredVersion 1.9.2" | Out-Default | Write-Verbose
-
-
-        # Az.Compute for Connect-AzAccount
-
-        Write-Host "Installing Module Az.Compute -RequiredVersion 4.2.1" | Out-Default | Write-Verbose
-
-        Install-Module -Name Az.Compute -RequiredVersion 4.2.1 -Force -AllowClobber | Out-Default | Write-Host | Write-Verbose
-
-        Write-Host "Installed Module Az.Compute -RequiredVersion 4.2.1" | Out-Default | Write-Verbose
-
-
-        # Az.Resources for Get-AzResource
-
-        Write-Host "Installing Module Az.Resources -RequiredVersion 2.4.0" | Out-Default | Write-Verbose
-
-        Install-Module -Name Az.Resources -RequiredVersion 2.4.0 -Force -AllowClobber | Out-Default | Write-Host | Write-Verbose
-
-        Write-Host "Installed Module Az.Resources -RequiredVersion 2.4.0" | Out-Default | Write-Verbose
-
-
-        # Az for Azure Modules
-
-        Write-Host "Installing Module Az -RequiredVersion 4.5.0" | Out-Default | Write-Verbose
-
-        Install-Module -Name Az -RequiredVersion 4.5.0 -AllowClobber -Force | Out-Default | Write-Host | Write-Verbose
-
-        Write-Host "Installed Module Az -RequiredVersion 4.5.0" | Out-Default | Write-Verbose
-
-
-        # Pester for Testing
-
-        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
-
-        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
-
-        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
-
-
-        $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     name: ''
     displayName: Azure Login
@@ -186,6 +111,7 @@ jobs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -194,13 +120,15 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     name: ''
     displayName: 'Generate: Image URL'
@@ -212,6 +140,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     name: ''
     displayName: VM Tests
@@ -231,12 +160,14 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-14-2
+
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
@@ -244,6 +175,7 @@ jobs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
       ArtifactName: w22d-14-2
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -251,6 +183,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w22d142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
@@ -342,12 +275,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -356,6 +291,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -364,6 +300,7 @@ jobs:
       ResourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -374,6 +311,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -392,18 +330,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-15-0
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
       ArtifactName: w22d-15-0
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -411,6 +352,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+
 - job: Job_6
   displayName: 'Agent job : w16d-14-2'
   timeoutInMinutes: 360
@@ -502,12 +444,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -516,6 +460,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -524,6 +469,7 @@ jobs:
       ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -534,6 +480,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -552,18 +499,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w16d-14-2
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
       ArtifactName: w16d-14-2
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -571,6 +521,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
   timeoutInMinutes: 360
@@ -662,12 +613,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -676,6 +629,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps']) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -684,6 +638,7 @@ jobs:
       ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -694,6 +649,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -712,18 +668,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w16d-15-0
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0.txt
       ArtifactName: w16d-15-0
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -731,6 +690,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
   timeoutInMinutes: 360
@@ -822,12 +782,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -836,6 +798,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -844,6 +807,7 @@ jobs:
       ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -854,6 +818,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -872,18 +837,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w19d-14-2
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2.txt
       ArtifactName: w19d-14-2
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -891,6 +859,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+
 - job: Job_2
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
@@ -982,12 +951,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -996,6 +967,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1004,6 +976,7 @@ jobs:
       ResourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1014,6 +987,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1032,18 +1006,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w19d-15-0
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0.txt
       ArtifactName: w19d-15-0
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1051,6 +1028,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+
 - job: Job_7
   displayName: 'Agent job : w16d-14-2j'
   timeoutInMinutes: 360
@@ -1142,12 +1120,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1156,6 +1136,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1164,6 +1145,7 @@ jobs:
       ResourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1174,6 +1156,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1192,18 +1175,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w16d-14-2j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
       ArtifactName: w16d-14-2j
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1211,6 +1197,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
@@ -1302,12 +1289,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1316,6 +1305,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1324,6 +1314,7 @@ jobs:
       ResourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1334,6 +1325,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1352,18 +1344,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w16d-15-0j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0j.txt
       ArtifactName: w16d-15-0j
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1371,6 +1366,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+
 - job: Job_9
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -1462,12 +1458,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1476,6 +1474,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1484,6 +1483,7 @@ jobs:
       ResourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1494,6 +1494,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1512,18 +1513,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w19d-15-0j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0j.txt
       ArtifactName: w19d-15-0j
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1531,6 +1535,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+
 - job: Job_10
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
@@ -1622,12 +1627,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1636,6 +1643,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1644,6 +1652,7 @@ jobs:
       ResourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1654,6 +1663,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1672,18 +1682,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w19d-14-2j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2j.txt
       ArtifactName: w19d-14-2j
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1691,6 +1704,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+
 - job: Job_11
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
@@ -1782,12 +1796,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1796,6 +1812,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1804,6 +1821,7 @@ jobs:
       ResourceGroupName: BakingDP-w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1814,6 +1832,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1832,18 +1851,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-15-0j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0j.txt
       ArtifactName: w22d-15-0j
       FileCopyOptions: ''
+
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
@@ -1851,6 +1873,7 @@ jobs:
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
       resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+
 - job: Job_12
   displayName: 'Agent job : w22d-14-2j'
   timeoutInMinutes: 360
@@ -1942,12 +1965,14 @@ jobs:
 
         $Env:PsModuleInstalled = 'true'
       errorActionPreference: continue
+
   - task: PowerShell@2
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
   - task: PowerShell@2
     name: BuildImage
     displayName: Build Image
@@ -1956,6 +1981,7 @@ jobs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText 'w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
       workingDirectory: scripts
+
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
@@ -1964,6 +1990,7 @@ jobs:
       ResourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
       Key: Usage
       Value: test-temp
+
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
     inputs:
@@ -1974,6 +2001,7 @@ jobs:
         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
   - task: PowerShell@2
     displayName: VM Tests
     inputs:
@@ -1992,18 +2020,21 @@ jobs:
         } else {
             Write-Host "Tested the image successfully."
         }
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
       testRunTitle: w22d-14-2j
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2j.txt
       ArtifactName: w22d-14-2j
       FileCopyOptions: ''
+      
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
     inputs:
