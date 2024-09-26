@@ -7,7 +7,7 @@ jobs:
 - job: Job_1
   displayName: 'Agent job : w22d-14-2'
   timeoutInMinutes: 120
-  condition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w22-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -108,14 +108,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w12r2d-14-2-$(VersionText-w12r2d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w22-14-2-$(VersionText-w22-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2022 $true -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w12r2d-14-2-$(VersionText-w12r2d-14-2)
+      ResourceGroupName: BakingDP-w22-14-2-$(VersionText-w22-14-2)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -126,7 +126,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w12r2d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
@@ -153,13 +153,13 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w12r2d-14-2
+      testRunTitle: w22-14-2
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w12r2d-14-2.txt
-      ArtifactName: w12r2d-14-2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22-14-2.txt
+      ArtifactName: w22-14-2
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -167,7 +167,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w12r2d-14-2-$(VersionText-w12r2d-14-2)
+      resourceGroupName: BakingDP-w22-14-2-$(VersionText-w22-14-2)
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
