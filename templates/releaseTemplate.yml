@@ -86,6 +86,8 @@ stages:
 
       - task: CloudFormationCreateOrUpdateStack@1
         displayName: 'Deploy AWS template'
+        variables:
+          TemplateS3Namespace: '/image-cd-pipeline'
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
