@@ -182,7 +182,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
 
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
