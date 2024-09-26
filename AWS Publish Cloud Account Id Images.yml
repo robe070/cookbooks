@@ -20,11 +20,9 @@ variables:
 
 resources:
   pipelines:
-    - pipeline: _Build Cloud Account Id Artefacts  3.0
-      project: Lansa AWS Scalable License Images
+    - pipeline: _Build Cloud Account Id Artefacts
       source: 'Build Cloud Account Id Artefacts  3.0'
-    - pipeline: _Build Image Release Artefacts  3.0
-      project: Lansa AWS Scalable License Images
+    - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
 
   repositories:
