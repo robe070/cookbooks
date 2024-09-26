@@ -119,10 +119,10 @@ jobs:
     name: ''
     displayName: VM Tests
     env:
-        TestImageName: w22d142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+        TestImageName: w22d-14-2-$(VersionText-w22d-14-2)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+        TestVmName: Test22142$(VersionText-w22d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -294,10 +294,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+        TestImageName: w22d-15-0-$(VersionText-w22d-15-0)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+        TestVmName: Test22150$(VersionText-w22d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -642,10 +642,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+        TestImageName: w16d-15-0-$(VersionText-w16d-15-0)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+        TestVmName: Test16150$(VersionText-w16d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -816,10 +816,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        TestImageName: w19d-14-2-$(VersionText-w19d-14-2)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        TestVmName: Test19142$(VersionText-w19d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -990,10 +990,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        TestImageName: w19d-15-0-$(VersionText-w19d-15-0)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        TestVmName: Test19150$(VersionText-w19d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1164,10 +1164,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+        TestImageName: w16d-14-2j-$(VersionText-w16d-14-2j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test16142j$(VersionText-w16d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1338,10 +1338,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+        TestImageName: w16d-15-0j-$(VersionText-w16d-15-0j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test16150j$(VersionText-w16d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1511,10 +1511,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+        TestImageName: w19d-15-0j-$(VersionText-w19d-15-0j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test19150j$(VersionText-w19d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1685,10 +1685,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+        TestImageName: w19d-14-2j-$(VersionText-w19d-14-2j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test19142j$(VersionText-w19d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1859,10 +1859,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+        TestImageName: w22d-15-0j-$(VersionText-w22d-15-0j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test22150j$(VersionText-w22d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -2033,10 +2033,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+        TestImageName: w22d-14-2j-$(VersionText-w22d-14-2j)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test22142j$(VersionText-w22d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
