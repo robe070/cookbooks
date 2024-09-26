@@ -96,7 +96,7 @@ stages:
         - checkout: _robe070_cookbooks
           path: "s/_robe070_cookbooks" 
         - pwsh: | 
-           Get-ChildItem -Path $(System.DefaultWorkingDirectory)/s/_robe070_cookbooks/ -Force -Recurse
+           Get-ChildItem -Path $(System.DefaultWorkingDirectory)/_robe070_cookbooks/ -Force -Recurse
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
