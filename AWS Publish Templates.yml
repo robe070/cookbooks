@@ -20,7 +20,7 @@ resources:
     ref: support/scalable_marketplace
 
   - repository: _robe070_cookbooks
-    endpoint: cookbooks
+    endpoint: robe070
     type: github
     name: robe070/cookbooks
     ref: debug/paas
