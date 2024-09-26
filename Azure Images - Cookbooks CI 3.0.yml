@@ -92,14 +92,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d-14-2$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
+      arguments: -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d142$(VersionText-w19d-14-2)
+      ResourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -156,7 +156,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d142$(VersionText-w22d-14-2)
+      resourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
 
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
@@ -263,7 +263,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d-15-0$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -271,7 +271,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)
+      ResourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -432,7 +432,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d-14-2$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -440,7 +440,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)
+      ResourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -601,7 +601,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d-15-0$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -609,7 +609,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)
+      ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -663,7 +663,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)
+      resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
 
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
