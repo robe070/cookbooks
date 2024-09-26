@@ -93,6 +93,7 @@ stages:
           vmImage: windows-2022
       steps:     
         - checkout: self
+        - checkout: _robe070_cookbooks
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
