@@ -93,6 +93,7 @@ stages:
           vmImage: windows-2022
       steps:     
         - checkout: self
+        - checkout: _robe070_cookbooks
         - pwsh: |
            Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
 
