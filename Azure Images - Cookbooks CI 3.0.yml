@@ -468,10 +468,10 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+        TestImageName: w16d-14-2-$(VersionText-w16d-14-2)
         TestCloudName: Azure
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+        TestVmName: Test16142$(VersionText-w16d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
