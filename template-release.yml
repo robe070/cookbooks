@@ -93,7 +93,7 @@ stages:
           vmImage: windows-2022
       steps:     
         - checkout: self
-        - pwsh: $(System.DefaultWorkingDirectory)
+        - pwsh: Print $(System.DefaultWorkingDirectory)
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
