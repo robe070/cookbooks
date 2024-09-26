@@ -20,10 +20,10 @@ resources:
     ref: support/scalable_marketplace
 
   - repository: _robe070_cookbooks
-    endpoint: hirendra-singh
+    endpoint: cookbooks
     type: github
-    name: hirendra-singh/cookbooks
-    ref: hiren/aws-template-release-3.0
+    name: robe070/cookbooks
+    ref: debug/paas
   
 pool:
   vmImage: windows-2022
