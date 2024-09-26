@@ -98,9 +98,8 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-    #Enabling tls 1.2 security protocol to establish a secure connection with the server.
+    #  Enabling TLS 1.2 security protocol to establsih a secure connection with the server when making web requests.
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer' -ErrorAction SilentlyContinue).InstallSQLServer
@@ -171,7 +170,11 @@ try
                 $downloaded = $true
             } catch {
                 $_
+<<<<<<< HEAD
                 $TotalFailedDownloadAttempts += 1
+=======
+                $TotalFailedDownloadAttempts += 1 
+>>>>>>> debug/paas
                 New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
 
