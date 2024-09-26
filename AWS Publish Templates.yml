@@ -94,15 +94,15 @@ stages:
       steps:     
         - checkout: self
         - checkout: _robe070_cookbooks
-        - pwsh: |
-           Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
+        # - pwsh: | 
+        #    Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             #arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'''
 
@@ -110,7 +110,8 @@ stages:
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
-            filePath: './$(System.DefaultWorkingDirectory)/scripts/GitMerge.ps1'
+            #filePath: './$(System.DefaultWorkingDirectory)/scripts/GitMerge.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
