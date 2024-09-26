@@ -98,7 +98,7 @@ stages:
           inputs:
             targetType: filePath
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: './_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: 's/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
