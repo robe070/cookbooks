@@ -98,14 +98,14 @@ stages:
           inputs:
             targetType: filePath
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(Build.SourceDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
-            filePath: './$(System.DefaultWorkingDirectory)/hiren_cookbooks/scripts/GitMerge.ps1'
+            filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
@@ -123,8 +123,7 @@ stages:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
             bucketName: '$(BucketNamePreview)'
-            #sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/hiren_aws-templates/CloudFormationWindows'
+            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
