@@ -92,14 +92,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d-14-2$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -ExternalIPAddresses $(ExternalIPAddresses)
+      arguments: -VersionText 'w22d-14-2$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
+      ResourceGroupName: BakingDP-w22d142$(VersionText-w19d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -156,7 +156,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
+      resourceGroupName: BakingDP-w22d142$(VersionText-w22d-14-2)
 
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
@@ -271,7 +271,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -325,7 +325,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)
 
 - job: Job_6
   displayName: 'Agent job : w16d-14-2'
@@ -440,7 +440,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -494,7 +494,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)
 
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
@@ -609,7 +609,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -663,7 +663,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)
 
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
@@ -770,7 +770,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d-14-2$(VersionText-w19d-14-2 -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w19d-14-2$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -778,7 +778,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -947,7 +947,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -1001,7 +1001,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)
 
 - job: Job_7
   displayName: 'Agent job : w16d-14-2j'
@@ -1116,7 +1116,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -1170,7 +1170,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)
 
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
@@ -1285,7 +1285,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -1339,8 +1339,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
-
+      resourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)
 - job: Job_9
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -1454,7 +1453,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -1508,7 +1507,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)
 
 - job: Job_10
   displayName: 'Agent job : w19d-14-2j'
@@ -1623,7 +1622,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -1677,7 +1676,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)
 
 - job: Job_11
   displayName: 'Agent job : w22d-15-0j'
@@ -1792,7 +1791,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d150j$(VersionText-w22d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -1846,7 +1845,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)
 
 - job: Job_12
   displayName: 'Agent job : w22d-14-2j'
@@ -1961,7 +1960,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -2015,5 +2014,5 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)
 ...
