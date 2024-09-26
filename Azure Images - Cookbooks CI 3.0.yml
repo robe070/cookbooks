@@ -20,32 +20,6 @@ variables:
   #   value: $False
   - name: azureUserId
     value: PowershellScriptsSP
-  - name:  Build-all
-    value: false
-  - name: Build-w22d-14-2
-    value: true
-  - name: Build-w22d-15-0
-    value: false
-  - name: Build-w22d-14-2j
-    value: false
-  - name: Build-w22d-15-0j
-    value: false  
-  - name: Build-w16d-14-2
-    value: false
-  - name: Build-w16d-14-2j
-    value: false
-  - name: Build-w16d-15-0
-    value: false
-  - name: Build-w16d-15-0j
-    value: false
-  - name: Build-w19d-14-2
-    value: false
-  - name: Build-w19d-14-2j
-    value: false
-  - name: Build-w19d-15-0
-    value: false
-  - name: Build-w19d-15-0j
-    value: false
   # - name: clientsecret
     # value: ********
   - name: GitBranch
