@@ -100,6 +100,10 @@ try
     }
     #  Enabling TLS 1.2 security protocol to establsih a secure connection with the server when making web requests.
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
+    Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
+    Install-WindowsFeature -name Web-Server -IncludeManagementTools
+
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
     $InstallSQLServer = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'InstallSQLServer' -ErrorAction SilentlyContinue).InstallSQLServer
