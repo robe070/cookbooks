@@ -122,7 +122,7 @@ stages:
             displayName: 'Set TemplateUrl task variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-        - powershell: |
+          - powershell: |
            'Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"'
           displayName: 'Output TemplateUrl Variable value'
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
