@@ -81,8 +81,12 @@ stages:
         pool: 
           vmImage: ${{ parameters.vmImage }}
         steps:
+          - download: _Build Image Release Artefacts
+            displayName: Download artifacts from Build Image Release Artefacts 3.0
           - checkout: self
           - checkout: _lansa_aws-templates
+          - checkout: _robe070_cookbooks
+          
           # - powershell: | 
           #     Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
       
