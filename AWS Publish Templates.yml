@@ -82,7 +82,7 @@ stages:
       steps:     
         - checkout: self
         - checkout: _robe070_cookbooks
-          # path: "s/_robe070_cookbooks" 
+          path: "s/_robe070_cookbooks" 
         # - pwsh: | 
         #    Get-ChildItem -Path $(System.DefaultWorkingDirectory)/_robe070_cookbooks/ -Force -Recurse
       
