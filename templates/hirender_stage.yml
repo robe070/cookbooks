@@ -110,16 +110,16 @@ stages:
               targetFolder: '$(System.DefaultWorkingDirectory)'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-        - powershell: |
-            $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
-            
-            if (Test-Path $path) {
-                $url = Get-Content -Path $path
-                Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
-            } else {
-                Write-Host "path does NOT exist - $path"
-            }
-          displayName: 'Set TemplateUrl task variable'
+          - powershell: |
+              $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
+              
+              if (Test-Path $path) {
+                  $url = Get-Content -Path $path
+                  Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
+              } else {
+                  Write-Host "path does NOT exist - $path"
+              }
+            displayName: 'Set TemplateUrl task variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
         - powershell: |
