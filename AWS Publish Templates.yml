@@ -21,9 +21,6 @@ resources:
     type: github
     name: robe070/cookbooks
     ref: debug/paas
-  
-pool:
-  vmImage: windows-2022
 
 # steps:
 #   - checkout: self
@@ -141,6 +138,7 @@ stages:
     dependsOn: S3PatchPAAS
     jobName: AgentJob_SmallStack
     jobDisplayname: 'Agent job: Small Stack'
+    vmImage: windows-2022
 
 - template: templates/hirender_stage.yml
   parameters:
