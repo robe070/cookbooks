@@ -170,11 +170,7 @@ try
                 $downloaded = $true
             } catch {
                 $_
-<<<<<<< HEAD
-                $TotalFailedDownloadAttempts += 1
-=======
                 $TotalFailedDownloadAttempts += 1 
->>>>>>> debug/paas
                 New-ItemProperty -Path HKLM:\Software\LANSA  -Name 'TotalFailedDownloadAttempts' -Value ($TotalFailedDownloadAttempts) -PropertyType DWORD -Force | Out-Null
                 $loops += 1
 
