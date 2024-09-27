@@ -95,8 +95,8 @@ stages:
         - checkout: self
         - checkout: _robe070_cookbooks
           path: "s/_robe070_cookbooks" 
-        - pwsh: | 
-           Get-ChildItem -Path $(System.DefaultWorkingDirectory)/_robe070_cookbooks/ -Force -Recurse
+        # - pwsh: | 
+        #    Get-ChildItem -Path $(System.DefaultWorkingDirectory)/_robe070_cookbooks/ -Force -Recurse
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
@@ -105,7 +105,7 @@ stages:
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             #arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
-            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''_robe070_cookbooks'''
+            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
@@ -124,6 +124,8 @@ stages:
       pool: 
           vmImage: windows-2022
       steps:
+        - checkout: self
+        - checkout: _lansa_aws-templates
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
           inputs:
