@@ -47,7 +47,7 @@ stages:
 
       pool:
         vmImage: $(vmImage) 
-        demands: '' 
+        #demands: ''
 
       steps:
         - download: _Build Image Release Artefacts
@@ -427,7 +427,7 @@ stages:
 
       pool:
         vmImage: $(vmImage) 
-        demands: '' 
+        #demands: '' 
 
       steps:
         - download: _Build Image Release Artefacts 3.0
