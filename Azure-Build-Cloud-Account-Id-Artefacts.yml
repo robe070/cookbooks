@@ -73,13 +73,18 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
 
   - task: PowerShell@2
-    name: Vmtest
-    displayName: VM Tests
+    displayName: 'VM Tests'
     inputs:
-      filePath: scripts/invoke-pester-tests.ps1
+      targetType: filePath
+      filePath: './scripts/invoke-pester-tests.ps1'
+    env:
+      TestImageName: $(System.JobDisplayName)
+      TestCloudName: Azure
+      TestVmName: $(System.JobDisplayName)
 
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
+    name: Vmtest
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
