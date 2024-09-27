@@ -1280,7 +1280,7 @@ jobs:
     env:
         TestImageName: w19d-15-0-$(VersionText-w19d-15-0)
         TestCloudName: Azure
-        TestVmName: T19150$(VersionText-w19d-15-0)
+        TestVmName: T1915$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   - task: PublishTestResults@2
