@@ -13,9 +13,6 @@ parameters:
   - name: jobDisplayname
     type: string
     default: none
-  - name: vmImage
-    type: string
-    default: none
   - name: resourceGroup
     type: string
     default: none
