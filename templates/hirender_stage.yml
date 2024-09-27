@@ -84,6 +84,9 @@ stages:
           - checkout: self
           - checkout: _lansa_aws-templates
             path: aws-templates
+            pwsh: | 
+              Get-ChildItem -Path $(System.DefaultWorkingDirectory)/aws-templates/ -Force -Recurse
+      
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
             displayName: 'Artifact Check: Set Gate Variable'
@@ -92,7 +95,7 @@ stages:
               regionName: 'ap-southeast-2'
               arguments: '-BaseImageName ''w16d-14-2'' -stackname ''AUS-Small'''
               #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+              filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/SetGateVariable.ps1'
 
           - pwsh: |
               # Print the Gate variables.
