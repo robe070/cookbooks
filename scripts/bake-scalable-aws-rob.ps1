@@ -11,7 +11,7 @@ Bake a LANSA image for Azure
 #>
 
 # $DebugPreference = "Continue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "SilentlyContinue"
 
 $MyInvocation.MyCommand.Path
 $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path

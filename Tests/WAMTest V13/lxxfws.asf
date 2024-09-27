@@ -1,0 +1,14 @@
+XWSP_I     1A   30    1    3
+XWSPLN     2A   40    4    7
+XWSWLT     3A  200    8   27
+XWSEID     4A  100   28   37
+XWSAPP     5A  100   38   47
+XWSSET     6N   50   48   52
+XWSSEQ     7N   50   53   57
+XWSSSQ     8N   50   58   62
+XWSLEN     0N  100   63   72
+XWSDTA     0A 5000   73  572
+XWSDAT     0N  100  573  582
+XWSTIM     0N  100  583  592
+XWSSP1     0A 1000  593  692
+.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

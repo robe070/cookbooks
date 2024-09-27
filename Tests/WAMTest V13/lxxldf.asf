@@ -1,0 +1,8 @@
+XDFLNG    01A   40    1    4
+XDFOLV    02A  100    5   14
+XDFOIT    03A  100   15   24
+XDFODF    04A  200   25   44
+XDFOVR    05A  200   45   64
+XDFPMT    06A   10   65   65
+XDFPTX    00A 1500   66  215
+

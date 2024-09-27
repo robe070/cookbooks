@@ -50,6 +50,24 @@ param(
 [Boolean]$DisableSQLServer = $true
 )
 
+function Test-RegistryValue {
+    param (
+        [parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]$Path,
+
+        [parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]$Value
+    )
+
+    try {
+        Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+
+}
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -597,8 +615,17 @@ try
 
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) ) {
             Write-Host ("$(Log-Date) Switch off Sentinel ")
-            New-Item -Path HKLM:\Software\LANSA\Common -Force | Out-Null
-            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name 'UseSentinelLicence' -Value 0 -PropertyType DWORD -Force | Out-Null
+
+            $RegKey = "HKLM:\Software\lansa\Common"
+            $RegProperty = "UseSentinelLicence"
+            if ( -not (Test-Path $RegKey) ) {
+                Write-Host( "Creating registry entry $RegKey")
+                New-Item -Path HKLM:\Software\lansa -Name Common | Out-Default | Write-Host
+            } else {
+                Write-Host( "$RegKey already exists")
+            }
+
+            New-ItemProperty -Path HKLM:\Software\LANSA\Common  -Name $RegProperty -Value 0 -PropertyType DWORD -Force | Out-Null
 
             [Environment]::SetEnvironmentVariable("LSFORCEHOST", "NONET", "Machine") | Out-Default | Write-Host
         }
@@ -635,7 +662,7 @@ try
             iis-reset | Out-Default | Write-Host
         }
 
-        #####################################################################################
+         #####################################################################################
         # Test if post install x_run processing had any fatal errors
         # Performed at the end as errors may occur due to the loadbalancer probe executing
         # before LANSA has completed installing.

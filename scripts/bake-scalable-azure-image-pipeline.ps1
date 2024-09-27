@@ -76,7 +76,23 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $InstallLanguagePack=$false
+    $InstallLanguagePack=$false,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallScalable=$true,
+
+    [Parameter(Mandatory=$false)]
+    [boolean]
+    $InstallBaseSoftware=$true,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Title,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $CloudAccountLicense
   )
 
 # $DebugPreference = "Continue"
@@ -107,10 +123,10 @@ while($count -ne 0 ) {
                             -AzureImageUri $AzureImageUri `
                             -GitBranch $GitBranch `
                             -Cloud $Cloud `
-                            -InstallBaseSoftware $true `
+                            -InstallBaseSoftware $InstallBaseSoftware `
+                            -InstallScalable $InstallScalable `
                             -InstallSQLServer $false `
                             -InstallIDE $false `
-                            -InstallScalable $true `
                             -Win2012 $Win2012 `
                             -ManualWinUpd $false `
                             -SkipSlowStuff $false `
@@ -124,14 +140,16 @@ while($count -ne 0 ) {
                             -RunWindowsUpdates $RunWindowsUpdates `
                             -ExternalIPAddresses $ExternalIPAddresses `
                             -Language $Language `
-                            -InstallLanguagePack:$InstallLanguagePack
+                            -InstallLanguagePack:$InstallLanguagePack `
+                            -Title $Title `
+                            -CloudAccountLicense $CloudAccountLicense
 
     }
     catch{
         $PSitem | Out-Default | Write-Host
         $count = $count -1
         if($count -eq 0){
-            Write-Host "Image Bake failed even after $MaxRetry retries"
+            throw "Image Bake failed even after $MaxRetry retries"
             break
         }
         elseif ($Cloud -eq 'AWS'){
@@ -143,7 +161,7 @@ while($count -ne 0 ) {
         break
     }
     if($Cloud -eq 'Azure'){
-        Write-Host "Image bake failed. Retry not enabled in Azure"
+        throw "Image bake failed. Retry not enabled in Azure"
         break
     }
 
