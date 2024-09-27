@@ -76,7 +76,7 @@ stages:
          # Print the Gate variables.
          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))d'], 'true'))
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))'], 'true'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete previous Failed Stack'

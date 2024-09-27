@@ -120,7 +120,7 @@ stages:
   parameters:
     stageName: 'w16d142IMGTest'
     stageDisplayname: 'w16d-14-2 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2
     stackname: w16d-14-2-IMG
@@ -132,7 +132,7 @@ stages:
   parameters:
     stageName: 'w16d150IMGTest'
     stageDisplayname: 'w16d-15-0 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0
     stackname: w16d-15-0-IMG
@@ -144,7 +144,7 @@ stages:
   parameters:
     stageName: 'w19d142IMGTest'
     stageDisplayname: 'w19d-14-2 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2
     stackname: w19d-14-2-IMG
@@ -156,7 +156,7 @@ stages:
   parameters:
     stageName: 'w19d150IMGTest'
     stageDisplayname: 'w19d-15-0 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-IMG
@@ -168,7 +168,7 @@ stages:
   parameters:
     stageName: 'w22d142IMGTest'
     stageDisplayname: 'w22d-14-2 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2
     stackname: w22d-14-2-IMG
@@ -180,7 +180,7 @@ stages:
   parameters:
     stageName: 'w22d150IMGTest'
     stageDisplayname: 'w22d-15-0 IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-IMG
@@ -192,7 +192,7 @@ stages:
   parameters:
     stageName: 'w16d142jIMGTest'
     stageDisplayname: 'w16d-14-2j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2j
     stackname: w16d-14-2j-IMG
@@ -204,7 +204,7 @@ stages:
   parameters:
     stageName: 'w16d150jIMGTest'
     stageDisplayname: 'w16d-15-0j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0j
     stackname: w16d-15-0j-IMG
@@ -216,7 +216,7 @@ stages:
   parameters:
     stageName: 'w19d142jIMGTest'
     stageDisplayname: 'w19d-14-2j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2j
     stackname: w19d-14-2j-IMG
@@ -228,7 +228,7 @@ stages:
   parameters:
     stageName: 'w19d150jIMGTest'
     stageDisplayname: 'w19d-15-0j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
@@ -240,7 +240,7 @@ stages:
   parameters:
     stageName: 'w22d142jIMGTest'
     stageDisplayname: 'w22d-14-2j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2j
     stackname: w22d-14-2j-IMG
@@ -252,7 +252,7 @@ stages:
   parameters:
     stageName: 'w22d150jIMGTest'
     stageDisplayname: 'w22d-15-0j IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-IMG
@@ -264,7 +264,7 @@ stages:
   parameters:
     stageName: 'w16d142CopyAMItoUS'
     stageDisplayname: 'w16d-14-2 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2
     jobDemand: DotNetFramework
@@ -276,7 +276,7 @@ stages:
   parameters:
     stageName: 'w16d150CopyAMItoUS'
     stageDisplayname: 'w16d-15-0 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0
     jobDemand: DotNetFramework
@@ -288,7 +288,7 @@ stages:
   parameters:
     stageName: 'w19d142CopyAMItoUS'
     stageDisplayname: 'w19d-14-2 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2
     jobDemand: DotNetFramework
@@ -300,7 +300,7 @@ stages:
   parameters:
     stageName: 'w19d150CopyAMItoUS'
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     jobDemand: DotNetFramework
@@ -312,7 +312,7 @@ stages:
   parameters:
     stageName: 'w22d142CopyAMItoUS'
     stageDisplayname: 'w22d-14-2 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2
     jobDemand: DotNetFramework
@@ -324,7 +324,7 @@ stages:
   parameters:
     stageName: 'w22d150CopyAMItoUS'
     stageDisplayname: 'w22d-15-0 Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     jobDemand: DotNetFramework
@@ -336,7 +336,7 @@ stages:
   parameters:
     stageName: 'w16d142jCopyAMItoUS'
     stageDisplayname: 'w16d-14-2j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2j
     jobDemand: DotNetFramework
@@ -348,7 +348,7 @@ stages:
   parameters:
     stageName: 'w16d150jCopyAMItoUS'
     stageDisplayname: 'w16d-15-0j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0j
     jobDemand: DotNetFramework
@@ -358,9 +358,9 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w19d142j Copy AMI to US'
+    stageName: 'w19d142jCopyAMItoUS'
     stageDisplayname: 'w19d-14-2j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2j
     jobDemand: DotNetFramework
@@ -372,7 +372,7 @@ stages:
   parameters:
     stageName: 'w19d150jCopyAMItoUS'
     stageDisplayname: 'w19d-15-0j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     jobDemand: DotNetFramework
@@ -382,9 +382,9 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w22d142j Copy AMI to US'
+    stageName: 'w22d142jCopyAMItoUS'
     stageDisplayname: 'w22d-14-2j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2j
     jobDemand: DotNetFramework
@@ -396,7 +396,7 @@ stages:
   parameters:
     stageName: 'w22d150jCopyAMItoUS'
     stageDisplayname: 'w22d-15-0j Copy AMI to US'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     jobDemand: DotNetFramework
@@ -569,7 +569,7 @@ stages:
   parameters:
     stageName: 'w16d142USIMGTest'
     stageDisplayname: 'w16d-14-2 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2
     stackname: w16d-14-2-US-IMG
@@ -581,7 +581,7 @@ stages:
   parameters:
     stageName: 'w16d150USIMGTest'
     stageDisplayname: 'w16d-15-0 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0
     stackname: w16d-15-0-US-IMG
@@ -593,7 +593,7 @@ stages:
   parameters:
     stageName: 'w16d142jUSIMGTest'
     stageDisplayname: 'w16d-14-2j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-14-2j
     stackname: w16d-14-2j-US-IMG
@@ -605,7 +605,7 @@ stages:
   parameters:
     stageName: 'w16d150jUSIMGTest'
     stageDisplayname: 'w16d-15-0j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w16d-15-0j
     stackname: w16d-15-0j-US-IMG
@@ -617,7 +617,7 @@ stages:
   parameters:
     stageName: 'w19d142USIMGTest'
     stageDisplayname: 'w19d-14-2 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2
     stackname: w19d-14-2-US-IMG
@@ -629,7 +629,7 @@ stages:
   parameters:
     stageName: 'w19d150USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-US-IMG
@@ -641,7 +641,7 @@ stages:
   parameters:
     stageName: 'w19d142jUSIMGTest'
     stageDisplayname: 'w19d-14-2j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-14-2j
     stackname: w19d-14-2j-US-IMG
@@ -653,7 +653,7 @@ stages:
   parameters:
     stageName: 'w19d150jUSIMGTest'
     stageDisplayname: 'w19d-15-0j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-US-IMG
@@ -665,7 +665,7 @@ stages:
   parameters:
     stageName: 'w22d142USIMGTest'
     stageDisplayname: 'w22d-14-2 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2
     stackname: w22d-14-2-US-IMG
@@ -677,7 +677,7 @@ stages:
   parameters:
     stageName: 'w22d150USIMGTest'
     stageDisplayname: 'w22d-15-0 US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-US-IMG
@@ -689,7 +689,7 @@ stages:
   parameters:
     stageName: 'w22d142jUSIMGTest'
     stageDisplayname: 'w22d-14-2j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-14-2j
     stackname: w22d-14-2j-US-IMG
@@ -701,7 +701,7 @@ stages:
   parameters:
     stageName: 'w22d150jUSIMGTest'
     stageDisplayname: 'w22d-15-0j US IMG Test'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-US-IMG
@@ -850,7 +850,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w16d-14-2
 #     stackname: w16d-14-2-IMG
@@ -861,7 +861,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w16d-15-0
 #     stackname: w16d-15-0-IMG
@@ -872,7 +872,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w19d-14-2
 #     stackname: w19d-14-2-IMG
@@ -883,7 +883,7 @@ stages:
   parameters:
     stageName: 'TagGit'
     stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
+    jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-IMG
@@ -894,7 +894,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w22d-14-2
 #     stackname: w22d-14-2-IMG
@@ -905,7 +905,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w22d-15-0
 #     stackname: w22d-15-0-IMG
@@ -916,7 +916,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w16d-14-2j
 #     stackname: w16d-14-2j-IMG
@@ -927,7 +927,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w16d-15-0j
 #     stackname: w16d-15-0j-IMG
@@ -938,7 +938,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w19d-14-2j
 #     stackname: w19d-14-2j-IMG
@@ -949,7 +949,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w19d-15-0j
 #     stackname: w19d-15-0j-IMG
@@ -960,7 +960,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w22d-14-2j
 #     stackname: w22d-14-2j-IMG
@@ -971,7 +971,7 @@ stages:
 #   parameters:
 #     stageName: 'TagGit'
 #     stageDisplayname: 'Tag Git'
-#     jobName: 'Agent job'
+#     jobName: 'Agentjob'
 #     jobDisplayname: 'Agent job'
 #     BaseImageName: w22d-15-0j
 #     stackname: w22d-15-0j-IMG
