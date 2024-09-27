@@ -85,7 +85,8 @@ stages:
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
           - checkout: self
           - checkout: _lansa_aws-templates
-          - checkout: _robe070_cookbooks
+            path: "aws-templates"
+          # - checkout: _robe070_cookbooks
           
           # - powershell: | 
           #     Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
@@ -98,7 +99,7 @@ stages:
               regionName: 'ap-southeast-2'
               arguments: '-BaseImageName ''w16d-14-2'' -stackname ''AUS-Small'''
               #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-              filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/SetGateVariable.ps1'
+              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
           - pwsh: |
               # Print the Gate variables.
