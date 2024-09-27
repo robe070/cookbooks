@@ -39,24 +39,46 @@ try
     cmd /c "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Ngen executequeueditems" | Out-Null
 
     if ( $Cloud -eq "AWS" ) {
-        if ( Test-Path $ENV:ProgramFiles\Amazon\Ec2ConfigService ) {
-            Write-Host "$(Log-Date) Configure EC2 Settings"
-            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath" | Out-Default
-            cmd /c del /F "$ENV:ProgramFiles\Amazon\Ec2ConfigService\Logs\*.txt" | Out-Default
-        } else {
-            # Newer EC2 Launch service
-            cmd /c del /F "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log\*.*" | Out-Default
+        $LogsFound = $False
+        Write-Host "$(Log-Date) Tidy Up EC2 Launch"
+        $EC2LogPath = "$ENV:ProgramFiles\Amazon\Ec2ConfigService"
+        if ( Test-Path $EC2LogPath ) {
+            Write-Host "$(Log-Date) Configure EC2 Settings Win 2012?"
+            Write-Host( "$(Log-Date) $EC2LogPath" )
+            &"$Script:IncludeDir\Ec2ConfigSettings.ps1" "$TempPath" | Out-Default | Write-Host
+            Remove-Item "$EC2LogPath\Logs\*.txt" -Force -Confirm:$false | Out-Default | Write-Host
+            $LogsFound = $True
+        }
+
+        $EC2LogPath = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Log"
+        if (Test-Path $EC2LogPath){
+            Write-Host( "$(Log-Date) Newer EC2 Launch service Win 2016 & 2019?" )
+            Write-Host( "$(Log-Date) $EC2LogPath" )
+            Remove-Item "$EC2LogPath\*.*" -Force -Confirm:$false | Out-Default | Write-Host
+            $LogsFound = $True
+        }
+
+        $EC2LogPath = "$ENV:ProgramData\Amazon\EC2Launch\Log"
+        if (Test-Path $EC2LogPath){
+            Write-Host( "$(Log-Date) Even Newer EC2 Launch service Win 2022?" )
+            Write-Host( "$(Log-Date) $EC2LogPath" )
+            Remove-Item "$EC2LogPath\*.*" -Force -Confirm:$false | Out-Default | Write-Host
+            $LogsFound = $True
+        }
+
+        if ( -not $LogsFound ) {
+            throw 'EC2 Launch log file location not found'
         }
     }
 
     Write-Host "$(Log-Date) Tidy up"
 
     if (Test-Path -Path $TempPath) {
-        cmd /c rd /S/Q $TempPath | Out-Host
+        cmd /c rd /S/Q $TempPath | Out-Default | Write-Host
     }
 
     if ( $Cloud -eq "Azure " -and ($Language -ne 'ENG') ) {
-        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "ConfigureLanguage" -Value "powershell -executionpolicy Bypass -file $GitRepoPath\scripts\recover-language-pack.ps1" | Out-Default
+        Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -Name "ConfigureLanguage" -Value "powershell -executionpolicy Bypass -file $GitRepoPath\scripts\recover-language-pack.ps1" | Out-Default | Write-Host
 
         # $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy unrestricted -file $GitRepoPath\scripts\recover-language-pack.ps1"
         # $trigger1 = New-ScheduledTaskTrigger -AtStartup
@@ -65,8 +87,9 @@ try
 }
 catch
 {
+    $_
     $Global:LANSAEXITCODE = $LASTEXITCODE
-    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Default
-    Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Default
+    Write-RedOutput "Remote-Script LASTEXITCODE = $LASTEXITCODE" | Out-Default | Write-Host
+    Write-RedOutput "install-lansa-post-winupdates.ps1 is the <No file> in the stack dump below" | Out-Default | Write-Host
     throw
 }
