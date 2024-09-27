@@ -12,8 +12,6 @@ variables:
     value: $false
   - name: atomic-build-ps
     value: $false
-  - name: azureUserId
-    value: PowershellScriptsSP
   - name: JpnLanguage
     value: ENG
   - name: quickstart-scripts
