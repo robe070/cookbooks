@@ -13,7 +13,7 @@ resources:
     - repository: _priyadishahCookbooks
       name: priyadishah/cookbooks
       type: github
-      ref: feature/AWS-Images-Cookbooks-CI-3.0
+      ref: feature/AWSImageRelease-3.0
       endpoint: priyadishah
 
 variables:
