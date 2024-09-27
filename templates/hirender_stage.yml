@@ -83,7 +83,6 @@ stages:
         steps:
           - checkout: self
           - checkout: _lansa_aws-templates
-            path: "s/_lansa_aws-templates"
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
             displayName: 'Artifact Check: Set Gate Variable'
