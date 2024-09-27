@@ -76,37 +76,41 @@ stages:
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    - job: ${{ parameters.jobName }}
-      displayName: ${{ parameters.jobDisplayname }}
-      pool: 
-        vmImage: ${{ parameters.vmImage }}
-      steps:
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        name: Gate
-        displayName: 'Artifact Check: Set Gate Variable'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ''w16d-14-2'' -stackname ''AUS-Small'''
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+      - job: ${{ parameters.jobName }}
+        displayName: ${{ parameters.jobDisplayname }}
+        pool: 
+          vmImage: ${{ parameters.vmImage }}
+        steps:
+          - checkout: self
+          - checkout: _lansa_aws-templates
+            path: "s/_lansa_aws-templates"
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            name: Gate
+            displayName: 'Artifact Check: Set Gate Variable'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              arguments: '-BaseImageName ''w16d-14-2'' -stackname ''AUS-Small'''
+              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
-      - pwsh: |
-          # Print the Gate variables.
-          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-        displayName: 'Artifact Check : Output Gate Variable'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - pwsh: |
+              # Print the Gate variables.
+              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+            displayName: 'Artifact Check : Output Gate Variable'
+          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
       
       - ${{ if eq(parameters['extraSteps'], true) }}:
-        - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
-          displayName: 'S3 Download: TemplateUrl.txt'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'eu-west-3'
-            bucketName: lansa
-            sourceFolder: templates/support/scalable/marketplace
-            globExpressions: TemplateUrl.txt
-            targetFolder: '$(System.DefaultWorkingDirectory)'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
+            displayName: 'S3 Download: TemplateUrl.txt'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'eu-west-3'
+              bucketName: lansa
+              sourceFolder: templates/support/scalable/marketplace
+              globExpressions: TemplateUrl.txt
+              targetFolder: '$(System.DefaultWorkingDirectory)'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
         - powershell: |
             $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
             
@@ -117,111 +121,112 @@ stages:
                 Write-Host "path does NOT exist - $path"
             }
           displayName: 'Set TemplateUrl task variable'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-        - powershell: 'Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"'
+        - powershell: |
+           'Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"'
           displayName: 'Output TemplateUrl Variable value'
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        displayName: 'Cleanup CFN Template : Small Stack-Template'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+                displayName: 'Cleanup CFN Template : Small Stack-Template'
+                inputs:
+                  awsCredentials: AzureDevOps
+                  regionName: 'ap-southeast-2'
+                  arguments: '-Gatestack $(Gate.stack)'
+                  filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+                condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
-        displayName: 'CFN Template deployment: Small Stack-TemplateTest'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          stackName: '$(Gate.stack)'
-          templateSource: s3
-          s3BucketName: '$(BucketNamePreview)'
-          s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
-          templateParametersSource: inline
-          templateParameters: |
-            [{
-                "ParameterKey": "StackType",
-                "ParameterValue": "Small"
-            },{
-                "ParameterKey": "10LansaGitRepoBranch",
-                "ParameterValue": "$(CookbooksBranchPreview)"
-            },{
-                "ParameterKey": "UpdateManagementScripts",
-                "ParameterValue": "Yes"
-            },{
-                "ParameterKey": "$(DBPasswordKey)",
-                "ParameterValue": "$(DBPasswordValue)"
-            }, {
-                "ParameterKey": "$(WebPasswordKey)",
-                "ParameterValue": "$(WebPasswordValue)"
-            }, {
-                "ParameterKey": "$(KeyNameKey)",    
-                "ParameterValue": "$(KeyNameValue)"
-            }, {
-                "ParameterKey": "$(RemoteAccessLocationKey)",   
-                "ParameterValue": "$(RemoteAccessLocationValue)"
-            }, {
-                "ParameterKey": "$(LansaMSIKey)",   
-                "ParameterValue": "$(msiURLPrevious)"
-            }, {
-                "ParameterKey": "LansaVersion",   
-                "ParameterValue": "$(LansaVersionPrevious)"
-            }, {
-                "ParameterKey": "11WebserverOSVersion",   
-                "ParameterValue": "$(WebserverOSPreviousVersionValue)"
-            }, {
-                "ParameterKey": "CurrentVPC",   
-                "ParameterValue": "$(CurrentVPC)"
-            }, {
-                "ParameterKey": "AvailabilityZones",   
-                "ParameterValue": "$(AvailabilityZones)"
-            }, {
-                "ParameterKey": "NumberOfAZs",   
-                "ParameterValue": "$(NumberOfAZs)"
-            }, {
-                "ParameterKey": "DBSubnetGroupName",   
-                "ParameterValue": "$(DBSubnetGroupName)"
-            }, {
-                "ParameterKey": "ELBSubnetIds",   
-                "ParameterValue": "$(ELBSubnetIds)"
-            }, {
-                "ParameterKey": "03DBUsername",   
-                "ParameterValue": "$(03DBUsername)"
-            }]
-          tags: 'usage=temp-test'
-          onFailure: 'DO_NOTHING'
-          timeoutInMins: 100
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
+            displayName: 'CFN Template deployment: Small Stack-TemplateTest'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              stackName: '$(Gate.stack)'
+              templateSource: s3
+              s3BucketName: '$(BucketNamePreview)'
+              s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
+              templateParametersSource: inline
+              templateParameters: |
+                [{
+                    "ParameterKey": "StackType",
+                    "ParameterValue": "Small"
+                },{
+                    "ParameterKey": "10LansaGitRepoBranch",
+                    "ParameterValue": "$(CookbooksBranchPreview)"
+                },{
+                    "ParameterKey": "UpdateManagementScripts",
+                    "ParameterValue": "Yes"
+                },{
+                    "ParameterKey": "$(DBPasswordKey)",
+                    "ParameterValue": "$(DBPasswordValue)"
+                }, {
+                    "ParameterKey": "$(WebPasswordKey)",
+                    "ParameterValue": "$(WebPasswordValue)"
+                }, {
+                    "ParameterKey": "$(KeyNameKey)",    
+                    "ParameterValue": "$(KeyNameValue)"
+                }, {
+                    "ParameterKey": "$(RemoteAccessLocationKey)",   
+                    "ParameterValue": "$(RemoteAccessLocationValue)"
+                }, {
+                    "ParameterKey": "$(LansaMSIKey)",   
+                    "ParameterValue": "$(msiURLPrevious)"
+                }, {
+                    "ParameterKey": "LansaVersion",   
+                    "ParameterValue": "$(LansaVersionPrevious)"
+                }, {
+                    "ParameterKey": "11WebserverOSVersion",   
+                    "ParameterValue": "$(WebserverOSPreviousVersionValue)"
+                }, {
+                    "ParameterKey": "CurrentVPC",   
+                    "ParameterValue": "$(CurrentVPC)"
+                }, {
+                    "ParameterKey": "AvailabilityZones",   
+                    "ParameterValue": "$(AvailabilityZones)"
+                }, {
+                    "ParameterKey": "NumberOfAZs",   
+                    "ParameterValue": "$(NumberOfAZs)"
+                }, {
+                    "ParameterKey": "DBSubnetGroupName",   
+                    "ParameterValue": "$(DBSubnetGroupName)"
+                }, {
+                    "ParameterKey": "ELBSubnetIds",   
+                    "ParameterValue": "$(ELBSubnetIds)"
+                }, {
+                    "ParameterKey": "03DBUsername",   
+                    "ParameterValue": "$(03DBUsername)"
+                }]
+              tags: 'usage=temp-test'
+              onFailure: 'DO_NOTHING'
+              timeoutInMins: 100
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        displayName: 'Test CFN Deployment : URL Tests'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Test CFN Deployment : URL Tests'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              arguments: '-Gatestack $(Gate.stack)'
+              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        displayName: 'AWS PowerShell: Test Image Version'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'AWS PowerShell: Test Image Version'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
+              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        displayName: 'Cleanup CFN Template : Small Stack-Template'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-          ignoreLASTEXITCODE: true
-        continueOnError: true
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Cleanup CFN Template : Small Stack-Template'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              arguments: '-Gatestack $(Gate.stack)'
+              filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+              ignoreLASTEXITCODE: true
+            continueOnError: true
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
