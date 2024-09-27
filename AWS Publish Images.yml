@@ -565,7 +565,7 @@ stages:
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
             filesAcl: 'public-read'
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w16d-14-2USIMGTest'
     stageDisplayname: 'w16d-14-2 US IMG Test'
@@ -577,7 +577,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w16d-15-0USIMGTest'
     stageDisplayname: 'w16d-15-0 US IMG Test'
@@ -589,7 +589,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w16d-14-2jUSIMGTest'
     stageDisplayname: 'w16d-14-2j US IMG Test'
@@ -601,7 +601,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w16d-15-0jUSIMGTest'
     stageDisplayname: 'w16d-15-0j US IMG Test'
@@ -613,7 +613,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w19d-14-2USIMGTest'
     stageDisplayname: 'w19d-14-2 US IMG Test'
@@ -625,7 +625,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w19d-15-0USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
@@ -637,7 +637,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w19d-14-2jUSIMGTest'
     stageDisplayname: 'w19d-14-2j US IMG Test'
@@ -649,7 +649,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w19d-15-0jUSIMGTest'
     stageDisplayname: 'w19d-15-0j US IMG Test'
@@ -661,7 +661,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w22d-14-2USIMGTest'
     stageDisplayname: 'w22d-14-2 US IMG Test'
@@ -673,7 +673,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w22d-15-0USIMGTest'
     stageDisplayname: 'w22d-15-0 US IMG Test'
@@ -685,7 +685,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w22d-14-2jUSIMGTest'
     stageDisplayname: 'w22d-14-2j US IMG Test'
@@ -697,7 +697,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: Templates/US-IMG-TEST.yml
+- template: Templates/US-IMG-Test.yml
   parameters:
     stageName: 'w22d-15-0jUSIMGTest'
     stageDisplayname: 'w22d-15-0j US IMG Test'
