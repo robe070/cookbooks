@@ -83,7 +83,7 @@ stages:
         steps:
           - checkout: self
           - checkout: _lansa_aws-templates
-            path: aws-templates
+            # path: aws-templates
           - powershell: | 
               Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
       
