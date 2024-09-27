@@ -88,10 +88,6 @@ stages:
             path: "aws-templates"
           # - checkout: _robe070_cookbooks
           
-          # - powershell: | 
-          #     Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
-          #     Get-ChildItem -Path $(Pipeline.Workspace) -Force -Recurse
-
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
             displayName: 'Artifact Check: Set Gate Variable'

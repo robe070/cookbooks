@@ -78,7 +78,7 @@ stages:
       displayName: 'Agent job'
       timeoutInMinutes: 0
       pool:
-          vmImage: windows-2022
+          vmImage: $(vmImage)
       steps:     
         - checkout: self
         - checkout: _robe070_cookbooks
@@ -109,7 +109,7 @@ stages:
     - job: Job_1
       displayName: Agent job
       pool: 
-          vmImage: windows-2022
+          vmImage: $(vmImage)
       steps:
         - checkout: self
         - checkout: _lansa_aws-templates
