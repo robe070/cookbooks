@@ -831,7 +831,7 @@ stages:
         # - checkout: _priyadishahCookbooks
         #   displayName: Checkout Divakshi/cookbooks
 
-        - task: ManualIntervention@8
+        - task: ManualIntervention
           displayName: 'Marketplace Instructions'
           inputs:
             instructions: |
