@@ -83,9 +83,8 @@ stages:
         steps:
           - checkout: self
           - checkout: _lansa_aws-templates
-            # path: aws-templates
-          - powershell: | 
-              Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
+          # - powershell: | 
+          #     Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse
       
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate

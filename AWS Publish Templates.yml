@@ -113,9 +113,7 @@ stages:
       steps:
         - checkout: self
         - checkout: _lansa_aws-templates
-          path: "s/_lansa_aws-templates"
-        - powershell: | 
-              Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse  
+          path: "s/_lansa_aws-templates" 
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
           inputs:
