@@ -1283,20 +1283,6 @@ jobs:
         TestVmName: T19150$(VersionText-w19d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
-      script: >-
-        # Invoke Pester Tests
-
-        cd $(System.DefaultWorkingDirectory)\Tests
-
-        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
-
-        $result | Out-Default | Write-Host
-
-        if ($result.Result -eq "Failed") {
-            throw "Failed Tests Count: $($result.FailedCount)"
-        } else {
-            Write-Host "Tested the image successfully."
-        }
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
