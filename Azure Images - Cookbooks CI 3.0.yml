@@ -1,14 +1,8 @@
-name: Azure-Images-Cookbooks-CI-3.0-$(Build.BuildId)
+name: Azure Images Cookbooks CI-$(Build.BuildId)
 
 trigger: none
 
 pr: none
-
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: feature/priyanka-classic2YAML
 
 variables: 
   - group: 'External IP Addresses'
@@ -20,14 +14,6 @@ variables:
     value: $false
   - name: azureUserId
     value: PowershellScriptsSP
-  # - name: clientsecret
-    # value: ********
-  - name: GitBranch
-    value: $(Build.SourceBranch)
-  - name: GitBranchPR
-    value: feature/priyanka-classic2YAML
-  - name: GitUserName
-    value: priyadishah
   - name: JpnLanguage
     value: ENG
   - name: quickstart-scripts
