@@ -407,18 +407,18 @@ stages:
 - stage: CommitAUStemplatechanges
   displayName: Commit AUS template changes
   dependsOn: 
-  - w16d-14-2CopyAMItoUS
-  - w16d-15-0CopyAMItoUS
-  - w16d-14-2jCopyAMItoUS
-  - w16d-15-0jCopyAMItoUS
-  - w19d-14-2CopyAMItoUS
-  - w19d-15-0CopyAMItoUS
-  - w19d-14-2jCopyAMItoUS
-  - w19d-15-0jCopyAMItoUS
-  - w22d-14-2CopyAMItoUS
-  - w22d-15-0CopyAMItoUS
-  - w22d-14-2jCopyAMItoUS
-  - w22d-15-0jCopyAMItoUS
+  - w16d142CopyAMItoUS
+  - w16d150CopyAMItoUS
+  - w16d142jCopyAMItoUS
+  - w16d150jCopyAMItoUS
+  - w19d142CopyAMItoUS
+  - w19d150CopyAMItoUS
+  - w19d142jCopyAMItoUS
+  - w19d150jCopyAMItoUS
+  - w22d142CopyAMItoUS
+  - w22d150CopyAMItoUS
+  - w22d142jCopyAMItoUS
+  - w22d150jCopyAMItoUS
   jobs:
     - job:
       displayName: Agent job 
@@ -438,7 +438,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: DivakshiCookbooks
+        - checkout: _priyadishahCookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
@@ -501,7 +501,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: DivakshiCookbooks
+        - checkout: _priyadishahCookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
@@ -743,7 +743,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: DivakshiCookbooks
+        - checkout: _priyadishahCookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
@@ -828,7 +828,7 @@ stages:
         # - checkout: _LansaAWSTemplates
         #   displayName: Checkout Divakshi/aws-templates
 
-        # - checkout: DivakshiCookbooks
+        # - checkout: _priyadishahCookbooks
         #   displayName: Checkout Divakshi/cookbooks
 
         - task: ManualIntervention@8
