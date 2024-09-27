@@ -93,10 +93,10 @@ stages:
           #     Get-ChildItem -Path $(Pipeline.Workspace) -Force -Recurse
 
           - task: PowerShell@2
-            displayName: copy items to current working directory
+            displayName: Copy Files Pipeline Workspace Directory to Current Working Directory
             inputs:
               targetType: 'inline'
-              script: 'Copy-Item -Path "$(Pipeline.WorkSpace)\_Build Image Release Artefacts\_drop\*" -Destination "$(System.DefaultWorkingDirectory)\_Build Image Release Artefacts" -Recurse'
+              script: 'Copy-Item -Path "$(Pipeline.WorkSpace)\_Build Image Release Artefacts\*" -Destination "$(System.DefaultWorkingDirectory)\_Build Image Release Artefacts" -Recurse'
       
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
