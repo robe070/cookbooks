@@ -51,16 +51,16 @@ stages:
         demands: ${{ parameters.jobDemand }}
 
       steps:
-      - download: _Build Image Release Artefacts 3.0
+      - download: _Build Image Release Artefacts
         displayName: Download artifacts from Build Image Release Artefacts 3.0
 
       - checkout: self
 
       - checkout: _LansaAWSTemplates
-        displayName: Checkout Divakshi/aws-templates
+        displayName: Checkout priyadishah/aws-templates-md
 
-      - checkout: DivakshiCookbooks
-        displayName: Checkout Divakshi/cookbooks
+      - checkout: _priyadishahCookbooks
+        displayName: Checkout priyadishah/cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'

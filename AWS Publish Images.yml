@@ -2,19 +2,19 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: _Build Image Release Artefacts 3.0
-      source: Build Image Release Artefacts  3.0
+    - pipeline: _Build Image Release Artefacts
+      source: 'Build Image Release Artefacts  3.0'
   repositories:
     - repository: _LansaAWSTemplates
-      name: Divakshi/aws-templates
+      name: priyadishah/aws-templates-md
       type: github
       ref: feature/Aws-Image-Release-3.0
-      endpoint: Divakshi
-    - repository: _DivakshiCookbooks
-      name: Divakshi/cookbooks
+      endpoint: priyadishah
+    - repository: _priyadishahCookbooks
+      name: priyadishah/cookbooks
       type: github
       ref: feature/AWS-Images-Cookbooks-CI-3.0
-      endpoint: Divakshi
+      endpoint: priyadishah
 
 variables:
   - group: Template Parameters
@@ -50,16 +50,16 @@ stages:
         demands: '' 
 
       steps:
-        - download: _Build Image Release Artefacts 3.0
+        - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
 
         - checkout: _LansaAWSTemplates
-          displayName: Checkout Divakshi/aws-templates
+          displayName: priyadishah/aws-templates-md
 
         - checkout: DivakshiCookbooks
-          displayName: Checkout Divakshi/cookbooks
+          displayName: priyadishah/cookbooks
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
