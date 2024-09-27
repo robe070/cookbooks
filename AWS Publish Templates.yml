@@ -132,7 +132,6 @@ stages:
     dependsOn: S3PatchPAAS
     jobName: AgentJob_SmallStack
     jobDisplayname: 'Agent job: Small Stack'
-    vmImage: windows-2022
 
 - template: templates/hirender_stage.yml
   parameters:
