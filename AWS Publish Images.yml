@@ -58,7 +58,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: priyadishah/aws-templates-md
 
-        - checkout: DivakshiCookbooks
+        - checkout: _priyadishahCookbooks
           displayName: priyadishah/cookbooks
 
         - task: PowerShell@2
@@ -262,7 +262,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w16d-14-2CopyAMItoUS'
+    stageName: 'w16d142CopyAMItoUS'
     stageDisplayname: 'w16d-14-2 Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -274,7 +274,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w16d-15-0CopyAMItoUS'
+    stageName: 'w16d150CopyAMItoUS'
     stageDisplayname: 'w16d-15-0 Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -286,7 +286,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w19d-14-2CopyAMItoUS'
+    stageName: 'w19d142CopyAMItoUS'
     stageDisplayname: 'w19d-14-2 Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -298,7 +298,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w19d-15-0CopyAMItoUS'
+    stageName: 'w19d150CopyAMItoUS'
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -334,7 +334,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w16d-14-2jCopyAMItoUS'
+    stageName: 'w16d142jCopyAMItoUS'
     stageDisplayname: 'w16d-14-2j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -346,7 +346,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w16d-15-0jCopyAMItoUS'
+    stageName: 'w16d150jCopyAMItoUS'
     stageDisplayname: 'w16d-15-0j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -358,7 +358,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w19d-14-2j Copy AMI to US'
+    stageName: 'w19d142j Copy AMI to US'
     stageDisplayname: 'w19d-14-2j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -370,7 +370,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w19d-15-0jCopyAMItoUS'
+    stageName: 'w19d150jCopyAMItoUS'
     stageDisplayname: 'w19d-15-0j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -382,7 +382,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w22d-14-2j Copy AMI to US'
+    stageName: 'w22d142j Copy AMI to US'
     stageDisplayname: 'w22d-14-2j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -394,7 +394,7 @@ stages:
 
 - template: Templates/Copy-AMI-to-US.yml
   parameters:
-    stageName: 'w22d-15-0jCopyAMItoUS'
+    stageName: 'w22d150jCopyAMItoUS'
     stageDisplayname: 'w22d-15-0j Copy AMI to US'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -567,7 +567,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w16d-14-2USIMGTest'
+    stageName: 'w16d142USIMGTest'
     stageDisplayname: 'w16d-14-2 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -579,7 +579,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w16d-15-0USIMGTest'
+    stageName: 'w16d150USIMGTest'
     stageDisplayname: 'w16d-15-0 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -591,7 +591,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w16d-14-2jUSIMGTest'
+    stageName: 'w16d142jUSIMGTest'
     stageDisplayname: 'w16d-14-2j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -603,7 +603,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w16d-15-0jUSIMGTest'
+    stageName: 'w16d150jUSIMGTest'
     stageDisplayname: 'w16d-15-0j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -615,7 +615,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w19d-14-2USIMGTest'
+    stageName: 'w19d142USIMGTest'
     stageDisplayname: 'w19d-14-2 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -627,7 +627,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w19d-15-0USIMGTest'
+    stageName: 'w19d150USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -639,7 +639,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w19d-14-2jUSIMGTest'
+    stageName: 'w19d142jUSIMGTest'
     stageDisplayname: 'w19d-14-2j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -651,7 +651,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w19d-15-0jUSIMGTest'
+    stageName: 'w19d150jUSIMGTest'
     stageDisplayname: 'w19d-15-0j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -663,7 +663,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w22d-14-2USIMGTest'
+    stageName: 'w22d142USIMGTest'
     stageDisplayname: 'w22d-14-2 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -675,7 +675,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w22d-15-0USIMGTest'
+    stageName: 'w22d150USIMGTest'
     stageDisplayname: 'w22d-15-0 US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -687,7 +687,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w22d-14-2jUSIMGTest'
+    stageName: 'w22d142jUSIMGTest'
     stageDisplayname: 'w22d-14-2j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -699,7 +699,7 @@ stages:
 
 - template: Templates/US-IMG-Test.yml
   parameters:
-    stageName: 'w22d-15-0jUSIMGTest'
+    stageName: 'w22d150jUSIMGTest'
     stageDisplayname: 'w22d-15-0j US IMG Test'
     jobName: 'Agent job'
     jobDisplayname: 'Agent job'
@@ -712,18 +712,18 @@ stages:
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
   dependsOn: 
-  - w16d-14-2USIMGTest
-  - w16d-15-0USIMGTest
-  - w16d-14-2jUSIMGTest
-  - w16d-15-0jUSIMGTest
-  - w19d-14-2USIMGTest
-  - w19d-15-0USIMGTest
-  - w19d-14-2jUSIMGTest
-  - w19d-15-0jUSIMGTest
-  - w22d-14-2USIMGTest
-  - w22d-15-0USIMGTest
-  - w22d-14-2jUSIMGTest
-  - w22d-15-0jUSIMGTest
+  - w16d142USIMGTest
+  - w16d150USIMGTest
+  - w16d142jUSIMGTest
+  - w16d150jUSIMGTest
+  - w19d142USIMGTest
+  - w19d150USIMGTest
+  - w19d142jUSIMGTest
+  - w19d150jUSIMGTest
+  - w22d142USIMGTest
+  - w22d150USIMGTest
+  - w22d142jUSIMGTest
+  - w22d150jUSIMGTest
   
   jobs:
     - job:
@@ -846,38 +846,38 @@ stages:
               4. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
               5. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2
-    stackname: w16d-14-2-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w16d-14-2
+#     stackname: w16d-14-2-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0
-    stackname: w16d-15-0-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w16d-15-0
+#     stackname: w16d-15-0-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
-    stackname: w19d-14-2-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w19d-14-2
+#     stackname: w19d-14-2-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
 - template: Templates/TagGit.yml
   parameters:
@@ -890,90 +890,90 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2
-    stackname: w22d-14-2-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w22d-14-2
+#     stackname: w22d-14-2-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w22d-15-0
-    stackname: w22d-15-0-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w22d-15-0
+#     stackname: w22d-15-0-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2j
-    stackname: w16d-14-2j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w16d-14-2j
+#     stackname: w16d-14-2j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0j
-    stackname: w16d-15-0j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w16d-15-0j
+#     stackname: w16d-15-0j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2j
-    stackname: w19d-14-2j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w19d-14-2j
+#     stackname: w19d-14-2j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-15-0j
-    stackname: w19d-15-0j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w19d-15-0j
+#     stackname: w19d-15-0j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2j
-    stackname: w22d-14-2j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w22d-14-2j
+#     stackname: w22d-14-2j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agent job'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w22d-15-0j
-    stackname: w22d-15-0j-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+# - template: Templates/TagGit.yml
+#   parameters:
+#     stageName: 'TagGit'
+#     stageDisplayname: 'Tag Git'
+#     jobName: 'Agent job'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w22d-15-0j
+#     stackname: w22d-15-0j-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: Marketplace
