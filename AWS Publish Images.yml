@@ -816,7 +816,7 @@ stages:
       displayName: Agentless job 
       timeoutInMinutes: 0
 
-      # pool:
+      pool: server
       #   vmImage: $(vmImage)  
 
       steps:
