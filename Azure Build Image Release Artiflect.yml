@@ -132,6 +132,10 @@ jobs:
   - task: PowerShell@2
     name: ''
     displayName: VM Tests
+    env:
+        TestImageName: w22d-14-2-$(VersionText-w22d-14-2)
+        TestCloudName: Azure
+        TestVmName: Test2214$(VersionText-w22d-14-2)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -292,6 +296,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-15-0-$(VersionText-w22d-15-0)
+        TestCloudName: Azure
+        TestVmName: Test2215$(VersionText-w22d-15-0)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -451,6 +459,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-14-2j-$(VersionText-w22d-14-2j)
+        TestCloudName: Azure
+        TestVmName: Test2214j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -610,6 +622,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-15-0j-$(VersionText-w22d-15-0j)
+        TestCloudName: Azure
+        TestVmName: Test2215j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -769,6 +785,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-14-2-$(VersionText-w16d-14-2)
+        TestCloudName: Azure
+        TestVmName: T1614$(VersionText-w16d-14-2)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -928,6 +948,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-15-0-$(VersionText-w16d-15-0)
+        TestCloudName: Azure
+        TestVmName: T1615$(VersionText-w16d-15-0)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1090,6 +1114,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-14-2-$(VersionText-w19d-14-2)
+        TestCloudName: Azure
+        TestVmName: T1914$(VersionText-w19d-14-2)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1249,6 +1277,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-15-0-$(VersionText-w19d-15-0)
+        TestCloudName: Azure
+        TestVmName: T1915$(VersionText-w19d-15-0)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1408,6 +1440,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-14-2j-$(VersionText-w16d-14-2j)
+        TestCloudName: Azure
+        TestVmName: T1614j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1567,6 +1603,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-15-0j-$(VersionText-w16d-15-0j)
+        TestCloudName: Azure
+        TestVmName: T1615j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1727,6 +1767,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-14-2j-$(VersionText-w19d-14-2j)
+        TestCloudName: Azure
+        TestVmName: T1914j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1886,6 +1930,10 @@ jobs:
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-15-0j-$(VersionText-w19d-15-0j)
+        TestCloudName: Azure
+        TestVmName: T1915j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
