@@ -1,14 +1,8 @@
-name: Azure-Images-Cookbooks-CI-3.0-$(Build.BuildId)
+name: Azure Images Cookbooks CI-$(Build.BuildId)
 
 trigger: none
 
 pr: none
-
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: feature/priyanka-classic2YAML
 
 variables: 
   - group: 'External IP Addresses'
@@ -24,6 +18,7 @@ variables:
     value: feature/priyanka-classic2YAML
   - name: GitUserName
     value: priyadishah
+    value: $false
   - name: JpnLanguage
     value: ENG
   - name: quickstart-scripts
@@ -88,14 +83,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild $(atomic-build-ps) -GitUserName $(GitUserName) -ExternalIPAddresses $(ExternalIPAddresses)
+      arguments: -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
+      ResourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -114,6 +109,11 @@ jobs:
   - task: PowerShell@2
     name: ''
     displayName: VM Tests
+    env:
+        TestImageName: w22d-14-2-$(VersionText-w22d-14-2)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test22142$(VersionText-w22d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   - task: PublishTestResults@2
@@ -137,7 +137,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildId)
+      resourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
 
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
@@ -167,7 +167,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2012-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $true -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -175,7 +175,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -192,6 +192,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-15-0-$(VersionText-w22d-15-0)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test22150$(VersionText-w22d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
 
@@ -215,7 +220,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
 
 - job: Job_6
   displayName: 'Agent job : w16d-14-2'
@@ -244,7 +249,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -252,7 +257,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -269,6 +274,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-14-2-$(VersionText-w16d-14-2)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test16142$(VersionText-w16d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       
@@ -292,7 +302,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
 
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
@@ -322,7 +332,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps']) -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -330,7 +340,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -347,6 +357,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-15-0-$(VersionText-w16d-15-0)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test16150$(VersionText-w16d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   
@@ -370,7 +385,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
 
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
@@ -391,7 +406,7 @@ jobs:
     displayName: Azure Login
     inputs:
       filePath: scripts/AzureLogin.ps1
-      arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+      arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString $(clientSecret) -AsPlainText -force)
       workingDirectory: scripts
 
   - task: PowerShell@2
@@ -400,7 +415,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -408,7 +423,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
       Key: Usage
       Value: test-temp
 
@@ -425,6 +440,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-14-2-$(VersionText-w19d-14-2)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19142$(VersionText-w19d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       
@@ -448,7 +468,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
 
 - job: Job_2
   displayName: 'Agent job : w19d-15-0'
@@ -478,7 +498,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -486,7 +506,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
       Key: Usage
       Value: test-temp
 
@@ -503,6 +523,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-15-0-$(VersionText-w19d-15-0)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19150$(VersionText-w19d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
      
@@ -526,7 +551,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
 
 - job: Job_7
   displayName: 'Agent job : w16d-14-2j'
@@ -556,7 +581,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -564,7 +589,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -581,6 +606,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-14-2j-$(VersionText-w16d-14-2j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test16142j$(VersionText-w16d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       
@@ -604,7 +634,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
 
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
@@ -634,7 +664,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -642,7 +672,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -659,6 +689,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w16d-15-0j-$(VersionText-w16d-15-0j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test16150j$(VersionText-w16d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       
@@ -682,8 +717,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
-
+      resourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
 - job: Job_9
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -712,7 +746,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -720,7 +754,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -737,6 +771,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-15-0j-$(VersionText-w19d-15-0j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19150j$(VersionText-w19d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
  
@@ -760,7 +799,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
 
 - job: Job_10
   displayName: 'Agent job : w19d-14-2j'
@@ -790,7 +829,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -798,7 +837,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -815,6 +854,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w19d-14-2j-$(VersionText-w19d-14-2j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test19142j$(VersionText-w19d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       
@@ -838,7 +882,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
 
 - job: Job_11
   displayName: 'Agent job : w22d-15-0j'
@@ -868,7 +912,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -876,7 +920,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
       Key: Usage
       Value: test-temp
 
@@ -893,6 +937,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-15-0j-$(VersionText-w22d-15-0j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test22150j$(VersionText-w22d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
    
@@ -916,7 +965,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
 
 - job: Job_12
   displayName: 'Agent job : w22d-14-2j'
@@ -946,7 +995,7 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -AtomicBuild variables['atomic-build-ps'] -GitUserName $(GitUserName) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage) -InstallLanguagePack
+      arguments: -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)
       workingDirectory: scripts
 
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
@@ -954,7 +1003,7 @@ jobs:
     continueOnError: true
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      ResourceGroupName: BakingDP-w22d-14-2j-$(VersionText-w22d-14-2j)
       Key: Usage
       Value: test-temp
 
@@ -971,6 +1020,11 @@ jobs:
 
   - task: PowerShell@2
     displayName: VM Tests
+    env:
+        TestImageName: w22d-14-2j-$(VersionText-w22d-14-2j)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: Test22142j$(VersionText-w22d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
     
@@ -994,5 +1048,5 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      resourceGroupName: BakingDP-w22d-14-2j-$(VersionText-w22d-14-2j)
 ...
