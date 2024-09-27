@@ -1,7 +1,6 @@
 resources:
   pipelines: 
   - pipeline: _Build Image Release Artefacts
-    path: s/_Build Image Release Artefacts
     source: 'Build Image Release Artefacts  3.0'
 
   repositories:
