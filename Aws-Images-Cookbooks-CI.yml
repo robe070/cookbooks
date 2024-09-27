@@ -1,0 +1,1013 @@
+variables:
+  - group: "External IP Addresses"
+  - group: "AWS base AMI Image Names"
+  - group: "Logins"
+  - name: atomic-build
+    value: $false
+  - name: atomic-build-ps
+    value: $false
+  - name: JpnLanguage
+    value: JPN 
+  - name: quickstart-scripts  
+    value: $(Agent.BuildDirectory)\test      
+  - name: regionName
+    value: ap-southeast-2
+  - name: vmImage
+    value: windows-2019  
+  - name: VersionText-w16d-14-2
+    value: 0 
+  - name: VersionText-w16d-14-2j
+    value: 0 
+  - name: VersionText-w16d-15-0
+    value: 0 
+  - name: VersionText-w16d-15-0j
+    value: 0 
+  - name: VersionText-w19d-14-2
+    value: 0 
+  - name: VersionText-w19d-14-2j
+    value: 0 
+  - name: VersionText-w19d-15-0
+    value: 0  
+  - name: VersionText-w19d-15-0j
+    value: 0
+  - name: VersionText-w22d-14-2
+    value: 0
+  - name: VersionText-w22d-14-2j
+    value: 0
+  - name: VersionText-w22d-15-0
+    value: 0
+  - name: VersionText-w22d-15-0j
+    value: 0                  
+
+jobs:
+- job: Job_1
+  displayName: 'Agent job : w16d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-14-2$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16142$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      SG: w16d-14-2$(VersionText-w16d-14-2)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-14-2$(VersionText-w16d-14-2)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+  
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-14-2
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
+      ArtifactName: aws-w16d-14-2
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-14-2)' -version 'w16d-14-2' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_2
+  displayName: 'Agent job : w16d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+  
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: "  -VersionText 'w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) "
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16150$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      SG: w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-15-0$(VersionText-w16d-15-0)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-15-0
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0.txt
+      ArtifactName: aws-w16d-15-0
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance  '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-15-0)' -version 'w16d-15-0' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+      
+- job: Job_3
+  displayName: 'Agent job : w19d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-14-2$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+    continueOnError: false
+    
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      SG: w19d-14-2$(VersionText-w19d-14-2)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-14-2$(VersionText-w19d-14-2)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-14-2
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2.txt
+      ArtifactName: aws-w19d-14-2
+      FileCopyOptions: ''
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance  '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+      
+- job: Job_4
+  displayName: 'Agent job : w19d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      SG: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0$(VersionText-w19d-15-0)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-15-0
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0.txt
+      ArtifactName: aws-w19d-15-0
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-15-0))' -version 'w19d-15-0' -DeleteAMI $true
+      scriptType: inline
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_5
+  displayName: 'Agent job : w22d-14-2'
+  timeoutInMinutes: 120
+  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: ''
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+ 
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      workingDirectory: scripts     
+  
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Generate: AMI Id'
+    env:
+      BuildImage: $(BuildImage)
+    inputs:
+      targetType: inline
+      powershell: |
+        Write-Host $(BuildImage)
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+ 
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM test
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test22142$(VersionText-w22d-14-2)$(Build.BuildNumber)
+      SG: w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w22d-14-2$(VersionText-w22d-14-2)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    name: ''
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-14-2
+
+  - task: PublishBuildArtifacts@1
+    name: ''
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
+      ArtifactName: aws-w22d-14-2
+      FileCopyOptions: ''
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-14-2)' -version 'w22d-14-2' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_6
+  displayName: 'Agent job : w22d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-15-0$(VersionText-w22d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    env:
+      BuildImage.amiID:: $(amiID)
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test22150$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      SG: w22d-15-0$(VersionText-w22d-15-0)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w22d-15-0$(VersionText-w22d-15-0)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-15-0
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
+      ArtifactName: aws-w22d-15-0
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_7
+  displayName: 'Agent job : w16d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-14-2j$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+ 
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      SG: w16d-14-2j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-14-2j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-14-2j
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
+      ArtifactName: aws-w16d-14-2j
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-14-2j)' -version 'w16d-14-2j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+      
+- job: Job_8
+  displayName: 'Agent job : w16d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-15-0j$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test16150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+      SG: w16d-15-0j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w16d-15-0j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-15-0j
+ 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0j.txt
+      ArtifactName: aws-w16d-15-0j
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-15-0j)' -version 'w16d-15-0j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_9
+  displayName: 'Agent job : w19d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+ 
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-14-2j$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      SG: w19d-14-2j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-14-2j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-14-2j
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2j.txt
+      ArtifactName: aws-w19d-14-2j
+      FileCopyOptions: ''
+ 
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-14-2j)' -version 'w19d-14-2j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+      
+- job: Job_10
+  displayName: 'Agent job : w19d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: 'Download Keypair '
+    inputs:
+      secureFile: AzureDevOps.pem
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-15-0j$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test19150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      SG: w19d-15-0j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w19d-15-0j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-15-0j
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0j.txt
+      ArtifactName: aws-w19d-15-0j
+      FileCopyOptions: ''
+ 
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+      
+- job: Job_11
+  displayName: 'Agent job : w22d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-14-2j$(VersionText-w22d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test22142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      SG: w22d-14-2j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w22d-14-2j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-14-2j
+ 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2j.txt
+      ArtifactName: aws-w22d-14-2j
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-14-2j)' -version 'w22d-14-2j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
+     
+- job: Job_12
+  displayName: 'Agent job : w22d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: $(vmImage)
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: 'Download Keypair '
+    inputs:
+      secureFile: AzureDevOps.pem
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-15-0j$(VersionText-w22d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+      TestImageName: $(BuildImage.amiID)
+      TestCloudName: AWS
+      AtomicBuild: $(atomic-build)
+      TestVmName: Test22150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+      SG: w22d-15-0j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+      keypair: $(KeypairName)
+      keypairpath: $(keypair.secureFilePath)
+      VersionText: w22d-15-0j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+     
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-15-0j
+ 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0j.txt
+      ArtifactName: aws-w22d-15-0j
+      FileCopyOptions: ''
+  
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j' -DeleteAMI $true
+      filePath: scripts/terminate-instance.ps1
