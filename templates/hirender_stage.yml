@@ -82,7 +82,7 @@ stages:
           vmImage: ${{ parameters.vmImage }}
         steps:
           - download: _Build Image Release Artefacts
-            path: (Pipeline.Workspace)/s
+            path: "(Pipeline.Workspace)/s"
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
           - checkout: self
           - checkout: _lansa_aws-templates
