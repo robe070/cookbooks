@@ -22,12 +22,6 @@ resources:
     name: robe070/cookbooks
     ref: debug/paas
 
-# steps:
-#   - checkout: self
-#   - checkout: _lansa_aws-templates
-#   - checkout: _lansa_aws-templates-mp
-#   - checkout: _robe070_cookbooks
- 
 variables:
   - name: CookbooksSource
     value: $(Build.Repository.LocalPath)\cookbooks
@@ -120,6 +114,8 @@ stages:
         - checkout: self
         - checkout: _lansa_aws-templates
           path: "s/_lansa_aws-templates"
+        - powershell: | 
+              Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Force -Recurse  
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
           inputs:
