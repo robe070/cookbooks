@@ -11,15 +11,9 @@ resources:
       name: priyadishah/aws-templates-md
       ref: feature/Aws-Image-Release-3.0
 
-    # - repository: _robe070_cookbooks
-    #   name: priyadishah/cookbooks
-    #   type: github
-    #   ref: feature/AWSImageRelease-3.0
-    #   endpoint: priyadishah
-
     - repository: _robe070_cookbooks
       type: github
-      endpoint: priyadishah
+      endpoint: robe070
       name: robe070/cookbooks
       ref: debug/paas
 
@@ -30,6 +24,8 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
+  - name: ArtifactSourceAlias
+    value: _lansa_aws-templates
   - name: CookbooksSource1
     value: c:\lansa
   - name: imageReleaseState
@@ -42,22 +38,22 @@ variables:
     value: /image-cd-pipeline
   - name: vmImage
     value: windows-2019
-  - name: GitAwsTemplateMarketPlaceBranch
-    value: support/scalable_marketplace
-  - name: GitAwsTemplatescalableBranch
-    value: support/scalable
-  - name: GitCookBooksGitHubName
-    value: github.com/robe070/cookbooks
-  - name: GitLansaAwsTemplatesGitHubName
-    value: github.com/lansa/aws-templates
-  - name: GitLansaAwsTemplatesPAT
-    value: ccc
-  - name: GitLansaAwsTemplatesRepoName
-    value: _lansa_aws-templates
-  - name: GitRepoUserEmail
-    value: lansacloud@lansa.com.au
-  - name: GitRepoUserName
-    value: LansaCloud
+  # - name: GitAwsTemplateMarketPlaceBranch
+  #   value: support/scalable_marketplace
+  # - name: GitAwsTemplatescalableBranch
+  #   value: support/scalable
+  # - name: GitCookBooksGitHubName
+  #   value: github.com/robe070/cookbooks
+  # - name: GitLansaAwsTemplatesGitHubName
+  #   value: github.com/lansa/aws-templates
+  # - name: GitLansaAwsTemplatesPAT
+  #   value: ccc
+  # - name: GitLansaAwsTemplatesRepoName
+  #   value: _lansa_aws-templates
+  # - name: GitRepoUserEmail
+  #   value: lansacloud@lansa.com.au
+  # - name: GitRepoUserName
+  #   value: LansaCloud
 
 stages:
 - stage: UpdateAUSAMIs
@@ -77,7 +73,6 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
-
         - checkout: _lansa_aws-templates
           displayName: priyadishah/aws-templates-md
           path: "s/_lansa_aws-templates"
