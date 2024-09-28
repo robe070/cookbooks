@@ -42,21 +42,21 @@ variables:
     value: /image-cd-pipeline
   - name: vmImage
     value: windows-2019
-  - name: GitAwsTemplateMarketPlaceBranch-del
+  - name: GitAwsTemplateMarketPlaceBranch
     value: support/scalable_marketplace
-  - name: GitAwsTemplatescalableBranch-del
+  - name: GitAwsTemplatescalableBranch
     value: support/scalable
-  - name: GitCookBooksGitHubName-x
+  - name: GitCookBooksGitHubName
     value: github.com/robe070/cookbooks
-  - name: GitLansaAwsTemplatesGitHubName-x
+  - name: GitLansaAwsTemplatesGitHubName
     value: github.com/lansa/aws-templates
-  - name: GitLansaAwsTemplatesPAT-x
+  - name: GitLansaAwsTemplatesPAT
     value: ccc
-  - name: GitLansaAwsTemplatesRepoName-x
+  - name: GitLansaAwsTemplatesRepoName
     value: _lansa_aws-templates
-  - name: GitRepoUserEmail-x
+  - name: GitRepoUserEmail
     value: lansacloud@lansa.com.au
-  - name: GitRepoUserName-x
+  - name: GitRepoUserName
     value: LansaCloud
 
 stages:
