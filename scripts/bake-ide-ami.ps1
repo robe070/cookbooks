@@ -672,7 +672,6 @@ $jsonObject = @"
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
-
         # Load up some required tools into remote environment
 
         # Load basic utils before running anything
@@ -680,21 +679,62 @@ $jsonObject = @"
 
 
         if ( $InstallBaseSoftware ) {
-
+            
             # Install Chocolatey
-
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
 
-            # Then we install git using chocolatey and pull down the rest of the files from git
+            if ( $Cloud -eq 'Azure' ) {
+                Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
+                
+                Execute-RemoteBlock $Script:session {
+                    Restart-Computer -force
+                }
+                Start-Sleep -Seconds 10
+            
+                Write-Host "$(Log-Date) Reconnecting session..."
+                if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
+            
+                Connect-RemoteSession | Out-Default | Write-Host
+                Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+                $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
+                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                    Write-Error "LastExitCode: $remotelastexitcode"
+                    throw 1
+                }
+                Execute-RemoteInit | Out-Default | Write-Host
+                Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
+                Write-host "$(Log-Date) The VM is now rebooted."
+            }
+            
 
+            # Then we install git using chocolatey and pull down the rest of the files from git
+            Write-Host "Installing Git!"
+            # if ( $Cloud -eq 'Azure' ) {
+                
+            #     Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+            #     $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
+            #     if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+            #         Write-Error "LastExitCode: $remotelastexitcode"
+            #         throw 1
+            #     }
+            # }
             Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\installGit.ps1 -ArgumentList  @($Script:GitRepo, $Script:GitRepoPath, $GitBranch, $GitUserName, $true)
 
             Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
+
 
             # Load utilities into Remote Session.
             # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
             # Reflect local variables into remote session
             Execute-RemoteInitPostGit
+            
+            if ( $Cloud -eq 'Azure' ) {
+                Write-Host "Installing .Net!"
+                . "$script:IncludeDir\Init-Baking-Vars.ps1"
+                . "$script:IncludeDir\Init-Baking-Includes.ps1"
+                . "$script:IncludeDir\dot-CommonTools.ps1"
+            }
+
 
             # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
             # Git is a far faster mechansim for transferring files than using RemotePS.
