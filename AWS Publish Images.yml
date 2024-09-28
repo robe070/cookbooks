@@ -41,7 +41,23 @@ variables:
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
   - name: vmImage
-    value: windows-2019   
+    value: windows-2019
+  - name: GitAwsTemplateMarketPlaceBranch-del
+    value: support/scalable_marketplace
+  - name: GitAwsTemplatescalableBranch-del
+    value: support/scalable
+  - name: GitCookBooksGitHubName-x
+    value: github.com/robe070/cookbooks
+  - name: GitLansaAwsTemplatesGitHubName-x
+    value: github.com/lansa/aws-templates
+  - name: GitLansaAwsTemplatesPAT-x
+    value: ccc
+  - name: GitLansaAwsTemplatesRepoName-x
+    value: _lansa_aws-templates
+  - name: GitRepoUserEmail-x
+    value: lansacloud@lansa.com.au
+  - name: GitRepoUserName-x
+    value: LansaCloud
 
 stages:
 - stage: UpdateAUSAMIs
