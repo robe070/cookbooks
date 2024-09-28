@@ -99,7 +99,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/lansa_aws-templatesooks/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templatesooks/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true  
 
