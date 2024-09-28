@@ -91,7 +91,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            filePath: '/$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/UpdateTemplateAMIMappings.ps1'
+            filePath: '/$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: '-ImageType ''Development'
             pwsh: true   
   
@@ -112,7 +112,7 @@ stages:
             regionName: 'ap-southeast-2'
             bucketName: lansa
             #sourceFolder: '$(System.DefaultWorkingDirectory)/aws-templates/CloudFormationWindows'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/CloudFormationWindows'
+            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
             filesAcl: 'public-read'
@@ -446,7 +446,7 @@ stages:
 
         - checkout: self
 
-        - checkout: _LansaAWSTemplates
+        - checkout: _lansa_aws-templates
           displayName: Checkout Divakshi/aws-templates
 
         - checkout: _robe070_cookbooks
@@ -509,7 +509,7 @@ stages:
 
         - checkout: self
 
-        - checkout: _LansaAWSTemplates
+        - checkout: _lansa_aws-templates
           displayName: Checkout Divakshi/aws-templates
 
         - checkout: _robe070_cookbooks
@@ -751,7 +751,7 @@ stages:
 
         - checkout: self
 
-        - checkout: _LansaAWSTemplates
+        - checkout: _lansa_aws-templates
           displayName: Checkout Divakshi/aws-templates
 
         - checkout: _robe070_cookbooks
@@ -836,7 +836,7 @@ stages:
 
         # - checkout: self
 
-        # - checkout: _LansaAWSTemplates
+        # - checkout: _lansa_aws-templates
         #   displayName: Checkout Divakshi/aws-templates
 
         # - checkout: _priyadishahCookbooks
