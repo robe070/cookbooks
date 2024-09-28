@@ -56,8 +56,8 @@ stages:
 
       - checkout: self
 
-      - checkout: _LansaAWSTemplates
-        displayName: Checkout priyadishah/_LansaAWSTemplates-md
+      - checkout: _lansa_aws-templates
+        displayName: Checkout priyadishah/_lansa_aws-templates
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
@@ -69,7 +69,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName''${{ parameters.BaseImageName }}''-stackname''${{ parameters.stackname }}'
-          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/SetGateVariable.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
           # Print the Gate variables.

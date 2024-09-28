@@ -6,10 +6,10 @@ resources:
       source: 'Build Image Release Artefacts  3.0'
   repositories:
     - repository: _lansa_aws-templates
-      name: priyadishah/aws-templates-md
       type: github
-      ref: feature/Aws-Image-Release-3.0
       endpoint: priyadishah
+      name: priyadishah/aws-templates-md
+      ref: feature/Aws-Image-Release-3.0
 
     # - repository: _robe070_cookbooks
     #   name: priyadishah/cookbooks
@@ -18,8 +18,8 @@ resources:
     #   endpoint: priyadishah
 
     - repository: _robe070_cookbooks
-      endpoint: priyadishah
       type: github
+      endpoint: priyadishah
       name: robe070/cookbooks
       ref: debug/paas
 
