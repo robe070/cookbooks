@@ -67,6 +67,7 @@ stages:
 
         - checkout: _robe070_cookbooks
           displayName: Rob cookbooks
+          path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
