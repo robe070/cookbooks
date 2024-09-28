@@ -96,8 +96,6 @@ stages:
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
-          variables:
-                    ArtifactSourceAlias: '_lansa_aws-templates'
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
