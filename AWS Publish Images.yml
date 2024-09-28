@@ -10,11 +10,18 @@ resources:
       type: github
       ref: feature/Aws-Image-Release-3.0
       endpoint: priyadishah
-    - repository: _priyadishahCookbooks
-      name: priyadishah/cookbooks
-      type: github
-      ref: feature/AWSImageRelease-3.0
+
+    # - repository: _priyadishahCookbooks
+    #   name: priyadishah/cookbooks
+    #   type: github
+    #   ref: feature/AWSImageRelease-3.0
+    #   endpoint: priyadishah
+
+    - repository: _robe070_cookbooks
       endpoint: priyadishah
+      type: github
+      name: robe070/cookbooks
+      ref: debug/paas
 
 variables:
   - group: Template Parameters
@@ -58,15 +65,14 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: priyadishah/aws-templates-md
 
-        - checkout: _priyadishahCookbooks
-          displayName: priyadishah/cookbooks
+        - checkout: _robe070_cookbooks
+          displayName: Rob cookbooks
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: './$(System.DefaultWorkingDirectory)/_priyadishahCookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true   
 
@@ -75,7 +81,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: './$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            filePath: '/$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true  
 
@@ -84,7 +90,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            filePath: './$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/UpdateTemplateAMIMappings.ps1'
+            filePath: '/$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: '-ImageType ''Development'
             pwsh: true   
   

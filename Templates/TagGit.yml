@@ -57,10 +57,10 @@ stages:
       - checkout: self
 
       - checkout: _LansaAWSTemplates
-        displayName: Checkout priyadishah/aws-templates-md
+        displayName: Checkout priyadishah/_LansaAWSTemplates-md
 
-      - checkout: _priyadishahCookbooks
-        displayName: Checkout priyadishah/cookbooks
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
@@ -69,7 +69,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName''${{ parameters.BaseImageName }}''-stackname''${{ parameters.stackname }}'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
           # Print the Gate variables.

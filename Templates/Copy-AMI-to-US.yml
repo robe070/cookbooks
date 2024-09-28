@@ -60,8 +60,8 @@ stages:
       - checkout: _LansaAWSTemplates
         displayName: Checkout priyadishah/aws-templates-md
 
-      - checkout: _priyadishahCookbooks
-        displayName: Checkout priyadishah/cookbooks
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Copy ami to Us-east-1'
@@ -69,7 +69,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/CopyAMIToUS.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/CopyAMIToUS.ps1'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Add Name Tag'
@@ -77,7 +77,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/AddNameTag.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/AddNameTag.ps1'
           condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1

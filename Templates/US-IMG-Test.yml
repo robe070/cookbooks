@@ -58,10 +58,10 @@ stages:
       - checkout: self
 
       - checkout: _LansaAWSTemplates
-        displayName: Checkout priyadishah/aws-templates-md
+        displayName: Checkout priyadishah/AWS Templates-md
 
-      - checkout: _priyadishahCookbooks
-        displayName: Checkout priyadishah/cookbooks
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'
@@ -77,7 +77,7 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/OverwriteAMIArtifact.ps1'    
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/OverwriteAMIArtifact.ps1'    
  
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
@@ -86,7 +86,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
          # Print the Gate variables.
@@ -101,7 +101,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
    
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
@@ -182,7 +182,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/PrintDeploymentOutput.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/PrintDeploymentOutput.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))  
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -191,7 +191,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/TestCFNDeployment.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/AWS Templates/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -200,7 +200,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/AlternateImageVersion.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/AWS Templates/scripts/AlternateImageVersion.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -209,7 +209,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/AWS Templates/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

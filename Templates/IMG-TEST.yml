@@ -60,8 +60,8 @@ stages:
       - checkout: _LansaAWSTemplates
         displayName: Checkout priyadishah/aws-templates-md
 
-      - checkout: _priyadishahCookbooks
-        displayName: Checkout priyadishah/cookbooks
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
@@ -70,7 +70,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''$(System.stackname)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
          # Print the Gate variables.
@@ -85,7 +85,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
