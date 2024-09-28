@@ -11,7 +11,7 @@ resources:
       ref: feature/Aws-Image-Release-3.0
       endpoint: priyadishah
 
-    # - repository: _priyadishahCookbooks
+    # - repository: _robe070_cookbooks
     #   name: priyadishah/cookbooks
     #   type: github
     #   ref: feature/AWSImageRelease-3.0
@@ -448,7 +448,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: _priyadishahCookbooks
+        - checkout: _robe070_cookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
@@ -511,7 +511,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: _priyadishahCookbooks
+        - checkout: _robe070_cookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
@@ -753,7 +753,7 @@ stages:
         - checkout: _LansaAWSTemplates
           displayName: Checkout Divakshi/aws-templates
 
-        - checkout: _priyadishahCookbooks
+        - checkout: _robe070_cookbooks
           displayName: Checkout Divakshi/cookbooks
 
         - task: PowerShell@2
