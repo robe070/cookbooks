@@ -62,7 +62,7 @@ stages:
 
         - checkout: self
 
-        - checkout: _LansaAWSTemplates
+        - checkout: _lansa_aws-templates
           displayName: priyadishah/aws-templates-md
 
         - checkout: _robe070_cookbooks
@@ -82,7 +82,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: '/$(System.DefaultWorkingDirectory)/_LansaAWSTemplates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            filePath: '/$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true  
 
