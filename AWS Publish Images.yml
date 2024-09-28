@@ -471,7 +471,7 @@ stages:
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            filePath: './$(System.DefaultWorkingDirectory)/cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true
    
