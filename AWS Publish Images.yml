@@ -13,7 +13,7 @@ resources:
 
     - repository: _robe070_cookbooks
       type: github
-      endpoint: robe070
+      endpoint: priyadishah
       name: robe070/cookbooks
       ref: debug/paas
 
@@ -94,7 +94,7 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templatesooks/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true  
 
