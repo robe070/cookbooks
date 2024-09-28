@@ -5,7 +5,7 @@ resources:
     - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
   repositories:
-    - repository: _LansaAWSTemplates
+    - repository: _lansa_aws-templates
       name: priyadishah/aws-templates-md
       type: github
       ref: feature/Aws-Image-Release-3.0
