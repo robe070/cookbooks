@@ -29,6 +29,22 @@ variables:
     value: c:\lansa
   - name: jpnLanguage
     value: JPN
+  # - name: GitAwsTemplateMarketPlaceBranch-del
+  #   value: support/scalable_marketplace
+  # - name: GitAwsTemplatescalableBranch-del
+  #   value: support/scalable
+  # - name: GitCookBooksGitHubName-x
+  #   value: github.com/robe070/cookbooks
+  # - name: GitLansaAwsTemplatesGitHubName-x
+  #   value: github.com/lansa/aws-templates
+  # - name: GitLansaAwsTemplatesPAT-x
+  #   value: ccc
+  # - name: GitLansaAwsTemplatesRepoName-x
+  #   value: _lansa_aws-templates-mp
+  # - name: GitRepoUserEmail-x
+  #   value: lansacloud@lansa.com.au
+  # - name: GitRepoUserName-x
+  #   value: LansaCloud
   - name: LansaReleaseTemplateUrl
     value: https://raw.githubusercontent.com/lansa/aws-templates/support/scalable/CloudFormationWindows/lansa-master-win.cfn.template
   - name: RegressionTestRegion
@@ -37,7 +53,6 @@ variables:
   - group: "VPC ap-southeast-2"
   - group: "VPC us-east-1"
   - group: "VPC us-west-1"
-
   - group: "VPC us-west-2"
   - group: "VPC ap-northeast-1"
   - group: "VPC eu-west-2"
@@ -232,15 +247,15 @@ stages:
 #         targetFolder: '$(FolderNameProduction)'
 #         filesAcl: 'public-read'
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'ValidateTemplateURLs'
-#     stagedisplayName: Validate Template URLs
-#     dependsOn: MergeToMarketplaceAndUpload
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w19d-15-0
-#     stackName: Validate-TemplateUrl
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'ValidateTemplateURLs'
+    stagedisplayName: Validate Template URLs
+    dependsOn: MergeToMarketplaceAndUpload
+    jobName: AgentJob_SmallStack
+    jobDisplayname: 'Agent job: Small Stack'
+    baseImageName: w19d-15-0
+    stackName: Validate-TemplateUrl
 
 # - stage: SubmittoAWSAndWaitforPreview
 #   displayName: 'Submit to AWS & Wait for Preview'
@@ -298,16 +313,16 @@ stages:
 #     baseImageName: w19d-14-2
 #     stackName: Tokyo-Preview
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: N_Virginia_Preview_w19d_15_0
-#     stagedisplayName: N. Virginia Preview w19d-15-0
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_NVirginia_Deployment_Test 
-#     jobDisplayname: 'Agent job : N. Virginia [us-east-1] Deployment Test'
-#     baseImageName: w19d-15-0
-#     stackName: N-Virginia-Preview
+- template: templates/hirender_stage.yml
+  parameters:
+    extraSteps: true
+    stageName: N_Virginia_Preview_w19d_15_0
+    stagedisplayName: N. Virginia Preview w19d-15-0
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_NVirginia_Deployment_Test 
+    jobDisplayname: 'Agent job : N. Virginia [us-east-1] Deployment Test'
+    baseImageName: w19d-15-0
+    stackName: N-Virginia-Preview
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -488,16 +503,16 @@ stages:
 #     baseImageName: w19d-14-2
 #     stackName: Sydney-Prod
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: Ohio_Prod_w19d_15_0
-#     stagedisplayName: Ohio Prod w19d-15-0
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_US_useast2_Deployment_Test  
-#     jobDisplayname: 'Agent job : US [us-east-2] Deployment Test'
-#     baseImageName: w19d-15-0
-#     stackName: Ohio-Prod
+- template: templates/hirender_stage.yml
+  parameters:
+    extraSteps: true
+    stageName: Ohio_Prod_w19d_15_0
+    stagedisplayName: Ohio Prod w19d-15-0
+    dependsOn: MergeAndTag
+    jobName: AgentJob_US_useast2_Deployment_Test  
+    jobDisplayname: 'Agent job : US [us-east-2] Deployment Test'
+    baseImageName: w19d-15-0
+    stackName: Ohio-Prod
 
 # - template: templates/hirender_stage.yml
 #   parameters:

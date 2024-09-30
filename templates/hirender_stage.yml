@@ -81,6 +81,7 @@ stages:
     jobs:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
+        timeoutInMinutes: 0
         pool: 
           vmImage: ${{ parameters.vmImage }}
         steps:
