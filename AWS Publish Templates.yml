@@ -123,35 +123,35 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSSmallShoeSizew16d_14_2'
-#     stagedisplayName: AUS Small Shoe Size w16d-14-2
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w16d-14-2
-#     stackName: AUS-Small
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSSmallShoeSizew16d_14_2'
+    stagedisplayName: AUS Small Shoe Size w16d-14-2
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_SmallStack
+    jobDisplayname: 'Agent job: Small Stack'
+    baseImageName: w16d-14-2
+    stackName: AUS-Small
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSTestShoeSizew16d_15_0'
-#     stagedisplayName: 'AUS Test Shoe Size w16d-15-0'
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_TestStack
-#     jobDisplayname: 'Agent job: Test Stack'
-#     baseImageName: w16d-15-0
-#     stackName: AUS-Test
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSTestShoeSizew16d_15_0'
+    stagedisplayName: 'AUS Test Shoe Size w16d-15-0'
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_TestStack
+    jobDisplayname: 'Agent job: Test Stack'
+    baseImageName: w16d-15-0
+    stackName: AUS-Test
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSDevShoeSizew19d_14_2'
-#     stagedisplayName: 'AUS Dev Shoe Size w19d-14-2s'
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_DevStack
-#     jobDisplayname: 'Agent job: Dev Stack'
-#     baseImageName: w19d-14-2s
-#     stackName: AUS-Dev
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSDevShoeSizew19d_14_2'
+    stagedisplayName: 'AUS Dev Shoe Size w19d-14-2s'
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_DevStack
+    jobDisplayname: 'Agent job: Dev Stack'
+    baseImageName: w19d-14-2s
+    stackName: AUS-Dev
 
 - template: templates/hirender_stage.yml
   parameters:
@@ -163,47 +163,47 @@ stages:
     baseImageName: w19d-15-0
     stackName: AUS-VPC
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSMediumShoeSizew16d_14_2j'
-#     stagedisplayName: AUS Medium Shoe Size w16d-14-2j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_MediumStack
-#     jobDisplayname: 'Agent job: Medium Stack'
-#     baseImageName: w16d-14-2j
-#     stackName: AUS-Medium
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSMediumShoeSizew16d_14_2j'
+    stagedisplayName: AUS Medium Shoe Size w16d-14-2j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_MediumStack
+    jobDisplayname: 'Agent job: Medium Stack'
+    baseImageName: w16d-14-2j
+    stackName: AUS-Medium
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSLargeShoeSizew16d_15_0j'
-#     stagedisplayName: AUS Large Shoe Size w16d-15-0j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_LargeStack
-#     jobDisplayname: 'Agent job: Large Stack'
-#     baseImageName: w16d-15-0j
-#     stackName: AUS-Large
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSLargeShoeSizew16d_15_0j'
+    stagedisplayName: AUS Large Shoe Size w16d-15-0j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_LargeStack
+    jobDisplayname: 'Agent job: Large Stack'
+    baseImageName: w16d-15-0j
+    stackName: AUS-Large
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSUpdateScriptsFALSEw19d_14_2j'
-#     stagedisplayName: AUS Update Scripts FALSE w19d-14-2j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_UpdateFalseStack
-#     jobDisplayname: 'Agent job: Update False Stack'
-#     baseImageName: w19d-14-2j
-#     stackName: AUS-UpdateScripts
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSUpdateScriptsFALSEw19d_14_2j'
+    stagedisplayName: AUS Update Scripts FALSE w19d-14-2j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_UpdateFalseStack
+    jobDisplayname: 'Agent job: Update False Stack'
+    baseImageName: w19d-14-2j
+    stackName: AUS-UpdateScripts
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSJPNVPCTestsw19d_15_0j'
-#     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_VpcStack
-#     jobDisplayname: 'Agent job: Vpc Stack'
-#     baseImageName: w19d-15-0j
-#     stackName: AUS-JPN-VPC
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSJPNVPCTestsw19d_15_0j'
+    stagedisplayName: AUS JPN VPC Tests w19d-15-0j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_VpcStack
+    jobDisplayname: 'Agent job: Vpc Stack'
+    baseImageName: w19d-15-0j
+    stackName: AUS-JPN-VPC
 
-# - stage: MergeToMarketplaceAndUpload
+# - stage: MergeToMarketplace&Upload
 #   displayName: Merge To Marketplace & Upload
 #   dependsOn: 
 #     - AUSSmallShoeSizew16d_14_2
@@ -251,7 +251,7 @@ stages:
   parameters:
     stageName: 'ValidateTemplateURLs'
     stagedisplayName: Validate Template URLs
-    dependsOn: MergeToMarketplaceAndUpload
+    dependsOn: MergeToMarketplace&Upload
     jobName: AgentJob_SmallStack
     jobDisplayname: 'Agent job: Small Stack'
     baseImageName: w19d-15-0
