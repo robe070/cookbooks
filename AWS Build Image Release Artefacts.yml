@@ -135,7 +135,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-14-2)' -version 'w16d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w16d-14-2)' -version 'w16d-14-2'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -270,7 +270,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-15-0)' -version 'w16d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w16d-15-0)' -version 'w16d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -408,7 +408,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -505,7 +505,7 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19150$(VersionText-w19d-15-0)-$(Build.BuildId)
+        TestVmName:1 T9150$(VersionText-w19d-15-0)-$(Build.BuildId)
         SG: w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
@@ -546,7 +546,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -681,7 +681,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -816,7 +816,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-14-2j)' -version 'w19d-14-2j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w19d-14-2j)' -version 'w19d-14-2j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -951,7 +951,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-14-2j)' -version 'w16d-14-2j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w16d-14-2j)' -version 'w16d-14-2j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -1088,7 +1088,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-15-0j)' -version 'w16d-15-0j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w16d-15-0j)' -version 'w16d-15-0j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -1223,7 +1223,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-14-2)' -version 'w22d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w22d-14-2)' -version 'w22d-14-2'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -1361,7 +1361,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -1496,7 +1496,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -1631,7 +1631,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-14-2j)' -version 'w22d-14-2j' -DeleteAMI $true
+      arguments: -versionText '$(VersionText-w22d-14-2j)' -version 'w22d-14-2j'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
