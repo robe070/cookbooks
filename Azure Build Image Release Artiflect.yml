@@ -135,7 +135,7 @@ jobs:
     env:
         TestImageName: w22d-14-2-$(VersionText-w22d-14-2)
         TestCloudName: Azure
-        TestVmName: Test2214$(VersionText-w22d-14-2)
+        TestVmName: T2214$(Build.BuildId) #Test2214$(VersionText-w22d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -299,7 +299,7 @@ jobs:
     env:
         TestImageName: w22d-15-0-$(VersionText-w22d-15-0)
         TestCloudName: Azure
-        TestVmName: Test2215$(VersionText-w22d-15-0)
+        TestVmName: T2215$(Build.BuildId) #Test2215$(VersionText-w22d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -462,7 +462,7 @@ jobs:
     env:
         TestImageName: w22d-14-2j-$(VersionText-w22d-14-2j)
         TestCloudName: Azure
-        TestVmName: Test2214j$(VersionText-w22d-14-2j)
+        TestVmName: T2214j$(Build.BuildId) #Test2214j$(VersionText-w22d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -625,7 +625,7 @@ jobs:
     env:
         TestImageName: w22d-15-0j-$(VersionText-w22d-15-0j)
         TestCloudName: Azure
-        TestVmName: Test2215j$(VersionText-w22d-15-0j)
+        TestVmName: T2215j$(Build.BuildId) #Test2215j$(VersionText-w22d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -788,7 +788,7 @@ jobs:
     env:
         TestImageName: w16d-14-2-$(VersionText-w16d-14-2)
         TestCloudName: Azure
-        TestVmName: T1614$(VersionText-w16d-14-2)
+        TestVmName: T1614$(Build.BuildId) #T1614$(VersionText-w16d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -951,7 +951,7 @@ jobs:
     env:
         TestImageName: w16d-15-0-$(VersionText-w16d-15-0)
         TestCloudName: Azure
-        TestVmName: T1615$(VersionText-w16d-15-0)
+        TestVmName: T1615$(Build.BuildId) #T1615$(VersionText-w16d-15-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1117,7 +1117,7 @@ jobs:
     env:
         TestImageName: w19d-14-2-$(VersionText-w19d-14-2)
         TestCloudName: Azure
-        TestVmName: T1914$(VersionText-w19d-14-2)
+        TestVmName: T1914$(Build.BuildId) #T1914$(VersionText-w19d-14-2)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1429,7 +1429,7 @@ jobs:
     env:
         TestImageName: w16d-14-2j-$(VersionText-w16d-14-2j)
         TestCloudName: Azure
-        TestVmName: T1614j$(VersionText-w16d-14-2j)
+        TestVmName: T1614j$(Build.BuildId) #T1614j$(VersionText-w16d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1592,7 +1592,7 @@ jobs:
     env:
         TestImageName: w16d-15-0j-$(VersionText-w16d-15-0j)
         TestCloudName: Azure
-        TestVmName: T1615j$(VersionText-w16d-15-0j)
+        TestVmName: T1615j$(Build.BuildId) #T1615j$(VersionText-w16d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1756,7 +1756,7 @@ jobs:
     env:
         TestImageName: w19d-14-2j-$(VersionText-w19d-14-2j)
         TestCloudName: Azure
-        TestVmName: T1914j$(VersionText-w19d-14-2j)
+        TestVmName: T1914j$(Build.BuildId) #T1914j$(VersionText-w19d-14-2j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -1919,7 +1919,7 @@ jobs:
     env:
         TestImageName: w19d-15-0j-$(VersionText-w19d-15-0j)
         TestCloudName: Azure
-        TestVmName: T1915j$(VersionText-w19d-15-0j)
+        TestVmName: T1915j$(Build.BuildId) #T1915j$(VersionText-w19d-15-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
