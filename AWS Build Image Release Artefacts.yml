@@ -229,7 +229,7 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16150$(VersionText-w16d-15-0)-$(Build.BuildId)
+        TestVmName: T16150$(VersionText-w16d-15-0)-$(Build.BuildId)
         SG: w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
@@ -505,7 +505,7 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName:1 T9150$(VersionText-w19d-15-0)-$(Build.BuildId)
+        TestVmName: T9150$(VersionText-w19d-15-0)-$(Build.BuildId)
         SG: w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
