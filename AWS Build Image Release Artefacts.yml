@@ -74,7 +74,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -94,11 +94,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16142$(VersionText-w16d-14-2)$(Build.BuildNumber)
-        SG: w16d-14-2-$(VersionText-w16d-14-2)$(Build.BuildNumber)
+        TestVmName: Test16142$(VersionText-w16d-14-2)$(Build.BuildId)
+        SG: w16d-14-2-$(VersionText-w16d-14-2)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-14-2-$(VersionText-w16d-14-2)$(Build.BuildNumber)
+        VersionText: w16d-14-2-$(VersionText-w16d-14-2)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -128,7 +128,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
-      ArtifactName: aws-w16d-14-2
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
@@ -210,7 +210,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -229,11 +229,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16150$(VersionText-w16d-15-0)$(Build.BuildNumber)
-        SG: w16d-15-0-$(VersionText-w16d-15-0)$(Build.BuildNumber)
+        TestVmName: Test16150$(VersionText-w16d-15-0)$(Build.BuildId)
+        SG: w16d-15-0-$(VersionText-w16d-15-0)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-15-0-$(VersionText-w16d-15-0)$(Build.BuildNumber)
+        VersionText: w16d-15-0-$(VersionText-w16d-15-0)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -263,7 +263,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0.txt
-      ArtifactName: aws-w16d-15-0
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance  '
@@ -348,7 +348,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -367,11 +367,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildNumber)
-        SG: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        TestVmName: Test19142$(VersionText-w19d-14-2)$(Build.BuildId)
+        SG: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildNumber)
+        VersionText: w19d-14-2-$(VersionText-w19d-14-2)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -401,7 +401,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2.txt
-      ArtifactName: aws-w19d-14-2
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance  '
@@ -486,7 +486,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -505,11 +505,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19150$(VersionText-w19d-15-0)$(Build.BuildNumber)
-        SG: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        TestVmName: T19150$(VersionText-w19d-15-0)$(Build.BuildId)
+        SG: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        VersionText: w19d-15-0-$(VersionText-w19d-15-0)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -539,7 +539,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0.txt
-      ArtifactName: aws-w19d-15-0
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
@@ -621,7 +621,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -640,11 +640,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19150j$(VersionText-w19d-15-0j)$(Build.BuildNumber)
-        SG: w19d-15-0j-$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test19150j$(VersionText-w19d-15-0j)$(Build.BuildId)
+        SG: w19d-15-0j-$(VersionText-w19d-15-0j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0j-$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+        VersionText: w19d-15-0j-$(VersionText-w19d-15-0j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -674,7 +674,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0j.txt
-      ArtifactName: aws-w19d-15-0j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
@@ -756,7 +756,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -775,11 +775,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test19142j$(VersionText-w19d-14-2j)$(Build.BuildNumber)
-        SG: w19d-14-2j-$(VersionText-w19d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test19142j$(VersionText-w19d-14-2j)$(Build.BuildId)
+        SG: w19d-14-2j-$(VersionText-w19d-14-2j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-14-2j-$(VersionText-w19d-15-0j)$(Build.BuildNumber)
+        VersionText: w19d-14-2j-$(VersionText-w19d-15-0j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -809,7 +809,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2j.txt
-      ArtifactName: aws-w19d-14-2j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
@@ -891,7 +891,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -910,11 +910,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16142j$(VersionText-w16d-14-2j)$(Build.BuildNumber)
-        SG: w16d-14-2j-$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test16142j$(VersionText-w16d-14-2j)$(Build.BuildId)
+        SG: w16d-14-2j-$(VersionText-w16d-14-2j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-14-2j-$(VersionText-w16d-14-2j)$(Build.BuildNumber)
+        VersionText: w16d-14-2j-$(VersionText-w16d-14-2j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -944,7 +944,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
-      ArtifactName: aws-w16d-14-2j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
@@ -1028,7 +1028,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1047,11 +1047,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test16150j$(VersionText-w16d-15-0j)$(Build.BuildNumber)
-        SG: w16d-15-0j-$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test16150j$(VersionText-w16d-15-0j)$(Build.BuildId)
+        SG: w16d-15-0j-$(VersionText-w16d-15-0j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-15-0j-$(VersionText-w16d-15-0j)$(Build.BuildNumber)
+        VersionText: w16d-15-0j-$(VersionText-w16d-15-0j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1081,7 +1081,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0j.txt
-      ArtifactName: aws-w16d-15-0j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
@@ -1163,7 +1163,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1182,11 +1182,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22142$(VersionText-w22d-14-2)$(Build.BuildNumber)
-        SG: w22d-14-2-$(VersionText-w22d-14-2)$(Build.BuildNumber)
+        TestVmName: Test22142$(VersionText-w22d-14-2)$(Build.BuildId)
+        SG: w22d-14-2-$(VersionText-w22d-14-2)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-14-2-$(VersionText-w22d-14-2)$(Build.BuildNumber)
+        VersionText: w22d-14-2-$(VersionText-w22d-14-2)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1216,7 +1216,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
-      ArtifactName: aws-w22d-14-2
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance  '
@@ -1301,7 +1301,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1320,11 +1320,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22150$(VersionText-w22d-15-0)$(Build.BuildNumber)
-        SG: w22d-15-0-$(VersionText-w22d-15-0)$(Build.BuildNumber)
+        TestVmName: Test22150$(VersionText-w22d-15-0)$(Build.BuildId)
+        SG: w22d-15-0-$(VersionText-w22d-15-0)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-15-0-$(VersionText-w22d-15-0)$(Build.BuildNumber)
+        VersionText: w22d-15-0-$(VersionText-w22d-15-0)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1354,7 +1354,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
-      ArtifactName: aws-w22d-15-0
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: 'Deleting Security group and Instance '
@@ -1436,7 +1436,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)$(Build.BuildNumber)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1455,11 +1455,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22150j$(VersionText-w22d-15-0j)$(Build.BuildNumber)
-        SG: w22d-15-0j-$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+        TestVmName: Test22150j$(VersionText-w22d-15-0j)$(Build.BuildId)
+        SG: w22d-15-0j-$(VersionText-w22d-15-0j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-15-0j-$(VersionText-w22d-15-0j)$(Build.BuildNumber)
+        VersionText: w22d-15-0j-$(VersionText-w22d-15-0j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1489,7 +1489,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0j.txt
-      ArtifactName: aws-w22d-15-0j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
@@ -1571,7 +1571,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)$(Build.BuildNumber)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1590,11 +1590,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: Test22142j$(VersionText-w22d-14-2j)$(Build.BuildNumber)
-        SG: w22d-14-2j-$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+        TestVmName: Test22142j$(VersionText-w22d-14-2j)$(Build.BuildId)
+        SG: w22d-14-2j-$(VersionText-w22d-14-2j)$(Build.BuildId)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-14-2j-$(VersionText-w22d-14-2j)$(Build.BuildNumber)
+        VersionText: w22d-14-2j-$(VersionText-w22d-14-2j)$(Build.BuildId)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1624,7 +1624,7 @@ jobs:
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2j.txt
-      ArtifactName: aws-w22d-14-2j
+      ArtifactName: aws
       FileCopyOptions: ''
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
     displayName: Deleting Security group and Instance
