@@ -70,6 +70,10 @@ parameters:
   - name: vmImage
     type: string
     default: windows-2022
+  - name: baseImageName
+    type: string
+    default: none
+
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -94,7 +98,7 @@ stages:
             inputs:
               awsCredentials: AzureDevOps
               regionName: 'ap-southeast-2'
-              arguments: '-BaseImageName ''w16d-14-2'' -stackname ''AUS-Small'''
+              arguments: '-BaseImageName "$(baseImageName)" -stackname "$(stackName)"'
               #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
 

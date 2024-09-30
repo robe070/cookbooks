@@ -154,6 +154,9 @@ stages:
     dependsOn: S3PatchPAAS
     jobName: AgentJob_VpcStack
     jobDisplayname: 'Agent job: Vpc Stack'
+    baseImageName: w19d-15-0
+    stackName: AUS-Small
+    
 
 # - template: templates/hirender_stage.yml
 #   parameters:
