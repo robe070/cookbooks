@@ -74,7 +74,6 @@ parameters:
     type: string
     default: none
 
-
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: ${{ parameters.dependsOn }}
@@ -98,7 +97,7 @@ stages:
             inputs:
               awsCredentials: AzureDevOps
               regionName: 'ap-southeast-2'
-              arguments: '-BaseImageName "$(baseImageName)" -stackname "$(stackName)"'
+              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''{{parameters.stackName}}'''
               #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
 

@@ -155,8 +155,7 @@ stages:
     jobName: AgentJob_VpcStack
     jobDisplayname: 'Agent job: Vpc Stack'
     baseImageName: w19d-15-0
-    stackName: AUS-Small
-    
+    stackName: Aus-Small
 
 # - template: templates/hirender_stage.yml
 #   parameters:
