@@ -53,8 +53,8 @@ resources:
     #   ref: feature/AWS-Cloud-Account-Id-Image-Release
     #   endpoint: priyadishah
     - repository: _robe070_cookbooks
-      endpoint: priyadishah
       type: github
+      endpoint: priyadishah
       name: robe070/cookbooks
       ref: debug/paas
 
