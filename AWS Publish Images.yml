@@ -74,6 +74,7 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
+        
         - checkout: _lansa_aws-templates
           displayName: priyadishah/aws-templates-md
           path: "s/_lansa_aws-templates"
