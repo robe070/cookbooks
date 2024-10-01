@@ -17,6 +17,22 @@ variables:
     value: BakingDP-ImageRelease
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
+  # - name: GitAwsTemplateMarketPlaceBranch-del
+  #   value: support/scalable_marketplace
+  # - name: GitAwsTemplatescalableBranch-del
+  #   value: support/scalable
+  # - name: GitCookBooksGitHubName-x
+  #   value: github.com/robe070/cookbooks
+  # - name: GitLansaAwsTemplatesGitHubName-x
+  #   value: github.com/lansa/aws-templates
+  # - name: GitLansaAwsTemplatesPAT-x
+  #   value: ccc
+  # - name: GitLansaAwsTemplatesRepoName-x
+  #   value: _lansa_aws-templates-mp
+  # - name: GitRepoUserEmail-x
+  #   value: lansacloud@lansa.com.au
+  # - name: GitRepoUserName-x
+  #   value: LansaCloud
 
 resources:
   pipelines:
@@ -26,16 +42,21 @@ resources:
       source: 'Build Image Release Artefacts  3.0'
 
   repositories:
-    - repository: _LansaAWSTemplates
+    - repository: _lansa_aws-templates
       name: priyadishah/aws-templates-md
       type: github
       ref: support/scalable
       endpoint: priyadishah
-    - repository: _priyadishahCookbooks
-      name: priyadishah/cookbooks
-      type: github
-      ref: feature/AWS-Cloud-Account-Id-Image-Release
+    # - repository: _priyadishahCookbooks
+    #   name: priyadishah/cookbooks
+    #   type: github
+    #   ref: feature/AWS-Cloud-Account-Id-Image-Release
+    #   endpoint: priyadishah
+    - repository: _robe070_cookbooks
       endpoint: priyadishah
+      type: github
+      name: robe070/cookbooks
+      ref: debug/paas
 
 pool:
   vmImage: windows-2022
