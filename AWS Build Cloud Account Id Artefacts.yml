@@ -10,7 +10,7 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: Windows-2019-AMI
-    value: LANSA Scalable License  w19d-15*
+    value: LANSA Scalable License  w19d-15-$(VersionText-w19d-15-0)*
 
 jobs:
 - job: Job_2
