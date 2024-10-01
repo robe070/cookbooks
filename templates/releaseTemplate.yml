@@ -56,11 +56,14 @@ stages:
 
       - checkout: _lansa_aws-templates
         displayName: Checkout aws-templates-md
+        path: "s/_lansa_aws-templates"
 
       # - checkout: _priyadishahCookbooks
       #   displayName: Checkout cookbooks
 
       - checkout: _robe070_cookbooks
+        displayName: Rob cookbooks
+        path: "s/_robe070_cookbooks"
 
       - task: AWSPowerShellModuleScript@1
         name: Gate
