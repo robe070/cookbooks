@@ -43,10 +43,10 @@ resources:
 
   repositories:
     - repository: _lansa_aws-templates
-      name: priyadishah/aws-templates-md
       type: github
-      ref: support/scalable
       endpoint: priyadishah
+      name: priyadishah/aws-templates-md
+      ref: support/scalable
     # - repository: _priyadishahCookbooks
     #   name: priyadishah/cookbooks
     #   type: github
