@@ -672,7 +672,6 @@ $jsonObject = @"
             # Ensure last exit code is 0. (exit by itself will terminate the remote session)
             cmd /c exit 0
         }
-
         # Load up some required tools into remote environment
 
         # Load basic utils before running anything
@@ -682,8 +681,42 @@ $jsonObject = @"
         if ( $InstallBaseSoftware ) {
 
             # Install Chocolatey
-
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
+
+            if ( $Cloud -eq 'Azure' ) {
+                Write-Host("$(Log-Date) Azure requires a reboot after installing choco. Rebooting now..")
+
+                Execute-RemoteBlock $Script:session {
+                    Restart-Computer -force
+                }
+                Start-Sleep -Seconds 10
+
+                Write-Host "$(Log-Date) Reconnecting session..."
+                if ( $Script:session ) { Remove-PSSession $Script:session | Out-Default | Write-Host }
+
+                Connect-RemoteSession | Out-Default | Write-Host
+                Invoke-Command -Session $Script:session {Set-ExecutionPolicy Unrestricted -Scope CurrentUser}
+                $remotelastexitcode = invoke-command  -Session $Script:session -ScriptBlock { $lastexitcode}
+                if ( $remotelastexitcode -and $remotelastexitcode -ne 0 ) {
+                    Write-Error "LastExitCode: $remotelastexitcode"
+                    throw 1
+                }
+                Execute-RemoteInit | Out-Default | Write-Host
+                Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\dot-CommonTools.ps1"
+                Write-host "$(Log-Date) Rebooted the VM!"
+                Execute-RemoteBlock $Script:session {
+
+                    Write-Host( "$(Log-Date) Path before changing it: $ENV:Path ")
+
+                   Add-DirectoryToEnvPathOnce -Directory "C:\ProgramData\chocolatey\bin\" | Out-Default | Write-Host
+
+                    Write-Host( "$(Log-Date) Path after changing it: $ENV:Path")
+
+                   choco | Out-Default | Write-Host
+
+                 }
+            }
+
 
             # Then we install git using chocolatey and pull down the rest of the files from git
 
@@ -691,10 +724,18 @@ $jsonObject = @"
 
             Execute-RemoteBlock $Script:session { "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Out-Default | Write-Host }
 
+
             # Load utilities into Remote Session.
             # Requires the git repo to be pulled down so the scripts are present and the script variables initialised with Init-Baking-Vars.ps1.
             # Reflect local variables into remote session
             Execute-RemoteInitPostGit
+
+            if ( $Cloud -eq 'Azure' ) {
+                . "$script:IncludeDir\Init-Baking-Vars.ps1"
+                . "$script:IncludeDir\Init-Baking-Includes.ps1"
+                . "$script:IncludeDir\dot-CommonTools.ps1"
+            }
+
 
             # Upload files that are not in Git. Should be limited to secure files that must not be in Git.
             # Git is a far faster mechansim for transferring files than using RemotePS.
@@ -1045,25 +1086,25 @@ $jsonObject = @"
                 }
                Invoke-Command -Session $Script:session {
                   # Set the path you want to check
-                  $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts" 
- 
+                  $pathToCheck = "$ENV:ProgramData\Amazon\EC2-Windows\Launch\Scripts"
+
                   # Check if the path exists
                   Write-Host("$(Log-Date) Checking if $pathToCheck exists")
                   if (Test-Path -Path $pathToCheck) {
                      Write-Host( "$(Log-Date) EC2-Launch path exists")
                      Write-Host "Executing Windows 2016 & 2019 sysprep"
- 
+
                      cd $pathToCheck | Out-Default | Write-Host
                      ./InitializeInstance.ps1 -Schedule | Out-Default | Write-Host
                      ./SysprepInstance.ps1 | Out-Default | Write-Host
- 
+
                   } else {
                      $pathToCheck = "$ENV:ProgramFiles\Amazon\EC2Launch"
                      Write-Host("$(Log-Date) Checking if $pathToCheck exists")
                      if (Test-Path -Path $pathToCheck) {
                         Write-Host( "$(Log-Date) EC2-Launch path exists")
                         Write-Host "Executing Windows 2022 sysprep"
- 
+
                         cd $pathToCheck | Out-Default | Write-Host
                         ./ec2launch.exe sysprep -c -s | Out-Default | Write-Host
                      } else {
@@ -1204,6 +1245,7 @@ $jsonObject = @"
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
 
         New-EC2Tag -Resources $amiID -Tags @{ Key = "Name" ; Value = $amiName} | Out-Default
+        New-EC2Tag -Resources $amiID -Tags @{ Key = "Environment" ; Value = "Lansa-Prod"} | Out-Default
 
         while ( $true )
         {
