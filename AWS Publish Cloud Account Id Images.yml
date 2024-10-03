@@ -62,7 +62,7 @@ pool:
   vmImage: windows-2022
 
 stages:
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v15idold'
     stageDisplayname: 'v15-id-old'
@@ -71,7 +71,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V15-OLD'], 'true'), eq(variables['Build-all'], 'true'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v13sp2idnew'
     stageDisplayname: 'v13sp2-id-new'
@@ -80,7 +80,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V13SP2-NEW'], 'true'), eq(variables['Build-all'], 'true'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v14sp2idnew'
     stageDisplayname: 'v14sp2-id-new'
@@ -89,7 +89,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V14SP2-NEW'], 'True'), eq(variables['Build-all'], 'True'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v15idnew'
     stageDisplayname: 'v15-id-new'
@@ -98,7 +98,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V15-NEW'], 'True'), eq(variables['Build-all'], 'True'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v13sp2scalable'
     stageDisplayname: 'v13sp2-scalable'
@@ -107,7 +107,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V13SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v14sp2scalable'
     stageDisplayname: 'v14sp2-scalable'
@@ -116,7 +116,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
-- template: templates/releaseTemplate.yml
+- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
   parameters:
     stageName: 'v15scalable'
     stageDisplayname: 'v15-scalable'
