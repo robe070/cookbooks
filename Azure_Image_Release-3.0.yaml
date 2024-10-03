@@ -1,148 +1,83 @@
-variables:
-  - group : "Template Parameters"
-  - group : "SKU Versions"
-  - group : "Image Names"
-  - group : "Git Repos"
-  - name : Build-all
-    value : true
-  - name : Build-w12r2d-14-2
-    value : false
-  - name : Build-w12r2d-15-0
-    value: false
-  - name : Build-w16d-14-2
-    value : false
-  - name : Build-w16d-14-2j
-    value : False
-  - name : Build-w16d-15-0
-    value : false
-  - name : Build-w16d-15-0j
-    value : False
-  - name : Build-w19d-14-2
-    value : false
-  - name : Build-w19d-14-2j
-    value : false
-  - name : Build-w19d-15-0
-    value : false
-  - name : Build-w19d-15-0j
-    value : True
-  - name : CookbooksSource
-    value : $(System.DefaultWorkingDirectory)\cookbooks
-  - name : jpnLanguage
-    value : JPN
-  - name : ResourceGroup
-    value : BakingDP-Custom-w12r2d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Custom-w12r2d-15-0
-  - name : ResourceGroup
-    value: BakingDP-Custom-w16d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Custom-w16d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Custom-w19d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Custom-w19d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Custom-w16d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Custom-w16d-15-0j
-  - name : ResourceGroup
-    value : BakingDP-Custom-w19d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Custom-w19d-15-0j
-  - name : ResourceGroup
-    value : BakingDP-Preview-AE-w12r2d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-UE-w12r2d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-FC-w12r2d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-AE-w12r2d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-UE-w12r2d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-FC-w12r2d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-EW-w16d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-UW-w16d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-SN-w16d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-BS-w19d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-FC-w19d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-IC-w16d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Preview-UW-w19d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Preview-JW-w16d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Preview-KC-w16d-15-0j
-  - name : ResourceGroup
-    value : BakingDP-Preview-NC-w19d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Preview-GW-w19d-15-0j
-  - name : ResourceGroup
-    value : BakingDP-Prod-UE-w12r2d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Prod-AE-w12r2d-15-0
-  - name : ResourceGroup
-    value : BBakingDP-Prod-EW-w16d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Prod-AE-w16d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Prod-US-w19d-14-2
-  - name : ResourceGroup
-    value : BakingDP-Prod-SA-w19d-15-0
-  - name : ResourceGroup
-    value : BakingDP-Prod-UC-w16d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Prod-EN-w16d-15-0j
-  - name : ResourceGroup
-    value : BakingDP-Prod-WI-w19d-14-2j
-  - name : ResourceGroup
-    value : BakingDP-Prod-SN-w19d-15-0j
-  - name : ResourceGroup
-    value : BakingDP
-  - name : SubscriptionId
-    value : 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
-  
+# File: azure-pipelines.yml
+trigger: none
+
 resources:
   pipelines:
-  - pipeline: '_Lansa Images - Cookbooks'
-    source: 'Build Image Release Artefacts 3.0'
-    project: 'Lansa Azure Scalable License Images'
-    branch: Feature/Image-Release-Debjit
+    - pipeline: _BuildImageReleaseArtefacts
+      source: Build Image Release Artefacts 3.0
   repositories:
-  - repository: '_lansa_azure-quickstart-templates'
-    type: github
-    endpoint: debjitbhowmik807
-    name: 'debjitbhowmik807/cookbooks'
-  - repository: '_lansa_azure-quickstart-templates-celestial'
-    type: github
-    endpoint: debjitbhowmik807
-    name: 'CelestialSystem/azure-quickstart-templates'
+    - repository: _lansa_azure_quickstart_templates
+      type: github
+      # endpoint: priyadishah
+      name: lansa/azure-quickstart-templates
+      ref: support/scalable
+    - repository: _CelestialSystem_azure_quickstart_templates
+      type: github
+      # endpoint: priyadishah
+      name: CelestialSystem/azure-quickstart-templates
+      ref: feature/139
+    - repository: _robe070_cookbooks
+      type: github
+      # endpoint: priyadishah
+      name: robe070/cookbooks
+      ref: debug/paas
+
+variables:
+  - group: Template Parameters
+  - group: SKU Versions
+  - group: Image Names
+  - group: Azure Logins
+  - group: Git Repos
 
 stages:
-- template: templates/stages-template.yml # Template reference
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d142Aus'
     stagedisplayName: 'w12r2d142 Aus'
     jobName: 'w12r2d142Aus'
- 
-- template: templates/stages-template.yml # Template reference
+    jobDisplayname: 'w12r2d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d150Aus'
     stagedisplayName: 'w12r2d150 Aus'
     jobName: 'w12r2d150Aus'
- 
+    jobDisplayname: 'w12r2d150 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142Aus'
+    stagedisplayName: 'w16d142 Aus'
+    jobName: 'w16d142Aus'
+    jobDisplayname: 'w16d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150Aus'
+    stagedisplayName: 'w16d150 Aus'
+    jobName: 'w16d150Aus'
+    jobDisplayname: 'w16d150 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142Aus'
+    stagedisplayName: 'w19d142 Aus' 
+    jobName: 'w19d142Aus'
+    jobDisplayname: 'w19d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
 - stage: 'PublishPreviewImages'
   displayName: 'Publish Preview Images'
-  dependsOn:
-    - 'w12r2d150Aus'
-    - 'w12r2d142Aus'
-  jobs:
+  dependsOn: 
+    - w12r2d150Aus
+    - w12r2d142Aus
+    - w16d142Aus
+    - w16d150Aus
+  jobs: 
   - job: 'AgentlessJob'
     displayName: 'Agentless job'
     pool: server
@@ -157,57 +92,63 @@ stages:
           4. Increment the Version number in the Image Build Pipeline
           5. Increment the Test Version Preview Variable (TestVersionPrev<SKU>) in the "SKU Version" Variable Group.
           6. Only now the pipeline may be continued to test the preview images
- 
+
 - stage: 'MergePatch_PAASCookbooks'
   displayName: 'Merge patch/paas cookbooks'
-  dependsOn: 'PublishPreviewImages'
-  jobs:
+  dependsOn: PublishPreviewImages
+  jobs: 
   - job: 'MergePatch_PAASCookbooks'
     displayName: 'Merge patch/PAAS cookbooks'
     steps:
-      #Your build pipeline references an undefined variable named ‘CookbooksBranchPreview’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitRobe070CookbooksPAT’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitRobe070CookbooksGitHubName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitUserEmail’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitUserName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘CookbooksSourceAlias’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (robe070/cookbooks)'
         inputs:
           targetType: filePath
-          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(CookbooksBranchPreview)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
- 
-        #Your build pipeline references an undefined variable named ‘CookbooksSourceAlias’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-        #Your build pipeline references an undefined variable named ‘CookbooksBranch’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-        #Your build pipeline references an undefined variable named ‘CookbooksBranchPreview’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
         inputs:
           targetType: filePath
-          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+          filePath: ' $(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
           arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)'''
-     
-- template: templates/stages-template.yml
+      
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d142AusEastPreview'
     stagedisplayName: 'w12r2d142 Aus East Preview'
-    dependsOn: 'MergePatch_PAASCookbooks'
     jobName: 'w12r2d142AusEastPreview'
- 
-- template: templates/stages-template.yml
+    jobDisplayname: 'w12r2d142 Aus East Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d142USEastPreview'
     stagedisplayName: 'w12r2d142 US East Preview'
-    dependsOn: 'MergePatch_PAASCookbooks'
     jobName: 'w12r2d142USEastPreview'
- 
+    jobDisplayname: 'w12r2d142 US East Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w12r2d142FranceCentralPreview'
+    stagedisplayName: 'w12r2d142 France Central Preview'
+    jobName: 'w12r2d142FranceCentralPreview'
+    jobDisplayname: 'w12r2d142 France Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
 - stage: 'GoLive'
   displayName: 'Go Live'
-  dependsOn:
-    - 'w12r2d142AusEastPreview'
-    - 'w12r2d142USEastPreview'
-  jobs:
+  dependsOn: 
+    - w12r2d142AusEastPreview
+    - w12r2d142USEastPreview
+    - w12r2d142FranceCentralPreview
+  jobs: 
   - job: 'AgentlessJob'
     displayName: 'Agentless job'
     pool: server
@@ -222,77 +163,75 @@ stages:
           4. Increment the Version number in the Image Build Pipeline
           5. Increment the Test Version Preview Variable (TestVersionPrev<SKU>) in the "SKU Version" Variable Group.
           6. Only now the pipeline may be continued to test the preview images
- 
+
 - stage: 'CookbooksMergeAndTag'
   displayName: 'Cookbooks Merge & Tag'
   dependsOn: 'GoLive'
-  jobs:
+  jobs: 
   - job: 'CookbooksMergeAndTag'
+    pool:
+      vmImage: Windows-2022
     displayName: 'Cookbooks Merge & Tag'
     steps:
     - task: PowerShell@2
-      displayName: 'Artifact Check - Set Gate Variable'
+      displayName: 'Artifact Check: Set Gate Variable'
+      name: Gate
       inputs:
         targetType: filePath
-        filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
         arguments: '-Version "w19d-15-0" -osName "Windows Server 2019"'
- 
-      #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘Gate.IsEnabled’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘Gate.ImageUrl’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘Gate.Sku’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
     - powershell: |
         # Print the Gate variables.
         if ( $(Gate.IsEnabled) -eq 'True' ) {
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
-        }
-       
+        } 
       displayName: 'Artifact Check - Output Gate Variable'
- 
-      #Your build pipeline references an undefined variable named ‘CookbooksBranchLive’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitRobe070CookbooksPAT’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitRobe070CookbooksGitHubName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitUserEmail’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘GitUserName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘CookbooksSourceAlias’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
     - task: PowerShell@2
       displayName: 'Write access to Git Repo (robe070/cookbooks)'
       inputs:
         targetType: filePath
-        filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
         arguments: '-GitBranch ''$(CookbooksBranchLive)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
- 
-      #Your build pipeline references an undefined variable named ‘CookbooksSourceAlias’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘CookbooksBranchPreview’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-      #Your build pipeline references an undefined variable named ‘CookbooksBranchLive’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
       inputs:
         targetType: filePath
-        filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
         arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranchPreview)'' -GitTargetBranch ''$(CookbooksBranchLive)'''
- 
-    #Your build pipeline references an undefined variable named ‘CookbooksSourceAlias’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-    #Your build pipeline references an undefined variable named ‘Gate.Sku’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
- 
+
     - task: PowerShell@2
       displayName: 'Tag robe070/cookbooks repo '
       inputs:
         targetType: filePath
-        filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
         arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags  ''AzureImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.Sku)'''
- 
-- template: templates/stages-template.yml
+
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d142USEastProduction'
     stagedisplayName: 'w12r2d142 US East Production'
-    dependsOn: 'CookbooksMergeAndTag'
     jobName: 'w12r2d142USEastProduction'
- 
-- template: templates/stages-template.yml
+    jobDisplayname: 'w12r2d142 US East Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
   parameters:
     stageName: 'w12r2d150AsiaEastProduction'
     stagedisplayName: 'w12r2d150 Asia East Production'
-    dependsOn: 'CookbooksMergeAndTag'
     jobName: 'w12r2d150AsiaEastProduction'
+    jobDisplayname: 'w12r2d150 Asia East Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142EuropeWestProduction'
+    stagedisplayName: 'w16d142 Europe West Production'
+    jobName: 'w16d142EuropeWestProduction'
+    jobDisplayname: 'w16d142 Europe West Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
