@@ -791,16 +791,18 @@ $jsonObject = @"
                 # Check out a potentially different branch
                 Write-Host "Branch: $using:GitBranch"
                 # Check out ORIGINs correct branch so we can then FORCE checkout of potentially an existing, but rebased branch
-                cmd /c git checkout "origin/$using:GitBranch"  '2>&1'
+                cmd /c git branch -d "$using:GitBranch"  '2>&1'
+                Write-host "All branches: $(git branch)"
                 if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
                 {
-                    throw 'Git checkout failed'
+                    throw "Git branch $using:GitBranch failed with LASTEXITCODE $LASTEXITCODE"
                 }
                 # Overwrite the origin's current tree onto the branch we really want - the local branch
                 cmd /c git checkout -B $using:GitBranch  '2>&1'
+                Write-host "All branches after checkout: $(git branch)"
                 if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 128)
                 {
-                    throw 'Git checkout failed'
+                    throw "Git checkout $using:GitBranch failed with LASTEXITCODE $LASTEXITCODE"
                 }
             }
             # $dummy = MessageBox "Check that git repo is the latest. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
