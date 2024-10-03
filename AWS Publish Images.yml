@@ -76,11 +76,11 @@ stages:
         - checkout: self
         
         - checkout: _lansa_aws-templates
-          displayName: priyadishah/aws-templates-md
+          displayName: Checkout Lansa AWS Templates
           path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
-          displayName: Rob cookbooks
+          displayName: Checkout Rob cookbooks
           path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2

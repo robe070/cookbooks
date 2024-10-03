@@ -58,10 +58,12 @@ stages:
       - checkout: self
 
       - checkout: _lansa_aws-templates
-        displayName: Checkout priyadishah/aws-templates-md
+        displayName: Checkout Lansa AWS Templates
+        path: "s/_lansa_aws-templates"
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
+        path: "s/_robe070_cookbooks"
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Copy ami to Us-east-1'

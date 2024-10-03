@@ -58,10 +58,12 @@ stages:
       - checkout: self
 
       - checkout: _lansa_aws-templates
-        displayName: Checkout priyadishah/aws-templates-md
+        displayName: Checkout Lansa AWS Templates
+        path: "s/_lansa_aws-templates"
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
+        path: "s/_robe070_cookbooks"
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
@@ -164,7 +166,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/PrintDeploymentOutput.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -173,7 +175,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/TestCFNDeployment.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -182,7 +184,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/AlternateImageVersion.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -191,7 +193,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

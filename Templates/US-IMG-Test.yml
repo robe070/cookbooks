@@ -58,10 +58,12 @@ stages:
       - checkout: self
 
       - checkout: _lansa_aws-templates
-        displayName: Checkout priyadishah/AWS Templates-md
+        displayName: Checkout Lansa AWS Templates
+        path: "s/_lansa_aws-templates"
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
+        path: "s/_robe070_cookbooks"
 
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'
