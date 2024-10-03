@@ -123,15 +123,15 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSSmallShoeSizew16d_14_2'
-#     stagedisplayName: AUS Small Shoe Size w16d-14-2
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w16d-14-2
-#     stackName: AUS-Small
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSSmallShoeSizew16d_14_2'
+    stagedisplayName: AUS Small Shoe Size w16d-14-2
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_SmallStack
+    jobDisplayname: 'Agent job: Small Stack'
+    baseImageName: w16d-14-2
+    stackName: AUS-Small
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -153,15 +153,15 @@ stages:
 #     baseImageName: w19d-14-2s
 #     stackName: AUS-Dev
 
-- template: templates/hirender_stage.yml
-  parameters:
-    stageName: 'AUSVPCTestsw19d_15_0'
-    stagedisplayName: AUS VPC Tests w19d-15-0
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_VpcStack
-    jobDisplayname: 'Agent job: Vpc Stack'
-    baseImageName: w19d-15-0
-    stackName: AUS-VPC
+# - template: templates/hirender_stage.yml
+#   parameters:
+#     stageName: 'AUSVPCTestsw19d_15_0'
+#     stagedisplayName: AUS VPC Tests w19d-15-0
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_VpcStack
+#     jobDisplayname: 'Agent job: Vpc Stack'
+#     baseImageName: w19d-15-0
+#     stackName: AUS-VPC
 
 # - template: templates/hirender_stage.yml
 #   parameters:
