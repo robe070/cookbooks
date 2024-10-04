@@ -73,7 +73,7 @@ parameters:
   - name: baseImageName
     type: string
     default: none
-  - name: versionText
+  - name: VersionText-TemplateCI
     type: string
     default: none
 
@@ -106,9 +106,10 @@ stages:
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
           
           - pwsh: |
-              Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$versionText-TemplateCI"
+              Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$VersionText-TemplateCI"
             displayName: 'Override the Gate.Version variable with TemplateCI value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+             echo $(version)
 
           - pwsh: |
               # Print the Gate variables.
