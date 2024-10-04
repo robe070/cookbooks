@@ -76,7 +76,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/${SetGateVariable}"
+          filePath: "$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/$(SetGateVariable)"
           failOnStderr: true
         continueOnError: false
       
