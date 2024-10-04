@@ -82,14 +82,14 @@ stages:
       steps:     
         - checkout: self
         - checkout: _robe070_cookbooks
-          path: "s/_robe070_cookbooks" 
+          # path: "s/_robe070_cookbooks" 
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
@@ -97,7 +97,7 @@ stages:
           inputs:
             targetType: filePath
             #filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
@@ -123,15 +123,15 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-- template: templates/hirender_stage.yml
-  parameters:
-    stageName: 'AUSSmallShoeSizew16d_14_2'
-    stagedisplayName: AUS Small Shoe Size w16d-14-2
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_SmallStack
-    jobDisplayname: 'Agent job: Small Stack'
-    baseImageName: w16d-14-2
-    stackName: AUS-Small
+# - template: templates/hirender_stage.yml
+#   parameters:
+#     stageName: 'AUSSmallShoeSizew16d_14_2'
+#     stagedisplayName: AUS Small Shoe Size w16d-14-2
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_SmallStack
+#     jobDisplayname: 'Agent job: Small Stack'
+#     baseImageName: w16d-14-2
+#     stackName: AUS-Small
 
 # - template: templates/hirender_stage.yml
 #   parameters:
