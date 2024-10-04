@@ -70,6 +70,62 @@ stages:
     jobDisplayname: 'w19d142 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142Aus'
+    stagedisplayName: 'w19d142 Aus' 
+    jobName: 'w19d142Aus'
+    jobDisplayname: 'w19d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))    
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142Aus'
+    stagedisplayName: 'w19d142 Aus' 
+    jobName: 'w19d142Aus'
+    jobDisplayname: 'w19d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150Aus'
+    stagedisplayName: 'w19d150 Aus' 
+    jobName: 'w19d150Aus'
+    jobDisplayname: 'w19d150 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142jAus'
+    stagedisplayName: 'w16d142j Aus' 
+    jobName: 'w16d142jAus'
+    jobDisplayname: 'w16d142j Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))    
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150jAus'
+    stagedisplayName: 'w16d150j Aus' 
+    jobName: 'w16d150jAus'
+    jobDisplayname: 'w16d150j Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142jAus'
+    stagedisplayName: 'w19d142j Aus' 
+    jobName: 'w19d142jAus'
+    jobDisplayname: 'w19d142j Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150jAus'
+    stagedisplayName: 'w19d150j Aus' 
+    jobName: 'w19d150jAus'
+    jobDisplayname: 'w19d150j Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+
 - stage: 'PublishPreviewImages'
   displayName: 'Publish Preview Images'
   dependsOn: 
@@ -141,6 +197,141 @@ stages:
     jobDisplayname: 'w12r2d142 France Central Preview'
     dependsOn: MergePatch_PAASCookbooks
     jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w12r2d150AusEastPreview'
+    stagedisplayName: 'w12r2d150 Aus East Preview'
+    jobName: 'w12r2d150AusEastPreview'
+    jobDisplayname: 'w12r2d150 Aus East Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w12r2d150USEastPreview'
+    stagedisplayName: 'w12r2d150 US East Preview'
+    jobName: 'w12r2d150USEastPreview'
+    jobDisplayname: 'w12r2d150 US East Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w12r2d150FranceCentralPreview'
+    stagedisplayName: 'w12r2d150 France Central Preview'
+    jobName: 'w12r2d150FranceCentralPreview'
+    jobDisplayname: 'w12r2d150 France Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142EurWestPreview'
+    stagedisplayName: 'w16d142 Eur West Preview'
+    jobName: 'w16d142EurWestPreview'
+    jobDisplayname: 'w16d142 Eur West Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142USWestPreview'
+    stagedisplayName: 'w16d142 US West Preview'
+    jobName: 'w16d142USWestPreview'
+    jobDisplayname: 'w16d142 US West Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))  
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150SANorthPreview'
+    stagedisplayName: 'w16d150 SA North Preview'
+    jobName: 'w16d150SANorthPreview'
+    jobDisplayname: 'w16d150 SA North Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150CanadaCentralPreview'
+    stagedisplayName: 'w16d150 Canada Central Preview'
+    jobName: 'w16d150CanadaCentralPreview'
+    jobDisplayname: 'w16d150 Canada Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150BrazilSouthPreview'
+    stagedisplayName: 'w19d150 Brazil South Preview'
+    jobName: 'w19d150BrazilSouthPreview'
+    jobDisplayname: 'w19d150 Brazil South Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))   
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142FranceCentralPreview'
+    stagedisplayName: 'w19d142 France Central Preview'
+    jobName: 'w19d142FranceCentralPreview'
+    jobDisplayname: 'w19d142 France Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))   
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142IndiaCentralPreview'
+    stagedisplayName: 'w16d142 India Central Preview'
+    jobName: 'w16d142IndiaCentralPreview'
+    jobDisplayname: 'w16d142 India Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150UKWestPreview'
+    stagedisplayName: 'w19d150 UK West Preview'
+    jobName: 'w19d150UKWestPreview'
+    jobDisplayname: 'w19d150 UK West Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142jJapanWestPreview'
+    stagedisplayName: 'w16d142j Japan West Preview'
+    jobName: 'w16d142jJapanWestPreview'
+    jobDisplayname: 'w16d142j Japan West Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150jKoreaCentralPreview'
+    stagedisplayName: 'w16d150j Korea Central Preview'
+    jobName: 'w16d150jKoreaCentralPreview'
+    jobDisplayname: 'w16d150j Korea Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))   
+    
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142jUSNorthCentralPreview'
+    stagedisplayName: 'w19d142j US NorthCentral Preview'
+    jobName: 'w19d142jUSNorthCentralPreview'
+    jobDisplayname: 'w19d142j US NorthCentral Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150jGermanyWestCentralPreview'
+    stagedisplayName: 'w19d150j Germany West Central Preview'
+    jobName: 'w19d150jGermanyWestCentralPreview'
+    jobDisplayname: 'w19d150j Germany West Central Preview'
+    dependsOn: MergePatch_PAASCookbooks
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))    
 
 - stage: 'GoLive'
   displayName: 'Go Live'
@@ -235,3 +426,66 @@ stages:
     jobDisplayname: 'w16d142 Europe West Production'
     dependsOn: CookbooksMergeAndTag
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150AusEastProduction'
+    stagedisplayName: 'w16d150 Aus East Production'
+    jobName: 'w16d150AusEastProduction'
+    jobDisplayname: 'w16d150 Aus East Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142UKSouthProduction'
+    stagedisplayName: 'w19d142 UK South Production'
+    jobName: 'w19d142UKSouthProduction'
+    jobDisplayname: 'w19d142 UK South Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150SoutheastAsiaProduction'
+    stagedisplayName: 'w19d150 Southeast Asia Production'
+    jobName: 'w19d150SoutheastAsiaProduction'
+    jobDisplayname: 'w19d150 Southeast Asia Productionn'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d142jUSCentralProduction'
+    stagedisplayName: 'w16d142j US Central Production'
+    jobName: 'w16d142jUSCentralProduction'
+    jobDisplayname: 'w16d142j US Central Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w16d150jEuropeNorthProduction'
+    stagedisplayName: 'w16d150j Europe North Production'
+    jobName: 'w16d150jEuropeNorthProduction'
+    jobDisplayname: 'w16d150j Europe North Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d142jWestIndiaProduction'
+    stagedisplayName: 'w19d142j West India Production'
+    jobName: 'w19d142jWestIndiaProduction'
+    jobDisplayname: 'w19d142j West India Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+
+- template: templates/debjit-stages.yml
+  parameters:
+    stageName: 'w19d150jSwitzerlandNorthProduction'
+    stagedisplayName: 'w19d150j Switzerland North Production'
+    jobName: 'w19d150jSwitzerlandNorthProduction'
+    jobDisplayname: 'w19d150j Switzerland North Production'
+    dependsOn: CookbooksMergeAndTag
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))    
