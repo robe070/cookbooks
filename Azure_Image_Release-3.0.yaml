@@ -8,17 +8,17 @@ resources:
   repositories:
     - repository: _lansa_azure_quickstart_templates
       type: github
-      # endpoint: priyadishah
+      endpoint: debjitbhowmik807
       name: lansa/azure-quickstart-templates
       ref: support/scalable
     - repository: _CelestialSystem_azure_quickstart_templates
       type: github
-      # endpoint: priyadishah
+      endpoint: debjitbhowmik807
       name: CelestialSystem/azure-quickstart-templates
       ref: feature/139
     - repository: _robe070_cookbooks
       type: github
-      # endpoint: priyadishah
+      endpoint: debjitbhowmik807
       name: robe070/cookbooks
       ref: debug/paas
 
