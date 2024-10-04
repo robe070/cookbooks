@@ -105,6 +105,7 @@ stages:
     jobName: 'w19d150'
     jobDisplayname: 'w19d-15-0'
     jobDemand: DotNetFramework
+    setGateVariable: SetGateVariable.ps1
     jobcondition: or(eq(variables['Build-V13SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
 - template: AzureDevOps/templates/TestImageReleaseTemplate.yml
@@ -114,6 +115,7 @@ stages:
     jobName: 'w19d150'
     jobDisplayname: 'w19d-15-0'
     jobDemand: DotNetFramework
+    setGateVariable: SetGateVariable.ps1
     jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
 
 - template: AzureDevOps/templates/TestImageReleaseTemplate.yml
@@ -123,4 +125,5 @@ stages:
     jobName: 'w19d150'
     jobDisplayname: 'w19d-15-0'
     jobDemand: DotNetFramework
+    setGateVariable: SetGateVariable.ps1
     jobcondition: or(eq(variables['Build-V15-Scalable'], 'True'), eq(variables['Build-all'], 'True'))

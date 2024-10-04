@@ -25,6 +25,9 @@ parameters:
   - name: jobDemand
     type: string
     default: ''
+  - name: setGateVariable
+    type: string
+    default: SetGateVariableCloudAccountId.ps1
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -40,6 +43,7 @@ stages:
 
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
+        SetGateVariable: ${{ parameters.setGateVariable }}
 
       pool:
         vmImage: ${{ parameters.vmImage }}
@@ -72,7 +76,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/${SetGateVariable}"
           failOnStderr: true
         continueOnError: false
       
