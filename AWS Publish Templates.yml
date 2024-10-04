@@ -250,7 +250,7 @@ stages:
   parameters:
     stageName: 'ValidateTemplateURLs'
     stagedisplayName: Validate Template URLs
-    dependsOn: MergeToMarketplace&Upload
+    dependsOn: MergeToMarketplaceAndUpload
     jobName: AgentJob_SmallStack
     jobDisplayname: 'Agent job: Small Stack'
     baseImageName: w19d-15-0
