@@ -1,4 +1,4 @@
-name: Build Image Release Artefacts -$(Build.BuildId)
+name: Build Image Release Artefacts 
 trigger: none
 variables:
   - group: "External IP Addresses"
@@ -74,7 +74,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -94,11 +94,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16142$(VersionText-w16d-14-2)-$(Build.BuildId)
-        SG: w16d-14-2-$(VersionText-w16d-14-2)-$(Build.BuildId)
+        TestVmName: T16142$(VersionText-w16d-14-2)
+        SG: w16d-14-2-$(VersionText-w16d-14-2)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-14-2-$(VersionText-w16d-14-2)-$(Build.BuildId)
+        VersionText: w16d-14-2-$(VersionText-w16d-14-2)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -157,7 +157,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText-w16d-14-2)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText-w16d-14-2)' -Force
 - job: Job_2
   displayName: 'Agent job : w16d-15-0'
   timeoutInMinutes: 360
@@ -210,7 +210,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -229,11 +229,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16150$(VersionText-w16d-15-0)-$(Build.BuildId)
-        SG: w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)
+        TestVmName: T16150$(VersionText-w16d-15-0)
+        SG: w16d-15-0-$(VersionText-w16d-15-0)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)
+        VersionText: w16d-15-0-$(VersionText-w16d-15-0)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -295,7 +295,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText-w16d-15-0)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText-w16d-15-0)' -Force
 - job: Job_5
   displayName: 'Agent job : w19d-14-2'
   timeoutInMinutes: 360
@@ -348,7 +348,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -367,11 +367,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19142$(VersionText-w19d-14-2)-$(Build.BuildId)
-        SG: w19d-14-2-$(VersionText-w19d-14-2)-$(Build.BuildId)
+        TestVmName: T19142$(VersionText-w19d-14-2)
+        SG: w19d-14-2-$(VersionText-w19d-14-2)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-14-2-$(VersionText-w19d-14-2)-$(Build.BuildId)
+        VersionText: w19d-14-2-$(VersionText-w19d-14-2)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -433,7 +433,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-14-2-$(VersionText-w19d-14-2)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2-$(VersionText-w19d-14-2)' -Force
 - job: Job_6
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
@@ -486,7 +486,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -505,11 +505,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T9150$(VersionText-w19d-15-0)-$(Build.BuildId)
-        SG: w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)
+        TestVmName: T9150$(VersionText-w19d-15-0)
+        SG: w19d-15-0-$(VersionText-w19d-15-0)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)
+        VersionText: w19d-15-0-$(VersionText-w19d-15-0)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -568,7 +568,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
 - job: Job_8
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -621,7 +621,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -640,11 +640,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19150j$(VersionText-w19d-15-0j)-$(Build.BuildId)
-        SG: w19d-15-0j-$(VersionText-w19d-15-0j)-$(Build.BuildId)
+        TestVmName: T19150j$(VersionText-w19d-15-0j)
+        SG: w19d-15-0j-$(VersionText-w19d-15-0j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0j-$(VersionText-w19d-15-0j)-$(Build.BuildId)
+        VersionText: w19d-15-0j-$(VersionText-w19d-15-0j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -703,7 +703,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0j-$(VersionText-w19d-15-0j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0j-$(VersionText-w19d-15-0j)' -Force
 - job: Job_7
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
@@ -756,7 +756,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -775,11 +775,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19142j$(VersionText-w19d-14-2j)-$(Build.BuildId)
-        SG: w19d-14-2j-$(VersionText-w19d-14-2j)-$(Build.BuildId)
+        TestVmName: T19142j$(VersionText-w19d-14-2j)
+        SG: w19d-14-2j-$(VersionText-w19d-14-2j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-14-2j-$(VersionText-w19d-14-2j)-$(Build.BuildId)
+        VersionText: w19d-14-2j-$(VersionText-w19d-14-2j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -838,7 +838,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-14-2j-$(VersionText-w19d-14-2j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2j-$(VersionText-w19d-14-2j)' -Force
 - job: Job_3
   displayName: 'Agent job : w16d-14-2j'
   timeoutInMinutes: 360
@@ -891,7 +891,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -910,11 +910,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16142j$(VersionText-w16d-14-2j)-$(Build.BuildId)
-        SG: w16d-14-2j-$(VersionText-w16d-14-2j)-$(Build.BuildId)
+        TestVmName: T16142j$(VersionText-w16d-14-2j)
+        SG: w16d-14-2j-$(VersionText-w16d-14-2j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-14-2j-$(VersionText-w16d-14-2j)-$(Build.BuildId)
+        VersionText: w16d-14-2j-$(VersionText-w16d-14-2j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -973,7 +973,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-14-2j-$(VersionText-w16d-14-2j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-14-2j-$(VersionText-w16d-14-2j)' -Force
  
 
 - job: Job_4
@@ -1028,7 +1028,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1047,11 +1047,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16150j$(VersionText-w16d-15-0j)-$(Build.BuildId)
-        SG: w16d-15-0j-$(VersionText-w16d-15-0j)-$(Build.BuildId)
+        TestVmName: T16150j$(VersionText-w16d-15-0j)
+        SG: w16d-15-0j-$(VersionText-w16d-15-0j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w16d-15-0j-$(VersionText-w16d-15-0j)-$(Build.BuildId)
+        VersionText: w16d-15-0j-$(VersionText-w16d-15-0j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1110,7 +1110,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-15-0j-$(VersionText-w16d-15-0j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-15-0j-$(VersionText-w16d-15-0j)' -Force
 - job: Job_9
   displayName: 'Agent job : w22d-14-2'
   timeoutInMinutes: 360
@@ -1163,7 +1163,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1182,11 +1182,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22142$(VersionText-w22d-14-2)-$(Build.BuildId)
-        SG: w22d-14-2-$(VersionText-w22d-14-2)-$(Build.BuildId)
+        TestVmName: T22142$(VersionText-w22d-14-2)
+        SG: w22d-14-2-$(VersionText-w22d-14-2)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-14-2-$(VersionText-w22d-14-2)-$(Build.BuildId)
+        VersionText: w22d-14-2-$(VersionText-w22d-14-2)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1248,7 +1248,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-14-2-$(VersionText-w22d-14-2)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-14-2-$(VersionText-w22d-14-2)' -Force
 - job: Job_10
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
@@ -1301,7 +1301,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1320,11 +1320,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22150$(VersionText-w22d-15-0)-$(Build.BuildId)
-        SG: w22d-15-0-$(VersionText-w22d-15-0)-$(Build.BuildId)
+        TestVmName: T22150$(VersionText-w22d-15-0)
+        SG: w22d-15-0-$(VersionText-w22d-15-0)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-15-0-$(VersionText-w22d-15-0)-$(Build.BuildId)
+        VersionText: w22d-15-0-$(VersionText-w22d-15-0)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1383,7 +1383,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
 - job: Job_12
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
@@ -1436,7 +1436,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)-$(Build.BuildId)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1455,11 +1455,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22150j$(VersionText-w22d-15-0j)-$(Build.BuildId)
-        SG: w22d-15-0j-$(VersionText-w22d-15-0j)-$(Build.BuildId)
+        TestVmName: T22150j$(VersionText-w22d-15-0j)
+        SG: w22d-15-0j-$(VersionText-w22d-15-0j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-15-0j-$(VersionText-w22d-15-0j)-$(Build.BuildId)
+        VersionText: w22d-15-0j-$(VersionText-w22d-15-0j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1518,7 +1518,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-15-0j-$(VersionText-w22d-15-0j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0j-$(VersionText-w22d-15-0j)' -Force
 - job: Job_11
   displayName: 'Agent job : w22d-14-2j'
   timeoutInMinutes: 360
@@ -1571,7 +1571,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)-$(Build.BuildId)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      arguments: " -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1590,11 +1590,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22142j$(VersionText-w22d-14-2j)-$(Build.BuildId)
-        SG: w22d-14-2j-$(VersionText-w22d-14-2j)-$(Build.BuildId)
+        TestVmName: T22142j$(VersionText-w22d-14-2j)
+        SG: w22d-14-2j-$(VersionText-w22d-14-2j)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-14-2j-$(VersionText-w22d-14-2j)-$(Build.BuildId)
+        VersionText: w22d-14-2j-$(VersionText-w22d-14-2j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1653,6 +1653,6 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-14-2j-$(VersionText-w22d-14-2j)-$(Build.BuildId)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-14-2j-$(VersionText-w22d-14-2j)' -Force
 
 ...
