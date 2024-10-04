@@ -80,14 +80,6 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w19d142Aus'
-    stagedisplayName: 'w19d142 Aus' 
-    jobName: 'w19d142Aus'
-    jobDisplayname: 'w19d142 Aus'
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-
-- template: templates/stages-template.yml
-  parameters:
     stageName: 'w19d150Aus'
     stagedisplayName: 'w19d150 Aus' 
     jobName: 'w19d150Aus'
@@ -130,9 +122,16 @@ stages:
   displayName: 'Publish Preview Images'
   dependsOn: 
     - w12r2d150Aus
-    - w12r2d142Aus
+    - w12r2d150Aus
     - w16d142Aus
     - w16d150Aus
+    - w19d142Aus
+    - w19d150Aus
+    - w16d142jAus
+    - w16d150jAus
+    - w19d142jAus
+    - w19d150jAus
+
   jobs: 
   - job: 'AgentlessJob'
     displayName: 'Agentless job'
@@ -337,8 +336,25 @@ stages:
   displayName: 'Go Live'
   dependsOn: 
     - w12r2d142AusEastPreview
+    - w12r2d142AusEastPreview
     - w12r2d142USEastPreview
     - w12r2d142FranceCentralPreview
+    - w12r2d150AusEastPreview
+    - w12r2d150USEastPreview
+    - w12r2d150FranceCentralPreview
+    - w16d142EurWestPreview
+    - w16d142USWestPreview
+    - w16d150SANorthPreview
+    - w16d150CanadaCentralPreview
+    - w19d150BrazilSouthPreview
+    - w19d142FranceCentralPreview
+    - w16d142IndiaCentralPreview
+    - w19d150UKWestPreview
+    - w16d142jJapanWestPreview
+    - w16d150jKoreaCentralPreview
+    - w19d142jUSNorthCentralPreview
+    - w19d150jGermanyWestCentralPreview
+    
   jobs: 
   - job: 'AgentlessJob'
     displayName: 'Agentless job'
@@ -357,7 +373,7 @@ stages:
 
 - stage: 'CookbooksMergeAndTag'
   displayName: 'Cookbooks Merge & Tag'
-  dependsOn: 'GoLive'
+  dependsOn: GoLive
   jobs: 
   - job: 'CookbooksMergeAndTag'
     pool:

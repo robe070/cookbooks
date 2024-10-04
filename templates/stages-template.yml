@@ -70,6 +70,9 @@ parameters:
   - name: jobDemand
     type: string
     default: none
+  - name: jobcondition
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
