@@ -90,7 +90,7 @@ stages:
           vmImage: ${{ parameters.vmImage }}
         # Add new variable to override the Gate.Varaible value ###################
         variables:
-          VersionText-TemplateCI: ${{ parameters.versionText_TemplateCI }}
+          VersionText-TemplateCI: ${{parameters.VersionText-TemplateCI}}
         steps:
           - download: _Build Image Release Artefacts
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
