@@ -202,7 +202,7 @@ stages:
 #     baseImageName: w19d-15-0j
 #     stackName: AUS-JPN-VPC
 
-- stage: MergeToMarketplace&Upload
+- stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
   dependsOn: 
     - AUSSmallShoeSizew16d_14_2
