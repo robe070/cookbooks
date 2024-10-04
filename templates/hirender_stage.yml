@@ -109,7 +109,6 @@ stages:
               Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$VersionText-TemplateCI"
             displayName: 'Override the Gate.Version variable with TemplateCI value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-             echo $(version)
 
           - pwsh: |
               # Print the Gate variables.
