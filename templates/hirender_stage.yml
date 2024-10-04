@@ -74,9 +74,9 @@ parameters:
     type: string
     default: none
   # Add new name value for version text
-  - name: VersionText_TemplateCI  
-    type: string
-    default: 8
+  # - name: VersionText_TemplateCI  
+  #   type: string
+  #   default: 8
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -89,8 +89,8 @@ stages:
         pool: 
           vmImage: ${{ parameters.vmImage }}
         # Add new variable to override the Gate.Varaible value ###################
-        variables:
-          VersionText_TemplateCI: ${{parameters.VersionText_TemplateCI}}
+        # variables:
+        #   VersionText_TemplateCI: ${{parameters.VersionText_TemplateCI}}
         steps:
           - download: _Build Image Release Artefacts
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
@@ -111,7 +111,7 @@ stages:
           
           # Added new task to override Gate.Version value as a workaround
           - pwsh: |
-              Write-Host "##vso[task.setvariable variable=version;isOutput=true]${{parameters.baseImageName}}-$(VersionText_TemplateCI)"
+              Write-Host "##vso[task.setvariable variable=version;isOutput=true]${{parameters.baseImageName}}-$(VersionText-TemplateCI)"
             name: UpdatedGate
             displayName: 'Override the Gate.Version variable with TemplateCI value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

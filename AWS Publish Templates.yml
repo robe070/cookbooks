@@ -48,7 +48,7 @@ variables:
   - name: LansaReleaseTemplateUrl
     value: https://raw.githubusercontent.com/lansa/aws-templates/support/scalable/CloudFormationWindows/lansa-master-win.cfn.template
   - name: RegressionTestRegion
-    value: ap-southeast-2                                  
+    value: ap-southeast-2                              
   - group: "Template Parameters"
   - group: "VPC ap-southeast-2"
   - group: "VPC us-east-1"
@@ -69,6 +69,7 @@ variables:
   - group: "S3 uploads"
   - group: "Git Repos"
   - group: "Logins"
+  - group: "ImageVersion"
 
 stages: 
 - stage: "MergePatchPaas"
