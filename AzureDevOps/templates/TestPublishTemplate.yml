@@ -77,7 +77,6 @@ parameters:
     type: string
     default: none
 
-
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: ${{ parameters.dependsOn }}
@@ -88,9 +87,6 @@ stages:
         timeoutInMinutes: 0
         pool: 
           vmImage: ${{ parameters.vmImage }}
-        # Add new variable to override the Gate.Varaible value ###################
-        # variables:
-        #   VersionText_TemplateCI: ${{parameters.VersionText_TemplateCI}}
         steps:
           - download: _Build Image Release Artefacts
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
