@@ -281,35 +281,35 @@ stages:
 #     LansaVersion: $(LansaVersion)
 #     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-- stage: SubmittoAWSAndWaitforPreview
-  displayName: 'Submit to AWS & Wait for Preview'
-  # dependsOn: ValidateTemplateURLs
-  jobs: 
-  - job: 'Job_1'
-    displayName: 'Agentless Job'
-    pool: server
-    steps:
-    - task: ManualIntervention@8
-      displayName: 'Manual Intervention : Submit Artefacts'
-      inputs:
-        instructions: |
-          Submit artefacts to AWS
-          1. Check that the master template has been updated with AMI IDs in the Image CD pipeline. Compare with the Product Load Form. Also check that the TemplateUrl properties are a single url, and not a condition. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-master-win.cfn.template
-          2. Upload Product Load Form to AWS Marketplace. 
-          3. This should have been updated with AMI IDs in the Image CD pipeline. Check that this has occurred. 
-          4. Wait for response from AWS Marketplace. 
-          5. Using the url provided in the response from AWS Marketplace, navigate to deploy the latest version of the stack on CloudFormation. It will show the url of the stack type template. Copy this url.
-          6. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
-          7. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
+# - stage: SubmittoAWSAndWaitforPreview
+#   displayName: 'Submit to AWS & Wait for Preview'
+#   dependsOn: ValidateTemplateURLs
+#   jobs: 
+#   - job: 'Job_1'
+#     displayName: 'Agentless Job'
+#     pool: server
+#     steps:
+#     - task: ManualIntervention@8
+#       displayName: 'Manual Intervention : Submit Artefacts'
+#       inputs:
+#         instructions: |
+#           Submit artefacts to AWS
+#           1. Check that the master template has been updated with AMI IDs in the Image CD pipeline. Compare with the Product Load Form. Also check that the TemplateUrl properties are a single url, and not a condition. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-master-win.cfn.template
+#           2. Upload Product Load Form to AWS Marketplace. 
+#           3. This should have been updated with AMI IDs in the Image CD pipeline. Check that this has occurred. 
+#           4. Wait for response from AWS Marketplace. 
+#           5. Using the url provided in the response from AWS Marketplace, navigate to deploy the latest version of the stack on CloudFormation. It will show the url of the stack type template. Copy this url.
+#           6. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
+#           7. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
           
-          Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
+#           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
     extraSteps: true
     stageName: ParisPrevieww16d_14_2
     stagedisplayName: Paris Preview w16d-14-2
-    dependsOn: SubmittoAWSAndWaitforPreview
+    # dependsOn: SubmittoAWSAndWaitforPreview
     jobName: AgentJob_ParisDeploymentTest 
     jobDisplayname: 'Agent job: Paris Deployment Test'
     baseImageName: w16d-14-2
