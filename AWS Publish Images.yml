@@ -77,11 +77,11 @@ stages:
         
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
-          #path: "s/_lansa_aws-templates"
+          path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
-          #path: "s/_robe070_cookbooks"
+          path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -462,11 +462,11 @@ stages:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout priyadishah/aws-templates-md
-          #path: "s/_lansa_aws-templates"
+          path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob/cookbooks
-          #path: "s/_robe070_cookbooks"
+          path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -527,9 +527,11 @@ stages:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout Divakshi/aws-templates
+          path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Divakshi/cookbooks
+          path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -769,23 +771,23 @@ stages:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout priyadishah/aws-templates-md
-          #path: "s/_lansa_aws-templates"
+          path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
-          #path: "s/_robe070_cookbooks"
+          path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            filePath: './$(System.DefaultWorkingDirectory)/cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true
 
         - pwsh: |
            # change to project directory
-           cd $(System.DefaultWorkingDirectory)/aws-templates
+           cd $(System.DefaultWorkingDirectory)/_lansa_aws-templates
    
            Write-Host "fetch changes"
            git fetch
