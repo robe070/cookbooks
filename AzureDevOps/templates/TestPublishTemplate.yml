@@ -76,6 +76,9 @@ parameters:
   - name: LansaVersion
     type: string
     default: none
+  - name: TemplateUrl
+    type: string
+    default: none 
 
 stages:
   - stage: ${{ parameters.stageName }}
