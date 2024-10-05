@@ -72,55 +72,55 @@ variables:
   - group: "ImageVersion"
 
 stages: 
-# - stage: "MergePatchPaas"
-#   displayName: Merge patch/pass
-#   jobs:
-#     - job: Job_1
-#       displayName: 'Agent job'
-#       timeoutInMinutes: 0
-#       pool:
-#           vmImage: windows-2022
-#       steps:     
-#         - checkout: self
-#         - checkout: _robe070_cookbooks
-#           path: "s/_robe070_cookbooks" 
+- stage: "MergePatchPaas"
+  displayName: Merge patch/pass
+  jobs:
+    - job: Job_1
+      displayName: 'Agent job'
+      timeoutInMinutes: 0
+      pool:
+          vmImage: windows-2022
+      steps:     
+        - checkout: self
+        - checkout: _robe070_cookbooks
+          path: "s/_robe070_cookbooks" 
       
-#         - task: PowerShell@2
-#           displayName: 'Write access to Git Repo (robe070/cookbooks)'
-#           inputs:
-#             targetType: filePath
-#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+        - task: PowerShell@2
+          displayName: 'Write access to Git Repo (robe070/cookbooks)'
+          inputs:
+            targetType: filePath
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
-#         - task: PowerShell@2
-#           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
-#           inputs:
-#             targetType: filePath
-#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-#             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
+        - task: PowerShell@2
+          displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
+          inputs:
+            targetType: filePath
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
-# - stage: S3PatchPAAS
-#   displayName: S3 patch/paas
-#   dependsOn: MergePatchPAAS
-#   jobs:
-#     - job: Job_1
-#       displayName: Agent job
-#       pool: 
-#           vmImage: windows-2022
-#       steps:
-#         - checkout: self
-#         - checkout: _lansa_aws-templates
-#           path: "s/_lansa_aws-templates" 
-#         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-#           displayName: 'S3 Upload: $(BucketNamePreview)'
-#           inputs:
-#             awsCredentials: AzureDevOps
-#             regionName: 'ap-southeast-2'
-#             bucketName: '$(BucketNamePreview)'
-#             sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
-#             globExpressions: '*.template'
-#             targetFolder: '$(FolderNamePreview)'
-#             filesAcl: 'public-read'
+- stage: S3PatchPAAS
+  displayName: S3 patch/paas
+  dependsOn: MergePatchPAAS
+  jobs:
+    - job: Job_1
+      displayName: Agent job
+      pool: 
+          vmImage: windows-2022
+      steps:
+        - checkout: self
+        - checkout: _lansa_aws-templates
+          path: "s/_lansa_aws-templates" 
+        - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+          displayName: 'S3 Upload: $(BucketNamePreview)'
+          inputs:
+            awsCredentials: AzureDevOps
+            regionName: 'ap-southeast-2'
+            bucketName: '$(BucketNamePreview)'
+            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+            globExpressions: '*.template'
+            targetFolder: '$(FolderNamePreview)'
+            filesAcl: 'public-read'
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -131,6 +131,9 @@ stages:
 #     jobDisplayname: 'Agent job: Small Stack'
 #     baseImageName: w16d-14-2
 #     stackName: AUS-Small
+#     LansaVersion: $(LansaVersionPrevious)
+#     11WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -141,6 +144,9 @@ stages:
 #     jobDisplayname: 'Agent job: Test Stack'
 #     baseImageName: w16d-15-0
 #     stackName: AUS-Test
+#     LansaVersion: $(lansaVersion)
+#     11WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -151,16 +157,20 @@ stages:
 #     jobDisplayname: 'Agent job: Dev Stack'
 #     baseImageName: w19d-14-2s
 #     stackName: AUS-Dev
+#     LansaVersion: $(LansaVersionPrevious)
+#     11WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'AUSVPCTestsw19d_15_0'
-#     stagedisplayName: AUS VPC Tests w19d-15-0
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_VpcStack
-#     jobDisplayname: 'Agent job: Vpc Stack'
-#     baseImageName: w19d-15-0
-#     stackName: AUS-VPC
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'AUSVPCTestsw19d_15_0'
+    stagedisplayName: AUS VPC Tests w19d-15-0
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_VpcStack
+    jobDisplayname: 'Agent job: Vpc Stack'
+    baseImageName: w19d-15-0
+    stackName: AUS-VPC
+    LansaVersion: $(lansaVersion)
+    11WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -171,6 +181,8 @@ stages:
 #     jobDisplayname: 'Agent job: Medium Stack'
 #     baseImageName: w16d-14-2j
 #     stackName: AUS-Medium
+#     LansaVersion: $(LansaVersionPrevious)
+#     11WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -181,6 +193,8 @@ stages:
 #     jobDisplayname: 'Agent job: Large Stack'
 #     baseImageName: w16d-15-0j
 #     stackName: AUS-Large
+#     LansaVersion: $(lansaVersion)
+#     11WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -191,6 +205,8 @@ stages:
 #     jobDisplayname: 'Agent job: Update False Stack'
 #     baseImageName: w19d-14-2j
 #     stackName: AUS-UpdateScripts
+#     LansaVersion: $(LansaVersionPrevious)
+#     11WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
 # - template: templates/hirender_stage.yml
 #   parameters:
@@ -201,18 +217,20 @@ stages:
 #     jobDisplayname: 'Agent job: Vpc Stack'
 #     baseImageName: w19d-15-0j
 #     stackName: AUS-JPN-VPC
+#     LansaVersion: $(lansaVersion)
+#     11WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
-  # dependsOn: 
-  #   - AUSSmallShoeSizew16d_14_2
-  #   - AUSTestShoeSizew16d_15_0
-  #   - AUSDevShoeSizew19d_14_2
-  #   - AUSVPCTestsw19d_15_0
-  #   - AUSMediumShoeSizew16d_14_2j
-  #   - AUSLargeShoeSizew16d_15_0j
-  #   - AUSUpdateScriptsFALSEw19d_14_2j
-  #   - AUSJPNVPCTestsw19d_15_0j
+  dependsOn: 
+    # - AUSSmallShoeSizew16d_14_2
+    # - AUSTestShoeSizew16d_15_0
+    # - AUSDevShoeSizew19d_14_2
+    - AUSVPCTestsw19d_15_0
+    # - AUSMediumShoeSizew16d_14_2j
+    # - AUSLargeShoeSizew16d_15_0j
+    # - AUSUpdateScriptsFALSEw19d_14_2j
+    # - AUSJPNVPCTestsw19d_15_0j
   jobs:
   - job: Job_1
     displayName: 'Agent Job'
@@ -251,15 +269,17 @@ stages:
           targetFolder: '$(FolderNameProduction)'
           filesAcl: 'public-read'
 
-# - template: templates/hirender_stage.yml
-#   parameters:
-#     stageName: 'ValidateTemplateURLs'
-#     stagedisplayName: Validate Template URLs
-#     dependsOn: MergeToMarketplaceAndUpload
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w19d-15-0
-#     stackName: Validate-TemplateUrl
+- template: templates/hirender_stage.yml
+  parameters:
+    stageName: 'ValidateTemplateURLs'
+    stagedisplayName: Validate Template URLs
+    dependsOn: MergeToMarketplaceAndUpload
+    jobName: AgentJob_SmallStack
+    jobDisplayname: 'Agent job: Small Stack'
+    baseImageName: w19d-15-0
+    stackName: Validate-TemplateUrl
+    LansaVersion: $(LansaVersion)
+    11WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - stage: SubmittoAWSAndWaitforPreview
 #   displayName: 'Submit to AWS & Wait for Preview'
@@ -392,14 +412,10 @@ stages:
 #       displayName: 'Manual Intervention : Merge & Go Live'
 #       inputs:
 #         instructions: |
-#           Preview tests have completed successfully.
-        
-#           Ready to go live.
-        
-#           Merge cookbooks patch/paas to support/scalable 
-        
-#           Click the button to go live.
-        
+#           Preview tests have completed successfully.        
+#           Ready to go live.        
+#           Merge cookbooks patch/paas to support/scalable         
+#           Click the button to go live.        
 #           Note that once the first template has been published that there is no preview stage. Its live straightaway. When/if that occurs, only the merge is required, then this stage can be continued. Consideration should be made of moving this Stage merge before the "Marketplace URL tests" and doing the merge then.
       
 # - stage: MergeAndTag
