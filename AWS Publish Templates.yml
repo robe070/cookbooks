@@ -72,55 +72,55 @@ variables:
   - group: "ImageVersion"
 
 stages: 
-- stage: "MergePatchPaas"
-  displayName: Merge patch/pass
-  jobs:
-    - job: Job_1
-      displayName: 'Agent job'
-      timeoutInMinutes: 0
-      pool:
-          vmImage: windows-2022
-      steps:     
-        - checkout: self
-        - checkout: _robe070_cookbooks
-          path: "s/_robe070_cookbooks" 
+# - stage: "MergePatchPaas"
+#   displayName: Merge patch/pass
+#   jobs:
+#     - job: Job_1
+#       displayName: 'Agent job'
+#       timeoutInMinutes: 0
+#       pool:
+#           vmImage: windows-2022
+#       steps:     
+#         - checkout: self
+#         - checkout: _robe070_cookbooks
+#           path: "s/_robe070_cookbooks" 
       
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (robe070/cookbooks)'
-          inputs:
-            targetType: filePath
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+#         - task: PowerShell@2
+#           displayName: 'Write access to Git Repo (robe070/cookbooks)'
+#           inputs:
+#             targetType: filePath
+#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+#             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
-        - task: PowerShell@2
-          displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
-          inputs:
-            targetType: filePath
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
+#         - task: PowerShell@2
+#           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
+#           inputs:
+#             targetType: filePath
+#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+#             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
-- stage: S3PatchPAAS
-  displayName: S3 patch/paas
-  dependsOn: MergePatchPAAS
-  jobs:
-    - job: Job_1
-      displayName: Agent job
-      pool: 
-          vmImage: windows-2022
-      steps:
-        - checkout: self
-        - checkout: _lansa_aws-templates
-          path: "s/_lansa_aws-templates" 
-        - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-          displayName: 'S3 Upload: $(BucketNamePreview)'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            bucketName: '$(BucketNamePreview)'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
-            globExpressions: '*.template'
-            targetFolder: '$(FolderNamePreview)'
-            filesAcl: 'public-read'
+# - stage: S3PatchPAAS
+#   displayName: S3 patch/paas
+#   dependsOn: MergePatchPAAS
+#   jobs:
+#     - job: Job_1
+#       displayName: Agent job
+#       pool: 
+#           vmImage: windows-2022
+#       steps:
+#         - checkout: self
+#         - checkout: _lansa_aws-templates
+#           path: "s/_lansa_aws-templates" 
+#         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+#           displayName: 'S3 Upload: $(BucketNamePreview)'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'ap-southeast-2'
+#             bucketName: '$(BucketNamePreview)'
+#             sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+#             globExpressions: '*.template'
+#             targetFolder: '$(FolderNamePreview)'
+#             filesAcl: 'public-read'
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -160,17 +160,17 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSVPCTestsw19d_15_0'
-    stagedisplayName: AUS VPC Tests w19d-15-0
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_VpcStack
-    jobDisplayname: 'Agent job: Vpc Stack'
-    baseImageName: w19d-15-0
-    stackName: AUS-VPC
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSVPCTestsw19d_15_0'
+#     stagedisplayName: AUS VPC Tests w19d-15-0
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_VpcStack
+#     jobDisplayname: 'Agent job: Vpc Stack'
+#     baseImageName: w19d-15-0
+#     stackName: AUS-VPC
+#     LansaVersion: $(lansaVersion)
+#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -226,7 +226,7 @@ stages:
     # - AUSSmallShoeSizew16d_14_2
     # - AUSTestShoeSizew16d_15_0
     # - AUSDevShoeSizew19d_14_2
-    - AUSVPCTestsw19d_15_0
+    # - AUSVPCTestsw19d_15_0
     # - AUSMediumShoeSizew16d_14_2j
     # - AUSLargeShoeSizew16d_15_0j
     # - AUSUpdateScriptsFALSEw19d_14_2j
