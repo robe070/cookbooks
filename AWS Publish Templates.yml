@@ -72,32 +72,32 @@ variables:
   - group: "ImageVersion"
 
 stages: 
-# - stage: "MergePatchPaas"
-#   displayName: Merge patch/pass
-#   jobs:
-#     - job: Job_1
-#       displayName: 'Agent job'
-#       timeoutInMinutes: 0
-#       pool:
-#           vmImage: windows-2022
-#       steps:     
-#         - checkout: self
-#         - checkout: _robe070_cookbooks
-#           path: "s/_robe070_cookbooks" 
+- stage: "MergePatchPaas"
+  displayName: Merge patch/pass
+  jobs:
+    - job: Job_1
+      displayName: 'Agent job'
+      timeoutInMinutes: 0
+      pool:
+          vmImage: windows-2022
+      steps:     
+        - checkout: self
+        - checkout: _robe070_cookbooks
+          # path: "s/_robe070_cookbooks" 
       
-#         - task: PowerShell@2
-#           displayName: 'Write access to Git Repo (robe070/cookbooks)'
-#           inputs:
-#             targetType: filePath
-#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+        - task: PowerShell@2
+          displayName: 'Write access to Git Repo (robe070/cookbooks)'
+          inputs:
+            targetType: filePath
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
-#         - task: PowerShell@2
-#           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
-#           inputs:
-#             targetType: filePath
-#             filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-#             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
+        - task: PowerShell@2
+          displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
+          inputs:
+            targetType: filePath
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 # - stage: S3PatchPAAS
 #   displayName: S3 patch/paas
@@ -220,8 +220,8 @@ stages:
 #     LansaVersion: $(lansaVersion)
 #     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-- stage: MergeToMarketplaceAndUpload
-  displayName: Merge To Marketplace & Upload
+# - stage: MergeToMarketplaceAndUpload
+#   displayName: Merge To Marketplace & Upload
   # dependsOn: 
   #   - AUSSmallShoeSizew16d_14_2
   #   - AUSTestShoeSizew16d_15_0
@@ -231,43 +231,43 @@ stages:
   #   - AUSLargeShoeSizew16d_15_0j
   #   - AUSUpdateScriptsFALSEw19d_14_2j
   #   - AUSJPNVPCTestsw19d_15_0j
-  jobs:
-  - job: Job_1
-    displayName: 'Agent Job'
-    pool: 
-      vmImage: windows-2022
-    steps:
-      - checkout: self
-      - checkout: _robe070_cookbooks
-        path: "s/_robe070_cookbooks"
-      - checkout: _lansa_aws-templates-mp
-        path: "s/_lansa_aws-templates-mp" 
-      - task: PowerShell@2
-        displayName: 'Write access to Git Repo (lansa/aws-templates)'
-        inputs:
-          targetType: filePath
-          filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
-          pwsh: true
+  # jobs:
+  # - job: Job_1
+  #   displayName: 'Agent Job'
+  #   pool: 
+  #     vmImage: windows-2022
+  #   steps:
+  #     - checkout: self
+  #     - checkout: _robe070_cookbooks
+  #       path: "s/_robe070_cookbooks"
+  #     - checkout: _lansa_aws-templates-mp
+  #       path: "s/_lansa_aws-templates-mp" 
+  #     - task: PowerShell@2
+  #       displayName: 'Write access to Git Repo (lansa/aws-templates)'
+  #       inputs:
+  #         targetType: filePath
+  #         filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+  #         arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
+  #         pwsh: true
   
-      - task: PowerShell@2
-        displayName: 'Merge support/scalable into support/scalable_marketplace'
-        inputs:
-          targetType: filePath
-          filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -GitSourceBranch ''$(GitLansaAwsTemplatesBranch)'' -GitTargetBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'''
-          pwsh: true
+  #     - task: PowerShell@2
+  #       displayName: 'Merge support/scalable into support/scalable_marketplace'
+  #       inputs:
+  #         targetType: filePath
+  #         filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+  #         arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -GitSourceBranch ''$(GitLansaAwsTemplatesBranch)'' -GitTargetBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'''
+  #         pwsh: true
 
-      - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-        displayName: 'S3 Upload to support/scalable'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
-          bucketName: '$(BucketNameProduction)'
-          sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates-mp/CloudFormationWindows'
-          globExpressions: '*.template'
-          targetFolder: '$(FolderNameProduction)'
-          filesAcl: 'public-read'
+  #     - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+  #       displayName: 'S3 Upload to support/scalable'
+  #       inputs:
+  #         awsCredentials: AzureDevOps
+  #         regionName: 'ap-southeast-2'
+  #         bucketName: '$(BucketNameProduction)'
+  #         sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates-mp/CloudFormationWindows'
+  #         globExpressions: '*.template'
+  #         targetFolder: '$(FolderNameProduction)'
+  #         filesAcl: 'public-read'
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -304,18 +304,18 @@ stages:
           
 #           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    extraSteps: true
-    stageName: ParisPrevieww16d_14_2
-    stagedisplayName: Paris Preview w16d-14-2
-    # dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_ParisDeploymentTest 
-    jobDisplayname: 'Agent job: Paris Deployment Test'
-    baseImageName: w16d-14-2
-    stackName: Paris-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     extraSteps: true
+#     stageName: ParisPrevieww16d_14_2
+#     stagedisplayName: Paris Preview w16d-14-2
+#     # dependsOn: SubmittoAWSAndWaitforPreview
+#     jobName: AgentJob_ParisDeploymentTest 
+#     jobDisplayname: 'Agent job: Paris Deployment Test'
+#     baseImageName: w16d-14-2
+#     stackName: Paris-Preview
+#     LansaVersion: $(LansaVersionPrevious)
+#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
