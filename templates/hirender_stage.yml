@@ -22,9 +22,6 @@ parameters:
   - name: osName
     type: string
     default: none
-  - name: LansaVersion
-    type: string
-    default: none 
   - name: imageId
     type: string
     default: none
