@@ -73,7 +73,7 @@ parameters:
   - name: baseImageName
     type: string
     default: none
-  - name: 11WebserverOSVersion
+  - name: WebserverOSVersion
     type: string
     default: none
   - name: LansaVersion
@@ -203,10 +203,10 @@ stages:
                     "ParameterValue": "$(msiURLPrevious)"
                 }, {
                     "ParameterKey": "LansaVersion",   
-                    "ParameterValue": "${{parameters.LansaVersion}}"
+                    "ParameterValue": "${{ parameters.LansaVersion }}"
                 }, {
                     "ParameterKey": "11WebserverOSVersion",   
-                    "ParameterValue": "${{parameters.11WebserverOSVersion}}"
+                    "ParameterValue": "${{ parameters.WebserverOSVersion }}"
                 }, {
                     "ParameterKey": "CurrentVPC",   
                     "ParameterValue": "$(CurrentVPC)"
