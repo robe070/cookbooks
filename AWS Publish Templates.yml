@@ -310,7 +310,7 @@ stages:
     stageName: ParisPrevieww16d_14_2
     stagedisplayName: Paris Preview w16d-14-2
     # dependsOn: SubmittoAWSAndWaitforPreview
-    dependsOn: SubmittoAWSAndWaitforPreview
+    dependsOn: MergeToMarketplaceAndUpload
     jobName: AgentJob_ParisDeploymentTest 
     jobDisplayname: 'Agent job: Paris Deployment Test'
     baseImageName: w16d-14-2
