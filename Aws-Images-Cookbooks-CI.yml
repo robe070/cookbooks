@@ -294,10 +294,10 @@ jobs:
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
       TestVmName: T19142$(VersionText-w19d-14-2)
-      SG: w19d-14-2$(VersionText-w19d-14-2)-$(Build.BuildNumber)
+      SG: w19d-14-2$(VersionText-w19d-14-2)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w19d-14-2$(VersionText-w19d-14-2)-$(Build.BuildNumber)
+      VersionText: w19d-14-2$(VersionText-w19d-14-2)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -347,7 +347,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-14-2-$(VersionText-w19d-14-2)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2$(VersionText-w19d-14-2)' -Force
       
 - job: Job_4
   displayName: 'Agent job : w19d-15-0'
@@ -449,7 +449,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0$(VersionText-w19d-15-0)' -Force
      
 - job: Job_5
   displayName: 'Agent job : w22d-14-2'
