@@ -203,10 +203,10 @@ stages:
                     "ParameterValue": "$(msiURLPrevious)"
                 }, {
                     "ParameterKey": "LansaVersion",   
-                    "ParameterValue": "${{ parameters.LansaVersion }}"
+                    "ParameterValue": "${{parameters.LansaVersion}}"
                 }, {
                     "ParameterKey": "11WebserverOSVersion",   
-                    "ParameterValue": "${{ parameters.11WebserverOSVersion }}"
+                    "ParameterValue": "${{parameters.11WebserverOSVersion}}"
                 }, {
                     "ParameterKey": "CurrentVPC",   
                     "ParameterValue": "$(CurrentVPC)"
