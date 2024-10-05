@@ -283,7 +283,7 @@ stages:
 
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'
-  dependsOn: ValidateTemplateURLs
+  # dependsOn: ValidateTemplateURLs
   jobs: 
   - job: 'Job_1'
     displayName: 'Agentless Job'
