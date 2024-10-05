@@ -109,7 +109,7 @@ stages:
               #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
           
-          # Added new task to override Gate.Version value as a workaround
+          # Added new task to override Gate.Version value 
           - pwsh: |
               Write-Host "##vso[task.setvariable variable=version;isOutput=true]${{parameters.baseImageName}}-$(VersionText-TemplateCI)"
             name: UpdatedGate
