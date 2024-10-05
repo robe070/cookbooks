@@ -72,6 +72,7 @@ stages:
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
+          path: s/_Build Image Release Artefacts
 
         - checkout: self
         
