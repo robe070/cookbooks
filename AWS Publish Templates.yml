@@ -220,54 +220,54 @@ stages:
 #     LansaVersion: $(lansaVersion)
 #     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - stage: MergeToMarketplaceAndUpload
-#   displayName: Merge To Marketplace & Upload
-#   dependsOn: 
-    # - AUSSmallShoeSizew16d_14_2
-    # - AUSTestShoeSizew16d_15_0
-    # - AUSDevShoeSizew19d_14_2
-    # - AUSVPCTestsw19d_15_0
-    # - AUSMediumShoeSizew16d_14_2j
-    # - AUSLargeShoeSizew16d_15_0j
-    # - AUSUpdateScriptsFALSEw19d_14_2j
-    # - AUSJPNVPCTestsw19d_15_0j
-#   jobs:
-#   - job: Job_1
-#     displayName: 'Agent Job'
-#     pool: 
-#       vmImage: windows-2022
-#     steps:
-#       - checkout: self
-#       - checkout: _robe070_cookbooks
-#         path: "s/_robe070_cookbooks"
-#       - checkout: _lansa_aws-templates-mp
-#         path: "s/_lansa_aws-templates-mp" 
-#       - task: PowerShell@2
-#         displayName: 'Write access to Git Repo (lansa/aws-templates)'
-#         inputs:
-#           targetType: filePath
-#           filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#           arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
-#           pwsh: true
+- stage: MergeToMarketplaceAndUpload
+  displayName: Merge To Marketplace & Upload
+  # dependsOn: 
+  #   - AUSSmallShoeSizew16d_14_2
+  #   - AUSTestShoeSizew16d_15_0
+  #   - AUSDevShoeSizew19d_14_2
+  #   - AUSVPCTestsw19d_15_0
+  #   - AUSMediumShoeSizew16d_14_2j
+  #   - AUSLargeShoeSizew16d_15_0j
+  #   - AUSUpdateScriptsFALSEw19d_14_2j
+  #   - AUSJPNVPCTestsw19d_15_0j
+  jobs:
+  - job: Job_1
+    displayName: 'Agent Job'
+    pool: 
+      vmImage: windows-2022
+    steps:
+      - checkout: self
+      - checkout: _robe070_cookbooks
+        path: "s/_robe070_cookbooks"
+      - checkout: _lansa_aws-templates-mp
+        path: "s/_lansa_aws-templates-mp" 
+      - task: PowerShell@2
+        displayName: 'Write access to Git Repo (lansa/aws-templates)'
+        inputs:
+          targetType: filePath
+          filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
+          pwsh: true
   
-#       - task: PowerShell@2
-#         displayName: 'Merge support/scalable into support/scalable_marketplace'
-#         inputs:
-#           targetType: filePath
-#           filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-#           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -GitSourceBranch ''$(GitLansaAwsTemplatesBranch)'' -GitTargetBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'''
-#           pwsh: true
+      - task: PowerShell@2
+        displayName: 'Merge support/scalable into support/scalable_marketplace'
+        inputs:
+          targetType: filePath
+          filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -GitSourceBranch ''$(GitLansaAwsTemplatesBranch)'' -GitTargetBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'''
+          pwsh: true
 
-#       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-#         displayName: 'S3 Upload to support/scalable'
-#         inputs:
-#           awsCredentials: AzureDevOps
-#           regionName: 'ap-southeast-2'
-#           bucketName: '$(BucketNameProduction)'
-#           sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates-mp/CloudFormationWindows'
-#           globExpressions: '*.template'
-#           targetFolder: '$(FolderNameProduction)'
-#           filesAcl: 'public-read'
+      - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+        displayName: 'S3 Upload to support/scalable'
+        inputs:
+          awsCredentials: AzureDevOps
+          regionName: 'ap-southeast-2'
+          bucketName: '$(BucketNameProduction)'
+          sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates-mp/CloudFormationWindows'
+          globExpressions: '*.template'
+          targetFolder: '$(FolderNameProduction)'
+          filesAcl: 'public-read'
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
