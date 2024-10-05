@@ -462,11 +462,11 @@ stages:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout priyadishah/aws-templates-md
-          path: "s/_lansa_aws-templates"
+          #path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob/cookbooks
-          path: "s/_robe070_cookbooks"
+          #path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -769,11 +769,11 @@ stages:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout priyadishah/aws-templates-md
-          path: "s/_lansa_aws-templates"
+          #path: "s/_lansa_aws-templates"
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
-          path: "s/_robe070_cookbooks"
+          #path: "s/_robe070_cookbooks"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
