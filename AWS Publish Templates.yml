@@ -279,7 +279,7 @@ stages:
     baseImageName: w19d-15-0
     stackName: Validate-TemplateUrl
     LansaVersion: $(LansaVersion)
-    11WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - stage: SubmittoAWSAndWaitforPreview
 #   displayName: 'Submit to AWS & Wait for Preview'
