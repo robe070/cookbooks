@@ -71,7 +71,8 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ${{ parameters.BaseImageName }} -stackname $(System.stackname)'
+          #arguments: '-BaseImageName ${{ parameters.BaseImageName }} -stackname $(System.stackname)'
+          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''w16d-14-2-IMG'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
