@@ -70,7 +70,7 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'
+          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/CopyAMIToUS.ps1'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
