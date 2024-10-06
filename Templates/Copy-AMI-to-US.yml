@@ -59,11 +59,11 @@ stages:
 
       - checkout: _lansa_aws-templates
         displayName: Checkout Lansa AWS Templates
-        path: "s/_lansa_aws-templates"
+        path: _lansa_aws-templates
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
-        path: "s/_robe070_cookbooks"
+        path: _robe070_cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Copy ami to Us-east-1'
@@ -71,7 +71,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/CopyAMIToUS.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/CopyAMIToUS.ps1'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Add Name Tag'
@@ -79,7 +79,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AddNameTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AddNameTag.ps1'
           condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
@@ -88,7 +88,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           bucketName: lansa
-          sourceFolder: '$(System.DefaultWorkingDirectory)'
+          sourceFolder: '$(Pipeline.Workspace)'
           globExpressions: '${{ parameters.globExpressions }}'
           targetFolder: 'templates/$(s3amiUpload)'
           filesAcl: 'public-read'

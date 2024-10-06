@@ -59,11 +59,11 @@ stages:
 
       - checkout: _lansa_aws-templates
         displayName: Checkout Lansa AWS Templates
-        path: "s/_lansa_aws-templates"
+        path: _lansa_aws-templates
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
-        path: "s/_robe070_cookbooks"
+        path: _robe070_cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'
@@ -72,14 +72,14 @@ stages:
           regionName: 'us-east-1'
           bucketName: lansa
           sourceFolder: 'templates/$(s3amiUpload)'
-          targetFolder: '$(System.DefaultWorkingDirectory)'
+          targetFolder: '$(Pipeline.Workspace)'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'    
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'    
  
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
@@ -88,7 +88,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
          # Print the Gate variables.
@@ -103,7 +103,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
    
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
@@ -184,7 +184,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))  
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -193,7 +193,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -202,7 +202,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -211,7 +211,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
-          filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

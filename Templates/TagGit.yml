@@ -58,11 +58,11 @@ stages:
 
       - checkout: _lansa_aws-templates
         displayName: Checkout Lansa AWS Templates
-        path: "s/_lansa_aws-templates"
+        path: _lansa_aws-templates
 
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob cookbooks
-        path: "s/_robe070_cookbooks"
+        path: _robe070_cookbooks
 
       - task: AWSPowerShellModuleScript@1
         name: Gate
@@ -71,7 +71,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariableCloudAccountId.ps1"
+          filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableCloudAccountId.ps1"
 
       - pwsh: |
           # Print the Gate variables.
@@ -82,7 +82,7 @@ stages:
         displayName: 'Write access to Git Repo (Divakshi/cookbooks)'
         inputs:
           targetType: filePath
-          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''                  
           pwsh: true
 
@@ -90,6 +90,6 @@ stages:
         displayName: 'Tag cookbooks repo'
         inputs:
           targetType: filePath
-          filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
           arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''            
           pwsh: true
