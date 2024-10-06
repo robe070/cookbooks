@@ -77,17 +77,18 @@ stages:
         
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
-          path: "s/_lansa_aws-templates"
+          path: _lansa_aws-templates
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
-          path: "s/_robe070_cookbooks"
+          path: _robe070_cookbooks
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true   
 
@@ -96,7 +97,8 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true  
 
@@ -105,7 +107,8 @@ stages:
           inputs:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
+            # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: '-ImageType ''Development'''
             pwsh: true   
   
@@ -126,7 +129,8 @@ stages:
             regionName: 'ap-southeast-2'
             bucketName: lansa
             #sourceFolder: '$(System.DefaultWorkingDirectory)/aws-templates/CloudFormationWindows'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+            # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+            sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
             filesAcl: 'public-read'
