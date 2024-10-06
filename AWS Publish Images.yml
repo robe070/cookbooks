@@ -15,8 +15,8 @@ resources:
     - repository: _robe070_cookbooks
       type: github
       endpoint: priyadishah
-      name: robe070/cookbooks
-      ref: debug/paas
+      name: priyadishah/cookbooks
+      ref: feature/AWSImageRelease-3.0
 
 variables:
   - group: Template Parameters
