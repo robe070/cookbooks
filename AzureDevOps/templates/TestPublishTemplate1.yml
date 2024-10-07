@@ -5,8 +5,6 @@ parameters:
   - name: stageDisplayname
     type: string
     default: none
-  # - name: dependsOn
-  #   default: []
   - name: jobName
     type: string
     default: none
@@ -79,7 +77,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    # dependsOn: ${{ parameters.dependsOn }}
+    dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
       - job: ${{ parameters.jobName }}

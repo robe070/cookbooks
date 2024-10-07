@@ -61,9 +61,6 @@ parameters:
   - name: gitBranch
     type: string
     default: none
-  # - name: extraSteps
-  #   type: boolean
-  #   default: false
   - name: vmImage
     type: string
     default: windows-2022
