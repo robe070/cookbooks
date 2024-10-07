@@ -12,6 +12,8 @@ param (
     $GitTargetBranch
   )
 
+Write-Host "This happens first"
+
 cd "$($env:Pipeline_Workspace)/$($GitRepoName)"
 
 Write-Host "PATH = $($env:Pipeline_Workspace)/$($GitRepoName)"
