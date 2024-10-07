@@ -138,7 +138,7 @@ stages:
                   } else {
                       Write-Host "path does NOT exist - $path"
                   }
-               displayName: 'Set TemplateUrl task variable'
+            displayName: 'Set TemplateUrl task variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - powershell: |
