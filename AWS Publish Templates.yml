@@ -260,7 +260,11 @@ stages:
         
       - checkout: _lansa_aws-templates
         displayName: Checkout Lansa AWS Templates
-        path: _lansa_aws-templates 
+        path: _lansa_aws-templates
+      
+      - checkout: _lansa_aws-templates-mp
+        displayName: Checkout Lansa AWS Marketplace Templates
+        path: _lansa_aws-templates-mp
 
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (lansa/aws-templates)'
