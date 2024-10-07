@@ -15,13 +15,6 @@ resources:
     endpoint: hirendra-singh
     name: hirendra-singh/aws-templates
     ref: support/scalable_marketplace
-
-
-  # - repository: _robe070_cookbooks
-  #   endpoint: robe070
-  #   type: github
-  #   name: _robe070/cookbooks
-  #   ref: debug/paas
  
   - repository: _robe070_cookbooks
     endpoint: robe070
@@ -122,14 +115,15 @@ stages:
       steps:
         - checkout: self
         - checkout: _lansa_aws-templates
-          path: "s/_lansa_aws-templates" 
+          # path: "s/_lansa_aws-templates" 
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
           inputs:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
             bucketName: '$(BucketNamePreview)'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+            sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
+            # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
