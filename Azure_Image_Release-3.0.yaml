@@ -16,11 +16,11 @@ resources:
       endpoint: debjitbhowmik807
       name: CelestialSystem/azure-quickstart-templates
       ref: feature/139
-    - repository: _robe070_cookbooks
-      type: github
-      endpoint: debjitbhowmik807
-      name: robe070/cookbooks
-      ref: debug/paas
+    # - repository: _robe070_cookbooks
+    #   type: github
+    #   endpoint: debjitbhowmik807
+    #   name: robe070/cookbooks
+    #   ref: debug/paas
 
 variables:
   - group: Template Parameters
@@ -74,6 +74,8 @@ stages:
     jobName: 'w19d142Aus'
     jobDisplayname: 'w19d142 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))   
+    version: w19d-14-2
+    osName: Windows Server 2019
 
 - template: templates/stages-template.yml
   parameters:
