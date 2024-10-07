@@ -99,13 +99,13 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
-        - task: PowerShell@2
-          displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
-          inputs:
-            targetType: filePath
-            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
+        # - task: PowerShell@2
+        #   displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
+        #   inputs:
+        #     targetType: filePath
+        #     # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+        #     filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
+        #     arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
   displayName: S3 patch/paas
