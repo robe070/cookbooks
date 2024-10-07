@@ -105,7 +105,7 @@ stages:
         inputs:
           targetType: filePath
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
-          arguments: '-Version ${{ parameters.version }} -osName ${{ parameters.osName }}'
+          arguments: '-Version ${{ parameters.version }} -osName "${{ parameters.osName }}"'
 
       - powershell: |
           # Print the Gate variables.
