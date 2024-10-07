@@ -143,6 +143,7 @@ stages:
 
           - powershell: |
                 Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
+                Write-Output "TemplateUrl variable value is - $(Task.TemplateUrl)"
             displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
