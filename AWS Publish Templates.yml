@@ -92,7 +92,7 @@ stages:
 
         - checkout: _robe070_cookbooks
           displayName: checkout rob cookbooks
-          path: _robe070_cookbooks
+          path: "s/_robe070_cookbooks"
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
