@@ -118,6 +118,16 @@ stages:
               Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
             displayName: 'Artifact Check : Output Gate Variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Cleanup CFN Template : Small Stack-Template'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: 'ap-southeast-2'
+              arguments: '-Gatestack $(Gate.stack)'
+              # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+              filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
       
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
