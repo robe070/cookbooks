@@ -16,11 +16,17 @@ resources:
     name: hirendra-singh/aws-templates
     ref: support/scalable_marketplace
 
+  # - repository: _robe070_cookbooks
+  #   endpoint: robe070
+  #   type: github
+  #   name: robe070/cookbooks
+  #   ref: debug/paas
+  
   - repository: _robe070_cookbooks
     endpoint: robe070
     type: github
-    name: robe070/cookbooks
-    ref: debug/paas
+    name: hirendra-singh/cookbooks
+    ref: hiren/aws-template-release-3.0
 
 variables:
   - name: CookbooksSource
