@@ -27,7 +27,7 @@ parameters:
     default: ''
   - name: setGateVariable
     type: string
-    default: SetGateVariableCloudAccountId.ps1
+    default: SetGateVariable.ps1
 
 stages:
   - stage: ${{ parameters.stageName }}
