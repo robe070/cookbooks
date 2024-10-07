@@ -86,6 +86,10 @@ stages:
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
+        
+        - checkout: _lansa_aws-templates
+          displayName: Checkout Lansa AWS Templates
+          path: _lansa_aws-templates
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
@@ -113,14 +117,14 @@ stages:
           vmImage: windows-2022
       steps:
         - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
         
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
+        
+        - checkout: _lansa_aws-templates
+          displayName: Checkout Lansa AWS Templates
+          path: _lansa_aws-templates
 
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
