@@ -91,10 +91,13 @@ stages:
         displayName: Downloading latest artefacts from Build Image Release Artefacts 3.0
 
       - checkout: _lansa_azure_quickstart_templates
-
+        path: _lansa_azure_quickstart_templates
+ 
       - checkout: _CelestialSystem_azure_quickstart_templates
-
+        path: _CelestialSystem_azure_quickstart_templates
+ 
       - checkout: _robe070_cookbooks
+        path: _robe070_cookbooks
 
       - task: PowerShell@2
         displayName: 'Artifact Check: Set Gate Variable'
