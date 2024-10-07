@@ -79,7 +79,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    dependsOn: ${{ parameters.dependsOn }}
+    # dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
       - job: ${{ parameters.jobName }}
