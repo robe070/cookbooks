@@ -72,7 +72,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           #arguments: '-BaseImageName ${{ parameters.BaseImageName }} -stackname $(System.stackname)'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''w16d-14-2-IMG'''
+          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
@@ -122,7 +122,7 @@ stages:
                 "ParameterValue": "$(LansaVersionPrevious)"
             }, {
                 "ParameterKey": "11WebserverOSVersion",   
-                "ParameterValue": "$(WebserverOSVersionValue)"
+                "ParameterValue": "$(WebserverOSLatestVersionValue)"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",   
                 "ParameterValue": "$(CookbooksBranch)"
