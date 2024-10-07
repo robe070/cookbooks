@@ -128,17 +128,17 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSSmallShoeSizew16d_14_2'
-#     stagedisplayName: AUS Small Shoe Size w16d-14-2
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w16d-14-2
-#     stackName: AUS-Small
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSSmallShoeSizew16d_14_2'
+    stagedisplayName: AUS Small Shoe Size w16d-14-2
+    dependsOn: S3PatchPAAS
+    # jobName: AgentJob_SmallStack
+    # jobDisplayname: 'Agent job: Small Stack'
+    # baseImageName: w16d-14-2
+    # stackName: AUS-Small
+    # LansaVersion: $(LansaVersionPrevious)
+    # WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
