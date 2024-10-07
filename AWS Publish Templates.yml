@@ -85,23 +85,23 @@ stages:
 
         - checkout: _robe070_cookbooks
           displayName: checkout rob cookbooks
-          # path: _robe070_cookbooks
-          path: "s/_robe070_cookbooks"
+          path: _robe070_cookbooks
+          # path: "s/_robe070_cookbooks"
       
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            # filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
-            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            # filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
@@ -115,30 +115,30 @@ stages:
       steps:
         - checkout: self
         - checkout: _lansa_aws-templates
-          path: "s/_lansa_aws-templates" 
+          # path: "s/_lansa_aws-templates" 
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
           inputs:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
             bucketName: '$(BucketNamePreview)'
-            # sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
-            sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+            sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
+            # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSSmallShoeSizew16d_14_2'
-    stagedisplayName: AUS Small Shoe Size w16d-14-2
-    dependsOn: S3PatchPAAS
-    # jobName: AgentJob_SmallStack
-    # jobDisplayname: 'Agent job: Small Stack'
-    # baseImageName: w16d-14-2
-    # stackName: AUS-Small
-    # LansaVersion: $(LansaVersionPrevious)
-    # WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSSmallShoeSizew16d_14_2'
+#     stagedisplayName: AUS Small Shoe Size w16d-14-2
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_SmallStack
+#     jobDisplayname: 'Agent job: Small Stack'
+#     baseImageName: w16d-14-2
+#     stackName: AUS-Small
+#     LansaVersion: $(LansaVersionPrevious)
+#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
