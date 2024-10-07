@@ -16,6 +16,7 @@ resources:
     name: hirendra-singh/aws-templates
     ref: support/scalable_marketplace
 
+    
   # - repository: _robe070_cookbooks
   #   endpoint: robe070
   #   type: github
