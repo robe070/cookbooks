@@ -135,6 +135,7 @@ stages:
                   if (Test-Path $path) {
                       $url = Get-Content -Path $path
                       Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
+                      Write-Output "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
                   } else {
                       Write-Host "path does NOT exist - $path"
                   }
@@ -143,7 +144,6 @@ stages:
 
           - powershell: |
                 Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
-                Write-Output "TemplateUrl variable value is - $(Task.TemplateUrl)"
             displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
