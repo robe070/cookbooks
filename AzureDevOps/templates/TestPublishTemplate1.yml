@@ -142,8 +142,8 @@ stages:
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - powershell: |
-                  Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
-              displayName: 'Output TemplateUrl Variable value'
+                Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
+            displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
