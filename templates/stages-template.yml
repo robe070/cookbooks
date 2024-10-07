@@ -93,9 +93,6 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
  
-      - checkout: _CelestialSystem_azure_quickstart_templates
-        path: _CelestialSystem_azure_quickstart_templates
- 
       - checkout: _robe070_cookbooks
         path: _robe070_cookbooks
 
@@ -132,7 +129,7 @@ stages:
           subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
           resourceGroupName: '$(ResourceGroup)'
           location: 'Australia East'
-          csmFile: '$(Pipeline.Workspace)/_lansa_azure-quickstart-templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
+          csmFile: '$(Pipeline.Workspace)/_lansa_azure_quickstart_templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
           overrideParameters: '-osName ${{ parameters.osName }} -lansaVersion ${{ parameters.lansaVersion }} -imageId ${{ parameters.imageId }} -imageSource ${{ parameters.imageSource }} -msiURL ${{ parameters.msiURL }} -stackName ${{ parameters.stackName }} -certificateBase64Encoded ${{ parameters.certificateBase64Encoded }} -certificatePassword ${{ parameters.certificatePassword }} -databaseLogin ${{ parameters.databaseLogin }} -databaseLoginPassword ${{ parameters.databaseLoginPassword }} -adminUsername ${{ parameters.adminUsername }} -adminPassword ${{ parameters.adminPassword }} -webUsername ${{ parameters.webUsername }} -webPassword ${{ parameters.webPassword }} -gitBranch ${{ parameters.gitBranch }}'
           deploymentName: CustomTestTemplate
           deploymentOutputs: deploymentOutput
