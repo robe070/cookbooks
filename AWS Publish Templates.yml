@@ -72,72 +72,70 @@ variables:
   - group: "ImageVersion"
 
 stages: 
-- stage: "MergePatchPaas"
-  displayName: Merge patch/pass
-  jobs:
-    - job: Job_1
-      displayName: 'Agent job'
-      timeoutInMinutes: 0
-      pool:
-          vmImage: windows-2022
-      steps:     
-      
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
+# - stage: "MergePatchPaas"
+#   displayName: Merge patch/pass
+#   jobs:
+#     - job: Job_1
+#       displayName: 'Agent job'
+#       timeoutInMinutes: 0
+#       pool:
+#           vmImage: windows-2022
+#       steps:     
+
+#         - checkout: _robe070_cookbooks
+#           displayName: Checkout Rob Cookbooks
+#           path: _robe070_cookbooks
         
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
+#         - checkout: _lansa_aws-templates
+#           displayName: Checkout Lansa AWS Templates
+#           path: _lansa_aws-templates
       
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (robe070/cookbooks)'
-          inputs:
-            targetType: filePath
-            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+#         - task: PowerShell@2
+#           displayName: 'Write access to Git Repo (robe070/cookbooks)'
+#           inputs:
+#             targetType: filePath
+#             # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+#             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+#             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
           
-        - pwsh: gc $(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1 # This is just a test
+#         - task: PowerShell@2
+#           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
+#           inputs:
+#             targetType: filePath
+#             # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+#             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
+#             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
-        - task: PowerShell@2
-          displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
-          inputs:
-            targetType: filePath
-            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
-
-- stage: S3PatchPAAS
-  displayName: S3 patch/paas
-  dependsOn: MergePatchPAAS
-  jobs:
-    - job: Job_1
-      displayName: Agent job
-      pool: 
-          vmImage: windows-2022
-      steps:
-        - checkout: self
+# - stage: S3PatchPAAS
+#   displayName: S3 patch/paas
+#   dependsOn: MergePatchPAAS
+#   jobs:
+#     - job: Job_1
+#       displayName: Agent job
+#       pool: 
+#           vmImage: windows-2022
+#       steps:
+#         - checkout: self
         
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
+#         - checkout: _robe070_cookbooks
+#           displayName: Checkout Rob Cookbooks
+#           path: _robe070_cookbooks
         
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
+#         - checkout: _lansa_aws-templates
+#           displayName: Checkout Lansa AWS Templates
+#           path: _lansa_aws-templates
 
-        - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-          displayName: 'S3 Upload: $(BucketNamePreview)'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            bucketName: '$(BucketNamePreview)'
-            sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
-            # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
-            globExpressions: '*.template'
-            targetFolder: '$(FolderNamePreview)'
-            filesAcl: 'public-read'
+#         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+#           displayName: 'S3 Upload: $(BucketNamePreview)'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'ap-southeast-2'
+#             bucketName: '$(BucketNamePreview)'
+#             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
+#             # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
+#             globExpressions: '*.template'
+#             targetFolder: '$(FolderNamePreview)'
+#             filesAcl: 'public-read'
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -152,17 +150,17 @@ stages:
 #     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSTestShoeSizew16d_15_0'
-    stagedisplayName: 'AUS Test Shoe Size w16d-15-0'
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_TestStack
-    jobDisplayname: 'Agent job: Test Stack'
-    baseImageName: w16d-15-0
-    stackName: AUS-Test
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSTestShoeSizew16d_15_0'
+#     stagedisplayName: 'AUS Test Shoe Size w16d-15-0'
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_TestStack
+#     jobDisplayname: 'Agent job: Test Stack'
+#     baseImageName: w16d-15-0
+#     stackName: AUS-Test
+#     LansaVersion: $(lansaVersion)
+#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
@@ -177,17 +175,17 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSVPCTestsw19d_15_0'
-    stagedisplayName: AUS VPC Tests w19d-15-0
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_VpcStack
-    jobDisplayname: 'Agent job: Vpc Stack'
-    baseImageName: w19d-15-0
-    stackName: AUS-VPC
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSVPCTestsw19d_15_0'
+#     stagedisplayName: AUS VPC Tests w19d-15-0
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_VpcStack
+#     jobDisplayname: 'Agent job: Vpc Stack'
+#     baseImageName: w19d-15-0
+#     stackName: AUS-VPC
+#     LansaVersion: $(lansaVersion)
+#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -201,17 +199,17 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSLargeShoeSizew16d_15_0j'
-    stagedisplayName: AUS Large Shoe Size w16d-15-0j
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_LargeStack
-    jobDisplayname: 'Agent job: Large Stack'
-    baseImageName: w16d-15-0j
-    stackName: AUS-Large
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSLargeShoeSizew16d_15_0j'
+#     stagedisplayName: AUS Large Shoe Size w16d-15-0j
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_LargeStack
+#     jobDisplayname: 'Agent job: Large Stack'
+#     baseImageName: w16d-15-0j
+#     stackName: AUS-Large
+#     LansaVersion: $(lansaVersion)
+#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate.yml
 #   parameters:
@@ -225,29 +223,29 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
-  parameters:
-    stageName: 'AUSJPNVPCTestsw19d_15_0j'
-    stagedisplayName: AUS JPN VPC Tests w19d-15-0j
-    dependsOn: S3PatchPAAS
-    jobName: AgentJob_VpcStack
-    jobDisplayname: 'Agent job: Vpc Stack'
-    baseImageName: w19d-15-0j
-    stackName: AUS-JPN-VPC
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate.yml
+#   parameters:
+#     stageName: 'AUSJPNVPCTestsw19d_15_0j'
+#     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
+#     dependsOn: S3PatchPAAS
+#     jobName: AgentJob_VpcStack
+#     jobDisplayname: 'Agent job: Vpc Stack'
+#     baseImageName: w19d-15-0j
+#     stackName: AUS-JPN-VPC
+#     LansaVersion: $(lansaVersion)
+#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
 - stage: MergeToMarketplaceAndUpload
-  displayName: Merge To Marketplace & Upload
+  # displayName: Merge To Marketplace & Upload
   dependsOn: 
     # - AUSSmallShoeSizew16d_14_2
-    - AUSTestShoeSizew16d_15_0
+    # - AUSTestShoeSizew16d_15_0
     # - AUSDevShoeSizew19d_14_2
-    - AUSVPCTestsw19d_15_0
+    # - AUSVPCTestsw19d_15_0
     # - AUSMediumShoeSizew16d_14_2j
-    - AUSLargeShoeSizew16d_15_0j
+    # - AUSLargeShoeSizew16d_15_0j
     # - AUSUpdateScriptsFALSEw19d_14_2j
-    - AUSJPNVPCTestsw19d_15_0j
+    # - AUSJPNVPCTestsw19d_15_0j
   jobs:
   - job: Job_1
     displayName: 'Agent Job'
