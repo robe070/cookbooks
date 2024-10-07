@@ -127,12 +127,12 @@ stages:
               bucketName: lansa
               sourceFolder: templates/support/scalable/marketplace
               globExpressions: TemplateUrl.txt
-              targetFolder: '$(Pipeline.Workspace)'
+              targetFolder: '$(System.DefaultWorkingDirectory)'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - powershell: |
                 Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
-                $path = "$(Pipeline.Workspace)/templates/support/scalable/marketplace/TemplateUrl.txt"
+                $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
                   if (Test-Path $path) {
                       $url = Get-Content -Path $path
                       Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
@@ -140,10 +140,11 @@ stages:
                       Write-Host "path does NOT exist - $path"
                   }
             displayName: 'Set TemplateUrl task variable'
+            name: Task
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - powershell: |
-                Write-Host "TemplateUrl variable value is - '$(Task.TemplateUrl)'"
+                Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
             displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
