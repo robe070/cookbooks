@@ -70,8 +70,9 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableCloudAccountId.ps1"
+          #arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
+          arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
+          filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1"
 
       - pwsh: |
           # Print the Gate variables.
