@@ -67,9 +67,6 @@ parameters:
   - name: gitBranch
     type: string
     default: none
-  - name: jobDemand
-    type: string
-    default: none
   - name: jobcondition
     type: string
     default: none
@@ -87,7 +84,6 @@ stages:
 
       pool:
         vmImage: ${{ parameters.vmImage }}
-        demands: ${{ parameters.jobDemand }}
 
       steps:
 
