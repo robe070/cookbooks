@@ -38,6 +38,7 @@ resources:
   pipelines:
     - pipeline: _Build Cloud Account Id Artefacts
       source: 'Build Cloud Account Id Artefacts  3.0'
+      
     - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
 
@@ -55,8 +56,8 @@ resources:
     - repository: _robe070_cookbooks
       type: github
       endpoint: priyadishah
-      name: robe070/cookbooks
-      ref: debug/paas
+      name: priyadishah/cookbooks
+      ref: feature/AWSImageRelease-3.0
 
 pool:
   vmImage: windows-2022
