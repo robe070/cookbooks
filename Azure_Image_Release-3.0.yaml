@@ -85,6 +85,8 @@ stages:
     jobName: 'w19d150Aus'
     jobDisplayname: 'w19d150 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+    version: w19d-15-0
+    osName: Windows Server 2019
 
 - template: templates/stages-template.yml
   parameters:
