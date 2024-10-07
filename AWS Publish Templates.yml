@@ -20,7 +20,7 @@ resources:
   - repository: _robe070_cookbooks
     endpoint: robe070
     type: github
-    name: "s/_robe070/cookbooks"
+    name: _robe070/cookbooks
     ref: debug/paas
  
   # - repository: _robe070_cookbooks
