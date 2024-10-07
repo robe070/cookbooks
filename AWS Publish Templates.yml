@@ -16,18 +16,18 @@ resources:
     name: hirendra-singh/aws-templates
     ref: support/scalable_marketplace
 
-    
-  # - repository: _robe070_cookbooks
-  #   endpoint: robe070
-  #   type: github
-  #   name: robe070/cookbooks
-  #   ref: debug/paas
- 
+
   - repository: _robe070_cookbooks
     endpoint: robe070
     type: github
-    name: hirendra-singh/cookbooks
-    ref: hiren/aws-template-release-3.0  
+    name: "s/_robe070/cookbooks"
+    ref: debug/paas
+ 
+  # - repository: _robe070_cookbooks
+  #   endpoint: robe070
+  #   type: github
+  #   name: hirendra-singh/cookbooks
+  #   ref: hiren/aws-template-release-3.0  
 
 variables:
   - name: CookbooksSource
@@ -98,14 +98,14 @@ stages:
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
+            filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
 
 - stage: S3PatchPAAS
