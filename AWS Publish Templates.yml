@@ -87,7 +87,7 @@ stages:
       pool:
           vmImage: windows-2022
       steps:     
-        - checkout: self
+        # - checkout: self
         - checkout: _robe070_cookbooks
           path: _robe070_cookbooks
       
