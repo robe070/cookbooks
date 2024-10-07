@@ -5,8 +5,8 @@ parameters:
   - name: stageDisplayname
     type: string
     default: none
-  - name: dependsOn
-    default: []
+  # - name: dependsOn
+  #   default: []
   - name: jobName
     type: string
     default: none
@@ -143,7 +143,7 @@ stages:
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - powershell: |
-                Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
+                Write-Host "TemplateUrl variable value is - '$(Task.TemplateUrl)'"
             displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
