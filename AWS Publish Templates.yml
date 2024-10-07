@@ -238,14 +238,14 @@ stages:
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
   dependsOn: 
-    - AUSSmallShoeSizew16d_14_2
-    # - AUSTestShoeSizew16d_15_0
+    # - AUSSmallShoeSizew16d_14_2
+    - AUSTestShoeSizew16d_15_0
     # - AUSDevShoeSizew19d_14_2
-    # - AUSVPCTestsw19d_15_0
-    - AUSMediumShoeSizew16d_14_2j
-    # - AUSLargeShoeSizew16d_15_0j
-    - AUSUpdateScriptsFALSEw19d_14_2j
-    # - AUSJPNVPCTestsw19d_15_0j
+    - AUSVPCTestsw19d_15_0
+    # - AUSMediumShoeSizew16d_14_2j
+    - AUSLargeShoeSizew16d_15_0j
+    # - AUSUpdateScriptsFALSEw19d_14_2j
+    - AUSJPNVPCTestsw19d_15_0j
   jobs:
   - job: Job_1
     displayName: 'Agent Job'
