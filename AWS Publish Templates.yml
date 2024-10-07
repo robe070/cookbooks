@@ -331,17 +331,17 @@ stages:
           
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
-  parameters:
-    stageName: ParisPrevieww16d_14_2
-    stagedisplayName: Paris Preview w16d-14-2
-    dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_ParisDeploymentTest 
-    jobDisplayname: 'Agent job: Paris Deployment Test'
-    baseImageName: w16d-14-2
-    stackName: Paris-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+# - template: AzureDevOps/templates/TestPublishTemplate1.yml
+#   parameters:
+#     stageName: ParisPrevieww16d_14_2
+#     stagedisplayName: Paris Preview w16d-14-2
+#     dependsOn: SubmittoAWSAndWaitforPreview
+#     jobName: AgentJob_ParisDeploymentTest 
+#     jobDisplayname: 'Agent job: Paris Deployment Test'
+#     baseImageName: w16d-14-2
+#     stackName: Paris-Preview
+#     LansaVersion: $(LansaVersionPrevious)
+#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
