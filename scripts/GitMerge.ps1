@@ -14,6 +14,8 @@ param (
 
 cd "$($env:Pipeline_Workspace)/$($GitRepoName)"
 
+Write-Host "PATH = $($env:Pipeline_Workspace)/$($GitRepoName)"
+
 # git fetch
 git fetch
 if (-not $?) {
