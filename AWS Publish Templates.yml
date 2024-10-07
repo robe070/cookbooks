@@ -345,7 +345,6 @@ stages:
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
-    extraSteps: true
     stageName: OregonPrevieww16d_15_0
     stagedisplayName: Oregon Preview w16d-15-0
     dependsOn: SubmittoAWSAndWaitforPreview
@@ -358,7 +357,6 @@ stages:
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
-#     extraSteps: true
 #     stageName: TokyoPrevieww19d_14_2
 #     stagedisplayName: Tokyo Preview w19d-14-2
 #     dependsOn: SubmittoAWSAndWaitforPreview
@@ -371,7 +369,6 @@ stages:
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
-    extraSteps: true
     stageName: N_Virginia_Preview_w19d_15_0
     stagedisplayName: N. Virginia Preview w19d-15-0
     dependsOn: SubmittoAWSAndWaitforPreview
@@ -384,7 +381,6 @@ stages:
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
-    extraSteps: true
     stageName: LondonPreview_w19d_15_0j
     stagedisplayName: London Preview w19d-15-0j
     dependsOn: SubmittoAWSAndWaitforPreview
@@ -397,7 +393,6 @@ stages:
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
-#     extraSteps: true
 #     stageName: N_CaliforniaPreview_w16d_14_2j
 #     stagedisplayName: N. California Preview w16d-14-2j
 #     dependsOn: SubmittoAWSAndWaitforPreview
@@ -410,7 +405,6 @@ stages:
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
-#     extraSteps: true
 #     stageName: MumbaiPreview_w19d_14_2j
 #     stagedisplayName: Mumbai Preview w19d-14-2j
 #     dependsOn: SubmittoAWSAndWaitforPreview
@@ -423,7 +417,6 @@ stages:
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
-    extraSteps: true
     stageName: HongKongPreview_w16d_15_0j
     stagedisplayName: Hong Kong Preview w16d-15-0j
     dependsOn: SubmittoAWSAndWaitforPreview
