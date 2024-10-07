@@ -32,6 +32,7 @@ variables:
 stages:
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w12r2d142Aus'
     stagedisplayName: 'w12r2d142 Aus'
     jobName: 'w12r2d142Aus'
@@ -40,6 +41,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w12r2d150Aus'
     stagedisplayName: 'w12r2d150 Aus'
     jobName: 'w12r2d150Aus'
@@ -48,6 +50,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w16d142Aus'
     stagedisplayName: 'w16d142 Aus'
     jobName: 'w16d142Aus'
@@ -56,6 +59,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w16d150Aus'
     stagedisplayName: 'w16d150 Aus'
     jobName: 'w16d150Aus'
@@ -64,6 +68,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w19d142Aus'
     stagedisplayName: 'w19d142 Aus' 
     jobName: 'w19d142Aus'
@@ -72,6 +77,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w19d142Aus'
     stagedisplayName: 'w19d142 Aus' 
     jobName: 'w19d142Aus'
@@ -80,6 +86,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w19d150Aus'
     stagedisplayName: 'w19d150 Aus' 
     jobName: 'w19d150Aus'
@@ -88,6 +95,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w16d142jAus'
     stagedisplayName: 'w16d142j Aus' 
     jobName: 'w16d142jAus'
@@ -96,6 +104,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w16d150jAus'
     stagedisplayName: 'w16d150j Aus' 
     jobName: 'w16d150jAus'
@@ -104,6 +113,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w19d142jAus'
     stagedisplayName: 'w19d142j Aus' 
     jobName: 'w19d142jAus'
@@ -112,6 +122,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
+    dependsOn:
     stageName: 'w19d150jAus'
     stagedisplayName: 'w19d150j Aus' 
     jobName: 'w19d150jAus'
