@@ -343,18 +343,18 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: OregonPrevieww16d_15_0
-#     stagedisplayName: Oregon Preview w16d-15-0
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_USWest2_Oregon_DeploymentTest  
-#     jobDisplayname: 'Agent job: US us-west-2 (Oregon) Deployment Test'
-#     baseImageName: w16d-15-0
-#     stackName: Oregon-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    extraSteps: true
+    stageName: OregonPrevieww16d_15_0
+    stagedisplayName: Oregon Preview w16d-15-0
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_USWest2_Oregon_DeploymentTest  
+    jobDisplayname: 'Agent job: US us-west-2 (Oregon) Deployment Test'
+    baseImageName: w16d-15-0
+    stackName: Oregon-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
@@ -369,31 +369,31 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: N_Virginia_Preview_w19d_15_0
-#     stagedisplayName: N. Virginia Preview w19d-15-0
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_NVirginia_Deployment_Test 
-#     jobDisplayname: 'Agent job : N. Virginia [us-east-1] Deployment Test'
-#     baseImageName: w19d-15-0
-#     stackName: N-Virginia-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    extraSteps: true
+    stageName: N_Virginia_Preview_w19d_15_0
+    stagedisplayName: N. Virginia Preview w19d-15-0
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_NVirginia_Deployment_Test 
+    jobDisplayname: 'Agent job : N. Virginia [us-east-1] Deployment Test'
+    baseImageName: w19d-15-0
+    stackName: N-Virginia-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: LondonPreview_w19d_15_0j
-#     stagedisplayName: London Preview w19d-15-0j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_Europe_London_Deployment_Test 
-#     jobDisplayname: 'Agent job : Europe (London) Deployment Test'
-#     baseImageName: w19d-15-0j
-#     stackName: London-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    extraSteps: true
+    stageName: LondonPreview_w19d_15_0j
+    stagedisplayName: London Preview w19d-15-0j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_Europe_London_Deployment_Test 
+    jobDisplayname: 'Agent job : Europe (London) Deployment Test'
+    baseImageName: w19d-15-0j
+    stackName: London-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
@@ -421,116 +421,135 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     extraSteps: true
-#     stageName: HongKongPreview_w16d_15_0j
-#     stagedisplayName: Hong Kong Preview w16d-15-0j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_HongKong_Deployment_Test 
-#     jobDisplayname: 'Agent job : Hong Kong Deployment Test'
-#     baseImageName: w16d-15-0j
-#     stackName: Hong-Kong-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    extraSteps: true
+    stageName: HongKongPreview_w16d_15_0j
+    stagedisplayName: Hong Kong Preview w16d-15-0j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_HongKong_Deployment_Test 
+    jobDisplayname: 'Agent job : Hong Kong Deployment Test'
+    baseImageName: w16d-15-0j
+    stackName: Hong-Kong-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - stage: WaitForLive
-#   displayName: Wait For Live
-#   dependsOn:
-#   - ParisPrevieww16d_14_2
-#   - OregonPrevieww16d_15_0
-#   - TokyoPrevieww19d_14_2
-#   - N_Virginia_Preview_w19d_15_0
-#   - LondonPreview_w19d_15_0j
-#   - N_CaliforniaPreview_w16d_14_2j
-#   - MumbaiPreview_w19d_14_2j
-#   - HongKongPreview_w16d_15_0j
-#   jobs:
-#   - job: Job_1
-#     displayName: 'Agentless Job'
-#     pool: server
-#     steps:     
-#     - task: ManualIntervention@8
-#       displayName: 'Manual Intervention : Merge & Go Live'
-#       inputs:
-#         instructions: |
-#           Preview tests have completed successfully.        
-#           Ready to go live.        
-#           Merge cookbooks patch/paas to support/scalable         
-#           Click the button to go live.        
-#           Note that once the first template has been published that there is no preview stage. Its live straightaway. When/if that occurs, only the merge is required, then this stage can be continued. Consideration should be made of moving this Stage merge before the "Marketplace URL tests" and doing the merge then.
+- stage: WaitForLive
+  displayName: Wait For Live
+  dependsOn:
+  # - ParisPrevieww16d_14_2
+  - OregonPrevieww16d_15_0
+  # - TokyoPrevieww19d_14_2
+  - N_Virginia_Preview_w19d_15_0
+  - LondonPreview_w19d_15_0j
+  # - N_CaliforniaPreview_w16d_14_2j
+  # - MumbaiPreview_w19d_14_2j
+  - HongKongPreview_w16d_15_0j
+  jobs:
+  - job: Job_1
+    displayName: 'Agentless Job'
+    pool: server
+    steps:     
+    - task: ManualIntervention@8
+      displayName: 'Manual Intervention : Merge & Go Live'
+      inputs:
+        instructions: |
+          Preview tests have completed successfully.        
+          Ready to go live.        
+          Merge cookbooks patch/paas to support/scalable         
+          Click the button to go live.        
+          Note that once the first template has been published that there is no preview stage. Its live straightaway. When/if that occurs, only the merge is required, then this stage can be continued. Consideration should be made of moving this Stage merge before the "Marketplace URL tests" and doing the merge then.
       
-# - stage: MergeAndTag
-#   displayName: Merge & Tag
-#   dependsOn:
-#     - WaitForLive
-#   jobs:
-#   - job: Job_1
-#     displayName: 'Agent job : Dev Stack'
-#     timeoutInMinutes: 120
-#     pool:
-#       vmImage: windows-2022
-#     steps:
-#     - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-#       displayName: 'Artifact Check : Set Gate Variable'
-#       inputs:
-#         awsCredentials: $(awsCredentials)
-#         regionName: $(RegressionTestRegion)
-#         arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
-#         filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+- stage: MergeAndTag
+  displayName: Merge & Tag
+  dependsOn:
+    - WaitForLive
+  jobs:
+  - job: Job_1
+    displayName: 'Agent job : Dev Stack'
+    timeoutInMinutes: 120
+    pool:
+      vmImage: windows-2022
+    steps:
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob Cookbooks
+        path: _robe070_cookbooks
+        
+      - checkout: _lansa_aws-templates
+        displayName: Checkout Lansa AWS Templates
+        path: _lansa_aws-templates
+      
+      - checkout: _lansa_aws-templates-mp
+        displayName: Checkout Lansa AWS Marketplace Templates
+        path: _lansa_aws-templates-mp
 
-#     - pwsh: |
-#        # Print the Gate variables.
-#        Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-#        displayName: 'Artifact Check : Output Gate Variable'
+      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        displayName: 'Artifact Check : Set Gate Variable'
+        inputs:
+          awsCredentials: $(awsCredentials)
+          regionName: $(RegressionTestRegion)
+          arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
+          # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+
+      - pwsh: |
+         # Print the Gate variables.
+        Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+        displayName: 'Artifact Check : Output Gate Variable'
       
-#     - task: PowerShell@2
-#       displayName: 'Write access to Git Repo (robe070/cookbooks)'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#         arguments: '-GitBranch ''$(CookbooksBranchPreview)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Write access to Git Repo (robe070/cookbooks)'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          arguments: '-GitBranch ''$(CookbooksBranchPreview)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+          pwsh: true
       
-#     - task: PowerShell@2
-#       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
-#         arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranchPreview)'' -GitTargetBranch ''$(CookbooksBranchProduction)'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitMerge.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
+          arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranchPreview)'' -GitTargetBranch ''$(CookbooksBranchProduction)'''
+          pwsh: true
       
-#     - task: PowerShell@2
-#       displayName: 'Write access to Templates Marketplace Branch'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#         arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Write access to Templates Marketplace Branch'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
+          pwsh: true
       
-#     - task: PowerShell@2
-#       displayName: 'Tag Templates Marketplace Branch'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
-#         arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Tag Templates Marketplace Branch'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
+          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
+          pwsh: true
       
-#     - task: PowerShell@2
-#       displayName: 'Write access to Templates Support Branch'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-#         arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Write access to Templates Support Branch'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+          arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'''
+          pwsh: true
       
-#     - task: PowerShell@2
-#       displayName: 'Tag Templates Support Branch'
-#       inputs:
-#         targetType: filePath
-#         filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
-#         arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
-#         pwsh: true
+      - task: PowerShell@2
+        displayName: 'Tag Templates Support Branch'
+        inputs:
+          targetType: filePath
+          # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
+          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
+          pwsh: true
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
@@ -544,17 +563,17 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: IrelandProd_w16d_15_0
-#     stagedisplayName: Ireland Prod w16d-15-0
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Ireland_Deployment_Test  
-#     jobDisplayname: 'Agent job : Ireland - Deployment Test'
-#     baseImageName: w16d-15-0
-#     stackName: Ireland-Prod
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: IrelandProd_w16d_15_0
+    stagedisplayName: Ireland Prod w16d-15-0
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Ireland_Deployment_Test  
+    jobDisplayname: 'Agent job : Ireland - Deployment Test'
+    baseImageName: w16d-15-0
+    stackName: Ireland-Prod
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
@@ -568,17 +587,17 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious))
 #     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: Ohio_Prod_w19d_15_0
-#     stagedisplayName: Ohio Prod w19d-15-0
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_US_useast2_Deployment_Test  
-#     jobDisplayname: 'Agent job : US [us-east-2] Deployment Test'
-#     baseImageName: w19d-15-0
-#     stackName: Ohio-Prod
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: Ohio_Prod_w19d_15_0
+    stagedisplayName: Ohio Prod w19d-15-0
+    dependsOn: MergeAndTag
+    jobName: AgentJob_US_useast2_Deployment_Test  
+    jobDisplayname: 'Agent job : US [us-east-2] Deployment Test'
+    baseImageName: w19d-15-0
+    stackName: Ohio-Prod
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 # - template: AzureDevOps/templates/TestPublishTemplate1.yml
 #   parameters:
@@ -616,14 +635,14 @@ stages:
 #     LansaVersion: $(LansaVersionPrevious)
 #     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: Bahrain_Prod_w19d_15_0j
-#     stagedisplayName: Bahrain Prod w19d-15-0j
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Bahrain_Deployment_Test 
-#     jobDisplayname: 'Agent job : Bahrain Deployment Test'
-#     baseImageName: w19d-15-0j
-#     stackName: Bahrain-Prod
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: Bahrain_Prod_w19d_15_0j
+    stagedisplayName: Bahrain Prod w19d-15-0j
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Bahrain_Deployment_Test 
+    jobDisplayname: 'Agent job : Bahrain Deployment Test'
+    baseImageName: w19d-15-0j
+    stackName: Bahrain-Prod
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
