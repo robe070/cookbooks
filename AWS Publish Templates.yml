@@ -105,7 +105,7 @@ stages:
 
 - stage: S3PatchPAAS
   displayName: S3 patch/paas
-  dependsOn: MergePatchPAAS
+  # dependsOn: MergePatchPAAS
   jobs:
     - job: Job_1
       displayName: Agent job
