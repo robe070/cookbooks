@@ -82,10 +82,12 @@ stages:
           vmImage: windows-2022
       steps:     
         - checkout: self
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
+
+
+        # - checkout: _robe070_cookbooks
+        #   displayName: Checkout Rob Cookbooks
+        #   path: _robe070_cookbooks
         
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
