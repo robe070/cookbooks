@@ -317,7 +317,8 @@ stages:
     pool: server
     timeoutInMinutes: 43200
     steps:
-    - task: ManualIntervention@8
+    - task: ManualValidation@1  
+    # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Submit Artefacts'
       timeoutInMinutes: 1440
       inputs:
