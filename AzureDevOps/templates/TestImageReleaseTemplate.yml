@@ -135,10 +135,10 @@ stages:
                 "ParameterValue": "$(Gate.ImageID)"
             }, {
                 "ParameterKey": "LansaVersion",   
-                "ParameterValue": "$(paramLansaVersion)"
+                "ParameterValue": "${{ parameters.paramLansaVersion }}"
             },  {
                 "ParameterKey": "11WebserverOSVersion",   
-                "ParameterValue": "$(paramWebserverOSVersionValue)"
+                "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",   
                 "ParameterValue": "$(CookbooksBranch)"
@@ -147,7 +147,7 @@ stages:
                 "ParameterValue": "$(TemplateS3Namespace)"
             }, {
                 "ParameterKey": "$(LansaMSIKey)",   
-                "ParameterValue": "$(parammsiURL)"
+                "ParameterValue": "${{ parameters.parammsiURL }}"
             }, {
                 "ParameterKey": "CurrentVPC",   
                 "ParameterValue": "$(CurrentVPC)"
