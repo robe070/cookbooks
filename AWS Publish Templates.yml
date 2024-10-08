@@ -503,7 +503,8 @@ stages:
 
       - pwsh: |
           # Print the Gate variables.
-          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+          # Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'
       
       - task: PowerShell@2
