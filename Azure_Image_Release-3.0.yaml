@@ -360,7 +360,7 @@ stages:
   displayName: 'Go Live'
   dependsOn: 
     - w22d142AusEastPreview
-    - w22d142AusEastPreview
+  #  - w22d142AusEastPreview
     - w22d142USEastPreview
     - w22d142FranceCentralPreview
     - w22d150AusEastPreview
@@ -442,21 +442,21 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d142USEastProduction'
-    stagedisplayName: 'w12r2d142 US East Production'
-    jobName: 'w12r2d142USEastProduction'
-    jobDisplayname: 'w12r2d142 US East Production'
+    stageName: 'w22d142USEastProduction'
+    stagedisplayName: 'w22d142 US East Production'
+    jobName: 'w22d142USEastProduction'
+    jobDisplayname: 'w22d142 US East Production'
     dependsOn: CookbooksMergeAndTag
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d150AsiaEastProduction'
-    stagedisplayName: 'w12r2d150 Asia East Production'
-    jobName: 'w12r2d150AsiaEastProduction'
-    jobDisplayname: 'w12r2d150 Asia East Production'
+    stageName: 'w22d150AsiaEastProduction'
+    stagedisplayName: 'w22d150 Asia East Production'
+    jobName: 'w22d150AsiaEastProduction'
+    jobDisplayname: 'w22d150 Asia East Production'
     dependsOn: CookbooksMergeAndTag
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
