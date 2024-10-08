@@ -120,10 +120,6 @@ stages:
                 "ParameterValue": "$(DBPasswordValue)"
             }, 
             {
-                "ParameterKey": "TagValue",
-                "ParameterValue": "Production"
-            }, 
-            {
                 "ParameterKey": "$(WebPasswordKey)",
                 "ParameterValue": "$(WebPasswordValue)"
             }, {
