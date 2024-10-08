@@ -495,7 +495,8 @@ stages:
       
       # Added new task to override Gate.Version value 
       - pwsh: |
-          Write-Host "##vso[task.setvariable variable=version;isOutput=true]$(w19d-15-0)-$(VersionText-TemplateCI)"
+          $baseImageName = "w19d-15-0"
+          Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$(VersionText-TemplateCI)"
         name: UpdatedGate
         displayName: 'Override the Gate.Version variable with TemplateCI value'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
