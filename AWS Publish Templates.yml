@@ -320,7 +320,6 @@ stages:
     - task: ManualValidation@1  
     # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Submit Artefacts'
-      timeoutInMinutes: 1440
       inputs:
         instructions: |
           Submit artefacts to AWS
@@ -445,8 +444,10 @@ stages:
   - job: Job_1
     displayName: 'Agentless Job'
     pool: server
-    steps:     
-    - task: ManualIntervention@8
+    timeoutInMinutes: 43200
+    steps:  
+    - task: ManualValidation@1   
+    # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Merge & Go Live'
       inputs:
         instructions: |
