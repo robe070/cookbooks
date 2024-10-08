@@ -28,6 +28,15 @@ parameters:
   - name: setGateVariable
     type: string
     default: SetGateVariable.ps1
+  - name: paramLansaVersion
+    type: string
+    default: none
+  - name: parammsiURL
+    type: string
+    default: none
+  - name: paramWebserverOSVersionValue
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -126,10 +135,10 @@ stages:
                 "ParameterValue": "$(Gate.ImageID)"
             }, {
                 "ParameterKey": "LansaVersion",   
-                "ParameterValue": "$(lansaVersion)"
+                "ParameterValue": "$(paramLansaVersion)"
             },  {
                 "ParameterKey": "11WebserverOSVersion",   
-                "ParameterValue": "$(WebserverOSLatestVersionValue)"
+                "ParameterValue": "$(paramWebserverOSVersionValue)"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",   
                 "ParameterValue": "$(CookbooksBranch)"
@@ -138,7 +147,7 @@ stages:
                 "ParameterValue": "$(TemplateS3Namespace)"
             }, {
                 "ParameterKey": "$(LansaMSIKey)",   
-                "ParameterValue": "$(msiURLLatest)"
+                "ParameterValue": "$(parammsiURL)"
             }, {
                 "ParameterKey": "CurrentVPC",   
                 "ParameterValue": "$(CurrentVPC)"
