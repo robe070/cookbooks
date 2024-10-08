@@ -470,7 +470,7 @@ stages:
     steps:
       - download: _Build Image Release Artefacts
         displayName: Download artifacts from Build Image Release Artefacts 3.0
-        
+
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
         path: _robe070_cookbooks
@@ -492,6 +492,13 @@ stages:
           arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
           # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+      
+      # Added new task to override Gate.Version value 
+      - pwsh: |
+          Write-Host "##vso[task.setvariable variable=version;isOutput=true]$(w19d-15-0)-$(VersionText-TemplateCI)"
+        name: UpdatedGate
+        displayName: 'Override the Gate.Version variable with TemplateCI value'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - pwsh: |
           # Print the Gate variables.
