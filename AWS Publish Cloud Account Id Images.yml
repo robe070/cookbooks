@@ -130,7 +130,6 @@ stages:
     stageDisplayname: 'v14sp2-scalable'
     jobName: 'w19d150'
     jobDisplayname: 'w19d-15-0'
-    paramLansaVersion: $(lansaVersionPrevious)
     jobDemand: DotNetFramework
     setGateVariable: SetGateVariable.ps1
     jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
