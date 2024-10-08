@@ -34,23 +34,23 @@ stages:
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w12r2d142Aus'
-    stagedisplayName: 'w12r2d142 Aus'
+    stageName: 'w22d142Aus'
+    stagedisplayName: 'w22d142 Aus'
     jobName: 'w12r2d142Aus'
-    jobDisplayname: 'w12r2d142 Aus'
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w12r2d-14-2
+    jobDisplayname: 'w22d142 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    Version: w22d-14-2
     osName: Windows Server 2012
 
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w12r2d150Aus'
-    stagedisplayName: 'w12r2d150 Aus'
-    jobName: 'w12r2d150Aus'
-    jobDisplayname: 'w12r2d150 Aus'
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w12r2d-15-0
+    stageName: 'w22d150Aus'
+    stagedisplayName: 'w22d150 Aus'
+    jobName: 'w22d150Aus'
+    jobDisplayname: 'w22d150 Aus'
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    Version: w22d-15-0
     osName: Windows Server 2012
 
 - template: templates/stages-template.yml
@@ -196,57 +196,57 @@ stages:
       
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d142AusEastPreview'
-    stagedisplayName: 'w12r2d142 Aus East Preview'
-    jobName: 'w12r2d142AusEastPreview'
-    jobDisplayname: 'w12r2d142 Aus East Preview'
+    stageName: 'w22d142AusEastPreview'
+    stagedisplayName: 'w22d142 Aus East Preview'
+    jobName: 'w22d142AusEastPreview'
+    jobDisplayname: 'w22d142 Aus East Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d142USEastPreview'
-    stagedisplayName: 'w12r2d142 US East Preview'
-    jobName: 'w12r2d142USEastPreview'
-    jobDisplayname: 'w12r2d142 US East Preview'
+    stageName: 'w22d142USEastPreview'
+    stagedisplayName: 'w22d142 US East Preview'
+    jobName: 'w22d142USEastPreview'
+    jobDisplayname: 'w22d142 US East Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
     stageName: 'w12r2d142FranceCentralPreview'
-    stagedisplayName: 'w12r2d142 France Central Preview'
-    jobName: 'w12r2d142FranceCentralPreview'
-    jobDisplayname: 'w12r2d142 France Central Preview'
+    stagedisplayName: 'w22d142 France Central Preview'
+    jobName: 'w22d142FranceCentralPreview'
+    jobDisplayname: 'w22d142 France Central Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d150AusEastPreview'
-    stagedisplayName: 'w12r2d150 Aus East Preview'
-    jobName: 'w12r2d150AusEastPreview'
-    jobDisplayname: 'w12r2d150 Aus East Preview'
+    stageName: 'w22d150AusEastPreview'
+    stagedisplayName: 'w22d150 Aus East Preview'
+    jobName: 'w22d150AusEastPreview'
+    jobDisplayname: 'w22d150 Aus East Preview'
     dependsOn: MergePatch_PAASCookbooks
     jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d150USEastPreview'
-    stagedisplayName: 'w12r2d150 US East Preview'
-    jobName: 'w12r2d150USEastPreview'
-    jobDisplayname: 'w12r2d150 US East Preview'
+    stageName: 'w22d150USEastPreview'
+    stagedisplayName: 'w22d150 US East Preview'
+    jobName: 'w22d150USEastPreview'
+    jobDisplayname: 'w22d150 US East Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d150FranceCentralPreview'
-    stagedisplayName: 'w12r2d150 France Central Preview'
-    jobName: 'w12r2d150FranceCentralPreview'
-    jobDisplayname: 'w12r2d150 France Central Preview'
+    stageName: 'w22d150FranceCentralPreview'
+    stagedisplayName: 'w22d150 France Central Preview'
+    jobName: 'w22d150FranceCentralPreview'
+    jobDisplayname: 'w22d150 France Central Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
 
 - template: templates/stages-template.yml
   parameters:
