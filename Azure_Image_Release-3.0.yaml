@@ -36,11 +36,11 @@ stages:
     dependsOn:
     stageName: 'w22d142Aus'
     stagedisplayName: 'w22d142 Aus'
-    jobName: 'w12r2d142Aus'
+    jobName: 'w22d142Aus'
     jobDisplayname: 'w22d142 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w22d-14-2
-    osName: Windows Server 2012
+    osName: Windows Server 2022
 
 - template: templates/stages-template.yml
   parameters:
@@ -51,7 +51,7 @@ stages:
     jobDisplayname: 'w22d150 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w22d-15-0
-    osName: Windows Server 2012
+    osName: Windows Server 2022
 
 - template: templates/stages-template.yml
   parameters:
