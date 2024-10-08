@@ -144,8 +144,8 @@ stages:
 - stage: 'PublishPreviewImages'
   displayName: 'Publish Preview Images'
   dependsOn: 
-    - w12r2d150Aus
-    - w12r2d150Aus
+    - w22d150Aus
+    - w22d150Aus
     - w16d142Aus
     - w16d150Aus
     - w19d142Aus
@@ -359,13 +359,13 @@ stages:
 - stage: 'GoLive'
   displayName: 'Go Live'
   dependsOn: 
-    - w12r2d142AusEastPreview
-    - w12r2d142AusEastPreview
-    - w12r2d142USEastPreview
-    - w12r2d142FranceCentralPreview
-    - w12r2d150AusEastPreview
-    - w12r2d150USEastPreview
-    - w12r2d150FranceCentralPreview
+    - w22d142AusEastPreview
+    - w22d142AusEastPreview
+    - w22d142USEastPreview
+    - w22d142FranceCentralPreview
+    - w22d150AusEastPreview
+    - w22d150USEastPreview
+    - w22d150FranceCentralPreview
     - w16d142EurWestPreview
     - w16d142USWestPreview
     - w16d150SANorthPreview
