@@ -137,17 +137,17 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSSmallShoeSizew16d_14_2'
-#     stagedisplayName: AUS Small Shoe Size w16d-14-2
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w16d-14-2
-#     stackName: AUS-Small
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSSmallShoeSizew16d_14_2'
+    stagedisplayName: AUS Small Shoe Size w16d-14-2
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_SmallStack
+    jobDisplayname: 'Agent job: Small Stack'
+    baseImageName: w16d-14-2
+    stackName: AUS-Small
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
@@ -163,17 +163,17 @@ stages:
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSDevShoeSizew19d_14_2'
-#     stagedisplayName: 'AUS Dev Shoe Size w19d-14-2s'
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_DevStack
-#     jobDisplayname: 'Agent job: Dev Stack'
-#     baseImageName: w19d-14-2s
-#     stackName: AUS-Dev
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSDevShoeSizew19d_14_2'
+    stagedisplayName: 'AUS Dev Shoe Size w19d-14-2s'
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_DevStack
+    jobDisplayname: 'Agent job: Dev Stack'
+    baseImageName: w19d-14-2s
+    stackName: AUS-Dev
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -187,65 +187,65 @@ stages:
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSMediumShoeSizew16d_14_2j'
-#     stagedisplayName: AUS Medium Shoe Size w16d-14-2j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_MediumStack
-#     jobDisplayname: 'Agent job: Medium Stack'
-#     baseImageName: w16d-14-2j
-#     stackName: AUS-Medium
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSMediumShoeSizew16d_14_2j'
+    stagedisplayName: AUS Medium Shoe Size w16d-14-2j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_MediumStack
+    jobDisplayname: 'Agent job: Medium Stack'
+    baseImageName: w16d-14-2j
+    stackName: AUS-Medium
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSLargeShoeSizew16d_15_0j'
-#     stagedisplayName: AUS Large Shoe Size w16d-15-0j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_LargeStack
-#     jobDisplayname: 'Agent job: Large Stack'
-#     baseImageName: w16d-15-0j
-#     stackName: AUS-Large
-#     LansaVersion: $(lansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSLargeShoeSizew16d_15_0j'
+    stagedisplayName: AUS Large Shoe Size w16d-15-0j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_LargeStack
+    jobDisplayname: 'Agent job: Large Stack'
+    baseImageName: w16d-15-0j
+    stackName: AUS-Large
+    LansaVersion: $(lansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSUpdateScriptsFALSEw19d_14_2j'
-#     stagedisplayName: AUS Update Scripts FALSE w19d-14-2j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_UpdateFalseStack
-#     jobDisplayname: 'Agent job: Update False Stack'
-#     baseImageName: w19d-14-2j
-#     stackName: AUS-UpdateScripts
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSUpdateScriptsFALSEw19d_14_2j'
+    stagedisplayName: AUS Update Scripts FALSE w19d-14-2j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_UpdateFalseStack
+    jobDisplayname: 'Agent job: Update False Stack'
+    baseImageName: w19d-14-2j
+    stackName: AUS-UpdateScripts
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate.yml
-#   parameters:
-#     stageName: 'AUSJPNVPCTestsw19d_15_0j'
-#     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
-#     dependsOn: S3PatchPAAS
-#     jobName: AgentJob_VpcStack
-#     jobDisplayname: 'Agent job: Vpc Stack'
-#     baseImageName: w19d-15-0j
-#     stackName: AUS-JPN-VPC
-#     LansaVersion: $(lansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate.yml
+  parameters:
+    stageName: 'AUSJPNVPCTestsw19d_15_0j'
+    stagedisplayName: AUS JPN VPC Tests w19d-15-0j
+    dependsOn: S3PatchPAAS
+    jobName: AgentJob_VpcStack
+    jobDisplayname: 'Agent job: Vpc Stack'
+    baseImageName: w19d-15-0j
+    stackName: AUS-JPN-VPC
+    LansaVersion: $(lansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
   dependsOn: 
-    # - AUSSmallShoeSizew16d_14_2
+    - AUSSmallShoeSizew16d_14_2
     - AUSTestShoeSizew16d_15_0
-    # - AUSDevShoeSizew19d_14_2
+    - AUSDevShoeSizew19d_14_2
     - AUSVPCTestsw19d_15_0
-    # - AUSMediumShoeSizew16d_14_2j
-    # - AUSLargeShoeSizew16d_15_0j
-    # - AUSUpdateScriptsFALSEw19d_14_2j
-    # - AUSJPNVPCTestsw19d_15_0j
+    - AUSMediumShoeSizew16d_14_2j
+    - AUSLargeShoeSizew16d_15_0j
+    - AUSUpdateScriptsFALSEw19d_14_2j
+    - AUSJPNVPCTestsw19d_15_0j
   jobs:
   - job: Job_1
     displayName: 'Agent Job'
@@ -333,17 +333,17 @@ stages:
           
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
       
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: ParisPrevieww16d_14_2
-#     stagedisplayName: Paris Preview w16d-14-2
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_ParisDeploymentTest 
-#     jobDisplayname: 'Agent job: Paris Deployment Test'
-#     baseImageName: w16d-14-2
-#     stackName: Paris-Preview
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: ParisPrevieww16d_14_2
+    stagedisplayName: Paris Preview w16d-14-2
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_ParisDeploymentTest 
+    jobDisplayname: 'Agent job: Paris Deployment Test'
+    baseImageName: w16d-14-2
+    stackName: Paris-Preview
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -357,17 +357,17 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: TokyoPrevieww19d_14_2
-#     stagedisplayName: Tokyo Preview w19d-14-2
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_AsiaPacific_Tokyo_DeploymentTest
-#     jobDisplayname: 'Agent job: Asia Pacific (Tokyo) Deployment Test'
-#     baseImageName: w19d-14-2
-#     stackName: Tokyo-Preview
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: TokyoPrevieww19d_14_2
+    stagedisplayName: Tokyo Preview w19d-14-2
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_AsiaPacific_Tokyo_DeploymentTest
+    jobDisplayname: 'Agent job: Asia Pacific (Tokyo) Deployment Test'
+    baseImageName: w19d-14-2
+    stackName: Tokyo-Preview
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -381,65 +381,65 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: LondonPreview_w19d_15_0j
-#     stagedisplayName: London Preview w19d-15-0j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_Europe_London_Deployment_Test 
-#     jobDisplayname: 'Agent job : Europe (London) Deployment Test'
-#     baseImageName: w19d-15-0j
-#     stackName: London-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: LondonPreview_w19d_15_0j
+    stagedisplayName: London Preview w19d-15-0j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_Europe_London_Deployment_Test 
+    jobDisplayname: 'Agent job : Europe (London) Deployment Test'
+    baseImageName: w19d-15-0j
+    stackName: London-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: N_CaliforniaPreview_w16d_14_2j
-#     stagedisplayName: N. California Preview w16d-14-2j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_US_uswest1_Deployment_Test
-#     jobDisplayname: 'Agent job : US [us-west-1] Deployment Test'
-#     baseImageName: w16d-14-2j
-#     stackName: N-California-Preview
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: N_CaliforniaPreview_w16d_14_2j
+    stagedisplayName: N. California Preview w16d-14-2j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_US_uswest1_Deployment_Test
+    jobDisplayname: 'Agent job : US [us-west-1] Deployment Test'
+    baseImageName: w16d-14-2j
+    stackName: N-California-Preview
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: MumbaiPreview_w19d_14_2j
-#     stagedisplayName: Mumbai Preview w19d-14-2j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_Mumbai_Deployment_Test 
-#     jobDisplayname: 'Agent job : Mumbai Deployment Test'
-#     baseImageName: w19d-14-2j
-#     stackName: Mumbai-Preview
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: MumbaiPreview_w19d_14_2j
+    stagedisplayName: Mumbai Preview w19d-14-2j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_Mumbai_Deployment_Test 
+    jobDisplayname: 'Agent job : Mumbai Deployment Test'
+    baseImageName: w19d-14-2j
+    stackName: Mumbai-Preview
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: HongKongPreview_w16d_15_0j
-#     stagedisplayName: Hong Kong Preview w16d-15-0j
-#     dependsOn: SubmittoAWSAndWaitforPreview
-#     jobName: AgentJob_HongKong_Deployment_Test 
-#     jobDisplayname: 'Agent job : Hong Kong Deployment Test'
-#     baseImageName: w16d-15-0j
-#     stackName: Hong-Kong-Preview
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: HongKongPreview_w16d_15_0j
+    stagedisplayName: Hong Kong Preview w16d-15-0j
+    dependsOn: SubmittoAWSAndWaitforPreview
+    jobName: AgentJob_HongKong_Deployment_Test 
+    jobDisplayname: 'Agent job : Hong Kong Deployment Test'
+    baseImageName: w16d-15-0j
+    stackName: Hong-Kong-Preview
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
 - stage: WaitForLive
   displayName: Wait For Live
   dependsOn:
-  # - ParisPrevieww16d_14_2
+  - ParisPrevieww16d_14_2
   - OregonPrevieww16d_15_0
-  # - TokyoPrevieww19d_14_2
+  - TokyoPrevieww19d_14_2
   - N_Virginia_Preview_w19d_15_0
-  # - LondonPreview_w19d_15_0j
-  # - N_CaliforniaPreview_w16d_14_2j
-  # - MumbaiPreview_w19d_14_2j
-  # - HongKongPreview_w16d_15_0j
+  - LondonPreview_w19d_15_0j
+  - N_CaliforniaPreview_w16d_14_2j
+  - MumbaiPreview_w19d_14_2j
+  - HongKongPreview_w16d_15_0j
   jobs:
   - job: Job_1
     displayName: 'Agentless Job'
@@ -468,6 +468,9 @@ stages:
     pool:
       vmImage: windows-2022
     steps:
+      - download: _Build Image Release Artefacts
+        displayName: Download artifacts from Build Image Release Artefacts 3.0
+        
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
         path: _robe070_cookbooks
@@ -549,17 +552,17 @@ stages:
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
           pwsh: true
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: StockholmProd_w16d_14_2
-#     stagedisplayName: Stockholm Prod w16d-14-2
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Stockholm_Deployment_Test 
-#     jobDisplayname: 'Agent job : Stockholm Deployment Test'
-#     baseImageName: w16d-14-2
-#     stackName: Stockholm-Prod
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: StockholmProd_w16d_14_2
+    stagedisplayName: Stockholm Prod w16d-14-2
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Stockholm_Deployment_Test 
+    jobDisplayname: 'Agent job : Stockholm Deployment Test'
+    baseImageName: w16d-14-2
+    stackName: Stockholm-Prod
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -573,17 +576,17 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: SydneyProd_w19d_14_2 
-#     stagedisplayName: Sydney Prod w19d-14-2
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Sydney_Deployment_Test  
-#     jobDisplayname: 'Agent job : Sydney Deployment Test'
-#     baseImageName: w19d-14-2
-#     stackName: Sydney-Prod
-#     LansaVersion: $(LansaVersionPrevious))
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: SydneyProd_w19d_14_2 
+    stagedisplayName: Sydney Prod w19d-14-2
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Sydney_Deployment_Test  
+    jobDisplayname: 'Agent job : Sydney Deployment Test'
+    baseImageName: w19d-14-2
+    stackName: Sydney-Prod
+    LansaVersion: $(LansaVersionPrevious))
+    WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -597,50 +600,50 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: Frankfurt_Prod_w16d_14_2j
-#     stagedisplayName: Frankfurt Prod w16d-14-2j
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Frankfurt_Deployment_Test  
-#     jobDisplayname: 'Agent job : Frankfurt Deployment Test'
-#     baseImageName: w16d-14-2j
-#     stackName: Frankfurt-Prod
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: Frankfurt_Prod_w16d_14_2j
+    stagedisplayName: Frankfurt Prod w16d-14-2j
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Frankfurt_Deployment_Test  
+    jobDisplayname: 'Agent job : Frankfurt Deployment Test'
+    baseImageName: w16d-14-2j
+    stackName: Frankfurt-Prod
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: CanadaProd_w19d_14_2j
-#     stagedisplayName: Canada Prod w19d-14-2j
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Canada_ca_central_1_Deployment_Test_tral 
-#     jobDisplayname: 'Agent job : Canada (ca-central-1)- Deployment Test tral'
-#     baseImageName: w19d-14-2j
-#     stackName: Canada-Prod
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: CanadaProd_w19d_14_2j
+    stagedisplayName: Canada Prod w19d-14-2j
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Canada_ca_central_1_Deployment_Test_tral 
+    jobDisplayname: 'Agent job : Canada (ca-central-1)- Deployment Test tral'
+    baseImageName: w19d-14-2j
+    stackName: Canada-Prod
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: Milan_Prod_w16d_14_2j
-#     stagedisplayName: Milan Prod w16d-14-2j
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Milan_Deployment_Test  
-#     jobDisplayname: 'Agent job : Milan Deployment Test '
-#     baseImageName: w16d-14-2j
-#     stackName: Milan-Prod
-#     LansaVersion: $(LansaVersionPrevious)
-#     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: Milan_Prod_w16d_14_2j
+    stagedisplayName: Milan Prod w16d-14-2j
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Milan_Deployment_Test  
+    jobDisplayname: 'Agent job : Milan Deployment Test '
+    baseImageName: w16d-14-2j
+    stackName: Milan-Prod
+    LansaVersion: $(LansaVersionPrevious)
+    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
 
-# - template: AzureDevOps/templates/TestPublishTemplate1.yml
-#   parameters:
-#     stageName: Bahrain_Prod_w19d_15_0j
-#     stagedisplayName: Bahrain Prod w19d-15-0j
-#     dependsOn: MergeAndTag
-#     jobName: AgentJob_Bahrain_Deployment_Test 
-#     jobDisplayname: 'Agent job : Bahrain Deployment Test'
-#     baseImageName: w19d-15-0j
-#     stackName: Bahrain-Prod
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+- template: AzureDevOps/templates/TestPublishTemplate1.yml
+  parameters:
+    stageName: Bahrain_Prod_w19d_15_0j
+    stagedisplayName: Bahrain Prod w19d-15-0j
+    dependsOn: MergeAndTag
+    jobName: AgentJob_Bahrain_Deployment_Test 
+    jobDisplayname: 'Agent job : Bahrain Deployment Test'
+    baseImageName: w19d-15-0j
+    stackName: Bahrain-Prod
+    LansaVersion: $(LansaVersion)
+    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
