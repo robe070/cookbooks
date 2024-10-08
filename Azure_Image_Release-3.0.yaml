@@ -214,7 +214,7 @@ stages:
 
 - template: templates/stages-template.yml
   parameters:
-    stageName: 'w12r2d142FranceCentralPreview'
+    stageName: 'w22d142FranceCentralPreview'
     stagedisplayName: 'w22d142 France Central Preview'
     jobName: 'w22d142FranceCentralPreview'
     jobDisplayname: 'w22d142 France Central Preview'
