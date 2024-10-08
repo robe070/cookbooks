@@ -16,6 +16,7 @@ resources:
       endpoint: debjitbhowmik807
       name: CelestialSystem/azure-quickstart-templates
       ref: feature/139
+      
     # - repository: _robe070_cookbooks
     #   type: github
     #   endpoint: debjitbhowmik807

@@ -84,9 +84,12 @@ stages:
 
       pool:
         vmImage: ${{ parameters.vmImage }}
+      
+
+      variables:
+        ConnectedServiceName: 'Azure Baking Images'
 
       steps:
-
       - download: _BuildImageReleaseArtefacts
         displayName: Downloading latest artefacts from Build Image Release Artefacts 3.0
 
@@ -95,6 +98,12 @@ stages:
  
       # - checkout: _robe070_cookbooks
       #   path: _robe070_cookbooks
+
+      # - repository: _robe070_cookbooks
+      #   type: github
+      #   endpoint: debjitbhowmik807
+      #   name: debjitbhowmik807/cookbooks
+      #   ref: Feature/Image-Release-Debjit
       
       - checkout: self # Checking out self because _robe070_cookbooks does not have the latests changes needed for the pipeline to run
         path: _robe070_cookbooks
@@ -128,7 +137,7 @@ stages:
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Deploy ARM Template'
         inputs:
-          azureResourceManagerConnection: 
+          azureResourceManagerConnection: $(ConnectedServiceName)
           subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
           resourceGroupName: '$(ResourceGroup)'
           location: 'Australia East'
@@ -142,7 +151,7 @@ stages:
       - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
         displayName: 'Azure Resource Group Tagging'
         inputs:
-          ConnectedServiceName: 'Azure Baking Images'
+          ConnectedServiceName: $(ConnectedServiceName)
           ResourceGroupName: ${{ parameters.resourceGroup }}
           Key: Usage
           Value: 'test-temp'
@@ -175,7 +184,7 @@ stages:
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Delete ResourceGroup'
         inputs:
-          azureResourceManagerConnection: 
+          azureResourceManagerConnection: $(ConnectedServiceName)
           subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
           action: DeleteRG
           resourceGroupName: ${{ parameters.resourceGroup }}
