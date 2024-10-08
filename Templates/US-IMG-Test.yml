@@ -30,7 +30,16 @@ parameters:
     type: string
     default: ''
   - name: dependsOn
-    default: []  
+    default: []
+  - name: paramLansaVersion
+    type: string
+    default: none
+  - name: parammsiURL
+    type: string
+    default: none
+  - name: paramWebserverOSVersionValue
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -134,10 +143,10 @@ stages:
                "ParameterValue": "Marketplace"
            }, {
                "ParameterKey": "LansaVersion",   
-               "ParameterValue": "$(LansaVersionPrevious)"
+               "ParameterValue": "${{ parameters.paramLansaVersion }}"
            }, {
                "ParameterKey": "11WebserverOSVersion",   
-               "ParameterValue": "$(WebserverOSVersionValue)"
+               "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
            }, {
                "ParameterKey": "10LansaGitRepoBranch",   
                "ParameterValue": "$(CookbooksBranch)"
@@ -146,7 +155,7 @@ stages:
                "ParameterValue": "$(TemplateS3Namespace)"
            }, {
                "ParameterKey": "$(LansaMSIKey)",   
-               "ParameterValue": "$(msiURLPrevious)"
+               "ParameterValue": "${{ parameters.parammsiURL }}"
            }, {
                "ParameterKey": "CurrentVPC",   
                "ParameterValue": "$(CurrentVPCUS)"

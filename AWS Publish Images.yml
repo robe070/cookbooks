@@ -156,6 +156,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -168,6 +171,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 - template: Templates/IMG-TEST.yml
   parameters:
@@ -180,6 +186,9 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersionPrevious)
+    parammsiURL: $(msiURLPrevious)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 - template: Templates/IMG-TEST.yml
   parameters:
@@ -192,6 +201,9 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersion)
+    parammsiURL: $(msiURLLatest)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -204,6 +216,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -216,6 +231,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -228,6 +246,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -240,6 +261,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -252,6 +276,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -264,6 +291,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -275,7 +305,10 @@ stages:
 #     stackname: w22d-14-2j-IMG
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))             
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)           
 
 # - template: Templates/IMG-TEST.yml
 #   parameters:
@@ -288,6 +321,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateAUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/Copy-AMI-to-US.yml
 #   parameters:
@@ -613,6 +649,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -625,6 +664,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -637,6 +679,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -649,6 +694,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 - template: Templates/US-IMG-Test.yml
   parameters:
@@ -661,6 +709,9 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersionPrevious)
+    parammsiURL: $(msiURLPrevious)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 - template: Templates/US-IMG-Test.yml
   parameters:
@@ -673,6 +724,9 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersion)
+    parammsiURL: $(msiURLLatest)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -685,6 +739,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -697,6 +754,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -709,6 +769,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -721,6 +784,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -733,6 +799,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 # - template: Templates/US-IMG-Test.yml
 #   parameters:
@@ -745,6 +814,9 @@ stages:
 #     jobDemand: DotNetFramework
 #     dependsOn: UpdateUSAMIs
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersion)
+#     parammsiURL: $(msiURLLatest)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
