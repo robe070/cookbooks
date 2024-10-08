@@ -161,6 +161,7 @@ stages:
     steps:
     - task: ManualIntervention@8
       displayName: 'Publish Preview Images'
+      timeoutInMinutes: 43200 # 30 Days
       inputs:
         instructions: |
           1. All preceding stages must be successful, or skipped
