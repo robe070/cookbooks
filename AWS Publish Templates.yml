@@ -166,11 +166,11 @@ stages:
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
     stageName: 'AUSDevShoeSizew19d_14_2'
-    stagedisplayName: 'AUS Dev Shoe Size w19d-14-2s'
+    stagedisplayName: 'AUS Dev Shoe Size w19d-14-2'
     dependsOn: S3PatchPAAS
     jobName: AgentJob_DevStack
     jobDisplayname: 'Agent job: Dev Stack'
-    baseImageName: w19d-14-2s
+    baseImageName: w19d-14-2
     stackName: AUS-Dev
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
