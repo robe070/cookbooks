@@ -541,7 +541,7 @@ stages:
           targetType: filePath
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
           # filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
-          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
           # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(UpdatedGate.version)-mp'''
           pwsh: true
