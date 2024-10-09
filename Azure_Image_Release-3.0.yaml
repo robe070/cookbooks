@@ -31,38 +31,38 @@ variables:
   - group: Git Repos
 
 stages:
-- template: templates/stages-template.yml
-  parameters:
-    dependsOn:
-    stageName: 'w22d142Aus'
-    stagedisplayName: 'w22d142 Aus'
-    jobName: 'w22d142Aus'
-    jobDisplayname: 'w22d142 Aus'
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w22d-14-2
-    osName: Windows Server 2022
+# - template: templates/stages-template.yml
+#   parameters:
+#     dependsOn:
+#     stageName: w22d142Aus
+#     stagedisplayName: w22d142 Aus
+#     jobName: w22d142Aus
+#     jobDisplayname: w22d142 Aus
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     Version: w22d-14-2
+#     osName: Windows Server 2022
+
+# - template: templates/stages-template.yml
+#   parameters:
+#     dependsOn:
+#     stageName: w22d150Aus
+#     stagedisplayName: w22d150 Aus
+#     jobName: w22d150Aus
+#     jobDisplayname: w22d150 Aus
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+#     Version: w22d-15-0
+#     osName: Windows Server 2022
 
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w22d150Aus'
-    stagedisplayName: 'w22d150 Aus'
-    jobName: 'w22d150Aus'
-    jobDisplayname: 'w22d150 Aus'
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w22d-15-0
-    osName: Windows Server 2022
-
-- template: templates/stages-template.yml
-  parameters:
-    dependsOn:
-    stageName: 'w16d142Aus'
-    stagedisplayName: 'w16d142 Aus'
-    jobName: 'w16d142Aus'
-    jobDisplayname: 'w16d142 Aus'
+    stageName: w16d142Aus
+    stagedisplayName: w16d142 Aus
+    jobName: w16d142Aus
+    jobDisplayname: w16d142 Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-    version: "w16d-14-2"
-    osName: Windows Server 2012
+    version: w16d-14-2
+    osName: Windows Server 2016
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Custom-w16d-14-2
@@ -71,10 +71,10 @@ stages:
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w16d150Aus'
-    stagedisplayName: 'w16d150 Aus'
-    jobName: 'w16d150Aus'
-    jobDisplayname: 'w16d150 Aus'
+    stageName: w16d150Aus
+    stagedisplayName: w16d150 Aus
+    jobName: w16d150Aus
+    jobDisplayname: w16d150 Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
     version: w16d-15-0
     osName: Windows Server 2016
@@ -86,7 +86,7 @@ stages:
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w19d142Aus'
+    stageName: w19d142Aus
     stagedisplayName: 'w19d142 Aus' 
     jobName: 'w19d142Aus'
     jobDisplayname: 'w19d142 Aus'
@@ -155,8 +155,8 @@ stages:
 - stage: 'PublishPreviewImages'
   displayName: 'Publish Preview Images'
   dependsOn: 
-    - w22d150Aus
-    - w22d150Aus
+    # - w22d150Aus
+    # - w22d150Aus
     - w16d142Aus
     - w16d150Aus
     - w19d142Aus
