@@ -40,8 +40,6 @@ parameters:
   - name: stackName
     type: string
     default: "$(Gate.VersionClean)"
-    type: string
-    default: none
   - name: jobcondition
     type: string
     default: none
@@ -67,10 +65,10 @@ stages:
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: Collation_JPN
-        ${{ if eq( parameters.osName, 'JPN' ) }}: 
-          value: $(Collation_JPN)
-        ${{ else }}:
-          value: ''
+          ${{ if eq( parameters.osName, 'JPN' ) }}: 
+            value: $(Collation_JPN)
+          ${{ else }}:
+            value: ''
 
       steps:
       - download: _BuildImageReleaseArtefacts
