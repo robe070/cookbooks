@@ -100,13 +100,16 @@ stages:
 - template: templates/stages-template.yml
   parameters:
     dependsOn:
-    stageName: 'w19d150Aus'
-    stagedisplayName: 'w19d150 Aus' 
-    jobName: 'w19d150Aus'
-    jobDisplayname: 'w19d150 Aus'
+    stageName: w19d150Aus
+    stagedisplayName: w19d150 Aus
+    jobName: w19d150Aus
+    jobDisplayname: w19d150 Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))    
     version: w19d-15-0
     osName: Windows Server 2019
+    lansaVersion: V15 GA
+    msiURL: $(msiURLv15)
+    resourceGroup: BakingDP-Custom-w19d-15-0
 
 - template: templates/stages-template.yml
   parameters:
@@ -118,6 +121,9 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w16d-14-2j
     osName: Windows Server 2016 JPN   
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLJPN)
+    resourceGroup: BakingDP-Custom-w16d-14-2j
 
 - template: templates/stages-template.yml
   parameters:
@@ -129,6 +135,9 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w16d-15-0j
     osName: Windows Server 2016 JPN
+    lansaVersion: V15 GA
+    msiURL: $(msiURLJPNLatest)
+    resourceGroup: BakingDP-Custom-w16d-15-0j
 
 - template: templates/stages-template.yml
   parameters:
@@ -140,6 +149,9 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w19d-14-2j
     osName: Windows Server 2019 JPN
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLJPN)
+    resourceGroup: BakingDP-Custom-w19d-14-2j
 
 - template: templates/stages-template.yml
   parameters:
@@ -151,6 +163,9 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w19d-15-0j
     osName: Windows Server 2019 JPN
+    lansaVersion: V15 GA
+    msiURL: $(msiURLJPNLatest)
+    resourceGroup: BakingDP-Custom-w19d-15-0j
 
 - stage: 'PublishPreviewImages'
   displayName: 'Publish Preview Images'
