@@ -61,8 +61,12 @@ stages:
     jobName: 'w16d142Aus'
     jobDisplayname: 'w16d142 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w16d-14-2
-    osName: Windows Server 2016
+    version: "w16d-14-2"
+    osName: Windows Server 2012
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLv142)
+    resourceGroup: BakingDP-Custom-w16d-14-2
+
 
 - template: templates/stages-template.yml
   parameters:
@@ -72,8 +76,12 @@ stages:
     jobName: 'w16d150Aus'
     jobDisplayname: 'w16d150 Aus'
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w16d-15-0
+    version: w16d-15-0
     osName: Windows Server 2016
+    lansaVersion: V15 GA
+    msiURL: $(msiURLv15)
+    resourceGroup: BakingDP-Custom-w16d-15-0
+
 
 - template: templates/stages-template.yml
   parameters:
@@ -85,6 +93,9 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))   
     version: w19d-14-2
     osName: Windows Server 2019
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLv142)
+    resourceGroup: BakingDP-Custom-w19d-14-2
 
 - template: templates/stages-template.yml
   parameters:
