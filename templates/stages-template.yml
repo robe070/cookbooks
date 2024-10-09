@@ -24,7 +24,7 @@ parameters:
     default: none
   - name: osName
     type: string
-    default: none
+    default: "$(Gate.VersionClean)"
   - name: lansaVersion
     type: string
     default: none 
@@ -33,7 +33,7 @@ parameters:
     default: none
   - name: imageSource
     type: string
-    default: none
+    default: Custom
   - name: msiURL
     type: string
     default: none
@@ -94,6 +94,7 @@ stages:
 
       variables:
         ConnectedServiceName: 'Azure Baking Images'
+        
 
       steps:
       - download: _BuildImageReleaseArtefacts
@@ -148,7 +149,7 @@ stages:
           resourceGroupName: '$(ResourceGroup)'
           location: 'Australia East'
           csmFile: '$(Pipeline.Workspace)/_lansa_azure_quickstart_templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
-          overrideParameters: '-osName "$(Gate.osName)" -lansaVersion "${{ parameters.lansaVersion }}" -imageId "$(Gate.ImageUrl)" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -stackName "${{ parameters.stackName }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static"'
+          overrideParameters: '-osName "${{ parameters.osName }}" -lansaVersion "${{ parameters.lansaVersion }}" -imageId "$(Gate.ImageUrl)" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -stackName "${{ parameters.stackName }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static"'
           deploymentName: CustomTestTemplate
           deploymentOutputs: deploymentOutput
           addSpnToEnvironment: true
