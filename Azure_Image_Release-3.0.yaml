@@ -87,9 +87,9 @@ stages:
   parameters:
     dependsOn:
     stageName: w19d142Aus
-    stagedisplayName: 'w19d142 Aus' 
-    jobName: 'w19d142Aus'
-    jobDisplayname: 'w19d142 Aus'
+    stagedisplayName: w19d142 Aus
+    jobName: w19d142Aus
+    jobDisplayname: w19d142 Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))   
     version: w19d-14-2
     osName: Windows Server 2019
