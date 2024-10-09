@@ -583,7 +583,7 @@ stages:
     jobDisplayname: 'Agent job : Sydney Deployment Test'
     baseImageName: w19d-14-2
     stackName: Sydney-Prod
-    LansaVersion: $(LansaVersionPrevious))
+    LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
