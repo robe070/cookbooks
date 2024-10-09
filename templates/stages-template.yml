@@ -98,7 +98,7 @@ stages:
 
       steps:
       - download: _BuildImageReleaseArtefacts
-        displayName: Downloading latest artefacts from Build Image Release Artefacts 3.0
+        # displayName: Downloading latest artefacts from Build Image Release Artefacts 3.0
 
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
