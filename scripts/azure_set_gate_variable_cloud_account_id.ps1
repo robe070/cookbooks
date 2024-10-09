@@ -45,5 +45,6 @@ if (Test-Path $path) {
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku"
     Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $uri"
 } else {
-    Write-Host "Artifact path $path does NOT exist for $Version"
+    #Write-Host "Artifact path $path does NOT exist for $Version"
+    throw "Artifact path does NOT exist for $Version" # Throwing error if there's no baseimage, instead of just writing it to the host.
 }
