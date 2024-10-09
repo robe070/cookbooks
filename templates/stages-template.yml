@@ -127,7 +127,7 @@ stages:
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
         displayName: 'Artifact Check: Output Gate Variable'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AzurePowerShell@5
         displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
