@@ -483,17 +483,19 @@ stages:
         displayName: Checkout Lansa AWS Marketplace Templates
         path: _lansa_aws-templates-mp
 
-      # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-      #   name: Gate
-      #   displayName: 'Artifact Check : Set Gate Variable'
-      #   inputs:
-      #     awsCredentials: $(awsCredentials)
-      #     regionName: $(RegressionTestRegion)
-      #     arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
-      #     # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-      #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        name: Gate
+        displayName: 'Artifact Check : Set Gate Variable'
+        inputs:
+          awsCredentials: $(awsCredentials)
+          regionName: $(RegressionTestRegion)
+          arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'' -VersionTextTemplateCI $(VersionText-TemplateCI)'
+          # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          # filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableTemplateCI.ps1'
+       
       
-      # # Added new task to override Gate.Version value 
+      # Added new task to override Gate.Version value 
       # - pwsh: |
       #     $baseImageName = "w19d-15-0"
       #     Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$(VersionText-TemplateCI)"
@@ -501,11 +503,11 @@ stages:
       #   displayName: 'Override the Gate.Version variable with TemplateCI value'
       #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      # - pwsh: |
-      #     # Print the Gate variables.
-      #     # Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-      #     Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
-      #   displayName: 'Artifact Check : Output Gate Variable'
+      - pwsh: |
+          # Print the Gate variables.
+          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+          # Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
+        displayName: 'Artifact Check : Output Gate Variable'
       
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (robe070/cookbooks)'
@@ -541,8 +543,8 @@ stages:
           targetType: filePath
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
-          # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
-          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(UpdatedGate.version)-mp'''
+          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
+          # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(UpdatedGate.version)-mp'''
           pwsh: true
       
       - task: PowerShell@2
@@ -561,7 +563,7 @@ stages:
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitTag.ps1'
           # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
-          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(UpdatedGate.version)'''
+          arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
           pwsh: true
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
