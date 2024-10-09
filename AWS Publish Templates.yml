@@ -315,11 +315,11 @@ stages:
   - job: 'Job_1'
     displayName: 'Agentless Job'
     pool: server
-    timeoutInMinutes: 43200
     steps:
     - task: ManualValidation@1  
     # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Submit Artefacts'
+      timeoutInMinutes: 43200
       inputs:
         instructions: |
           Submit artefacts to AWS
@@ -444,11 +444,11 @@ stages:
   - job: Job_1
     displayName: 'Agentless Job'
     pool: server
-    timeoutInMinutes: 43200
     steps:  
     - task: ManualValidation@1   
     # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Merge & Go Live'
+      timeoutInMinutes: 43200
       inputs:
         instructions: |
           Preview tests have completed successfully.        
@@ -530,8 +530,8 @@ stages:
         inputs:
           targetType: filePath
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          # filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitRepoWriteAccess.ps1'
+          # filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
           pwsh: true
       
