@@ -30,7 +30,7 @@ parameters:
     default: none 
   - name: imageId
     type: string
-    default: none
+    default: "$(Gate.ImageUrl)"
   - name: imageSource
     type: string
     default: Custom
@@ -40,42 +40,14 @@ parameters:
   - name: stackName
     type: string
     default: "$(Gate.VersionClean)"
-  - name: certificateBase64Encoded
-    type: string
-    default: none
-  - name: certificatePassword
-    type: string
-    default: none
-  - name: databaseLogin
-    type: string
-    default: none
-  - name: databaseLoginPassword
-    type: string
-    default: none
-  - name: adminUsername
-    type: string
-    default: none
-  - name: adminPassword
-    type: string
-    default: none
-  - name: webUsername
-    type: string
-    default: none
-  - name: webPassword
-    type: string
-    default: none
-  - name: gitBranch
     type: string
     default: none
   - name: jobcondition
     type: string
     default: none
-  - name: applicationGatewaySkuTier
+  - name: Collation_JPN
     type: string
-    default: Standard_v2
-  - name: applicationGatewaySkuName
-    type: string
-    default: Standard_v2
+    default: $(Collation_JPN)
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -90,11 +62,15 @@ stages:
 
       pool:
         vmImage: ${{ parameters.vmImage }}
-      
 
       variables:
-        ConnectedServiceName: 'Azure Baking Images'
-        
+        - name: ConnectedServiceName
+          value: 'Azure Baking Images'
+        - name: Collation_JPN
+        ${{ if eq( parameters.osName, 'JPN' ) }}: 
+          value: $(Collation_JPN)
+        ${{ else }}:
+          value: ''
 
       steps:
       - download: _BuildImageReleaseArtefacts
@@ -112,7 +88,7 @@ stages:
       #   name: debjitbhowmik807/cookbooks
       #   ref: Feature/Image-Release-Debjit
       
-      - checkout: self # Checking out self because _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+      - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
         path: _robe070_cookbooks
 
       - task: PowerShell@2
@@ -149,7 +125,7 @@ stages:
           resourceGroupName: ${{ parameters.resourceGroup }}
           location: 'Australia East'
           csmFile: '$(Pipeline.Workspace)/_lansa_azure_quickstart_templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
-          overrideParameters: '-osName "${{ parameters.osName }}" -lansaVersion "${{ parameters.lansaVersion }}" -imageId "$(Gate.ImageUrl)" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -stackName "${{ parameters.stackName }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static"'
+          overrideParameters: '-osName "${{ parameters.osName }}" -lansaVersion "${{ parameters.lansaVersion }}" -imageId "${{ parameters.lansaVersion }}" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -stackName "${{ parameters.stackName }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -collation $(Collation_JPN) -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static"'
           deploymentName: CustomTestTemplate
           deploymentOutputs: deploymentOutput
           addSpnToEnvironment: true
