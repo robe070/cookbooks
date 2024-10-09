@@ -101,21 +101,14 @@ stages:
             inputs:
               awsCredentials: AzureDevOps
               regionName: 'ap-southeast-2'
-              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
-              #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-              filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
-          
-          # Added new task to override Gate.Version value 
-          - pwsh: |
-              Write-Host "##vso[task.setvariable variable=version;isOutput=true]${{parameters.baseImageName}}-$(VersionText-TemplateCI)"
-            name: UpdatedGate
-            displayName: 'Override the Gate.Version variable with TemplateCI value'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+              # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
+              # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -VersionTextTemplateCI $(VersionText-TemplateCI)'
+              filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariableTemplateCI.ps1'
 
           - pwsh: |
               # Print the Gate variables.
-              # Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
+              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
             displayName: 'Artifact Check : Output Gate Variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
@@ -209,8 +202,7 @@ stages:
             inputs:
               awsCredentials: AzureDevOps
               regionName: 'ap-southeast-2'
-              # arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
-              arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(UpdatedGate.version)'''
+              arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/AlternateImageVersion.ps1'
 

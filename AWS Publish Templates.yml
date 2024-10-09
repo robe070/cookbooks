@@ -317,7 +317,6 @@ stages:
     pool: server
     steps:
     - task: ManualValidation@1  
-    # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Submit Artefacts'
       timeoutInMinutes: 43200
       inputs:
@@ -446,7 +445,6 @@ stages:
     pool: server
     steps:  
     - task: ManualValidation@1   
-    # - task: ManualIntervention@8
       displayName: 'Manual Intervention : Merge & Go Live'
       timeoutInMinutes: 43200
       inputs:
@@ -491,22 +489,11 @@ stages:
           regionName: $(RegressionTestRegion)
           arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'' -VersionTextTemplateCI $(VersionText-TemplateCI)'
           # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-          # filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableTemplateCI.ps1'
        
-      
-      # Added new task to override Gate.Version value 
-      # - pwsh: |
-      #     $baseImageName = "w19d-15-0"
-      #     Write-Host "##vso[task.setvariable variable=version;isOutput=true]$baseImageName-$(VersionText-TemplateCI)"
-      #   name: UpdatedGate
-      #   displayName: 'Override the Gate.Version variable with TemplateCI value'
-      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-
       - pwsh: |
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-          # Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(UpdatedGate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'
       
       - task: PowerShell@2
@@ -533,7 +520,6 @@ stages:
           targetType: filePath
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitRepoWriteAccess.ps1'
-          # filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
           pwsh: true
       
@@ -544,7 +530,6 @@ stages:
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
-          # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(UpdatedGate.version)-mp'''
           pwsh: true
       
       - task: PowerShell@2
@@ -562,7 +547,6 @@ stages:
           targetType: filePath
           # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitTag.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitTag.ps1'
-          # arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
           pwsh: true
 
