@@ -39,7 +39,7 @@ parameters:
     default: none
   - name: stackName
     type: string
-    default: none
+    default: "$(Gate.VersionClean)"
   - name: certificateBase64Encoded
     type: string
     default: none
