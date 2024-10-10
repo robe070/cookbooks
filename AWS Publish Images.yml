@@ -159,6 +159,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -174,6 +175,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/TestAusImage.yml
   parameters:
@@ -189,6 +191,7 @@ stages:
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/TestAusImage.yml
   parameters:
@@ -204,6 +207,7 @@ stages:
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -219,6 +223,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -234,6 +239,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -249,6 +255,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -264,6 +271,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -279,6 +287,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -294,6 +303,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -308,7 +318,8 @@ stages:
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
-#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)           
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)     
+#     paramTagValue: "Lansa-Prod"      
 
 # - template: AzureDevOps/templates/TestAusImage.yml
 #   parameters:
@@ -324,6 +335,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/CopyImageToUS.yml
 #   parameters:
@@ -652,6 +664,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -667,6 +680,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -682,6 +696,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -697,6 +712,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/TestUSImage.yml
   parameters:
@@ -712,6 +728,7 @@ stages:
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/TestUSImage.yml
   parameters:
@@ -727,6 +744,7 @@ stages:
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -742,6 +760,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -757,6 +776,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -772,6 +792,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -787,6 +808,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -802,6 +824,7 @@ stages:
 #     paramLansaVersion: $(lansaVersionPrevious)
 #     parammsiURL: $(msiURLPrevious)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/TestUSImage.yml
 #   parameters:
@@ -817,6 +840,7 @@ stages:
 #     paramLansaVersion: $(lansaVersion)
 #     parammsiURL: $(msiURLLatest)
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
@@ -957,134 +981,58 @@ stages:
               4. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
               5. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-14-2
-#     stackname: w16d-14-2-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+- stage: TagGit
+  displayName: Tag Git
+  jobs:
+    - job:
+      displayName: Agent job 
+      timeoutInMinutes: 0
+      cancelTimeoutInMinutes: 1 
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-15-0
-#     stackname: w16d-15-0-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+      pool:
+        vmImage: $(vmImage) 
+        #demands: ''
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w19d-14-2
-#     stackname: w19d-14-2-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+      steps:
+        - download: _Build Image Release Artefacts
+          displayName: Download artifacts from Build Image Release Artefacts 3.0
 
-- template: Templates/TagGit.yml
-  parameters:
-    stageName: 'TagGit'
-    stageDisplayname: 'Tag Git'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-15-0
-    stackname: w19d-15-0-IMG
-    jobDemand: DotNetFramework
-    dependsOn: Marketplace
+        - checkout: self
+        
+        - checkout: _lansa_aws-templates
+          displayName: Checkout Lansa AWS Templates
+          path: _lansa_aws-templates
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w22d-14-2
-#     stackname: w22d-14-2-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+        - checkout: _robe070_cookbooks
+          displayName: Checkout Rob cookbooks
+          path: _robe070_cookbooks
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w22d-15-0
-#     stackname: w22d-15-0-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+          name: Gate
+          displayName: 'Artifact Check : Set Gate Variable'
+          inputs:
+            awsCredentials: AzureDevOps
+            regionName: 'ap-southeast-2'
+            arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-14-2j
-#     stackname: w16d-14-2j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+        - pwsh: |
+            # Print the Gate variables.
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+          displayName: 'Artifact Check : Output Gate Variable'
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-15-0j
-#     stackname: w16d-15-0j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+        - task: PowerShell@2
+          displayName: 'Write access to Git Repo (robe070/cookbooks)'
+          inputs:
+            targetType: filePath
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+            pwsh: true
 
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w19d-14-2j
-#     stackname: w19d-14-2j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
-
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w19d-15-0j
-#     stackname: w19d-15-0j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
-
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w22d-14-2j
-#     stackname: w22d-14-2j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
-
-# - template: Templates/TagGit.yml
-#   parameters:
-#     stageName: 'TagGit'
-#     stageDisplayname: 'Tag Git'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w22d-15-0j
-#     stackname: w22d-15-0j-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: Marketplace
+        - task: PowerShell@2
+          displayName: 'Tag cookbooks repo'
+          inputs:
+            targetType: filePath
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
+            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
+            pwsh: true

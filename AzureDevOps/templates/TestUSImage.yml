@@ -40,6 +40,9 @@ parameters:
   - name: paramWebserverOSVersionValue
     type: string
     default: none
+  - name: paramTagValue
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -145,6 +148,9 @@ stages:
                "ParameterKey": "LansaVersion",   
                "ParameterValue": "${{ parameters.paramLansaVersion }}"
            }, {
+                "ParameterKey": "TagValue",   
+                "ParameterValue": "${{ parameters.paramTagValue }}"
+            },{
                "ParameterKey": "11WebserverOSVersion",   
                "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
            }, {
