@@ -507,17 +507,17 @@ stages:
         #demands: '' 
 
       steps:
-        - download: _Build Image Release Artefacts 3.0
+        - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
 
         - checkout: _lansa_aws-templates
-          displayName: Checkout priyadishah/aws-templates-md
+          displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
 
         - checkout: _robe070_cookbooks
-          displayName: Checkout Rob/cookbooks
+          displayName: Checkout Rob cookbooks
           path: _robe070_cookbooks
 
         - task: PowerShell@2
@@ -573,17 +573,17 @@ stages:
         demands: 'DotNetFramework' 
 
       steps:
-        - download: _Build Image Release Artefacts 3.0
+        - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
 
         - checkout: _lansa_aws-templates
-          displayName: Checkout Divakshi/_lansa_aws-templates
+          displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
 
         - checkout: _robe070_cookbooks
-          displayName: Checkout Divakshi/cookbooks
+          displayName: Checkout Rob cookbooks
           path: _robe070_cookbooks
 
         - task: PowerShell@2
@@ -868,13 +868,13 @@ stages:
         vmImage: $(vmImage)  
 
       steps:
-        - download: _Build Image Release Artefacts 3.0
+        - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
 
         - checkout: _lansa_aws-templates
-          displayName: Checkout priyadishah/_lansa_aws-templates-md
+          displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
 
         - checkout: _robe070_cookbooks
