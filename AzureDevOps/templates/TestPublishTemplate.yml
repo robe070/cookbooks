@@ -75,7 +75,10 @@ parameters:
     default: none
   - name: TemplateUrl
     type: string
-    default: none 
+    default: none
+  - name: AwsRegion
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -100,10 +103,10 @@ stages:
             displayName: 'Artifact Check: Set Gate Variable'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: "ap-southeast-2"
               # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -VersionTextTemplateCI $(VersionText-TemplateCI)'
+              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -Version $(VersionText-TemplateCI)'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariableTemplateCI.ps1'
 
           - pwsh: |
@@ -116,7 +119,7 @@ stages:
             displayName: 'Cleanup CFN Template : Small Stack-Template'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: ${{ parameters.AwsRegion }}
               arguments: '-Gatestack $(Gate.stack)'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
@@ -126,7 +129,7 @@ stages:
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: ${{ parameters.AwsRegion }}
               stackName: '$(Gate.stack)'
               templateSource: s3
               s3BucketName: '$(BucketNamePreview)'
@@ -191,7 +194,7 @@ stages:
             displayName: 'Test CFN Deployment : URL Tests'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: ${{ parameters.AwsRegion }}
               arguments: '-Gatestack $(Gate.stack)'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/TestCFNDeployment.ps1'
@@ -201,7 +204,7 @@ stages:
             displayName: 'AWS PowerShell: Test Image Version'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: ${{ parameters.AwsRegion }}
               arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/AlternateImageVersion.ps1'
@@ -212,7 +215,7 @@ stages:
             displayName: 'Cleanup CFN Template : Small Stack-Template'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: 'ap-southeast-2'
+              regionName: ${{ parameters.AwsRegion }}
               arguments: '-Gatestack $(Gate.stack)'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'

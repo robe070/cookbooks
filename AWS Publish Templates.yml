@@ -148,6 +148,7 @@ stages:
     stackName: AUS-Small
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: ap-southeast-2
 
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
@@ -161,6 +162,7 @@ stages:
     stackName: AUS-Test
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: ap-southeast-2
     
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
@@ -174,6 +176,7 @@ stages:
     stackName: AUS-Dev
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -186,6 +189,7 @@ stages:
     stackName: AUS-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -198,6 +202,7 @@ stages:
     stackName: AUS-Medium
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -210,6 +215,7 @@ stages:
     stackName: AUS-Large
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -222,6 +228,7 @@ stages:
     stackName: AUS-UpdateScripts
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate.yml
   parameters:
@@ -234,6 +241,7 @@ stages:
     stackName: AUS-JPN-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: ap-southeast-2
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
@@ -307,6 +315,7 @@ stages:
     stackName: Validate-TemplateUrl
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: us-east-1
 
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'
@@ -343,6 +352,7 @@ stages:
     stackName: Paris-Preview
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: eu-west-3
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -355,6 +365,7 @@ stages:
     stackName: Oregon-Preview
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: us-west-2
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -367,6 +378,7 @@ stages:
     stackName: Tokyo-Preview
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: ap-northeast-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -379,6 +391,7 @@ stages:
     stackName: N-Virginia-Preview
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: us-east-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -391,6 +404,7 @@ stages:
     stackName: London-Preview
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: eu-west-2
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -403,6 +417,7 @@ stages:
     stackName: N-California-Preview
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: us-west-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -415,6 +430,7 @@ stages:
     stackName: Mumbai-Preview
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: ap-south-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -427,6 +443,7 @@ stages:
     stackName: Hong-Kong-Preview
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: ap-southeast-2
 
 - stage: WaitForLive
   displayName: Wait For Live
@@ -487,7 +504,7 @@ stages:
         inputs:
           awsCredentials: $(awsCredentials)
           regionName: $(RegressionTestRegion)
-          arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'' -VersionTextTemplateCI $(VersionText-TemplateCI)'
+          arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'' -Version $(VersionText-TemplateCI)'
           # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableTemplateCI.ps1'
        
@@ -561,6 +578,7 @@ stages:
     stackName: Stockholm-Prod
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: eu-north-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -573,6 +591,7 @@ stages:
     stackName: Ireland-Prod
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
+    AwsRegion: eu-west-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -585,6 +604,7 @@ stages:
     stackName: Sydney-Prod
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: ap-southeast-2
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -597,6 +617,7 @@ stages:
     stackName: Ohio-Prod
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
+    AwsRegion: us-east-2
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -609,6 +630,7 @@ stages:
     stackName: Frankfurt-Prod
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: eu-central-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -621,6 +643,7 @@ stages:
     stackName: Canada-Prod
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: ca-central-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -633,6 +656,7 @@ stages:
     stackName: Milan-Prod
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
+    AwsRegion: eu-south-1
 
 - template: AzureDevOps/templates/TestPublishTemplate1.yml
   parameters:
@@ -645,3 +669,4 @@ stages:
     stackName: Bahrain-Prod
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
+    AwsRegion: me-south-1
