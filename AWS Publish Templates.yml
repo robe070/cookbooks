@@ -443,7 +443,7 @@ stages:
     stackName: Hong-Kong-Preview
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
-    AwsRegion: ap-southeast-2
+    AwsRegion: ap-east-1
 
 - stage: WaitForLive
   displayName: Wait For Live
