@@ -8,7 +8,7 @@ resources:
     type: github
     endpoint: hirendra-singh
     name: hirendra-singh/aws-templates
-    ref: feature/hiren-aws-yaml-release
+    ref: support/scalable
   
   - repository: _lansa_aws-templates-mp
     type: github
