@@ -177,21 +177,21 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/TestAusImage.yml
-  parameters:
-    stageName: 'w19d142IMGTest'
-    stageDisplayname: 'w19d-14-2 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
-    stackname: w19d-14-2-IMG
-    jobDemand: DotNetFramework
-    dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-    paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramTagValue: "Lansa-Prod"
+# - template: AzureDevOps/templates/TestAusImage.yml
+#   parameters:
+#     stageName: 'w19d142IMGTest'
+#     stageDisplayname: 'w19d-14-2 IMG Test'
+#     jobName: 'Agentjob'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w19d-14-2
+#     stackname: w19d-14-2-IMG
+#     jobDemand: DotNetFramework
+#     dependsOn: UpdateAUSAMIs
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+#     paramLansaVersion: $(lansaVersionPrevious)
+#     parammsiURL: $(msiURLPrevious)
+#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+#     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/TestAusImage.yml
   parameters:
@@ -361,17 +361,17 @@ stages:
 #     globExpressions: w16d-15-0.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: AzureDevOps/templates/CopyImageToUS.yml
-  parameters:
-    stageName: 'w19d142CopyAMItoUS'
-    stageDisplayname: 'w19d-14-2 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
-    jobDemand: DotNetFramework
-    dependsOn: w19d142IMGTest
-    globExpressions: w19d-14-2.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+# - template: AzureDevOps/templates/CopyImageToUS.yml
+#   parameters:
+#     stageName: 'w19d142CopyAMItoUS'
+#     stageDisplayname: 'w19d-14-2 Copy AMI to US'
+#     jobName: 'Agentjob'
+#     jobDisplayname: 'Agent job'
+#     BaseImageName: w19d-14-2
+#     jobDemand: DotNetFramework
+#     dependsOn: w19d142IMGTest
+#     globExpressions: w19d-14-2.txt
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: AzureDevOps/templates/CopyImageToUS.yml
   parameters:
@@ -488,7 +488,7 @@ stages:
   # - w16d150CopyAMItoUS
   # - w16d142jCopyAMItoUS
   # - w16d150jCopyAMItoUS
-  - w19d142CopyAMItoUS
+  #- w19d142CopyAMItoUS
   - w19d150CopyAMItoUS
   # - w19d142jCopyAMItoUS
   # - w19d150jCopyAMItoUS
