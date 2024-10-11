@@ -109,14 +109,14 @@ stages:
         displayName: 'Artifact Check : Output Gate Variable'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))    
 
-      # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-      #   displayName: 'Delete previous Failed Stack'
-      #   inputs:
-      #     awsCredentials: AzureDevOps
-      #     regionName: 'us-east-1'
-      #     arguments: '-Gatestack $(Gate.stack)'
-      #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        displayName: 'Delete previous Failed Stack'
+        inputs:
+          awsCredentials: AzureDevOps
+          regionName: 'us-east-1'
+          arguments: '-Gatestack $(Gate.stack)'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
    
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
         displayName: 'Deploy AWS template'
