@@ -116,7 +116,7 @@ stages:
           
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
-            displayName: 'Artifact Check: Set Gate Variable'f
+            displayName: 'Artifact Check: Set Gate Variable'
             inputs:
               awsCredentials: AzureDevOps
               regionName: "ap-southeast-2"
