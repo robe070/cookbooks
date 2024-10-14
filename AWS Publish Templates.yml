@@ -338,7 +338,7 @@ stages:
       
         - checkout: _lansa_aws-templates-mp
           displayName: Checkout Lansa AWS Marketplace Templates
-          # path: _lansa_aws-templates-mp"  
+          path: _lansa_aws-templates-mp 
         
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
