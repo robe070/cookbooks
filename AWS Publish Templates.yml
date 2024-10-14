@@ -360,7 +360,7 @@ stages:
             regionName: "us-east-1"
             arguments: '-Gatestack $(Gate.stack)'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-            filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
     
         - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
@@ -432,7 +432,7 @@ stages:
             regionName: "us-east-1"
             arguments: '-Gatestack $(Gate.stack)'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
-            filePath: '$(Pipeline.Workspace)/aws-templates/scripts/TestCFNDeployment.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/TestCFNDeployment.ps1'
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -442,7 +442,7 @@ stages:
             regionName: "us-east-1"
             arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
-            filePath: '$(Pipeline.Workspace)/aws-templates/scripts/AlternateImageVersion.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/AlternateImageVersion.ps1'
 
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
@@ -453,7 +453,7 @@ stages:
             regionName: "us-east-1"
             arguments: '-Gatestack $(Gate.stack)'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-            filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
             ignoreLASTEXITCODE: true
           continueOnError: true
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
