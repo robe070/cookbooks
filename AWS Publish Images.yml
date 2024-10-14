@@ -145,7 +145,7 @@ stages:
             awsArguments: 's3://lansa/templates/support/scalable/ami-list/ --recursive'
             failOnStandardError: false       
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w16d142IMGTest'
 #     stageDisplayname: 'w16d-14-2 IMG Test'
@@ -161,7 +161,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w16d150IMGTest'
 #     stageDisplayname: 'w16d-15-0 IMG Test'
@@ -177,7 +177,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w19d142IMGTest'
 #     stageDisplayname: 'w19d-14-2 IMG Test'
@@ -193,7 +193,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/TestAusImage.yml
+- template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w19d150IMGTest'
     stageDisplayname: 'w19d-15-0 IMG Test'
@@ -209,7 +209,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w22d142IMGTest'
 #     stageDisplayname: 'w22d-14-2 IMG Test'
@@ -225,7 +225,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w22d150IMGTest'
 #     stageDisplayname: 'w22d-15-0 IMG Test'
@@ -241,7 +241,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w16d142jIMGTest'
 #     stageDisplayname: 'w16d-14-2j IMG Test'
@@ -257,7 +257,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w16d150jIMGTest'
 #     stageDisplayname: 'w16d-15-0j IMG Test'
@@ -273,7 +273,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w19d142jIMGTest'
 #     stageDisplayname: 'w19d-14-2j IMG Test'
@@ -289,7 +289,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w19d150jIMGTest'
 #     stageDisplayname: 'w19d-15-0j IMG Test'
@@ -305,7 +305,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w22d142jIMGTest'
 #     stageDisplayname: 'w22d-14-2j IMG Test'
@@ -321,7 +321,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)     
 #     paramTagValue: "Lansa-Prod"      
 
-# - template: AzureDevOps/templates/TestAusImage.yml
+# - template: AzureDevOps/templates/AWSTestAusImage.yml
 #   parameters:
 #     stageName: 'w22d150jIMGTest'
 #     stageDisplayname: 'w22d-15-0j IMG Test'
@@ -337,7 +337,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w16d142CopyAMItoUS'
 #     stageDisplayname: 'w16d-14-2 Copy AMI to US'
@@ -349,7 +349,7 @@ stages:
 #     globExpressions: w16d-14-2.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w16d150CopyAMItoUS'
 #     stageDisplayname: 'w16d-15-0 Copy AMI to US'
@@ -361,7 +361,7 @@ stages:
 #     globExpressions: w16d-15-0.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w19d142CopyAMItoUS'
 #     stageDisplayname: 'w19d-14-2 Copy AMI to US'
@@ -373,7 +373,7 @@ stages:
 #     globExpressions: w19d-14-2.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-- template: AzureDevOps/templates/CopyImageToUS.yml
+- template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w19d150CopyAMItoUS'
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
@@ -385,7 +385,7 @@ stages:
     globExpressions: w19d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w22d142CopyAMItoUS'
 #     stageDisplayname: 'w22d-14-2 Copy AMI to US'
@@ -397,7 +397,7 @@ stages:
 #     globExpressions: w22d-14-2.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
    
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w22d150CopyAMItoUS'
 #     stageDisplayname: 'w22d-15-0 Copy AMI to US'
@@ -409,7 +409,7 @@ stages:
 #     globExpressions: w22d-15-0.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w16d142jCopyAMItoUS'
 #     stageDisplayname: 'w16d-14-2j Copy AMI to US'
@@ -421,7 +421,7 @@ stages:
 #     globExpressions: w16d-14-2j.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w16d150jCopyAMItoUS'
 #     stageDisplayname: 'w16d-15-0j Copy AMI to US'
@@ -433,7 +433,7 @@ stages:
 #     globExpressions: w16d-15-0j.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w19d142jCopyAMItoUS'
 #     stageDisplayname: 'w19d-14-2j Copy AMI to US'
@@ -445,7 +445,7 @@ stages:
 #     globExpressions: w19d-14-2j.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w19d150jCopyAMItoUS'
 #     stageDisplayname: 'w19d-15-0j Copy AMI to US'
@@ -457,7 +457,7 @@ stages:
 #     globExpressions: w19d-15-0j.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w22d142jCopyAMItoUS'
 #     stageDisplayname: 'w22d-14-2j Copy AMI to US'
@@ -469,7 +469,7 @@ stages:
 #     globExpressions: w22d-14-2j.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/CopyImageToUS.yml
+# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
 #     stageName: 'w22d150jCopyAMItoUS'
 #     stageDisplayname: 'w22d-15-0j Copy AMI to US'
@@ -650,7 +650,7 @@ stages:
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
             filesAcl: 'public-read'
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w16d142USIMGTest'
 #     stageDisplayname: 'w16d-14-2 US IMG Test'
@@ -666,7 +666,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w16d150USIMGTest'
 #     stageDisplayname: 'w16d-15-0 US IMG Test'
@@ -682,7 +682,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w16d142jUSIMGTest'
 #     stageDisplayname: 'w16d-14-2j US IMG Test'
@@ -698,7 +698,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w16d150jUSIMGTest'
 #     stageDisplayname: 'w16d-15-0j US IMG Test'
@@ -714,7 +714,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/TestUSImage.yml
+- template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w19d142USIMGTest'
     stageDisplayname: 'w19d-14-2 US IMG Test'
@@ -730,7 +730,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/TestUSImage.yml
+- template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w19d150USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
@@ -746,7 +746,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w19d142jUSIMGTest'
 #     stageDisplayname: 'w19d-14-2j US IMG Test'
@@ -762,7 +762,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w19d150jUSIMGTest'
 #     stageDisplayname: 'w19d-15-0j US IMG Test'
@@ -778,7 +778,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w22d142USIMGTest'
 #     stageDisplayname: 'w22d-14-2 US IMG Test'
@@ -794,7 +794,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w22d150USIMGTest'
 #     stageDisplayname: 'w22d-15-0 US IMG Test'
@@ -810,7 +810,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w22d142jUSIMGTest'
 #     stageDisplayname: 'w22d-14-2j US IMG Test'
@@ -826,7 +826,7 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/TestUSImage.yml
+# - template: AzureDevOps/templates/AWSTestUSImage.yml
 #   parameters:
 #     stageName: 'w22d150jUSIMGTest'
 #     stageDisplayname: 'w22d-15-0j US IMG Test'
