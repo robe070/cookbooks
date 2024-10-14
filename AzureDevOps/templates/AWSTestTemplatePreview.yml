@@ -200,7 +200,7 @@ stages:
                     "ParameterValue": "$(RemoteAccessLocationValue)"
                 }, {
                     "ParameterKey": "$(LansaMSIKey)",   
-                    "ParameterValue": "$(msiURLPrevious)"
+                    "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
                     "ParameterKey": "LansaVersion",   
                     "ParameterValue": "${{ parameters.LansaVersion }}"
@@ -209,19 +209,19 @@ stages:
                     "ParameterValue": "${{ parameters.WebserverOSVersion }}"
                 }, {
                     "ParameterKey": "CurrentVPC",   
-                    "ParameterValue": "${{ parameters.vpc }}"
+                    "ParameterValue": "${{ parameters.paramCurrentVPC }}"
                 }, {
                     "ParameterKey": "AvailabilityZones",   
-                    "ParameterValue": "${{ parameters.az }}"
+                    "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
                 }, {
                     "ParameterKey": "NumberOfAZs",   
-                    "ParameterValue": "${{ parameters.NoOfAZs }}"
+                    "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
                 }, {
                     "ParameterKey": "CreateVPC",   
                     "ParameterValue": "Yes"
                 }, {
                     "ParameterKey": "ELBSubnetIds",   
-                    "ParameterValue": "${{ parameters.ELBSnIds }}"
+                    "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
