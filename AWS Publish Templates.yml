@@ -329,8 +329,8 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0 
 
         - checkout: self
-        - checkout: _lansa_aws-templates
-          path: "aws-templates" 
+        # - checkout: _lansa_aws-templates
+        #   path: "aws-templates" 
         - checkout: _lansa_aws-templates-mp
           path: "aws-templates"  
         
