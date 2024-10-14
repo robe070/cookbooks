@@ -332,9 +332,9 @@ stages:
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
         
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
+        # - checkout: _lansa_aws-templates
+        #   displayName: Checkout Lansa AWS Templates
+        #   path: _lansa_aws-templates
       
         - checkout: _lansa_aws-templates-mp
           displayName: Checkout Lansa AWS Marketplace Templates
@@ -349,7 +349,7 @@ stages:
             # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
             arguments: '-BaseImageName ''w19d-15-0'' -stackname ''Validate-TemplateUrl'' -Version $(VersionText-TemplateCI)'
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/SetGateVariableTemplateCI.ps1'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetGateVariableTemplateCI.ps1'
 
         - pwsh: |
             # Print the Gate variables.
