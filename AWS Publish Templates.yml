@@ -137,7 +137,7 @@ stages:
             targetFolder: '$(FolderNamePreview)'
             filesAcl: 'public-read'
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSSmallShoeSizew16d_14_2'
     stagedisplayName: AUS Small Shoe Size w16d-14-2
@@ -156,7 +156,7 @@ stages:
     NoOfAZs: $(NumberOfAZs)
 
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSTestShoeSizew16d_15_0'
     stagedisplayName: 'AUS Test Shoe Size w16d-15-0'
@@ -175,7 +175,7 @@ stages:
     NoOfAZs: $(NumberOfAZs)
     
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSDevShoeSizew19d_14_2'
     stagedisplayName: 'AUS Dev Shoe Size w19d-14-2'
@@ -193,7 +193,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSVPCTestsw19d_15_0'
     stagedisplayName: AUS VPC Tests w19d-15-0
@@ -211,7 +211,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSMediumShoeSizew16d_14_2j'
     stagedisplayName: AUS Medium Shoe Size w16d-14-2j
@@ -229,7 +229,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSLargeShoeSizew16d_15_0j'
     stagedisplayName: AUS Large Shoe Size w16d-15-0j
@@ -247,7 +247,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSUpdateScriptsFALSEw19d_14_2j'
     stagedisplayName: AUS Update Scripts FALSE w19d-14-2j
@@ -265,7 +265,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSJPNVPCTestsw19d_15_0j'
     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
@@ -344,7 +344,7 @@ stages:
           targetFolder: '$(FolderNameProduction)'
           filesAcl: 'public-read'
 
-- template: AzureDevOps/templates/TestPublishTemplate.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'ValidateTemplateURLs'
     stagedisplayName: Validate Template URLs
