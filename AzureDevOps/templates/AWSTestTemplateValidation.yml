@@ -118,7 +118,7 @@ stages:
             displayName: 'Artifact Check: Set Gate Variable'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: "ap-southeast-2"
+              regionName: ${{ parameters.AwsRegion }}
               # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
               arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -Version $(VersionText-TemplateCI)'
