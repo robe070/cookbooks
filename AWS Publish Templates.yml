@@ -326,13 +326,19 @@ stages:
         vmImage: windows-2022
       steps:
         - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0 
+        displayName: Download artifacts from Build Image Release Artefacts 3.0
 
-        - checkout: self
-        # - checkout: _lansa_aws-templates
-        #   path: "aws-templates" 
-        - checkout: _lansa_aws-templates-mp
-          path: "aws-templates"  
+      - checkout: _robe070_cookbooks
+        displayName: Checkout Rob Cookbooks
+        path: _robe070_cookbooks
+        
+      - checkout: _lansa_aws-templates
+        displayName: Checkout Lansa AWS Templates
+        path: _lansa_aws-templates
+      
+      - checkout: _lansa_aws-templates-mp
+        displayName: Checkout Lansa AWS Marketplace Templates
+        path: _lansa_aws-templates-mp"  
         
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
