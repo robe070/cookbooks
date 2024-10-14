@@ -94,8 +94,7 @@ parameters:
   - name: NoOfAZs
     type: string
     default: none
-  - 
-
+  
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: ${{ parameters.dependsOn }}
