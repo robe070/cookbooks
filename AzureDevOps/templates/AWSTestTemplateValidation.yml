@@ -145,10 +145,10 @@ stages:
               templateParameters: |
               [{
                   "ParameterKey": "StackType",
-                  "ParameterValue": "Small"
+                  "ParameterValue": "${{ parameters.paramStackType }}"
               },{
                   "ParameterKey": "10LansaGitRepoBranch",
-                  "ParameterValue": "$(CookbooksBranchPreview)"
+                  "ParameterValue": "${{ parameters.param10LansaGitRepoBranch }}"
               },{
                   "ParameterKey": "UpdateManagementScripts",
                   "ParameterValue": "Yes"
@@ -166,7 +166,7 @@ stages:
                   "ParameterValue": "$(RemoteAccessLocationValue)"
               }, {
                   "ParameterKey": "$(LansaMSIKey)",   
-                  "ParameterValue": "$(msiURLPrevious)"
+                  "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
               }, {
                     "ParameterKey": "LansaVersion",   
                     "ParameterValue": "${{ parameters.LansaVersion }}"
