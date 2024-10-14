@@ -143,58 +143,59 @@ stages:
               s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
               templateParametersSource: inline
               templateParameters: |
-              [{
-                  "ParameterKey": "StackType",
-                  "ParameterValue": "${{ parameters.paramStackType }}"
-              },{
-                  "ParameterKey": "10LansaGitRepoBranch",
-                  "ParameterValue": "${{ parameters.param10LansaGitRepoBranch }}"
-              },{
-                  "ParameterKey": "UpdateManagementScripts",
-                  "ParameterValue": "Yes"
-              },{
-                  "ParameterKey": "$(DBPasswordKey)",
-                  "ParameterValue": "$(DBPasswordValue)"
-              }, {
-                  "ParameterKey": "$(WebPasswordKey)",
-                  "ParameterValue": "$(WebPasswordValue)"
-              }, {
-                  "ParameterKey": "$(KeyNameKey)",    
-                  "ParameterValue": "$(KeyNameValue)"
-              }, {
-                  "ParameterKey": "$(RemoteAccessLocationKey)",   
-                  "ParameterValue": "$(RemoteAccessLocationValue)"
-              }, {
-                  "ParameterKey": "$(LansaMSIKey)",   
-                  "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
-              }, {
-                    "ParameterKey": "LansaVersion",   
-                    "ParameterValue": "${{ parameters.LansaVersion }}"
+                [{
+                    "ParameterKey": "StackType",
+                    "ParameterValue": "${{ parameters.paramStackType }}"
+                },{
+                    "ParameterKey": "10LansaGitRepoBranch",
+                    "ParameterValue": "${{ parameters.param10LansaGitRepoBranch }}"
+                },{
+                    "ParameterKey": "UpdateManagementScripts",
+                    "ParameterValue": "Yes"
+                },{
+                    "ParameterKey": "$(DBPasswordKey)",
+                    "ParameterValue": "$(DBPasswordValue)"
                 }, {
-                    "ParameterKey": "11WebserverOSVersion",   
-                    "ParameterValue": "${{ parameters.WebserverOSVersion }}"
-              }, {
-                  "ParameterKey": "CurrentVPC",   
-                  "ParameterValue": "$(CurrentVPC)"
-              }, {
-                  "ParameterKey": "AvailabilityZones",   
-                  "ParameterValue": "$(AvailabilityZones)"
-              }, {
-                  "ParameterKey": "NumberOfAZs",   
-                  "ParameterValue": "$(NumberOfAZs)"
-              }, {
-                  "ParameterKey": "DBSubnetGroupName",   
-                  "ParameterValue": "$(DBSubnetGroupName)"
-              }, {
-                  "ParameterKey": "ELBSubnetIds",   
-                  "ParameterValue": "$(ELBSubnetIds)"
-              }, {
-                  "ParameterKey": "03DBUsername",   
-                  "ParameterValue": "$(03DBUsername)"
-              }]
-             tags: 'usage=temp-test'
-             onFailure: 'DO_NOTHING'
-             timeoutInMins: 100
+                    "ParameterKey": "$(WebPasswordKey)",
+                    "ParameterValue": "$(WebPasswordValue)"
+                }, {
+                    "ParameterKey": "$(KeyNameKey)",    
+                    "ParameterValue": "$(KeyNameValue)"
+                }, {
+                    "ParameterKey": "$(RemoteAccessLocationKey)",   
+                    "ParameterValue": "$(RemoteAccessLocationValue)"
+                }, {
+                    "ParameterKey": "$(LansaMSIKey)",   
+                    "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
+                }, {
+                      "ParameterKey": "LansaVersion",   
+                      "ParameterValue": "${{ parameters.LansaVersion }}"
+                  }, {
+                      "ParameterKey": "11WebserverOSVersion",   
+                      "ParameterValue": "${{ parameters.WebserverOSVersion }}"
+                }, {
+                    "ParameterKey": "CurrentVPC",   
+                    "ParameterValue": "$(CurrentVPC)"
+                }, {
+                    "ParameterKey": "AvailabilityZones",   
+                    "ParameterValue": "$(AvailabilityZones)"
+                }, {
+                    "ParameterKey": "NumberOfAZs",   
+                    "ParameterValue": "$(NumberOfAZs)"
+                }, {
+                    "ParameterKey": "DBSubnetGroupName",   
+                    "ParameterValue": "$(DBSubnetGroupName)"
+                }, {
+                    "ParameterKey": "ELBSubnetIds",   
+                    "ParameterValue": "$(ELBSubnetIds)"
+                }, {
+                    "ParameterKey": "03DBUsername",   
+                    "ParameterValue": "$(03DBUsername)"
+                }]
+
+              tags: 'usage=temp-test'
+              onFailure: 'DO_NOTHING'
+              timeoutInMins: 100
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
