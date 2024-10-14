@@ -279,8 +279,8 @@ stages:
       - checkout: _robe070_cookbooks
         path: _robe070_cookbooks
         
-      - checkout: _lansa_aws-templates
-        path: _lansa_aws-templates
+      # - checkout: _lansa_aws-templates
+      #   path: _lansa_aws-templates
       
       - checkout: _lansa_aws-templates-mp
         path: "_lansa_aws-templates-mp"
