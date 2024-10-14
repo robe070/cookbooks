@@ -454,7 +454,7 @@ stages:
           displayName: 'Test CFN Deployment : URL Tests'
           inputs:
             awsCredentials: AzureDevOps
-            regionName: ${{ parameters.AwsRegion }}
+            regionName: "us-east-1"
             arguments: '-Gatestack $(Gate.stack)'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
             filePath: '$(Pipeline.Workspace)/aws-templates/scripts/TestCFNDeployment.ps1'
@@ -464,7 +464,7 @@ stages:
           displayName: 'AWS PowerShell: Test Image Version'
           inputs:
             awsCredentials: AzureDevOps
-            regionName: ${{ parameters.AwsRegion }}
+            regionName: "us-east-1"
             arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
             filePath: '$(Pipeline.Workspace)/aws-templates/scripts/AlternateImageVersion.ps1'
@@ -475,7 +475,7 @@ stages:
           displayName: 'Cleanup CFN Template : Small Stack-Template'
           inputs:
             awsCredentials: AzureDevOps
-            regionName: ${{ parameters.AwsRegion }}
+            regionName: "us-east-1"
             arguments: '-Gatestack $(Gate.stack)'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
             filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
