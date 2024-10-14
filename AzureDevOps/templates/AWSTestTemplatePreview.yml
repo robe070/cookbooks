@@ -79,19 +79,18 @@ parameters:
   - name: AwsRegion
     type: string
     default: none
-  - name: vpc
+  - name: paramCurrentVPC
     type: string
     default: none
-  - name: az
+  - name: paramAvailabilityZones
     type: string
     default: none
-  - name: DBSnGroupName
+  - name: paramNumberOfAZs
     type: string
     default: none
-  - name: ELBSnIds
+  - name: paramELBSubnetIds
     type: string
-    default: none
-  - name: NoOfAZs
+  - name: paramLansaMSIKey
     type: string
     default: none
   

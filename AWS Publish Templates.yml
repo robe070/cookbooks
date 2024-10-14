@@ -510,10 +510,11 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-west-3
-    vpc: $(CurrentVPC-eu-west-3)
-    az: $(AvailabilityZones-eu-west-3)
-    ELBSnIds: $(ELBSubnetIds-eu-west-3)
-    NoOfAZs: $(NumberOfAZs-eu-west-3)
+    paramCurrentVPC: $(CurrentVPC-eu-west-3)
+    paramAvailabilityZones: $(AvailabilityZones-eu-west-3)
+    paramNumberOfAZs: $(NumberOfAZs-eu-west-3)
+    paramELBSubnetIds: $(ELBSubnetIds-eu-west-3)
+    paramLansaMSIKey: $(msiURLPrevious)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -527,10 +528,11 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: us-west-2
-    vpc: $(CurrentVPC-us-west-2)
-    az: $(AvailabilityZones-us-west-2)
-    ELBSnIds: $(ELBSubnetIds-us-west-2)
-    NoOfAZs: $(NumberOfAZs-us-west-2)
+    paramCurrentVPC: $(CurrentVPC-us-west-2)
+    paramAvailabilityZones: $(AvailabilityZones-us-west-2)
+    paramNumberOfAZs: $(NumberOfAZs-us-west-2)
+    paramELBSubnetIds: $(ELBSubnetIds-us-west-2)
+    paramLansaMSIKey: $(msiURLLatest)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -544,10 +546,11 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: ap-northeast-1
-    vpc: $(CurrentVPC-ap-northeast-1)
-    az: $(AvailabilityZones-ap-northeast-1)
-    ELBSnIds: $(ELBSubnetIds-ap-northeast-1)
-    NoOfAZs: $(NumberOfAZs-ap-northeast-1)
+    paramCurrentVPC: $(CurrentVPC-ap-northeast-1)
+    paramAvailabilityZones: $(AvailabilityZones-ap-northeast-1)
+    paramNumberOfAZs: $(NumberOfAZs-ap-northeast-1)
+    paramELBSubnetIds: $(ELBSubnetIds-ap-northeast-1)
+    paramLansaMSIKey: $(msiURLPrevious)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -561,10 +564,11 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: us-east-1
-    vpc: $(CurrentVPCUS)
-    az: $(AvailabilityZonesUS)
-    ELBSnIds: $(ELBSubnetIdsUS)
-    NoOfAZs: $(NumberOfAZsUS)
+    paramCurrentVPC: $(CurrentVPCUS)
+    paramAvailabilityZones: $(AvailabilityZonesUS)
+    paramNumberOfAZs: $(NumberOfAZsUS)
+    paramELBSubnetIds: $(ELBSubnetIdsUS)
+    paramLansaMSIKey: $(msiURLLatest)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -578,10 +582,11 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: eu-west-2
-    vpc: $(CurrentVPC-eu-west-2)
-    az: $(AvailabilityZones-eu-west-2)
-    ELBSnIds: $(ELBSubnetIds-eu-west-2)
-    NoOfAZs: $(NumberOfAZs-eu-west-2)
+    paramCurrentVPC: $(CurrentVPC-eu-west-2)
+    paramAvailabilityZones: $(AvailabilityZones-eu-west-2)
+    paramNumberOfAZs: $(NumberOfAZs-eu-west-2)
+    paramELBSubnetIds: $(ELBSubnetIds-eu-west-2)
+    paramLansaMSIKey: $(msiURLJPNLatest)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -595,10 +600,11 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: us-west-1
-    vpc: $(CurrentVPC-us-west-1)
-    az: $(AvailabilityZones-us-west-1)
-    ELBSnIds: $(ELBSubnetIds-us-west-1)
-    NoOfAZs: $(NumberOfAZs-us-west-1)
+    paramCurrentVPC: $(CurrentVPC-us-west-1)
+    paramAvailabilityZones: $(AvailabilityZones-us-west-1)
+    paramNumberOfAZs: $(NumberOfAZs-us-west-1)
+    paramELBSubnetIds: $(ELBSubnetIds-us-west-1)
+    paramLansaMSIKey: $(msiURLJPNPrevious)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -612,10 +618,11 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: ap-south-1
-    vpc: $(CurrentVPC-ap-south-1)
-    az: $(AvailabilityZones-ap-south-1)
-    ELBSnIds: $(ELBSubnetIds-ap-south-1)
-    NoOfAZs: $(NumberOfAZs-ap-south-1)
+    paramCurrentVPC: $(CurrentVPC-ap-south-1)
+    paramAvailabilityZones: $(AvailabilityZones-ap-south-1)
+    paramNumberOfAZs: $(NumberOfAZs-ap-south-1)
+    paramELBSubnetIds: $(ELBSubnetIds-ap-south-1)
+    paramLansaMSIKey: $(msiURLJPNPrevious)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -629,10 +636,11 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: ap-east-1
-    vpc: $(CurrentVPC-ap-east-1)
-    az: $(AvailabilityZones-ap-east-1)
-    ELBSnIds: $(ELBSubnetIds-ap-east-1)
-    NoOfAZs: $(NumberOfAZs-ap-east-1)
+    paramCurrentVPC: $(CurrentVPC-ap-east-1)
+    paramAvailabilityZones: $(AvailabilityZones-ap-east-1)
+    paramNumberOfAZs: $(NumberOfAZs-ap-east-1)
+    paramELBSubnetIds: $(ELBSubnetIds-ap-east-1)
+    paramLansaMSIKey: $(msiURLJPNLatest)
 
 - stage: WaitForLive
   displayName: Wait For Live
