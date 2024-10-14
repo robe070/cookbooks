@@ -283,7 +283,7 @@ stages:
         path: _lansa_aws-templates
       
       - checkout: _lansa_aws-templates-mp
-        path: _lansa_aws-templates-mp
+        path: "_lansa_aws-templates-mp"
 
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -333,6 +333,7 @@ stages:
           # path: "aws-templates"
         # - checkout: _robe070_cookbooks
         - checkout: _lansa_aws-templates-mp
+          path: "aws-templates"
         
           
         
