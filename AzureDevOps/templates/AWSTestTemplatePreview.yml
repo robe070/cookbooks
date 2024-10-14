@@ -94,6 +94,7 @@ parameters:
   - name: NoOfAZs
     type: string
     default: none
+  - 
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -187,9 +188,6 @@ stages:
                     "ParameterKey": "10LansaGitRepoBranch",
                     "ParameterValue": "$(CookbooksBranchPreview)"
                 },{
-                    "ParameterKey": "UpdateManagementScripts",
-                    "ParameterValue": "Yes"
-                },{
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
                 }, {
@@ -220,8 +218,8 @@ stages:
                     "ParameterKey": "NumberOfAZs",   
                     "ParameterValue": "${{ parameters.NoOfAZs }}"
                 }, {
-                    "ParameterKey": "DBSubnetGroupName",   
-                    "ParameterValue": "${{ parameters.DBSnGroupName }}"
+                    "ParameterKey": "CreateVPC",   
+                    "ParameterValue": "Yes"
                 }, {
                     "ParameterKey": "ELBSubnetIds",   
                     "ParameterValue": "${{ parameters.ELBSnIds }}"

@@ -75,7 +75,7 @@ parameters:
     default: none
   - name: TemplateUrl
     type: string
-    default: none
+    default: none 
   - name: AwsRegion
     type: string
     default: none
@@ -94,7 +94,7 @@ parameters:
   - name: NoOfAZs
     type: string
     default: none
-
+  - 
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -122,13 +122,42 @@ stages:
               regionName: "ap-southeast-2"
               # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
+              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -Version $(VersionText-TemplateCI)'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariableTemplateCI.ps1'
 
           - pwsh: |
               # Print the Gate variables.
               Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
             displayName: 'Artifact Check : Output Gate Variable'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+      
+          - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
+            displayName: 'S3 Download: TemplateUrl.txt'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              bucketName: lansa
+              sourceFolder: templates/support/scalable/marketplace
+              globExpressions: TemplateUrl.txt
+              targetFolder: '$(System.DefaultWorkingDirectory)'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+          - powershell: |
+                Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
+                $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
+                  if (Test-Path $path) {
+                      $url = Get-Content -Path $path
+                      Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
+                  } else {
+                      Write-Host "path does NOT exist - $path"
+                  }
+            displayName: 'Set TemplateUrl task variable'
+            name: Task
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+          - powershell: |
+                Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
+            displayName: 'Output TemplateUrl Variable value'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -140,7 +169,7 @@ stages:
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-      
+
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
             inputs:
@@ -157,10 +186,7 @@ stages:
                     "ParameterValue": "Small"
                 },{
                     "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "$(CookbooksBranchPreview)"
-                },{
-                    "ParameterKey": "UpdateManagementScripts",
-                    "ParameterValue": "Yes"
+                    "ParameterValue": "$(CookbooksBranchProduction)"
                 },{
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
@@ -192,8 +218,8 @@ stages:
                     "ParameterKey": "NumberOfAZs",   
                     "ParameterValue": "${{ parameters.NoOfAZs }}"
                 }, {
-                    "ParameterKey": "DBSubnetGroupName",   
-                    "ParameterValue": "${{ parameters.DBSnGroupName }}"
+                    "ParameterKey": "CreateVPC",   
+                    "ParameterValue": "Yes"
                 }, {
                     "ParameterKey": "ELBSubnetIds",   
                     "ParameterValue": "${{ parameters.ELBSnIds }}"

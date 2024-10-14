@@ -385,7 +385,7 @@ stages:
           
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
       
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: ParisPrevieww16d_14_2
     stagedisplayName: Paris Preview w16d-14-2
@@ -402,7 +402,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-west-3)
     NoOfAZs: $(NumberOfAZs-eu-west-3)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: OregonPrevieww16d_15_0
     stagedisplayName: Oregon Preview w16d-15-0
@@ -419,7 +419,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-us-west-2)
     NoOfAZs: $(NumberOfAZs-us-west-2)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: TokyoPrevieww19d_14_2
     stagedisplayName: Tokyo Preview w19d-14-2
@@ -436,7 +436,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-ap-northeast-1)
     NoOfAZs: $(NumberOfAZs-ap-northeast-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: N_Virginia_Preview_w19d_15_0
     stagedisplayName: N. Virginia Preview w19d-15-0
@@ -453,7 +453,7 @@ stages:
     ELBSnIds: $(ELBSubnetIdsUS)
     NoOfAZs: $(NumberOfAZsUS)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: LondonPreview_w19d_15_0j
     stagedisplayName: London Preview w19d-15-0j
@@ -470,7 +470,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-west-2)
     NoOfAZs: $(NumberOfAZs-eu-west-2)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: N_CaliforniaPreview_w16d_14_2j
     stagedisplayName: N. California Preview w16d-14-2j
@@ -487,7 +487,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-us-west-1)
     NoOfAZs: $(NumberOfAZs-us-west-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: MumbaiPreview_w19d_14_2j
     stagedisplayName: Mumbai Preview w19d-14-2j
@@ -504,7 +504,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-ap-south-1)
     NoOfAZs: $(NumberOfAZs-ap-south-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: HongKongPreview_w16d_15_0j
     stagedisplayName: Hong Kong Preview w16d-15-0j
@@ -643,7 +643,7 @@ stages:
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
           pwsh: true
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: StockholmProd_w16d_14_2
     stagedisplayName: Stockholm Prod w16d-14-2
@@ -660,7 +660,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-north-1)
     NoOfAZs: $(NumberOfAZs-eu-north-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: IrelandProd_w16d_15_0
     stagedisplayName: Ireland Prod w16d-15-0
@@ -677,7 +677,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-west-1)
     NoOfAZs: $(NumberOfAZs-eu-west-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: SydneyProd_w19d_14_2 
     stagedisplayName: Sydney Prod w19d-14-2
@@ -694,7 +694,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds)
     NoOfAZs: $(NumberOfAZs)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Ohio_Prod_w19d_15_0
     stagedisplayName: Ohio Prod w19d-15-0
@@ -711,7 +711,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-us-east-2)
     NoOfAZs: $(NumberOfAZs-us-east-2)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Frankfurt_Prod_w16d_14_2j
     stagedisplayName: Frankfurt Prod w16d-14-2j
@@ -728,7 +728,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-central-1)
     NoOfAZs: $(NumberOfAZs-eu-central-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: CanadaProd_w19d_14_2j
     stagedisplayName: Canada Prod w19d-14-2j
@@ -745,7 +745,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-ca-central-1)
     NoOfAZs: $(NumberOfAZs-ca-central-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Milan_Prod_w16d_14_2j
     stagedisplayName: Milan Prod w16d-14-2j
@@ -762,7 +762,7 @@ stages:
     ELBSnIds: $(ELBSubnetIds-eu-south-1)
     NoOfAZs: $(NumberOfAZs-eu-south-1)
 
-- template: AzureDevOps/templates/TestPublishTemplate1.yml
+- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Bahrain_Prod_w19d_15_0j
     stagedisplayName: Bahrain Prod w19d-15-0j
