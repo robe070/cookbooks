@@ -78,8 +78,8 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          # arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copyid)'' -Copyname ''$(Copyname)'''
+          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
+          # arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copyid)'' -Copyname ''$(Copyname)'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AddNameTag.ps1'
           condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
 
