@@ -330,10 +330,10 @@ stages:
 
         - checkout: self
         - checkout: _lansa_aws-templates
-          # path: "aws-templates"
+        #   path: "aws-templates"
         # - checkout: _robe070_cookbooks
         - checkout: _lansa_aws-templates-mp
-          path: "aws-templates"
+          # path: "aws-templates"
         
           
         
