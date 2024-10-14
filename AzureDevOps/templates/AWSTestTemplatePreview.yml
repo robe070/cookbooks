@@ -175,9 +175,8 @@ stages:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               stackName: '$(Gate.stack)'
-              templateSource: s3
-              s3BucketName: '$(BucketNamePreview)'
-              s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
+              templateSource: url
+              templateUrl: '$(Task.TemplateUrl)'
               templateParametersSource: inline
               templateParameters: |
                 [{
@@ -226,7 +225,6 @@ stages:
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
                 }]
-              tags: 'usage=temp-test'
               onFailure: 'DO_NOTHING'
               timeoutInMins: 100
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

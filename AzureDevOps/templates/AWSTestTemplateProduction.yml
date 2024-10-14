@@ -175,9 +175,8 @@ stages:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               stackName: '$(Gate.stack)'
-              templateSource: s3
-              s3BucketName: '$(BucketNamePreview)'
-              s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
+              templateSource: url
+              templateUrl: '$(Task.TemplateUrl)'
               templateParametersSource: inline
               templateParameters: |
                 [{
