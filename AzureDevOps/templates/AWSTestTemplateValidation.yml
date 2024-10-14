@@ -76,24 +76,16 @@ parameters:
   - name: TemplateUrl
     type: string
     default: none
-  - name: AwsRegion
+  - name: paramStackType
     type: string
     default: none
-  - name: vpc
+  - name: paramLansaMSIKey
     type: string
     default: none
-  - name: az
+  - name: param10LansaGitRepoBranch
     type: string
     default: none
-  - name: DBSnGroupName
-    type: string
-    default: none
-  - name: ELBSnIds
-    type: string
-    default: none
-  - name: NoOfAZs
-    type: string
-    default: none
+
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -118,7 +110,7 @@ stages:
             displayName: 'Artifact Check: Set Gate Variable'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
+              regionName: 'ap-southeast-2'
               # arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
               arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'' -Version $(VersionText-TemplateCI)'
@@ -134,7 +126,7 @@ stages:
             displayName: 'Cleanup CFN Template : Small Stack-Template'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
+              regionName: 'ap-southeast-2'
               arguments: '-Gatestack $(Gate.stack)'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
@@ -144,65 +136,65 @@ stages:
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
+              regionName: 'ap-southeast-2'
               stackName: '$(Gate.stack)'
               templateSource: s3
               s3BucketName: '$(BucketNamePreview)'
               s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
               templateParametersSource: inline
               templateParameters: |
-                [{
-                    "ParameterKey": "StackType",
-                    "ParameterValue": "Small"
-                },{
-                    "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "$(CookbooksBranchPreview)"
-                },{
-                    "ParameterKey": "UpdateManagementScripts",
-                    "ParameterValue": "Yes"
-                },{
-                    "ParameterKey": "$(DBPasswordKey)",
-                    "ParameterValue": "$(DBPasswordValue)"
-                }, {
-                    "ParameterKey": "$(WebPasswordKey)",
-                    "ParameterValue": "$(WebPasswordValue)"
-                }, {
-                    "ParameterKey": "$(KeyNameKey)",    
-                    "ParameterValue": "$(KeyNameValue)"
-                }, {
-                    "ParameterKey": "$(RemoteAccessLocationKey)",   
-                    "ParameterValue": "$(RemoteAccessLocationValue)"
-                }, {
-                    "ParameterKey": "$(LansaMSIKey)",   
-                    "ParameterValue": "$(msiURLPrevious)"
-                }, {
+              [{
+                  "ParameterKey": "StackType",
+                  "ParameterValue": "Small"
+              },{
+                  "ParameterKey": "10LansaGitRepoBranch",
+                  "ParameterValue": "$(CookbooksBranchPreview)"
+              },{
+                  "ParameterKey": "UpdateManagementScripts",
+                  "ParameterValue": "Yes"
+              },{
+                  "ParameterKey": "$(DBPasswordKey)",
+                  "ParameterValue": "$(DBPasswordValue)"
+              }, {
+                  "ParameterKey": "$(WebPasswordKey)",
+                  "ParameterValue": "$(WebPasswordValue)"
+              }, {
+                  "ParameterKey": "$(KeyNameKey)",    
+                  "ParameterValue": "$(KeyNameValue)"
+              }, {
+                  "ParameterKey": "$(RemoteAccessLocationKey)",   
+                  "ParameterValue": "$(RemoteAccessLocationValue)"
+              }, {
+                  "ParameterKey": "$(LansaMSIKey)",   
+                  "ParameterValue": "$(msiURLPrevious)"
+              }, {
                     "ParameterKey": "LansaVersion",   
                     "ParameterValue": "${{ parameters.LansaVersion }}"
                 }, {
                     "ParameterKey": "11WebserverOSVersion",   
                     "ParameterValue": "${{ parameters.WebserverOSVersion }}"
-                }, {
-                    "ParameterKey": "CurrentVPC",   
-                    "ParameterValue": "${{ parameters.vpc }}"
-                }, {
-                    "ParameterKey": "AvailabilityZones",   
-                    "ParameterValue": "${{ parameters.az }}"
-                }, {
-                    "ParameterKey": "NumberOfAZs",   
-                    "ParameterValue": "${{ parameters.NoOfAZs }}"
-                }, {
-                    "ParameterKey": "DBSubnetGroupName",   
-                    "ParameterValue": "${{ parameters.DBSnGroupName }}"
-                }, {
-                    "ParameterKey": "ELBSubnetIds",   
-                    "ParameterValue": "${{ parameters.ELBSnIds }}"
-                }, {
-                    "ParameterKey": "03DBUsername",   
-                    "ParameterValue": "$(03DBUsername)"
-                }]
-              tags: 'usage=temp-test'
-              onFailure: 'DO_NOTHING'
-              timeoutInMins: 100
+              }, {
+                  "ParameterKey": "CurrentVPC",   
+                  "ParameterValue": "$(CurrentVPC)"
+              }, {
+                  "ParameterKey": "AvailabilityZones",   
+                  "ParameterValue": "$(AvailabilityZones)"
+              }, {
+                  "ParameterKey": "NumberOfAZs",   
+                  "ParameterValue": "$(NumberOfAZs)"
+              }, {
+                  "ParameterKey": "DBSubnetGroupName",   
+                  "ParameterValue": "$(DBSubnetGroupName)"
+              }, {
+                  "ParameterKey": "ELBSubnetIds",   
+                  "ParameterValue": "$(ELBSubnetIds)"
+              }, {
+                  "ParameterKey": "03DBUsername",   
+                  "ParameterValue": "$(03DBUsername)"
+              }]
+             tags: 'usage=temp-test'
+             onFailure: 'DO_NOTHING'
+             timeoutInMins: 100
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1

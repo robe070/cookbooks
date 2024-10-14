@@ -148,12 +148,9 @@ stages:
     stackName: AUS-Small
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Small
+    paramLansaMSIKey: $(msiURLPrevious)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
@@ -167,13 +164,9 @@ stages:
     stackName: AUS-Test
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
-    
+    paramStackType: Test
+    paramLansaMSIKey: $(msiURLLatest)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -186,12 +179,9 @@ stages:
     stackName: AUS-Dev
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Development
+    paramLansaMSIKey: $(msiURLPrevious)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -204,12 +194,8 @@ stages:
     stackName: AUS-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramLansaMSIKey: $(msiURLLatest)
+    param10LansaGitRepoBranch: $(CookbooksBranch)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -222,12 +208,9 @@ stages:
     stackName: AUS-Medium
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Medium
+    paramLansaMSIKey: $(msiURLJPNPrevious)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -240,12 +223,9 @@ stages:
     stackName: AUS-Large
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Large
+    paramLansaMSIKey: $(msiURLJPNLatest)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -258,12 +238,9 @@ stages:
     stackName: AUS-UpdateScripts
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Large
+    paramLansaMSIKey: $(msiURLJPNPrevious)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -276,12 +253,9 @@ stages:
     stackName: AUS-JPN-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
-    AwsRegion: ap-southeast-2
-    vpc: $(CurrentVPC)
-    az: $(AvailabilityZones)
-    DBSnGroupName: $(DBSubnetGroupName)
-    ELBSnIds: $(ELBSubnetIds)
-    NoOfAZs: $(NumberOfAZs)
+    paramStackType: Development
+    paramLansaMSIKey: $(msiURLJPNLatest)
+    param10LansaGitRepoBranch: $(CookbooksBranch)
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
