@@ -103,7 +103,7 @@ stages:
           - checkout: self
           - checkout: _lansa_aws-templates
             path: "aws-templates"
-          - checkout: _robe070_cookbooks
+          # - checkout: _robe070_cookbooks
           
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate

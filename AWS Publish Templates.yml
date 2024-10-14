@@ -329,9 +329,9 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0 
 
         - checkout: self
-                
         - checkout: _lansa_aws-templates
-          path: _lansa_aws-templates
+          path: "aws-templates"
+        # - checkout: _robe070_cookbooks
         
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
