@@ -79,21 +79,20 @@ parameters:
   - name: AwsRegion
     type: string
     default: none
-  - name: vpc
+  - name: paramCurrentVPC
     type: string
     default: none
-  - name: az
+  - name: paramAvailabilityZones
     type: string
     default: none
-  - name: DBSnGroupName
+  - name: paramNumberOfAZs
     type: string
     default: none
-  - name: ELBSnIds
+  - name: paramELBSubnetIds
     type: string
-    default: none
-  - name: NoOfAZs
+  - name: paramLansaMSIKey
     type: string
-    default: none
+    default: non
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -199,7 +198,7 @@ stages:
                     "ParameterValue": "$(RemoteAccessLocationValue)"
                 }, {
                     "ParameterKey": "$(LansaMSIKey)",   
-                    "ParameterValue": "$(msiURLPrevious)"
+                    "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
                     "ParameterKey": "LansaVersion",   
                     "ParameterValue": "${{ parameters.LansaVersion }}"
@@ -208,19 +207,19 @@ stages:
                     "ParameterValue": "${{ parameters.WebserverOSVersion }}"
                 }, {
                     "ParameterKey": "CurrentVPC",   
-                    "ParameterValue": "${{ parameters.vpc }}"
+                    "ParameterValue": "${{ parameters.paramCurrentVPC }}"
                 }, {
                     "ParameterKey": "AvailabilityZones",   
-                    "ParameterValue": "${{ parameters.az }}"
+                    "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
                 }, {
                     "ParameterKey": "NumberOfAZs",   
-                    "ParameterValue": "${{ parameters.NoOfAZs }}"
+                    "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
                 }, {
                     "ParameterKey": "CreateVPC",   
                     "ParameterValue": "Yes"
                 }, {
                     "ParameterKey": "ELBSubnetIds",   
-                    "ParameterValue": "${{ parameters.ELBSnIds }}"
+                    "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
