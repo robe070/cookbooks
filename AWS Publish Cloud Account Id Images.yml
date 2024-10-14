@@ -63,7 +63,7 @@ pool:
   vmImage: windows-2022
 
 stages:
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v15idold'
     stageDisplayname: 'v15-id-old'
@@ -75,7 +75,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v13sp2idnew'
     stageDisplayname: 'v13sp2-id-new'
@@ -87,7 +87,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v14sp2idnew'
     stageDisplayname: 'v14sp2-id-new'
@@ -99,7 +99,7 @@ stages:
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v15idnew'
     stageDisplayname: 'v15-id-new'
@@ -111,7 +111,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v13sp2scalable'
     stageDisplayname: 'v13sp2-scalable'
@@ -124,7 +124,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v14sp2scalable'
     stageDisplayname: 'v14sp2-scalable'
@@ -137,7 +137,7 @@ stages:
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 
-- template: AzureDevOps/templates/TestImageReleaseTemplate.yml
+- template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
     stageName: 'v15scalable'
     stageDisplayname: 'v15-scalable'
