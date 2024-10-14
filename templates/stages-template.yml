@@ -65,8 +65,8 @@ stages:
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: Collation_JPN
-          ${{ if eq( parameters.osName, 'JPN' ) }}: 
-            value: $(Collation_JPN)
+          ${{ if contains( parameters.osName, 'JPN' ) }}: 
+            value: -collation $(Collation_JPN)
           ${{ else }}:
             value: ''
 
@@ -95,7 +95,7 @@ stages:
         inputs:
           targetType: filePath
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
-          arguments: '-Version "${{ parameters.version }}" -osName "${{ parameters.osName }}"'
+          arguments: -Version "${{ parameters.version }}" -osName "${{ parameters.osName }}"
 
       - powershell: |
           # Print the Gate variables.
@@ -103,17 +103,25 @@ stages:
         displayName: 'Artifact Check: Output Gate Variable'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: AzurePowerShell@5
-        displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
+      # - task: AzurePowerShell@5
+      #   displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
+      #   inputs:
+      #     azureSubscription: 'Azure Baking Images'
+      #     ScriptType: InlineScript
+      #     Inline: |
+      #       Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
+      #       Remove-AzResourceGroup -Name ${{ parameters.resourceGroup }} -Force
+      #     errorActionPreference: silentlyContinue
+      #     azurePowerShellVersion: LatestVersion
+      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      - task: AzureResourceManagerTemplateDeployment@3
         inputs:
-          azureSubscription: 'Azure Baking Images'
-          ScriptType: InlineScript
-          Inline: |
-            Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
-            Remove-AzResourceGroup -Name ${{ parameters.resourceGroup }} -Force
-          errorActionPreference: silentlyContinue
-          azurePowerShellVersion: LatestVersion
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: $(ConnectedServiceName)
+          subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+          action: 'DeleteRG'
+          resourceGroupName: ${{ parameters.resourceGroup }}
 
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Deploy ARM Template'
@@ -122,8 +130,8 @@ stages:
           subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
           resourceGroupName: ${{ parameters.resourceGroup }}
           location: 'Australia East'
-          csmFile: '$(Pipeline.Workspace)/_lansa_azure_quickstart_templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json'
-          overrideParameters: '-osName "${{ parameters.osName }}" -lansaVersion "${{ parameters.lansaVersion }}" -imageId "${{ parameters.imageId }}" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -stackName "${{ parameters.stackName }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -collation $(Collation_JPN) -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static"'
+          csmFile: $(Pipeline.Workspace)/_lansa_azure_quickstart_templates/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json
+          overrideParameters: -osName "$(Gate.osName)" -stackName "$(Gate.VersionClean)" -imageId "$(Gate.ImageUrl)" -lansaVersion "${{ parameters.lansaVersion }}" -imageSource "${{ parameters.imageSource }}" -msiURL "${{ parameters.msiURL }}" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -agpublicIpSku "Standard" -agpublicIpAllocationMethod "Static" $(Collation_JPN)
           deploymentName: CustomTestTemplate
           deploymentOutputs: deploymentOutput
           addSpnToEnvironment: true
@@ -150,7 +158,7 @@ stages:
         inputs:
           targetType: filePath
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_url_tests.ps1'
-          arguments: '-deploymentOutput none$(deploymentOutput)none'
+          arguments: -deploymentOutput '$(deploymentOutput)'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AzurePowerShell@5
@@ -158,7 +166,7 @@ stages:
         inputs:
           azureSubscription: 'Azure Baking Images'
           ScriptPath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_test_image_version.ps1'
-          ScriptArguments: '-SkuName "$(Gate.Sku)" -deploymentOutput none$(deploymentOutput)none '
+          ScriptArguments: -SkuName "$(Gate.Sku)" -deploymentOutput '$(deploymentOutput)'
           azurePowerShellVersion: LatestVersion
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
