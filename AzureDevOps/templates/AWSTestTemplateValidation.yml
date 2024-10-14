@@ -95,7 +95,6 @@ parameters:
     type: string
     default: none
 
-
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: ${{ parameters.dependsOn }}
