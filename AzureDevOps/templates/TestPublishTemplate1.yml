@@ -79,6 +79,21 @@ parameters:
   - name: AwsRegion
     type: string
     default: none
+  - name: vpc
+    type: string
+    default: none
+  - name: az
+    type: string
+    default: none
+  - name: DBSnGroupName
+    type: string
+    default: none
+  - name: ELBSnIds
+    type: string
+    default: none
+  - name: NoOfAZs
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -197,19 +212,19 @@ stages:
                     "ParameterValue": "${{ parameters.WebserverOSVersion }}"
                 }, {
                     "ParameterKey": "CurrentVPC",   
-                    "ParameterValue": "$(CurrentVPC)"
+                    "ParameterValue": "${{ parameters.vpc }}"
                 }, {
                     "ParameterKey": "AvailabilityZones",   
-                    "ParameterValue": "$(AvailabilityZones)"
+                    "ParameterValue": "$${{ parameters.az }}"
                 }, {
                     "ParameterKey": "NumberOfAZs",   
-                    "ParameterValue": "$(NumberOfAZs)"
+                    "ParameterValue": "${{ parameters.NoOfAZs }}"
                 }, {
                     "ParameterKey": "DBSubnetGroupName",   
-                    "ParameterValue": "$(DBSubnetGroupName)"
+                    "ParameterValue": "${{ parameters.DBSnGroupName }}"
                 }, {
                     "ParameterKey": "ELBSubnetIds",   
-                    "ParameterValue": "$(ELBSubnetIds)"
+                    "ParameterValue": "${{ parameters.ELBSnIds }}"
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
