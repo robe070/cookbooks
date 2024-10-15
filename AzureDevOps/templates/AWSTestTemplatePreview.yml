@@ -108,17 +108,17 @@ stages:
           - download: _Build Image Release Artefacts
             displayName: Download artifacts from Build Image Release Artefacts 3.0  
 
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
-        
-        - checkout: _lansa_aws-templates-mp
-          displayName: Checkout Lansa AWS Marketplace Templates
-          path: _lansa_aws-templates-mp 
-        
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: aws-templates
+          - checkout: _robe070_cookbooks
+            displayName: Checkout Rob Cookbooks
+            path: _robe070_cookbooks
+          
+          - checkout: _lansa_aws-templates-mp
+            displayName: Checkout Lansa AWS Marketplace Templates
+            path: _lansa_aws-templates-mp 
+          
+          - checkout: _lansa_aws-templates
+            displayName: Checkout Lansa AWS Templates
+            path: aws-templates
           
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
