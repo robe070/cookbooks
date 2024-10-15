@@ -103,25 +103,25 @@ stages:
         displayName: 'Artifact Check: Output Gate Variable'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      # - task: AzurePowerShell@5
-      #   displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
-      #   inputs:
-      #     azureSubscription: 'Azure Baking Images'
-      #     ScriptType: InlineScript
-      #     Inline: |
-      #       Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
-      #       Remove-AzResourceGroup -Name ${{ parameters.resourceGroup }} -Force
-      #     errorActionPreference: silentlyContinue
-      #     azurePowerShellVersion: LatestVersion
-      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-
-      - task: AzureResourceManagerTemplateDeployment@3
+      - task: AzurePowerShell@5
+        displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
         inputs:
-          deploymentScope: 'Resource Group'
-          azureResourceManagerConnection: $(ConnectedServiceName)
-          subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
-          action: 'DeleteRG'
-          resourceGroupName: ${{ parameters.resourceGroup }}
+          azureSubscription: 'Azure Baking Images'
+          ScriptType: InlineScript
+          Inline: |
+            Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
+            Remove-AzResourceGroup -Name ${{ parameters.resourceGroup }} -Force -ErrorAction SilentlyContinue
+          errorActionPreference: silentlyContinue
+          azurePowerShellVersion: LatestVersion
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      # - task: AzureResourceManagerTemplateDeployment@3
+      #   inputs:
+      #     deploymentScope: 'Resource Group'
+      #     azureResourceManagerConnection: $(ConnectedServiceName)
+      #     subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
+      #     action: 'DeleteRG'
+      #     resourceGroupName: ${{ parameters.resourceGroup }}
 
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Deploy ARM Template'
