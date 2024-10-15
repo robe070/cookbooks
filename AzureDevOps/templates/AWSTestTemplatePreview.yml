@@ -230,16 +230,35 @@ stages:
               filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-          - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
-            displayName: 'CFN Template deployment: Small Stack-TemplateTest'
-            inputs:
-              awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
-              stackName: '$(Gate.stack)'
-              templateSource: url
-              templateUrl: '$(Task.TemplateUrl)'
-              templateParametersSource: inline
-              templateParameters: '[$(templateParameters)]'
+          - ${{ if endsWith(parameters.stageName, 'j')}}:
+            - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
+              displayName: 'CFN Template deployment: Small Stack-TemplateTest'
+              inputs:
+                awsCredentials: AzureDevOps
+                regionName: ${{ parameters.AwsRegion }}
+                stackName: '$(Gate.stack)'
+                templateSource: url
+                templateUrl: '$(Task.TemplateUrl)'
+                templateParametersSource: inline
+                templateParameters: '[ 
+                                        $(templateParameters),
+                                        {
+                                          "ParameterKey": "DBCCSID",
+                                          "ParameterValue": "$(DBCCSID)"
+                                        } 
+                                      ]'
+
+            ${{ else }}:
+            - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
+              displayName: 'CFN Template deployment: Small Stack-TemplateTest'
+              inputs:
+                awsCredentials: AzureDevOps
+                regionName: ${{ parameters.AwsRegion }}
+                stackName: '$(Gate.stack)'
+                templateSource: url
+                templateUrl: '$(Task.TemplateUrl)'
+                templateParametersSource: inline
+                templateParameters: '[$(templateParameters)]'
                 # [{
                 #     "ParameterKey": "StackType",
                 #     "ParameterValue": "Small"
