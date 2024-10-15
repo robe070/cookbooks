@@ -372,8 +372,8 @@ stages:
             regionName: "us-east-1"
             stackName: '$(Gate.stack)'
             templateSource: s3
-            s3BucketName: '$(BucketNameProduction)'
-            s3ObjectKey: '$(FolderNameProduction)/lansa-stack-type-win.cfn.template'
+            s3BucketName: lansa
+            s3ObjectKey: templates/support/scalable/lansa-stack-type-win.cfn.template
             templateParametersSource: inline
             templateParameters: |
               [{
