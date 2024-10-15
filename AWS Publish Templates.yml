@@ -329,13 +329,13 @@ stages:
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
         
-        # - checkout: _lansa_aws-templates-mp
-        #   displayName: Checkout Lansa AWS Marketplace Templates
-        #   path: aws-templates 
+        - checkout: _lansa_aws-templates-mp
+          displayName: Checkout Lansa AWS Marketplace Templates
+          path: aws-templates 
         
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: aws-templates
+        # - checkout: _lansa_aws-templates
+        #   displayName: Checkout Lansa AWS Templates
+        #   path: aws-templates
     
         
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -459,24 +459,6 @@ stages:
             ignoreLASTEXITCODE: true
           continueOnError: true
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-
-# - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
-#   parameters:
-#     stageName: 'ValidateTemplateURLs'
-#     stagedisplayName: Validate Template URLs
-#     dependsOn: MergeToMarketplaceAndUpload
-#     jobName: AgentJob_SmallStack
-#     jobDisplayname: 'Agent job: Small Stack'
-#     baseImageName: w19d-15-0
-#     stackName: Validate-TemplateUrl
-#     LansaVersion: $(LansaVersion)
-#     WebserverOSVersion: $(WebserverOSLatestVersionValue)
-#     AwsRegion: us-east-1
-#     paramCurrentVPC: $(CurrentVPCUS)
-#     paramAvailabilityZones: $(AvailabilityZonesUS)
-#     paramNumberOfAZs: $(NumberOfAZsUS)
-#     paramELBSubnetIds: $(ELBSubnetIdsUS)
-#     paramLansaMSIKey: $(msiURLLatest)
 
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'
