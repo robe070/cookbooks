@@ -105,6 +105,55 @@ stages:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
+        variables: 
+        - name: templateParameters
+          value: |
+              {
+                  "ParameterKey": "StackType",
+                  "ParameterValue": "Small"
+              },{
+                  "ParameterKey": "10LansaGitRepoBranch",
+                  "ParameterValue": "$(CookbooksBranchPreview)"
+              },{
+                  "ParameterKey": "$(DBPasswordKey)",
+                  "ParameterValue": "$(DBPasswordValue)"
+              }, {
+                  "ParameterKey": "$(WebPasswordKey)",
+                  "ParameterValue": "$(WebPasswordValue)"
+              }, {
+                  "ParameterKey": "$(KeyNameKey)",    
+                  "ParameterValue": "$(KeyNameValue)"
+              }, {
+                  "ParameterKey": "$(RemoteAccessLocationKey)",   
+                  "ParameterValue": "$(RemoteAccessLocationValue)"
+              }, {
+                  "ParameterKey": "$(LansaMSIKey)",   
+                  "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
+              }, {
+                  "ParameterKey": "LansaVersion",   
+                  "ParameterValue": "${{ parameters.LansaVersion }}"
+              }, {
+                  "ParameterKey": "11WebserverOSVersion",   
+                  "ParameterValue": "${{ parameters.WebserverOSVersion }}"
+              }, {
+                  "ParameterKey": "CurrentVPC",   
+                  "ParameterValue": "${{ parameters.paramCurrentVPC }}"
+              }, {
+                  "ParameterKey": "AvailabilityZones",   
+                  "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
+              }, {
+                  "ParameterKey": "NumberOfAZs",   
+                  "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
+              }, {
+                  "ParameterKey": "CreateVPC",   
+                  "ParameterValue": "Yes"
+              }, {
+                  "ParameterKey": "ELBSubnetIds",   
+                  "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
+              }, {
+                  "ParameterKey": "03DBUsername",   
+                  "ParameterValue": "$(03DBUsername)"
+              } 
         pool: 
           vmImage: ${{ parameters.vmImage }}
         steps:
@@ -190,53 +239,53 @@ stages:
               templateSource: url
               templateUrl: '$(Task.TemplateUrl)'
               templateParametersSource: inline
-              templateParameters: |
-                [{
-                    "ParameterKey": "StackType",
-                    "ParameterValue": "Small"
-                },{
-                    "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "$(CookbooksBranchPreview)"
-                },{
-                    "ParameterKey": "$(DBPasswordKey)",
-                    "ParameterValue": "$(DBPasswordValue)"
-                }, {
-                    "ParameterKey": "$(WebPasswordKey)",
-                    "ParameterValue": "$(WebPasswordValue)"
-                }, {
-                    "ParameterKey": "$(KeyNameKey)",    
-                    "ParameterValue": "$(KeyNameValue)"
-                }, {
-                    "ParameterKey": "$(RemoteAccessLocationKey)",   
-                    "ParameterValue": "$(RemoteAccessLocationValue)"
-                }, {
-                    "ParameterKey": "$(LansaMSIKey)",   
-                    "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
-                }, {
-                    "ParameterKey": "LansaVersion",   
-                    "ParameterValue": "${{ parameters.LansaVersion }}"
-                }, {
-                    "ParameterKey": "11WebserverOSVersion",   
-                    "ParameterValue": "${{ parameters.WebserverOSVersion }}"
-                }, {
-                    "ParameterKey": "CurrentVPC",   
-                    "ParameterValue": "${{ parameters.paramCurrentVPC }}"
-                }, {
-                    "ParameterKey": "AvailabilityZones",   
-                    "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
-                }, {
-                    "ParameterKey": "NumberOfAZs",   
-                    "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
-                }, {
-                    "ParameterKey": "CreateVPC",   
-                    "ParameterValue": "Yes"
-                }, {
-                    "ParameterKey": "ELBSubnetIds",   
-                    "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
-                }, {
-                    "ParameterKey": "03DBUsername",   
-                    "ParameterValue": "$(03DBUsername)"
-                }]
+              templateParameters: '[$(templateParameters)]'
+                # [{
+                #     "ParameterKey": "StackType",
+                #     "ParameterValue": "Small"
+                # },{
+                #     "ParameterKey": "10LansaGitRepoBranch",
+                #     "ParameterValue": "$(CookbooksBranchPreview)"
+                # },{
+                #     "ParameterKey": "$(DBPasswordKey)",
+                #     "ParameterValue": "$(DBPasswordValue)"
+                # }, {
+                #     "ParameterKey": "$(WebPasswordKey)",
+                #     "ParameterValue": "$(WebPasswordValue)"
+                # }, {
+                #     "ParameterKey": "$(KeyNameKey)",    
+                #     "ParameterValue": "$(KeyNameValue)"
+                # }, {
+                #     "ParameterKey": "$(RemoteAccessLocationKey)",   
+                #     "ParameterValue": "$(RemoteAccessLocationValue)"
+                # }, {
+                #     "ParameterKey": "$(LansaMSIKey)",   
+                #     "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
+                # }, {
+                #     "ParameterKey": "LansaVersion",   
+                #     "ParameterValue": "${{ parameters.LansaVersion }}"
+                # }, {
+                #     "ParameterKey": "11WebserverOSVersion",   
+                #     "ParameterValue": "${{ parameters.WebserverOSVersion }}"
+                # }, {
+                #     "ParameterKey": "CurrentVPC",   
+                #     "ParameterValue": "${{ parameters.paramCurrentVPC }}"
+                # }, {
+                #     "ParameterKey": "AvailabilityZones",   
+                #     "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
+                # }, {
+                #     "ParameterKey": "NumberOfAZs",   
+                #     "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
+                # }, {
+                #     "ParameterKey": "CreateVPC",   
+                #     "ParameterValue": "Yes"
+                # }, {
+                #     "ParameterKey": "ELBSubnetIds",   
+                #     "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
+                # }, {
+                #     "ParameterKey": "03DBUsername",   
+                #     "ParameterValue": "$(03DBUsername)"
+                # }]
               onFailure: 'DO_NOTHING'
               timeoutInMins: 100
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
