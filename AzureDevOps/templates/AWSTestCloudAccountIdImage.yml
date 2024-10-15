@@ -25,9 +25,9 @@ parameters:
   - name: jobDemand
     type: string
     default: ''
-  - name: setGateVariable
+  - name: paramsetGateVariable
     type: string
-    default: SetGateVariable.ps1
+    default: none
   - name: paramLansaVersion
     type: string
     default: none
@@ -85,7 +85,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-BaseImageName ''$(System.JobDisplayName)'' -stackname ''$(System.StageDisplayName)-$(System.JobDisplayName)'''
-          filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/$(SetGateVariable)"
+          filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/${{ parameters.paramsetGateVariable }}"
           failOnStderr: true
         continueOnError: false
       
