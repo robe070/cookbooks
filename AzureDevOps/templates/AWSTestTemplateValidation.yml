@@ -88,7 +88,9 @@ parameters:
   - name: paramDBCCSID
     type: string
     default: ''
-
+  - name: paramS3ObjectKey
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -143,7 +145,7 @@ stages:
               stackName: '$(Gate.stack)'
               templateSource: s3
               s3BucketName: '$(BucketNamePreview)'
-              s3ObjectKey: '$(FolderNamePreview)/lansa-stack-type-win.cfn.template'
+              s3ObjectKey: '$(FolderNamePreview)/${{ parameters.paramS3ObjectKey }}'
               templateParametersSource: inline
               templateParameters: |
                 [{

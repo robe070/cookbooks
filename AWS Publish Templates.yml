@@ -145,6 +145,7 @@ stages:
     jobName: AgentJob_SmallStack
     jobDisplayname: 'Agent job: Small Stack'
     baseImageName: w16d-14-2
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Small
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
@@ -161,6 +162,7 @@ stages:
     jobName: AgentJob_TestStack
     jobDisplayname: 'Agent job: Test Stack'
     baseImageName: w16d-15-0
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Test
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
@@ -176,6 +178,7 @@ stages:
     jobName: AgentJob_DevStack
     jobDisplayname: 'Agent job: Dev Stack'
     baseImageName: w19d-14-2
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Dev
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
@@ -191,6 +194,7 @@ stages:
     jobName: AgentJob_VpcStack
     jobDisplayname: 'Agent job: Vpc Stack'
     baseImageName: w19d-15-0
+    paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
@@ -205,6 +209,7 @@ stages:
     jobName: AgentJob_MediumStack
     jobDisplayname: 'Agent job: Medium Stack'
     baseImageName: w16d-14-2j
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Medium
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
@@ -221,6 +226,7 @@ stages:
     jobName: AgentJob_LargeStack
     jobDisplayname: 'Agent job: Large Stack'
     baseImageName: w16d-15-0j
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Large
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
@@ -237,6 +243,7 @@ stages:
     jobName: AgentJob_UpdateFalseStack
     jobDisplayname: 'Agent job: Update False Stack'
     baseImageName: w19d-14-2j
+    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-UpdateScripts
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
@@ -253,10 +260,10 @@ stages:
     jobName: AgentJob_VpcStack
     jobDisplayname: 'Agent job: Vpc Stack'
     baseImageName: w19d-15-0j
+    paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-JPN-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
-    paramStackType: Development
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranch)
     paramDBCCSID: $(DBCCSID)
