@@ -85,6 +85,9 @@ parameters:
   - name: param10LansaGitRepoBranch
     type: string
     default: none
+  - name: paramDBCCSID
+    type: string
+    default: ''
 
 
 stages:
@@ -191,6 +194,9 @@ stages:
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
+                },{	
+                    "ParameterKey": "DBCCSID",   	
+                    "ParameterValue": "${{ parameters.paramDBCCSID }}"
                 }]
 
               tags: 'usage=temp-test'

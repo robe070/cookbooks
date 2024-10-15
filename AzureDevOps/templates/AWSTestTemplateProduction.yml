@@ -95,7 +95,10 @@ parameters:
     type: string
   - name: paramLansaMSIKey
     type: string
-    default: non
+    default: none
+  - name: paramDBCCSID
+    type: string
+    default: ''
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -234,6 +237,9 @@ stages:
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
+                },{	
+                    "ParameterKey": "DBCCSID",   	
+                    "ParameterValue": "${{ parameters.paramDBCCSID }}"
                 }]
               tags: 'usage=temp-test'
               onFailure: 'DO_NOTHING'

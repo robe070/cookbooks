@@ -211,6 +211,7 @@ stages:
     paramStackType: Medium
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -226,6 +227,7 @@ stages:
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -241,6 +243,7 @@ stages:
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -256,6 +259,7 @@ stages:
     paramStackType: Development
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranch)
+    paramDBCCSID: $(DBCCSID)
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
@@ -601,6 +605,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-us-west-1)
     paramELBSubnetIds: $(ELBSubnetIds-us-west-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -620,6 +625,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-ap-south-1)
     paramELBSubnetIds: $(ELBSubnetIds-ap-south-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -639,6 +645,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-ap-east-1)
     paramELBSubnetIds: $(ELBSubnetIds-ap-east-1)
     paramLansaMSIKey: $(msiURLJPNLatest)
+    paramDBCCSID: $(DBCCSID)
 
 - stage: WaitForLive
   displayName: Wait For Live
@@ -856,6 +863,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-central-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-central-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -875,6 +883,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ca-central-1)
     paramNumberOfAZs: $(NumberOfAZs-ca-central-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -894,6 +903,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-south-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-south-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -913,3 +923,4 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-me-south-1)
     paramNumberOfAZs: $(NumberOfAZs-me-south-1)
     paramLansaMSIKey: $(msiURLJPNLatest)
+    paramDBCCSID: $(DBCCSID)
