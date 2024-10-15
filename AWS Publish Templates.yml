@@ -581,6 +581,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-west-2)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-2)
     paramLansaMSIKey: $(msiURLJPNLatest)
+    paramDBCCSID: $(DBCCSID)
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
