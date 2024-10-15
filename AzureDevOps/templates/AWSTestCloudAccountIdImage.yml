@@ -52,7 +52,7 @@ stages:
 
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
-        SetGateVariable: ${{ parameters.setGateVariable }}
+        SetGateVariable: ${{ parameters.paramsetGateVariable }}
 
       pool:
         vmImage: ${{ parameters.vmImage }}
