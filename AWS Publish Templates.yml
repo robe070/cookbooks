@@ -765,6 +765,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-north-1
+    s3Region: eu-north-1
     paramCurrentVPC: $(CurrentVPC-eu-north-1)
     paramAvailabilityZones: $(AvailabilityZones-eu-north-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-north-1)
@@ -783,6 +784,7 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-west-1
+    s3Region: eu-west-1
     paramCurrentVPC: $(CurrentVPC-eu-west-1)
     paramAvailabilityZones: $(AvailabilityZones-eu-west-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-1)
@@ -801,6 +803,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: ap-southeast-2
+    s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC)
     paramAvailabilityZones: $(AvailabilityZones)
     paramELBSubnetIds: $(ELBSubnetIds)
@@ -819,6 +822,7 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: us-east-2
+    s3Region: us-east-2
     paramCurrentVPC: $(CurrentVPC-us-east-2)
     paramAvailabilityZones: $(AvailabilityZones-us-east-2)
     paramELBSubnetIds: $(ELBSubnetIds-us-east-2)
@@ -837,6 +841,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: eu-central-1
+    s3Region: eu-central-1
     paramCurrentVPC: $(CurrentVPC-eu-central-1)
     paramAvailabilityZones: $(AvailabilityZones-eu-central-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-central-1)
@@ -855,6 +860,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: ca-central-1
+    s3Region: ca-central-1
     paramCurrentVPC: $(CurrentVPC-ca-central-1)
     paramAvailabilityZones: $(AvailabilityZones-ca-central-1)
     paramELBSubnetIds: $(ELBSubnetIds-ca-central-1)
@@ -873,6 +879,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: eu-south-1
+    s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC-eu-south-1)
     paramAvailabilityZones: $(AvailabilityZones-eu-south-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-south-1)
@@ -891,6 +898,7 @@ stages:
     LansaVersion: $(LansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: me-south-1
+    s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC-me-south-1)
     paramAvailabilityZones: $(AvailabilityZones-me-south-1)
     paramELBSubnetIds: $(ELBSubnetIds-me-south-1)
