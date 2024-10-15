@@ -79,6 +79,9 @@ parameters:
   - name: AwsRegion
     type: string
     default: none
+  - name: s3Region
+    type: string
+    default: none
   - name: paramCurrentVPC
     type: string
     default: none
@@ -141,7 +144,7 @@ stages:
             displayName: 'S3 Download: TemplateUrl.txt'
             inputs:
               awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
+              regionName: ${{ parameters.s3Region }}
               bucketName: lansa
               sourceFolder: templates/support/scalable/marketplace
               globExpressions: TemplateUrl.txt
