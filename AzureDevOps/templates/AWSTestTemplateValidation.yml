@@ -91,6 +91,9 @@ parameters:
   - name: paramS3ObjectKey
     type: string
     default: none
+  - name: paramArguments
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -211,7 +214,7 @@ stages:
             inputs:
               awsCredentials: AzureDevOps
               regionName: 'ap-southeast-2'
-              arguments: '-Gatestack $(Gate.stack)'
+              arguments: '${{ parameters.paramArguments }}'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/TestCFNDeployment.ps1'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))

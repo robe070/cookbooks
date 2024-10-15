@@ -152,6 +152,7 @@ stages:
     paramStackType: Small
     paramLansaMSIKey: $(msiURLPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramArguments: '-Gatestack $(Gate.stack)'
 
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
@@ -169,6 +170,7 @@ stages:
     paramStackType: Test
     paramLansaMSIKey: $(msiURLLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramArguments: '-Gatestack $(Gate.stack)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -185,6 +187,7 @@ stages:
     paramStackType: Development
     paramLansaMSIKey: $(msiURLPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramArguments: '-Gatestack $(Gate.stack)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -200,6 +203,7 @@ stages:
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramLansaMSIKey: $(msiURLLatest)
     param10LansaGitRepoBranch: $(CookbooksBranch)
+    paramArguments: '-Gatestack $(Gate.stack)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -217,6 +221,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
+    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -234,6 +239,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
+    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -251,6 +257,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
+    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
 
 - template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
@@ -267,6 +274,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranch)
     paramDBCCSID: $(DBCCSID)
+    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
