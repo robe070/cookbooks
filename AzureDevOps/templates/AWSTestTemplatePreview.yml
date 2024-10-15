@@ -110,6 +110,8 @@ stages:
           - checkout: self
           - checkout: _lansa_aws-templates
             path: "aws-templates"
+          - checkout: _lansa_aws-templates-mp
+            path: "aws-templates"
           # - checkout: _robe070_cookbooks
           
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -259,6 +261,7 @@ stages:
               arguments: '-Gatestack $(Gate.stack)'
               # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
+              
               ignoreLASTEXITCODE: true
             continueOnError: true
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
