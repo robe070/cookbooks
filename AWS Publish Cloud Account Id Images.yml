@@ -7,6 +7,7 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
+  - group: ImageVersion
   - name: CookbooksSource1
     value: c:\lansa
   - name: imageReleaseState
