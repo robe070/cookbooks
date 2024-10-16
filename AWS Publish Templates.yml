@@ -524,6 +524,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-west-3)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-3)
     paramLansaMSIKey: $(msiURLPrevious)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -543,6 +544,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-us-west-2)
     paramELBSubnetIds: $(ELBSubnetIds-us-west-2)
     paramLansaMSIKey: $(msiURLLatest)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -562,6 +564,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-ap-northeast-1)
     paramELBSubnetIds: $(ELBSubnetIds-ap-northeast-1)
     paramLansaMSIKey: $(msiURLPrevious)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -581,6 +584,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZsUS)
     paramELBSubnetIds: $(ELBSubnetIdsUS)
     paramLansaMSIKey: $(msiURLLatest)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -601,6 +605,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-2)
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -621,6 +626,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-us-west-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -641,6 +647,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ap-south-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -661,6 +668,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ap-east-1)
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
+    paramTagValue: "Lansa-Prod"
 
 - stage: WaitForLive
   displayName: Wait For Live
