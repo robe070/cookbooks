@@ -37,6 +37,9 @@ parameters:
   - name: paramWebserverOSVersionValue
     type: string
     default: none
+  - name: paramTagValue
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -135,15 +138,18 @@ stages:
                 "ParameterKey": "AMIId",   
                 "ParameterValue": "$(Gate.ImageID)"
             }, {
+                "ParameterKey": "TagValue",   
+                "ParameterValue": "${{ parameters.paramTagValue }}"
+            }, {
                 "ParameterKey": "LansaVersion",   
                 "ParameterValue": "${{ parameters.paramLansaVersion }}"
-            },  {
+            }, {
                 "ParameterKey": "11WebserverOSVersion",   
                 "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",   
                 "ParameterValue": "$(CookbooksBranch)"
-            },  {
+            }, {
                 "ParameterKey": "TemplateS3Namespace",   
                 "ParameterValue": "$(TemplateS3Namespace)"
             }, {

@@ -75,6 +75,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -88,6 +89,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -101,6 +103,7 @@ stages:
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -114,6 +117,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -128,6 +132,7 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -142,6 +147,7 @@ stages:
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
   parameters:
@@ -156,3 +162,4 @@ stages:
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
+    paramTagValue: "Lansa-Prod"
