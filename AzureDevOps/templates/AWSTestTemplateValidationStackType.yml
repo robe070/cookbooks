@@ -202,9 +202,6 @@ stages:
                 },{	
                     "ParameterKey": "DBCCSID",   	
                     "ParameterValue": "${{ parameters.paramDBCCSID }}"
-                },{
-                    "ParameterKey": "TagValue",  
-                    "ParameterValue": "Lansa-Prod"
                 }]
 
               tags: 'usage=temp-test'
