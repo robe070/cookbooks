@@ -153,7 +153,7 @@ stages:
     paramLansaMSIKey: $(msiURLPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
-    paramTagValue: "Lansa-Prod"
+    
 
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
@@ -172,7 +172,7 @@ stages:
     paramLansaMSIKey: $(msiURLLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -190,7 +190,7 @@ stages:
     paramLansaMSIKey: $(msiURLPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
   parameters:
@@ -207,7 +207,7 @@ stages:
     paramLansaMSIKey: $(msiURLLatest)
     param10LansaGitRepoBranch: $(CookbooksBranch)
     paramArguments: '-Gatestack $(Gate.stack)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -226,7 +226,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -245,7 +245,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -264,7 +264,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
   parameters:
@@ -282,7 +282,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranch)
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
-    paramTagValue: "Lansa-Prod"
+    
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
@@ -535,7 +535,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-west-3)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-3)
     paramLansaMSIKey: $(msiURLPrevious)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -555,7 +555,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-us-west-2)
     paramELBSubnetIds: $(ELBSubnetIds-us-west-2)
     paramLansaMSIKey: $(msiURLLatest)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -575,7 +575,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-ap-northeast-1)
     paramELBSubnetIds: $(ELBSubnetIds-ap-northeast-1)
     paramLansaMSIKey: $(msiURLPrevious)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -595,7 +595,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZsUS)
     paramELBSubnetIds: $(ELBSubnetIdsUS)
     paramLansaMSIKey: $(msiURLLatest)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -616,7 +616,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-2)
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -637,7 +637,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-us-west-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -658,7 +658,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ap-south-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -679,7 +679,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ap-east-1)
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - stage: WaitForLive
   displayName: Wait For Live
@@ -821,7 +821,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-north-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-north-1)
     paramLansaMSIKey: $(msiURLPrevious)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -841,7 +841,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-west-1)
     paramLansaMSIKey: $(msiURLLatest)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -861,7 +861,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds)
     paramNumberOfAZs: $(NumberOfAZs)
     paramLansaMSIKey: $(msiURLPrevious)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -881,7 +881,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-us-east-2)
     paramNumberOfAZs: $(NumberOfAZs-us-east-2)
     paramLansaMSIKey: $(msiURLLatest)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -902,7 +902,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-central-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -923,7 +923,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-ca-central-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -944,7 +944,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-south-1)
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
@@ -965,4 +965,4 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-me-south-1)
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
-    paramTagValue: "Lansa-Prod"
+    

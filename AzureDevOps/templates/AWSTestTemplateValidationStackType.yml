@@ -94,9 +94,6 @@ parameters:
   - name: paramArguments
     type: string
     default: none
-  - name: paramTagValue
-    type: string
-    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -207,7 +204,7 @@ stages:
                     "ParameterValue": "${{ parameters.paramDBCCSID }}"
                 },{
                     "ParameterKey": "TagValue",  
-                    "ParameterValue": "${{ parameters.paramTagValue }}"
+                    "ParameterValue": "Lansa-Prod"
                 }]
 
               tags: 'usage=temp-test'
