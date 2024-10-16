@@ -209,7 +209,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack)'
     
 
-- template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
   parameters:
     stageName: 'AUSMediumShoeSizew16d_14_2j'
     stagedisplayName: AUS Medium Shoe Size w16d-14-2j
