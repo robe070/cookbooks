@@ -100,7 +100,7 @@ stages:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
           arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'''
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableTemplateCI.ps1'
 
       - pwsh: |
          # Print the Gate variables.
