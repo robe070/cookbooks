@@ -7,7 +7,6 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
-  - group: ImageVersion
   - name: CookbooksSource1
     value: c:\lansa
   - name: imageReleaseState
@@ -132,7 +131,7 @@ stages:
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramsetGateVariable: 'SetGateVariableTemplateCI.ps1'
+    paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
@@ -147,7 +146,7 @@ stages:
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramsetGateVariable: 'SetGateVariableTemplateCI.ps1'
+    paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml
@@ -162,5 +161,5 @@ stages:
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramsetGateVariable: 'SetGateVariableTemplateCI.ps1'
+    paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"
