@@ -99,7 +99,7 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'''
+          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'' -Version $(VersionText-TemplateCI)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariableTemplateCI.ps1'
 
       - pwsh: |
