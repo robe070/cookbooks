@@ -205,7 +205,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranch)
     paramArguments: '-Gatestack $(Gate.stack)'
 
-- template: AzureDevOps/templates/AWSTestTemplateValidation.yml
+- template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
     stageName: 'AUSMediumShoeSizew16d_14_2j'
     stagedisplayName: AUS Medium Shoe Size w16d-14-2j
