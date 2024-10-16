@@ -441,6 +441,9 @@ stages:
               }, {
                   "ParameterKey": "03DBUsername",   
                   "ParameterValue": "$(03DBUsername)"
+              },{
+                  "ParameterKey": "TagValue",  
+                  "ParameterValue": "Lansa-Prod"
               }]
             tags: 'usage=temp-test'
             onFailure: 'DO_NOTHING'
