@@ -347,6 +347,10 @@ stages:
           targetFolder: '$(FolderNameProduction)'
           filesAcl: 'public-read'
 
+      - pwsh: |
+          Get-ChildItem '$(Pipeline.Workspace)/_lansa_aws-templates-mp/CloudFormationWindows'
+          Get-ChildItem '$(Pipeline.Workspace)/_lansa_aws-templates-mp/CloudFormationWindows/lansa-stack-type-win.cfn.template'
+        
 - stage: ValidateTemplateURLs
   displayName: Validate Template URLs
   dependsOn: MergeToMarketplaceAndUpload
