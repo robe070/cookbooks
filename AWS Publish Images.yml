@@ -374,17 +374,17 @@ stages:
 #     globExpressions: w19d-14-2.txt
 #     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
-# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
-#   parameters:
-#     stageName: 'w19d150CopyAMItoUS'
-#     stageDisplayname: 'w19d-15-0 Copy AMI to US'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w19d-15-0
-#     jobDemand: DotNetFramework
-#     dependsOn: w19d150IMGTest
-#     globExpressions: w19d-15-0.txt
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+  parameters:
+    stageName: 'w19d150CopyAMItoUS'
+    stageDisplayname: 'w19d-15-0 Copy AMI to US'
+    jobName: 'Agentjob'
+    jobDisplayname: 'Agent job'
+    BaseImageName: w19d-15-0
+    jobDemand: DotNetFramework
+    dependsOn: w19d150IMGTest
+    globExpressions: w19d-15-0.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
 # - template: AzureDevOps/templates/AWSCopyImageToUS .yml
 #   parameters:
