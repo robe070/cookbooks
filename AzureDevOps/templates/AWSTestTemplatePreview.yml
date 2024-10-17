@@ -98,7 +98,10 @@ parameters:
     default: none
   - name: paramDBCCSID
     type: string
-    default: '' 
+    default: ''
+  - name: paramTagValue
+    type: string
+    default: none 
   
 stages:
   - stage: ${{ parameters.stageName }}
@@ -108,9 +111,6 @@ stages:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
-        variables: 
-        - name: templateParameters
-          value: 
         pool: 
           vmImage: ${{ parameters.vmImage }}
         steps:
@@ -242,9 +242,12 @@ stages:
                 }, {
                     "ParameterKey": "03DBUsername",   
                     "ParameterValue": "$(03DBUsername)"
-                 },{	
+                }, {	
                     "ParameterKey": "DBCCSID",   	
-                    "ParameterValue": "${{ parameters.paramDBCCSID }}"	   
+                    "ParameterValue": "${{ parameters.paramDBCCSID }}"
+                }, {	
+                    "ParameterKey": "TagValue",   	
+                    "ParameterValue": "${{ parameters.paramTagValue }}"	   
                 }]
               onFailure: 'DO_NOTHING'
               timeoutInMins: 100

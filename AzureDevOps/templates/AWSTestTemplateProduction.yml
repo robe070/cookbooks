@@ -99,6 +99,9 @@ parameters:
   - name: paramDBCCSID
     type: string
     default: ''
+  - name: paramTagValue
+    type: string
+    default: none
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -240,6 +243,9 @@ stages:
                 },{	
                     "ParameterKey": "DBCCSID",   	
                     "ParameterValue": "${{ parameters.paramDBCCSID }}"
+                },{	
+                    "ParameterKey": "TagValue",   	
+                    "ParameterValue": "${{ parameters.paramTagValue }}"
                 }]
               tags: 'usage=temp-test'
               onFailure: 'DO_NOTHING'
