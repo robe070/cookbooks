@@ -163,12 +163,15 @@ stages:
 
       - task: AzurePowerShell@5
         displayName: 'Azure PowerShell: Test Image Version'
+        env:
+          RESOURCEGROUP: $(ResourceGroupName)
         inputs:
           azureSubscription: 'Azure Baking Images'
           ScriptPath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_test_image_version.ps1'
           ScriptArguments: -SkuName "$(Gate.Sku)" -deploymentOutput '$(deploymentOutput)'
           azurePowerShellVersion: LatestVersion
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
 
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Delete ResourceGroup'
