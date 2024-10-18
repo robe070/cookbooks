@@ -10,7 +10,7 @@ resources:
       type: github
       endpoint: priyadishah
       name: priyadishah/aws-templates-md
-      ref: feature/Aws-Image-Release-3.0
+      ref: support/scalable
 
     - repository: _robe070_cookbooks
       type: github
