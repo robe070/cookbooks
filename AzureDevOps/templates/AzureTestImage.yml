@@ -164,7 +164,7 @@ stages:
       - task: AzurePowerShell@5
         displayName: 'Azure PowerShell: Test Image Version'
         env:
-          RESOURCEGROUP: $(ResourceGroupName)
+          RESOURCEGROUP: ${{ parameters.resourceGroup }}
         inputs:
           azureSubscription: 'Azure Baking Images'
           ScriptPath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_test_image_version.ps1'
