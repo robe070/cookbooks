@@ -146,21 +146,21 @@ stages:
             awsArguments: 's3://lansa/templates/support/scalable/ami-list/ --recursive'
             failOnStandardError: false       
 
-# - template: AzureDevOps/templates/AWSTestAusImage.yml
-#   parameters:
-#     stageName: 'w16d142IMGTest'
-#     stageDisplayname: 'w16d-14-2 IMG Test'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-14-2
-#     stackname: w16d-14-2-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: UpdateAUSAMIs
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#     paramLansaVersion: $(lansaVersionPrevious)
-#     parammsiURL: $(msiURLPrevious)
-#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-#     paramTagValue: "Lansa-Prod"
+- template: AzureDevOps/templates/AWSTestAusImage.yml
+  parameters:
+    stageName: 'w16d142IMGTest'
+    stageDisplayname: 'w16d-14-2 IMG Test'
+    jobName: 'Agentjob'
+    jobDisplayname: 'Agent job'
+    BaseImageName: w16d-14-2
+    stackname: w16d-14-2-IMG
+    jobDemand: DotNetFramework
+    dependsOn: UpdateAUSAMIs
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersionPrevious)
+    parammsiURL: $(msiURLPrevious)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
@@ -338,17 +338,17 @@ stages:
 #     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
 #     paramTagValue: "Lansa-Prod"
 
-# - template: AzureDevOps/templates/AWSCopyImageToUS .yml
-#   parameters:
-#     stageName: 'w16d142CopyAMItoUS'
-#     stageDisplayname: 'w16d-14-2 Copy AMI to US'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-14-2
-#     jobDemand: DotNetFramework
-#     dependsOn: w16d142IMGTest
-#     globExpressions: w16d-14-2.txt
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+  parameters:
+    stageName: 'w16d142CopyAMItoUS'
+    stageDisplayname: 'w16d-14-2 Copy AMI to US'
+    jobName: 'Agentjob'
+    jobDisplayname: 'Agent job'
+    BaseImageName: w16d-14-2
+    jobDemand: DotNetFramework
+    dependsOn: w16d142IMGTest
+    globExpressions: w16d-14-2.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
@@ -485,7 +485,7 @@ stages:
 - stage: CommitAUStemplatechanges
   displayName: Commit AUS template changes
   dependsOn: 
-  # - w16d142CopyAMItoUS
+  - w16d142CopyAMItoUS
   - w16d150CopyAMItoUS
   # - w16d142jCopyAMItoUS
   # - w16d150jCopyAMItoUS
@@ -651,21 +651,21 @@ stages:
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
             filesAcl: 'public-read'
 
-# - template: AzureDevOps/templates/AWSTestUSImage.yml
-#   parameters:
-#     stageName: 'w16d142USIMGTest'
-#     stageDisplayname: 'w16d-14-2 US IMG Test'
-#     jobName: 'Agentjob'
-#     jobDisplayname: 'Agent job'
-#     BaseImageName: w16d-14-2
-#     stackname: w16d-14-2-US-IMG
-#     jobDemand: DotNetFramework
-#     dependsOn: UpdateUSAMIs
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-#     paramLansaVersion: $(lansaVersionPrevious)
-#     parammsiURL: $(msiURLPrevious)
-#     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-#     paramTagValue: "Lansa-Prod"
+- template: AzureDevOps/templates/AWSTestUSImage.yml
+  parameters:
+    stageName: 'w16d142USIMGTest'
+    stageDisplayname: 'w16d-14-2 US IMG Test'
+    jobName: 'Agentjob'
+    jobDisplayname: 'Agent job'
+    BaseImageName: w16d-14-2
+    stackname: w16d-14-2-US-IMG
+    jobDemand: DotNetFramework
+    dependsOn: UpdateUSAMIs
+    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    paramLansaVersion: $(lansaVersionPrevious)
+    parammsiURL: $(msiURLPrevious)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
@@ -846,7 +846,7 @@ stages:
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
   dependsOn: 
-  # - w16d142USIMGTest
+  - w16d142USIMGTest
   - w16d150USIMGTest
   # - w16d142jUSIMGTest
   # - w16d150jUSIMGTest
