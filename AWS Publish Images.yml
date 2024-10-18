@@ -238,7 +238,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/AWSTestAusImage.yml
@@ -302,7 +302,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/AWSTestAusImage.yml
@@ -334,7 +334,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOS2022jpn)
     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/AWSCopyImageToUS .yml
@@ -775,7 +775,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/AWSTestUSImage.yml
@@ -807,7 +807,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
 # - template: AzureDevOps/templates/AWSTestUSImage.yml
@@ -839,7 +839,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOS2022jpn)
     paramTagValue: "Lansa-Prod"
 
 - stage: CommitUStemplatechanges
