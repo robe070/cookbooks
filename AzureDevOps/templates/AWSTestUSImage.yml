@@ -57,7 +57,13 @@ stages:
       displayName: ${{ parameters.jobDisplayname }}
 
       variables:
-        TemplateS3Namespace: '/image-cd-pipeline'
+        - name: TemplateS3Namespace
+          value: '/image-cd-pipeline'
+        - name: japan_override
+          ${{ if endsWith(lower(parameters.BaseImageName), 'j')}}:
+            value: -Language $(jpnLanguage)
+          ${{ else }}:
+            value: ''
 
       pool:
         vmImage: ${{ parameters.vmImage }}
@@ -207,7 +213,7 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          arguments: '-Gatestack $(Gate.stack)'
+          arguments: '-Gatestack $(Gate.stack) $(japan_override)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
