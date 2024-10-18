@@ -25,7 +25,6 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
-  # - group: ImageVersion
   - name: ArtifactSourceAlias
     value: _lansa_aws-templates
   - name: CookbooksSource1
