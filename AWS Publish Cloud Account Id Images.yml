@@ -145,7 +145,7 @@ stages:
     jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"
 
