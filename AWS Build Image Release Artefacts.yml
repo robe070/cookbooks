@@ -1,0 +1,1658 @@
+name: Build Image Release Artefacts 
+trigger: none
+variables:
+  - group: "External IP Addresses"
+  - group: "ImageVersion"
+  - group: "Logins"
+  - group: "AWS base AMI Image Names"
+  - name: JpnLanguage
+    value: JPN
+  - name: atomic-build
+    value: $false
+  - name: atomic-build-ps
+    value: $false
+  - name: quickstart-scripts
+    value: $(Agent.BuildDirectory)\test
+  - name: regionName
+    value: ap-southeast-2
+
+#resources:
+#  repositories:
+#  - repository: self
+#    type: git
+#    ref: feature/Build-Image-Release-Artefacts-3.0
+jobs:
+- job: Job_1
+  displayName: 'Agent job : w16d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+       awsCredentials: $(awsCredentials)
+       regionName: $(regionName)
+       filePath: scripts/install-powershell-modules.ps1
+       inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+          Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+          Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+          Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T16142$(VersionText-w16d-14-2)
+        SG: w16d-14-2-$(VersionText-w16d-14-2)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w16d-14-2-$(VersionText-w16d-14-2)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-14-2
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-14-2)' -version 'w16d-14-2'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID)"
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText-w16d-14-2)' -Force
+- job: Job_2
+  displayName: 'Agent job : w16d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T16150$(VersionText-w16d-15-0)
+        SG: w16d-15-0-$(VersionText-w16d-15-0)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w16d-15-0-$(VersionText-w16d-15-0)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-15-0
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance  '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-15-0)' -version 'w16d-15-0'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >
+        # Terminating the Instance
+
+        #Write-Host "Value is $(TerminateInstance)"
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText-w16d-15-0)' -Force
+- job: Job_5
+  displayName: 'Agent job : w19d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T19142$(VersionText-w19d-14-2)
+        SG: w19d-14-2-$(VersionText-w19d-14-2)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-14-2-$(VersionText-w19d-14-2)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-14-2
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance  '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >
+        # Terminating the Instance
+
+        #Write-Host "Value is $(TerminateInstance)"
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2-$(VersionText-w19d-14-2)' -Force
+- job: Job_6
+  displayName: 'Agent job : w19d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T9150$(VersionText-w19d-15-0)
+        SG: w19d-15-0-$(VersionText-w19d-15-0)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-15-0-$(VersionText-w19d-15-0)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        # }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-15-0
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
+- job: Job_8
+  displayName: 'Agent job : w19d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T19150j$(VersionText-w19d-15-0j)
+        SG: w19d-15-0j-$(VersionText-w19d-15-0j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-15-0j-$(VersionText-w19d-15-0j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-15-0j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-15-0j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0j-$(VersionText-w19d-15-0j)' -Force
+- job: Job_7
+  displayName: 'Agent job : w19d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T19142j$(VersionText-w19d-14-2j)
+        SG: w19d-14-2j-$(VersionText-w19d-14-2j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w19d-14-2j-$(VersionText-w19d-14-2j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w19d-14-2j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w19d-14-2j)' -version 'w19d-14-2j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2j-$(VersionText-w19d-14-2j)' -Force
+- job: Job_3
+  displayName: 'Agent job : w16d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T16142j$(VersionText-w16d-14-2j)
+        SG: w16d-14-2j-$(VersionText-w16d-14-2j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w16d-14-2j-$(VersionText-w16d-14-2j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-14-2j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-14-2j)' -version 'w16d-14-2j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w16d-14-2j-$(VersionText-w16d-14-2j)' -Force
+ 
+
+- job: Job_4
+  displayName: 'Agent job : w16d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+         Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        
+         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T16150j$(VersionText-w16d-15-0j)
+        SG: w16d-15-0j-$(VersionText-w16d-15-0j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w16d-15-0j-$(VersionText-w16d-15-0j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w16d-15-0j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w16d-15-0j)' -version 'w16d-15-0j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w16d-15-0j-$(VersionText-w16d-15-0j)' -Force
+- job: Job_9
+  displayName: 'Agent job : w22d-14-2'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download KeyPair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T22142$(VersionText-w22d-14-2)
+        SG: w22d-14-2-$(VersionText-w22d-14-2)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w22d-14-2-$(VersionText-w22d-14-2)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-14-2
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance  '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-14-2)' -version 'w22d-14-2'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >
+        # Terminating the Instance
+
+        #Write-Host "Value is $(TerminateInstance)"
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w22d-14-2-$(VersionText-w22d-14-2)' -Force
+- job: Job_10
+  displayName: 'Agent job : w22d-15-0'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T22150$(VersionText-w22d-15-0)
+        SG: w22d-15-0-$(VersionText-w22d-15-0)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w22d-15-0-$(VersionText-w22d-15-0)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-15-0
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Deleting Security group and Instance '
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
+- job: Job_12
+  displayName: 'Agent job : w22d-15-0j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T22150j$(VersionText-w22d-15-0j)
+        SG: w22d-15-0j-$(VersionText-w22d-15-0j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w22d-15-0j-$(VersionText-w22d-15-0j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-15-0j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-15-0j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0j-$(VersionText-w22d-15-0j)' -Force
+- job: Job_11
+  displayName: 'Agent job : w22d-14-2j'
+  timeoutInMinutes: 360
+  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Install PowerShell Modules
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/install-powershell-modules.ps1
+      inlineScript: >+
+        if ("$(GitBranch)".Contains("refs/heads")) {
+            $branch ="$(GitBranch)".replace("refs/heads/", "")
+        } else {
+            $branch = "$(GitBranchPR)"
+        }
+
+        $branch | Write-Host | Out-Default | Write-Verbose
+
+        Write-Host "##vso[task.setvariable variable=GitBranch]$branch" | Out-Default | Write-Verbose
+
+        if ($Env:PsModuleInstalled -eq 'True') {
+            Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
+            return;
+        }
+
+        # Pester for Testing
+
+        Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+
+        Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+
+        Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+
+
+        $Env:PsModuleInstalled = 'True'
+
+  - task: DownloadSecureFile@1
+    name: keypair
+    displayName: Download Keypair
+    inputs:
+      secureFile: AzureDevOps.pem
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: BuildImage
+    displayName: Build Image
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: " -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language $(JpnLanguage)"
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+  - task: PowerShell@2
+    displayName: 'Generate: AMI Id'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    name: Vmtest
+    displayName: VM Tests
+    env:
+        TestImageName: $(BuildImage.amiID)
+        TestCloudName: AWS
+        AtomicBuild: $(atomic-build)
+        TestVmName: T22142j$(VersionText-w22d-14-2j)
+        SG: w22d-14-2j-$(VersionText-w22d-14-2j)
+        keypair: $(KeypairName)
+        keypairpath: $(keypair.secureFilePath)
+        VersionText: w22d-14-2j-$(VersionText-w22d-14-2j)
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      filePath: scripts/invoke-pester-tests.ps1
+      inlineScript: >2-
+
+        # Invoke Pester Tests
+
+        cd $(System.DefaultWorkingDirectory)\Tests
+
+        $result = Invoke-Pester -Script '.\Image*' -OutputFormat  NUnitXml -OutputFile '$(System.DefaultWorkingDirectory)\Test-Vm.xml' -PassThru
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Result -eq "Failed") {
+            throw "Failed Tests Count: $($result.FailedCount)"
+        } else {
+            Write-Host "Tested the image successfully."
+        }
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: w22d-14-2j
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Image URL copy'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2j.txt
+      ArtifactName: aws
+      FileCopyOptions: ''
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: Deleting Security group and Instance
+    inputs:
+      awsCredentials: $(awsCredentials)
+      regionName: $(regionName)
+      arguments: -versionText '$(VersionText-w22d-14-2j)' -version 'w22d-14-2j'
+      filePath: scripts/terminate-instance.ps1
+      inlineScript: >+
+        # Terminating the Instance
+
+        if('$(TerminateInstance)' -eq 'True') {
+           Write-Host "Removing the instance $(BuildImage.InstanceID) "
+            Remove-EC2Instance -InstanceId $(BuildImage.InstanceID) -Force
+        }
+
+        #Removing Vm
+
+        Write-Host "Removing the Vm"
+
+        Remove-EC2Instance -InstanceId  $(Vmtest.instanceID) -Force
+
+
+        # Deleting the Security Group
+
+        Write-Host "Deleting the security group"
+
+        Start-Sleep -Seconds 180
+         Remove-EC2SecurityGroup -GroupName 'w22d-14-2j-$(VersionText-w22d-14-2j)' -Force
+
+...
