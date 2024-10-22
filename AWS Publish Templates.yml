@@ -154,6 +154,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "Yes"
     
 
 
@@ -174,6 +175,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "Yes"
     
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
@@ -193,6 +195,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "Yes"
     
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
@@ -208,7 +211,7 @@ stages:
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramLansaMSIKey: $(msiURLLatest)
-    param10LansaGitRepoBranch: $(CookbooksBranch)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
     
@@ -231,6 +234,7 @@ stages:
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "Yes"
     
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
@@ -251,6 +255,7 @@ stages:
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "Yes"
     
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
@@ -271,6 +276,7 @@ stages:
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
+    paramUpdateManagementScripts: "No"
     
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
@@ -286,7 +292,7 @@ stages:
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     paramLansaMSIKey: $(msiURLJPNLatest)
-    param10LansaGitRepoBranch: $(CookbooksBranch)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
@@ -346,10 +352,6 @@ stages:
           globExpressions: '*.template'
           targetFolder: '$(FolderNameProduction)'
           filesAcl: 'public-read'
-
-      - pwsh: |
-          Get-ChildItem '$(Pipeline.Workspace)/_lansa_aws-templates-mp/CloudFormationWindows'
-          Get-Content '$(Pipeline.Workspace)/_lansa_aws-templates-mp/CloudFormationWindows/lansa-stack-type-win.cfn.template'
         
 - stage: ValidateTemplateURLs
   displayName: Validate Template URLs

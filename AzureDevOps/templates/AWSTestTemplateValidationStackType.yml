@@ -97,6 +97,10 @@ parameters:
   - name: paramTagValue
     type: string
     default: none
+  - name: paramUpdateManagementScripts
+    type: string
+    default: none
+  
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -162,7 +166,7 @@ stages:
                     "ParameterValue": "${{ parameters.param10LansaGitRepoBranch }}"
                 },{
                     "ParameterKey": "UpdateManagementScripts",
-                    "ParameterValue": "Yes"
+                    "ParameterValue": "${{ parameters.paramUpdateManagementScripts }}"
                 },{
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
