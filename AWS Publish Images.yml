@@ -8,15 +8,15 @@ resources:
   repositories:
     - repository: _lansa_aws-templates
       type: github
-      endpoint: priyadishah
-      name: priyadishah/aws-templates-md
+      endpoint: robe070
+      name: lansa/aws-templates
       ref: support/scalable
 
     - repository: _robe070_cookbooks
       type: github
-      endpoint: priyadishah
-      name: priyadishah/cookbooks
-      ref: feature/AWSImageRelease-3.0
+      endpoint: robe070
+      name: robe070/cookbooks
+      ref: debug/paas
 
 variables:
   - group: Template Parameters
@@ -61,12 +61,12 @@ stages:
   displayName: Update AUS AMIs
   jobs:
     - job:
-      displayName: Agent job 
+      displayName: Agent job
       timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1 
+      cancelTimeoutInMinutes: 1
 
       pool:
-        vmImage: $(vmImage) 
+        vmImage: $(vmImage)
         #demands: ''
 
       steps:
@@ -74,7 +74,7 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
-        
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
@@ -90,7 +90,7 @@ stages:
             # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true   
+            pwsh: true
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
@@ -100,7 +100,7 @@ stages:
             #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true  
+            pwsh: true
 
         - task: PowerShell@2
           displayName: 'Update Template AMI Mappings'
@@ -110,8 +110,8 @@ stages:
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: '-ImageType ''Development'''
-            pwsh: true   
-  
+            pwsh: true
+
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
           inputs:
@@ -143,7 +143,7 @@ stages:
             awsCommand: s3
             awsSubCommand: rm
             awsArguments: 's3://lansa/templates/support/scalable/ami-list/ --recursive'
-            failOnStandardError: false       
+            failOnStandardError: false
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
@@ -318,7 +318,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
-    paramWebserverOSVersionValue: $(WebserverOS2022jpn)     
+    paramWebserverOSVersionValue: $(WebserverOS2022jpn)
     paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
@@ -396,7 +396,7 @@ stages:
     dependsOn: w22d142IMGTest
     globExpressions: w22d-14-2.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
-   
+
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w22d150CopyAMItoUS'
@@ -483,7 +483,7 @@ stages:
 
 - stage: CommitAUStemplatechanges
   displayName: Commit AUS template changes
-  dependsOn: 
+  dependsOn:
   - w16d142CopyAMItoUS
   - w16d150CopyAMItoUS
   - w16d142jCopyAMItoUS
@@ -498,13 +498,13 @@ stages:
   - w22d150jCopyAMItoUS
   jobs:
     - job:
-      displayName: Agent job 
+      displayName: Agent job
       timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1 
+      cancelTimeoutInMinutes: 1
 
       pool:
-        vmImage: $(vmImage) 
-        #demands: '' 
+        vmImage: $(vmImage)
+        #demands: ''
 
       steps:
         - download: _Build Image Release Artefacts
@@ -528,34 +528,34 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true
-   
+
 
         - pwsh: |
            # change to project directory
            cd $(Pipeline.Workspace)/_lansa_aws-templates
-   
+
            # fetch changes
            git fetch
            if (-not $?) {
             Write-Host(" git fetch failed");
             exit 1
            }
-   
-   
+
+
            # merge branch to the main branch (for testing merging temp branch to feature/119)
            git pull origin $(GitLansaAwsTemplatesTempBranch)
            if (-not $?) {
             Write-Host(" git pull origin $(GitLansaAwsTemplatesTempBranch) failed");
             exit 1
            }
-   
+
            # push to the main branch
            git push
            if (-not $?) {
             Write-Host(" git push failed");
             exit 1
            }
-   
+
           displayName: 'Commit AUS template changes'
 
 - stage: UpdateUSAMIs
@@ -564,13 +564,13 @@ stages:
 
   jobs:
     - job:
-      displayName: Agent job 
+      displayName: Agent job
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 
       pool:
-        vmImage: $(vmImage) 
-        demands: 'DotNetFramework' 
+        vmImage: $(vmImage)
+        demands: 'DotNetFramework'
 
       steps:
         - download: _Build Image Release Artefacts
@@ -602,7 +602,7 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true    
+            pwsh: true
 
         - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
           displayName: 'S3 Download: lansa'
@@ -619,7 +619,7 @@ stages:
             awsCredentials: AzureDevOps
             regionName: 'us-east-1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'
-    
+
         - task: PowerShell@2
           displayName: 'Update Template AMI Mappings'
           inputs:
@@ -844,7 +844,7 @@ stages:
 
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
-  dependsOn: 
+  dependsOn:
   - w16d142USIMGTest
   - w16d150USIMGTest
   - w16d142jUSIMGTest
@@ -857,15 +857,15 @@ stages:
   - w22d150USIMGTest
   - w22d142jUSIMGTest
   - w22d150jUSIMGTest
-  
+
   jobs:
     - job:
-      displayName: Agent job 
+      displayName: Agent job
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 
       pool:
-        vmImage: $(vmImage)  
+        vmImage: $(vmImage)
 
       steps:
         - download: _Build Image Release Artefacts
@@ -892,30 +892,30 @@ stages:
         - pwsh: |
            # change to project directory
            cd $(Pipeline.Workspace)/_lansa_aws-templates
-   
+
            Write-Host "fetch changes"
            git fetch
            if (-not $?) {
              Write-Host("git fetch failed");
              exit 1
            }
-   
+
            Write-Host "merge branch to the main branch"
            git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories
            if (-not $?) {
              Write-Host("git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories failed");
              exit 1
            }
-   
+
            Write-Host "Push to the main branch (support/scalable branch)"
            git push
            if (-not $?) {
              Write-Host("git push failed");
              exit 1
            }
-   
+
            # The merge to Marketplace branch belongs in the template pipeline, so conditioned out for the moment
-   
+
            if ($false) {
            Write-Host "Checkout to (support/scalable_marketplace branch)"
            git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch)
@@ -923,36 +923,36 @@ stages:
              Write-Host("git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch) failed");
              exit 1
            }
-   
+
            # pull changes from (support/scalable branch)
            git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories
            if (-not $?) {
              Write-Host("git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories failed");
              exit 1
            }
-   
+
            # push to the main branch  (support/scalable_marketplace branch)
            git push
            if (-not $?) {
              Write-Host("git push failed");
              exit 1
            }
-   
+
            } # if($false)
-   
+
           displayName: 'Commit US template changes'
-    
+
 - stage: Marketplace
   displayName: Marketplace
   dependsOn: CommitUStemplatechanges
 
   jobs:
     - job:
-      displayName: Agentless job 
+      displayName: Agentless job
       timeoutInMinutes: 0
 
       pool: server
-      #   vmImage: $(vmImage)  
+      #   vmImage: $(vmImage)
 
       steps:
         # - download: _Build Image Release Artefacts 3.0
@@ -985,12 +985,12 @@ stages:
   displayName: Tag Git
   jobs:
     - job:
-      displayName: Agent job 
+      displayName: Agent job
       timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1 
+      cancelTimeoutInMinutes: 1
 
       pool:
-        vmImage: $(vmImage) 
+        vmImage: $(vmImage)
         #demands: ''
 
       steps:
@@ -998,7 +998,7 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
-        
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
