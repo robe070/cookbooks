@@ -48,7 +48,7 @@ variables:
   - name: LansaReleaseTemplateUrl
     value: https://raw.githubusercontent.com/lansa/aws-templates/support/scalable/CloudFormationWindows/lansa-master-win.cfn.template
   - name: RegressionTestRegion
-    value: ap-southeast-2                              
+    value: ap-southeast-2                           
   - group: "Template Parameters"
   - group: "VPC ap-southeast-2"
   - group: "VPC us-east-1"
@@ -389,7 +389,7 @@ stages:
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
             # arguments: '-BaseImageName ''w19d-15-0'' -stackname ''Validate-TemplateUrl'' -Version $(VersionText-TemplateCI)'
             # filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariableTemplateCI.ps1'
-            arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
+            arguments: '-BaseImageName ''w19d-15-0'' -stackname ''Validate-TemplateUrl'''
             filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
 
         - pwsh: |
