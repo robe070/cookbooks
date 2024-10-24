@@ -3,29 +3,29 @@ variables:
   - group: Image Names
   - group: External IP Addresses
   - name: Build-w22d-14-2
-  - value: false
+    value: false
   - name: Build-w22d-15-0
-  - value: false
+    value: false
   - name: Build-w22d-14-2j
-  - value: false
+    value: false
   - name: Build-w22d-15-0j
-  - value: false
+    value: false
   - name: Build-w16d-14-2
-  - value: false
+    value: false
   - name: Build-w16d-14-2j
-  - value: false
+    value: false
   - name: Build-w16d-15-0
-  - value: false
+    value: false
   - name: Build-w16d-15-0j
-  - value: false
+    value: false
   - name: Build-w19d-14-2
-  - value: false
+    value: false
   - name: Build-w19d-14-2j
-  - value: false
+    value: false
   - name: Build-w19d-15-0
-  - value: false
+    value: false
   - name: Build-w19d-15-0j
-  - value: false
+    value: false
 
    
 jobs:
