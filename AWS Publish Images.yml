@@ -959,27 +959,15 @@ stages:
   dependsOn: CommitUStemplatechanges
 
   jobs:
-    - job:
-      displayName: Agentless job
-      timeoutInMinutes: 0
-
+    - job: 'Job_1'
+      displayName: 'Agentless Job'
       pool: server
-      #   vmImage: $(vmImage)
-
+      
       steps:
-        # - download: _Build Image Release Artefacts 3.0
-        #   displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        # - checkout: self
-
-        # - checkout: _lansa_aws-templates
-        #   displayName: Checkout Divakshi/aws-templates
-
-        # - checkout: _priyadishahCookbooks
-        #   displayName: Checkout Divakshi/cookbooks
-
-        - task: ManualIntervention@8
+      
+        - task: ManualValidation@1
           displayName: 'Marketplace Instructions'
+          timeoutInMinutes: 43200
           inputs:
             instructions: |
               1. Manual step. Submit US AMIs to AWS MP. Upload the AMIs to AWS Markeplace.
@@ -992,6 +980,7 @@ stages:
               3. Even if only the images are being updated, the Template CD pipeline must be run to upload the updated templates to S3 ready for publication.
               4. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
               5. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
+            onTimeout: 'resume'
 
 - stage: TagGit
   displayName: Tag Git
