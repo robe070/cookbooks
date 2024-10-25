@@ -10,11 +10,11 @@ resources:
       endpoint: debjitbhowmik807
       name: debjitbhowmik807/azure-quickstart-templates
       ref: support/scalable
-    - repository: _CelestialSystem_azure_quickstart_templates
+    - repository: _robe070_cookbooks
       type: github
       endpoint: debjitbhowmik807
-      name: CelestialSystem/azure-quickstart-templates
-      ref: feature/139
+      name: robe070/cookbooks
+      ref: debug/paas  
       
 
 variables:
