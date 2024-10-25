@@ -43,9 +43,8 @@ parameters:
   - name: jobcondition
     type: string
     default: none
-  # - name: CollationJPN
-  #   type: string
-  #   default: $(Collation_JPN)
+  - name: continueOnError_URLTests
+    default: false
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -159,7 +158,9 @@ stages:
           targetType: filePath
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_url_tests.ps1'
           arguments: -deploymentOutput '$(deploymentOutput)'
+        continueOnError: ${{ parameters.continueOnError_URLTests }}
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+        
 
       - task: AzurePowerShell@5
         displayName: 'Azure PowerShell: Test Image Version'

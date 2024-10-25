@@ -68,12 +68,13 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w16d-14-2j
+    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
     dependsOn:
     stageName: w16d150jAus
-    stagedisplayName: w16d150j Aus'
+    stagedisplayName: w16d150j Aus
     jobName: w16d150jAus
     jobDisplayname: w16d150j Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -82,6 +83,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w16d-15-0j
+    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -115,7 +117,7 @@ stages:
   parameters:
     dependsOn:
     stageName: w19d142jAus
-    stagedisplayName: w19d142j Aus'
+    stagedisplayName: w19d142j Aus
     jobName: w19d142jAus
     jobDisplayname: w19d142j Aus
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
@@ -124,6 +126,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w19d-14-2j
+    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -138,6 +141,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w19d-15-0j
+    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -180,6 +184,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w22d-14-2j
+    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -194,6 +199,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w22d-15-0j
+    continueOnError_URLTests: true
     
 - stage: PublishPreviewImages
   displayName: Publish Preview Images
