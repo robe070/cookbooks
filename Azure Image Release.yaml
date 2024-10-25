@@ -238,6 +238,15 @@ stages:
       vmImage: Windows-2022
     displayName: 'Merge patch/PAAS cookbooks'
     steps:
+      - download: _BuildImageReleaseArtefacts
+        displayName: Downloading artefacts from Build Image Release Artefacts 3.0
+
+      - checkout: _lansa_azure_quickstart_templates
+        path: _lansa_azure_quickstart_templates
+ 
+      - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+        path: _robe070_cookbooks
+
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (robe070/cookbooks)'
         inputs:
