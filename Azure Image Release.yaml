@@ -68,7 +68,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w16d-14-2j
-    continueOnError_URLTests: true
+    
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -83,7 +83,6 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w16d-15-0j
-    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -126,7 +125,6 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w19d-14-2j
-    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -141,7 +139,6 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w19d-15-0j
-    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -184,7 +181,6 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w22d-14-2j
-    continueOnError_URLTests: true
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -199,7 +195,6 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Custom-w22d-15-0j
-    continueOnError_URLTests: true
     
 - stage: PublishPreviewImages
   displayName: Publish Preview Images
