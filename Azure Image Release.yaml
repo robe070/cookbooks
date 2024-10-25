@@ -234,9 +234,10 @@ stages:
   dependsOn: PublishPreviewImages
   jobs: 
   - job: 'MergePatch_PAASCookbooks'
+    pool:
+      vmImage: Windows-2022
     displayName: 'Merge patch/PAAS cookbooks'
     steps:
-
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (robe070/cookbooks)'
         inputs:

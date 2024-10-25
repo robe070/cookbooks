@@ -76,8 +76,8 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
  
-      - checkout: _robe070_cookbooks
-        path: _robe070_cookbooks
+      # - checkout: _robe070_cookbooks
+      #   path: _robe070_cookbooks
 
       - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
         path: _robe070_cookbooks
