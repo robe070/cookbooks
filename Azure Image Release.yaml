@@ -384,7 +384,7 @@ stages:
     Version: w16d-15-0
     osName: Windows Server 2016
     lansaVersion: V15 GA
-    msiURL: msiURLv15
+    msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-SN-w16d-15-0
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -398,7 +398,7 @@ stages:
     Version: w16d-15-0
     osName: Windows Server 2016
     lansaVersion: V15 GA
-    msiURL: msiURLv15
+    msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-CC-w16d-15-0
 
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -412,7 +412,7 @@ stages:
     Version: w19d-15-0
     osName: Windows Server 2019
     lansaVersion: V15 GA
-    msiURL: msiURLv15
+    msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-BS-w19d-15-0
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -426,7 +426,7 @@ stages:
     Version: w19d-14-2
     osName: Windows Server 2019
     lansaVersion: V14 SP2
-    msiURL: msiURLv142
+    msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-FC-w19d-14-2
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -440,7 +440,7 @@ stages:
     Version: w16d-14-2
     osName: Windows Server 2016
     lansaVersion: V14 SP2
-    msiURL: msiURLv142
+    msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-IC-w16d-14-2
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -454,7 +454,7 @@ stages:
     Version: w19d-15-0
     osName: Windows Server 2019
     lansaVersion: V15 GA
-    msiURL: msiURLv15
+    msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-UW-w19d-15-0
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -468,7 +468,7 @@ stages:
     Version: w16d-14-2j
     osName: Windows Server 2016 JPN
     lansaVersion: V14 SP2
-    msiURL: msiURLJPN
+    msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-JW-w16d-14-2j
 
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -482,7 +482,7 @@ stages:
     Version: w16d-15-0j
     osName: Windows Server 2016 JPN
     lansaVersion: V15 GA
-    msiURL: msiURLJPNLatest
+    msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-KC-w16d-15-0j
     
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -496,7 +496,7 @@ stages:
     Version: w19d-14-2j
     osName: Windows Server 2019 JPN
     lansaVersion: V14 SP2
-    msiURL: msiURLJPN
+    msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-NC-w19d-14-2j
 
 - template: AzureDevOps\templates\Azure Test Image.yml
@@ -510,7 +510,7 @@ stages:
     Version: w19d-15-0j
     osName: Windows Server 2019 JPN
     lansaVersion: V15 GA
-    msiURL: msiURLJPNLatest
+    msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-GW-w19d-15-0j
 
 - stage: 'GoLive'
