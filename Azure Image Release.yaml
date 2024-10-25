@@ -310,7 +310,7 @@ stages:
     jobName: 'w22d150AusEastPreview'
     jobDisplayname: 'w22d150 Aus East Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
     Version: w22d-15-0
     osName: Windows Server 2022
     lansaVersion: V15 GA
