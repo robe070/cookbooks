@@ -295,7 +295,7 @@ stages:
     jobName: 'w22d150AusEastPreview'
     jobDisplayname: 'w22d150 Aus East Preview'
     dependsOn: MergePatch_PAASCookbooks
-    jobcondition: and(succeeded(), or(eq(variables['Build-w12r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22r2d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -463,7 +463,7 @@ stages:
   displayName: 'Go Live'
   dependsOn: 
     - w22d142AusEastPreview
-  #  - w22d142AusEastPreview
+    - w22d142AusEastPreview
     - w22d142USEastPreview
     - w22d142FranceCentralPreview
     - w22d150AusEastPreview
@@ -507,6 +507,14 @@ stages:
       vmImage: Windows-2022
     displayName: 'Cookbooks Merge & Tag'
     steps:
+      - download: _BuildImageReleaseArtefacts
+        displayName: Downloading artefacts from Build Image Release Artefacts 3.0
+
+      - checkout: _lansa_azure_quickstart_templates
+        path: _lansa_azure_quickstart_templates
+ 
+      - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+        path: _robe070_cookbooks
     - task: PowerShell@2
       displayName: 'Artifact Check: Set Gate Variable'
       name: Gate
