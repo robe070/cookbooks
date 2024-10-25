@@ -221,6 +221,7 @@ stages:
       displayName: Publish Preview Images
       timeoutInMinutes: 43200 # 30 Days
       inputs:
+        onTimeout: 'reject'
         instructions: |
           1. All preceding stages must be successful, or skipped
           2. Publish the preview images in the marketplace
@@ -544,6 +545,7 @@ stages:
     - task: ManualValidation@1
       displayName: 'Publish Preview Images'
       inputs:
+        onTimeout: 'reject'
         instructions: |
           1. All preceding stages must be successful, or skipped
           2. Publish the preview images in the marketplace
