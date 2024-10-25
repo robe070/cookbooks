@@ -269,6 +269,11 @@ stages:
     jobDisplayname: 'w22d142 Aus East Preview'
     dependsOn: MergePatch_PAASCookbooks
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    Version: w22d-14-2
+    osName: Windows Server 2022
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLv142)
+    resourceGroup: BakingDP-Preview-AE-w22d-14-2
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -278,6 +283,11 @@ stages:
     jobDisplayname: 'w22d142 US East Preview'
     dependsOn: MergePatch_PAASCookbooks
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    Version: w22d-14-2
+    osName: Windows Server 2022
+    lansaVersion: V14 SP2
+    msiURL: $(msiURLv142)
+    resourceGroup: BakingDP-Preview-UE-w22d-14-2
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
