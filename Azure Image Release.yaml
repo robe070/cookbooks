@@ -8,13 +8,10 @@ resources:
     - repository: _lansa_azure_quickstart_templates
       type: github
       endpoint: debjitbhowmik807
+      # endpoint: robe070
       name: debjitbhowmik807/azure-quickstart-templates
+      # name: lansa/azure-quickstart-templates
       ref: support/scalable
-    # - repository: _robe070_cookbooks
-    #   type: github
-    #   endpoint: debjitbhowmik807
-    #   name: robe070/cookbooks
-    #   ref: debug/paas
       
 
 variables:
@@ -25,7 +22,6 @@ variables:
   - group: Git Repos
 
 stages:
-
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
     dependsOn:
@@ -39,7 +35,6 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Custom-w16d-14-2
-
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -69,7 +64,6 @@ stages:
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Custom-w16d-14-2j
     
-
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
     dependsOn:
@@ -245,7 +239,7 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
  
-      - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+      - checkout: self
         path: _robe070_cookbooks
 
       - task: PowerShell@2
@@ -598,8 +592,9 @@ stages:
     - checkout: _lansa_azure_quickstart_templates
       path: _lansa_azure_quickstart_templates
 
-    - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+    - checkout: self
       path: _robe070_cookbooks
+
     - task: PowerShell@2
       displayName: 'Artifact Check: Set Gate Variable'
       name: Gate
