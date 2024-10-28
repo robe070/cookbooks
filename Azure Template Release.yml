@@ -4,7 +4,7 @@ resources:
   pipelines:
     - pipeline: _TemplatesCI
       # source: Template CI 3.0 
-      source: Template CI 3.0
+      source: CI Templates 3.0
     - pipeline: _BuildImageReleaseArtefacts
       source: Build Image Release Artefacts 3.0
   repositories:
