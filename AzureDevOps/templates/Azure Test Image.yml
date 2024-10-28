@@ -74,6 +74,8 @@ stages:
         - name: imageReleaseState
           ${{ if contains( lower(parameters.stageName), 'production' ) }}: 
             value: -imageReleaseState "Production"
+          ${{ elseif endsWith( lower(parameters.stageName), 'preview' ) }}: 
+            value: -imageReleaseState "Preview"
           ${{ else }}:
             value: ''
 

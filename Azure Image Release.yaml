@@ -270,6 +270,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-UW-w16d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -284,6 +285,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-EW-w16d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -298,6 +300,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-IC-w16d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -312,6 +315,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-JW-w16d-14-2j
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -326,6 +330,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-CC-w16d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -340,6 +345,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-SN-w16d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -354,6 +360,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-KC-w16d-15-0j
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -368,6 +375,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-FC-w19d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -382,20 +390,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-NC-w19d-14-2j
-
-# - template: AzureDevOps\templates\Azure Test Image.yml
-#   parameters:
-#     stageName: 'w19d142jUSNorthCentralPreview'
-#     stagedisplayName: 'w19d142j US NorthCentral Preview'
-#     jobName: 'w19d142jUSNorthCentralPreview'
-#     jobDisplayname: 'w19d142j US NorthCentral Preview'
-#     dependsOn: MergePatch_PAASCookbooks
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
-#     Version: w19d-14-2j
-#     osName: Windows Server 2019 JPN
-#     lansaVersion: V14 SP2
-#     msiURL: $(msiURLJPN)
-#     resourceGroup: BakingDP-Preview-NC-w19d-14-2j
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -410,6 +405,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-BS-w19d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -424,20 +420,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-UW-w19d-15-0
-
-# - template: AzureDevOps\templates\Azure Test Image.yml
-#   parameters:
-#     stageName: 'w19d150UKWestPreview'
-#     stagedisplayName: 'w19d150 UK West Preview'
-#     jobName: 'w19d150UKWestPreview'
-#     jobDisplayname: 'w19d150 UK West Preview'
-#     dependsOn: MergePatch_PAASCookbooks
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
-#     Version: w19d-15-0
-#     osName: Windows Server 2019
-#     lansaVersion: V15 GA
-#     msiURL: $(msiURLv15)
-#     resourceGroup: BakingDP-Preview-UW-w19d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -452,6 +435,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-GW-w19d-15-0j
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -466,6 +450,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-AE-w22d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -480,6 +465,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-UE-w22d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -494,6 +480,7 @@ stages:
     lansaVersion: V14 SP2
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-FC-w22d-14-2
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -508,6 +495,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-AE-w22d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -522,6 +510,7 @@ stages:
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-UE-w22d-15-0
+    imageSource: Marketplace
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -535,7 +524,8 @@ stages:
     osName: Windows Server 2022
     lansaVersion: V15 GA
     msiURL: $(msiURLv15)
-    resourceGroup: BakingDP-Preview-FC-w22d-15-0  
+    resourceGroup: BakingDP-Preview-FC-w22d-15-0
+    imageSource: Marketplace
 
 - stage: 'GoLive'
   displayName: 'Go Live'
