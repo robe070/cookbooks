@@ -67,19 +67,17 @@ stages:
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: CollationJPN
-          ${{ if contains( parameters.osName, 'JPN' ) }}: 
+          ${{ if contains(parameters.osName, 'JPN') }}: 
             value: -collation "$(Collation_JPN)"
           ${{ else }}:
             value: ''
         - name: imageReleaseState
-          ${{ if contains( lower(parameters.stageName), 'production' ) }}: 
+          ${{ if contains(lower(parameters.stageName), 'production') }}: 
             value: -imageReleaseState "Production"
-          ${{ elseif endsWith( lower(parameters.stageName), 'preview' ) }}: 
+          ${{ elseif endsWith(lower(parameters.stageName), 'preview') }}: 
             value: -imageReleaseState "Preview"
           ${{ else }}:
             value: ''
-
-
 
       steps:
       - download: _BuildImageReleaseArtefacts
@@ -87,11 +85,8 @@ stages:
 
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
- 
-      # - checkout: _robe070_cookbooks
-      #   path: _robe070_cookbooks
 
-      - checkout: self # Checking out self (and calling it _robe070_cookbooks) because the original _robe070_cookbooks does not have the latests changes needed for the pipeline to run
+      - checkout: self
         path: _robe070_cookbooks
 
       - task: PowerShell@2
@@ -157,7 +152,6 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_url_tests.ps1'
           arguments: -deploymentOutput '$(deploymentOutput)'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-        
 
       - task: AzurePowerShell@5
         displayName: 'Azure PowerShell: Test Image Version'
@@ -169,7 +163,6 @@ stages:
           ScriptArguments: -SkuName "$(Gate.Sku)" -deploymentOutput '$(deploymentOutput)'
           azurePowerShellVersion: LatestVersion
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-
 
       - task: AzureResourceManagerTemplateDeployment@3
         displayName: 'Delete ResourceGroup'
