@@ -3,7 +3,6 @@ trigger: none
 resources:
   pipelines:
     - pipeline: _TemplatesCI
-      # source: Template CI 3.0 
       source: CI Templates 3.0
     - pipeline: _BuildImageReleaseArtefacts
       source: Build Image Release Artefacts 3.0
@@ -13,12 +12,6 @@ resources:
       endpoint: Harinder-accolite
       name: lansa/azure-quickstart-templates
       ref: support/scalable
-    # - repository: _robe070_cookbooks
-    #   type: github
-    #   endpoint: nkhl-accolite
-    #   # name: robe070/cookbooks
-    #   name: nkhl-accolite/cookbooks
-    #   ref: debug/paas
     - repository: _robe070_cookbooks_nkhl
       type: github
       endpoint: Harinder-accolite
@@ -66,18 +59,17 @@ stages:
 # - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
 #   parameters:
 #     dependsOn:
-#     stageName: AUSSQLAZURE1DBw22r2d142
-#     stageDisplayname: AUS SQLAZURE1 DB w22r2d-14-2
-#     jobName: AUSSQLAZURE1DBw22r2d142
-#     jobDisplayname: AUS SQLAZURE1 DB w22r2d-14-2
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w22r2d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
-#     version: w22r2d-14-2
+#     stageName: AUSSQLAZURE1DBw22d142
+#     stageDisplayname: AUS SQLAZURE1 DB w22d-14-2
+#     jobName: AUSSQLAZURE1DBw22d142
+#     jobDisplayname: AUS SQLAZURE1 DB w22d-14-2
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'true'), eq(variables['Build-all'], 'true')))
+#     version: w22d-14-2
 #     osName: Windows Server 2022
 #     SqlDeploymentName: SQLAZURE1
 #     deploymentOutputs: SQLAZURE1-deploymentOutput
 #     resourceGroup: SQLAZURE1-TEST
 
-#1
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -96,7 +88,6 @@ stages:
     stackName: SQL2VMSS
     version: w19d-14-2
 
-#2
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -115,7 +106,6 @@ stages:
     stackName: SQL3VMSS
     version: w16d-14-2
 
-# #3
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -136,7 +126,6 @@ stages:
     stackName: SQL4VMSS
     version: w19d-15-0
 
-# #4
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -161,11 +150,11 @@ stages:
 # - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
 #   parameters:
 #     dependsOn: 
-#     stageName: AUSSQLAZURE6DBw22r2d150 
-#     stageDisplayname: AUS SQLAZURE6 DB w22r2d-15-0
-#     jobName: AUSSQLAZURE6DBw12r2d150 
-#     jobDisplayname: AUS SQLAZURE6 DB w22r2d-15-0
-#     jobcondition: and(succeeded(), or(eq(variables['Build-w22r2d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
+#     stageName: AUSSQLAZURE6DBw22d150 
+#     stageDisplayname: AUS SQLAZURE6 DB w22d-15-0
+#     jobName: AUSSQLAZURE6DBw22d150 
+#     jobDisplayname: AUS SQLAZURE6 DB w22d-15-0
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
 #     databaseNewOrExisting: new
 #     edition: Premium
 #     lansaVersion: V15 GA
@@ -179,8 +168,6 @@ stages:
 #     stackName: SQL6VMSS
 #     version: w12r2d-15-0
     
-
-# 6
 - template: AzureDevOps\templates\AzureTestTemplateValidationMSSQLandMYSQL.yml
   parameters:
     dependsOn: 
@@ -199,7 +186,6 @@ stages:
     stackName: MYSQLVMSS
     version: w19d-15-0
 
-# 7
 - template: AzureDevOps\templates\AzureTestTemplateValidationMSSQLandMYSQL.yml
   parameters:
     dependsOn: 
@@ -219,7 +205,6 @@ stages:
     stackName: MSSQLVMSS
     version: w19d-14-2
 
-# 8
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -247,7 +232,6 @@ stages:
     maxSizeBytes: 10737418240
     applicationGatewayCapacity: 1
 
-# 9
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -272,7 +256,6 @@ stages:
     dbMinCapacity: 0.5
     maxSizeBytes: '107374182400'
 
-#10
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -294,7 +277,6 @@ stages:
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 536870912000
 
-#11
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -319,7 +301,6 @@ stages:
     autoScaleMinCapacity: 1
     autoScaleMaxCapacity: 15
      
-
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: 
@@ -391,8 +372,6 @@ stages:
     SqlDeploymentName: TemplateProd-Test-w19d-15-0
     stackName: "$(Gate.VersionClean)"
     version: w19d-15-0
-
-    
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:

@@ -101,11 +101,11 @@ parameters:
     type: string
     default: "Static"
 
-
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: '${{ parameters.dependsOn }}'
     displayName: ${{ parameters.stageDisplayname }}
+
     jobs:
     - job: ${{ parameters.jobName }}
       timeoutInMinutes: 120
@@ -130,7 +130,7 @@ stages:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMinCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" -collation $(Collation_JPN)'
           ${{ else }}:
             value: ''
-        
+
       cancelTimeoutInMinutes: 1
       condition: ${{ parameters.jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
@@ -139,15 +139,15 @@ stages:
         vmImage: ${{ parameters.vmImage }}
 
       steps:
-        - pwsh: write-host "addn. params - $(additionalOverrideParameters) "
         - download: _TemplatesCI
           displayName: Download artefacts from Template CI 3.0
+
         - download: _BuildImageReleaseArtefacts
           displayName: Download artefacts from Build Image Release Artefacts 3.0
+
         - checkout: _lansa_azure_quickstart_templates
           path: _lansa_azure_quickstart_templates
-        # - checkout: _robe070_cookbooks
-        #   path: _robe070_cookbooks
+
         - checkout: self
           path: _robe070_cookbooks
 
