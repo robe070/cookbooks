@@ -347,6 +347,7 @@ stages:
   jobs: 
   - job: AgentlessJob
     displayName: 'Manual Intervention: Deploy Template'
+    timeoutInMinutes: 43200 # 30 days
     pool: server
     steps:
     - task: ManualValidation@0
