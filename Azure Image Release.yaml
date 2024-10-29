@@ -303,6 +303,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-IC-w16d-14-2
     imageSource: Marketplace
+    location: Central India
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -318,6 +319,7 @@ stages:
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-JW-w16d-14-2j
     imageSource: Marketplace
+    location: Japan West
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -333,6 +335,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-CC-w16d-15-0
     imageSource: Marketplace
+    location: Canada Central
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -348,6 +351,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-SN-w16d-15-0
     imageSource: Marketplace
+    location: South Africa North
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -363,6 +367,7 @@ stages:
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-KC-w16d-15-0j
     imageSource: Marketplace
+    location: Korea Central
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -378,6 +383,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-FC-w19d-14-2
     imageSource: Marketplace
+    location: France Central
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -393,6 +399,7 @@ stages:
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Preview-NC-w19d-14-2j
     imageSource: Marketplace
+    location: North Central US
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -408,6 +415,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-BS-w19d-15-0
     imageSource: Marketplace
+    location: Brazil South
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -423,6 +431,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-UW-w19d-15-0
     imageSource: Marketplace
+    location: UK West
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -438,6 +447,7 @@ stages:
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Preview-GW-w19d-15-0j
     imageSource: Marketplace
+    location: Germany West Central
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -468,6 +478,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-UE-w22d-14-2
     imageSource: Marketplace
+    location: East US
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -483,6 +494,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-FC-w22d-14-2
     imageSource: Marketplace
+    location: France Central
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -513,6 +525,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-UE-w22d-15-0
     imageSource: Marketplace
+    location: East US
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -528,11 +541,11 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Preview-FC-w22d-15-0
     imageSource: Marketplace
+    location: France Central
 
 - stage: 'GoLive'
   displayName: 'Go Live'
   dependsOn: 
-    - w22d142AusEastPreview
     - w22d142AusEastPreview
     - w22d142USEastPreview
     - w22d142FranceCentralPreview
@@ -640,6 +653,8 @@ stages:
     resourceGroup: BakingDP-Prod-UE-w22d-14-2
     osNameOverride: Windows Server 2022
     imageSource: Marketplace
+    location: East US
+    
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -656,6 +671,7 @@ stages:
     resourceGroup: BakingDP-Prod-AE-w22d-15-0
     osNameOverride: Windows Server 2022
     imageSource: Marketplace
+    location: East Asia
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -671,6 +687,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Prod-EW-w16d-14-2
     imageSource: Marketplace
+    location: West Europe
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -701,6 +718,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Prod-US-w19d-14-2
     imageSource: Marketplace
+    location: UK South
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -716,6 +734,7 @@ stages:
     msiURL: $(msiURLv15)
     resourceGroup: BakingDP-Prod-SA-w19d-15-0
     imageSource: Marketplace
+    location: Southeast Asia
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -731,6 +750,7 @@ stages:
     msiURL: $(msiURLJPN)
     resourceGroup: BakingDP-Prod-UC-w16d-14-2j
     imageSource: Marketplace
+    location: Central US
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -746,6 +766,7 @@ stages:
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Prod-EN-w16d-15-0j
     imageSource: Marketplace
+    location: North Europe
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -761,6 +782,7 @@ stages:
     msiURL: $(msiURLJPN)
     ResourceGroup: BakingDP-Prod-WI-w19d-14-2j
     imageSource: Marketplace
+    location: West India
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -776,3 +798,4 @@ stages:
     msiURL: $(msiURLJPNLatest)
     resourceGroup: BakingDP-Prod-SN-w19d-15-0j
     imageSource: Marketplace
+    location: Switzerland North
