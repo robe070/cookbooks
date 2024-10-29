@@ -58,7 +58,7 @@ variables:
   - name: jpnLanguage
     value: JPN
   - name: LansaReleaseTemplateUrl
-    value: https://raw.githubusercontent.com/lansa/azure-quickstart-templates/sup
+    value: https://raw.githubusercontent.com/lansa/azure-quickstart-templates/support/scalable/lansa-vmss-windows-autoscale-sql-database/mainTemplate.json
   - name : SubscriptionId
     value: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
 
