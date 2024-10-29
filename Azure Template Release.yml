@@ -293,8 +293,6 @@ stages:
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 536870912000
-    agpublicIpSku: Basic
-    agpublicIpAllocationMethod: Dynamic
 
 #11
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
@@ -318,8 +316,7 @@ stages:
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 1099511627776
     autoScaleMinCapacity: 1
-    autoScaleMaxCapacity: 15
-    agpublicIpAllocationMethod: Dynamic  
+    autoScaleMaxCapacity: 15  
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -329,7 +326,6 @@ stages:
     jobName: AUSLargeStackShoeSizesw19d142j
     jobDisplayname: AUS Large Stack Shoe Sizes w19d-14-2j
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'true'), eq(variables['Build-all'], 'true')))  
-    databaseNewOrExisting: new
     lansaVersion: V14 SP2
     msiURL: $(msiURLJPN)
     osName: Windows Server 2019 JPN 
