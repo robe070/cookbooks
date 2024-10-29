@@ -271,7 +271,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-UW-w16d-14-2
     imageSource: Marketplace
-    paramlocation: West US
+    location: West US
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -287,7 +287,7 @@ stages:
     msiURL: $(msiURLv142)
     resourceGroup: BakingDP-Preview-EW-w16d-14-2
     imageSource: Marketplace
-    paramlocation: West Europe
+    location: West Europe
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
