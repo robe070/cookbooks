@@ -86,11 +86,11 @@ parameters:
     type: boolean
     default: true
   - name: autoScaleMinCapacity
-    type: number
-    default: 0
+    type: string
+    default: ''
   - name: autoScaleMaxCapacity
-    type: number
-    default: 10
+    type: string
+    default: ''
   - name: databaseName
     type: string
     default: lansa
@@ -126,7 +126,7 @@ stages:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity ${{ parameters.applicationGatewayCapacity }} -collation $(Collation_JPN)'
           ${{ elseif eq(parameters.stageName, 'AUSMediumStackShoeSizesw16d150j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -agpublicIpAllocationMethod "${{ parameters.agpublicIpAllocationMethod }}" -agpublicIpSku "${{ parameters.agpublicIpSku }}" -enableAutoscaling true -autoScaleMinCapacity ${{ parameters.autoScaleMinCapacity }} -autoScaleMaxCapacity ${{ parameters.autoScaleMaxCapacity }} -collation $(Collation_JPN)'
-          ${{ elseif eq(parameters.stageDisplayname, 'AUSLargeStackShoeSizesw19d142j') }}:
+          ${{ elseif eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d142j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMaxCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" -collation $(Collation_JPN)'
           ${{ else }}:
             value: ''
