@@ -116,20 +116,6 @@ stages:
           value: 'Azure Baking Images'
         - name: location
           value: 'Australia East'
-        # - name: additionalOverrideParameters
-        #   ${{ if contains(lower(parameters.stageDisplayname), 'shoe') }}:
-        #     ${{ if endsWith(lower(parameters.stageDisplayname), 'j') }}: 
-        #       ${{ if contains(lower(parameters.stageDisplayname), 'test') }}:
-        #         value: -virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}" -collation "$(Collation_JPN)" -keyVaultName "$(keyVaultName)" -keyVaultCertificateName "$(keyVaultCertificateName)" -keyVaultRGName "BakingDP"
-        #       ${{ else }}:
-        #         value: -virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}" -collation "$(Collation_JPN)"
-        #     ${{ else }}:
-        #       value: -virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}"
-        #   ${{ else }}:
-        #     ${{ if endsWith(lower(parameters.stageDisplayname), 'j') }}: 
-        #       value: -collation $(Collation_JPN)
-        #     ${{ else }}:
-        #       value: ''
 
         - name: additionalOverrideParameters
           ${{ if eq(parameters.stageName, 'AUSDevShoe_WithKeyVaultCert_Sizesw19d150') }}: 
@@ -137,11 +123,11 @@ stages:
           ${{ elseif eq(parameters.stageName, 'AUSTestShoe_WithKeyVaultCert_Sizesw16142j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}" -keyVaultName "$(keyVaultName)" -keyVaultCertificateName "$(keyVaultCertificateName)" -keyVaultRGName "BakingDP" -collation $(Collation_JPN)'
           ${{ elseif eq(parameters.stageName, 'AUSSmallStackShoeSizesw19d150j') }}:
-            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -requestedServiceObjectiveName "${{ parameters.requestedServiceObjectiveName }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity ${{ parameters.applicationGatewayCapacity }} -collation $(Collation_JPN)'
-          ${{ elseif or(eq(parameters.stageName, 'AUSMediumStackShoeSizesw16d150j'), eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d142j')) }}:
-            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -requestedServiceObjectiveName "${{ parameters.requestedServiceObjectiveName }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -agpublicIpAllocationMethod "${{ parameters.agpublicIpAllocationMethod }}" -agpublicIpSku "${{ parameters.agpublicIpSku }}" -enableAutoscaling true -autoScaleMinCapacity ${{ parameters.autoScaleMinCapacity }} -autoScaleMaxCapacity ${{ parameters.autoScaleMaxCapacity }} -collation $(Collation_JPN)'
+            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity ${{ parameters.applicationGatewayCapacity }} -collation $(Collation_JPN)'
+          ${{ elseif eq(parameters.stageName, 'AUSMediumStackShoeSizesw16d150j') }}:
+            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -agpublicIpAllocationMethod "${{ parameters.agpublicIpAllocationMethod }}" -agpublicIpSku "${{ parameters.agpublicIpSku }}" -enableAutoscaling true -autoScaleMinCapacity ${{ parameters.autoScaleMinCapacity }} -autoScaleMaxCapacity ${{ parameters.autoScaleMaxCapacity }} -collation $(Collation_JPN)'
           ${{ elseif eq(parameters.stageDisplayname, 'AUSLargeStackShoeSizesw19d142j') }}:
-            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -requestedServiceObjectiveName "${{ parameters.requestedServiceObjectiveName }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMaxCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" -collation $(Collation_JPN)'
+            value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMaxCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" -collation $(Collation_JPN)'
           ${{ else }}:
             value: ''
         
