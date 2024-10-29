@@ -315,8 +315,10 @@ stages:
     virtualMachineSize: Standard_B12ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 1099511627776
+    applicationGatewaySkuTier: WAF_v2
     autoScaleMinCapacity: 1
-    autoScaleMaxCapacity: 15  
+    autoScaleMaxCapacity: 15
+     
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
