@@ -246,6 +246,8 @@ stages:
     dbMinCapacity: 0.5
     maxSizeBytes: 10737418240
     applicationGatewayCapacity: 1
+    agpublicIpSku: Basic
+    agpublicIpAllocationMethod: Dynamic
 
 # 9
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
@@ -271,7 +273,8 @@ stages:
     serverlessDbCapacity: 4
     dbMinCapacity: 0.5
     maxSizeBytes: '107374182400'
-
+    agpublicIpSku: Basic
+    agpublicIpAllocationMethod: Dynamic
 #10
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
