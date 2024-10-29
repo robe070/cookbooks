@@ -305,7 +305,6 @@ stages:
     jobName: AUSMediumStackShoeSizesw16d150j
     jobDisplayname: AUS Medium Stack Shoe Sizes w16d-15-0j
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
-    databaseNewOrExisting: new 
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
     osName: Windows Server 2016 JPN 
@@ -317,10 +316,10 @@ stages:
     imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B12ms
     dbVirtualMachineSize: Standard_B2ms
-    dbMinCapacity: 0
     maxSizeBytes: 1099511627776
     autoScaleMinCapacity: 1
     autoScaleMaxCapacity: 15
+    agpublicIpAllocationMethod: Dynamic  
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
