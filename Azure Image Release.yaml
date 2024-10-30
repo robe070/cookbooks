@@ -10,7 +10,7 @@ resources:
       endpoint: robe070
       name: lansa/azure-quickstart-templates
       ref: support/scalable
-    
+
 variables:
   - group: Template Parameters
   - group: SKU Versions
@@ -304,7 +304,6 @@ stages:
     imageSource: Marketplace
     location: Central India
     gitBranch: patch/paas
-    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -703,7 +702,7 @@ stages:
     resourceGroup: BakingDP-Prod-EW-w16d-14-2
     imageSource: Marketplace
     location: West Europe
- 
+
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
     stageName: 'w16d150AusEastProduction'
