@@ -55,10 +55,6 @@ jobs:
   - checkout: self
     fetchTags: false
 
-  - powershell: |
-    Write-Host "The value is: $(ExternalIPAddresses)"
-    displayName: 'Print variable from External IP Addresses Group'
-
   - task: PowerShell@2
     name: ''
     displayName: Install PS Module
