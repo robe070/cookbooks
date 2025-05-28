@@ -476,6 +476,7 @@ try
 
             # ADD inbound rule for IP addresses passed along  with command line
             if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
+                Write-Host "Adding External IP Addresses $ExternalIPAddresses"
 
                 # Create an inbound network security group rule for port 3389
                 $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
@@ -492,6 +493,8 @@ try
                 -Direction Inbound -Priority 1020 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
                 -DestinationPortRange 5986 -Access Allow
 
+            } else {
+                Write-Host "Not Adding External IP Addresses $ExternalIPAddresses"
             }
 
             $externalipcidr = "$externalip/32"
