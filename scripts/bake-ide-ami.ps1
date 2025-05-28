@@ -143,7 +143,7 @@ param (
     $InstallLanguagePack,
 
     [Parameter(Mandatory=$false)]
-    [String[]]
+    [String]
     $ExternalIPAddresses,
 
     [Parameter(Mandatory=$false)]
