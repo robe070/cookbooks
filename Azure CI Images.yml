@@ -79,11 +79,12 @@ jobs:
       arguments: -VersionText 'w22d-16-0-$(VersionText-w22d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
+      Action: 'Add'
       Key: Usage
       Value: test-temp
 
@@ -171,10 +172,11 @@ jobs:
       arguments: -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
       Key: Usage
@@ -253,10 +255,11 @@ jobs:
       arguments: -VersionText 'w16d-16-0-$(VersionText-w16d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
       Key: Usage
@@ -336,10 +339,11 @@ jobs:
       arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
       Key: Usage
@@ -419,10 +423,11 @@ jobs:
       arguments: -VersionText 'w19d-16-0-$(VersionText-w19d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
       Key: Usage
@@ -502,10 +507,11 @@ jobs:
       arguments: -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
       Key: Usage
@@ -585,10 +591,11 @@ jobs:
       arguments: -VersionText 'w16d-16-0j-$(VersionText-w16d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
       Key: Usage
@@ -668,10 +675,11 @@ jobs:
       arguments: -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
       Key: Usage
@@ -750,10 +758,11 @@ jobs:
       arguments: -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
       Key: Usage
@@ -833,10 +842,11 @@ jobs:
       arguments: -VersionText 'w19d-16-0j-$(VersionText-w19d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
       Key: Usage
@@ -916,10 +926,11 @@ jobs:
       arguments: -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
       Key: Usage
@@ -999,10 +1010,11 @@ jobs:
       arguments: -VersionText 'w22d-16-0j-$(VersionText-w22d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+  - task: azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: true
     inputs:
+      Action: 'Add'
       ConnectedServiceName: $(ConnectedServiceName)
       ResourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
       Key: Usage
