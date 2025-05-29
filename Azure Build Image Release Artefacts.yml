@@ -5,9 +5,9 @@ variables:
 
 jobs:
 - job: Job_1
-  displayName: 'Agent job : w22d-14-2'
+  displayName: 'Agent job : w22d-16-0'
   timeoutInMinutes: 120
-  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -31,14 +31,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d-14-2-$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry)
+      arguments: -VersionText 'w22d-16-0-$(VersionText-w22d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
+      ResourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -49,16 +49,16 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-16-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     name: ''
     displayName: VM Tests
     env:
-        TestImageName: w22d-14-2-$(VersionText-w22d-14-2)
+        TestImageName: w22d-16-0-$(VersionText-w22d-16-0)
         TestCloudName: Azure
-        TestVmName: T2214$(Build.BuildId) #Test2214$(VersionText-w22d-14-2)
+        TestVmName: T2216$(Build.BuildId) #Test2216$(VersionText-w22d-16-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   - task: PublishTestResults@2
@@ -66,13 +66,13 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w22d-14-2
+      testRunTitle: w22d-16-0
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2.txt
-      ArtifactName: w22d-14-2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-16-0.txt
+      ArtifactName: w22d-16-0
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -80,7 +80,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-14-2-$(VersionText-w22d-14-2)
+      resourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
@@ -155,9 +155,9 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
 - job: Job_11
-  displayName: 'Agent job : w22d-14-2j'
+  displayName: 'Agent job : w22d-16-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -180,14 +180,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w22d-14-2j-$(VersionText-w22d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -InstallLanguagePack:$true -Language 'JPN'
+      arguments: -VersionText 'w22d-16-0j-$(VersionText-w22d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -MaxRetry $(MaxRetry) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-14-2j-$(VersionText-w22d-14-2j)
+      ResourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -197,15 +197,15 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w22d-16-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d-14-2j-$(VersionText-w22d-14-2j)
+        TestImageName: w22d-16-0j-$(VersionText-w22d-16-0j)
         TestCloudName: Azure
-        TestVmName: T2214j$(Build.BuildId) #Test2214j$(VersionText-w22d-14-2j)
+        TestVmName: T2216j$(Build.BuildId) #Test2216j$(VersionText-w22d-16-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -214,12 +214,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w22d-14-2j
+      testRunTitle: w22d-16-0j
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-14-2j.txt
-      ArtifactName: w22d-14-2j
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w22d-16-0j.txt
+      ArtifactName: w22d-16-0j
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -227,7 +227,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-14-2j-$(VersionText-w22d-14-2j)
+      resourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
 - job: Job_12
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
@@ -303,9 +303,9 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
 - job: Job_6
-  displayName: 'Agent job : w16d-14-2'
+  displayName: 'Agent job : w16d-16-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-16-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -328,14 +328,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d-14-2-$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false  -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
+      arguments: -VersionText 'w16d-16-0-$(VersionText-w16d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false  -MaxRetry $(MaxRetry) -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
+      ResourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -345,15 +345,15 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-16-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-14-2-$(VersionText-w16d-14-2)
+        TestImageName: w16d-16-0-$(VersionText-w16d-16-0)
         TestCloudName: Azure
-        TestVmName: T1614$(Build.BuildId) #T1614$(VersionText-w16d-14-2)
+        TestVmName: T1616$(Build.BuildId) #T1616$(VersionText-w16d-16-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -362,12 +362,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-14-2
+      testRunTitle: w16d-16-0
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
-      ArtifactName: w16d-14-2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-16-0.txt
+      ArtifactName: w16d-16-0
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -375,7 +375,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-14-2-$(VersionText-w16d-14-2)
+      resourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
   timeoutInMinutes: 360
@@ -540,16 +540,16 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
 - job: Job_3
-  displayName: 'Agent job : w19d-14-2'
+  displayName: 'Agent job : w19d-16-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2019
   steps:
   - checkout: self
   - task: PowerShell@2
     displayName: Install PS Module
-    condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    condition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-all'], 'True')))
     inputs:
       filePath: scripts/install-powershell-modules-azure.ps1
       script: >-
@@ -568,14 +568,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d-14-2-$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -GitUserName $(GitUserName) -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) 
+      arguments: -VersionText 'w19d-16-0-$(VersionText-w19d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -GitUserName $(GitUserName) -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses)
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
+      ResourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -585,15 +585,15 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-16-0.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-14-2-$(VersionText-w19d-14-2)
+        TestImageName: w19d-16-0-$(VersionText-w19d-16-0)
         TestCloudName: Azure
-        TestVmName: T1914$(Build.BuildId) #T1914$(VersionText-w19d-14-2)
+        TestVmName: T1916$(Build.BuildId) #T1916$(VersionText-w19d-16-0)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -602,12 +602,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w19d-14-2
+      testRunTitle: w19d-16-0
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2.txt
-      ArtifactName: w19d-14-2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-16-0.txt
+      ArtifactName: w19d-16-0
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -615,7 +615,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-14-2-$(VersionText-w19d-14-2)
+      resourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
 - job: Job_2
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
@@ -690,9 +690,9 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
 - job: Job_7
-  displayName: 'Agent job : w16d-14-2j'
+  displayName: 'Agent job : w16d-16-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w16d-16-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -715,14 +715,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w16d-14-2j-$(VersionText-w16d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
+      arguments: -VersionText 'w16d-16-0j-$(VersionText-w16d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
+      ResourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -732,15 +732,15 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-16-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-14-2j-$(VersionText-w16d-14-2j)
+        TestImageName: w16d-16-0j-$(VersionText-w16d-16-0j)
         TestCloudName: Azure
-        TestVmName: T1614j$(Build.BuildId) #T1614j$(VersionText-w16d-14-2j)
+        TestVmName: T1616j$(Build.BuildId) #T1616j$(VersionText-w16d-16-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -749,12 +749,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-14-2j
+      testRunTitle: w16d-16-0j
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
-      ArtifactName: w16d-14-2j
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-16-0j.txt
+      ArtifactName: w16d-16-0j
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -762,7 +762,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-14-2j-$(VersionText-w16d-14-2j)
+      resourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
@@ -837,9 +837,9 @@ jobs:
       action: DeleteRG
       resourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
 - job: Job_9
-  displayName: 'Agent job : w19d-14-2j'
+  displayName: 'Agent job : w19d-16-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
     vmImage: windows-2022
   steps:
@@ -863,14 +863,14 @@ jobs:
     timeoutInMinutes: 120
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText 'w19d-14-2j-$(VersionText-w19d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
+      arguments: -VersionText 'w19d-16-0j-$(VersionText-w19d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName  $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
   - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
     displayName: Azure Resource Group Tagging
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
+      ResourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -880,15 +880,15 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-14-2j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w19d-16-0j.txt") -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-14-2j-$(VersionText-w19d-14-2j)
+        TestImageName: w19d-16-0j-$(VersionText-w19d-16-0j)
         TestCloudName: Azure
-        TestVmName: T1914j$(Build.BuildId) #T1914j$(VersionText-w19d-14-2j)
+        TestVmName: T1916j$(Build.BuildId) #T1916j$(VersionText-w19d-16-0j)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -897,12 +897,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w19d-14-2j
+      testRunTitle: w19d-16-0j
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-14-2j.txt
-      ArtifactName: w19d-14-2j
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w19d-16-0j.txt
+      ArtifactName: w19d-16-0j
       FileCopyOptions: ''
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: Delete Resource Group
@@ -910,7 +910,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-14-2j-$(VersionText-w19d-14-2j)
+      resourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
 - job: Job_10
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -984,5 +984,5 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)      
+      resourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
 ...

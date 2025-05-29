@@ -475,7 +475,7 @@ try
             $pip = New-AzPublicIpAddress -ResourceGroupName $VmResourceGroup -Location $location -Name $publicDNSName -AllocationMethod Static -IdleTimeoutInMinutes 4 -Force
 
             # ADD inbound rule for IP addresses passed along  with command line
-            if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
+            if ( $ExternalIPAddresses ) {
                 Write-Host "Adding External IP Addresses $ExternalIPAddresses"
 
                 # Create an inbound network security group rule for port 3389
