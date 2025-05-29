@@ -67,7 +67,7 @@ param (
     $RunWindowsUpdates=$false,
 
     [Parameter(Mandatory=$false)]
-    [String]
+    [String[]]
     $ExternalIPAddresses,
 
     [Parameter(Mandatory=$false)]

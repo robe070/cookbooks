@@ -143,7 +143,7 @@ param (
     $InstallLanguagePack,
 
     [Parameter(Mandatory=$false)]
-    [String]
+    [String[]]
     $ExternalIPAddresses,
 
     [Parameter(Mandatory=$false)]
@@ -477,27 +477,11 @@ try
             # ADD inbound rule for IP addresses passed along  with command line
             if ( $ExternalIPAddresses ) {
                 Write-Host "Adding External IP Addresses $ExternalIPAddresses"
-
-                # Create an inbound network security group rule for port 3389
-                $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleRDPName  -Protocol Tcp `
-                -Direction Inbound -Priority 1000 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 3389 -Access Allow
-
-                # Create an inbound network security group rule for port 5985
-                $nsgRuleWinRMHttp = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpName  -Protocol Tcp `
-                -Direction Inbound -Priority 1010 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 5985 -Access Allow
-
-                # Create an inbound network security group rule for port 5986
-                $nsgRuleWinRMHttps = New-AzNetworkSecurityRuleConfig -Name $AzNetworkSecurityGroupRuleWinRMHttpsName  -Protocol Tcp `
-                -Direction Inbound -Priority 1020 -SourceAddressPrefix $ExternalIPAddresses -SourcePortRange * -DestinationAddressPrefix * `
-                -DestinationPortRange 5986 -Access Allow
-
+                $externalipcidr = @("$externalip/32") + $ExternalIPAddresses
             } else {
                 Write-Host "Not Adding External IP Addresses $ExternalIPAddresses"
+                $externalipcidr = "$externalip/32"
             }
-
-            $externalipcidr = "$externalip/32"
             Write-Host "Adding External IP $externalipcidr"
 
             # Create an inbound network security group rule for port 3389
