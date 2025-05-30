@@ -145,9 +145,9 @@ try
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
-    Write-Host "Installing C Runtime V12 Visual Studio 2013"
-    DownloadAndInstallCRuntime -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/uploads/CRuntime2013/vcredist2013_x64.exe' -installer_file (Join-Path $temppath 'vcredist2013_x64.exe') -log_file (Join-Path $temppath 'vcredist2013_x64.log');
-    DownloadAndInstallCRuntime -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/uploads/CRuntime2013/vcredist2013_x86.exe' -installer_file (Join-Path $temppath 'vcredist2013_x86.exe') -log_file (Join-Path $temppath 'vcredist2013_x86.log');
+    Write-Host "Installing Visual C++ Redistributable for Visual Studio 2015-2022"
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vcredist2013_x64.exe') -log_file (Join-Path $temppath 'vcredist2015+_x64.log');
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vcredist2013_x86.exe') -log_file (Join-Path $temppath 'vcredist2015+_x86.log');
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
