@@ -49,7 +49,7 @@ jobs:
 
 
   pool:
-    vmImage: windows-2019
+    vmImage: windows-2022
 
   steps:
   - checkout: self
@@ -140,7 +140,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2019
+    vmImage: windows-2022
   steps:
   - checkout: self
     fetchTags: false
