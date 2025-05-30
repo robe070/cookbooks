@@ -391,7 +391,7 @@ try
         # use a separate resource group for the VM for easier deletion
         $VmResourceGroup = "BakingDP-$VersionText"
 
-        # Create or update the resource group using the specified parameter
+        Write-Host("Create the resource group $VmResourceGroup")
         New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host
 
         # Create and use the Storage Account in the VM Resource Group
