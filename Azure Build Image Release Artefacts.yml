@@ -41,7 +41,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
+      ResourceGroupName: BakingDP-w22d-16-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -59,9 +59,9 @@ jobs:
     name: ''
     displayName: VM Tests
     env:
-        TestImageName: w22d-16-0-$(VersionText-w22d-16-0)
+        TestImageName: w22d-16-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T2216$(Build.BuildId) #Test2216$(VersionText-w22d-16-0)
+        TestVmName: T2216$(Build.BuildId) #Test2216$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   - task: PublishTestResults@2
@@ -83,7 +83,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
+      resourceGroupName: BakingDP-w22d-16-0-$(VersionText)
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
@@ -116,7 +116,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
+      ResourceGroupName: BakingDP-w22d-15-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -132,9 +132,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d-15-0-$(VersionText-w22d-15-0)
+        TestImageName: w22d-15-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T2215$(Build.BuildId) #Test2215$(VersionText-w22d-15-0)
+        TestVmName: T2215$(Build.BuildId) #Test2215$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -156,7 +156,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
+      resourceGroupName: BakingDP-w22d-15-0-$(VersionText)
 - job: Job_11
   displayName: 'Agent job : w22d-16-0j'
   timeoutInMinutes: 360
@@ -190,7 +190,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
+      ResourceGroupName: BakingDP-w22d-16-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -206,9 +206,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d-16-0j-$(VersionText-w22d-16-0j)
+        TestImageName: w22d-16-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T2216j$(Build.BuildId) #Test2216j$(VersionText-w22d-16-0j)
+        TestVmName: T2216j$(Build.BuildId) #Test2216j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -230,7 +230,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
+      resourceGroupName: BakingDP-w22d-16-0j-$(VersionText)
 - job: Job_12
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
@@ -264,7 +264,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
+      ResourceGroupName: BakingDP-w22d-15-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -280,9 +280,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w22d-15-0j-$(VersionText-w22d-15-0j)
+        TestImageName: w22d-15-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T2215j$(Build.BuildId) #Test2215j$(VersionText-w22d-15-0j)
+        TestVmName: T2215j$(Build.BuildId) #Test2215j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -304,7 +304,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
+      resourceGroupName: BakingDP-w22d-15-0j-$(VersionText)
 - job: Job_6
   displayName: 'Agent job : w16d-16-0'
   timeoutInMinutes: 360
@@ -338,7 +338,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
+      ResourceGroupName: BakingDP-w16d-16-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -354,9 +354,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-16-0-$(VersionText-w16d-16-0)
+        TestImageName: w16d-16-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1616$(Build.BuildId) #T1616$(VersionText-w16d-16-0)
+        TestVmName: T1616$(Build.BuildId) #T1616$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -378,7 +378,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
+      resourceGroupName: BakingDP-w16d-16-0-$(VersionText)
 - job: Job_4
   displayName: 'Agent job : w16d-15-0'
   timeoutInMinutes: 360
@@ -488,7 +488,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
+      ResourceGroupName: BakingDP-w16d-15-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -504,9 +504,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-15-0-$(VersionText-w16d-15-0)
+        TestImageName: w16d-15-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1615$(Build.BuildId) #T1615$(VersionText-w16d-15-0)
+        TestVmName: T1615$(Build.BuildId) #T1615$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -541,7 +541,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
+      resourceGroupName: BakingDP-w16d-15-0-$(VersionText)
 - job: Job_3
   displayName: 'Agent job : w19d-16-0'
   timeoutInMinutes: 360
@@ -578,7 +578,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
+      ResourceGroupName: BakingDP-w19d-16-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -594,9 +594,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-16-0-$(VersionText-w19d-16-0)
+        TestImageName: w19d-16-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1916$(Build.BuildId) #T1916$(VersionText-w19d-16-0)
+        TestVmName: T1916$(Build.BuildId) #T1916$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -618,7 +618,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
+      resourceGroupName: BakingDP-w19d-16-0-$(VersionText)
 - job: Job_2
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
@@ -652,7 +652,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
+      ResourceGroupName: BakingDP-w19d-15-0-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -668,9 +668,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-15-0-$(VersionText-w19d-15-0)
+        TestImageName: w19d-15-0-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1915$(Build.BuildId) #T1915$(VersionText-w19d-15-0)$(Build.BuildNumber)
+        TestVmName: T1915$(Build.BuildId) #T1915$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
   - task: PublishTestResults@2
@@ -691,7 +691,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
+      resourceGroupName: BakingDP-w19d-15-0-$(VersionText)
 - job: Job_7
   displayName: 'Agent job : w16d-16-0j'
   timeoutInMinutes: 360
@@ -725,7 +725,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
+      ResourceGroupName: BakingDP-w16d-16-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -741,9 +741,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-16-0j-$(VersionText-w16d-16-0j)
+        TestImageName: w16d-16-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1616j$(Build.BuildId) #T1616j$(VersionText-w16d-16-0j)
+        TestVmName: T1616j$(Build.BuildId) #T1616j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -765,7 +765,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
+      resourceGroupName: BakingDP-w16d-16-0j-$(VersionText)
 - job: Job_8
   displayName: 'Agent job : w16d-15-0j'
   timeoutInMinutes: 360
@@ -798,7 +798,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
+      ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -814,9 +814,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w16d-15-0j-$(VersionText-w16d-15-0j)
+        TestImageName: w16d-15-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1615j$(Build.BuildId) #T1615j$(VersionText-w16d-15-0j)
+        TestVmName: T1615j$(Build.BuildId) #T1615j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -838,7 +838,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
+      resourceGroupName: BakingDP-w16d-15-0j-$(VersionText)
 - job: Job_9
   displayName: 'Agent job : w19d-16-0j'
   timeoutInMinutes: 360
@@ -873,7 +873,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
+      ResourceGroupName: BakingDP-w19d-16-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -889,9 +889,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-16-0j-$(VersionText-w19d-16-0j)
+        TestImageName: w19d-16-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1916j$(Build.BuildId) #T1916j$(VersionText-w19d-16-0j)
+        TestVmName: T1916j$(Build.BuildId) #T1916j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -913,7 +913,7 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
+      resourceGroupName: BakingDP-w19d-16-0j-$(VersionText)
 - job: Job_10
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
@@ -947,7 +947,7 @@ jobs:
     continueOnError: True
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
+      ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText)
       Key: Usage
       Value: test-temp
   - task: PowerShell@2
@@ -963,9 +963,9 @@ jobs:
   - task: PowerShell@2
     displayName: VM Tests
     env:
-        TestImageName: w19d-15-0j-$(VersionText-w19d-15-0j)
+        TestImageName: w19d-15-0j-$(VersionText)
         TestCloudName: Azure
-        TestVmName: T1915j$(Build.BuildId) #T1915j$(VersionText-w19d-15-0j)
+        TestVmName: T1915j$(Build.BuildId) #T1915j$(VersionText)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
       script: >-
@@ -987,5 +987,5 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
+      resourceGroupName: BakingDP-w19d-15-0j-$(VersionText)
 ...
