@@ -71,6 +71,7 @@ jobs:
       workingDirectory: scripts
 
   - task: PowerShell@2
+    condition: false
     name: BuildImage
     displayName: Build Image
     timeoutInMinutes: 120
@@ -79,14 +80,15 @@ jobs:
       arguments: -VersionText 'w22d-16-0-$(VersionText-w22d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-16-0-$(VersionText-w22d-16-0)
-      Action: 'Add'
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w22d-16-0-$(VersionText-w22d-16-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w22d-16-0-$(VersionText-w22d-16-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     name: ''
@@ -164,6 +166,7 @@ jobs:
       workingDirectory: scripts
 
   - task: PowerShell@2
+    condition: false
     name: BuildImage
     displayName: Build Image
     timeoutInMinutes: 120
@@ -172,15 +175,15 @@ jobs:
       arguments: -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-15-0-$(VersionText-w22d-15-0)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w22d-15-0-$(VersionText-w22d-15-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w22d-15-0-$(VersionText-w22d-15-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -255,15 +258,15 @@ jobs:
       arguments: -VersionText 'w16d-16-0-$(VersionText-w16d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-16-0-$(VersionText-w16d-16-0)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w16d-16-0-$(VersionText-w16d-16-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w16d-16-0-$(VersionText-w16d-16-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -339,15 +342,15 @@ jobs:
       arguments: -VersionText 'w16d-15-0-$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-15-0-$(VersionText-w16d-15-0)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w16d-15-0-$(VersionText-w16d-15-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w16d-15-0-$(VersionText-w16d-15-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -423,15 +426,15 @@ jobs:
       arguments: -VersionText 'w19d-16-0-$(VersionText-w19d-16-0)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-16-0-$(VersionText-w19d-16-0)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w19d-16-0-$(VersionText-w19d-16-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w19d-16-0-$(VersionText-w19d-16-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -507,15 +510,15 @@ jobs:
       arguments: -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-15-0-$(VersionText-w19d-15-0)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w19d-15-0-$(VersionText-w19d-15-0) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w19d-15-0-$(VersionText-w19d-15-0)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -591,15 +594,15 @@ jobs:
       arguments: -VersionText 'w16d-16-0j-$(VersionText-w16d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w16d-16-0j-$(VersionText-w16d-16-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -675,15 +678,15 @@ jobs:
       arguments: -VersionText 'w16d-15-0j-$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w16d-15-0j-$(VersionText-w16d-15-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -758,15 +761,15 @@ jobs:
       arguments: -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w19d-15-0j-$(VersionText-w19d-15-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -842,15 +845,15 @@ jobs:
       arguments: -VersionText 'w19d-16-0j-$(VersionText-w19d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w19d-16-0j-$(VersionText-w19d-16-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -926,15 +929,15 @@ jobs:
       arguments: -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w22d-15-0j-$(VersionText-w22d-15-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -1010,15 +1013,15 @@ jobs:
       arguments: -VersionText 'w22d-16-0j-$(VersionText-w22d-16-0j)' -VersionMajor 16 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-URI-JPN) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$true -Language 'JPN'
       workingDirectory: scripts
 
-  - task: azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
     inputs:
-      Action: 'Add'
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j) with Usage = "test-temp"" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name "BakingDP-w22d-16-0j-$(VersionText-w22d-16-0j)" -Tag @{ Usage = "test-temp" }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
