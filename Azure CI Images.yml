@@ -40,6 +40,8 @@ variables:
     value: 0
   - name: VersionText-w22d-15-0j
     value: 0
+  - name: vmImage
+    value: windows-2022
 
 jobs:
 - job: Job_1
@@ -49,7 +51,7 @@ jobs:
 
 
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
 
   steps:
   - checkout: self
@@ -140,7 +142,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -233,7 +235,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -316,7 +318,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -400,7 +402,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -484,7 +486,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -568,7 +570,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-16-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -652,7 +654,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -735,7 +737,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -819,7 +821,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -903,7 +905,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
@@ -987,7 +989,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'true'), eq(variables['Build-all'], 'true')))
   pool:
-    vmImage: windows-2022
+    vmImage: $(vmImage)
   steps:
   - checkout: self
     fetchTags: false
