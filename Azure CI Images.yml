@@ -71,7 +71,7 @@ jobs:
       workingDirectory: scripts
 
   - task: PowerShell@2
-    condition: false
+    condition: true
     name: BuildImage
     displayName: Build Image
     timeoutInMinutes: 120
@@ -166,7 +166,7 @@ jobs:
       workingDirectory: scripts
 
   - task: PowerShell@2
-    condition: false
+    condition: true
     name: BuildImage
     displayName: Build Image
     timeoutInMinutes: 120
