@@ -11,7 +11,7 @@ parameters:
 jobs:
 - job: Job_1
   displayName: 'Agent job : w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
-  timeoutInMinutes: ${{ variables['ScriptTimeout'] }}
+  timeoutInMinutes: ${{ variables.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
     JobName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
@@ -50,7 +50,7 @@ jobs:
     condition: false
     name: BuildImage
     displayName: Build Image
-    timeoutInMinutes: ${{ variables['ScriptTimeout'] }}
+    timeoutInMinutes: ${{ variables.ScriptTimeout }}
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
