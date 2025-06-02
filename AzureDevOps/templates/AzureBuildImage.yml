@@ -19,7 +19,7 @@ jobs:
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
-    JobName: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
+    JobName: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
     JobVersionText: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
     JobResourceGroupName: BakingDP-${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
     JobImageName: ${{ parameters.CloudImageName }}
@@ -27,7 +27,7 @@ jobs:
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
     JobTag: 'test-temp'
     JobImageUrlOutputFileName: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
-    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ parameters.LanguageString }}${{ variables['Build.BuildId'] }}
+    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ parameters.LanguageSuffix }}${{ variables['Build.BuildId'] }}
 
     ${{ if eq(parameters.LanguageSuffix, 'j') }}:
       Language: 'JPN'
