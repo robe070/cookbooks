@@ -60,6 +60,17 @@ jobs:
         Write-Host "JobImageUrlOutputFileName: $(JobImageUrlOutputFileName)" | Out-Default | Write-Host
         Write-Host "JobTestVmName: $(JobTestVmName)" | Out-Default | Write-Host
 
+  - task: AzurePowerShell@5
+    displayName: 'Delete RG: $(JobResourceGroupName)'
+    inputs:
+      azureSubscription: 'Azure Baking Images'
+      ScriptType: InlineScript
+      Inline: |
+        Write-Host Deleting Resource Group $(JobResourceGroupName)
+        Remove-AzResourceGroup -Name $(JobResourceGroupName) -Force -ErrorAction SilentlyContinue
+      errorActionPreference: silentlyContinue
+      azurePowerShellVersion: LatestVersion
+
   - task: PowerShell@2
     name: ''
     displayName: Install PS Module
@@ -134,7 +145,7 @@ jobs:
       FileCopyOptions: ''
 
   - task: AzureResourceManagerTemplateDeployment@3
-    displayName: Delete RG
+    displayName: Delete RG $(JobResourceGroupName)
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
