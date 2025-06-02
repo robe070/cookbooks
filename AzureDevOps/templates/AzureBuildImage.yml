@@ -5,6 +5,8 @@ parameters:
     type: number
   - name: LansaMinorVersion
     type: number
+  - name: VersionText
+    type: string
   - name: CloudImageName
     type: string
   - name: ScriptTimeout # Can't refer to a variable in a template thats declared in the parent yml. Hence it must be passed as a parameter
@@ -14,14 +16,15 @@ parameters:
     default: ''
 
 jobs:
-- job: ${{ format('Job_w{0}d_{1}_{2}{3}_{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText) }}
-  displayName: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
+- job: ${{ format('Job_w{0}d_{1}_{2}{3}_{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, parameters.VersionText) }}
+  displayName: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, parameters.VersionText)}}
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}'], 'true'), eq(variables['Build-all'], 'true')))
+
   variables:
     JobName: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
-    JobVersionText: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
-    JobResourceGroupName: BakingDP-${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
+    JobVersionText: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, parameters.VersionText)}}
+    JobResourceGroupName: BakingDP-${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, parameters.VersionText)}}
     JobImageName: ${{ parameters.CloudImageName }}
     JobVersionMajor: ${{ parameters.LansaMajorVersion }}
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
@@ -33,7 +36,7 @@ jobs:
       Language: 'JPN'
       InstallLanguagePack: $True
     ${{ else }}:
-      Language: ''
+      Language: 'ENG'
       InstallLanguagePack: $False
   pool:
     vmImage: $(vmImage)
