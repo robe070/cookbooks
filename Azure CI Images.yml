@@ -12,18 +12,22 @@ variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
   - group: 'Azure Logins'
-  - name: atomic-build
-    value: $False
+
   - name: azureUserId
     value: PowershellScriptsSP
+
   - name: VersionText
     value: 0
+
   - name: vmImage
     value: windows-2022
+
   - name:  TestCloudName
     value: 'Azure'
+
   - name: AtomicBuild
-    value: $True
+    value: $False
+
   - name: ScriptTimeout
     value: 360
 
@@ -90,7 +94,7 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
@@ -100,7 +104,7 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
@@ -110,7 +114,7 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2019-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
@@ -120,7 +124,7 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2019-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
@@ -130,7 +134,7 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2022-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
@@ -140,5 +144,5 @@ jobs:
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
-    CloudImageName: $(Windows-2022-IMAGE-NAME-URI-JPN)
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ variables.ScriptTimeout }}

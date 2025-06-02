@@ -46,6 +46,21 @@ jobs:
     fetchTags: false
 
   - task: PowerShell@2
+    displayName: Print Variable Values
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "JobVersionTextRoot: $(JobVersionTextRoot)" | Out-Default | Write-Host
+        Write-Host "JobVersionText: $(JobVersionText)" | Out-Default | Write-Host
+        Write-Host "JobResourceGroupName: $(JobResourceGroupName)" | Out-Default | Write-Host
+        Write-Host "JobImageName: $(JobImageName)" | Out-Default | Write-Host
+        Write-Host "JobVersionMajor: $(JobVersionMajor)" | Out-Default | Write-Host
+        Write-Host "JobVersionMinor: $(JobVersionMinor)" | Out-Default | Write-Host
+        Write-Host "JobTag: $(JobTag)" | Out-Default | Write-Host
+        Write-Host "JobImageUrlOutputFileName: $(JobImageUrlOutputFileName)" | Out-Default | Write-Host
+        Write-Host "JobTestVmName: $(JobTestVmName)" | Out-Default | Write-Host
+
+  - task: PowerShell@2
     name: ''
     displayName: Install PS Module
     inputs:
@@ -98,10 +113,11 @@ jobs:
     env:
         TestImageName: $(JobVersionText)
         TestCloudName: Azure
-        AtomicBuild: $(atomic-build)
+        AtomicBuild: $(AtomicBuild)
         TestVmName: $(JobTestVmName)
     inputs:
       filePath: scripts/invoke-pester-tests.ps1
+
   - task: PublishTestResults@2
     displayName: Publish Test Results **/Test-*.xml
     inputs:
