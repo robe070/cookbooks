@@ -9,22 +9,38 @@ parameters:
     type: string
   - name: ScriptTimeout # Can't refer to a variable in a template thats declared in the parent yml. Hence it must be passed as a parameter
     type: number
+  - name: LanguageSuffix # Optional. English is an empty string. Japanese = 'J'
+    type: string
+    default: ''
+# The remaining parameters are Helper Parameters. Do not pass these in
+  - name: JobName
+    type: string
+    default: ${{ format('Job_w{0}d_{1}_{2}{3}_{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText) }}
+  - name: VersionTextRoot
+    type: string
+    default: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
+  - name: InstallLanguagePack
+    type: boolean
+    default: ${{ if eq(parameters.LanguageSuffix, 'j') }} then $True else $False
+  - name: InstallLanguagePack
+    type: string
+    default: ${{ if eq(parameters.LanguageSuffix, 'j') }} then 'JPN' else ''
 
 jobs:
-- job: Job_w${{ parameters.OSVersion }}d_${{ parameters.LansaMajorVersion }}_${{ parameters.LansaMinorVersion }}
-  displayName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
+- job: ${{ parameters.JobName }}
+  displayName: '${{ parameters.VersionTextRoot }}-$(VersionText)'
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
-  condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
+  condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.VersionTextRoot }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
-    JobName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
-    JobVersionText: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}-$(VersionText)'
-    JobResourceGroupName: 'BakingDP-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}-$(VersionText)'
+    JobName: ${{ parameters.VersionTextRoot }}
+    JobVersionText: '${{ parameters.VersionTextRoot }}-$(VersionText)'
+    JobResourceGroupName: 'BakingDP-${{ parameters.VersionTextRoot }}-$(VersionText)'
     JobImageName: ${{ parameters.CloudImageName }}
     JobVersionMajor: ${{ parameters.LansaMajorVersion }}
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
     JobTag: 'test-temp'
-    JobImageUrlOutputFileName: "w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}.txt"
-    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ variables['Build.BuildId'] }}
+    JobImageUrlOutputFileName: "${{ parameters.VersionTextRoot }}-$(VersionText).txt"
+    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ parameters.LanguageString }}${{ variables['Build.BuildId'] }}
 
   pool:
     vmImage: $(vmImage)
@@ -55,7 +71,7 @@ jobs:
     timeoutInMinutes: ${{ parameters.ScriptTimeout }}
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
+      arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$(InstallLanguagePack) -Language $(Language)
       workingDirectory: scripts
 
   - task: PowerShell@2
@@ -95,14 +111,14 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: $(JobName)
+      testRunTitle: $(VersionTextRoot)
 
   - task: PublishBuildArtifacts@1
     name: ''
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/$(JobName).txt
-      ArtifactName: $(JobName)
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/$(VersionTextRoot).txt
+      ArtifactName: $(VersionTextRoot)
       FileCopyOptions: ''
 
   - task: AzureResourceManagerTemplateDeployment@3
