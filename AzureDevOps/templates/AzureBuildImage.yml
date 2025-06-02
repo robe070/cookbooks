@@ -21,7 +21,7 @@ jobs:
   variables:
     JobName: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
     JobVersionText: ${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
-    JobResourceGroupName: 'BakingDP-${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
+    JobResourceGroupName: BakingDP-${{ format('w{0}d-{1}-{2}{3}-{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText)}}
     JobImageName: ${{ parameters.CloudImageName }}
     JobVersionMajor: ${{ parameters.LansaMajorVersion }}
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
