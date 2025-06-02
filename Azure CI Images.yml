@@ -26,7 +26,6 @@ variables:
     value: $True
   - name: ScriptTimeout
     value: 360
-    type: number
 
 jobs:
 
