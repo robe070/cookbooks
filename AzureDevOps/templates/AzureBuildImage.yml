@@ -49,7 +49,7 @@ jobs:
     displayName: Print Variable Values
     inputs:
       targetType: inline
-      script: >-
+      script: |
         Write-Host "JobVersionTextRoot: $(JobVersionTextRoot)" | Out-Default | Write-Host
         Write-Host "JobVersionText: $(JobVersionText)" | Out-Default | Write-Host
         Write-Host "JobResourceGroupName: $(JobResourceGroupName)" | Out-Default | Write-Host
