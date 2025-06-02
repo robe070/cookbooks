@@ -28,9 +28,13 @@ jobs:
     JobTag: 'test-temp'
     JobImageUrlOutputFileName: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
     JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ parameters.LanguageString }}${{ variables['Build.BuildId'] }}
-    InstallLanguagePack: ${{ if eq(parameters.LanguageSuffix, 'j') }} then $True else $False
-    Language: ${{ if eq(parameters.LanguageSuffix, 'j') }} then 'JPN' else ''
 
+    ${{ if eq(parameters.LanguageSuffix, 'j') }}:
+      Language: 'JPN'
+      InstallLanguagePack: $True
+    ${{ else }}:
+      Language: ''
+      InstallLanguagePack: $False
   pool:
     vmImage: $(vmImage)
 
