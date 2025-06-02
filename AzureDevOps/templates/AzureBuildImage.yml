@@ -11,7 +11,7 @@ parameters:
     type: number
 
 jobs:
-- job: Job_1
+- job: Job_w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}
   displayName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
