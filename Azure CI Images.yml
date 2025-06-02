@@ -31,7 +31,7 @@ variables:
 jobs:
 - job: Job_1
   displayName: 'Agent job : w22d-16-0'
-  timeoutInMinutes: $(ScriptTimeout)
+  timeoutInMinutes: ${{ variables.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
     JobName: 'w22d-16-0'
@@ -70,7 +70,7 @@ jobs:
     condition: true
     name: BuildImage
     displayName: Build Image
-    timeoutInMinutes: $(ScriptTimeout)
+    timeoutInMinutes: ${{ variables.ScriptTimeout }}
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
