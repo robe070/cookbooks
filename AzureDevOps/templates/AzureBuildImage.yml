@@ -12,35 +12,24 @@ parameters:
   - name: LanguageSuffix # Optional. English is an empty string. Japanese = 'J'
     type: string
     default: ''
-# The remaining parameters are Helper Parameters. Do not pass these in
-  - name: JobName
-    type: string
-    default: ${{ format('Job_w{0}d_{1}_{2}{3}_{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText) }}
-  - name: VersionTextRoot
-    type: string
-    default: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
-  - name: InstallLanguagePack
-    type: boolean
-    default: ${{ if eq(parameters.LanguageSuffix, 'j') }} then $True else $False
-  - name: InstallLanguagePack
-    type: string
-    default: ${{ if eq(parameters.LanguageSuffix, 'j') }} then 'JPN' else ''
 
 jobs:
-- job: ${{ parameters.JobName }}
-  displayName: '${{ parameters.VersionTextRoot }}-$(VersionText)'
+- job: ${{ format('Job_w{0}d_{1}_{2}{3}_{4}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix, variables.VersionText) }}
+  displayName: '${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}-$(VersionText)'
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
-  condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.VersionTextRoot }}'], 'true'), eq(variables['Build-all'], 'true')))
+  condition: and(succeeded(), or(eq(variables['Build-${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
-    JobName: ${{ parameters.VersionTextRoot }}
-    JobVersionText: '${{ parameters.VersionTextRoot }}-$(VersionText)'
-    JobResourceGroupName: 'BakingDP-${{ parameters.VersionTextRoot }}-$(VersionText)'
+    JobName: ${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}
+    JobVersionText: '${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}-$(VersionText)'
+    JobResourceGroupName: 'BakingDP-${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}-$(VersionText)'
     JobImageName: ${{ parameters.CloudImageName }}
     JobVersionMajor: ${{ parameters.LansaMajorVersion }}
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
     JobTag: 'test-temp'
-    JobImageUrlOutputFileName: "${{ parameters.VersionTextRoot }}-$(VersionText).txt"
+    JobImageUrlOutputFileName: "${{ format('w{0}d-{1}-{2}{3}', parameters.OSVersion, parameters.LansaMajorVersion, parameters.LansaMinorVersion, parameters.LanguageSuffix) }}-$(VersionText).txt"
     JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ parameters.LanguageString }}${{ variables['Build.BuildId'] }}
+    InstallLanguagePack: ${{ if eq(parameters.LanguageSuffix, 'j') }} then $True else $False
+    Language: ${{ if eq(parameters.LanguageSuffix, 'j') }} then 'JPN' else ''
 
   pool:
     vmImage: $(vmImage)
