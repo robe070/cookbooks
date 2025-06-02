@@ -24,6 +24,8 @@ variables:
     value: 'Azure'
   - name: AtomicBuild
     value: $True
+  - name: ScriptTimeout
+    value: 360
 
 jobs:
 
