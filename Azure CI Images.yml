@@ -35,6 +35,7 @@ jobs:
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     CloudImageName: $(Windows-2022-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
 
 - job: Job_5
   displayName: 'Agent job : w22d-15-0'
