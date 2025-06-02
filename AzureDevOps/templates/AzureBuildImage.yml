@@ -8,10 +8,14 @@ parameters:
   - name: CloudImageName
     type: string
 
+variables:
+  - name: ScriptTimeout
+    value: 360
+
 jobs:
 - job: Job_1
   displayName: 'Agent job : w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
-  timeoutInMinutes: ${ScriptTimeout}
+  timeoutInMinutes: {{ variables.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
     JobName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
@@ -22,7 +26,7 @@ jobs:
     JobVersionMinor: ${{ parameters.LansaMinorVersion }}
     JobTag: 'test-temp'
     JobImageUrlOutputFileName: "w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}.txt"
-    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}$(Build.BuildId)
+    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.LansaMajorVersion }}${{ parameters.LansaMinorVersion }}${{ variables['Build.BuildId'] }}
 
   pool:
     vmImage: $(vmImage)
@@ -50,7 +54,7 @@ jobs:
     condition: false
     name: BuildImage
     displayName: Build Image
-    timeoutInMinutes: ${ScriptTimeout}
+    timeoutInMinutes: {{ variables.ScriptTimeout }}
     inputs:
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
