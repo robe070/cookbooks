@@ -1,0 +1,112 @@
+parameters:
+  - name: OSVersion
+    type: string
+  - name: LansaMajorVersion
+    type: number
+  - name: LansaMinorVersion
+    type: number
+  - name: CloudImageName
+    type: string
+
+jobs:
+- job: Job_1
+  displayName: 'Agent job : w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
+  timeoutInMinutes: ${{ variables.ScriptTimeout }}
+  condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
+  variables:
+    JobName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
+    JobVersionText: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}-$(VersionText)'
+    JobResourceGroupName: 'BakingDP-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}-$(VersionText)'
+    JobImageName: ${{ parameters.CloudImageName }}
+    JobVersionMajor: ${{ parameters.LansaMajorVersion }}
+    JobVersionMinor: ${{ parameters.LansaMinorVersion }}
+    JobTag: 'test-temp'
+    JobImageUrlOutputFileName: "w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}.txt"
+    JobTestVmName: T${{ parameters.OSVersion }}${{ parameters.OSVersLansaMajorVersionion }}${{ parameters.OSVersLansaMinorVersionion }}$(Build.BuildId)
+
+  pool:
+    vmImage: $(vmImage)
+
+  steps:
+  - checkout: self
+    fetchTags: false
+
+  - task: PowerShell@2
+    name: ''
+    displayName: Install PS Module
+    inputs:
+      filePath: scripts/install-powershell-modules-azure.ps1
+      errorActionPreference: continue
+
+  - task: PowerShell@2
+    name: ''
+    displayName: Azure Login
+    inputs:
+      filePath: scripts/AzureLogin.ps1
+      arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+      workingDirectory: scripts
+
+  - task: PowerShell@2
+    condition: false
+    name: BuildImage
+    displayName: Build Image
+    timeoutInMinutes: ${{ variables.ScriptTimeout }}
+    inputs:
+      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)
+      workingDirectory: scripts
+
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Azure Resource Group Tagging'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Tagging $(JobResourceGroupName) with Usage = $(JobTag)" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name $(JobResourceGroupName) -Tag @{ Usage = $(JobTag) }
+
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Generate: Image URL'
+    inputs:
+      targetType: inline
+      script: >-
+        Write-Host "Writing the Full Image URL $(BuildImage.ImageUrl) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
+
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) $(JobImageUrlOutputFileName)) -InputObject $(BuildImage.ImageUrl) | Out-Default | Write-Host
+
+        Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
+
+  - task: PowerShell@2
+    name: ''
+    displayName: VM Tests
+    env:
+        TestImageName: $(JobVersionText)
+        TestCloudName: Azure
+        AtomicBuild: $(atomic-build)
+        TestVmName: $(JobTestVmName)
+    inputs:
+      filePath: scripts/invoke-pester-tests.ps1
+  - task: PublishTestResults@2
+    displayName: Publish Test Results **/Test-*.xml
+    inputs:
+      testRunner: NUnit
+      testResultsFiles: '**/Test-*.xml'
+      testRunTitle: $(JobName)
+
+  - task: PublishBuildArtifacts@1
+    name: ''
+    displayName: 'Publish Artifact: Image URL'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/$(JobName).txt
+      ArtifactName: $(JobName)
+      FileCopyOptions: ''
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: Delete Resource Group
+    inputs:
+      ConnectedServiceName: $(ConnectedServiceName)
+      subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
+      action: DeleteRG
+      resourceGroupName: $(JobResourceGroupName)
