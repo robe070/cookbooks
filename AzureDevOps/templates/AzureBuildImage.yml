@@ -12,7 +12,7 @@ parameters:
 
 jobs:
 - job: Job_1
-  displayName: 'Agent job : w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
+  displayName: 'w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'
   timeoutInMinutes: ${{ parameters.ScriptTimeout }}
   condition: and(succeeded(), or(eq(variables['Build-w${{ parameters.OSVersion }}d-${{ parameters.LansaMajorVersion }}-${{ parameters.LansaMinorVersion }}'], 'true'), eq(variables['Build-all'], 'true')))
   variables:
@@ -60,11 +60,11 @@ jobs:
 
   - task: PowerShell@2
     name: ''
-    displayName: 'Azure Resource Group Tagging'
+    displayName: 'Tag RG'
     inputs:
       targetType: inline
       script: >-
-        Write-Host "Tagging $(JobResourceGroupName) with Usage = $(JobTag)" | Out-Default | Write-Host
+        Write-Host "Tagging $(JobResourceGroupName) with Usage = "$(JobTag)"" | Out-Default | Write-Host
 
         Set-AzResourceGroup -Name $(JobResourceGroupName) -Tag @{ Usage = $(JobTag) }
 
@@ -106,7 +106,7 @@ jobs:
       FileCopyOptions: ''
 
   - task: AzureResourceManagerTemplateDeployment@3
-    displayName: Delete Resource Group
+    displayName: Delete RG
     inputs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
