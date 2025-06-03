@@ -20,6 +20,7 @@ variables:
 
 parameters:
   - name: VersionText # Promote the Library Variable to a template parameter so that it may be used in a template expression at compile time
+    type: string
     default: ''
 
 jobs:
