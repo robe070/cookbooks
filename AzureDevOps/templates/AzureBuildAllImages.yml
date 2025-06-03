@@ -1,3 +1,7 @@
+parameters:
+  - name: ScriptTimeout # Can't refer to a (numeric?) variable in a template thats declared in the parent yml. Hence it must be passed as a parameter
+    type: number
+
 jobs:
 
 - template: AzureBuildImage.yml
@@ -7,7 +11,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -16,7 +20,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -25,7 +29,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -34,7 +38,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -43,7 +47,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -52,7 +56,7 @@ jobs:
     LansaMinorVersion: '0'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -62,7 +66,7 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -72,7 +76,7 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -82,7 +86,7 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -92,7 +96,7 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -102,7 +106,7 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
@@ -112,4 +116,4 @@ jobs:
     LanguageSuffix: 'j'
     VersionText: ${{ variables.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
-    ScriptTimeout: ${{ variables.ScriptTimeout }}
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}

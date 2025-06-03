@@ -21,4 +21,6 @@ variables:
 jobs:
 
 - template: AzureDevOps/templates/AzureBuildAllImages.yml
+  parameters:
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
 
