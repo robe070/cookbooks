@@ -21,5 +21,4 @@ variables:
 jobs:
 
 - template: AzureDevOps/templates/AzureBuildAllImages.yml
-  parameters:
-    DummyParam: 'Test'
+
