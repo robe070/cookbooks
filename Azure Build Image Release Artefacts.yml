@@ -18,10 +18,14 @@ variables:
   - name: ScriptTimeout
     value: 360
 
+parameters:
+  - name: VersionText # Promote the Library Variable to a template parameter so that it may be used in a template expression at compile time
+    default: ''
+
 jobs:
 
 - template: AzureDevOps/templates/AzureBuildAllImages.yml
   parameters:
-    VersionText: ${{ variables.VersionText }}
+    VersionText: $(VersionText )
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
