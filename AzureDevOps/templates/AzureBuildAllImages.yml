@@ -1,6 +1,8 @@
 parameters:
-  - name: ScriptTimeout # Can't refer to a (numeric?) variable in a template thats declared in the parent yml. Hence it must be passed as a parameter
+  - name: ScriptTimeout # Can't refer to a variable in a template invocation nor in template decalaration thats declared in the parent yml. Hence it must be passed as a parameter
     type: number
+  - name: VersionText
+    type: string
 
 jobs:
 
@@ -9,7 +11,7 @@ jobs:
     OSVersion: '22'
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: $(VersionText)
     CloudImageName: $(Windows-2022-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -18,7 +20,7 @@ jobs:
     OSVersion: '22'
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
