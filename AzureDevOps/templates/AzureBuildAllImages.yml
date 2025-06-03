@@ -4,25 +4,6 @@ parameters:
     default: ''
 
 jobs:
-variables:
-  - group: 'External IP Addresses'
-  - group: 'Image Names'
-  - group: 'Azure Logins'
-
-  - name: azureUserId
-    value: PowershellScriptsSP
-
-  - name: vmImage
-    value: windows-2022
-
-  - name:  TestCloudName
-    value: 'Azure'
-
-  - name: AtomicBuild
-    value: $False
-
-  - name: ScriptTimeout
-    value: 360
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
   parameters:
