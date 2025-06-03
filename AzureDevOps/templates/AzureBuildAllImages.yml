@@ -1,3 +1,5 @@
+parameters:
+
 variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
