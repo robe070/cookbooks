@@ -1,4 +1,7 @@
 parameters:
+  - name: DummyParam
+    type: string
+    default: ''
 
 variables:
   - group: 'External IP Addresses'
