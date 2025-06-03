@@ -15,6 +15,9 @@ variables:
   - name: AtomicBuild
     value: $False
 
+  - name: VersionText
+    value: 18
+
   - name: ScriptTimeout
     value: 360
 
