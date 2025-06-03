@@ -11,7 +11,7 @@ jobs:
     OSVersion: '22'
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
-    VersionText: $(VersionText)
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
