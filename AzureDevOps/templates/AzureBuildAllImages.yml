@@ -3,6 +3,7 @@ parameters:
     type: string
     default: ''
 
+jobs:
 variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
@@ -22,8 +23,6 @@ variables:
 
   - name: ScriptTimeout
     value: 360
-
-jobs:
 
 - template: AzureDevOps/templates/AzureBuildImage.yml
   parameters:
