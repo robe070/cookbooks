@@ -1,0 +1,135 @@
+variables:
+  - group: 'External IP Addresses'
+  - group: 'Image Names'
+  - group: 'Azure Logins'
+
+  - name: azureUserId
+    value: PowershellScriptsSP
+
+  - name: vmImage
+    value: windows-2022
+
+  - name:  TestCloudName
+    value: 'Azure'
+
+  - name: AtomicBuild
+    value: $False
+
+  - name: ScriptTimeout
+    value: 360
+
+jobs:
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}
+
+- template: AzureDevOps/templates/AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ variables.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ variables.ScriptTimeout }}

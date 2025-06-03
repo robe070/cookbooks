@@ -60,17 +60,6 @@ jobs:
         Write-Host "JobImageUrlOutputFileName: $(JobImageUrlOutputFileName)" | Out-Default | Write-Host
         Write-Host "JobTestVmName: $(JobTestVmName)" | Out-Default | Write-Host
 
-  - task: AzurePowerShell@5
-    displayName: 'Delete RG: $(JobResourceGroupName)'
-    inputs:
-      azureSubscription: 'Azure Baking Images'
-      ScriptType: InlineScript
-      Inline: |
-        Write-Host Deleting Resource Group $(JobResourceGroupName)
-        Remove-AzResourceGroup -Name $(JobResourceGroupName) -Force -ErrorAction SilentlyContinue
-      errorActionPreference: silentlyContinue
-      azurePowerShellVersion: LatestVersion
-
   - task: PowerShell@2
     name: ''
     displayName: Install PS Module
@@ -85,6 +74,15 @@ jobs:
       filePath: scripts/AzureLogin.ps1
       arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
       workingDirectory: scripts
+
+  - task: PowerShell@2
+    displayName: 'Delete RG: $(JobResourceGroupName)'
+    inputs:
+      targetType: inline
+      script: |
+        Write-Host Deleting Resource Group $(JobResourceGroupName)
+        Remove-AzResourceGroup -Name $(JobResourceGroupName) -Force -ErrorAction SilentlyContinue
+      errorActionPreference: silentlyContinue
 
   - task: PowerShell@2
     condition: true
@@ -121,6 +119,7 @@ jobs:
   - task: PowerShell@2
     name: ''
     displayName: VM Tests
+    timeoutInMinutes: 15 # Typically takes about 6 mins on Azure. Much longer than that and the VM will not reach ready state.
     env:
         TestImageName: $(JobVersionText)
         TestCloudName: Azure
