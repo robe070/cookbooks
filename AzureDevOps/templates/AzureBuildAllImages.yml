@@ -1,5 +1,13 @@
+ # These parameters are only required because variables of ANY kind (main, template, pipeline or group)...
+ # 1. A variable may only be referenced in a template expression if its declared in the current template.
+ # 2. Thus Group Variables and Pipeline Variables CANNOT BE USED with a template, IF THEY ARE REQUIRED AT COMPILE TIME.
+ # e.g. VersionText is used in the Job.displayName.
+ # 3. A variable declared in a parent template may be referenced INDIRECTLY by passing it as a PARAMETER to its children.
+ # Thus VersionText and ScriptTimeout must be declared as Variables in the top level file, and then passed in as a parameter to here.
+ # Note how the CloudImageName is a Group Variable. It works because its not evaluated until RUNTIME.
+
 parameters:
-  - name: ScriptTimeout # Can't refer to a variable in a template invocation nor in template decalaration thats declared in the parent yml. Hence it must be passed as a parameter
+  - name: ScriptTimeout
     type: number
   - name: VersionText
     type: string
