@@ -38,7 +38,7 @@ jobs:
     OSVersion: '16'
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -47,7 +47,7 @@ jobs:
     OSVersion: '19'
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -56,7 +56,7 @@ jobs:
     OSVersion: '19'
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -66,7 +66,7 @@ jobs:
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -76,7 +76,7 @@ jobs:
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -86,7 +86,7 @@ jobs:
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -96,7 +96,7 @@ jobs:
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -106,7 +106,7 @@ jobs:
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
@@ -116,6 +116,6 @@ jobs:
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
-    VersionText: ${{ variables.VersionText }}
+    VersionText: ${{ parameters.VersionText }}
     CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
