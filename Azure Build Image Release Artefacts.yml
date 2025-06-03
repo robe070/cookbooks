@@ -22,6 +22,6 @@ jobs:
 
 - template: AzureDevOps/templates/AzureBuildAllImages.yml
   parameters:
-    VersionText: "$(VersionText )"  # Quotes are important as at this point $(VersionText) is undefined)
+    VersionText: $(VersionText )
     ScriptTimeout: ${{ variables.ScriptTimeout }}
 
