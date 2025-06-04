@@ -145,7 +145,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AzurePowerShell@5
-        displayName: 'Azure PowerShell: Test Image Version'
+        displayName: 'Tag RG'
         env:
           RESOURCEGROUP: ${{ parameters.resourceGroup }}
         inputs:
