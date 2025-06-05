@@ -80,7 +80,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-all'], 'True')))
     databaseNewOrExisting: new
     lansaVersion: V16 GA
-    msiURL: $(msiURLv160)
+    msiURL: $(msiURLv16)
     osName: Windows Server 2019
     requestedServiceObjectiveName: S0
     resourceGroup: SQLAZURE2-TEST
@@ -99,7 +99,7 @@ stages:
     jobDisplayname: AUS SQLAZURE3 DB w16d-16-0
     jobcondition: and(succeeded(), or(eq(variables['Build-w16d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
     lansaVersion: V16 GA
-    msiURL: $(msiURLv160)
+    msiURL: $(msiURLv16)
     osName: Windows Server 2016
     requestedServiceObjectiveName: S4
     resourceGroup: SQLAZURE3-TEST
@@ -201,7 +201,7 @@ stages:
     databaseType: MSSQLS
     databaseNewOrExisting: existing
     lansaVersion: V16 GA
-    msiURL: $(msiURLv160)
+    msiURL: $(msiURLv16)
     osName: Windows Server 2019
     requestedServiceObjectiveName: S2
     resourceGroup: mssqls1Test
