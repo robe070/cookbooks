@@ -30,7 +30,7 @@ stages:
     version: w16d-16-0
     osName: Windows Server 2016
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Custom-w16d-16-0
     gitBranch: debug/paas
 
@@ -90,7 +90,7 @@ stages:
     version: w19d-16-0
     osName: Windows Server 2019
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Custom-w19d-16-0
     gitBranch: debug/paas
 
@@ -150,7 +150,7 @@ stages:
     Version: w22d-16-0
     osName: Windows Server 2022
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Custom-w22d-16-0
     gitBranch: debug/paas
 
@@ -278,7 +278,7 @@ stages:
     Version: w16d-16-0
     osName: Windows Server 2016
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-UW-w16d-16-0
     imageSource: Marketplace
     location: West US
@@ -295,7 +295,7 @@ stages:
     Version: w16d-16-0
     osName: Windows Server 2016
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-EW-w16d-16-0
     imageSource: Marketplace
     location: West Europe
@@ -312,7 +312,7 @@ stages:
     Version: w16d-16-0
     osName: Windows Server 2016
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-IC-w16d-16-0
     imageSource: Marketplace
     location: Central India
@@ -397,7 +397,7 @@ stages:
     Version: w19d-16-0
     osName: Windows Server 2019
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-FC-w19d-16-0
     imageSource: Marketplace
     location: France Central
@@ -482,7 +482,7 @@ stages:
     Version: w22d-16-0
     osName: Windows Server 2022
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-AE-w22d-16-0
     imageSource: Marketplace
     gitBranch: patch/paas
@@ -498,7 +498,7 @@ stages:
     Version: w22d-16-0
     osName: Windows Server 2022
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-UE-w22d-16-0
     imageSource: Marketplace
     location: East US
@@ -515,7 +515,7 @@ stages:
     Version: w22d-16-0
     osName: Windows Server 2022
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Preview-FC-w22d-16-0
     imageSource: Marketplace
     location: France Central
@@ -678,7 +678,7 @@ stages:
     Version: w22d-16-0
     osName: Windows Server 2022
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Prod-UE-w22d-16-0
     osNameOverride: Windows Server 2022
     imageSource: Marketplace
@@ -745,7 +745,7 @@ stages:
     Version: w16d-16-0
     osName: Windows Server 2016
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Prod-EW-w16d-16-0
     imageSource: Marketplace
     location: West Europe
@@ -776,7 +776,7 @@ stages:
     Version: w19d-16-0
     osName: Windows Server 2019
     lansaVersion: V16 GA
-    msiURL: $(msiURLv142)
+    msiURL: $(msiURLv160)
     resourceGroup: BakingDP-Prod-US-w19d-16-0
     imageSource: Marketplace
     location: UK South
