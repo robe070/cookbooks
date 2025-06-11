@@ -139,8 +139,8 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-    #  Enabling TLS 1.2 security protocol to establsih a secure connection with the server when making web requests.
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Write-Host("Enabling TLS 1.2 & 1.3 security protocol (& Disabling older versions) to establsih a secure connection with the server when making web requests.")
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -f [Net.SecurityProtocolType]::Tls13
 
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -165,6 +165,27 @@ try
     if ( $Cloud -eq "AWS" ) {
       Write-Host "$(Log-Date) Install AWS CLI"
       DownloadAndInstallMSI -MSIuri 'https://awscli.amazonaws.com/AWSCLIV2.msi' -installer_file (Join-Path $temppath 'AWSCLIV2.msi') -log_file (Join-Path $temppath 'AWSCLI.log');
+    }
+
+    DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/dotnet-core-uninstall.msi' -installer_file (Join-Path $temppath 'dotnet-core-uninstall.msi') -log_file (Join-Path $temppath 'dotnet-core-uninstall-installer.log')
+    $DotnetCoreUninstall = 'C:\Program Files (x86)\dotnet-core-uninstall\dotnet-core-uninstall.exe'
+    if ( test-path $DotnetCoreUninstall ) {
+        Write-Host("Uninstalling .NET Core V6 because it is unsupported using $DotnetCoreUninstall")
+        $StdOutLog = Join-Path $temppath 'dotnet-core-uninstall-out.log'
+        $StdErrLog = Join-Path $temppath 'dotnet-core-uninstall-err.log'
+
+        #$p = Start-Process -FilePath $DotnetCoreUninstall -ArgumentList @('list') -Wait -PassThru -NoNewWindow -RedirectStandardOutput $StdOutLog -RedirectStandardError $StdErrLog
+
+        $p = Start-Process -FilePath $DotnetCoreUninstall -ArgumentList @('remove', '--hosting-bundle', '--all', '-y') -Wait -PassThru -NoNewWindow -RedirectStandardOutput $StdOutLog -RedirectStandardError $StdErrLog
+
+        Get-Content $StdOutLog
+        Get-Content $StdErrLog
+        if ( $p.ExitCode -ne 0 ) {
+            $ErrorMessage = "$DotnetCoreUninstall returned error code $($p.ExitCode)."
+            throw $ErrorMessage
+        } else {
+            Write-Host ".NET Core V6 successfully uninstalled."
+        }
     }
 
     Write-Host "Clear the UTF-8 system locale option. If already switched off this code has no effect"
