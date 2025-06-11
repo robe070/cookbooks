@@ -178,8 +178,9 @@ try
 
         $p = Start-Process -FilePath $DotnetCoreUninstall -ArgumentList @('remove', '--hosting-bundle', '--all', '-y') -Wait -PassThru -NoNewWindow -RedirectStandardOutput $StdOutLog -RedirectStandardError $StdErrLog
 
-        Get-Content $StdOutLog
-        Get-Content $StdErrLog
+        Get-Content $StdOutLog  | Out-Default | Write-Host
+        Get-Content $StdErrLog | Out-Default | Write-Host
+
         if ( $p.ExitCode -ne 0 ) {
             $ErrorMessage = "$DotnetCoreUninstall returned error code $($p.ExitCode)."
             throw $ErrorMessage
@@ -353,10 +354,10 @@ try
             Add-DirectoryToEnvPathOnce -Directory "c:\Program Files\Amazon\AWSCLI" | Out-Default | Write-Host
             }
 
-        if ( $Cloud -eq "Azure" ) {
-            Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
-            &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
-        }
+        # if ( $Cloud -eq "Azure" ) {
+        #     Write-GreenOutput "$(Log-Date) Installing AzCopy" | Write-Host
+        #     &"$Script:IncludeDir\installAzCopy.ps1" $TempPath | Out-Default | Write-Host
+        # }
 
         Write-Host "$(Log-Date) Running scheduleTasks.ps1"
         &"$Script:IncludeDir\scheduleTasks.ps1" | Out-Default | Write-Host
