@@ -1,0 +1,129 @@
+ # These parameters are only required because variables of ANY kind (main, template, pipeline or group)...
+ # 1. A variable may only be referenced in a template expression if its declared in the current template.
+ # 2. Thus Group Variables and Pipeline Variables CANNOT BE USED with a template, IF THEY ARE REQUIRED AT COMPILE TIME.
+ # e.g. VersionText is used in the Job.displayName.
+ # 3. A variable declared in a parent template may be referenced INDIRECTLY by passing it as a PARAMETER to its children.
+ # Thus VersionText and ScriptTimeout must be declared as Variables in the top level file, and then passed in as a parameter to here.
+ # Note how the CloudImageName is a Group Variable. It works because its not evaluated until RUNTIME.
+
+parameters:
+  - name: ScriptTimeout
+    type: number
+  - name: VersionText
+    type: string
+
+jobs:
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '16'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '19'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2019-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '15'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}
+
+- template: AzureBuildImage.yml
+  parameters:
+    OSVersion: '22'
+    LansaMajorVersion: '16'
+    LansaMinorVersion: '0'
+    LanguageSuffix: 'j'
+    VersionText: ${{ parameters.VersionText }}
+    CloudImageName: $(Windows-2022-IMAGE-NAME-JPN)
+    ScriptTimeout: ${{ parameters.ScriptTimeout }}

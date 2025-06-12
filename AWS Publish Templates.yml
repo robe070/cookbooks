@@ -1,5 +1,5 @@
 resources:
-  pipelines: 
+  pipelines:
   - pipeline: _Build Image Release Artefacts
     source: 'Build Image Release Artefacts  3.0'
 
@@ -9,13 +9,13 @@ resources:
     endpoint: robe070
     name: lansa/aws-templates
     ref: support/scalable
-  
+
   - repository: _lansa_aws-templates-mp
     type: github
     endpoint: robe070
     name: lansa/aws-templates
     ref: support/scalable_marketplace
- 
+
   - repository: _robe070_cookbooks
     endpoint: robe070
     type: github
@@ -32,7 +32,10 @@ variables:
   - name: LansaReleaseTemplateUrl
     value: https://raw.githubusercontent.com/lansa/aws-templates/support/scalable/CloudFormationWindows/lansa-master-win.cfn.template
   - name: RegressionTestRegion
-    value: ap-southeast-2                           
+    value: ap-southeast-2
+  - name: vmImage
+    value: windows-2022
+
   - group: "Template Parameters"
   - group: "VPC ap-southeast-2"
   - group: "VPC us-east-1"
@@ -55,7 +58,7 @@ variables:
   - group: "Logins"
   - group: "ImageVersion"
 
-stages: 
+stages:
 - stage: "MergePatchPaas"
   displayName: Merge patch/pass
   jobs:
@@ -63,30 +66,30 @@ stages:
       displayName: 'Agent job'
       timeoutInMinutes: 0
       pool:
-          vmImage: windows-2022
-      steps:     
+          vmImage: $(vmImage)
+      steps:
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
-        
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
-      
+
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
-          
+
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
-            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)''' 
+            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)'''
 
 - stage: S3PatchPAAS
   displayName: S3 patch/paas
@@ -94,15 +97,15 @@ stages:
   jobs:
     - job: Job_1
       displayName: Agent job
-      pool: 
-          vmImage: windows-2022
+      pool:
+          vmImage: $(vmImage)
       steps:
         - checkout: self
-        
+
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
-        
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
@@ -136,7 +139,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "Yes"
-    
+
 
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
@@ -157,7 +160,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "Yes"
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -177,7 +180,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "Yes"
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
   parameters:
@@ -195,7 +198,7 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -216,7 +219,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "Yes"
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -237,7 +240,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "Yes"
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationStackType.yml
   parameters:
@@ -258,7 +261,7 @@ stages:
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
     paramUpdateManagementScripts: "No"
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateValidationMaster.yml
   parameters:
@@ -277,11 +280,11 @@ stages:
     paramDBCCSID: $(DBCCSID)
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramTagValue: Lansa-Prod
-    
+
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
-  dependsOn: 
+  dependsOn:
     - AUSSmallShoeSizew16d_14_2
     - AUSTestShoeSizew16d_15_0
     - AUSDevShoeSizew19d_14_2
@@ -293,13 +296,13 @@ stages:
   jobs:
   - job: Job_1
     displayName: 'Agent Job'
-    pool: 
-      vmImage: windows-2022
-    steps:        
+    pool:
+      vmImage: $(vmImage)
+    steps:
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
         path: _robe070_cookbooks
-              
+
       - checkout: _lansa_aws-templates-mp
         displayName: Checkout Lansa AWS Marketplace Templates
         path: _lansa_aws-templates-mp
@@ -311,7 +314,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
           pwsh: true
-  
+
       - task: PowerShell@2
         displayName: 'Merge support/scalable into support/scalable_marketplace'
         inputs:
@@ -330,7 +333,7 @@ stages:
           globExpressions: '*.template'
           targetFolder: '$(FolderNameProduction)'
           filesAcl: 'public-read'
-        
+
 - stage: ValidateTemplateURLs
   displayName: Validate Template URLs
   dependsOn: MergeToMarketplaceAndUpload
@@ -338,8 +341,8 @@ stages:
     - job: Job_1
       displayName: 'Agent job : Small Stack'
       timeoutInMinutes: 0
-      pool: 
-        vmImage: windows-2022
+      pool:
+        vmImage: $(vmImage)
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
@@ -347,16 +350,16 @@ stages:
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob Cookbooks
           path: _robe070_cookbooks
-        
+
         - checkout: _lansa_aws-templates-mp
           displayName: Checkout Lansa AWS Marketplace Templates
-          path: _lansa_aws-templates-mp 
-        
+          path: _lansa_aws-templates-mp
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: aws-templates
-    
-        
+
+
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
           displayName: 'Artifact Check: Set Gate Variable'
@@ -380,7 +383,7 @@ stages:
             arguments: '-Gatestack $(Gate.stack)'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
           condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-    
+
         - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
           displayName: 'CFN Template deployment: Small Stack-TemplateTest'
           inputs:
@@ -405,40 +408,40 @@ stages:
                   "ParameterKey": "$(WebPasswordKey)",
                   "ParameterValue": "$(WebPasswordValue)"
               }, {
-                  "ParameterKey": "$(KeyNameKey)",    
+                  "ParameterKey": "$(KeyNameKey)",
                   "ParameterValue": "$(KeyNameValue)"
               }, {
-                  "ParameterKey": "$(RemoteAccessLocationKey)",   
+                  "ParameterKey": "$(RemoteAccessLocationKey)",
                   "ParameterValue": "$(RemoteAccessLocationValue)"
               }, {
-                  "ParameterKey": "$(LansaMSIKey)",   
+                  "ParameterKey": "$(LansaMSIKey)",
                   "ParameterValue": "$(msiURLLatest)"
               }, {
-                  "ParameterKey": "LansaVersion",   
+                  "ParameterKey": "LansaVersion",
                   "ParameterValue": "$(LansaVersion)"
               }, {
-                  "ParameterKey": "11WebserverOSVersion",   
+                  "ParameterKey": "11WebserverOSVersion",
                   "ParameterValue": "$(WebserverOSLatestVersionValue)"
               }, {
-                  "ParameterKey": "CurrentVPC",   
+                  "ParameterKey": "CurrentVPC",
                   "ParameterValue": "$(CurrentVPCUS)"
               }, {
-                  "ParameterKey": "AvailabilityZones",   
+                  "ParameterKey": "AvailabilityZones",
                   "ParameterValue": "$(AvailabilityZonesUS)"
               }, {
-                  "ParameterKey": "NumberOfAZs",   
+                  "ParameterKey": "NumberOfAZs",
                   "ParameterValue": "$(NumberOfAZsUS)"
               }, {
-                  "ParameterKey": "CreateVPC",   
+                  "ParameterKey": "CreateVPC",
                   "ParameterValue": "Yes"
               }, {
-                  "ParameterKey": "ELBSubnetIds",   
+                  "ParameterKey": "ELBSubnetIds",
                   "ParameterValue": "$(ELBSubnetIdsUS)"
               }, {
-                  "ParameterKey": "03DBUsername",   
+                  "ParameterKey": "03DBUsername",
                   "ParameterValue": "$(03DBUsername)"
-              }, {	
-                  "ParameterKey": "TagValue",   	
+              }, {
+                  "ParameterKey": "TagValue",
                   "ParameterValue": "Lansa-Prod"
               }]
             tags: 'usage=temp-test'
@@ -478,34 +481,34 @@ stages:
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'
   dependsOn: ValidateTemplateURLs
-  jobs: 
+  jobs:
   - job: 'Job_1'
     displayName: 'Agentless Job'
     pool: server
     timeoutInMinutes: 43200
     steps:
-    - task: ManualValidation@1  
+    - task: ManualValidation@1
       displayName: 'Manual Intervention : Submit Artefacts'
       timeoutInMinutes: 43200
       inputs:
         instructions: |
           Submit artefacts to AWS
           1. Check that the master template has been updated with AMI IDs in the Image CD pipeline. Compare with the Product Load Form. Also check that the TemplateUrl properties are a single url, and not a condition. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-master-win.cfn.template
-          2. Upload Product Load Form to AWS Marketplace. 
-          3. This should have been updated with AMI IDs in the Image CD pipeline. Check that this has occurred. 
-          4. Wait for response from AWS Marketplace. 
+          2. Upload Product Load Form to AWS Marketplace.
+          3. This should have been updated with AMI IDs in the Image CD pipeline. Check that this has occurred.
+          4. Wait for response from AWS Marketplace.
           5. Using the url provided in the response from AWS Marketplace, navigate to deploy the latest version of the stack on CloudFormation. It will show the url of the stack type template. Copy this url.
           6. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
           7. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
-          
+
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
-      
+
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: ParisPrevieww16d_14_2
     stagedisplayName: Paris Preview w16d-14-2
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_ParisDeploymentTest 
+    jobName: AgentJob_ParisDeploymentTest
     jobDisplayname: 'Agent job: Paris Deployment Test'
     baseImageName: w16d-14-2
     stackName: Paris-Preview
@@ -519,14 +522,14 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-3)
     paramLansaMSIKey: $(msiURLPrevious)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: OregonPrevieww16d_15_0
     stagedisplayName: Oregon Preview w16d-15-0
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_USWest2_Oregon_DeploymentTest  
+    jobName: AgentJob_USWest2_Oregon_DeploymentTest
     jobDisplayname: 'Agent job: US us-west-2 (Oregon) Deployment Test'
     baseImageName: w16d-15-0
     stackName: Oregon-Preview
@@ -540,7 +543,7 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-us-west-2)
     paramLansaMSIKey: $(msiURLLatest)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -561,14 +564,14 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIds-ap-northeast-1)
     paramLansaMSIKey: $(msiURLPrevious)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: N_Virginia_Preview_w19d_15_0
     stagedisplayName: N. Virginia Preview w19d-15-0
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_NVirginia_Deployment_Test 
+    jobName: AgentJob_NVirginia_Deployment_Test
     jobDisplayname: 'Agent job : N. Virginia [us-east-1] Deployment Test'
     baseImageName: w19d-15-0
     stackName: N-Virginia-Preview
@@ -582,14 +585,14 @@ stages:
     paramELBSubnetIds: $(ELBSubnetIdsUS)
     paramLansaMSIKey: $(msiURLLatest)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: LondonPreview_w19d_15_0j
     stagedisplayName: London Preview w19d-15-0j
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_Europe_London_Deployment_Test 
+    jobName: AgentJob_Europe_London_Deployment_Test
     jobDisplayname: 'Agent job : Europe (London) Deployment Test'
     baseImageName: w19d-15-0j
     stackName: London-Preview
@@ -604,7 +607,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
@@ -626,14 +629,14 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: MumbaiPreview_w19d_14_2j
     stagedisplayName: Mumbai Preview w19d-14-2j
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_Mumbai_Deployment_Test 
+    jobName: AgentJob_Mumbai_Deployment_Test
     jobDisplayname: 'Agent job : Mumbai Deployment Test'
     baseImageName: w19d-14-2j
     stackName: Mumbai-Preview
@@ -648,14 +651,14 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplatePreview.yml
   parameters:
     stageName: HongKongPreview_w16d_15_0j
     stagedisplayName: Hong Kong Preview w16d-15-0j
     dependsOn: SubmittoAWSAndWaitforPreview
-    jobName: AgentJob_HongKong_Deployment_Test 
+    jobName: AgentJob_HongKong_Deployment_Test
     jobDisplayname: 'Agent job : Hong Kong Deployment Test'
     baseImageName: w16d-15-0j
     stackName: Hong-Kong-Preview
@@ -670,7 +673,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - stage: WaitForLive
   displayName: Wait For Live
@@ -688,18 +691,18 @@ stages:
     displayName: 'Agentless Job'
     pool: server
     timeoutInMinutes: 43200
-    steps:  
-    - task: ManualValidation@1   
+    steps:
+    - task: ManualValidation@1
       displayName: 'Manual Intervention : Merge & Go Live'
       timeoutInMinutes: 43200
       inputs:
         instructions: |
-          Preview tests have completed successfully.        
-          Ready to go live.        
-          Merge cookbooks patch/paas to support/scalable         
-          Click the button to go live.        
+          Preview tests have completed successfully.
+          Ready to go live.
+          Merge cookbooks patch/paas to support/scalable
+          Click the button to go live.
           Note that once the first template has been published that there is no preview stage. Its live straightaway. When/if that occurs, only the merge is required, then this stage can be continued. Consideration should be made of moving this Stage merge before the "Marketplace URL tests" and doing the merge then.
-      
+
 - stage: MergeAndTag
   displayName: Merge & Tag
   dependsOn:
@@ -709,7 +712,7 @@ stages:
     displayName: 'Agent job : Dev Stack'
     timeoutInMinutes: 120
     pool:
-      vmImage: windows-2022
+      vmImage: $(vmImage)
     steps:
       - download: _Build Image Release Artefacts
         displayName: Download artifacts from Build Image Release Artefacts 3.0
@@ -717,11 +720,11 @@ stages:
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
         path: _robe070_cookbooks
-        
+
       - checkout: _lansa_aws-templates
         displayName: Checkout Lansa AWS Templates
         path: _lansa_aws-templates
-      
+
       - checkout: _lansa_aws-templates-mp
         displayName: Checkout Lansa AWS Marketplace Templates
         path: _lansa_aws-templates-mp
@@ -734,12 +737,12 @@ stages:
           regionName: $(RegressionTestRegion)
           arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-       
+
       - pwsh: |
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'
-      
+
       - task: PowerShell@2
         displayName: 'Write access to Git Repo (robe070/cookbooks)'
         inputs:
@@ -747,7 +750,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(CookbooksBranchPreview)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
           pwsh: true
-      
+
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
         inputs:
@@ -755,7 +758,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
           arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranchPreview)'' -GitTargetBranch ''$(CookbooksBranchProduction)'''
           pwsh: true
-      
+
       - task: PowerShell@2
         displayName: 'Write access to Templates Marketplace Branch'
         inputs:
@@ -763,7 +766,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(GitLansaAwsTemplatesMarketPlaceBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesRepoName)'''
           pwsh: true
-      
+
       - task: PowerShell@2
         displayName: 'Tag Templates Marketplace Branch'
         inputs:
@@ -771,7 +774,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
           arguments: '-GitRepoName ''$(GitLansaAwsTemplatesRepoName)'' -Tags ''AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'''
           pwsh: true
-      
+
       - task: PowerShell@2
         displayName: 'Write access to Templates Support Branch'
         inputs:
@@ -779,7 +782,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitRepoWriteAccess.ps1'
           arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(GitLansaAwsTemplatesSupportRepoName)'''
           pwsh: true
-      
+
       - task: PowerShell@2
         displayName: 'Tag Templates Support Branch'
         inputs:
@@ -793,7 +796,7 @@ stages:
     stageName: StockholmProd_w16d_14_2
     stagedisplayName: Stockholm Prod w16d-14-2
     dependsOn: MergeAndTag
-    jobName: AgentJob_Stockholm_Deployment_Test 
+    jobName: AgentJob_Stockholm_Deployment_Test
     jobDisplayname: 'Agent job : Stockholm Deployment Test'
     baseImageName: w16d-14-2
     stackName: Stockholm-Prod
@@ -807,14 +810,14 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-north-1)
     paramLansaMSIKey: $(msiURLPrevious)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: IrelandProd_w16d_15_0
     stagedisplayName: Ireland Prod w16d-15-0
     dependsOn: MergeAndTag
-    jobName: AgentJob_Ireland_Deployment_Test  
+    jobName: AgentJob_Ireland_Deployment_Test
     jobDisplayname: 'Agent job : Ireland - Deployment Test'
     baseImageName: w16d-15-0
     stackName: Ireland-Prod
@@ -828,14 +831,14 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-west-1)
     paramLansaMSIKey: $(msiURLLatest)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
-    stageName: SydneyProd_w19d_14_2 
+    stageName: SydneyProd_w19d_14_2
     stagedisplayName: Sydney Prod w19d-14-2
     dependsOn: MergeAndTag
-    jobName: AgentJob_Sydney_Deployment_Test  
+    jobName: AgentJob_Sydney_Deployment_Test
     jobDisplayname: 'Agent job : Sydney Deployment Test'
     baseImageName: w19d-14-2
     stackName: Sydney-Prod
@@ -849,14 +852,14 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs)
     paramLansaMSIKey: $(msiURLPrevious)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Ohio_Prod_w19d_15_0
     stagedisplayName: Ohio Prod w19d-15-0
     dependsOn: MergeAndTag
-    jobName: AgentJob_US_useast2_Deployment_Test  
+    jobName: AgentJob_US_useast2_Deployment_Test
     jobDisplayname: 'Agent job : US [us-east-2] Deployment Test'
     baseImageName: w19d-15-0
     stackName: Ohio-Prod
@@ -870,14 +873,14 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-us-east-2)
     paramLansaMSIKey: $(msiURLLatest)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Frankfurt_Prod_w16d_14_2j
     stagedisplayName: Frankfurt Prod w16d-14-2j
     dependsOn: MergeAndTag
-    jobName: AgentJob_Frankfurt_Deployment_Test  
+    jobName: AgentJob_Frankfurt_Deployment_Test
     jobDisplayname: 'Agent job : Frankfurt Deployment Test'
     baseImageName: w16d-14-2j
     stackName: Frankfurt-Prod
@@ -892,14 +895,14 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: CanadaProd_w19d_14_2j
     stagedisplayName: Canada Prod w19d-14-2j
     dependsOn: MergeAndTag
-    jobName: AgentJob_Canada_ca_central_1_Deployment_Test_tral 
+    jobName: AgentJob_Canada_ca_central_1_Deployment_Test_tral
     jobDisplayname: 'Agent job : Canada (ca-central-1)- Deployment Test tral'
     baseImageName: w19d-14-2j
     stackName: Canada-Prod
@@ -914,14 +917,14 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Milan_Prod_w16d_14_2j
     stagedisplayName: Milan Prod w16d-14-2j
     dependsOn: MergeAndTag
-    jobName: AgentJob_Milan_Deployment_Test  
+    jobName: AgentJob_Milan_Deployment_Test
     jobDisplayname: 'Agent job : Milan Deployment Test '
     baseImageName: w16d-14-2j
     stackName: Milan-Prod
@@ -936,14 +939,14 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    
+
 
 - template: AzureDevOps/templates/AWSTestTemplateProduction.yml
   parameters:
     stageName: Bahrain_Prod_w19d_15_0j
     stagedisplayName: Bahrain Prod w19d-15-0j
     dependsOn: MergeAndTag
-    jobName: AgentJob_Bahrain_Deployment_Test 
+    jobName: AgentJob_Bahrain_Deployment_Test
     jobDisplayname: 'Agent job : Bahrain Deployment Test'
     baseImageName: w19d-15-0j
     stackName: Bahrain-Prod
@@ -958,4 +961,3 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
     paramTagValue: Lansa-Prod
-    

@@ -40,6 +40,9 @@ parameters:
   - name: paramTagValue
     type: string
     default: none
+  - name: disableIntegratorTest
+    type: boolean
+    default: false
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -88,7 +91,7 @@ stages:
           filePath: "$(Pipeline.Workspace)/_lansa_aws-templates/scripts/${{ parameters.paramsetGateVariable }}"
           failOnStderr: true
         continueOnError: false
-      
+
       - pwsh: |
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.stack:$(Gate.stack)" | Out-Default
@@ -118,57 +121,57 @@ stages:
             [{
                 "ParameterKey": "$(DBPasswordKey)",
                 "ParameterValue": "$(DBPasswordValue)"
-            }, 
+            },
             {
                 "ParameterKey": "$(WebPasswordKey)",
                 "ParameterValue": "$(WebPasswordValue)"
             }, {
-                "ParameterKey": "$(KeyNameKey)",    
+                "ParameterKey": "$(KeyNameKey)",
                 "ParameterValue": "$(KeyNameValue)"
             }, {
-                "ParameterKey": "$(RemoteAccessLocationKey)",   
+                "ParameterKey": "$(RemoteAccessLocationKey)",
                 "ParameterValue": "$(RemoteAccessLocationValue)"
             }, {
-                "ParameterKey": "ImageSource",   
+                "ParameterKey": "ImageSource",
                 "ParameterValue": "Custom"
             }, {
-                "ParameterKey": "AMIId",   
+                "ParameterKey": "AMIId",
                 "ParameterValue": "$(Gate.ImageID)"
             }, {
-                "ParameterKey": "TagValue",   
+                "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
             }, {
-                "ParameterKey": "LansaVersion",   
+                "ParameterKey": "LansaVersion",
                 "ParameterValue": "${{ parameters.paramLansaVersion }}"
             }, {
-                "ParameterKey": "11WebserverOSVersion",   
+                "ParameterKey": "11WebserverOSVersion",
                 "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
             }, {
-                "ParameterKey": "10LansaGitRepoBranch",   
+                "ParameterKey": "10LansaGitRepoBranch",
                 "ParameterValue": "$(CookbooksBranch)"
             }, {
-                "ParameterKey": "TemplateS3Namespace",   
+                "ParameterKey": "TemplateS3Namespace",
                 "ParameterValue": "$(TemplateS3Namespace)"
             }, {
-                "ParameterKey": "$(LansaMSIKey)",   
+                "ParameterKey": "$(LansaMSIKey)",
                 "ParameterValue": "${{ parameters.parammsiURL }}"
             }, {
-                "ParameterKey": "CurrentVPC",   
+                "ParameterKey": "CurrentVPC",
                 "ParameterValue": "$(CurrentVPC)"
             }, {
-                "ParameterKey": "AvailabilityZones",   
+                "ParameterKey": "AvailabilityZones",
                 "ParameterValue": "$(AvailabilityZones)"
             }, {
-                "ParameterKey": "NumberOfAZs",   
+                "ParameterKey": "NumberOfAZs",
                 "ParameterValue": "$(NumberOfAZs)"
             }, {
-                "ParameterKey": "DBSubnetGroupName",   
+                "ParameterKey": "DBSubnetGroupName",
                 "ParameterValue": "$(DBSubnetGroupName)"
             }, {
-                "ParameterKey": "ELBSubnetIds",   
+                "ParameterKey": "ELBSubnetIds",
                 "ParameterValue": "$(ELBSubnetIds)"
             }, {
-                "ParameterKey": "03DBUsername",   
+                "ParameterKey": "03DBUsername",
                 "ParameterValue": "$(03DBUsername)"
             }
             ]
@@ -190,13 +193,22 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
 
       - task: AWSPowerShellModuleScript@1
-        displayName: 'Test CFN Deployment: URL tests'
+        displayName: 'Test CFN Deployment: All URL tests'
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'))
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'), not(${{ parameters.disableIntegratorTest }}))
+
+      - task: AWSPowerShellModuleScript@1
+        displayName: 'Test CFN Deployment: URL tests - not Integrator'
+        inputs:
+          awsCredentials: AzureDevOps
+          regionName: 'ap-southeast-2'
+          arguments: '-Gatestack $(Gate.stack) -DisableIntegratorTest'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'true'), ${{ parameters.disableIntegratorTest }})
 
       - task: AWSPowerShellModuleScript@1
         displayName: 'Delete Stack'

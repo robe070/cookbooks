@@ -70,26 +70,26 @@ stages:
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: CollationJPN
-          ${{ if contains(parameters.osName, 'JPN') }}: 
+          ${{ if contains(parameters.osName, 'JPN') }}:
             value: -collation "$(Collation_JPN)"
           ${{ else }}:
             value: ''
         - name: LanguageJPN
-          ${{ if contains(parameters.osName, 'JPN') }}: 
+          ${{ if contains(parameters.osName, 'JPN') }}:
             value: -Language "$(jpnLanguage)"
           ${{ else }}:
             value: ''
         - name: imageReleaseState
-          ${{ if contains(lower(parameters.stageName), 'production') }}: 
+          ${{ if contains(lower(parameters.stageName), 'production') }}:
             value: -imageReleaseState "Production"
-          ${{ elseif endsWith(lower(parameters.stageName), 'preview') }}: 
+          ${{ elseif endsWith(lower(parameters.stageName), 'preview') }}:
             value: -imageReleaseState "Preview"
           ${{ else }}:
             value: ''
         - name: imageId
-          ${{ if contains(lower(parameters.stageName), 'production') }}: 
+          ${{ if contains(lower(parameters.stageName), 'production') }}:
             value: ''
-          ${{ elseif endsWith(lower(parameters.stageName), 'preview') }}: 
+          ${{ elseif endsWith(lower(parameters.stageName), 'preview') }}:
             value: ''
           ${{ else }}:
             value: -imageId "$(Gate.ImageUrl)"
@@ -121,7 +121,7 @@ stages:
       - task: AzurePowerShell@5
         displayName: 'Delete resource group: ${{ parameters.resourceGroup }}'
         inputs:
-          azureSubscription: 'Azure Baking Images'
+          azureSubscription: $(ConnectedServiceName)
           ScriptType: InlineScript
           Inline: |
             Write-Host Deleting Resource Group ${{ parameters.resourceGroup }}
@@ -144,13 +144,17 @@ stages:
           addSpnToEnvironment: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-        displayName: 'Azure Resource Group Tagging'
+      - task: AzurePowerShell@5
+        displayName: 'Tag RG'
+        env:
+          RESOURCEGROUP: ${{ parameters.resourceGroup }}
         inputs:
-          ConnectedServiceName: $(ConnectedServiceName)
-          ResourceGroupName: ${{ parameters.resourceGroup }}
-          Key: Usage
-          Value: 'test-temp'
+          azureSubscription: $(ConnectedServiceName)
+          ScriptType: 'InlineScript'
+          Inline: |
+            Write-Host "Tagging $env:RESOURCEGROUP with Usage = 'test-temp'" | Out-Default | Write-Host
+            Set-AzResourceGroup -Name $env:RESOURCEGROUP -Tag @{ Usage = 'test-temp' }
+          azurePowerShellVersion: LatestVersion
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
@@ -173,7 +177,7 @@ stages:
         env:
           RESOURCEGROUP: ${{ parameters.resourceGroup }}
         inputs:
-          azureSubscription: 'Azure Baking Images'
+          azureSubscription: $(ConnectedServiceName)
           ScriptPath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_test_image_version.ps1'
           ScriptArguments: -SkuName "$(Gate.Sku)" -deploymentOutput '$(deploymentOutput)'
           azurePowerShellVersion: LatestVersion

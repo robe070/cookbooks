@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+
+<!-- Cloud Start Here page -->
+
+<html lang="en">
+	<head>
+		<title>LANSA Scalable License</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<meta name="viewport" content="width:device-width, initial-scale=1">
+		<style type="text/css">
+			body {
+				font-family: Arial, sans-serif;
+				text-align: center;
+				margin: 2% 10%;
+				background-size: 100%;
+				background-position: center;
+				overflow-wrap: break-word;
+				word-wrap: break-word;
+				-ms-word-break: break-all;
+				word-break: break-word;
+				-ms-hyphens: auto;
+				-moz-hyphens: auto;
+				-webkit-hyphens: auto;
+				hyphens: auto;
+			}
+			h1 {
+				font-weight: 600;
+				font-size: 200%;
+			}
+			section {
+				margin: 3em auto auto auto;
+				text-align: left;
+				max-width: 800px;
+			}
+			img.splash {
+				width: 220px;
+				height: 137px;
+			}
+			@media all and (min-width: 480px) {
+				img.splash {
+					width: 450px;
+					height: 281px;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<h1>LANSA Scalable License version 16.0</h1>
+		</header>
+		<main>
+			<section>
+				<p>This virtual machine must be instantiated using the supplied Azure Resource Manager (ARM) template referred to below.
+                You only need to RDP into the instance in order to troubleshoot issues when creating the LANSA stack
+                using the ARM template.</p>
+			</section>
+            <section>
+				<p>Before you begin, you should ensure that you have the skills necessary to use LANSA effectively. If you need LANSA training, various lessions are available at <a href="https://learn.lansa.com/" target="_blank">learn.lansa.com</a></p>
+			</section>
+			<section>
+                <p>Do not use this Azure image until you have produced a LANSA application with the LANSA IDE.</p>
+                <p>Full instructions for using the template and creating your stack are provided here: <a href="https://docs.lansa.com/16/en/lansa022/index.htm#lansa/vldtoolct_0250.htm%3FTocPath%3DLANSA%2520Application%2520Deployment%2520Tool%7CCloud%2520Tutorials%7CMicrosoft%2520Azure%2520Tutorial%7C_____0" target="_blank">Microsoft Azure Tutorial</a></p>
+                <p>A summary of the steps involved are:</p>
+                <ol>
+					<li>Subscribe to the LANSA Scalable License.</li>
+					<li>Upload your LANSA Web Application MSI to Azure storage – and obtain the URL of the MSI.</li>
+					<li>Use the Azure Portal to create a scalable LANSA stack using the template URL provided above.</li>
+					<li>You will be prompted to enter various parameters. The parameters listed in the Basic blade are all you need to consider to instantiate a stack that will work. The rest are tuning or maintenance parameters which you only need to consider when creating a production stack. In particular you need to put the URL of the MSI in parameter Lansa MSI URL and provide answers for the other mandatory parameters – passwords and SSL certificate.</li>
+				</ol>
+			</section>
+         </main>
+	</body>
+</html>
