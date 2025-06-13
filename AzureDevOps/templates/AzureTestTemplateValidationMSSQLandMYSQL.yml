@@ -172,7 +172,7 @@ stages:
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
         - task: AzureResourceManagerTemplateDeployment@3
-          displayName: 'ARM Template deployment: ${{ parameters.stageDisplayname }}'
+          displayName: 'Deploy DB: ${{ parameters.stageDisplayname }}'
           name: sqlazuredeployment
           inputs:
             azureResourceManagerConnection: $(ConnectedServiceName)
@@ -199,7 +199,7 @@ stages:
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
           - task: AzureResourceManagerTemplateDeployment@3
-            displayName: 'ARM Template deployment: MySQL1DB'
+            displayName: 'Deploy Main Stack: MySQL1DB'
             inputs:
               azureResourceManagerConnection: $(ConnectedServiceName)
               subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
@@ -231,7 +231,7 @@ stages:
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
           - task: AzureResourceManagerTemplateDeployment@3
-            displayName: '${{ parameters.stageDisplayname }}: ARM Template deployment'
+            displayName: 'Deploy Main Stack ${{ parameters.stageDisplayname }}'
             inputs:
               azureResourceManagerConnection: $(ConnectedServiceName)
               subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
