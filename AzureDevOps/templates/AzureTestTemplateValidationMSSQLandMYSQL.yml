@@ -46,25 +46,25 @@ parameters:
   - name: osName
     type: string
     default: none
-  - name: lansaVersion 
+  - name: lansaVersion
     type: string
     default: none
-  - name: databaseType  
+  - name: databaseType
     type: string
     default: none
-  - name: edition  
+  - name: edition
     type: string
     default: Standard
-  - name: requestedServiceObjectiveName  
+  - name: requestedServiceObjectiveName
     type: string
     default: ''
-  - name: msiURL  
+  - name: msiURL
     type: string
     default: none
-  - name: databaseName  
+  - name: databaseName
     type: string
     default: none
-  - name: databaseLogin  
+  - name: databaseLogin
     type: string
     default: none
   - name: databaseNewOrExisting
@@ -113,7 +113,7 @@ stages:
       cancelTimeoutInMinutes: 1
       condition: ${{ parameters.jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
-      
+
       pool:
         vmImage: ${{ parameters.vmImage }}
 
@@ -138,7 +138,7 @@ stages:
             arguments: -Version "${{ parameters.version }}" -osName "${{ parameters.osName }}"
 
         - powershell: |
-            # Print the Gate variables. 
+            # Print the Gate variables.
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
           displayName: 'Artifact Check : Output Gate Variable'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
@@ -178,7 +178,7 @@ stages:
 
               $deployment_Output = ConvertFrom-Json '$(deploymentOutput_common)'
               $serverName = $deployment_Output.serverName.value
-              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName" | Out-Default | Write-Verbose 
+              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName" | Out-Default | Write-Verbose
             displayName: 'Get MySQL DB ServerName'
             name: mysqlDBOutput
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
@@ -196,7 +196,7 @@ stages:
               deploymentOutputs: deploymentOutput
               addSpnToEnvironment: true
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
-        
+
         - ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142') }}:
           - task: AzurePowerShell@5
             displayName: GetServerIP
@@ -211,7 +211,7 @@ stages:
                 $pipName = $deploymentOutput.publicIpAddressName.value
                 $output = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName '$(ResourceGroup)'
                 $vmIP = $output.IpAddress
-                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP" | Out-Default | Write-Verbose 
+                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP" | Out-Default | Write-Verbose
               azurePowerShellVersion: LatestVersion
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -235,27 +235,31 @@ stages:
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-          displayName: 'Tagging DB'
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Tag RG'
           inputs:
-            ConnectedServiceName: $(ConnectedServiceName)
-            ResourceGroupName: ${{ parameters.resourceGroup }}
-            Key: Usage
-            Value: 'test-temp'
+            targetType: inline
+            script: >-
+              Write-Host "Tagging '${{ parameters.resourceGroup }}' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+
+              Set-AzResourceGroup -Name '${{ parameters.resourceGroup }}' -Tag @{ Usage = '$(JobTag)' }
           continueOnError: true
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-          displayName: 'Tagging Resource Group'
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Tag RG'
           inputs:
-            ConnectedServiceName: $(ConnectedServiceName)
-            ResourceGroupName: '$(ResourceGroup)'
-            Key: Usage
-            Value: 'test-temp'
+            targetType: inline
+            script: >-
+              Write-Host "Tagging '$(ResourceGroup)' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+
+              Set-AzResourceGroup -Name '$(ResourceGroup)' -Tag @{ Usage = '$(JobTag)' }
           continueOnError: true
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: PowerShell@2      
+        - task: PowerShell@2
           displayName: 'Test ARM Deployment: URL Tests'
           inputs:
             targetType: filePath

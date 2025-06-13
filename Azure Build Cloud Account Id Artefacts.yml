@@ -16,8 +16,9 @@ jobs:
   displayName: Build w19d-15-ID Image to test Old Cloud Account Id license
   timeoutInMinutes: 360
   variables:
-    - name: VersionText
-      value: w19d-15-ID
+    VersionText: w19d-15-ID
+    JobResourceGroupName: BakingDP-$(VersionText)
+    JobTag: 'test-temp'
 
   # condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
   # There is not a Win 2019 old azure license
@@ -51,14 +52,15 @@ jobs:
       arguments: -VersionText '$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AZR*.5.lic' -MaxRetry $(MaxRetry)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
-    inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-$(VersionText)
-      Key: Usage
-      Value: test-temp
+  - task: PowerShell@2
+  name: ''
+  displayName: 'Tag RG'
+  inputs:
+    targetType: inline
+    script: >-
+      Write-Host "Tagging '$(JobResourceGroupName)' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+
+      Set-AzResourceGroup -Name '$(JobResourceGroupName)' -Tag @{ Usage = '$(JobTag)' }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -102,14 +104,15 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-$(VersionText)
+      resourceGroupName: $(JobResourceGroupName)
 
 - job: w22d_15_ID_New
   displayName: Build w22d-15-ID Image to test New Cloud Account Id license
   timeoutInMinutes: 360
   variables:
-    - name: VersionText
-      value: w22d-15-ID
+    VersionText: w22d-15-ID
+    JobResourceGroupName: BakingDP-$(VersionText)
+    JobTag: 'test-temp'
 
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
 
@@ -141,14 +144,15 @@ jobs:
       arguments: -VersionText '$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-IMAGE-NAME) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -ExternalIPAddresses  $(ExternalIPAddresses) -CloudAccountLicense 'x_lic_AZR*.5.lic' -MaxRetry $(MaxRetry)
       workingDirectory: scripts
 
-  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-    displayName: Azure Resource Group Tagging
-    continueOnError: true
+  - task: PowerShell@2
+    name: ''
+    displayName: 'Tag RG'
     inputs:
-      ConnectedServiceName: $(ConnectedServiceName)
-      ResourceGroupName: BakingDP-$(VersionText)
-      Key: Usage
-      Value: test-temp
+      targetType: inline
+      script: >-
+        Write-Host "Tagging '$(JobResourceGroupName)' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+
+        Set-AzResourceGroup -Name '$(JobResourceGroupName)' -Tag @{ Usage = '$(JobTag)' }
 
   - task: PowerShell@2
     displayName: 'Generate: Image URL'
@@ -192,5 +196,5 @@ jobs:
       ConnectedServiceName: $(ConnectedServiceName)
       subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
       action: DeleteRG
-      resourceGroupName: BakingDP-$(VersionText)
+      resourceGroupName: $(JobResourceGroupName)
 
