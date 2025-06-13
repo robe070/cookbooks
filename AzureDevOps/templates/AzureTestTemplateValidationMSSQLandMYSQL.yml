@@ -133,7 +133,7 @@ stages:
           name: Gate
           displayName: 'Artifact Check: Set Gate Variable'
           env:
-            RESOURCEGROUPNAME: $(resourceGroup) # azure_set_gate_variable.ps1 needlessly refers to an environment variable for the resource group name. It could use the variable directly.
+            RESOURCEGROUPNAME: BakingDP # azure_set_gate_variable.ps1 needs to know which resource group the image is located in. Note the same as the resource group for the stack.
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
