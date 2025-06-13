@@ -132,13 +132,13 @@ stages:
         - name: additionalOverrideParameters
           ${{ if eq(parameters.stageName, 'AUSDevShoe_WithKeyVaultCert_Sizesw19d150') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}"'
-          ${{ elseif eq(parameters.stageName, 'AUSTestShoe_WithKeyVaultCert_Sizesw16142j') }}:
+          ${{ elseif eq(parameters.stageName, 'AUSTestShoe_WithKeyVaultCert_Sizesw16160j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}" -keyVaultName "$(keyVaultName)" -keyVaultCertificateName "$(keyVaultCertificateName)" -keyVaultRGName "BakingDP" '
           ${{ elseif eq(parameters.stageName, 'AUSSmallStackShoeSizesw19d150j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity ${{ parameters.applicationGatewayCapacity }} '
           ${{ elseif eq(parameters.stageName, 'AUSMediumStackShoeSizesw16d150j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity ${{ parameters.autoScaleMinCapacity }} -autoScaleMaxCapacity ${{ parameters.autoScaleMaxCapacity }} '
-          ${{ elseif eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d142j') }}:
+          ${{ elseif eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d160j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMinCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" '
           ${{ else }}:
             value: ''
@@ -162,6 +162,17 @@ stages:
 
         - checkout: self
           path: _robe070_cookbooks
+
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Validate stageName parameter'
+          inputs:
+            targetType: inline
+            script: |
+              Write_host("additionalOverrideParameters = $additionalOverrideParameters")
+              throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
+              cmd /c exit 2
+          condition: and(succeeded(), eq(lower(variables['additionalOverrideParameters']), ''))
 
         - task: PowerShell@2
           name: ''
