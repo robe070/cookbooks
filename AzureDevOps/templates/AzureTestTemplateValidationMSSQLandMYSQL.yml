@@ -154,7 +154,7 @@ stages:
 
         - powershell: |
             # Print the Gate variables.
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)"
           displayName: 'Artifact Check : Output Gate Variable'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -189,11 +189,11 @@ stages:
         - ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150') }}:
           - powershell: |
               # Print the Deployment Output
-              Write-Host "$(deploymentOutput_common)" | out-default | Write-Verbose
+              Write-Host "$(deploymentOutput_common)"
 
               $deployment_Output = ConvertFrom-Json '$(deploymentOutput_common)'
               $serverName = $deployment_Output.serverName.value
-              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName" | Out-Default | Write-Verbose
+              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName"
             displayName: 'Get MySQL DB ServerName'
             name: mysqlDBOutput
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
@@ -212,7 +212,7 @@ stages:
               addSpnToEnvironment: true
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142') }}:
+        - ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160') }}:
           - task: AzurePowerShell@5
             displayName: GetServerIP
             name: mssqlDBOutput
@@ -221,12 +221,12 @@ stages:
               ScriptType: InlineScript
               Inline: |
                 # Print the Deployment Output
-                Write-Host "$(deploymentOutput_common)" | out-default | Write-Verbose
+                Write-Host "$(deploymentOutput_common)"
                 $deploymentOutput =ConvertFrom-Json '$(deploymentOutput_common)'
                 $pipName = $deploymentOutput.publicIpAddressName.value
                 $output = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName '$(ResourceGroup)'
                 $vmIP = $output.IpAddress
-                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP" | Out-Default | Write-Verbose
+                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP"
               azurePowerShellVersion: LatestVersion
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -246,7 +246,7 @@ stages:
 
         - powershell: |
             # Print the Deployment Output
-            Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+            Write-Host "$(deploymentOutput)"
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -256,19 +256,7 @@ stages:
           inputs:
             targetType: inline
             script: >-
-              Write-Host "Tagging '${{ parameters.resourceGroup }}' with Usage = '$(JobTag)'" | Out-Default | Write-Host
-
-              Set-AzResourceGroup -Name '${{ parameters.resourceGroup }}' -Tag @{ Usage = '$(JobTag)' }
-          continueOnError: true
-          condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
-
-        - task: PowerShell@2
-          name: ''
-          displayName: 'Tag RG'
-          inputs:
-            targetType: inline
-            script: >-
-              Write-Host "Tagging '$(ResourceGroup)' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+              Write-Host "Tagging '$(ResourceGroup)' with Usage = '$(JobTag)'"
 
               Set-AzResourceGroup -Name '$(ResourceGroup)' -Tag @{ Usage = '$(JobTag)' }
           continueOnError: true

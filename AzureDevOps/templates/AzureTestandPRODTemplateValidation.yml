@@ -173,7 +173,7 @@ stages:
 
         - powershell: |
             # Print the Gate variables.
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)"
           displayName: 'Artifact Check : Output Gate Variable'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -214,7 +214,7 @@ stages:
 
         - powershell: |
             # Print the Deployment Output
-            Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+            Write-Host "$(deploymentOutput)"
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -224,9 +224,9 @@ stages:
           inputs:
             targetType: inline
             script: >-
-              Write-Host "Tagging $(JobResourceGroupName) with Usage = '$(JobTag)'" | Out-Default | Write-Host
+              Write-Host "Tagging $(ResourceGroup) with Usage = '$(JobTag)'"
 
-              Set-AzResourceGroup -Name $(JobResourceGroupName) -Tag @{ Usage = '$(JobTag)' }
+              Set-AzResourceGroup -Name $(ResourceGroup) -Tag @{ Usage = '$(JobTag)' }
 
         - task: PowerShell@2
           displayName: 'Test ARM Deployment: URL Tests'
