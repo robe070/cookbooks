@@ -107,7 +107,6 @@ stages:
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: location
-          # value: 'Australia Southeast'
           value: 'Australia East'
 
       cancelTimeoutInMinutes: 1
@@ -128,6 +127,16 @@ stages:
         #   path: _robe070_cookbooks
         - checkout: self
           path: _robe070_cookbooks
+
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Validate stageName parameter'
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host ""##vso[task.logissue type=error]StageName parameter ${{ parameters.stageName }} is not a supported value." | Out-Default | Write-Host
+              cmd /c exit 1
+          condition: and(succeeded(), eq(lower(variables['$(csmFile)']), ''))
 
         - task: PowerShell@2
           name: Gate

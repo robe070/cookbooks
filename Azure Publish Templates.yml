@@ -189,6 +189,7 @@ stages:
     SqlDeploymentName: mysql1Test
     stackName: MYSQLVMSS
     version: w19d-15-0
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestTemplateValidationMSSQLandMYSQL.yml
   parameters:
@@ -208,6 +209,7 @@ stages:
     SqlDeploymentName: mssqls1Test
     stackName: MSSQLVMSS
     version: w19d-16-0
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
