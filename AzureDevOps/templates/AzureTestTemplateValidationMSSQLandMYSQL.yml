@@ -146,6 +146,14 @@ stages:
           condition: and(succeeded(), eq(lower(variables['csmFile']), ''))
 
         - task: PowerShell@2
+          name: ''
+          displayName: Azure Login
+          inputs:
+            filePath: scripts/AzureLogin.ps1
+            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+            workingDirectory: scripts
+
+        - task: PowerShell@2
           name: Gate
           displayName: 'Artifact Check: Set Gate Variable'
           env:
