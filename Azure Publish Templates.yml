@@ -230,13 +230,13 @@ stages:
     SqlDeploymentName: DevStack
     stackName: DevSt
     version: w19d-15-0
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     edition: Serverless
     dbMinCapacity: 0.5
     maxSizeBytes: 10737418240
     applicationGatewayCapacity: 1
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -253,7 +253,6 @@ stages:
     SqlDeploymentName: TestStack
     stackName: TestSt
     version: w16d-16-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     keyVaultEnabled: 'true'
@@ -261,6 +260,7 @@ stages:
     serverlessDbCapacity: 4
     dbMinCapacity: 0.5
     maxSizeBytes: '107374182400'
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -278,10 +278,10 @@ stages:
     SqlDeploymentName: SmallStack
     stackName: SmallSt
     version: w19d-15-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 536870912000
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -299,12 +299,12 @@ stages:
     SqlDeploymentName: MediumStack
     stackName: MedSt
     version: w16d-15-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B12ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 1099511627776
     autoScaleMinCapacity: 1
     autoScaleMaxCapacity: 15
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -323,7 +323,6 @@ stages:
     edition: Premium
     stackName: LargeSt
     version: w19d-16-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B20ms
     dbVirtualMachineSize: Standard_B2ms
     dbMinCapacity: 0
@@ -334,6 +333,7 @@ stages:
     enableAutoscaling: true
     autoScaleMinCapacity: 2
     autoScaleMaxCapacity: 30
+    imageReleaseState: preview
 
 - stage: ProductionStage
   displayName: Production Stage
