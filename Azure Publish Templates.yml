@@ -333,7 +333,7 @@ stages:
     enableAutoscaling: true
     autoScaleMinCapacity: 2
     autoScaleMaxCapacity: 30
-    imageReleaseState: preview
+    imageReleaseState: Preview
 
 - stage: ProductionStage
   displayName: Production Stage
