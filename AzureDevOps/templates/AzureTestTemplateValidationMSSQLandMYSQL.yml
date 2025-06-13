@@ -94,7 +94,7 @@ stages:
       variables:
         - name: ResourceGroup
           value: ${{ parameters.resourceGroup }}
-
+AUSMSSQLS1DBw19d160
         - name: csmFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlTemplate.json
@@ -137,9 +137,10 @@ stages:
           inputs:
             targetType: inline
             script: |
-              Write-Host "##vso[task.logissue type=error]StageName parameter ${{ parameters.stageName }} is not a supported value."
+              Write_host("csmFile = $csmFile")
+              throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
               cmd /c exit 2
-          condition: and(succeeded(), eq(lower(variables['$(csmFile)']), ''))
+          condition: and(succeeded(), eq(lower(variables['csmFile']), ''))
 
         - task: PowerShell@2
           name: Gate
