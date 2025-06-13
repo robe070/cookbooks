@@ -94,18 +94,21 @@ stages:
       variables:
         - name: ResourceGroup
           value: ${{ parameters.resourceGroup }}
+
         - name: csmFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlTemplate.json
-          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142' ) }}:
+          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160' ) }}:
             value: sqlServerTemplate.json
         - name: csmParametersFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlParameters.json
-          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142' ) }}:
+          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160' ) }}:
             value: sqlServerParameters.json
+
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
+
         - name: location
           value: 'Australia East'
 
