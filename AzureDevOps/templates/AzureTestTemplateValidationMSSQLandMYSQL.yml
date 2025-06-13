@@ -94,7 +94,7 @@ stages:
       variables:
         - name: ResourceGroup
           value: ${{ parameters.resourceGroup }}
-AUSMSSQLS1DBw19d160
+
         - name: csmFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlTemplate.json
