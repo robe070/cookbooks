@@ -104,9 +104,6 @@ parameters:
     type: string
     default: Australia East
 
-variables:
-
-
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: '${{ parameters.dependsOn }}'
