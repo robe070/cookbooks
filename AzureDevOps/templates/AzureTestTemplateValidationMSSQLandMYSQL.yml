@@ -149,9 +149,9 @@ stages:
           name: ''
           displayName: Azure Login
           inputs:
-            filePath: $(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
             arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
-            workingDirectory: scripts
+            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
 
         - task: PowerShell@2
           name: Gate
