@@ -134,8 +134,8 @@ stages:
           inputs:
             targetType: inline
             script: |
-              Write-Host ""##vso[task.logissue type=error]StageName parameter ${{ parameters.stageName }} is not a supported value." | Out-Default | Write-Host
-              cmd /c exit 1
+              Write-Host "##vso[task.logissue type=error]StageName parameter ${{ parameters.stageName }} is not a supported value."
+              cmd /c exit 2
           condition: and(succeeded(), eq(lower(variables['$(csmFile)']), ''))
 
         - task: PowerShell@2
