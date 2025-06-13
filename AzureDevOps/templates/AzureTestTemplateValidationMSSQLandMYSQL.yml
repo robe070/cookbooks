@@ -112,6 +112,9 @@ stages:
         - name: location
           value: 'Australia East'
 
+        - name: JobTag
+          value: 'test-temp'
+
       cancelTimeoutInMinutes: 1
       condition: ${{ parameters.jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
