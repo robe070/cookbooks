@@ -38,7 +38,7 @@ variables:
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
   - name: vmImage
-    value: windows-2019
+    value: windows-2022
   # - name: GitAwsTemplateMarketPlaceBranch
   #   value: support/scalable_marketplace
   # - name: GitAwsTemplatescalableBranch
@@ -74,7 +74,7 @@ stages:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
         - checkout: self
-        
+
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
@@ -534,27 +534,27 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
             pwsh: true
-            
-            
+
+
         - pwsh: |
            # change to project directory
            cd $(Pipeline.Workspace)/_lansa_aws-templates
-           
+
            # fetch changes
            git fetch
            if (-not $?) {
             Write-Host(" git fetch failed");
             exit 1
            }
-           
-           
+
+
            # merge branch to the main branch (for testing merging temp branch to feature/119)
            git pull origin $(GitLansaAwsTemplatesTempBranch)
            if (-not $?) {
             Write-Host(" git pull origin $(GitLansaAwsTemplatesTempBranch) failed");
             exit 1
            }
-           
+
            # push to the main branch
            git push
            if (-not $?) {
@@ -964,7 +964,7 @@ stages:
       pool: server
       timeoutInMinutes: 43200
       steps:
-      
+
         - task: ManualValidation@1
           displayName: 'Marketplace Instructions'
           timeoutInMinutes: 43200

@@ -1,8 +1,1 @@
-[CmdletBinding()]
-param (
-    [Parameter(Mandatory=$false)]
-    [Switch]
-    $Lang=$false
-)
-Write-Host ("test1 Lang = $Lang" )
-.\test2.ps1 -Lang:$Lang
+C:\dev\cookbooks\scripts\bake-scalable-azure-image-pipeline.ps1 -VersionText 'w22d-15-0-0' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName 2022-Datacenter -GitBranch "debug/paas" -Cloud 'Azure' -Win2012 $false -GitUserName robe070 -MaxRetry 1 -ExternalIPAddresses '103.231.169.65/32,103.110.171.121/32,106.211.132.182/32,103.109.109.25/32,159.196.169.219/32'

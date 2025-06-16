@@ -10,15 +10,18 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: Windows-2019-AMI
-    value: LANSA Scalable License  w19d-15-0-$(VersionText-w19d-15-0)*
+    value: LANSA Scalable License  w19d-15-0-$(VersionText-w19d-15-0)
+  - name: vmImage
+    value: windows-2022
 
 jobs:
 - job: Job_2
-  displayName: w19d-15-ID-OLD
+  displayName: w19d-15-ID-OLD Not Supported
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID-OLD'], 'True'), eq(variables['Build-all'], 'True')))
+  # Disable building the old account ID because it is no longer supported
+  condition: and(False, succeeded(), or(eq(variables['Build-w19d-15-ID-OLD'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: windows-2019
+    vmImage: $(vmImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -154,7 +157,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID-NEW'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: windows-2019
+    vmImage: $(vmImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
