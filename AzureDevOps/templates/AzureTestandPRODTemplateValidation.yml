@@ -169,18 +169,10 @@ stages:
           inputs:
             targetType: inline
             script: |
-              Write_host("additionalOverrideParameters = $additionalOverrideParameters")
-              throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
-              cmd /c exit 2
+              Write-Host("additionalOverrideParameters = $additionalOverrideParameters")
+              Write-Warning "WARNING: StageName parameter ${{ parameters.stageName }} is not a supported value so Override Parameters has been set to null."
+          continueOnError: true
           condition: and(succeeded(), eq(lower(variables['additionalOverrideParameters']), ''))
-
-        - task: PowerShell@2
-          name: ''
-          displayName: Azure Login
-          inputs:
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
-            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
-            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
 
         - task: PowerShell@2
           name: Gate
@@ -239,13 +231,21 @@ stages:
 
         - task: PowerShell@2
           name: ''
+          displayName: Azure Login
+          inputs:
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
+            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
+
+        - task: PowerShell@2
+          name: ''
           displayName: 'Tag RG'
           inputs:
             targetType: inline
-            script: >-
+            script: |
               Write-Host "Tagging $(ResourceGroup) with Usage = '$(JobTag)'"
-
               Set-AzResourceGroup -Name $(ResourceGroup) -Tag @{ Usage = '$(JobTag)' }
+          continueOnError: true
 
         - task: PowerShell@2
           displayName: 'Test ARM Deployment: URL Tests'

@@ -140,18 +140,11 @@ stages:
           inputs:
             targetType: inline
             script: |
-              Write_host("csmFile = $csmFile")
+              Write-Host("csmFile = $csmFile")
               throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
               cmd /c exit 2
+          continueOnError: true
           condition: and(succeeded(), eq(lower(variables['csmFile']), ''))
-
-        - task: PowerShell@2
-          name: ''
-          displayName: Azure Login
-          inputs:
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
-            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
-            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
 
         - task: PowerShell@2
           name: Gate
@@ -260,6 +253,15 @@ stages:
             Write-Host "$(deploymentOutput)"
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
+
+
+        - task: PowerShell@2
+          name: ''
+          displayName: Azure Login
+          inputs:
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
+            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
 
         - task: PowerShell@2
           name: ''
