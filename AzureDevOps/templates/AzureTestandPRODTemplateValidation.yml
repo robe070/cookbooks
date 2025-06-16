@@ -170,7 +170,7 @@ stages:
             targetType: inline
             script: |
               Write-Host("additionalOverrideParameters = $additionalOverrideParameters")
-              Write-Warning "WARNING: StageName parameter ${{ parameters.stageName }} is not a supported value so Override Parameters has been set to null."
+              Write-Warning "StageName parameter ${{ parameters.stageName }} is not a supported value so Override Parameters has been set to null."
           continueOnError: true
           condition: and(succeeded(), eq(lower(variables['additionalOverrideParameters']), ''))
 

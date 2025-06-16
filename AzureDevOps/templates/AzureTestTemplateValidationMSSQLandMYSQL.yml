@@ -143,7 +143,6 @@ stages:
               Write-Host("csmFile = $csmFile")
               throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
               cmd /c exit 2
-          continueOnError: true
           condition: and(succeeded(), eq(lower(variables['csmFile']), ''))
 
         - task: PowerShell@2

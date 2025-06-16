@@ -343,7 +343,7 @@ stages:
     - AUSSQLAZURE4DBw19d150
     - AUSSQLAZURE5DBw16d150
     # - AUSSQLAZURE6DBw22r2d150
-    - AUSMYSQL1DBw19d150
+    # - AUSMYSQL1DBw19d150  # MYSQL Single Server no longer supported on Azure
     - AUSMSSQLS1DBw19d160
     - AUSDevShoe_WithKeyVaultCert_Sizesw19d150
     - AUSTestShoe_WithKeyVaultCert_Sizesw16160j
