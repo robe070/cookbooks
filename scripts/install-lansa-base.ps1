@@ -108,7 +108,8 @@ function DownloadAndInstallCRuntime {
     }
 
     $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart',"/log $log_file") -Wait -PassThru
-    if ( $p.ExitCode -ne 0 ) {
+    # ExitCode of 3010 means a reboot is required
+    if ( $p.ExitCode -ne 0 -and ($p.ExitCode -ne 3010) ) {
         $ExitCode = $p.ExitCode
         $ErrorMessage = "Install of $MSIuri returned error code $($p.ExitCode). See $log_file"
         throw $ErrorMessage

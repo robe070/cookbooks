@@ -674,7 +674,9 @@ $jsonObject = @"
             # Install Chocolatey
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
 
-            if ( $Cloud -eq 'Azure' ) {
+            # Sometimes the C runtime requires a reboot after installing, and on Azure as described below
+            # it was required for other reasons.
+            {
                 # This section exists for when choco 2.0 is being installed. It was never fully functional,
                 # but left as a marker of where the work reached. Choco 1.4 is actually being used"
                 # It all works OK on Azure, so as it aint broke we're not fixing it"
