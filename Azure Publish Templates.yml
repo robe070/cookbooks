@@ -359,7 +359,7 @@ stages:
     - task: ManualValidation@0
       displayName: 'Manual Validation: Production Template'
       inputs:
-        instructions: "Deploy the template to the Production Stage"
+        instructions: "Test that the Preview Solution Template links work and have the expected UI fixes. Deploy the template to the Production Stage"
         onTimeout: 'reject'
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
