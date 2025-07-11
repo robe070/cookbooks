@@ -323,7 +323,8 @@ try
                 Wait-EC2State $TaggedInstance.ResourceId "Terminated"
                 Write-Host( "Security group = $($script:SG)")
             }
-            Create-Ec2SecurityGroup $ExternalIPAddresses
+            Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.219/32") )
+            #Create-Ec2SecurityGroup $ExternalIPAddresses
         }
     }
 
