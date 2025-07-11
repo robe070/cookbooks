@@ -33,7 +33,7 @@ variables:
     value: https://raw.githubusercontent.com/lansa/aws-templates/support/scalable/CloudFormationWindows/lansa-master-win.cfn.template
   - name: RegressionTestRegion
     value: ap-southeast-2
-  - name: vmImage
+  - name: agentVMImage
     value: windows-2022
 
   - group: "Template Parameters"
@@ -66,7 +66,7 @@ stages:
       displayName: 'Agent job'
       timeoutInMinutes: 0
       pool:
-          vmImage: $(vmImage)
+          vmImage: $(agentVMImage)
       steps:
 
         - checkout: _robe070_cookbooks
@@ -98,7 +98,7 @@ stages:
     - job: Job_1
       displayName: Agent job
       pool:
-          vmImage: $(vmImage)
+          vmImage: $(agentVMImage)
       steps:
         - checkout: self
 
@@ -297,7 +297,7 @@ stages:
   - job: Job_1
     displayName: 'Agent Job'
     pool:
-      vmImage: $(vmImage)
+      vmImage: $(agentVMImage)
     steps:
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
@@ -342,7 +342,7 @@ stages:
       displayName: 'Agent job : Small Stack'
       timeoutInMinutes: 0
       pool:
-        vmImage: $(vmImage)
+        vmImage: $(agentVMImage)
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
@@ -712,7 +712,7 @@ stages:
     displayName: 'Agent job : Dev Stack'
     timeoutInMinutes: 120
     pool:
-      vmImage: $(vmImage)
+      vmImage: $(agentVMImage)
     steps:
       - download: _Build Image Release Artefacts
         displayName: Download artifacts from Build Image Release Artefacts 3.0

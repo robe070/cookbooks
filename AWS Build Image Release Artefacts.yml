@@ -13,7 +13,7 @@ variables:
     value: $(Agent.BuildDirectory)\test
   - name: regionName
     value: ap-southeast-2
-  - name: vmImage
+  - name: agentVMImage
     value: windows-2022
   - name: VersionText
     value: 19
@@ -30,7 +30,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -160,13 +160,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w25d-16-0-$(VersionText-w25d-16-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-16-0-$(VersionText)' -Force
 - job: Job_2
   displayName: 'Agent job : w25d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -213,7 +213,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w25d-15-0-$(VersionText-w25d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(windows-2025-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w25d-15-0-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(windows-2025-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -232,11 +232,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16150$(VersionText-w25d-15-0)
-        SG: w25d-15-0-$(VersionText-w25d-15-0)
+        TestVmName: T16150$(VersionText)
+        SG: w25d-15-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w25d-15-0-$(VersionText-w25d-15-0)
+        VersionText: w25d-15-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -273,7 +273,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w25d-15-0)' -version 'w25d-15-0'
+      arguments: -versionText '$(VersionText)' -version 'w25d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -298,13 +298,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w25d-15-0-$(VersionText-w25d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-15-0-$(VersionText)' -Force
 - job: Job_5
   displayName: 'Agent job : w19d-16-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -351,7 +351,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-16-0-$(VersionText-w19d-16-0)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-16-0-$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -370,11 +370,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19142$(VersionText-w19d-16-0)
-        SG: w19d-16-0-$(VersionText-w19d-16-0)
+        TestVmName: T19142$(VersionText)
+        SG: w19d-16-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-16-0-$(VersionText-w19d-16-0)
+        VersionText: w19d-16-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -411,7 +411,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-16-0)' -version 'w19d-16-0'
+      arguments: -versionText '$(VersionText)' -version 'w19d-16-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -436,13 +436,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-16-0-$(VersionText-w19d-16-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-16-0-$(VersionText)' -Force
 - job: Job_6
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -489,7 +489,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0-$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-15-0-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -508,11 +508,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T9150$(VersionText-w19d-15-0)
-        SG: w19d-15-0-$(VersionText-w19d-15-0)
+        TestVmName: T9150$(VersionText)
+        SG: w19d-15-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0-$(VersionText-w19d-15-0)
+        VersionText: w19d-15-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -549,7 +549,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0)' -version 'w19d-15-0'
+      arguments: -versionText '$(VersionText)' -version 'w19d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -571,13 +571,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText)' -Force
 - job: Job_8
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -712,7 +712,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -847,7 +847,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -984,7 +984,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1119,7 +1119,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1166,7 +1166,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-16-0-$(VersionText-w22d-16-0)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-16-0-$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1185,11 +1185,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22142$(VersionText-w22d-16-0)
-        SG: w22d-16-0-$(VersionText-w22d-16-0)
+        TestVmName: T22142$(VersionText)
+        SG: w22d-16-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-16-0-$(VersionText-w22d-16-0)
+        VersionText: w22d-16-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1226,7 +1226,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-16-0)' -version 'w22d-16-0'
+      arguments: -versionText '$(VersionText)' -version 'w22d-16-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -1251,13 +1251,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-16-0-$(VersionText-w22d-16-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-16-0-$(VersionText)' -Force
 - job: Job_10
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1304,7 +1304,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0-$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-15-0-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1323,11 +1323,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22150$(VersionText-w22d-15-0)
-        SG: w22d-15-0-$(VersionText-w22d-15-0)
+        TestVmName: T22150$(VersionText)
+        SG: w22d-15-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w22d-15-0-$(VersionText-w22d-15-0)
+        VersionText: w22d-15-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -1364,7 +1364,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0'
+      arguments: -versionText '$(VersionText)' -version 'w22d-15-0'
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -1386,13 +1386,13 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText)' -Force
 - job: Job_12
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1527,7 +1527,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
