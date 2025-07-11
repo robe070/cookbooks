@@ -147,15 +147,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w16d142IMGTest'
-    stageDisplayname: 'w16d-14-2 IMG Test'
+    stageName: 'w25d142IMGTest'
+    stageDisplayname: 'w25d-16-0 IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2
-    stackname: w16d-14-2-IMG
+    BaseImageName: w25d-16-0
+    stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
@@ -163,15 +163,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w16d150IMGTest'
-    stageDisplayname: 'w16d-15-0 IMG Test'
+    stageName: 'w25d150IMGTest'
+    stageDisplayname: 'w25d-15-0 IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0
-    stackname: w16d-15-0-IMG
+    BaseImageName: w25d-15-0
+    stackname: w25d-15-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
@@ -180,14 +180,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w19d142IMGTest'
-    stageDisplayname: 'w19d-14-2 IMG Test'
+    stageDisplayname: 'w19d-16-0 IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
-    stackname: w19d-14-2-IMG
+    BaseImageName: w19d-16-0
+    stackname: w19d-16-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
@@ -203,7 +203,7 @@ stages:
     stackname: w19d-15-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
@@ -212,14 +212,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w22d142IMGTest'
-    stageDisplayname: 'w22d-14-2 IMG Test'
+    stageDisplayname: 'w22d-16-0 IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2
-    stackname: w22d-14-2-IMG
+    BaseImageName: w22d-16-0
+    stackname: w22d-16-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOS2022)
@@ -235,7 +235,7 @@ stages:
     stackname: w22d-15-0-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOS2022)
@@ -243,15 +243,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w16d142jIMGTest'
-    stageDisplayname: 'w16d-14-2j IMG Test'
+    stageName: 'w25d142jIMGTest'
+    stageDisplayname: 'w25d-16-0j IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2j
-    stackname: w16d-14-2j-IMG
+    BaseImageName: w25d-16-0j
+    stackname: w25d-16-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOSJpnPreviousVersionValue)
@@ -260,15 +260,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w16d150jIMGTest'
-    stageDisplayname: 'w16d-15-0j IMG Test'
+    stageName: 'w25d150jIMGTest'
+    stageDisplayname: 'w25d-15-0j IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0j
-    stackname: w16d-15-0j-IMG
+    BaseImageName: w25d-15-0j
+    stackname: w25d-15-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOSJpnPreviousVersionValue)
@@ -278,14 +278,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w19d142jIMGTest'
-    stageDisplayname: 'w19d-14-2j IMG Test'
+    stageDisplayname: 'w19d-16-0j IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2j
-    stackname: w19d-14-2j-IMG
+    BaseImageName: w19d-16-0j
+    stackname: w19d-16-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
@@ -302,7 +302,7 @@ stages:
     stackname: w19d-15-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
@@ -312,14 +312,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w22d142jIMGTest'
-    stageDisplayname: 'w22d-14-2j IMG Test'
+    stageDisplayname: 'w22d-16-0j IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2j
-    stackname: w22d-14-2j-IMG
+    BaseImageName: w22d-16-0j
+    stackname: w22d-16-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOS2022jpn)
@@ -336,7 +336,7 @@ stages:
     stackname: w22d-15-0j-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateAUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOS2022jpn)
@@ -345,39 +345,39 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w16d142CopyAMItoUS'
-    stageDisplayname: 'w16d-14-2 Copy AMI to US'
+    stageName: 'w25d142CopyAMItoUS'
+    stageDisplayname: 'w25d-16-0 Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2
+    BaseImageName: w25d-16-0
     jobDemand: DotNetFramework
-    dependsOn: w16d142IMGTest
-    globExpressions: w16d-14-2.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    dependsOn: w25d142IMGTest
+    globExpressions: w25d-16-0.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w16d150CopyAMItoUS'
-    stageDisplayname: 'w16d-15-0 Copy AMI to US'
+    stageName: 'w25d150CopyAMItoUS'
+    stageDisplayname: 'w25d-15-0 Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0
+    BaseImageName: w25d-15-0
     jobDemand: DotNetFramework
-    dependsOn: w16d150IMGTest
-    globExpressions: w16d-15-0.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    dependsOn: w25d150IMGTest
+    globExpressions: w25d-15-0.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w19d142CopyAMItoUS'
-    stageDisplayname: 'w19d-14-2 Copy AMI to US'
+    stageDisplayname: 'w19d-16-0 Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
+    BaseImageName: w19d-16-0
     jobDemand: DotNetFramework
     dependsOn: w19d142IMGTest
-    globExpressions: w19d-14-2.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    globExpressions: w19d-16-0.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
@@ -389,19 +389,19 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150IMGTest
     globExpressions: w19d-15-0.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w22d142CopyAMItoUS'
-    stageDisplayname: 'w22d-14-2 Copy AMI to US'
+    stageDisplayname: 'w22d-16-0 Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2
+    BaseImageName: w22d-16-0
     jobDemand: DotNetFramework
     dependsOn: w22d142IMGTest
-    globExpressions: w22d-14-2.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    globExpressions: w22d-16-0.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
@@ -413,43 +413,43 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w22d150IMGTest
     globExpressions: w22d-15-0.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w16d142jCopyAMItoUS'
-    stageDisplayname: 'w16d-14-2j Copy AMI to US'
+    stageName: 'w25d142jCopyAMItoUS'
+    stageDisplayname: 'w25d-16-0j Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2j
+    BaseImageName: w25d-16-0j
     jobDemand: DotNetFramework
-    dependsOn: w16d142jIMGTest
-    globExpressions: w16d-14-2j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    dependsOn: w25d142jIMGTest
+    globExpressions: w25d-16-0j.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w16d150jCopyAMItoUS'
-    stageDisplayname: 'w16d-15-0j Copy AMI to US'
+    stageName: 'w25d150jCopyAMItoUS'
+    stageDisplayname: 'w25d-15-0j Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0j
+    BaseImageName: w25d-15-0j
     jobDemand: DotNetFramework
-    dependsOn: w16d150jIMGTest
-    globExpressions: w16d-15-0j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    dependsOn: w25d150jIMGTest
+    globExpressions: w25d-15-0j.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w19d142jCopyAMItoUS'
-    stageDisplayname: 'w19d-14-2j Copy AMI to US'
+    stageDisplayname: 'w19d-16-0j Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2j
+    BaseImageName: w19d-16-0j
     jobDemand: DotNetFramework
     dependsOn: w19d142jIMGTest
-    globExpressions: w19d-14-2j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    globExpressions: w19d-16-0j.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
@@ -461,19 +461,19 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150jIMGTest
     globExpressions: w19d-15-0j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w22d142jCopyAMItoUS'
-    stageDisplayname: 'w22d-14-2j Copy AMI to US'
+    stageDisplayname: 'w22d-16-0j Copy AMI to US'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2j
+    BaseImageName: w22d-16-0j
     jobDemand: DotNetFramework
     dependsOn: w22d142jIMGTest
-    globExpressions: w22d-14-2j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    globExpressions: w22d-16-0j.txt
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
@@ -485,15 +485,15 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w22d150jIMGTest
     globExpressions: w22d-15-0j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
 - stage: CommitAUStemplatechanges
   displayName: Commit AUS template changes
   dependsOn:
-  - w16d142CopyAMItoUS
-  - w16d150CopyAMItoUS
-  - w16d142jCopyAMItoUS
-  - w16d150jCopyAMItoUS
+  - w25d142CopyAMItoUS
+  - w25d150CopyAMItoUS
+  - w25d142jCopyAMItoUS
+  - w25d150jCopyAMItoUS
   - w19d142CopyAMItoUS
   - w19d150CopyAMItoUS
   - w19d142jCopyAMItoUS
@@ -658,15 +658,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w16d142USIMGTest'
-    stageDisplayname: 'w16d-14-2 US IMG Test'
+    stageName: 'w25d142USIMGTest'
+    stageDisplayname: 'w25d-16-0 US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2
-    stackname: w16d-14-2-US-IMG
+    BaseImageName: w25d-16-0
+    stackname: w25d-16-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
@@ -674,15 +674,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w16d150USIMGTest'
-    stageDisplayname: 'w16d-15-0 US IMG Test'
+    stageName: 'w25d150USIMGTest'
+    stageDisplayname: 'w25d-15-0 US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0
-    stackname: w16d-15-0-US-IMG
+    BaseImageName: w25d-15-0
+    stackname: w25d-15-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
@@ -690,15 +690,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w16d142jUSIMGTest'
-    stageDisplayname: 'w16d-14-2j US IMG Test'
+    stageName: 'w25d142jUSIMGTest'
+    stageDisplayname: 'w25d-16-0j US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-14-2j
-    stackname: w16d-14-2j-US-IMG
+    BaseImageName: w25d-16-0j
+    stackname: w25d-16-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOSJpnPreviousVersionValue)
@@ -707,15 +707,15 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w16d150jUSIMGTest'
-    stageDisplayname: 'w16d-15-0j US IMG Test'
+    stageName: 'w25d150jUSIMGTest'
+    stageDisplayname: 'w25d-15-0j US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w16d-15-0j
-    stackname: w16d-15-0j-US-IMG
+    BaseImageName: w25d-15-0j
+    stackname: w25d-15-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOSJpnPreviousVersionValue)
@@ -725,14 +725,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w19d142USIMGTest'
-    stageDisplayname: 'w19d-14-2 US IMG Test'
+    stageDisplayname: 'w19d-16-0 US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2
-    stackname: w19d-14-2-US-IMG
+    BaseImageName: w19d-16-0
+    stackname: w19d-16-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
@@ -748,7 +748,7 @@ stages:
     stackname: w19d-15-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
@@ -757,14 +757,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w19d142jUSIMGTest'
-    stageDisplayname: 'w19d-14-2j US IMG Test'
+    stageDisplayname: 'w19d-16-0j US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w19d-14-2j
-    stackname: w19d-14-2j-US-IMG
+    BaseImageName: w19d-16-0j
+    stackname: w19d-16-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
@@ -781,7 +781,7 @@ stages:
     stackname: w19d-15-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
@@ -791,14 +791,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w22d142USIMGTest'
-    stageDisplayname: 'w22d-14-2 US IMG Test'
+    stageDisplayname: 'w22d-16-0 US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2
-    stackname: w22d-14-2-US-IMG
+    BaseImageName: w22d-16-0
+    stackname: w22d-16-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLPrevious)
     paramWebserverOSVersionValue: $(WebserverOS2022)
@@ -814,7 +814,7 @@ stages:
     stackname: w22d-15-0-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLLatest)
     paramWebserverOSVersionValue: $(WebserverOS2022)
@@ -823,14 +823,14 @@ stages:
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
     stageName: 'w22d142jUSIMGTest'
-    stageDisplayname: 'w22d-14-2j US IMG Test'
+    stageDisplayname: 'w22d-16-0j US IMG Test'
     jobName: 'Agentjob'
     jobDisplayname: 'Agent job'
-    BaseImageName: w22d-14-2j
-    stackname: w22d-14-2j-US-IMG
+    BaseImageName: w22d-16-0j
+    stackname: w22d-16-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOS2022jpn)
@@ -847,7 +847,7 @@ stages:
     stackname: w22d-15-0j-US-IMG
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
     paramWebserverOSVersionValue: $(WebserverOS2022jpn)
@@ -857,10 +857,10 @@ stages:
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
   dependsOn:
-  - w16d142USIMGTest
-  - w16d150USIMGTest
-  - w16d142jUSIMGTest
-  - w16d150jUSIMGTest
+  - w25d142USIMGTest
+  - w25d150USIMGTest
+  - w25d142jUSIMGTest
+  - w25d150jUSIMGTest
   - w19d142USIMGTest
   - w19d150USIMGTest
   - w19d142jUSIMGTest
