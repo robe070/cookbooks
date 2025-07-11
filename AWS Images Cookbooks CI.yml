@@ -67,7 +67,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2$(VersionText-w16d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w16d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
 
   - task: PowerShell@2
@@ -88,11 +88,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T16142$(VersionText-w16d-14-2)
-      SG: w16d-14-2$(VersionText-w16d-14-2)
+      TestVmName: T16142$(VersionText)
+      SG: w16d-14-2$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-14-2$(VersionText-w16d-14-2)
+      VersionText: w16d-14-2$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -117,7 +117,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-14-2)' -version 'w16d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText)' -version 'w16d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -139,7 +139,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText-w16d-14-2)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText)' -Force
 
 - job: Job_2
   displayName: 'Agent job : w16d-15-0'
@@ -168,7 +168,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: "  -VersionText 'w16d-15-0$(VersionText-w16d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) "
+      arguments: "  -VersionText 'w16d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
 
   - task: PowerShell@2
@@ -189,11 +189,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T16150$(VersionText-w16d-15-0)
-      SG: w16d-15-0$(VersionText-w16d-15-0)
+      TestVmName: T16150$(VersionText)
+      SG: w16d-15-0$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-15-0$(VersionText-w16d-15-0)
+      VersionText: w16d-15-0$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -218,7 +218,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-15-0)' -version 'w16d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText)' -version 'w16d-15-0' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -243,7 +243,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText-w16d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText)' -Force
 
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
@@ -272,7 +272,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2$(VersionText-w19d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
     continueOnError: false
 
@@ -293,11 +293,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T19142$(VersionText-w19d-14-2)
-      SG: w19d-14-2$(VersionText-w19d-14-2)
+      TestVmName: T19142$(VersionText)
+      SG: w19d-14-2$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w19d-14-2$(VersionText-w19d-14-2)
+      VersionText: w19d-14-2$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -322,7 +322,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-14-2)' -version 'w19d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText)' -version 'w19d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -347,7 +347,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-14-2$(VersionText-w19d-14-2)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-14-2$(VersionText)' -Force
 
 - job: Job_4
   displayName: 'Agent job : w19d-15-0'
@@ -376,7 +376,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0$(VersionText-w19d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w19d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
 
   - task: PowerShell@2
@@ -397,11 +397,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T19150$(VersionText-w19d-15-0)
-      SG: w19d-15-0$(VersionText-w19d-15-0)
+      TestVmName: T19150$(VersionText)
+      SG: w19d-15-0$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w19d-15-0$(VersionText-w19d-15-0)
+      VersionText: w19d-15-0$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -426,7 +426,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0))' -version 'w19d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText))' -version 'w19d-15-0' -DeleteAMI $true
       scriptType: inline
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
@@ -449,7 +449,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0$(VersionText-w19d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0$(VersionText)' -Force
 
 - job: Job_5
   displayName: 'Agent job : w22d-14-2'
@@ -479,7 +479,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2$(VersionText-w22d-14-2)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       workingDirectory: scripts
 
@@ -506,11 +506,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T22142$(VersionText-w22d-14-2)
-      SG: w22d-14-2$(VersionText-w22d-14-2)
+      TestVmName: T22142$(VersionText)
+      SG: w22d-14-2$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w22d-14-2$(VersionText-w22d-14-2)
+      VersionText: w22d-14-2$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -537,7 +537,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-14-2)' -version 'w22d-14-2' -DeleteAMI $true
+      arguments: -versionText '$(VersionText)' -version 'w22d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -562,7 +562,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-14-2-$(VersionText-w22d-14-2)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-14-2-$(VersionText)' -Force
 
 - job: Job_6
   displayName: 'Agent job : w22d-15-0'
@@ -591,7 +591,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0$(VersionText-w22d-15-0)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: " -VersionText 'w22d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
 
   - task: PowerShell@2
@@ -614,11 +614,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T22150$(VersionText-w22d-15-0)
-      SG: w22d-15-0$(VersionText-w22d-15-0)
+      TestVmName: T22150$(VersionText)
+      SG: w22d-15-0$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w22d-15-0$(VersionText-w22d-15-0)
+      VersionText: w22d-15-0$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -643,7 +643,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0)' -version 'w22d-15-0' -DeleteAMI $true
+      arguments: -versionText '$(VersionText)' -version 'w22d-15-0' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >+
         # Terminating the Instance
@@ -665,7 +665,7 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText-w22d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText)' -Force
 
 - job: Job_7
   displayName: 'Agent job : w16d-14-2j'
