@@ -25,6 +25,8 @@ function Create-Ec2SecurityGroup
     param([string[]]$ExternalIPAddresses)
     $groupExists = $true
 
+    Get-AWSPowerShellVersion -ListServiceVersionInfo
+
     try
     {
         $Groups = Get-EC2SecurityGroup -GroupNames $script:SG -ea SilentlyContinue
@@ -75,7 +77,7 @@ function Create-Ec2SecurityGroup
             $ipPermission1.IpProtocol = "icmp"
             $ipPermission1.FromPort = -1
             $ipPermission1.ToPort = -1
-            $ipPermission1.IpRanges.Add($iprange)
+            $ipPermission1.Ipv4Ranges.Add($iprange)
             $ipPermissions += $ipPermission1
 
             # Add the second permission
