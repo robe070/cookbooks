@@ -42,18 +42,28 @@ function Create-Ec2SecurityGroup
     $externalip = Get-ExternalIP
     $externalipcidr = "$externalip/32"
     if ( ($ExternalIPAddresses -contains $externalipcidr) ) {
-        Write-Host "SG already enabled for Default IP $externalipcidr"
+        Write-Host "Default IP $externalipcidr already present"
     } else {
-        Write-Host "Enabling SG for Default IP $externalipcidr"
+        Write-Host "Adding Default IP $externalipcidr"
         $ExternalIPAddresses += $externalipcidr
     }
 
     if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
         Write-Host "Enabling SG for IP $ExternalIPAddresses"
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        foreach ( $iprange in $ExternalIPAddresses ) {
+            $iprange = $iprange.replace(' ','')
+            Write-Host("iprange type = $($iprange.GetType())")
+            Write-Host "Enabling SG for IP $iprange"
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        }
+
+        # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
         # $ipPermissions = @()
 
