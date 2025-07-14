@@ -50,10 +50,10 @@ function Create-Ec2SecurityGroup
 
     if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
         Write-Host "Enabling SG for IP $ExternalIPAddresses"
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $ExternalIPAddresses} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $ExternalIPAddresses} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $ExternalIPAddresses} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $ExternalIPAddresses} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
         # $ipPermissions = @()
 
