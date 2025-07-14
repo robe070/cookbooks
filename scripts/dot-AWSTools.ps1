@@ -25,11 +25,6 @@ function Create-Ec2SecurityGroup
     param([string[]]$ExternalIPAddresses)
     $groupExists = $true
 
-    Get-Command Grant-EC2SecurityGroupIngress | Select-Object Name, Module  | Out-Default | Write-Host
-    Get-Module -ListAvailable -Name AWSPowerShell | Select-Object Name, Version, Path   | Out-Default | Write-Host
-    UnInstall-Module -Name AWSPowerShell | Out-Default | Write-Host
-    Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
-
     try
     {
         $Groups = Get-EC2SecurityGroup -GroupNames $script:SG -ea SilentlyContinue
