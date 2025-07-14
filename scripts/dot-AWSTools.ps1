@@ -25,7 +25,10 @@ function Create-Ec2SecurityGroup
     param([string[]]$ExternalIPAddresses)
     $groupExists = $true
 
-    Get-AWSPowerShellVersion -ListServiceVersionInfo
+    Get-Command Grant-EC2SecurityGroupIngress | Select-Object Name, Module  | Out-Default | Write-Host
+    Get-Module -ListAvailable -Name AWS.Tools.NetCore | Select-Object Name, Version, Path   | Out-Default | Write-Host
+    UnInstall-Module -Name AWSPowerShell.NetCore | Out-Default | Write-Host
+    Install-Module -Name AWSPowerShell.NetCore -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
 
     try
     {
@@ -77,7 +80,7 @@ function Create-Ec2SecurityGroup
             $ipPermission1.IpProtocol = "icmp"
             $ipPermission1.FromPort = -1
             $ipPermission1.ToPort = -1
-            $ipPermission1.Ipv4Ranges.Add($iprange)
+            $ipPermission1.IpRanges.Add($iprange)
             $ipPermissions += $ipPermission1
 
             # Add the second permission
@@ -120,5 +123,5 @@ function Create-Ec2SecurityGroup
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} -ErrorAction SilentlyContinue | Out-Default | Write-Host
 }
 
-# $script:SG = "RGSG"
-# Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.200/32") )
+$script:SG = "RGSG"
+Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.200/32") )
