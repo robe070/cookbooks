@@ -443,10 +443,11 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: Default
   steps:
   - checkout: self
   - task: PowerShell@2
+    condition: false
     displayName: Install PowerShell Modules
     inputs:
       filePath: scripts/install-powershell-modules.ps1
