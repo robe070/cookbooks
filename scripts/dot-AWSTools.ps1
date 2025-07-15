@@ -53,20 +53,10 @@ function Create-Ec2SecurityGroup
 
     if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
         Write-Host "Enabling SG for IP $ExternalIPAddresses"
-         foreach ( $iprange in $ExternalIPAddresses ) {
-             $iprange = $iprange.replace(' ','')
-             Write-Host("iprange type = $($iprange.GetType())")
-             Write-Host "Enabling SG for IP $iprange"
-            #     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            #     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            #     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            #     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($iprange)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            # }
-
-            # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = @($ExternalIPAddresses)} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+        foreach ( $iprange in $ExternalIPAddresses ) {
+            $iprange = $iprange.replace(' ','')
+            Write-Host("iprange type = $($iprange.GetType())")
+            Write-Host "Enabling SG for IP $iprange"
 
             $ipPermissions = @()
 
@@ -103,20 +93,11 @@ function Create-Ec2SecurityGroup
             $ipPermissions += $ipPermission4
 
             Grant-EC2SecurityGroupIngress -GroupId $GroupId -IpPermissions $ipPermissions
-         }
+        }
     }
-    # $externalip = Get-ExternalIP
-    # $externalipcidr = "$externalip/32"
-
-    # Write-Host "Enabling SG for Default IP $externalipcidr"
-
-    # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    # Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} -ErrorAction SilentlyContinue | Out-Default | Write-Host
 }
 
-$script:SG = "RGSG"
-Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.200/32") )
+# $script:SG = "RGSG"
+# Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.200/32") )
