@@ -181,7 +181,8 @@ Describe "VM Tests" {
                 $script:SG = $env:SG
 
                 . "$script:IncludeDir\dot-AWSTools.ps1"
-                Create-Ec2SecurityGroup $env:ExternalIPAddresses
+                $ipArray = $env:ExternalIPAddresses -split ',' | ForEach-Object { $_.Trim() }
+                Create-Ec2SecurityGroup $ipArray
 
                 $script:instancename = " $VmName LANSA Scalable License installed on $(Log-Date)"
                 . "$script:IncludeDir\dot-Create-EC2Instance.ps1"
