@@ -16,6 +16,8 @@ Describe "VM Tests" {
             $ImgName = $env:TestImageName
             $ImgName | Out-Default | Write-Host
 
+            Write-Host("Env:SkuName = $env:SkuName")"
+
             $CloudName = $env:TestCloudName
             $CloudName | Out-Default | Write-Host
 
@@ -233,7 +235,7 @@ Describe "VM Tests" {
                 }
                 elseif($CloudName -eq 'AWS'){
                     . "$script:IncludeDir\dot-Execute-RemoteScript.ps1"
-                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestImageVersion.ps1 -ArgumentList @($env:VersionText)
+                    Execute-RemoteScript -Session $script:session -FilePath $script:IncludeDir\..\Tests\TestImageVersion.ps1 -ArgumentList @($env:SkuName)
                 }
             } catch {
                 Write-Host $_.Exception | out-default

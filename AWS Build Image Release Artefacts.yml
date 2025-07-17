@@ -312,7 +312,7 @@ jobs:
         SG: w19d-15-0-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        VersionText: w19d-15-0-$(VersionText)
+        SkuName: w19d-15-0-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)

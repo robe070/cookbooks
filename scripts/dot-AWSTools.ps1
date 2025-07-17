@@ -52,10 +52,9 @@ function Create-Ec2SecurityGroup
     }
 
     if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
-        Write-Host "Enabling SG for IP $ExternalIPAddresses"
+        Write-Host "Enabling SG for all these IP: $ExternalIPAddresses"
         foreach ( $iprange in $ExternalIPAddresses ) {
             $iprange = $iprange.replace(' ','')
-            Write-Host("iprange type = $($iprange.GetType())")
             Write-Host "Enabling SG for IP $iprange"
 
             $ipPermissions = @()
