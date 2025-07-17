@@ -16,7 +16,7 @@ Describe "VM Tests" {
             $ImgName = $env:TestImageName
             $ImgName | Out-Default | Write-Host
 
-            Write-Host("Env:SkuName = $env:SkuName")"
+            Write-Host("Env:SkuName = $env:SkuName")
 
             $CloudName = $env:TestCloudName
             $CloudName | Out-Default | Write-Host
