@@ -1,19 +1,110 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+# Create Agents.yml
 trigger:
-- master
+- none  # Manual trigger only
 
-pool:
-  vmImage: 'windows-latest'
+variables:
+- group: Logins
+- name: resourceGroup
+  value: 'AzureDevOps'
+- name: location
+  value: 'eastus'
+- name: baseVmName
+  value: 'ado-agent'
+- name: vmCount
+  value: 10
+- name: adminUsername
+  value: 'azureuser'
+- name: adminPassword
+  value: '$(adminPassword)'  # Set as a secret variable
+- name: vnetName
+  value: 'AzureDevOps-vnet'
+- name: subnetName
+  value: 'default'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+jobs:
+- job: CreateVMs
+  displayName: 'Create $(vmCount) Agent VMs starting at number $(startVmCount)'
+  pool:
+    vmImage: 'windows-latest'
+  steps:
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: '<AzureServiceConnection>'
+      ScriptType: 'InlineScript'
+      azurePowerShellVersion: 'LatestVersion'
+      Inline: |
+        $resourceGroup = '$(resourceGroup)'
+        $location = '$(location)'
+        $adminUsername = '$(adminUsername)'
+        $adminPassword = ConvertTo-SecureString '$(adminPassword)' -AsPlainText -Force
+        $vmCount = $(vmCount)
+        $baseVmName = '$(baseVmName)'
+        $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
+        $subnet = $vnet.Subnets | Where-Object { $_.Name -eq '$(subnetName)' }
+
+        for ($i = $(startVmCount); $i -le $vmCount; $i++) {
+          $vmName = "${baseVmName}$i"
+
+          Write-Host "Creating VM: $vmName"
+
+          $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
+
+          $pip = New-AzPublicIpAddress -Name "${vmName}-pip" -ResourceGroupName $resourceGroup -Location $location `
+            -AllocationMethod Dynamic -Sku Basic
+
+          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location `
+            -SubnetId $subnet.Id -PublicIpAddressId $pip.Id
+
+          $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
+            Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
+            Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
+            Add-AzVMNetworkInterface -Id $nic.Id
+
+          New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
+        }
+
+- job: InstallAgent
+  displayName: 'Install Azure DevOps Agent via WinRM'
+  dependsOn: CreateVMs
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: '<AzureServiceConnection>'
+      ScriptType: 'InlineScript'
+      azurePowerShellVersion: 'LatestVersion'
+      Inline: |
+        $resourceGroup = '$(resourceGroup)'
+        $adminUsername = '$(adminUsername)'
+        $adminPassword = '$(adminPassword)'
+        $vmCount = $(vmCount)
+        $baseVmName = '$(baseVmName)'
+
+        for ($i = 1; $i -le $vmCount; $i++) {
+          $vmName = "${baseVmName}$i"
+          Write-Host "Installing agent on: $vmName"
+
+          $script = @"
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri https://vstsagentpackage.azureedge.net/agent/2.227.2/vsts-agent-win-x64-2.227.2.zip -OutFile agent.zip
+          Expand-Archive agent.zip -DestinationPath C:\adoagent
+          cd C:\adoagent
+          .\config.cmd --unattended --url https://dev.azure.com/VisualLansa `
+            --auth pat --token $(AzurePATforRobG) `
+            --pool Default --agent $vmName --acceptTeeEula --runAsService `
+            --windowsLogonAccount $adminUsername --windowsLogonPassword $adminPassword
+          # .\svc install
+          # .\svc start
+          # Disable auto-installed Pester
+          Rename-Item -Path "c:\program files\WindowsPowerShell\Modules\Pester\3.4.0" -NewName "c:\program files\WindowsPowerShell\Modules\Pester\3.4.0-disabled"
+          Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
+          "@
+
+          $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
+
+          $invokeResult.Value | ForEach-Object {
+            Write-Host $_.Message
+        }
