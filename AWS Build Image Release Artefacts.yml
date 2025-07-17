@@ -195,16 +195,6 @@ jobs:
     inputs:
       filePath: scripts/install-powershell-modules.ps1
 
-  - task: PowerShell@2
-    condition: true
-    name: BuildImage
-    displayName: Build Image
-    timeoutInMinutes: ${{ parameters.ScriptTimeout }}
-    inputs:
-      filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: -VersionText $(JobVersionText) -VersionMajor $(JobVersionMajor) -VersionMinor $(JobVersionMinor) -AmazonAMIName $(JobImageName) -GitBranch "$(GitBranch)" -Cloud 'Azure' -Win2012 $false -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -InstallLanguagePack:$(InstallLanguagePack) -Language $(Language)
-      workingDirectory: scripts
-
   - task: DownloadSecureFile@1
     name: keypair
     displayName: Download KeyPair
