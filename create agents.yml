@@ -12,6 +12,8 @@ variables:
   value: 'Agent'
 - name: vmCount
   value: 10
+- name: startVmCount
+  value: 2
 - name: adminUsername
   value: 'lansa'
 - name: adminPassword
@@ -23,7 +25,7 @@ variables:
 
 jobs:
 - job: CreateVMs
-  displayName: 'Create $(vmCount) Agent VMs starting at number $(startVmCount)'
+  displayName: 'Create ${{ variables.vmCount }} Agent VMs starting at number ${{ variables.startVmCount }}'
   pool:
     vmImage: 'windows-latest'
   steps:
