@@ -3,17 +3,17 @@ trigger:
 - none  # Manual trigger only
 
 variables:
-- group: Azure Logins
+- group: Logins
 - name: resourceGroup
   value: 'AzureDevOps'
 - name: location
   value: 'eastus'
 - name: baseVmName
-  value: 'ado-agent'
+  value: 'Agent'
 - name: vmCount
   value: 10
 - name: adminUsername
-  value: 'azureuser'
+  value: 'lansa'
 - name: adminPassword
   value: '$(adminPassword)'  # Set as a secret variable
 - name: vnetName
