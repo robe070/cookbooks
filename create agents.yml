@@ -3,7 +3,7 @@ trigger:
 - none  # Manual trigger only
 
 variables:
-- group: Logins
+- group: Azure Logins
 - name: resourceGroup
   value: 'AzureDevOps'
 - name: location
@@ -30,7 +30,7 @@ jobs:
 
   - task: AzurePowerShell@5
     inputs:
-      azureSubscription: '<AzureServiceConnection>'
+      azureSubscription: 'Azure Baking Images'
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
