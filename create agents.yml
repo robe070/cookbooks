@@ -30,7 +30,7 @@ jobs:
 
   - task: AzurePowerShell@5
     inputs:
-      azureSubscription: 'Azure Baking Images'
+      azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
@@ -73,7 +73,7 @@ jobs:
 
   - task: AzurePowerShell@5
     inputs:
-      azureSubscription: '<AzureServiceConnection>'
+      azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
