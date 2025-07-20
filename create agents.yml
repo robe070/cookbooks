@@ -29,7 +29,7 @@ jobs:
   steps:
 
   - task: AzurePowerShell@5
-    DisplayName: Create VMs
+    displayName: Create VMs
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
