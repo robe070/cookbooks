@@ -16,8 +16,6 @@ variables:
   value: 2
 - name: adminUsername
   value: 'lansa'
-- name: adminPassword
-  value: '$(adminPassword)'  # Set as a secret variable
 - name: vnetName
   value: 'AzureDevOps-vnet'
 - name: subnetName
@@ -39,7 +37,7 @@ jobs:
         $resourceGroup = '$(resourceGroup)'
         $location = '$(location)'
         $adminUsername = '$(adminUsername)'
-        $adminPassword = ConvertTo-SecureString '$(adminPassword)' -AsPlainText -Force
+        $adminPassword = ConvertTo-SecureString '$(agentAdminPassword)' -AsPlainText -Force
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
         $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
@@ -81,7 +79,7 @@ jobs:
       Inline: |
         $resourceGroup = '$(resourceGroup)'
         $adminUsername = '$(adminUsername)'
-        $adminPassword = '$(adminPassword)'
+        $adminPassword = '$(agentAdminPassword)'
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
 
