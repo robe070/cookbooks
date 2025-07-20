@@ -13,7 +13,7 @@ variables:
 - name: vmCount
   value: 10
 - name: startVmCount
-  value: 2
+  value: 3
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -29,6 +29,7 @@ jobs:
   steps:
 
   - task: AzurePowerShell@5
+    DisplayName: Create VMs
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
@@ -64,14 +65,8 @@ jobs:
           New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
         }
 
-- job: InstallAgent
-  displayName: 'Install Azure DevOps Agent via WinRM'
-  dependsOn: CreateVMs
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-
   - task: AzurePowerShell@5
+    displayName: 'Install Azure DevOps Agent via WinRM and other required apps'
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
