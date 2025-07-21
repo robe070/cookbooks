@@ -38,6 +38,7 @@ jobs:
       Inline: |
         $resourceGroup = '$(resourceGroup)'
         $location = '$(location)'
+        $nsgName = 'Agent1-nsg'
         $adminUsername = '$(adminUsername)'
         $adminPassword = ConvertTo-SecureString '$(agentAdminPassword)' -AsPlainText -Force
         $vmCount = $(vmCount)
@@ -59,7 +60,9 @@ jobs:
 
           $pip = New-AzPublicIpAddress -Name "${vmName}-pip" -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
 
-          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -Force
+          $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
+
+          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
 
           $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
             Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
