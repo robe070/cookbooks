@@ -56,19 +56,15 @@ jobs:
           Write-Host "Creating VM: $vmName"
 
           $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
-          Write-Host("Debug 1")
 
           $pip = New-AzPublicIpAddress -Name "${vmName}-pip" -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
-          Write-Host("Debug 2")
 
           $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -Force
-          Write-Host("Debug 3")
 
           $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
             Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
             Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
             Add-AzVMNetworkInterface -Id $nic.Id
-          Write-Host("Debug 4")
 
           New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
         }
