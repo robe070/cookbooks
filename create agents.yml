@@ -85,7 +85,7 @@ jobs:
           $vmName = "${baseVmName}$i"
           Write-Host "Installing agent on: $vmName"
 
-          $script = @"
+          $script = "
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Invoke-WebRequest -Uri https://vstsagentpackage.azureedge.net/agent/2.227.2/vsts-agent-win-x64-2.227.2.zip -OutFile agent.zip
           Expand-Archive agent.zip -DestinationPath C:\adoagent
@@ -99,7 +99,7 @@ jobs:
           # Disable auto-installed Pester
           Rename-Item -Path "c:\program files\WindowsPowerShell\Modules\Pester\3.4.0" -NewName "c:\program files\WindowsPowerShell\Modules\Pester\3.4.0-disabled"
           Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
-          "@
+          "
 
           $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
 
