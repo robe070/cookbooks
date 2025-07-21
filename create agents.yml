@@ -155,9 +155,9 @@ jobs:
             $Script = [scriptblock]::create($ScriptBlock)
             $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script  -Parameter @{
               vmName=$vmName;
-              adminUsername=$adminUsername;
-              adminPassword=$(agentAdminPassword);
-              AzurePAT=$AzurePAT
+              # adminUsername=$adminUsername;
+              # adminPassword=$(agentAdminPassword);
+              # AzurePAT=$AzurePAT
             } -ErrorAction Stop
 
           } catch {
