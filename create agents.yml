@@ -105,16 +105,16 @@ jobs:
               try {
                 Write-Host ("Script echoing vmName = $vmName")
 
-                $LogFile = "C:\adoagent\install-log.txt"
+                $LogFile = "C:\agent\install-log.txt"
                 Start-Transcript -Path $LogFile -Force -IncludeInvocationHeader
 
-                if (-not (Test-Path C:\adoagent)) {
+                if (-not (Test-Path C:\agent\config.cmd)) {
                     Write-Host "Installing agent on: $vmName"
 
                     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                     Invoke-WebRequest -Uri https://vstsagentpackage.azureedge.net/agent/2.227.2/vsts-agent-win-x64-2.227.2.zip -OutFile agent.zip
-                    Expand-Archive agent.zip -DestinationPath C:\adoagent
-                    cd C:\adoagent
+                    Expand-Archive agent.zip -DestinationPath C:\agent
+                    cd C:\agent
 
                     .\config.cmd --unattended --url https://dev.azure.com/VisualLansa `
                       --auth pat --token $AzurePAT `
