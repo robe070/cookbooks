@@ -80,7 +80,7 @@ jobs:
       Inline: |
         $resourceGroup = '$(resourceGroup)'
         $adminUsername = '$(adminUsername)'
-        #$adminPassword = '$(agentAdminPassword)'
+        $agentAdminPassword = '$(agentAdminPassword)'
         $AzurePAT = '$(AzurePATforRobG)'
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
@@ -103,7 +103,7 @@ jobs:
                   [string]$AzurePAT
               )
               push-location
-              stop-transcript -ErrorAction SilentlyContinue
+              stop-transcript -ErrorAction SilentlyContinue | Out-Null
               try {
                   Write-Host ("Script echoing vmName = $vmName")
 
@@ -147,7 +147,7 @@ jobs:
               } catch {
                   $_ | Out-Default | Write-Host
               } finally {
-                  Stop-Transcript -ErrorAction SilentlyContinue
+                  Stop-Transcript -ErrorAction SilentlyContinue | Out-Null
                   pop-location
               }
             }
@@ -156,7 +156,7 @@ jobs:
             $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script  -Parameter @{
               vmName=$vmName;
               adminUsername=$adminUsername;
-              # adminPassword=$(agentAdminPassword);
+              adminPassword=$agentAdminPassword;
               AzurePAT=$AzurePAT;
             } -ErrorAction Stop
 
