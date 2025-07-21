@@ -89,7 +89,7 @@ jobs:
 
           $script = "
           if (-not (Test-Path C:\adoagent)) {
-            Write-Host "Installing agent on: $vmName"
+            Write-Host 'Installing agent on: ' + $vmName
 
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Invoke-WebRequest -Uri https://vstsagentpackage.azureedge.net/agent/2.227.2/vsts-agent-win-x64-2.227.2.zip -OutFile agent.zip
