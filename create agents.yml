@@ -86,10 +86,15 @@ jobs:
         $baseVmName = '$(baseVmName)'
 
         for ($i = 1; $i -le $vmCount; $i++) {
-          $vmName = "${baseVmName}0$i"
-          Write-Host "Installing agent on: $vmName"
+          $vmName = "${baseVmName}$i"
+          Write-Host "[$vmName] Installing agent"
 
           try {
+            if (-not (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue)) {
+              Write-Host "VM $vmName does not exist. Skipping installation."
+              continue
+            }
+
             $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptPath 'c:\Agent\install-azure-agent.ps1' -Parameter @{
               vmName=$vmName
               adminUsername=$adminUsername
