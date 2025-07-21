@@ -29,7 +29,7 @@ jobs:
   steps:
 
   - task: AzurePowerShell@5
-    condition: eq(variables['InstallVMsOnly'], 'false')
+    # condition: eq(variables['InstallVMsOnly'], 'false')
     displayName: Create VMs
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
@@ -47,6 +47,11 @@ jobs:
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
+
+          if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
+            Write-Host "VM $vmName already exists. Skipping creation."
+            continue
+          }
 
           Write-Host "Creating VM: $vmName"
 
@@ -81,10 +86,11 @@ jobs:
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
-          Write-Host "Installing agent on: $vmName"
 
           $script = "
           if (-not (Test-Path C:\adoagent)) {
+            Write-Host "Installing agent on: $vmName"
+
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Invoke-WebRequest -Uri https://vstsagentpackage.azureedge.net/agent/2.227.2/vsts-agent-win-x64-2.227.2.zip -OutFile agent.zip
             Expand-Archive agent.zip -DestinationPath C:\adoagent
@@ -110,7 +116,7 @@ jobs:
 
           $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
 
-          $invokeResult.Value | ForEach-Object {
-            Write-Host "[$vmName] $_.Message"
+          foreach ($entry in $result.Value) {
+            Write-Host "[$vmName] Output: $($entry.Message)"
           }
         }
