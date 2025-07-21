@@ -85,7 +85,7 @@ jobs:
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
 
-        for ($i = 3; $i -le $vmCount; $i++) {
+        for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
           Write-Host "[$vmName] Installing agent"
 
