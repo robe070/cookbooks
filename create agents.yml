@@ -160,6 +160,10 @@ jobs:
               AzurePAT=$AzurePAT
             } -ErrorAction Stop
 
+          } catch {
+            $_ | Out-Default | Write-Host
+            throw
+          } finally {
             if ($result -and $result.Value) {
               foreach ($entry in $result.Value) {
                 if (-not ([string]::IsNullOrEmpty($entry) ) ) {
@@ -169,7 +173,5 @@ jobs:
             } else {
               Write-Host "[$vmName] No output returned from script execution."
             }
-          } catch {
-            throw "[$vmName] Error during script execution: $($_.Exception.Message)"
           }
         }
