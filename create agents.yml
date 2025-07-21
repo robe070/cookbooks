@@ -103,7 +103,7 @@ jobs:
                   [string]$AzurePAT
               )
               push-location
-              stop-transcript -ErrorAction SilentlyContinue | Out-Null
+              stop-transcript -ErrorAction Ignore
               try {
                   Write-Host ("Script echoing vmName = $vmName")
 
@@ -147,7 +147,7 @@ jobs:
               } catch {
                   $_ | Out-Default | Write-Host
               } finally {
-                  Stop-Transcript -ErrorAction SilentlyContinue | Out-Null
+                  Stop-Transcript -ErrorAction Ignore
                   pop-location
               }
             }
