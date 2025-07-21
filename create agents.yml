@@ -114,13 +114,17 @@ jobs:
           }
           "
 
-          $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
+          try {
+            $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
+          } catch {
+            $_ | Out-Default | Write-Host
+          }
 
           if ($null -eq $result.Value) {
               Write-Host "[$vmName] No output returned from script."
           } else {
             Write-Host "[$vmName] Raw result:"
-            $result | Format-List | Out-String | Write-Host
+            $result | Format-List | Out-Default | Write-Host
 
             foreach ($entry in $result.Value) {
               Write-Host "[$vmName] Output: $($entry.Message)"
