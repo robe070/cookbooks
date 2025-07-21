@@ -61,7 +61,7 @@ jobs:
           $pip = New-AzPublicIpAddress -Name "${vmName}-pip" -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
           Write-Host("Debug 2")
 
-          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking $true -Force
+          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -Force
           Write-Host("Debug 3")
 
           $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
