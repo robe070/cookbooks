@@ -31,7 +31,7 @@ jobs:
   steps:
 
   - task: AzurePowerShell@5
-    condition: (variables['InstallVMsOnly'], 'false')
+    condition: eq(variables['InstallVMsOnly'], 'false')
     displayName: Create VMs
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
