@@ -105,6 +105,7 @@ jobs:
               Write-Host "[$vmName] No output returned from script execution."
             }
           } catch {
+            $_ | Out-Default | Write-Host
             Write-Host "[$vmName] Error during script execution: $($_.Exception.Message)"
           }
         }
