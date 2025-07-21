@@ -11,8 +11,6 @@ variables:
 - name: baseVmName
   value: 'Agent'
 - name: vmCount
-  value: 1
-- name: startVmCount
   value: 3
 - name: InstallVMsOnly
   value: 'true'
@@ -25,7 +23,7 @@ variables:
 
 jobs:
 - job: CreateVMs
-  displayName: 'Create ${{ variables.vmCount }} Agent VMs starting at number ${{ variables.startVmCount }}'
+  displayName: 'Create & Install ${{ variables.vmCount }} Agent VMs'
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -47,7 +45,7 @@ jobs:
         $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
         $subnet = $vnet.Subnets | Where-Object { $_.Name -eq '$(subnetName)' }
 
-        for ($i = $(startVmCount); $i -le $vmCount; $i++) {
+        for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
 
           Write-Host "Creating VM: $vmName"
@@ -108,10 +106,11 @@ jobs:
           } else {
             Write-Host 'Correct Pester version already installed. Skipping.'
           }
+          "
 
           $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
-          "
 
           $invokeResult.Value | ForEach-Object {
             Write-Host "[$vmName] $_.Message"
+          }
         }
