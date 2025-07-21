@@ -103,12 +103,16 @@ jobs:
                   [string]$AzurePAT
               )
               push-location
-              stop-transcript -ErrorAction Ignore
               try {
                   Write-Host ("Script echoing vmName = $vmName")
 
                   $LogFile = "C:\install-log.txt"
-                  Start-Transcript -Path $LogFile -Force -IncludeInvocationHeader
+                  try {
+                    Start-Transcript -Path $LogFile -Force
+                  } catch  [System.InvalidOperationException] {
+                    stop-transcript -EA Ignore | Out-Null
+                    Start-Transcript -Path $LogFile -Force
+                  }
 
                   if (-not (Test-Path C:\agent\config.cmd))
                   #if ((Test-Path C:\agent\config.cmd))
@@ -147,7 +151,7 @@ jobs:
               } catch {
                   $_ | Out-Default | Write-Host
               } finally {
-                  Stop-Transcript -ErrorAction Ignore
+                  Stop-Transcript -ErrorAction Ignore | Out-Null
                   pop-location
               }
             }
