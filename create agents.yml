@@ -140,12 +140,14 @@ jobs:
                   # Ensure correct version of Pester
                   if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
                       Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
+                      Write-Host 'Auto-installed Pester version now disabled'
                   } else {
                       Write-Host 'Auto-installed Pester version already disabled. Skipping.'
                   }
 
-                  if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\6.6.1') {
+                  if (-not (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\5.6.1')) {
                       Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
+                      Write-Host 'Correct Pester version now installed.'
                   } else {
                       Write-Host 'Correct Pester version already installed. Skipping.'
                   }
