@@ -90,12 +90,12 @@ jobs:
           Write-Host "Installing agent on: $vmName"
 
           try {
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptPath 'c:\install-azure-agent.ps1' -Parameter @(
-              "vmName=$vmName",
-              "adminUsername=$adminUsername",
-              "adminPassword=$adminPassword",
-              "AzurePAT=$AzurePAT"
-            ) -ErrorAction Stop
+            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptPath 'c:\install-azure-agent.ps1' -Parameter @{
+              vmName=$vmName,
+              adminUsername=$adminUsername,
+              adminPassword=$adminPassword,
+              AzurePAT=$AzurePAT
+            } -ErrorAction Stop
 
             if ($result -and $result.Value) {
               foreach ($entry in $result.Value) {
