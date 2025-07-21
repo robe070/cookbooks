@@ -95,12 +95,31 @@ jobs:
               continue
             }
 
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptPath 'c:\Agent\install-azure-agent.ps1' -Parameter @{
-              vmName=$vmName
-              adminUsername=$adminUsername
-              adminPassword=$adminPassword
-              AzurePAT=$AzurePAT
-            } -ErrorAction Stop
+            $ScriptBlock = {
+                param(
+                    [string] $FirstMessage,
+                    [string] $SecondMessage
+                    )
+                Write-Host "First Message = $FirstMessage"
+                Write-Host "Second Message = $SecondMessage"
+            }
+
+            $Script = [scriptblock]::create($ScriptBlock)
+            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -Script $script  -Parameter @{ FirstMessage = "First message"; SecondMessage="Second Message"}
+
+            # $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -Script $script  -Parameter @{
+            #   vmName=$vmName;
+            #   adminUsername=$adminUsername;
+            #   adminPassword=$adminPassword;
+            #   AzurePAT=$AzurePAT
+            # } -ErrorAction Stop
+
+            # $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptPath 'c:\Agent\install-azure-agent.ps1' -Parameter @{
+            #   vmName=$vmName
+            #   adminUsername=$adminUsername
+            #   adminPassword=$adminPassword
+            #   AzurePAT=$AzurePAT
+            # } -ErrorAction Stop
 
             if ($result -and $result.Value) {
               foreach ($entry in $result.Value) {
