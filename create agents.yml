@@ -116,7 +116,14 @@ jobs:
 
           $invokeResult = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script
 
-          foreach ($entry in $result.Value) {
-            Write-Host "[$vmName] Output: $($entry.Message)"
+          if ($null -eq $result.Value) {
+              Write-Host "[$vmName] No output returned from script."
+          } else {
+            Write-Host "[$vmName] Raw result:"
+            $result | Format-List | Out-String | Write-Host
+
+            foreach ($entry in $result.Value) {
+              Write-Host "[$vmName] Output: $($entry.Message)"
+            }
           }
         }
