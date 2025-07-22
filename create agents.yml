@@ -264,7 +264,6 @@ jobs:
                   }
 
                   Write-Host 'Install working version of AWS Powershell'
-                  Get-Command Grant-EC2SecurityGroupIngress | Select-Object Name, Module | Out-Default | Write-Host
                   Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
                   Get-Command Grant-EC2SecurityGroupIngress | Select-Object Name, Module | Out-Default | Write-Host
 
