@@ -146,6 +146,7 @@ jobs:
                   }
 
                   if (-not (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\5.6.1')) {
+                      Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
                       Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
                       Write-Host 'Correct Pester version now installed.'
                   } else {
