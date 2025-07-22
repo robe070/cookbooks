@@ -10,7 +10,7 @@ variables:
 - name: baseVmName
   value: 'Agent'
 - name: vmCount
-  value: 1
+  value: 3
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -36,6 +36,7 @@ jobs:
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
+        $ErrorActionPreference = 'Stop'
         $resourceGroup = '$(resourceGroup)'
         $location = '$(location)'
         $nsgName = 'Agent1-nsg'
@@ -122,6 +123,7 @@ jobs:
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
+        $ErrorActionPreference = 'Stop'
         $resourceGroup = '$(resourceGroup)'
         $adminUsername = '$(adminUsername)'
         $agentAdminPassword = '$(agentAdminPassword)'
@@ -146,6 +148,7 @@ jobs:
                   [string]$adminPassword,
                   [string]$AzurePAT
               )
+              $ErrorActionPreference = 'Stop'
               $poolName = '$(agentPoolName)'
               $org = "VisualLansa"
               push-location
@@ -269,6 +272,7 @@ jobs:
 
               } catch {
                   $_ | Out-Default | Write-Host
+                  throw
               } finally {
                   Stop-Transcript -ErrorAction Ignore | Out-Null
                   pop-location
