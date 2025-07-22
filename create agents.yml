@@ -1,4 +1,3 @@
-# Create Agents.yml
 trigger:
 - none  # Manual trigger only
 
@@ -12,14 +11,16 @@ variables:
   value: 'Agent'
 - name: vmCount
   value: 3
-- name: InstallVMsOnly
-  value: 'true'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
   value: 'AzureDevOps-vnet'
 - name: subnetName
   value: 'default'
+- name: storageAccountName
+  value: 'lansadevopsdiagstorage'  # must be globally unique
+- name: agentPoolName
+  value: 'Default'
 
 jobs:
 - job: CreateVMs
@@ -29,8 +30,7 @@ jobs:
   steps:
 
   - task: AzurePowerShell@5
-    # condition: eq(variables['InstallVMsOnly'], 'false')
-    displayName: Create VMs
+    displayName: 'Create VMs (if missing) & Shared Resources'
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
@@ -45,35 +45,69 @@ jobs:
         $baseVmName = '$(baseVmName)'
         $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
         $subnet = $vnet.Subnets | Where-Object { $_.Name -eq '$(subnetName)' }
+        $storageAccountName = '$(storageAccountName)'
+
+        # Create shared diagnostics storage account if it doesn't exist
+        $storage = Get-AzStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName -ErrorAction SilentlyContinue
+        if (-not $storage) {
+          Write-Host "Creating storage account $storageAccountName for boot diagnostics..."
+          $storage = New-AzStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName `
+            -Location $location -SkuName Standard_LRS -Kind StorageV2
+        } else {
+          Write-Host "Using existing storage account $storageAccountName for boot diagnostics."
+        }
+
+        $diagStorageUri = $storage.PrimaryEndpoints.Blob.ToString()
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
+          $nicName = "${vmName}-nic"
+          $pipName = "${vmName}-pip"
 
           if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
             Write-Host "VM $vmName already exists. Skipping creation."
             continue
           }
 
-          Write-Host "Creating VM: $vmName"
+          # Delete orphaned disk if it exists
+          $osDiskName = "${vmName}_OsDisk_1_$(location)"
+          $orphanDisk = Get-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -ErrorAction SilentlyContinue
+          if ($orphanDisk) {
+            Write-Host "Deleting orphaned OS disk $osDiskName..."
+            Remove-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -Force
+          }
 
+          # Credentials
           $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
 
-          $pip = New-AzPublicIpAddress -Name "${vmName}-pip" -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+          # Public IP
+          $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+          if (-not $pip) {
+            $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+          }
 
+          # NSG
           $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
 
-          $nic = New-AzNetworkInterface -Name "${vmName}-nic" -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
+          # NIC
+          $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+          if (-not $nic) {
+            $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
+          }
 
+          # VM Configuration
           $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
             Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
             Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
-            Add-AzVMNetworkInterface -Id $nic.Id
+            Add-AzVMNetworkInterface -Id $nic.Id |
+            Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
 
+          Write-Host "Creating VM: $vmName"
           New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
         }
 
   - task: AzurePowerShell@5
-    displayName: 'Install Azure DevOps Agent via WinRM and other required apps'
+    displayName: 'Install Azure DevOps Agent & Configure'
     inputs:
       azureSubscription: $(ConnectedServiceNameARM)
       ScriptType: 'InlineScript'
@@ -85,6 +119,7 @@ jobs:
         $AzurePAT = '$(AzurePATforRobG)'
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
+        $poolName = '$(agentPoolName)'
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
@@ -94,6 +129,18 @@ jobs:
             if (-not (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue)) {
               Write-Host "VM $vmName does not exist. Skipping installation."
               continue
+            }
+
+            # Remove existing agent registration from pool (via REST API)
+            $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
+            $headers = @{ Authorization = "Basic $encodedPAT" }
+            $agentList = Invoke-RestMethod -Uri "https://dev.azure.com/VisualLansa/_apis/distributedtask/pools/$poolName/agents?api-version=7.0" -Headers $headers -Method Get
+            $existingAgent = $agentList.value | Where-Object { $_.name -eq $vmName }
+            if ($existingAgent) {
+              Write-Host "Agent $vmName already registered. Removing old entry..."
+              $agentId = $existingAgent.id
+              Invoke-RestMethod -Uri "https://dev.azure.com/VisualLansa/_apis/distributedtask/pools/$poolName/agents/$agentId?api-version=7.0" -Headers $headers -Method Delete
+              Start-Sleep -Seconds 5
             }
 
             $ScriptBlock = {
@@ -174,7 +221,7 @@ jobs:
           } finally {
             if ($result -and $result.Value) {
               foreach ($entry in $result.Value) {
-                if (-not ([string]::IsNullOrEmpty($entry) ) ) {
+                if (-not ([string]::IsNullOrWhiteSpace($entry) ) ) {
                   Write-Host "[$vmName] $($entry.Message)"
                 }
               }
