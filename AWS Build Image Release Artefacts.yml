@@ -968,8 +968,20 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - template: AzureDevOps/templates/stop-agents.yml
-  dependsOn: Job_1, Job_2, Job_3, Job_4, Job_5, Job_6, Job_7, Job_8, Job_9, Job_10, Job_11, Job_12
   parameters:
+    dependsOn:
+      - Job_1
+      - Job_2
+      - Job_3
+      - Job_4
+      - Job_5
+      - Job_6
+      - Job_7
+      - Job_8
+      - Job_9
+      - Job_10
+      - Job_11
+      - Job_12
     resourceGroup: $(agentResourceGroup)
     baseVmName: $(agentBaseVmName)
     vmCount: 12

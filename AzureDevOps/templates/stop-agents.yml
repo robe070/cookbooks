@@ -8,9 +8,13 @@ parameters:
     type: number
   - name: azureSubscription
     type: string
+  - name: dependsOn
+    type: object
+    default: []
 
 jobs:
 - job: StopAgents
+  dependsOn: ${{ parameters.dependsOn }}
   displayName: 'Stop Agent VMs'
   pool:
     vmImage: 'windows-latest'
