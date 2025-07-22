@@ -125,6 +125,7 @@ jobs:
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
         $poolName = '$(agentPoolName)'
+        $org = "VisualLansa"
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
@@ -137,15 +138,68 @@ jobs:
             }
 
             # Remove existing agent registration from pool (via REST API)
+            $baseUri = "https://dev.azure.com/$org/_apis"
             $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
             $headers = @{ Authorization = "Basic $encodedPAT" }
-            $agentList = Invoke-RestMethod -Uri "https://dev.azure.com/VisualLansa/_apis/distributedtask/pools/$poolName/agents?api-version=7.0" -Headers $headers -Method Get
-            $existingAgent = $agentList.value | Where-Object { $_.name -eq $vmName }
+
+            # Get agent pool list
+            Write-Host "Getting list of agent pools..."
+            $relativeUri = "/distributedtask/pools?api-version=7.0"
+            $url = "$baseUri$relativeUri"
+            Write-Host "Calling: $url"
+
+            try {
+                $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                $poolList | Out-Default | Write-Host
+            } catch {
+                $_ | Out-Default | Write-Host
+                throw
+            }
+
+            # Find target pool by name
+            $pool = $poolList.value | Where-Object { $_.name -eq $poolName }
+
+            if (-not $pool) {
+                Write-Host "Agent pool '$poolName' not found."
+                throw
+            }
+
+            $poolId = $pool.id
+            Write-Host "Found agent pool '$poolName' with ID $poolId"
+
+            # Get list of agents in that pool
+            $relativeUri = "/distributedtask/pools/$poolId/agents?api-version=7.0"
+            $url = "$baseUri$relativeUri"
+            Write-Host "Calling: $url"
+
+            try {
+                $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                $agents | Out-Default | Write-Host
+            } catch {
+                $_ | Out-Default | Write-Host
+                throw
+            }
+
+            # Find agent by VM name
+            $existingAgent = $agents.value | Where-Object { $_.name -eq $vmName }
+
             if ($existingAgent) {
-              Write-Host "Agent $vmName already registered. Removing old entry..."
-              $agentId = $existingAgent.id
-              Invoke-RestMethod -Uri "https://dev.azure.com/VisualLansa/_apis/distributedtask/pools/$poolName/agents/$agentId?api-version=7.0" -Headers $headers -Method Delete
-              Start-Sleep -Seconds 5
+                $agentId = $existingAgent.id
+                Write-Host "Removing existing agent '$vmName' with ID $agentId"
+
+                $relativeUri = "/distributedtask/pools/$poolId/agents/${agentId}?api-version=7.0"
+                $url = "$baseUri$relativeUri"
+                Write-Host "Calling: $url"
+
+                try {
+                    $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
+                    $delResponse | Out-Default | Write-Host
+                } catch {
+                    $_ | Out-Default | Write-Host
+                    throw
+                }
+            } else {
+                Write-Host "Agent '$vmName' not found in pool. No removal needed."
             }
 
             $ScriptBlock = {
