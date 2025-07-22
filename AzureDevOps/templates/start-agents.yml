@@ -1,0 +1,48 @@
+# .azure-pipelines/start-agents.yml
+parameters:
+  - name: resourceGroup
+    type: string
+  - name: baseVmName
+    type: string
+  - name: vmCount
+    type: number
+  - name: azureSubscription
+    type: string
+
+jobs:
+- job: StartAgents
+  displayName: 'Start Agent VMs'
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: AzurePowerShell@5
+    displayName: 'Ensure Agent VMs are Started'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      ScriptType: 'InlineScript'
+      azurePowerShellVersion: 'LatestVersion'
+      Inline: |
+        $resourceGroup = '${{ parameters.resourceGroup }}'
+        $baseVmName = '${{ parameters.baseVmName }}'
+        $vmCount = ${{ parameters.vmCount }}
+
+        for ($i = 1; $i -le $vmCount; $i++) {
+          $vmName = "$baseVmName$i"
+          Write-Host "Checking if VM '$vmName' exists..."
+
+          $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Status -ErrorAction SilentlyContinue
+          if (-not $vm) {
+            Write-Host "VM $vmName does not exist. Skipping."
+            continue
+          }
+
+          $status = ($vm.Statuses | Where-Object { $_.Code -like "PowerState/*" }).DisplayStatus
+          Write-Host "Current status of $vmName: $status"
+
+          if ($status -eq "VM running") {
+            Write-Host "$vmName is already running. No action needed."
+          } else {
+            Write-Host "Starting VM: $vmName"
+            Start-AzVM -Name $vmName -ResourceGroupName $resourceGroup
+          }
+        }

@@ -25,7 +25,15 @@ variables:
 #    type: git
 #    ref: feature/Build-Image-Release-Artefacts-3.0
 jobs:
+- template: AzureDevOps/templates/start-agents.yml
+  parameters:
+    resourceGroup: $(agentResourceGroup)
+    baseVmName: $(agentBaseVmName)
+    vmCount: 12
+    azureSubscription: $(ConnectedServiceName)
+
 - job: Job_1
+  dependsOn: StartAgents
   displayName: 'Agent job : w25d-16-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -106,6 +114,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_2
+  dependsOn: StartAgents
   displayName: 'Agent job : w25d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -182,6 +191,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_5
+  dependsOn: StartAgents
   displayName: 'Agent job : w19d-16-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -258,6 +268,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_6
+  dependsOn: StartAgents
   displayName: 'Agent job : w19d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -336,6 +347,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_8
+  dependsOn: StartAgents
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -410,6 +422,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_7
+  dependsOn: StartAgents
   displayName: 'Agent job : w19d-16-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -486,6 +499,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_3
+  dependsOn: StartAgents
   displayName: 'Agent job : w25d-16-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -565,6 +579,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_4
+  dependsOn: StartAgents
   displayName: 'Agent job : w25d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -641,6 +656,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_9
+  dependsOn: StartAgents
   displayName: 'Agent job : w22d-16-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -720,6 +736,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_10
+  dependsOn: StartAgents
   displayName: 'Agent job : w22d-15-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -797,6 +814,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_12
+  dependsOn: StartAgents
   displayName: 'Agent job : w22d-15-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-V15'], 'True')))
@@ -873,6 +891,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_11
+  dependsOn: StartAgents
   displayName: 'Agent job : w22d-16-0j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-V16'], 'True')))
@@ -948,3 +967,10 @@ jobs:
       arguments: -versionText '$(VersionText-w22d-16-0j)' -version 'w22d-16-0j'
       filePath: scripts/terminate-instance.ps1
 
+- template: AzureDevOps/templates/stop-agents.yml
+  dependsOn: Job_1, Job_2, Job_3, Job_4, Job_5, Job_6, Job_7, Job_8, Job_9, Job_10, Job_11, Job_12
+  parameters:
+    resourceGroup: $(agentResourceGroup)
+    baseVmName: $(agentBaseVmName)
+    vmCount: 12
+    azureSubscription: $(ConnectedServiceName)
