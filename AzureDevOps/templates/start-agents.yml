@@ -37,7 +37,7 @@ jobs:
           }
 
           $status = ($vm.Statuses | Where-Object { $_.Code -like "PowerState/*" }).DisplayStatus
-          Write-Host "Current status of $vmName: $status"
+          Write-Host "Current status of ${vmName}: $status"
 
           if ($status -eq "VM running") {
             Write-Host "$vmName is already running. No action needed."

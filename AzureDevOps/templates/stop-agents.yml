@@ -41,7 +41,7 @@ jobs:
           }
 
           $status = ($vm.Statuses | Where-Object { $_.Code -like "PowerState/*" }).DisplayStatus
-          Write-Host "Current status of $vmName: $status"
+          Write-Host "Current status of ${vmName}: $status"
 
           if ($status -eq "VM deallocated") {
             Write-Host "$vmName is already stopped. No action needed."
