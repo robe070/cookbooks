@@ -59,53 +59,58 @@ jobs:
 
         $diagStorageUri = $storage.PrimaryEndpoints.Blob.ToString()
 
-        for ($i = 1; $i -le $vmCount; $i++) {
-          $vmName = "${baseVmName}$i"
-          $nicName = "${vmName}-nic"
-          $pipName = "${vmName}-pip"
+        try {
 
-          if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
-            Write-Host "VM $vmName already exists. Skipping creation."
-            continue
+          for ($i = 1; $i -le $vmCount; $i++) {
+            $vmName = "${baseVmName}$i"
+            $nicName = "${vmName}-nic"
+            $pipName = "${vmName}-pip"
+
+            if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
+              Write-Host "VM $vmName already exists. Skipping creation."
+              continue
+            }
+
+            Write-Host 'Delete orphaned disk if it exists'
+            $osDiskName = "${vmName}_OsDisk_1_$(location)"
+            $orphanDisk = Get-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -ErrorAction SilentlyContinue
+            if ($orphanDisk) {
+              Write-Host "Deleting orphaned OS disk $osDiskName..."
+              Remove-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -Force
+            }
+
+            # Credentials
+            $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
+
+            # Public IP
+            $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+            if (-not $pip) {
+              $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+            }
+
+            # NSG
+            $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
+
+            # NIC
+            $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+            if (-not $nic) {
+              $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
+            }
+
+            # VM Configuration
+            $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
+              Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
+              Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
+              Add-AzVMNetworkInterface -Id $nic.Id |
+              Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
+
+            Write-Host "Creating VM: $vmName"
+            New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
           }
-
-          # Delete orphaned disk if it exists
-          $osDiskName = "${vmName}_OsDisk_1_$(location)"
-          $orphanDisk = Get-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -ErrorAction SilentlyContinue
-          if ($orphanDisk) {
-            Write-Host "Deleting orphaned OS disk $osDiskName..."
-            Remove-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -Force
-          }
-
-          # Credentials
-          $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
-
-          # Public IP
-          $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
-          if (-not $pip) {
-            $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
-          }
-
-          # NSG
-          $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
-
-          # NIC
-          $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
-          if (-not $nic) {
-            $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
-          }
-
-          # VM Configuration
-          $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
-            Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
-            Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
-            Add-AzVMNetworkInterface -Id $nic.Id |
-            Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
-
-          Write-Host "Creating VM: $vmName"
-          New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
+        } catch {
+          $_ | Out-Default | Write-Host
+          throw
         }
-
   - task: AzurePowerShell@5
     displayName: 'Install Azure DevOps Agent & Configure'
     inputs:
