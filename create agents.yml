@@ -10,7 +10,7 @@ variables:
 - name: baseVmName
   value: 'Agent'
 - name: vmCount
-  value: 12
+  value: 1
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
