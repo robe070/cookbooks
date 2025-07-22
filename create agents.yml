@@ -72,11 +72,15 @@ jobs:
             }
 
             Write-Host 'Delete orphaned disk if it exists'
-            $osDiskName = "${vmName}_OsDisk_1_$(location)"
-            $orphanDisk = Get-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -ErrorAction SilentlyContinue
-            if ($orphanDisk) {
-              Write-Host "Deleting orphaned OS disk $osDiskName..."
-              Remove-AzDisk -ResourceGroupName $resourceGroup -Name $osDiskName -Force
+            $diskPrefix = "${vmName}_OsDisk_1_"
+            Write-Host "Searching for orphaned disks starting with '$diskPrefix'"
+            $orphanDisks = Get-AzDisk -ResourceGroupName $resourceGroup | Where-Object {
+                $_.Name -like "$diskPrefix*"
+            }
+
+            foreach ($disk in $orphanDisks) {
+                Write-Host "Deleting orphaned disk: $($disk.Name)"
+                Remove-AzDisk -ResourceGroupName $resourceGroup -Name $disk.Name -Force
             }
 
             # Credentials
@@ -124,8 +128,6 @@ jobs:
         $AzurePAT = '$(AzurePATforRobG)'
         $vmCount = $(vmCount)
         $baseVmName = '$(baseVmName)'
-        $poolName = '$(agentPoolName)'
-        $org = "VisualLansa"
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
@@ -137,71 +139,6 @@ jobs:
               continue
             }
 
-            # Remove existing agent registration from pool (via REST API)
-            $baseUri = "https://dev.azure.com/$org/_apis"
-            $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
-            $headers = @{ Authorization = "Basic $encodedPAT" }
-
-            # Get agent pool list
-            Write-Host "Getting list of agent pools..."
-            $relativeUri = "/distributedtask/pools?api-version=7.0"
-            $url = "$baseUri$relativeUri"
-            Write-Host "Calling: $url"
-
-            try {
-                $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                $poolList | Out-Default | Write-Host
-            } catch {
-                $_ | Out-Default | Write-Host
-                throw
-            }
-
-            # Find target pool by name
-            $pool = $poolList.value | Where-Object { $_.name -eq $poolName }
-
-            if (-not $pool) {
-                Write-Host "Agent pool '$poolName' not found."
-                throw
-            }
-
-            $poolId = $pool.id
-            Write-Host "Found agent pool '$poolName' with ID $poolId"
-
-            # Get list of agents in that pool
-            $relativeUri = "/distributedtask/pools/$poolId/agents?api-version=7.0"
-            $url = "$baseUri$relativeUri"
-            Write-Host "Calling: $url"
-
-            try {
-                $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                $agents | Out-Default | Write-Host
-            } catch {
-                $_ | Out-Default | Write-Host
-                throw
-            }
-
-            # Find agent by VM name
-            $existingAgent = $agents.value | Where-Object { $_.name -eq $vmName }
-
-            if ($existingAgent) {
-                $agentId = $existingAgent.id
-                Write-Host "Removing existing agent '$vmName' with ID $agentId"
-
-                $relativeUri = "/distributedtask/pools/$poolId/agents/${agentId}?api-version=7.0"
-                $url = "$baseUri$relativeUri"
-                Write-Host "Calling: $url"
-
-                try {
-                    $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
-                    $delResponse | Out-Default | Write-Host
-                } catch {
-                    $_ | Out-Default | Write-Host
-                    throw
-                }
-            } else {
-                Write-Host "Agent '$vmName' not found in pool. No removal needed."
-            }
-
             $ScriptBlock = {
               param (
                   [string]$vmName,
@@ -209,6 +146,8 @@ jobs:
                   [string]$adminPassword,
                   [string]$AzurePAT
               )
+              $poolName = '$(agentPoolName)'
+              $org = "VisualLansa"
               push-location
               try {
                   Write-Host ("Script echoing vmName = $vmName")
@@ -225,6 +164,71 @@ jobs:
                   #if ((Test-Path C:\agent\config.cmd))
                   {
                       Write-Host "Installing agent on: $vmName"
+
+                      # Remove existing agent registration from pool (via REST API)
+                      $baseUri = "https://dev.azure.com/$org/_apis"
+                      $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
+                      $headers = @{ Authorization = "Basic $encodedPAT" }
+
+                      # Get agent pool list
+                      Write-Host "Getting list of agent pools..."
+                      $relativeUri = "/distributedtask/pools?api-version=7.0"
+                      $url = "$baseUri$relativeUri"
+                      Write-Host "Calling: $url"
+
+                      try {
+                          $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                          $poolList | Out-Default | Write-Host
+                      } catch {
+                          $_ | Out-Default | Write-Host
+                          throw
+                      }
+
+                      # Find target pool by name
+                      $pool = $poolList.value | Where-Object { $_.name -eq $poolName }
+
+                      if (-not $pool) {
+                          Write-Host "Agent pool '$poolName' not found."
+                          throw
+                      }
+
+                      $poolId = $pool.id
+                      Write-Host "Found agent pool '$poolName' with ID $poolId"
+
+                      # Get list of agents in that pool
+                      $relativeUri = "/distributedtask/pools/$poolId/agents?api-version=7.0"
+                      $url = "$baseUri$relativeUri"
+                      Write-Host "Calling: $url"
+
+                      try {
+                          $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                          $agents | Out-Default | Write-Host
+                      } catch {
+                          $_ | Out-Default | Write-Host
+                          throw
+                      }
+
+                      # Find agent by VM name
+                      $existingAgent = $agents.value | Where-Object { $_.name -eq $vmName }
+
+                      if ($existingAgent) {
+                          $agentId = $existingAgent.id
+                          Write-Host "Removing existing agent '$vmName' with ID $agentId"
+
+                          $relativeUri = "/distributedtask/pools/$poolId/agents/${agentId}?api-version=7.0"
+                          $url = "$baseUri$relativeUri"
+                          Write-Host "Calling: $url"
+
+                          try {
+                              $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
+                              $delResponse | Out-Default | Write-Host
+                          } catch {
+                              $_ | Out-Default | Write-Host
+                              throw
+                          }
+                      } else {
+                          Write-Host "Agent '$vmName' not found in pool. No removal needed."
+                      }
 
                       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                       Invoke-WebRequest -Uri https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip -OutFile c:\agent.zip
