@@ -139,7 +139,24 @@ jobs:
         }
 
         Write-Host "Waiting for all parallel provisioning jobs to complete..."
-        $jobs | ForEach-Object { Receive-Job -Job $_ -Wait -AutoRemoveJob }
+        foreach ($job in $jobs) {
+          try {
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              Write-Host "Job Output:"
+              $output | Out-Default | Write-Host
+          } catch {
+              Write-Host "Caught exception from job:"
+              $_ | Out-Default | Write-Host
+              throw
+          }
+
+          if ($job.State -eq 'Failed') {
+              $err = $job.ChildJobs[0].JobStateInfo.Reason
+              Write-Host "Job failed with reason:"
+              $err | Out-Default | Write-Host
+              throw
+          }
+        }
         Write-Host "All VMs created."
 
   - task: AzurePowerShell@5
@@ -310,7 +327,9 @@ jobs:
                     Stop-Transcript -ErrorAction Ignore | Out-Null
                     pop-location
                 }
-              }
+              } # Install Script Block
+
+              $Script = [scriptblock]::create($ScriptBlock)
               $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script `
                 -Parameter @{ vmName=$vmName; adminUsername=$adminUsername; adminPassword=$adminPassword; AzurePAT=$AzurePAT }
               $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
@@ -318,13 +337,27 @@ jobs:
             } catch {
               $_ | Out-Default | Write-Host
               throw
-            }
+            } # Job Script Block
+
           } -ArgumentList $vmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT
         } # Job loop
 
         Write-Host "Waiting for all agent install jobs..."
-        $jobs | Wait-Job
-        foreach ($j in $jobs) {
-          Receive-Job $j | Out-Default | Write-Host
-          Remove-Job $j
+        foreach ($job in $jobs) {
+          try {
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              Write-Host "Job Output:"
+              $output | Out-Default | Write-Host
+          } catch {
+              Write-Host "Caught exception from job:"
+              $_ | Out-Default | Write-Host
+              throw
+          }
+
+          if ($job.State -eq 'Failed') {
+              $err = $job.ChildJobs[0].JobStateInfo.Reason
+              Write-Host "Job failed with reason:"
+              $err | Out-Default | Write-Host
+              throw
+          }
         }
