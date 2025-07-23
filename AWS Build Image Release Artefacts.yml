@@ -373,7 +373,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0j-$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w19d-15-0j-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -392,11 +392,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19150j$(VersionText-w19d-15-0j)
-        SG: w19d-15-0j-$(VersionText-w19d-15-0j)
+        TestVmName: T19150j$(VersionText)
+        SG: w19d-15-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w19d-15-0j-$(VersionText-w19d-15-0j)
+        SkuName: w19d-15-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -419,7 +419,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j'
+      arguments: -versionText '$(VersionText)' -version 'w19d-15-0j'
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_7
@@ -448,7 +448,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-16-0j-$(VersionText-w19d-16-0j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w19d-16-0j-$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -467,11 +467,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T19142j$(VersionText-w19d-16-0j)
-        SG: w19d-16-0j-$(VersionText-w19d-16-0j)
+        TestVmName: T19142j$(VersionText)
+        SG: w19d-16-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w19d-16-0j-$(VersionText-w19d-16-0j)
+        SkuName: w19d-16-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -496,7 +496,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-16-0j)' -version 'w19d-16-0j'
+      arguments: -versionText '$(VersionText)' -version 'w19d-16-0j'
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_3
@@ -526,7 +526,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w25d-16-0j-$(VersionText-w25d-16-0j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(windows-2025-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w25d-16-0j-$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(windows-2025-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
 
   - task: PowerShell@2
@@ -547,11 +547,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16142j$(VersionText-w25d-16-0j)
-        SG: w25d-16-0j-$(VersionText-w25d-16-0j)
+        TestVmName: T16142j$(VersionText)
+        SG: w25d-16-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w25d-16-0j-$(VersionText-w25d-16-0j)
+        SkuName: w25d-16-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -576,7 +576,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w25d-16-0j)' -version 'w25d-16-0j'
+      arguments: -versionText '$(VersionText)' -version 'w25d-16-0j'
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_4
@@ -605,7 +605,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w25d-15-0j-$(VersionText-w25d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(windows-2025-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w25d-15-0j-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(windows-2025-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -624,11 +624,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T16150j$(VersionText-w25d-15-0j)
-        SG: w25d-15-0j-$(VersionText-w25d-15-0j)
+        TestVmName: T16150j$(VersionText)
+        SG: w25d-15-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w25d-15-0j-$(VersionText-w25d-15-0j)
+        SkuName: w25d-15-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -653,7 +653,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w25d-15-0j)' -version 'w25d-15-0j'
+      arguments: -versionText '$(VersionText)' -version 'w25d-15-0j'
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_9
@@ -840,7 +840,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0j-$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w22d-15-0j-$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -859,11 +859,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22150j$(VersionText-w22d-15-0j)
-        SG: w22d-15-0j-$(VersionText-w22d-15-0j)
+        TestVmName: T22150j$(VersionText)
+        SG: w22d-15-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w22d-15-0j-$(VersionText-w22d-15-0j)
+        SkuName: w22d-15-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -888,7 +888,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j'
+      arguments: -versionText '$(VersionText)' -version 'w22d-15-0j'
       filePath: scripts/terminate-instance.ps1
 
 - job: Job_11
@@ -917,7 +917,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-16-0j-$(VersionText-w22d-16-0j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
+      arguments: " -VersionText 'w22d-16-0j-$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -RunWindowsUpdates $(RunWindowsUpdates) -ExternalIPAddresses  $(ExternalIPAddresses) -Language 'JPN'"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -936,11 +936,11 @@ jobs:
         TestImageName: $(BuildImage.amiID)
         TestCloudName: AWS
         AtomicBuild: $(atomic-build)
-        TestVmName: T22142j$(VersionText-w22d-16-0j)
-        SG: w22d-16-0j-$(VersionText-w22d-16-0j)
+        TestVmName: T22142j$(VersionText)
+        SG: w22d-16-0j-$(VersionText)
         keypair: $(KeypairName)
         keypairpath: $(keypair.secureFilePath)
-        SkuName: w22d-16-0j-$(VersionText-w22d-16-0j)
+        SkuName: w22d-16-0j-$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -965,7 +965,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-16-0j)' -version 'w22d-16-0j'
+      arguments: -versionText '$(VersionText)' -version 'w22d-16-0j'
       filePath: scripts/terminate-instance.ps1
 
 - template: AzureDevOps/templates/stop-agents.yml
