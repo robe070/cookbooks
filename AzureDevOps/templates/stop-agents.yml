@@ -15,6 +15,7 @@ jobs:
 - job: StopAgents
   displayName: 'Stop Agent VMs'
   dependsOn: ${{ parameters.dependsOn }}
+  condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'
   steps:
