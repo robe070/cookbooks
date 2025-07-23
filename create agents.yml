@@ -4,12 +4,8 @@ trigger:
 variables:
 - group: Logins
 - group: Agents
-- name: resourceGroup
-  value: 'AzureDevOps'
 - name: location
   value: 'eastus'
-- name: baseVmName
-  value: ${{variables.agentBaseVmName}}
 - name: vmCount
   value: 12
 - name: adminUsername
@@ -44,7 +40,7 @@ jobs:
         $adminUsername = '$(adminUsername)'
         $adminPassword = ConvertTo-SecureString '$(agentAdminPassword)' -AsPlainText -Force
         $vmCount = $(vmCount)
-        $baseVmName = '$(baseVmName)'
+        $baseVmName = '$(agentBaseVmName)'
         $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
         $subnet = $vnet.Subnets | Where-Object { $_.Name -eq '$(subnetName)' }
         $storageAccountName = '$(storageAccountName)'
@@ -130,7 +126,7 @@ jobs:
         $agentAdminPassword = '$(agentAdminPassword)'
         $AzurePAT = '$(AzurePATforRobG)'
         $vmCount = $(vmCount)
-        $baseVmName = '$(baseVmName)'
+        $baseVmName = '$(agentBaseVmName)'
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
