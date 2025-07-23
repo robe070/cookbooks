@@ -18,10 +18,6 @@ jobs:
   displayName: 'Stop Agent VMs'
   pool:
     vmImage: 'windows-latest'
-
-  variables:
-    JobBaseVmName: ${{ parameters.baseVmName }}
-
   steps:
   - task: AzurePowerShell@5
     displayName: 'Ensure Agent VMs are Stopped'
@@ -32,8 +28,12 @@ jobs:
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
         $resourceGroup = '${{ parameters.resourceGroup }}'
-        $baseVmName = '$(JobBaseVmName)'
+        $baseVmName = '${{ parameters.baseVmName }}'
         $vmCount = ${{ parameters.vmCount }}
+
+        Write-Host "resourceGroup = $resourceGroup"
+        Write-Host "baseVmName = $baseVmName"
+        Write-Host "vmCount = $vmCount"
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "$baseVmName$i"
