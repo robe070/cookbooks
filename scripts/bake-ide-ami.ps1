@@ -1233,6 +1233,7 @@ $jsonObject = @"
 
         $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $Language $VersionText installed on $(Log-Date)"
         $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
+        Write-Host "Creating AMI with description '$TagDesc' and Name '$AmiName"
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image
