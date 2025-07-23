@@ -3,12 +3,13 @@ trigger:
 
 variables:
 - group: Logins
+- group: Agents
 - name: resourceGroup
   value: 'AzureDevOps'
 - name: location
   value: 'eastus'
 - name: baseVmName
-  value: 'Agent'
+  value: ${{variables.agentBaseVmName}}
 - name: vmCount
   value: 12
 - name: adminUsername
@@ -32,12 +33,12 @@ jobs:
   - task: AzurePowerShell@5
     displayName: 'Create VMs (if missing) & Shared Resources'
     inputs:
-      azureSubscription: $(ConnectedServiceNameARM)
+      azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
         $ErrorActionPreference = 'Stop'
-        $resourceGroup = '$(resourceGroup)'
+        $resourceGroup = '$(agentResourceGroup)'
         $location = '$(location)'
         $nsgName = 'Agent1-nsg'
         $adminUsername = '$(adminUsername)'
@@ -119,12 +120,12 @@ jobs:
   - task: AzurePowerShell@5
     displayName: 'Install Azure DevOps Agent & Configure'
     inputs:
-      azureSubscription: $(ConnectedServiceNameARM)
+      azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
         $ErrorActionPreference = 'Stop'
-        $resourceGroup = '$(resourceGroup)'
+        $resourceGroup = '$(agentResourceGroup)'
         $adminUsername = '$(adminUsername)'
         $agentAdminPassword = '$(agentAdminPassword)'
         $AzurePAT = '$(AzurePATforRobG)'
