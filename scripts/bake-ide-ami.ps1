@@ -762,7 +762,7 @@ $jsonObject = @"
             # Make sure the session is initialised correctly
             ReConnect-Session
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe, $Platform ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
 
             if ( $InstallScalable ) {
 

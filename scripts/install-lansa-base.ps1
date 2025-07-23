@@ -30,8 +30,12 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $ChefRecipe
-    )
+    $ChefRecipe,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Platform
+)
 
 Set-StrictMode -Off
 
