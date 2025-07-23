@@ -34,16 +34,32 @@ jobs:
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
         $ErrorActionPreference = 'Stop'
+
         $resourceGroup = '$(agentResourceGroup)'
         $location = '$(location)'
-        $nsgName = 'Agent1-nsg'
+        $vmCount = $(vmCount)
         $adminUsername = '$(adminUsername)'
         $adminPassword = ConvertTo-SecureString '$(agentAdminPassword)' -AsPlainText -Force
-        $vmCount = $(vmCount)
         $baseVmName = '$(agentBaseVmName)'
-        $vnet = Get-AzVirtualNetwork -Name '$(vnetName)' -ResourceGroupName $resourceGroup
-        $subnet = $vnet.Subnets | Where-Object { $_.Name -eq '$(subnetName)' }
+        $vnetName = '$(vnetName)'
+        $subnetName = '$(subnetName)'
+        $nsgName = 'Agent1-nsg'
         $storageAccountName = '$(storageAccountName)'
+
+        Write-Host "Provisioning parameters:"
+        Write-Host "Resource Group: $resourceGroup"
+        Write-Host "Location: $location"
+        Write-Host "VM Count: $vmCount"
+        Write-Host "Admin Username: $adminUsername"
+        Write-Host "Base VM Name: $baseVmName"
+        Write-Host "VNet Name: $vnetName"
+        Write-Host "Subnet Name: $subnetName"
+        Write-Host "NSG Name: $nsgName"
+        Write-Host "Storage Account Name: $storageAccountName"
+
+        $vnet = Get-AzVirtualNetwork -Name $vnetName -ResourceGroupName $resourceGroup
+        $subnet = $vnet.Subnets | Where-Object { $_.Name -eq $subnetName }
+        $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
 
         # Create shared diagnostics storage account if it doesn't exist
         $storage = Get-AzStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName -ErrorAction SilentlyContinue
@@ -57,250 +73,258 @@ jobs:
 
         $diagStorageUri = $storage.PrimaryEndpoints.Blob.ToString()
 
-        try {
+        $adminCred = New-Object PSCredential($adminUsername, $adminPassword)
 
-          for ($i = 1; $i -le $vmCount; $i++) {
-            $vmName = "${baseVmName}$i"
+        $jobs = @()
+        for ($i = 1; $i -le $vmCount; $i++) {
+          $index = $i
+          $job = Start-Job -ScriptBlock {
+            param (
+              $index, $baseVmName, $resourceGroup, $location, $adminCred,
+              $diagStorageUri, $subnet, $nsg, $storageAccountName
+            )
+
+            $ErrorActionPreference = 'Stop'
+            $vmName = "$baseVmName$index"
             $nicName = "${vmName}-nic"
             $pipName = "${vmName}-pip"
 
+            Write-Host "[Job $vmName] Starting provisioning..."
+
+            # Skip if VM exists
             if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
-              Write-Host "VM $vmName already exists. Skipping creation."
-              continue
+              Write-Host "[Job $vmName] Already exists. Skipping."
+              return
             }
 
-            Write-Host 'Delete orphaned disk if it exists'
+            # Delete orphaned disks
             $diskPrefix = "${vmName}_OsDisk_1_"
-            Write-Host "Searching for orphaned disks starting with '$diskPrefix'"
             $orphanDisks = Get-AzDisk -ResourceGroupName $resourceGroup | Where-Object {
-                $_.Name -like "$diskPrefix*"
+              $_.Name -like "$diskPrefix*"
             }
-
             foreach ($disk in $orphanDisks) {
-                Write-Host "Deleting orphaned disk: $($disk.Name)"
-                Remove-AzDisk -ResourceGroupName $resourceGroup -Name $disk.Name -Force
+              Write-Host "[Job $vmName] Deleting orphaned disk: $($disk.Name)"
+              Remove-AzDisk -ResourceGroupName $resourceGroup -Name $disk.Name -Force
             }
 
-            # Credentials
-            $cred = New-Object System.Management.Automation.PSCredential($adminUsername, $adminPassword)
-
-            # Public IP
+            # Create PIP
             $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
             if (-not $pip) {
-              $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+              $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
+                -Location $location -AllocationMethod Dynamic -Sku Basic -Force
             }
 
-            # NSG
-            $nsg = Get-AzNetworkSecurityGroup -ResourceGroupName $resourceGroup -Name $nsgName
-
-            # NIC
+            # Create NIC
             $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
             if (-not $nic) {
-              $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
+              $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup `
+                -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id `
+                -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
             }
 
-            # VM Configuration
+            # VM Config
             $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
-              Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate |
+              Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $adminCred -ProvisionVMAgent -EnableAutoUpdate |
               Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
               Add-AzVMNetworkInterface -Id $nic.Id |
               Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
 
-            Write-Host "Creating VM: $vmName"
+            Write-Host "[Job $vmName] Creating VM..."
             New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
-          }
-        } catch {
-          $_ | Out-Default | Write-Host
-          throw
+            Write-Host "[Job $vmName] VM created successfully."
+          } -ArgumentList $index, $baseVmName, $resourceGroup, $location, $adminCred,
+                         $diagStorageUri, $subnet, $nsg, $storageAccountName
+
+          $jobs += $job
         }
+
+        Write-Host "Waiting for all parallel provisioning jobs to complete..."
+        $jobs | ForEach-Object { Receive-Job -Job $_ -Wait -AutoRemoveJob }
+        Write-Host "All VMs created."
+
   - task: AzurePowerShell@5
-    displayName: 'Install Azure DevOps Agent & Configure'
+    displayName: 'Install DevOps Agents in Parallel'
     inputs:
       azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
       azurePowerShellVersion: 'LatestVersion'
       Inline: |
         $ErrorActionPreference = 'Stop'
+        Write-Host "VM Count: $(vmCount)"
+        Write-Host "Installing to pool: $(agentPoolName)"
+
         $resourceGroup = '$(agentResourceGroup)'
         $adminUsername = '$(adminUsername)'
-        $agentAdminPassword = '$(agentAdminPassword)'
+        $adminPassword = '$(agentAdminPassword)'
         $AzurePAT = '$(AzurePATforRobG)'
-        $vmCount = $(vmCount)
         $baseVmName = '$(agentBaseVmName)'
+        $vmCount = $(vmCount)
+
+        $jobs = @()
 
         for ($i = 1; $i -le $vmCount; $i++) {
           $vmName = "${baseVmName}$i"
-          Write-Host "[$vmName] Installing agent"
+          $jobs += Start-Job -ScriptBlock {
+            param($vmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT)
 
-          try {
-            if (-not (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue)) {
-              Write-Host "VM $vmName does not exist. Skipping installation."
-              continue
-            }
+            try {
+              Write-Host "Starting agent install on $vmName"
+              $scriptblock = {
+                param (
+                    [string]$vmName,
+                    [string]$adminUsername,
+                    [string]$adminPassword,
+                    [string]$AzurePAT
+                )
+                $ErrorActionPreference = 'Stop'
+                $poolName = '$(agentPoolName)'
+                $org = "VisualLansa"
+                push-location
+                try {
+                    Write-Host ("Script echoing vmName = $vmName")
 
-            $ScriptBlock = {
-              param (
-                  [string]$vmName,
-                  [string]$adminUsername,
-                  [string]$adminPassword,
-                  [string]$AzurePAT
-              )
-              $ErrorActionPreference = 'Stop'
-              $poolName = '$(agentPoolName)'
-              $org = "VisualLansa"
-              push-location
-              try {
-                  Write-Host ("Script echoing vmName = $vmName")
+                    $LogFile = "C:\install-log.txt"
+                    try {
+                      Start-Transcript -Path $LogFile -Force
+                    } catch  [System.InvalidOperationException] {
+                      stop-transcript -EA Ignore | Out-Null
+                      Start-Transcript -Path $LogFile -Force
+                    }
 
-                  $LogFile = "C:\install-log.txt"
-                  try {
-                    Start-Transcript -Path $LogFile -Force
-                  } catch  [System.InvalidOperationException] {
-                    stop-transcript -EA Ignore | Out-Null
-                    Start-Transcript -Path $LogFile -Force
-                  }
+                    if (-not (Test-Path C:\agent\config.cmd))
+                    #if ((Test-Path C:\agent\config.cmd))
+                    {
+                        Write-Host "Installing agent on: $vmName"
 
-                  if (-not (Test-Path C:\agent\config.cmd))
-                  #if ((Test-Path C:\agent\config.cmd))
-                  {
-                      Write-Host "Installing agent on: $vmName"
+                        # Remove existing agent registration from pool (via REST API)
+                        $baseUri = "https://dev.azure.com/$org/_apis"
+                        $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
+                        $headers = @{ Authorization = "Basic $encodedPAT" }
 
-                      # Remove existing agent registration from pool (via REST API)
-                      $baseUri = "https://dev.azure.com/$org/_apis"
-                      $encodedPAT = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$AzurePAT"))
-                      $headers = @{ Authorization = "Basic $encodedPAT" }
+                        # Get agent pool list
+                        Write-Host "Getting list of agent pools..."
+                        $relativeUri = "/distributedtask/pools?api-version=7.0"
+                        $url = "$baseUri$relativeUri"
+                        Write-Host "Calling: $url"
 
-                      # Get agent pool list
-                      Write-Host "Getting list of agent pools..."
-                      $relativeUri = "/distributedtask/pools?api-version=7.0"
-                      $url = "$baseUri$relativeUri"
-                      Write-Host "Calling: $url"
+                        try {
+                            $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                            $poolList | Out-Default | Write-Host
+                        } catch {
+                            $_ | Out-Default | Write-Host
+                            throw
+                        }
 
-                      try {
-                          $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                          $poolList | Out-Default | Write-Host
-                      } catch {
-                          $_ | Out-Default | Write-Host
-                          throw
-                      }
+                        # Find target pool by name
+                        $pool = $poolList.value | Where-Object { $_.name -eq $poolName }
 
-                      # Find target pool by name
-                      $pool = $poolList.value | Where-Object { $_.name -eq $poolName }
+                        if (-not $pool) {
+                            Write-Host "Agent pool '$poolName' not found."
+                            throw
+                        }
 
-                      if (-not $pool) {
-                          Write-Host "Agent pool '$poolName' not found."
-                          throw
-                      }
+                        $poolId = $pool.id
+                        Write-Host "Found agent pool '$poolName' with ID $poolId"
 
-                      $poolId = $pool.id
-                      Write-Host "Found agent pool '$poolName' with ID $poolId"
+                        # Get list of agents in that pool
+                        $relativeUri = "/distributedtask/pools/$poolId/agents?api-version=7.0"
+                        $url = "$baseUri$relativeUri"
+                        Write-Host "Calling: $url"
 
-                      # Get list of agents in that pool
-                      $relativeUri = "/distributedtask/pools/$poolId/agents?api-version=7.0"
-                      $url = "$baseUri$relativeUri"
-                      Write-Host "Calling: $url"
+                        try {
+                            $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                            $agents | Out-Default | Write-Host
+                        } catch {
+                            $_ | Out-Default | Write-Host
+                            throw
+                        }
 
-                      try {
-                          $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                          $agents | Out-Default | Write-Host
-                      } catch {
-                          $_ | Out-Default | Write-Host
-                          throw
-                      }
+                        # Find agent by VM name
+                        $existingAgent = $agents.value | Where-Object { $_.name -eq $vmName }
 
-                      # Find agent by VM name
-                      $existingAgent = $agents.value | Where-Object { $_.name -eq $vmName }
+                        if ($existingAgent) {
+                            $agentId = $existingAgent.id
+                            Write-Host "Removing existing agent '$vmName' with ID $agentId"
 
-                      if ($existingAgent) {
-                          $agentId = $existingAgent.id
-                          Write-Host "Removing existing agent '$vmName' with ID $agentId"
+                            $relativeUri = "/distributedtask/pools/$poolId/agents/${agentId}?api-version=7.0"
+                            $url = "$baseUri$relativeUri"
+                            Write-Host "Calling: $url"
 
-                          $relativeUri = "/distributedtask/pools/$poolId/agents/${agentId}?api-version=7.0"
-                          $url = "$baseUri$relativeUri"
-                          Write-Host "Calling: $url"
+                            try {
+                                $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
+                                $delResponse | Out-Default | Write-Host
+                            } catch {
+                                $_ | Out-Default | Write-Host
+                                throw
+                            }
+                        } else {
+                            Write-Host "Agent '$vmName' not found in pool. No removal needed."
+                        }
 
-                          try {
-                              $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
-                              $delResponse | Out-Default | Write-Host
-                          } catch {
-                              $_ | Out-Default | Write-Host
-                              throw
-                          }
-                      } else {
-                          Write-Host "Agent '$vmName' not found in pool. No removal needed."
-                      }
+                        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+                        Invoke-WebRequest -Uri https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip -OutFile c:\agent.zip
+                        Expand-Archive c:\agent.zip -DestinationPath C:\agent
+                        cd C:\agent
 
-                      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                      Invoke-WebRequest -Uri https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip -OutFile c:\agent.zip
-                      Expand-Archive c:\agent.zip -DestinationPath C:\agent
-                      cd C:\agent
+                        .\config.cmd --unattended --url https://dev.azure.com/VisualLansa `
+                            --auth pat --token $AzurePAT `
+                            --pool Default --agent $vmName --acceptTeeEula --runAsService `
+                            --windowsLogonAccount $adminUsername --windowsLogonPassword $adminPassword
 
-                      .\config.cmd --unattended --url https://dev.azure.com/VisualLansa `
-                          --auth pat --token $AzurePAT `
-                          --pool Default --agent $vmName --acceptTeeEula --runAsService `
-                          --windowsLogonAccount $adminUsername --windowsLogonPassword $adminPassword
+                        # Optional start
+                        # .\svc install
+                        # .\svc start
+                    } else {
+                        Write-Host 'Agent already installed. Skipping.'
+                    }
 
-                      # Optional start
-                      # .\svc install
-                      # .\svc start
-                  } else {
-                      Write-Host 'Agent already installed. Skipping.'
-                  }
+                    Write-Host 'Ensure correct version of Pester'
+                    if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
+                        Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
+                        Write-Host 'Auto-installed Pester version now disabled'
+                    } else {
+                        Write-Host 'Auto-installed Pester version already disabled. Skipping.'
+                    }
 
-                  Write-Host 'Ensure correct version of Pester'
-                  if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
-                      Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
-                      Write-Host 'Auto-installed Pester version now disabled'
-                  } else {
-                      Write-Host 'Auto-installed Pester version already disabled. Skipping.'
-                  }
+                    if (-not (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\5.6.1')) {
+                        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+                        Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
+                        Write-Host 'Correct Pester version now installed.'
+                    } else {
+                        Write-Host 'Correct Pester version already installed. Skipping.'
+                    }
 
-                  if (-not (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\5.6.1')) {
-                      Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-                      Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
-                      Write-Host 'Correct Pester version now installed.'
-                  } else {
-                      Write-Host 'Correct Pester version already installed. Skipping.'
-                  }
-
-                  Write-Host 'Install working version of AWS Powershell'
-                  $AWSModule = Get-InstalledModule -Name AWSPowerShell -ErrorAction Ignore
-                  if ( $AWSModule -and $AWSModule.Version -ne '4.1.554') {
-                    throw 'AWSPowerShell module must be version 4.1.554. It is currently ${AWSModule.Version}'
-                  }
-                  if ( -not $AWSModule) {
-                    Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
-                  }
-                  Get-InstalledModule -Name AWSPowerShell | Out-Default | Write-Host
-              } catch {
-                  $_ | Out-Default | Write-Host
-                  throw
-              } finally {
-                  Stop-Transcript -ErrorAction Ignore | Out-Null
-                  pop-location
-              }
-            }
-
-            $Script = [scriptblock]::create($ScriptBlock)
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script  -Parameter @{
-              vmName=$vmName;
-              adminUsername=$adminUsername;
-              adminPassword=$agentAdminPassword;
-              AzurePAT=$AzurePAT;
-            } -ErrorAction Stop
-
-          } catch {
-            $_ | Out-Default | Write-Host
-            throw
-          } finally {
-            if ($result -and $result.Value) {
-              foreach ($entry in $result.Value) {
-                if (-not ([string]::IsNullOrWhiteSpace($entry) ) ) {
-                  Write-Host "[$vmName] $($entry.Message)"
+                    Write-Host 'Install working version of AWS Powershell'
+                    $AWSModule = Get-InstalledModule -Name AWSPowerShell -ErrorAction Ignore
+                    if ( $AWSModule -and $AWSModule.Version -ne '4.1.554') {
+                      throw 'AWSPowerShell module must be version 4.1.554. It is currently ${AWSModule.Version}'
+                    }
+                    if ( -not $AWSModule) {
+                      Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
+                    }
+                    Get-InstalledModule -Name AWSPowerShell | Out-Default | Write-Host
+                } catch {
+                    $_ | Out-Default | Write-Host
+                    throw
+                } finally {
+                    Stop-Transcript -ErrorAction Ignore | Out-Null
+                    pop-location
                 }
               }
-            } else {
-              Write-Host "[$vmName] No output returned from script execution."
+              $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $script `
+                -Parameter @{ vmName=$vmName; adminUsername=$adminUsername; adminPassword=$adminPassword; AzurePAT=$AzurePAT }
+              $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
+
+            } catch {
+              $_ | Out-Default | Write-Host
+              throw
             }
-          }
+          } -ArgumentList $vmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT
+        } # Job loop
+
+        Write-Host "Waiting for all agent install jobs..."
+        $jobs | Wait-Job
+        foreach ($j in $jobs) {
+          Receive-Job $j | Out-Default | Write-Host
+          Remove-Job $j
         }
