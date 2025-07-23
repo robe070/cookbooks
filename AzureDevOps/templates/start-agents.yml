@@ -44,25 +44,53 @@ jobs:
 
               Write-Host "Starting VM: ${vmName}"
               try {
-                $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
+                $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Status -ErrorAction SilentlyContinue
                 if ($vm) {
-                  Start-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction Stop
-                  Write-Host "${vmName} started successfully."
+                  # Extract statuses
+                  $powerStatus = $vm.Statuses | Where-Object { $_.Code -like 'PowerState/*' }
+                  $provisionStatus = $vm.Statuses | Where-Object { $_.Code -like 'ProvisioningState/*' }
+
+                  Write-Host "VM Provisioning State: $($provisionStatus.Code)"
+                  Write-Host "VM Power State: $($powerStatus.Code)"
+
+                  # Only start if it's provisioned and not running
+                  if ($provisionStatus.Code -eq 'ProvisioningState/succeeded' -and
+                      $powerStatus.Code -ne 'PowerState/running') {
+
+                      Write-Host "Starting VM '$($vm.Name)'..."
+                      Start-AzVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName
+                      Write-Host "${vmName} started successfully."
+                  } else {
+                      Write-Host "VM '$($vm.Name)' is already running or not in a startable state."
+                  }
                 } else {
                   Write-Host "${vmName} does not exist. Skipping."
                 }
               } catch {
                 $_ | Out-Default | Write-Host
+                throw
               }
             } -ArgumentList $vmName, $resourceGroup
           }
 
           Write-Host "Waiting for all VM start jobs to complete..."
-          $jobs | Wait-Job
-
           foreach ($job in $jobs) {
-            Receive-Job -Job $job | Out-Default | Write-Host
-            Remove-Job -Job $job
+            try {
+                $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+                Write-Host "Job Output:"
+                $output | Out-Default | Write-Host
+            } catch {
+                Write-Host "Caught exception from job:"
+                $_ | Out-Default | Write-Host
+                throw
+            }
+
+            if ($job.State -eq 'Failed') {
+                $err = $job.ChildJobs[0].JobStateInfo.Reason
+                Write-Host "Job failed with reason:"
+                $err | Out-Default | Write-Host
+                throw
+            }
           }
 
           Write-Host "All VMs started."
