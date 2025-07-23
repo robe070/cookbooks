@@ -271,8 +271,8 @@ jobs:
                                 $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
                                 $delResponse | Out-Default | Write-Host
                             } catch {
-                                Write-Host "Error removing Agent '$vmName'"
                                 $_ | Out-Default | Write-Host
+                                Write-Host "Error removing Agent '$vmName'"
                             }
                             Write-Host "Agent '$vmName' removed"
                         } else {
@@ -284,7 +284,7 @@ jobs:
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip
 
-                        Write-Host "Extra the Agent install from the zip file"
+                        Write-Host "Extract the Agent install from the zip file"
                         Expand-Archive c:\agent.zip -DestinationPath C:\agent
                         cd C:\agent
 
@@ -292,10 +292,6 @@ jobs:
                             --auth pat --token $AzurePAT `
                             --pool Default --agent $vmName --acceptTeeEula --runAsService `
                             --windowsLogonAccount $adminUsername --windowsLogonPassword $adminPassword
-
-                        # Optional start
-                        # .\svc install
-                        # .\svc start
                     } else {
                         Write-Host 'Agent already installed. Skipping.'
                     }
