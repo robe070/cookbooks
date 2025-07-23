@@ -271,15 +271,20 @@ jobs:
                                 $delResponse = Invoke-RestMethod -Uri $url -Headers $headers -Method Delete
                                 $delResponse | Out-Default | Write-Host
                             } catch {
+                                Write-Host "Error removing Agent '$vmName'"
                                 $_ | Out-Default | Write-Host
-                                throw
                             }
+                            Write-Host "Agent '$vmName' removed"
                         } else {
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
+                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip"
+                        Write-Host "Downloading $AgentInstallUri"
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                        Invoke-WebRequest -Uri https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip -OutFile c:\agent.zip
+                        Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip
+
+                        Write-Host "Extra the Agent install from the zip file"
                         Expand-Archive c:\agent.zip -DestinationPath C:\agent
                         cd C:\agent
 
