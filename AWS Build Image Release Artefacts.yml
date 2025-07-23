@@ -5,6 +5,7 @@ variables:
   - group: "ImageVersion"
   - group: "Logins"
   - group: "AWS base AMI Image Names"
+  - group: "Agents"
   - name: atomic-build
     value: $false
   - name: atomic-build-ps
