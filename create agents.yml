@@ -93,8 +93,18 @@ jobs:
 
             # Skip if VM exists
             $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
+
             if ($vm) {
-              Write-Host "[Job $vmName] Already exists. Skipping VM creation."
+              Write-Host "[Job $vmName] VM already exists. Checking status..."
+              # Check if VM is running, if not, start it
+              $vmStatus = (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Status).Statuses | Where-Object { $_.Code -like 'PowerState/*' }
+              if ($vmStatus.Code -ne 'PowerState/running') {
+                Write-Host "[Job $vmName] VM exists but is not running. Starting VM..."
+                Start-AzVM -ResourceGroupName $resourceGroup -Name $vmName | Out-Default | Write-Host
+                Write-Host "[Job $vmName] VM started."
+              } else {
+                Write-Host "[Job $vmName] VM is already running."
+              }
             } else {
               # Delete orphaned disks
               $diskPrefix = "${vmName}_OsDisk_1_"
