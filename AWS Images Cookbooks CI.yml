@@ -45,8 +45,20 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w16d-14-2$(VersionText)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2016-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -95,8 +107,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText)' -version 'w16d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w16d-14-2'
+        -DeleteAMI $true
       inlineScript: >
         # Terminating the Instance
 
@@ -146,8 +161,20 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: "  -VersionText 'w16d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) "
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w16d-15-0$(VersionText)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2016-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -196,8 +223,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText)' -version 'w16d-15-0' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w16d-15-0'
+        -DeleteAMI $true
       inlineScript: >
         # Terminating the Instance
 
@@ -250,7 +280,19 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
+      arguments: |
+        -VersionText 'w19d-14-2$(VersionText)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2019-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
     continueOnError: false
 
@@ -300,7 +342,10 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText)' -version 'w19d-14-2' -DeleteAMI $true
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w19d-14-2'
+        -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
       inlineScript: >
         # Terminating the Instance
@@ -354,8 +399,20 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w19d-15-0$(VersionText)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2019-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -404,9 +461,12 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText))' -version 'w19d-15-0' -DeleteAMI $true
-      scriptType: inline
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w19d-15-0'
+        -DeleteAMI $true
+      scriptType: inline
       inlineScript: >+
         # Terminating the Instance
 
@@ -457,8 +517,20 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2$(VersionText)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w22d-14-2$(VersionText)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2022-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
       workingDirectory: scripts
 
   - task: PowerShell@2
@@ -515,8 +587,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText)' -version 'w22d-14-2' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w22d-14-2'
+        -DeleteAMI $true
       inlineScript: >
         # Terminating the Instance
 
@@ -569,8 +644,20 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0$(VersionText)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w22d-15-0$(VersionText)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2022-AMI)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -621,8 +708,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText)' -version 'w22d-15-0' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText)'
+        -version 'w22d-15-0'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -672,8 +762,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-14-2j$(VersionText-w16d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w16d-14-2j$(VersionText-w16d-14-2j)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2016-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -722,8 +825,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-14-2j)' -version 'w16d-14-2j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w16d-14-2j)'
+        -version 'w16d-14-2j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -773,8 +879,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w16d-15-0j$(VersionText-w16d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2016-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses) -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w16d-15-0j$(VersionText-w16d-15-0j)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2016-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -823,8 +942,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w16d-15-0j)' -version 'w16d-15-0j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w16d-15-0j)'
+        -version 'w16d-15-0j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -874,8 +996,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-14-2j$(VersionText-w19d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w19d-14-2j$(VersionText-w19d-14-2j)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2019-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -924,8 +1059,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-14-2j)' -version 'w19d-14-2j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w19d-14-2j)'
+        -version 'w19d-14-2j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -975,8 +1113,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w19d-15-0j$(VersionText-w19d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2019-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w19d-15-0j$(VersionText-w19d-15-0j)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2019-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1025,8 +1176,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w19d-15-0j)' -version 'w19d-15-0j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w19d-15-0j)'
+        -version 'w19d-15-0j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -1076,8 +1230,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-14-2j$(VersionText-w22d-14-2j)' -VersionMajor 14 -VersionMinor 2 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w22d-14-2j$(VersionText-w22d-14-2j)'
+        -VersionMajor 14
+        -VersionMinor 2
+        -AmazonAMIName $(Windows-2022-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1126,8 +1293,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-14-2j)' -version 'w22d-14-2j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w22d-14-2j)'
+        -version 'w22d-14-2j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
@@ -1177,8 +1347,21 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: " -VersionText 'w22d-15-0j$(VersionText-w22d-15-0j)' -VersionMajor 15 -VersionMinor 0 -AmazonAMIName $(Windows-2022-AMI-JPN) -GitBranch \"$(GitBranch)\" -Cloud 'AWS' -Win2012 $false -KeyPairName $(KeypairName) -KeyPairPath $(keypair.secureFilePath) -GitUserName $(GitUserName) -MaxRetry $(MaxRetry) -ExternalIPAddresses $(ExternalIPAddresses)  -Language $(JpnLanguage)"
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
+      arguments: |
+        -VersionText 'w22d-15-0j$(VersionText-w22d-15-0j)'
+        -VersionMajor 15
+        -VersionMinor 0
+        -AmazonAMIName $(Windows-2022-AMI-JPN)
+        -GitBranch "$(GitBranch)"
+        -Cloud 'AWS'
+        -Win2012 $false
+        -KeyPairName $(KeypairName)
+        -KeyPairPath $(keypair.secureFilePath)
+        -GitUserName $(GitUserName)
+        -MaxRetry $(MaxRetry)
+        -ExternalIPAddresses $(ExternalIPAddresses)
+        -Language $(JpnLanguage)
 
   - task: PowerShell@2
     displayName: 'Generate: AMI Id'
@@ -1227,8 +1410,11 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: -versionText '$(VersionText-w22d-15-0j)' -version 'w22d-15-0j' -DeleteAMI $true
       filePath: scripts/terminate-instance.ps1
+      arguments: |
+        -versionText '$(VersionText-w22d-15-0j)'
+        -version 'w22d-15-0j'
+        -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
 
