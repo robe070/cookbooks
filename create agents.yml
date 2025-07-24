@@ -92,46 +92,63 @@ jobs:
             Write-Host "[Job $vmName] Starting provisioning..."
 
             # Skip if VM exists
-            if (Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue) {
-              Write-Host "[Job $vmName] Already exists. Skipping."
-              return
+            $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
+            if ($vm) {
+              Write-Host "[Job $vmName] Already exists. Skipping VM creation."
+            } else {
+              # Delete orphaned disks
+              $diskPrefix = "${vmName}_OsDisk_1_"
+              $orphanDisks = Get-AzDisk -ResourceGroupName $resourceGroup | Where-Object {
+                $_.Name -like "$diskPrefix*"
+              }
+              foreach ($disk in $orphanDisks) {
+                Write-Host "[Job $vmName] Deleting orphaned disk: $($disk.Name)"
+                Remove-AzDisk -ResourceGroupName $resourceGroup -Name $disk.Name -Force
+              }
+
+              # Create PIP
+              $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+              if (-not $pip) {
+                $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
+                  -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+              }
+
+              # Create NIC
+              $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
+              if (-not $nic) {
+                $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup `
+                  -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id `
+                  -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
+              }
+
+              # VM Config
+              $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
+                Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $adminCred -ProvisionVMAgent -EnableAutoUpdate |
+                Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
+                Add-AzVMNetworkInterface -Id $nic.Id |
+                Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
+
+              Write-Host "[Job $vmName] Creating VM..."
+              New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
+              Write-Host "[Job $vmName] VM created successfully."
+
+              # Get the VM object again after creation
+              $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName
             }
 
-            # Delete orphaned disks
-            $diskPrefix = "${vmName}_OsDisk_1_"
-            $orphanDisks = Get-AzDisk -ResourceGroupName $resourceGroup | Where-Object {
-              $_.Name -like "$diskPrefix*"
+            # Always check and set ShutdownPolicy=Excluded tag
+            $tags = $vm.Tags
+            if (-not $tags) {
+              $tags = @{}
             }
-            foreach ($disk in $orphanDisks) {
-              Write-Host "[Job $vmName] Deleting orphaned disk: $($disk.Name)"
-              Remove-AzDisk -ResourceGroupName $resourceGroup -Name $disk.Name -Force
+            if (-not $tags.ContainsKey('ShutdownPolicy') -or $tags['ShutdownPolicy'] -ne 'Excluded') {
+              Write-Host "[Job $vmName] Adding tag ShutdownPolicy=Excluded"
+              $tags['ShutdownPolicy'] = 'Excluded'
+              Set-AzResource -ResourceId $vm.Id -Tag $tags -Force
+              Write-Host "[Job $vmName] Tag applied."
+            } else {
+              Write-Host "[Job $vmName] Tag ShutdownPolicy=Excluded already present."
             }
-
-            # Create PIP
-            $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
-            if (-not $pip) {
-              $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
-                -Location $location -AllocationMethod Dynamic -Sku Basic -Force
-            }
-
-            # Create NIC
-            $nic = Get-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
-            if (-not $nic) {
-              $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroup `
-                -Location $location -SubnetId $subnet.Id -PublicIpAddressId $pip.Id `
-                -EnableAcceleratedNetworking -NetworkSecurityGroupId $nsg.Id -Force
-            }
-
-            # VM Config
-            $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
-              Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $adminCred -ProvisionVMAgent -EnableAutoUpdate |
-              Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
-              Add-AzVMNetworkInterface -Id $nic.Id |
-              Set-AzVMBootDiagnostic -Enable -ResourceGroupName $resourceGroup -StorageAccountName $storageAccountName
-
-            Write-Host "[Job $vmName] Creating VM..."
-            New-AzVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConfig
-            Write-Host "[Job $vmName] VM created successfully."
           } -ArgumentList $index, $baseVmName, $resourceGroup, $location, $adminCred,
                          $diagStorageUri, $subnet, $nsg, $storageAccountName
 
@@ -157,7 +174,7 @@ jobs:
               throw
           }
         }
-        Write-Host "All VMs created."
+        Write-Host "All VMs created and tags checked/applied."
 
   - task: AzurePowerShell@5
     displayName: 'Install DevOps Agents in Parallel'
