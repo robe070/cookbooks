@@ -144,7 +144,7 @@ jobs:
             if (-not $tags.ContainsKey('ShutdownPolicy') -or $tags['ShutdownPolicy'] -ne 'Excluded') {
               Write-Host "[Job $vmName] Adding tag ShutdownPolicy=Excluded"
               $tags['ShutdownPolicy'] = 'Excluded'
-              Set-AzResource -ResourceId $vm.Id -Tag $tags -Force
+              Set-AzResource -ResourceId $vm.Id -Tag $tags -Force -ApiVersion "2024-11-01" | Out-Default | Write-Host
               Write-Host "[Job $vmName] Tag applied."
             } else {
               Write-Host "[Job $vmName] Tag ShutdownPolicy=Excluded already present."
