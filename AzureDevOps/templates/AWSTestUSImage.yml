@@ -10,7 +10,7 @@ parameters:
     default: true
   - name: jobName
     type: string
-    default: none  
+    default: none
   - name: jobDisplayname
     type: string
     default: none
@@ -19,7 +19,7 @@ parameters:
     default: none
   - name: stackname
     type: string
-    default: none    
+    default: none
   - name: vmImage
     type: string
     default: windows-2019
@@ -100,8 +100,8 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'    
- 
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'
+
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Artifact Check : Set Gate Variable'
         name: Gate
@@ -114,9 +114,9 @@ stages:
       - pwsh: |
          # Print the Gate variables.
          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-   
+
         displayName: 'Artifact Check : Output Gate Variable'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))    
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete previous Failed Stack'
@@ -126,7 +126,7 @@ stages:
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-   
+
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
         displayName: 'Deploy AWS template'
         inputs:
@@ -145,56 +145,48 @@ stages:
                "ParameterKey": "$(WebPasswordKey)",
                "ParameterValue": "$(WebPasswordValue)"
            }, {
-               "ParameterKey": "$(KeyNameKey)",    
+               "ParameterKey": "$(KeyNameKey)",
                "ParameterValue": "$(KeyNameValue)"
            }, {
-               "ParameterKey": "$(RemoteAccessLocationKey)",   
+               "ParameterKey": "$(RemoteAccessLocationKey)",
                "ParameterValue": "$(RemoteAccessLocationValue)"
            }, {
-               "ParameterKey": "ImageSource",   
+               "ParameterKey": "ImageSource",
                "ParameterValue": "Marketplace"
            }, {
-               "ParameterKey": "LansaVersion",   
-               "ParameterValue": "${{ parameters.paramLansaVersion }}"
-           }, {
-                "ParameterKey": "TagValue",   
+                "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
-            },{
-               "ParameterKey": "11WebserverOSVersion",   
-               "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
-           }, {
-               "ParameterKey": "10LansaGitRepoBranch",   
+           },{
+               "ParameterKey": "10LansaGitRepoBranch",
                "ParameterValue": "$(CookbooksBranch)"
            },  {
-               "ParameterKey": "TemplateS3Namespace",   
+               "ParameterKey": "TemplateS3Namespace",
                "ParameterValue": "$(TemplateS3Namespace)"
            }, {
-               "ParameterKey": "$(LansaMSIKey)",   
+               "ParameterKey": "$(LansaMSIKey)",
                "ParameterValue": "${{ parameters.parammsiURL }}"
            }, {
-               "ParameterKey": "CurrentVPC",   
+               "ParameterKey": "CurrentVPC",
                "ParameterValue": "$(CurrentVPCUS)"
            }, {
-               "ParameterKey": "AvailabilityZones",   
+               "ParameterKey": "AvailabilityZones",
                "ParameterValue": "$(AvailabilityZonesUS)"
            }, {
-               "ParameterKey": "NumberOfAZs",   
+               "ParameterKey": "NumberOfAZs",
                "ParameterValue": "$(NumberOfAZsUS)"
            }, {
-               "ParameterKey": "DBSubnetGroupName",   
+               "ParameterKey": "DBSubnetGroupName",
                "ParameterValue": "$(DBSubnetGroupNameUS)"
            }, {
-                "ParameterKey": "DBCCSID",   	
+                "ParameterKey": "DBCCSID",
                 "ParameterValue": "${{ parameters.paramDBCCSID }}"
            }, {
-               "ParameterKey": "ELBSubnetIds",   
+               "ParameterKey": "ELBSubnetIds",
                "ParameterValue": "$(ELBSubnetIdsUS)"
            }, {
-               "ParameterKey": "03DBUsername",   
+               "ParameterKey": "03DBUsername",
                "ParameterValue": "$(03DBUsername)"
-           }
-     
-           ]
+           }]
           tags: 'usage=test-temp'
           onFailure: 'DO_NOTHING'
           disableRollback: true
@@ -212,7 +204,7 @@ stages:
           regionName: 'us-east-1'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))  
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Test CFN Deployment: URL tests'
@@ -242,7 +234,7 @@ stages:
           ignoreLASTEXITCODE: true
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-  
-  
-  
+
+
+
 

@@ -75,7 +75,7 @@ parameters:
     default: none
   - name: TemplateUrl
     type: string
-    default: none 
+    default: none
   - name: AwsRegion
     type: string
     default: none
@@ -111,24 +111,24 @@ stages:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
-        pool: 
+        pool:
           vmImage: ${{ parameters.vmImage }}
         steps:
           - download: _Build Image Release Artefacts
-            displayName: Download artifacts from Build Image Release Artefacts 3.0 
+            displayName: Download artifacts from Build Image Release Artefacts 3.0
 
           - checkout: _robe070_cookbooks
             displayName: Checkout Rob Cookbooks
             path: _robe070_cookbooks
-          
+
           - checkout: _lansa_aws-templates-mp
             displayName: Checkout Lansa AWS Marketplace Templates
-            path: _lansa_aws-templates-mp 
-          
+            path: _lansa_aws-templates-mp
+
           - checkout: _lansa_aws-templates
             displayName: Checkout Lansa AWS Templates
             path: aws-templates
-          
+
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
             displayName: 'Artifact Check: Set Gate Variable'
@@ -143,7 +143,7 @@ stages:
               Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
             displayName: 'Artifact Check : Output Gate Variable'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-      
+
           - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
             displayName: 'S3 Download: TemplateUrl.txt'
             inputs:
@@ -205,43 +205,37 @@ stages:
                     "ParameterKey": "$(WebPasswordKey)",
                     "ParameterValue": "$(WebPasswordValue)"
                 }, {
-                    "ParameterKey": "$(KeyNameKey)",    
+                    "ParameterKey": "$(KeyNameKey)",
                     "ParameterValue": "$(KeyNameValue)"
                 }, {
-                    "ParameterKey": "$(RemoteAccessLocationKey)",   
+                    "ParameterKey": "$(RemoteAccessLocationKey)",
                     "ParameterValue": "$(RemoteAccessLocationValue)"
                 }, {
-                    "ParameterKey": "$(LansaMSIKey)",   
+                    "ParameterKey": "$(LansaMSIKey)",
                     "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
-                    "ParameterKey": "LansaVersion",   
-                    "ParameterValue": "${{ parameters.LansaVersion }}"
-                }, {
-                    "ParameterKey": "11WebserverOSVersion",   
-                    "ParameterValue": "${{ parameters.WebserverOSVersion }}"
-                }, {
-                    "ParameterKey": "CurrentVPC",   
+                    "ParameterKey": "CurrentVPC",
                     "ParameterValue": "${{ parameters.paramCurrentVPC }}"
                 }, {
-                    "ParameterKey": "AvailabilityZones",   
+                    "ParameterKey": "AvailabilityZones",
                     "ParameterValue": "${{ parameters.paramAvailabilityZones }}"
                 }, {
-                    "ParameterKey": "NumberOfAZs",   
+                    "ParameterKey": "NumberOfAZs",
                     "ParameterValue": "${{ parameters.paramNumberOfAZs }}"
                 }, {
-                    "ParameterKey": "CreateVPC",   
+                    "ParameterKey": "CreateVPC",
                     "ParameterValue": "Yes"
                 }, {
-                    "ParameterKey": "ELBSubnetIds",   
+                    "ParameterKey": "ELBSubnetIds",
                     "ParameterValue": "${{ parameters.paramELBSubnetIds }}"
                 }, {
-                    "ParameterKey": "03DBUsername",   
+                    "ParameterKey": "03DBUsername",
                     "ParameterValue": "$(03DBUsername)"
-                },{	
-                    "ParameterKey": "DBCCSID",   	
+                },{
+                    "ParameterKey": "DBCCSID",
                     "ParameterValue": "${{ parameters.paramDBCCSID }}"
-                },{	
-                    "ParameterKey": "TagValue",   	
+                },{
+                    "ParameterKey": "TagValue",
                     "ParameterValue": "${{ parameters.paramTagValue }}"
                 }]
               tags: 'usage=temp-test'

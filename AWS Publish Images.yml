@@ -25,6 +25,7 @@ variables:
   - group: VPC ap-southeast-2
   - group: VPC us-east-1
   - group: Git Repos
+  - group: Agents
   - name: ArtifactSourceAlias
     value: _lansa_aws-templates
   - name: CookbooksSource1
@@ -38,7 +39,7 @@ variables:
   - name: TemplateS3Namespace
     value: /image-cd-pipeline
   - name: agentVMImage
-    value: windows-2022
+    value: Default
   # - name: GitAwsTemplateMarketPlaceBranch
   #   value: support/scalable_marketplace
   # - name: GitAwsTemplatescalableBranch
@@ -57,8 +58,19 @@ variables:
   #   value: LansaCloud
 
 stages:
+- stage: StartVMs
+  displayName: Start VMs
+  jobs:
+  - template: AzureDevOps/templates/start-agents.yml
+    parameters:
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: $(ConnectedServiceName)
+
 - stage: UpdateAUSAMIs
   displayName: Update AUS AMIs
+  dependsOn: StartVMs
   jobs:
     - job:
       displayName: Agent job
@@ -67,7 +79,6 @@ stages:
 
       pool:
         vmImage: $(agentVMImage)
-        #demands: ''
 
       steps:
         - download: _Build Image Release Artefacts
@@ -89,7 +100,12 @@ stages:
             targetType: filePath
             # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
+            arguments: |
+              -GitBranch '$(GitLansaAwsTemplatesBranch)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$( GitLansaAwsTemplatesGitHubName)'
+              -GitUserEmail '$(GitRepoUserEmail)'
+              -GitUserName '$(GitRepoUserName)'
+              -GitRepoName '$(ArtifactSourceAlias)'
             pwsh: true
 
         - task: PowerShell@2
@@ -99,7 +115,9 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
+            arguments: |
+              -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
+              -GitRepoName '$(ArtifactSourceAlias)'
             pwsh: true
 
         - task: PowerShell@2
@@ -109,7 +127,8 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            arguments: '-ImageType ''Development'''
+            arguments: |
+              -ImageType 'Development'
             pwsh: true
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
@@ -831,7 +850,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
-    paramLansaVersion: $(LansaVersionPrevious)
+    paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
     paramWebserverOSVersionValue: $(WebserverOS2022jpn)
     paramTagValue: "Lansa-Prod"

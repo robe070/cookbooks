@@ -139,14 +139,8 @@ stages:
                 "ParameterKey": "ImageSource",
                 "ParameterValue": "Marketplace"
             }, {
-                "ParameterKey": "LansaVersion",
-                "ParameterValue": "${{ parameters.paramLansaVersion }}"
-            }, {
                 "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
-            }, {
-                "ParameterKey": "11WebserverOSVersion",
-                "ParameterValue": "${{ parameters.paramWebserverOSVersionValue }}"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",
                 "ParameterValue": "$(CookbooksBranch)"

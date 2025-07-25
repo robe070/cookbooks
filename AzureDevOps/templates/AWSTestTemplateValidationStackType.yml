@@ -100,7 +100,7 @@ parameters:
   - name: paramUpdateManagementScripts
     type: string
     default: none
-  
+
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -110,15 +110,15 @@ stages:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
-        pool: 
+        pool:
           vmImage: ${{ parameters.vmImage }}
         steps:
           - download: _Build Image Release Artefacts
-            displayName: Download artifacts from Build Image Release Artefacts 3.0  
+            displayName: Download artifacts from Build Image Release Artefacts 3.0
           - checkout: self
           - checkout: _lansa_aws-templates
             path: "aws-templates"
-          
+
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
             displayName: 'Artifact Check: Set Gate Variable'
@@ -142,7 +142,7 @@ stages:
               arguments: '-Gatestack $(Gate.stack)'
               filePath: '$(Pipeline.Workspace)/aws-templates/scripts/DeletePreviousFailedStack.ps1'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
-      
+
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
             inputs:
@@ -170,43 +170,37 @@ stages:
                     "ParameterKey": "$(WebPasswordKey)",
                     "ParameterValue": "$(WebPasswordValue)"
                 }, {
-                    "ParameterKey": "$(KeyNameKey)",    
+                    "ParameterKey": "$(KeyNameKey)",
                     "ParameterValue": "$(KeyNameValue)"
                 }, {
-                    "ParameterKey": "$(RemoteAccessLocationKey)",   
+                    "ParameterKey": "$(RemoteAccessLocationKey)",
                     "ParameterValue": "$(RemoteAccessLocationValue)"
                 }, {
-                    "ParameterKey": "$(LansaMSIKey)",   
+                    "ParameterKey": "$(LansaMSIKey)",
                     "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
-                      "ParameterKey": "LansaVersion",   
-                      "ParameterValue": "${{ parameters.LansaVersion }}"
-                  }, {
-                      "ParameterKey": "11WebserverOSVersion",   
-                      "ParameterValue": "${{ parameters.WebserverOSVersion }}"
-                }, {
-                    "ParameterKey": "CurrentVPC",   
+                    "ParameterKey": "CurrentVPC",
                     "ParameterValue": "$(CurrentVPC)"
                 }, {
-                    "ParameterKey": "AvailabilityZones",   
+                    "ParameterKey": "AvailabilityZones",
                     "ParameterValue": "$(AvailabilityZones)"
                 }, {
-                    "ParameterKey": "NumberOfAZs",   
+                    "ParameterKey": "NumberOfAZs",
                     "ParameterValue": "$(NumberOfAZs)"
                 }, {
-                    "ParameterKey": "DBSubnetGroupName",   
+                    "ParameterKey": "DBSubnetGroupName",
                     "ParameterValue": "$(DBSubnetGroupName)"
                 }, {
-                    "ParameterKey": "ELBSubnetIds",   
+                    "ParameterKey": "ELBSubnetIds",
                     "ParameterValue": "$(ELBSubnetIds)"
                 }, {
-                    "ParameterKey": "03DBUsername",   
+                    "ParameterKey": "03DBUsername",
                     "ParameterValue": "$(03DBUsername)"
-                },{	
-                    "ParameterKey": "DBCCSID",   	
+                },{
+                    "ParameterKey": "DBCCSID",
                     "ParameterValue": "${{ parameters.paramDBCCSID }}"
-                },{	
-                    "ParameterKey": "TagValue",   	
+                },{
+                    "ParameterKey": "TagValue",
                     "ParameterValue": "${{ parameters.paramTagValue }}"
                 }]
 
