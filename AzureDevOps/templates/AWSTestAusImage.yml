@@ -56,12 +56,16 @@ stages:
     - job: ${{ parameters.jobName }}
       timeoutInMinutes: 120
       cancelTimeoutInMinutes: 1
-      condition: ${{ parameters. jobcondition}}
+      # condition: ${{ parameters. jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
 
       variables:
-        - name: TemplateS3Namespace
-          value: '/image-cd-pipeline'
+        # We are using the name space as declared by the git branch, are we not?
+        # Thats where the templates have been uploaded to by the first Stage.
+        # CookbooksBranch: '$(Build.SourceBranchName)'
+        # So probably delete this variable.
+        # - name: TemplateS3Namespace
+        #  value: '/image-cd-pipeline'
         - name: japan_override
           ${{ if endsWith(lower(parameters.BaseImageName), 'j')}}:
             value: -Language $(jpnLanguage)
@@ -69,8 +73,7 @@ stages:
             value: ''
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
-        demands: ${{ parameters.jobDemand }}
+        name: $(agentVMImage)
 
       steps:
       - download: _Build Image Release Artefacts
@@ -92,15 +95,15 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          #arguments: '-BaseImageName ${{ parameters.BaseImageName }} -stackname $(System.stackname)'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -stackname ''${{ parameters.stackname }}'''
+          arguments: |
+            -BaseImageName '${{ parameters.BaseImageName }}'
+            -stackname '${{ parameters.stackname }}'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
       - pwsh: |
          # Print the Gate variables.
          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Output Gate Variable'
-        #condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))'], 'true'))
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -136,17 +139,17 @@ stages:
                 "ParameterKey": "$(RemoteAccessLocationKey)",
                 "ParameterValue": "$(RemoteAccessLocationValue)"
             }, {
-                "ParameterKey": "ImageSource",
-                "ParameterValue": "Marketplace"
+                "ParameterKey": "ImageId",
+                "ParameterValue": "$(Gate.ImageID)"
+            }, {
+                "ParameterKey": "MPS3KeyPrefix",
+                "ParameterValue": "templates/$(CookbooksBranch)$(TemplateS3Namespace)/"
             }, {
                 "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
             }, {
                 "ParameterKey": "10LansaGitRepoBranch",
                 "ParameterValue": "$(CookbooksBranch)"
-            },  {
-                "ParameterKey": "TemplateS3Namespace",
-                "ParameterValue": "$(TemplateS3Namespace)"
             }, {
                 "ParameterKey": "$(LansaMSIKey)",
                 "ParameterValue": "${{ parameters.parammsiURL }}"
