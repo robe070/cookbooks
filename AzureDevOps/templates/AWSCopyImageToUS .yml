@@ -7,7 +7,7 @@ parameters:
     default: none
   - name: runStage
     type: boolean
-    default: succeeded()
+    default: true
   - name: jobName
     type: string
     default: none
@@ -34,7 +34,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    condition: ${{ parameters.runStage }}
+    condition: and(succeeded(), eq('${{ parameters.runStage }}', true))
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
