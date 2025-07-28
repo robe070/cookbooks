@@ -23,7 +23,8 @@ jobs:
   displayName: 'Stop Agent VMs'
   dependsOn: |
     - RootStopTrigger
-    - ${{ parameters.dependsOn }}
+    - ${{ each item in parameters.dependsOn }}:
+      - ${{ item }}
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'
