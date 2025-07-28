@@ -106,7 +106,6 @@ stages:
               -GitUserEmail '$(GitRepoUserEmail)'
               -GitUserName '$(GitRepoUserName)'
               -GitRepoName '$(ArtifactSourceAlias)'
-            pwsh: true
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
@@ -118,7 +117,6 @@ stages:
             arguments: |
               -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
               -GitRepoName '$(ArtifactSourceAlias)'
-            pwsh: true
 
         - task: PowerShell@2
           condition: false
@@ -130,7 +128,6 @@ stages:
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: |
               -ImageType 'Development'
-            pwsh: true
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
@@ -552,36 +549,35 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true
 
 
-        - pwsh: |
-           # change to project directory
-           cd $(Pipeline.Workspace)/_lansa_aws-templates
+        # - pwsh: |
+        #    # change to project directory
+        #    cd $(Pipeline.Workspace)/_lansa_aws-templates
 
-           # fetch changes
-           git fetch
-           if (-not $?) {
-            Write-Host(" git fetch failed");
-            exit 1
-           }
+        #    # fetch changes
+        #    git fetch
+        #    if (-not $?) {
+        #     Write-Host(" git fetch failed");
+        #     exit 1
+        #    }
 
 
-           # merge branch to the main branch (for testing merging temp branch to feature/119)
-           git pull origin $(GitLansaAwsTemplatesTempBranch)
-           if (-not $?) {
-            Write-Host(" git pull origin $(GitLansaAwsTemplatesTempBranch) failed");
-            exit 1
-           }
+        #    # merge branch to the main branch (for testing merging temp branch to feature/119)
+        #    git pull origin $(GitLansaAwsTemplatesTempBranch)
+        #    if (-not $?) {
+        #     Write-Host(" git pull origin $(GitLansaAwsTemplatesTempBranch) failed");
+        #     exit 1
+        #    }
 
-           # push to the main branch
-           git push
-           if (-not $?) {
-            Write-Host(" git push failed");
-            exit 1
-           }
+        #    # push to the main branch
+        #    git push
+        #    if (-not $?) {
+        #     Write-Host(" git push failed");
+        #     exit 1
+        #    }
 
-          displayName: 'Commit AUS template changes'
+        #   displayName: 'Commit AUS template changes'
 
 - stage: UpdateUSAMIs
   displayName: Update US AMIs
@@ -617,7 +613,6 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitLansaAwsTemplatesUserEmail)'' -GitUserName ''$(GitLansaAwsTemplatesUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
@@ -626,7 +621,6 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true
 
         - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
           displayName: 'S3 Download: lansa'
@@ -651,7 +645,6 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments: '-ImageType ''Production'''
-            pwsh: true
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
@@ -917,60 +910,57 @@ stages:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-            pwsh: true
 
-        - pwsh: |
-           # change to project directory
-           cd $(Pipeline.Workspace)/_lansa_aws-templates
+        # - pwsh: |
+        #    # change to project directory
+        #    cd $(Pipeline.Workspace)/_lansa_aws-templates
 
-           Write-Host "fetch changes"
-           git fetch
-           if (-not $?) {
-             Write-Host("git fetch failed");
-             exit 1
-           }
+        #    Write-Host "fetch changes"
+        #    git fetch
+        #    if (-not $?) {
+        #      Write-Host("git fetch failed");
+        #      exit 1
+        #    }
 
-           Write-Host "merge branch to the main branch"
-           git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories
-           if (-not $?) {
-             Write-Host("git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories failed");
-             exit 1
-           }
+        #    Write-Host "merge branch to the main branch"
+        #    git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories
+        #    if (-not $?) {
+        #      Write-Host("git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories failed");
+        #      exit 1
+        #    }
 
-           Write-Host "Push to the main branch (support/scalable branch)"
-           git push
-           if (-not $?) {
-             Write-Host("git push failed");
-             exit 1
-           }
+        #    Write-Host "Push to the main branch (support/scalable branch)"
+        #    git push
+        #    if (-not $?) {
+        #      Write-Host("git push failed");
+        #      exit 1
+        #    }
 
-           # The merge to Marketplace branch belongs in the template pipeline, so conditioned out for the moment
+        #    # The merge to Marketplace branch belongs in the template pipeline, so conditioned out for the moment
 
-           if ($false) {
-           Write-Host "Checkout to (support/scalable_marketplace branch)"
-           git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch)
-           if (-not $?) {
-             Write-Host("git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch) failed");
-             exit 1
-           }
+        #    if ($false) {
+        #    Write-Host "Checkout to (support/scalable_marketplace branch)"
+        #    git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch)
+        #    if (-not $?) {
+        #      Write-Host("git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch) failed");
+        #      exit 1
+        #    }
 
-           # pull changes from (support/scalable branch)
-           git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories
-           if (-not $?) {
-             Write-Host("git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories failed");
-             exit 1
-           }
+        #    # pull changes from (support/scalable branch)
+        #    git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories
+        #    if (-not $?) {
+        #      Write-Host("git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories failed");
+        #      exit 1
+        #    }
 
-           # push to the main branch  (support/scalable_marketplace branch)
-           git push
-           if (-not $?) {
-             Write-Host("git push failed");
-             exit 1
-           }
+        #    # push to the main branch  (support/scalable_marketplace branch)
+        #    git push
+        #    if (-not $?) {
+        #      Write-Host("git push failed");
+        #      exit 1
+        #    }
 
-           } # if($false)
-
-          displayName: 'Commit US template changes'
+        #    } # if($false)
 
 - stage: Marketplace
   displayName: Marketplace
@@ -1045,7 +1035,6 @@ stages:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
-            pwsh: true
 
         - task: PowerShell@2
           displayName: 'Tag cookbooks repo'
@@ -1053,7 +1042,6 @@ stages:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
-            pwsh: true
 
     - template: AzureDevOps/templates/stop-agents.yml
       parameters:
