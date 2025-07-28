@@ -12,16 +12,13 @@ parameters:
   - name: dependsOn
     type: object
     default: []
-  - name: dependentJobName
-    type: string
-    default: RootStopTrigger
 
 jobs:
 # RootStopTrigger is required so that there is at least one job in this stage that always runs,
 #  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
 - job: RootStopTrigger
   displayName: "Start StopVMs Stage"
-  dependsOn: ${{ parameters.dependsOn }}
+  # dependsOn: ${{ parameters.dependsOn }}
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -29,19 +26,10 @@ jobs:
 
 - job: StopAgents
   displayName: 'Stop Agent VMs'
-  # 🔐 fromJson("['RootStopTrigger']") is a safe trick to inject an array literal without YAML parsing errors.
-  # 🔍 Why this works:
-  # Azure DevOps allows fromJson() in expressions
-  # "['RootStopTrigger']" is a JSON array string that gets parsed into an array
-  # Now concat() merges two arrays cleanly
-  #dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
-  #dependsOn: join(',', variables.myArray)
-  # dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
-  # dependsOn: concat(${{ parameters.dependentJobName }}, ${{ parameters.dependsOn }}) (not tried this one yet!)
-  # variables:
-  #   - name: dependentJobNames
-  #     value: ${{ join(',',parameters.dependsOn) }}
-  dependsOn: RootStopTrigger, ${{ join(',',parameters.dependsOn) }}
+  dependsOn:
+#    - RootStopTrigger
+    - ${{ parameters.dependsOn }}
+
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'
