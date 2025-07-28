@@ -102,7 +102,7 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments:
               -GitBranch '$(GitLansaAwsTemplatesBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$( GitLansaAwsTemplatesGitHubName)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
               -GitUserEmail '$(GitRepoUserEmail)'
               -GitUserName '$(GitRepoUserName)'
               -GitRepoName '$(ArtifactSourceAlias)'
