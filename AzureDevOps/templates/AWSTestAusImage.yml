@@ -97,7 +97,7 @@ stages:
           regionName: 'ap-southeast-2'
           scriptType: 'filePath'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-          arguments: |
+          arguments:
             -BaseImageName '${{ parameters.BaseImageName }}'
             -stackname '${{ parameters.stackname }}'
 
