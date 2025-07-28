@@ -95,16 +95,20 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
+          scriptType: 'filePath'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           arguments: |
             -BaseImageName '${{ parameters.BaseImageName }}'
             -stackname '${{ parameters.stackname }}'
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
-      - pwsh: |
-         # Print the Gate variables.
-         Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-        displayName: 'Output Gate Variable'
+      - task: PowerShell@2
+        displayName: 'Output Gate Variables'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+        inputs:
+          targetType: inline
+          script: |
+            # Print the Gate variables.
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete previous Failed Stack'
