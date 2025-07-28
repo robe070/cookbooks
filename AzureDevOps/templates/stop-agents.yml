@@ -21,7 +21,12 @@ jobs:
 
 - job: StopAgents
   displayName: 'Stop Agent VMs'
-  dependsOn:  ${{ concat('RootStopTrigger', parameters.dependsOn) }}
+  # 🔐 fromJson("['RootStopTrigger']") is a safe trick to inject an array literal without YAML parsing errors.
+  # 🔍 Why this works:
+  # Azure DevOps allows fromJson() in expressions
+  # "['RootStopTrigger']" is a JSON array string that gets parsed into an array
+  # Now concat() merges two arrays cleanly
+  dependsOn: ${{ concat(fromJson("['RootStopTrigger']"), parameters.dependsOn) }}
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'
