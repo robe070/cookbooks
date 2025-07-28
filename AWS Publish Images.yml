@@ -1047,7 +1047,7 @@ stages:
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
             pwsh: true
 
-        - task: TagCookbooksRepo@1
+        - task: PowerShell@2
           displayName: 'Tag cookbooks repo'
           inputs:
             targetType: filePath
@@ -1057,7 +1057,7 @@ stages:
 
     - template: AzureDevOps/templates/stop-agents.yml
       parameters:
-        dependson: TagCookbooksRepo@1
+        dependson: TagGitJob
         resourceGroup: $(agentResourceGroup)
         baseVmName: $(agentBaseVmName)
         vmCount: 12
