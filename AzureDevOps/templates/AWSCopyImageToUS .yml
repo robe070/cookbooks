@@ -71,21 +71,24 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/CopyAMIToUS.ps1'
+          arguments: -BaseImageName '${{ parameters.BaseImageName }}'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Add Name Tag'
+        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
-          # arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copyid)'' -Copyname ''$(Copyname)'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AddNameTag.ps1'
-          condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
+          arguments:
+            -BaseImageName '${{ parameters.BaseImageName }}'
+            -Copyid '$(Copy.id)'
+            -Copyname '$(Copy.name)'
 
       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
         displayName: 'S3 Upload AMI File'
+        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
@@ -94,5 +97,4 @@ stages:
           globExpressions: '${{ parameters.globExpressions }}'
           targetFolder: 'templates/$(s3amiUpload)'
           filesAcl: 'public-read'
-        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
 
