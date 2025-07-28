@@ -73,7 +73,7 @@ stages:
   dependsOn: StartVMs
   jobs:
     - job:
-      displayName: Agent job
+      displayName: Update AUS AMIs
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 
@@ -100,7 +100,7 @@ stages:
             targetType: filePath
             # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: |
+            arguments:
               -GitBranch '$(GitLansaAwsTemplatesBranch)'
               -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$( GitLansaAwsTemplatesGitHubName)'
               -GitUserEmail '$(GitRepoUserEmail)'
@@ -114,7 +114,7 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            arguments: |
+            arguments:
               -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
               -GitRepoName '$(ArtifactSourceAlias)'
 
@@ -126,7 +126,7 @@ stages:
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            arguments: |
+            arguments:
               -ImageType 'Development'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
@@ -498,10 +498,13 @@ stages:
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
-
+            arguments:
+              -GitBranch '$(GitLansaAwsTemplatesBranch)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
+              -GitUserEmail '$(GitRepoUserEmail)'
+              -GitUserName '$(GitRepoUserName)'
+              -GitRepoName '$(ArtifactSourceAlias)'
 
         # - pwsh: |
         #    # change to project directory
@@ -564,7 +567,12 @@ stages:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitLansaAwsTemplatesUserEmail)'' -GitUserName ''$(GitLansaAwsTemplatesUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
+            arguments:
+              -GitBranch '$(GitLansaAwsTemplatesBranch)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
+              -GitUserEmail '$(GitLansaAwsTemplatesUserEmail)'
+              -GitUserName '$(GitLansaAwsTemplatesUserName)'
+              -GitRepoName '$(ArtifactSourceAlias)'
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
@@ -572,7 +580,9 @@ stages:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesTempBranch)'' -GitRepoName ''$(ArtifactSourceAlias)'''
+            arguments:
+              -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
+              -GitRepoName '$(ArtifactSourceAlias)'
 
         - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
           displayName: 'S3 Download: lansa'
@@ -596,7 +606,8 @@ stages:
             targetType: filePath
             # filePath: './$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            arguments: '-ImageType ''Production'''
+            arguments:
+              -ImageType 'Production'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
@@ -837,7 +848,12 @@ stages:
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(GitLansaAwsTemplatesBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(ArtifactSourceAlias)'''
+            arguments:
+              -GitBranch '$(GitLansaAwsTemplatesBranch)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
+              -GitUserEmail '$(GitRepoUserEmail)'
+              -GitUserName '$(GitRepoUserName)'
+              -GitRepoName '$(ArtifactSourceAlias)'
 
         # - pwsh: |
         #    # change to project directory
@@ -949,27 +965,39 @@ stages:
           inputs:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
-            arguments: '-BaseImageName ''w19d-15-0'' -stackname ''w19d-15-0-IMG'''
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+            arguments:
+              -BaseImageName 'w19d-15-0'
+              -stackname 'w19d-15-0-IMG'
 
-        - pwsh: |
-            # Print the Gate variables.
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+        - task: PowerShell@2
           displayName: 'Artifact Check : Output Gate Variable'
+          inputs:
+            targetType: inline
+            script: |
+              # Print the Gate variables.
+              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (robe070/cookbooks)'
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+            arguments:
+              -GitBranch '$(CookbooksBranch)'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'
+              -GitUserEmail '$(GitRepoUserEmail)'
+              -GitUserName '$(GitRepoUserName)'
+              -GitRepoName '$(CookbooksSourceAlias)'
 
         - task: PowerShell@2
           displayName: 'Tag cookbooks repo'
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
-            arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
+            arguments:
+              -GitRepoName '$(CookbooksSourceAlias)'
+              -Tags 'AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'
 
     - template: AzureDevOps/templates/stop-agents.yml
       parameters:
