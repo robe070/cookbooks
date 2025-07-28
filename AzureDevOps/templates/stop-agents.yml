@@ -10,6 +10,9 @@ parameters:
   - name: dependsOn
     type: object
     default: []
+  - name: dependentJobName
+    type: string
+    default: RootStopTrigger
 
 jobs:
 # RootStopTrigger is required so that there is at least one job in this stage that always runs,
@@ -26,7 +29,10 @@ jobs:
   # Azure DevOps allows fromJson() in expressions
   # "['RootStopTrigger']" is a JSON array string that gets parsed into an array
   # Now concat() merges two arrays cleanly
-  dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
+  #dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
+  #dependsOn: join(',', variables.myArray)
+  dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'
