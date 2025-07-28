@@ -166,8 +166,6 @@ stages:
   parameters:
     stageName: 'w25d142IMGTest'
     stageDisplayname: 'w25d-16-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
@@ -182,8 +180,6 @@ stages:
   parameters:
     stageName: 'w25d150IMGTest'
     stageDisplayname: 'w25d-15-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-IMG
     jobDemand: DotNetFramework
@@ -198,8 +194,6 @@ stages:
   parameters:
     stageName: 'w19d142IMGTest'
     stageDisplayname: 'w19d-16-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-IMG
     jobDemand: DotNetFramework
@@ -214,8 +208,6 @@ stages:
   parameters:
     stageName: 'w19d150IMGTest'
     stageDisplayname: 'w19d-15-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-IMG
     jobDemand: DotNetFramework
@@ -230,8 +222,6 @@ stages:
   parameters:
     stageName: 'w22d142IMGTest'
     stageDisplayname: 'w22d-16-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-IMG
     jobDemand: DotNetFramework
@@ -246,8 +236,6 @@ stages:
   parameters:
     stageName: 'w22d150IMGTest'
     stageDisplayname: 'w22d-15-0 IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-IMG
     jobDemand: DotNetFramework
@@ -262,8 +250,6 @@ stages:
   parameters:
     stageName: 'w25d142jIMGTest'
     stageDisplayname: 'w25d-16-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-IMG
     jobDemand: DotNetFramework
@@ -279,8 +265,6 @@ stages:
   parameters:
     stageName: 'w25d150jIMGTest'
     stageDisplayname: 'w25d-15-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-IMG
     jobDemand: DotNetFramework
@@ -296,8 +280,6 @@ stages:
   parameters:
     stageName: 'w19d142jIMGTest'
     stageDisplayname: 'w19d-16-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-IMG
     jobDemand: DotNetFramework
@@ -313,8 +295,6 @@ stages:
   parameters:
     stageName: 'w19d150jIMGTest'
     stageDisplayname: 'w19d-15-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
     jobDemand: DotNetFramework
@@ -330,8 +310,6 @@ stages:
   parameters:
     stageName: 'w22d142jIMGTest'
     stageDisplayname: 'w22d-16-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-IMG
     jobDemand: DotNetFramework
@@ -347,8 +325,6 @@ stages:
   parameters:
     stageName: 'w22d150jIMGTest'
     stageDisplayname: 'w22d-15-0j IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-IMG
     jobDemand: DotNetFramework
@@ -364,8 +340,6 @@ stages:
   parameters:
     stageName: 'w25d142CopyAMItoUS'
     stageDisplayname: 'w25d-16-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0
     jobDemand: DotNetFramework
     dependsOn: w25d142IMGTest
@@ -376,8 +350,6 @@ stages:
   parameters:
     stageName: 'w25d150CopyAMItoUS'
     stageDisplayname: 'w25d-15-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0
     jobDemand: DotNetFramework
     dependsOn: w25d150IMGTest
@@ -388,8 +360,6 @@ stages:
   parameters:
     stageName: 'w19d142CopyAMItoUS'
     stageDisplayname: 'w19d-16-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0
     jobDemand: DotNetFramework
     dependsOn: w19d142IMGTest
@@ -400,8 +370,6 @@ stages:
   parameters:
     stageName: 'w19d150CopyAMItoUS'
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     jobDemand: DotNetFramework
     dependsOn: w19d150IMGTest
@@ -412,8 +380,6 @@ stages:
   parameters:
     stageName: 'w22d142CopyAMItoUS'
     stageDisplayname: 'w22d-16-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0
     jobDemand: DotNetFramework
     dependsOn: w22d142IMGTest
@@ -424,8 +390,6 @@ stages:
   parameters:
     stageName: 'w22d150CopyAMItoUS'
     stageDisplayname: 'w22d-15-0 Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     jobDemand: DotNetFramework
     dependsOn: w22d150IMGTest
@@ -436,8 +400,6 @@ stages:
   parameters:
     stageName: 'w25d142jCopyAMItoUS'
     stageDisplayname: 'w25d-16-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0j
     jobDemand: DotNetFramework
     dependsOn: w25d142jIMGTest
@@ -448,8 +410,6 @@ stages:
   parameters:
     stageName: 'w25d150jCopyAMItoUS'
     stageDisplayname: 'w25d-15-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0j
     jobDemand: DotNetFramework
     dependsOn: w25d150jIMGTest
@@ -460,8 +420,6 @@ stages:
   parameters:
     stageName: 'w19d142jCopyAMItoUS'
     stageDisplayname: 'w19d-16-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0j
     jobDemand: DotNetFramework
     dependsOn: w19d142jIMGTest
@@ -472,8 +430,6 @@ stages:
   parameters:
     stageName: 'w19d150jCopyAMItoUS'
     stageDisplayname: 'w19d-15-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     jobDemand: DotNetFramework
     dependsOn: w19d150jIMGTest
@@ -484,8 +440,6 @@ stages:
   parameters:
     stageName: 'w22d142jCopyAMItoUS'
     stageDisplayname: 'w22d-16-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0j
     jobDemand: DotNetFramework
     dependsOn: w22d142jIMGTest
@@ -496,8 +450,6 @@ stages:
   parameters:
     stageName: 'w22d150jCopyAMItoUS'
     stageDisplayname: 'w22d-15-0j Copy AMI to US'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     jobDemand: DotNetFramework
     dependsOn: w22d150jIMGTest
@@ -671,8 +623,6 @@ stages:
   parameters:
     stageName: 'w25d142USIMGTest'
     stageDisplayname: 'w25d-16-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-US-IMG
     jobDemand: DotNetFramework
@@ -687,8 +637,6 @@ stages:
   parameters:
     stageName: 'w25d150USIMGTest'
     stageDisplayname: 'w25d-15-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-US-IMG
     jobDemand: DotNetFramework
@@ -703,8 +651,6 @@ stages:
   parameters:
     stageName: 'w25d142jUSIMGTest'
     stageDisplayname: 'w25d-16-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-US-IMG
     jobDemand: DotNetFramework
@@ -720,8 +666,6 @@ stages:
   parameters:
     stageName: 'w25d150jUSIMGTest'
     stageDisplayname: 'w25d-15-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-US-IMG
     jobDemand: DotNetFramework
@@ -737,8 +681,6 @@ stages:
   parameters:
     stageName: 'w19d142USIMGTest'
     stageDisplayname: 'w19d-16-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-US-IMG
     jobDemand: DotNetFramework
@@ -753,8 +695,6 @@ stages:
   parameters:
     stageName: 'w19d150USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-US-IMG
     jobDemand: DotNetFramework
@@ -769,8 +709,6 @@ stages:
   parameters:
     stageName: 'w19d142jUSIMGTest'
     stageDisplayname: 'w19d-16-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-US-IMG
     jobDemand: DotNetFramework
@@ -786,8 +724,6 @@ stages:
   parameters:
     stageName: 'w19d150jUSIMGTest'
     stageDisplayname: 'w19d-15-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-US-IMG
     jobDemand: DotNetFramework
@@ -803,8 +739,6 @@ stages:
   parameters:
     stageName: 'w22d142USIMGTest'
     stageDisplayname: 'w22d-16-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-US-IMG
     jobDemand: DotNetFramework
@@ -819,8 +753,6 @@ stages:
   parameters:
     stageName: 'w22d150USIMGTest'
     stageDisplayname: 'w22d-15-0 US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-US-IMG
     jobDemand: DotNetFramework
@@ -835,8 +767,6 @@ stages:
   parameters:
     stageName: 'w22d142jUSIMGTest'
     stageDisplayname: 'w22d-16-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-US-IMG
     jobDemand: DotNetFramework
@@ -852,8 +782,6 @@ stages:
   parameters:
     stageName: 'w22d150jUSIMGTest'
     stageDisplayname: 'w22d-15-0j US IMG Test'
-    jobName: 'Agentjob'
-    jobDisplayname: 'Agent job'
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-US-IMG
     jobDemand: DotNetFramework
