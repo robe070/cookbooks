@@ -164,7 +164,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w25d142IMGTest'
+    stageName: 'w25d160IMGTest'
     stageDisplayname: 'w25d-16-0 IMG Test'
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-IMG
@@ -192,7 +192,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w19d142IMGTest'
+    stageName: 'w19d160IMGTest'
     stageDisplayname: 'w19d-16-0 IMG Test'
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-IMG
@@ -220,7 +220,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w22d142IMGTest'
+    stageName: 'w22d160IMGTest'
     stageDisplayname: 'w22d-16-0 IMG Test'
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-IMG
@@ -248,7 +248,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w25d142jIMGTest'
+    stageName: 'w25d160jIMGTest'
     stageDisplayname: 'w25d-16-0j IMG Test'
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-IMG
@@ -278,7 +278,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w19d142jIMGTest'
+    stageName: 'w19d160jIMGTest'
     stageDisplayname: 'w19d-16-0j IMG Test'
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-IMG
@@ -308,7 +308,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
-    stageName: 'w22d142jIMGTest'
+    stageName: 'w22d160jIMGTest'
     stageDisplayname: 'w22d-16-0j IMG Test'
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-IMG
@@ -338,11 +338,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w25d142CopyAMItoUS'
+    stageName: 'w25d160CopyAMItoUS'
     stageDisplayname: 'w25d-16-0 Copy AMI to US'
     BaseImageName: w25d-16-0
     jobDemand: DotNetFramework
-    dependsOn: w25d142IMGTest
+    dependsOn: w25d160IMGTest
     globExpressions: w25d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -358,11 +358,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w19d142CopyAMItoUS'
+    stageName: 'w19d160CopyAMItoUS'
     stageDisplayname: 'w19d-16-0 Copy AMI to US'
     BaseImageName: w19d-16-0
     jobDemand: DotNetFramework
-    dependsOn: w19d142IMGTest
+    dependsOn: w19d160IMGTest
     globExpressions: w19d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -378,11 +378,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w22d142CopyAMItoUS'
+    stageName: 'w22d160CopyAMItoUS'
     stageDisplayname: 'w22d-16-0 Copy AMI to US'
     BaseImageName: w22d-16-0
     jobDemand: DotNetFramework
-    dependsOn: w22d142IMGTest
+    dependsOn: w22d160IMGTest
     globExpressions: w22d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -398,11 +398,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w25d142jCopyAMItoUS'
+    stageName: 'w25d160jCopyAMItoUS'
     stageDisplayname: 'w25d-16-0j Copy AMI to US'
     BaseImageName: w25d-16-0j
     jobDemand: DotNetFramework
-    dependsOn: w25d142jIMGTest
+    dependsOn: w25d160jIMGTest
     globExpressions: w25d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -418,11 +418,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w19d142jCopyAMItoUS'
+    stageName: 'w19d160jCopyAMItoUS'
     stageDisplayname: 'w19d-16-0j Copy AMI to US'
     BaseImageName: w19d-16-0j
     jobDemand: DotNetFramework
-    dependsOn: w19d142jIMGTest
+    dependsOn: w19d160jIMGTest
     globExpressions: w19d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -438,11 +438,11 @@ stages:
 
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
-    stageName: 'w22d142jCopyAMItoUS'
+    stageName: 'w22d160jCopyAMItoUS'
     stageDisplayname: 'w22d-16-0j Copy AMI to US'
     BaseImageName: w22d-16-0j
     jobDemand: DotNetFramework
-    dependsOn: w22d142jIMGTest
+    dependsOn: w22d160jIMGTest
     globExpressions: w22d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -459,17 +459,17 @@ stages:
 - stage: CommitAUStemplatechanges
   displayName: Commit AUS template changes
   dependsOn:
-  - w25d142CopyAMItoUS
+  - w25d160CopyAMItoUS
   - w25d150CopyAMItoUS
-  - w25d142jCopyAMItoUS
+  - w25d160jCopyAMItoUS
   - w25d150jCopyAMItoUS
-  - w19d142CopyAMItoUS
+  - w19d160CopyAMItoUS
   - w19d150CopyAMItoUS
-  - w19d142jCopyAMItoUS
+  - w19d160jCopyAMItoUS
   - w19d150jCopyAMItoUS
-  - w22d142CopyAMItoUS
+  - w22d160CopyAMItoUS
   - w22d150CopyAMItoUS
-  - w22d142jCopyAMItoUS
+  - w22d160jCopyAMItoUS
   - w22d150jCopyAMItoUS
   jobs:
     - job:
@@ -632,7 +632,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w25d142USIMGTest'
+    stageName: 'w25d160USIMGTest'
     stageDisplayname: 'w25d-16-0 US IMG Test'
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-US-IMG
@@ -660,7 +660,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w25d142jUSIMGTest'
+    stageName: 'w25d160jUSIMGTest'
     stageDisplayname: 'w25d-16-0j US IMG Test'
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-US-IMG
@@ -690,7 +690,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w19d142USIMGTest'
+    stageName: 'w19d160USIMGTest'
     stageDisplayname: 'w19d-16-0 US IMG Test'
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-US-IMG
@@ -718,7 +718,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w19d142jUSIMGTest'
+    stageName: 'w19d160jUSIMGTest'
     stageDisplayname: 'w19d-16-0j US IMG Test'
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-US-IMG
@@ -748,7 +748,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w22d142USIMGTest'
+    stageName: 'w22d160USIMGTest'
     stageDisplayname: 'w22d-16-0 US IMG Test'
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-US-IMG
@@ -776,7 +776,7 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
-    stageName: 'w22d142jUSIMGTest'
+    stageName: 'w22d160jUSIMGTest'
     stageDisplayname: 'w22d-16-0j US IMG Test'
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-US-IMG
@@ -807,17 +807,17 @@ stages:
 - stage: CommitUStemplatechanges
   displayName: Commit US template changes
   dependsOn:
-  - w25d142USIMGTest
+  - w25d160USIMGTest
   - w25d150USIMGTest
-  - w25d142jUSIMGTest
+  - w25d160jUSIMGTest
   - w25d150jUSIMGTest
-  - w19d142USIMGTest
+  - w19d160USIMGTest
   - w19d150USIMGTest
-  - w19d142jUSIMGTest
+  - w19d160jUSIMGTest
   - w19d150jUSIMGTest
-  - w22d142USIMGTest
+  - w22d160USIMGTest
   - w22d150USIMGTest
-  - w22d142jUSIMGTest
+  - w22d160jUSIMGTest
   - w22d150jUSIMGTest
 
   jobs:
