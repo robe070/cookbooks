@@ -53,11 +53,11 @@ stages:
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    - job: ${{ parameters.jobName }}
+    - job: ${{ parameters.stageName }}
       timeoutInMinutes: 120
       cancelTimeoutInMinutes: 1
       # condition: ${{ parameters. jobcondition}}
-      displayName: ${{ parameters.jobDisplayname }}
+      displayName: ${{ parameters.stageDisplayname }}
 
       variables:
         # We are using the name space as declared by the git branch, are we not?
