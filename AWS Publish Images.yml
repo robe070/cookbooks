@@ -1003,7 +1003,7 @@ stages:
 - stage: TagGit
   displayName: Tag Git
   jobs:
-    - job:
+    - job: TagGitJob
       displayName: Agent job
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
@@ -1061,7 +1061,7 @@ stages:
   - template: AzureDevOps/templates/stop-agents.yml
     parameters:
       dependsOn:
-        - TagGit
+        - TagGitJob
       resourceGroup: $(agentResourceGroup)
       baseVmName: $(agentBaseVmName)
       vmCount: 12
