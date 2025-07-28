@@ -1,3 +1,5 @@
+# Note, when including this template and using the dependsOn parameter,
+# it must be in the same Stage as where the dependent job is defined.
 parameters:
   - name: resourceGroup
     type: string
