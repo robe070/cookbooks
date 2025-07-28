@@ -348,6 +348,9 @@ jobs:
                       Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
                     }
                     Get-InstalledModule -Name AWSPowerShell | Out-Default | Write-Host
+
+                    Write-Host 'Install AWS CLI'
+                    msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
                 } catch {
                     $_ | Out-Default | Write-Host
                     throw
