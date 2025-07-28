@@ -16,81 +16,80 @@ parameters:
     type: string
     default: RootStopTrigger
 
-jobs:
-# RootStopTrigger is required so that there is at least one job in this stage that always runs,
-#  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
-- job: RootStopTrigger
-  displayName: "Start StopVMs Stage"
-  dependsOn: ${{ parameters.dependsOn }}
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-    - script: echo "Stopping VMs..."
+  # RootStopTrigger is required so that there is at least one job in this stage that always runs,
+  #  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
+  - job: RootStopTrigger
+    displayName: "Start StopVMs Stage"
+    dependsOn: ${{ parameters.dependsOn }}
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - script: echo "Stopping VMs..."
 
-- job: StopAgents
-  displayName: 'Stop Agent VMs'
-  # 🔐 fromJson("['RootStopTrigger']") is a safe trick to inject an array literal without YAML parsing errors.
-  # 🔍 Why this works:
-  # Azure DevOps allows fromJson() in expressions
-  # "['RootStopTrigger']" is a JSON array string that gets parsed into an array
-  # Now concat() merges two arrays cleanly
-  #dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
-  #dependsOn: join(',', variables.myArray)
-  # dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
-  # dependsOn: concat(${{ parameters.dependentJobName }}, ${{ parameters.dependsOn }}) (not tried this one yet!)
-  # variables:
-  #   - name: dependentJobNames
-  #     value: ${{ join(',',parameters.dependsOn) }}
-  dependsOn: RootStopTrigger, ${{ join(',',parameters.dependsOn) }}
-  condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-    - task: AzurePowerShell@5
-      displayName: 'Stop agent VMs in parallel'
-      inputs:
-        azureSubscription: ${{ parameters.azureSubscription }}
-        ScriptType: 'InlineScript'
-        azurePowerShellVersion: 'LatestVersion'
-        Inline: |
-          $resourceGroup = '${{ parameters.resourceGroup }}'
-          $baseVmName = '${{ parameters.baseVmName }}'
-          $vmCount = ${{ parameters.vmCount }}
+  - job: StopAgents
+    displayName: 'Stop Agent VMs'
+    # 🔐 fromJson("['RootStopTrigger']") is a safe trick to inject an array literal without YAML parsing errors.
+    # 🔍 Why this works:
+    # Azure DevOps allows fromJson() in expressions
+    # "['RootStopTrigger']" is a JSON array string that gets parsed into an array
+    # Now concat() merges two arrays cleanly
+    #dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
+    #dependsOn: join(',', variables.myArray)
+    # dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+    # dependsOn: concat(${{ parameters.dependentJobName }}, ${{ parameters.dependsOn }}) (not tried this one yet!)
+    # variables:
+    #   - name: dependentJobNames
+    #     value: ${{ join(',',parameters.dependsOn) }}
+    dependsOn: RootStopTrigger, ${{ join(',',parameters.dependsOn) }}
+    condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - task: AzurePowerShell@5
+        displayName: 'Stop agent VMs in parallel'
+        inputs:
+          azureSubscription: ${{ parameters.azureSubscription }}
+          ScriptType: 'InlineScript'
+          azurePowerShellVersion: 'LatestVersion'
+          Inline: |
+            $resourceGroup = '${{ parameters.resourceGroup }}'
+            $baseVmName = '${{ parameters.baseVmName }}'
+            $vmCount = ${{ parameters.vmCount }}
 
-          Write-Host "StopAgents Parameters:"
-          Write-Host "Resource Group: $resourceGroup"
-          Write-Host "Base VM Name: $baseVmName"
-          Write-Host "VM Count: $vmCount"
+            Write-Host "StopAgents Parameters:"
+            Write-Host "Resource Group: $resourceGroup"
+            Write-Host "Base VM Name: $baseVmName"
+            Write-Host "VM Count: $vmCount"
 
-          $jobs = @()
+            $jobs = @()
 
-          for ($i = 1; $i -le $vmCount; $i++) {
-            $vmName = "${baseVmName}$i"
-            Write-Host "Queuing stop job for ${vmName}"
-            $jobs += Start-Job -ScriptBlock {
-              param($vmName, $resourceGroup)
+            for ($i = 1; $i -le $vmCount; $i++) {
+              $vmName = "${baseVmName}$i"
+              Write-Host "Queuing stop job for ${vmName}"
+              $jobs += Start-Job -ScriptBlock {
+                param($vmName, $resourceGroup)
 
-              Write-Host "Stopping VM: ${vmName}"
-              try {
-                $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
-                if ($vm) {
-                  Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force -NoWait
-                  Write-Host "${vmName} stop initiated."
-                } else {
-                  Write-Host "${vmName} does not exist. Skipping."
+                Write-Host "Stopping VM: ${vmName}"
+                try {
+                  $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
+                  if ($vm) {
+                    Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force -NoWait
+                    Write-Host "${vmName} stop initiated."
+                  } else {
+                    Write-Host "${vmName} does not exist. Skipping."
+                  }
+                } catch {
+                  $_ | Out-Default | Write-Host
                 }
-              } catch {
-                $_ | Out-Default | Write-Host
-              }
-            } -ArgumentList $vmName, $resourceGroup
-          }
+              } -ArgumentList $vmName, $resourceGroup
+            }
 
-          Write-Host "Waiting for all VM stop jobs to complete..."
-          $jobs | Wait-Job
+            Write-Host "Waiting for all VM stop jobs to complete..."
+            $jobs | Wait-Job
 
-          foreach ($job in $jobs) {
-            Receive-Job -Job $job | Out-Default | Write-Host
-            Remove-Job -Job $job
-          }
+            foreach ($job in $jobs) {
+              Receive-Job -Job $job | Out-Default | Write-Host
+              Remove-Job -Job $job
+            }
 
-          Write-Host "All VMs stop commands issued."
+            Write-Host "All VMs stop commands issued."
