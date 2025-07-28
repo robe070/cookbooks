@@ -19,6 +19,7 @@ jobs:
 #  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
 - job: RootStopTrigger
   displayName: "Start StopVMs Stage"
+  dependsOn: ${{ parameters.dependsOn }}
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -38,9 +39,7 @@ jobs:
   # variables:
   #   - name: dependentJobNames
   #     value: ${{ join(',',parameters.dependsOn) }}
-
-  dependsOn: ${{ join(',', parameters.dependsOn) }}
-
+  dependsOn: RootStopTrigger, ${{ join(',',parameters.dependsOn) }}
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
     vmImage: 'windows-latest'

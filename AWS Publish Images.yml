@@ -1047,7 +1047,7 @@ stages:
             arguments: '-GitBranch ''$(CookbooksBranch)'' -GitURL ''https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'' -GitUserEmail ''$(GitRepoUserEmail)'' -GitUserName ''$(GitRepoUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
             pwsh: true
 
-        - task: PowerShell@2
+        - task: TagCookbooksRepo@1
           displayName: 'Tag cookbooks repo'
           inputs:
             targetType: filePath
@@ -1055,14 +1055,10 @@ stages:
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
             pwsh: true
 
-- stage: StopVMs
-  displayName: Stop VMs
-  jobs:
-  - template: AzureDevOps/templates/stop-agents.yml
-    parameters:
-      dependsOn:
-        - TagGitJob
-      resourceGroup: $(agentResourceGroup)
-      baseVmName: $(agentBaseVmName)
-      vmCount: 12
-      azureSubscription: 'Azure Baking Images'
+        - template: AzureDevOps/templates/stop-agents.yml
+          parameters:
+            dependson: TagCookbooksRepo@1
+            resourceGroup: $(agentResourceGroup)
+            baseVmName: $(agentBaseVmName)
+            vmCount: 12
+            azureSubscription: 'Azure Baking Images'
