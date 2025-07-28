@@ -33,11 +33,11 @@ jobs:
   #dependsOn: join(',', variables.myArray)
   # dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
   # dependsOn: concat(${{ parameters.dependentJobName }}, ${{ parameters.dependsOn }}) (not tried this one yet!)
-  variables:
-    - name: dependentJobNames
-      value: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+  # variables:
+  #   - name: dependentJobNames
+  #     value: ${{ join(',',parameters.dependsOn) }}
 
-  dependsOn: ${{ variables.dependentJobNames }}
+  dependsOn: ${{ join(',',parameters.dependsOn) }}
 
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
