@@ -108,19 +108,28 @@ stages:
           targetType: inline
           script: |
             # Print the Gate variables.
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"
+
+      - task: PowerShell@2
+        displayName: 'Gate Variables Not Set'
+        condition: and(succeeded(), ne(variables['Gate.IsEnabled'], 'True'))
+        inputs:
+          targetType: inline
+          script: |
+            Write-Host "Gate variables not set"
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete previous Failed Stack'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
         displayName: 'Deploy AWS template'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
@@ -187,42 +196,45 @@ stages:
           captureStackOutputs: asJSON
           captureAsSecuredVars: false
           timeoutInMins: 120
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Print Deployment Output'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Test CFN Deployment: URL tests'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-Gatestack $(Gate.stack) $(japan_override)'
+          arguments:
+            -Gatestack $(Gate.stack)
+            $(japan_override)
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Alternate Image Version Test'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
+          arguments:
+            -Gatestack '$(Gate.stack)'
+            -Gateversion '$(Gate.version)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AlternateImageVersion.ps1'
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Delete Stack'
+        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+        continueOnError: true
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
-        continueOnError: true
-        condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
