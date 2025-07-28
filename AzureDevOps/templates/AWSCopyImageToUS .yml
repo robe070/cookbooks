@@ -28,7 +28,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    condition: and(succeeded(), eq('${{ parameters.jobCondition }}', true))
+    condition: ${{ parameters.jobCondition }}
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
