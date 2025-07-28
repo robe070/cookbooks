@@ -1055,14 +1055,14 @@ stages:
             arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags ''AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'''
             pwsh: true
 
-# - stage: StopVMs
-#   displayName: Stop VMs
-#   jobs:
-#   - template: AzureDevOps/templates/stop-agents.yml
-#     parameters:
-#       dependsOn:
-#         - TagGit
-#       resourceGroup: $(agentResourceGroup)
-#       baseVmName: $(agentBaseVmName)
-#       vmCount: 12
-#       azureSubscription: $(ConnectedServiceName)
+- stage: StopVMs
+  displayName: Stop VMs
+  jobs:
+  - template: AzureDevOps/templates/stop-agents.yml
+    parameters:
+      dependsOn:
+        - TagGit
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'

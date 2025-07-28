@@ -7,7 +7,7 @@ parameters:
     default: none
   - name: runStage
     type: boolean
-    default: true
+    default: succeeded()
   - name: jobName
     type: string
     default: none
@@ -16,7 +16,7 @@ parameters:
     default: none
   - name: BaseImageName
     type: string
-    default: none  
+    default: none
   - name: vmImage
     type: string
     default: windows-2019
@@ -28,9 +28,9 @@ parameters:
     default: ''
   - name: globExpressions
     type: string
-    default: ''  
+    default: ''
   - name: dependsOn
-    default: []  
+    default: []
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -95,5 +95,4 @@ stages:
           targetFolder: 'templates/$(s3amiUpload)'
           filesAcl: 'public-read'
         condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
-    
-    
+
