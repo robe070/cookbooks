@@ -8,12 +8,6 @@ parameters:
   - name: runStage
     type: boolean
     default: true
-  - name: jobName
-    type: string
-    default: none
-  - name: jobDisplayname
-    type: string
-    default: none
   - name: BaseImageName
     type: string
     default: none
