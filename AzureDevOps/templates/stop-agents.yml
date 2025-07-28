@@ -14,6 +14,10 @@ parameters:
     type: string
     default: RootStopTrigger
 
+variables:
+  - name: dependentJobNames
+    value: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+
 jobs:
 # RootStopTrigger is required so that there is at least one job in this stage that always runs,
 #  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
@@ -31,7 +35,9 @@ jobs:
   # Now concat() merges two arrays cleanly
   #dependsOn: ${{ concat(array('RootStopTrigger'), parameters.dependsOn) }}
   #dependsOn: join(',', variables.myArray)
-  dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+  # dependsOn: ${{ concat(parameters.dependentJobName, parameters.dependsOn) }}
+  # dependsOn: concat(${{ parameters.dependentJobName }}, ${{ parameters.dependsOn }}) (not tried this one yet!)
+  dependsOn: ${{ variables.dependentJobNames }}
 
   condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
   pool:
