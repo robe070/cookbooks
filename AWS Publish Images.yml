@@ -5,6 +5,32 @@ resources:
     - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
 
+  repositories:
+    - template: AzureDevOps/templates/GitHubRepoResource.yml
+      parameters:
+        repository: _robe070_cookbooks
+        name: robe070/cookbooks
+        ref: ${{ variables.CookbooksBranch }}
+
+    - template: AzureDevOps/templates/GitHubRepoResource.yml
+      parameters:
+        repository: _lansa_aws-templates
+        name: lansa/aws-templates
+        ref: ${{ variables.GitLansaAwsTemplatesBranch }}
+
+# repositories:
+#     - repository: ${{ parameters.repository }}
+#       type: github
+#       endpoint: robe070
+#       name: ${{ parameters.name }}
+#       ref: ${{ parameters.ref }}
+
+#     - repository: ${{ parameters.repository }}
+#       type: github
+#       endpoint: robe070
+#       name: ${{ parameters.name }}
+#       ref: ${{ parameters.ref }}
+
 variables:
   - group: Template Parameters
   - group: Default Branch
@@ -30,18 +56,6 @@ variables:
     value: Default
 
 stages:
-- template: AzureDevOps/templates/GitHubRepoResource.yml
-  parameters:
-    repository: _robe070_cookbooks
-    name: robe070/cookbooks
-    ref: ${{ variables.CookbooksBranch }}
-
-- template: AzureDevOps/templates/GitHubRepoResource.yml
-  parameters:
-    repository: _lansa_aws-templates
-    name: lansa/aws-templates
-    ref: ${{ variables.GitLansaAwsTemplatesBranch }}
-
 - stage: DeleteExistingRepos
   displayName: Delete existing secondary repositories
   jobs:
