@@ -53,20 +53,9 @@ stages:
       vmCount: 12
       azureSubscription: 'Azure Baking Images'
 
-- stage: DeleteExistingRepos
-  displayName: Delete existing secondary repositories
-  dependsOn: StartVMs
-  jobs:
-  - job: DeleteExistingRepos
-    displayName: Delete existing secondary repositories
-    pool:
-      name: $(agentVMImage)
-    steps:
-    - checkout: none
-
 - stage: UpdateAUSAMIs
   displayName: Update AUS AMIs
-  dependsOn: DeleteExistingRepos
+  dependsOn: StartVMs
   jobs:
     - job:
       displayName: Update AUS AMIs
@@ -103,7 +92,7 @@ stages:
         - script: |
             cd $(Pipeline.Workspace)/_lansa_aws-templates
             git fetch origin
-            git reset --hard $(GitLansaAwsTemplatesBranch)
+            git reset --hard HEAD
           displayName: Force update lansa_aws-templates repo to latest
 
         - checkout: _robe070_cookbooks
