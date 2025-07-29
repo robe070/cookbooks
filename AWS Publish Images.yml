@@ -60,10 +60,10 @@ stages:
         script: |
           Write-Host "Deleting existing secondary repositories..."
           cd $(Pipeline.Workspace)
-          rd _lansa_aws-templates /s /q
+          remove-item _lansa_aws-templates -Recurse -Force
 
           cd $(Pipeline.Workspace)
-          rd _robe070_cookbooks /s /q
+          remove-item _robe070_cookbooks -Recurse -Force
 
 - stage: StartVMs
   displayName: Start VMs
