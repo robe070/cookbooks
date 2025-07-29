@@ -5,30 +5,18 @@ resources:
     - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
 
-    - template: AzureDevOps/templates/GitHubRepoResource.yml
-      parameters:
-        repository: _robe070_cookbooks
-        name: robe070/cookbooks
-        ref: ${{ variables.CookbooksBranch }}
+  repositories:
+    - repository: _robe070_cookbooks
+      type: github
+      endpoint: robe070
+      name: robe070/cookbooks
+      ref: debug/paas
 
-    - template: AzureDevOps/templates/GitHubRepoResource.yml
-      parameters:
-        repository: _lansa_aws-templates
-        name: lansa/aws-templates
-        ref: ${{ variables.GitLansaAwsTemplatesBranch }}
-
-# repositories:
-#     - repository: ${{ parameters.repository }}
-#       type: github
-#       endpoint: robe070
-#       name: ${{ parameters.name }}
-#       ref: ${{ parameters.ref }}
-
-#     - repository: ${{ parameters.repository }}
-#       type: github
-#       endpoint: robe070
-#       name: ${{ parameters.name }}
-#       ref: ${{ parameters.ref }}
+    - repository: _lansa_aws-templates
+      type: github
+      endpoint: robe070
+      name: lansa/aws-templates
+      ref: support/scalable
 
 variables:
   - group: Template Parameters
