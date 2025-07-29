@@ -36,8 +36,9 @@ variables:
     value: JPN
   - name: stackname
     value: BakingDP-ImageRelease
-  # - name: TemplateS3Namespace
-  #   value: /image-cd-pipeline
+  - name: TemplateS3Namespace
+    #value: /image-cd-pipeline
+    value:
   - name: agentVMImage
     value: Default
 
