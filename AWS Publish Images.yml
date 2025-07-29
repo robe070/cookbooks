@@ -64,18 +64,6 @@ stages:
     steps:
     - checkout: none
 
-    - task: PowerShell@2
-      displayName: 'Delete existing secondary repositories'
-      inputs:
-        targetType: inline
-        script: |
-          Write-Host "Deleting existing secondary repositories..."
-          cd $(Pipeline.Workspace)
-          remove-item _lansa_aws-templates -Recurse -Force -ErrorAction SilentlyContinue
-
-          cd $(Pipeline.Workspace)
-          remove-item _robe070_cookbooks -Recurse -Force -ErrorAction SilentlyContinue
-
 - stage: UpdateAUSAMIs
   displayName: Update AUS AMIs
   dependsOn: DeleteExistingRepos
@@ -91,6 +79,18 @@ stages:
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
+
+        - task: PowerShell@2
+          displayName: 'Delete existing secondary repositories'
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+              cd $(Pipeline.Workspace)
+              remove-item _lansa_aws-templates -Recurse -Force -ErrorAction SilentlyContinue
+
+              cd $(Pipeline.Workspace)
+              remove-item _robe070_cookbooks -Recurse -Force -ErrorAction SilentlyContinue
 
         - checkout: self
 
