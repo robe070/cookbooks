@@ -107,6 +107,11 @@ stages:
               -GitUserName '$(GitRepoUserName)'
               -GitRepoName '$(ArtifactSourceAlias)'
 
+        - powershell: |
+            $env:Path = "C:\Program Files\Amazon\AWSCLIV2;$env:Path"
+            aws --version
+          displayName: 'Check AWS CLI version'
+
         - task: AmazonWebServices.aws-vsts-tools.InstallAWSCredentials@1
           name: SetAWSVariables
           displayName: 'Inject AWS credentials into environment variables'
