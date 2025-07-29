@@ -107,7 +107,7 @@ stages:
               -GitUserName '$(GitRepoUserName)'
               -GitRepoName '$(ArtifactSourceAlias)'
 
-        - task: AmazonWebServices.aws-vsts-tools.ConfigureAWS@1
+        - task: AmazonWebServices.aws-vsts-tools.InstallAWSCredentials@1
           name: SetAWSVariables
           displayName: 'Inject AWS credentials into environment variables'
           inputs:
