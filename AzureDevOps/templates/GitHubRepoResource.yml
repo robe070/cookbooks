@@ -1,0 +1,15 @@
+parameters:
+- name: repository
+  type: string
+- name: name
+  type: string
+- name: ref
+  type: string
+
+resources:
+  repositories:
+    - repository: ${{ parameters.repository }}
+      type: github
+      endpoint: robe070
+      name: ${{ parameters.name }}
+      ref: ${{ parameters.ref }}

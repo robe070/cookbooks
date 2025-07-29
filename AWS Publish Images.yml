@@ -5,19 +5,6 @@ resources:
     - pipeline: _Build Image Release Artefacts
       source: 'Build Image Release Artefacts  3.0'
 
-  repositories:
-    - repository: _lansa_aws-templates
-      type: github
-      endpoint: robe070
-      name: lansa/aws-templates
-      ref: support/scalable
-
-    - repository: _robe070_cookbooks
-      type: github
-      endpoint: robe070
-      name: robe070/cookbooks
-      ref: debug/paas
-
 variables:
   - group: Template Parameters
   - group: Default Branch
@@ -43,8 +30,43 @@ variables:
     value: Default
 
 stages:
+- template: AzureDevOps/templates/GitHubRepoResource.yml
+  parameters:
+    repository: _robe070_cookbooks
+    name: robe070/cookbooks
+    ref: ${{ variables.CookbooksBranch }}
+
+- template: AzureDevOps/templates/GitHubRepoResource.yml
+  parameters:
+    repository: _lansa_aws-templates
+    name: lansa/aws-templates
+    ref: ${{ variables.GitLansaAwsTemplatesBranch }}
+
+- stage: DeleteExistingRepos
+  displayName: Delete existing secondary repositories
+  jobs:
+  - job: DeleteExistingRepos
+    displayName: Delete existing secondary repositories
+    pool:
+      name: $(agentVMImage)
+    steps:
+    - checkout: none
+
+    - task: PowerShell@2
+      displayName: 'Delete existing secondary repositories'
+      inputs:
+        targetType: inline
+        script: |
+          Write-Host "Deleting existing secondary repositories..."
+          cd $(Pipeline.Workspace)
+          rd _lansa_aws-templates /s /q
+
+          cd $(Pipeline.Workspace)
+          rd _robe070_cookbooks /s /q
+
 - stage: StartVMs
   displayName: Start VMs
+  dependsOn: DeleteExistingRepos
   jobs:
   - template: AzureDevOps/templates/start-agents.yml
     parameters:
@@ -80,7 +102,7 @@ stages:
         - script: |
             cd $(Pipeline.Workspace)/_lansa_aws-templates
             git fetch origin
-            git reset --hard $(GitLansaAwsTemplatesTempBranch)
+            git reset --hard $(GitLansaAwsTemplatesBranch)
           displayName: Force update lansa_aws-templates repo to latest
 
         - checkout: _robe070_cookbooks
@@ -170,7 +192,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -184,7 +206,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -198,7 +220,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -212,7 +234,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -226,7 +248,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
@@ -240,7 +262,7 @@ stages:
     dependsOn: UpdateAUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
@@ -638,7 +660,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -652,7 +674,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -696,7 +718,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -710,7 +732,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
@@ -754,7 +776,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
@@ -768,7 +790,7 @@ stages:
     dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 

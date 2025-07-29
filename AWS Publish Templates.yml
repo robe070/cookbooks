@@ -8,19 +8,19 @@ resources:
     type: github
     endpoint: robe070
     name: lansa/aws-templates
-    ref: support/scalable
+    ref: $(GitLansaAwsTemplatesBranch)
 
   - repository: _lansa_aws-templates-mp
     type: github
     endpoint: robe070
     name: lansa/aws-templates
-    ref: support/scalable_marketplace
+    ref: $(GitLansaAwsTemplatesMarketPlaceBranch)
 
   - repository: _robe070_cookbooks
     endpoint: robe070
     type: github
     name: robe070/cookbooks
-    ref: debug/paas
+    ref: $(CookbooksBranch)
 
 variables:
   - name: CookbooksSource
@@ -134,7 +134,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     paramStackType: Small
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
@@ -155,7 +155,7 @@ stages:
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     paramStackType: Test
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
@@ -175,7 +175,7 @@ stages:
     LansaVersion: $(LansaVersionPrevious)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramStackType: Development
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
@@ -194,7 +194,7 @@ stages:
     stackName: AUS-VPC
     LansaVersion: $(lansaVersion)
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramArguments: '-Gatestack $(Gate.stack)'
     paramTagValue: Lansa-Prod
@@ -415,7 +415,7 @@ stages:
                   "ParameterValue": "$(RemoteAccessLocationValue)"
               }, {
                   "ParameterKey": "$(LansaMSIKey)",
-                  "ParameterValue": "$(msiURLLatest)"
+                  "ParameterValue": "$(msiURLv15)"
               }, {
                   "ParameterKey": "LansaVersion",
                   "ParameterValue": "$(LansaVersion)"
@@ -520,7 +520,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-eu-west-3)
     paramNumberOfAZs: $(NumberOfAZs-eu-west-3)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-3)
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     paramTagValue: Lansa-Prod
 
 
@@ -541,7 +541,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-us-west-2)
     paramNumberOfAZs: $(NumberOfAZs-us-west-2)
     paramELBSubnetIds: $(ELBSubnetIds-us-west-2)
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     paramTagValue: Lansa-Prod
 
 
@@ -562,7 +562,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-ap-northeast-1)
     paramNumberOfAZs: $(NumberOfAZs-ap-northeast-1)
     paramELBSubnetIds: $(ELBSubnetIds-ap-northeast-1)
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     paramTagValue: Lansa-Prod
 
 
@@ -583,7 +583,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZonesUS)
     paramNumberOfAZs: $(NumberOfAZsUS)
     paramELBSubnetIds: $(ELBSubnetIdsUS)
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     paramTagValue: Lansa-Prod
 
 
@@ -808,7 +808,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-eu-north-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-north-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-north-1)
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     paramTagValue: Lansa-Prod
 
 
@@ -829,7 +829,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-eu-west-1)
     paramELBSubnetIds: $(ELBSubnetIds-eu-west-1)
     paramNumberOfAZs: $(NumberOfAZs-eu-west-1)
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     paramTagValue: Lansa-Prod
 
 
@@ -850,7 +850,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones)
     paramELBSubnetIds: $(ELBSubnetIds)
     paramNumberOfAZs: $(NumberOfAZs)
-    paramLansaMSIKey: $(msiURLPrevious)
+    paramLansaMSIKey: $(msiURLv16)
     paramTagValue: Lansa-Prod
 
 
@@ -871,7 +871,7 @@ stages:
     paramAvailabilityZones: $(AvailabilityZones-us-east-2)
     paramELBSubnetIds: $(ELBSubnetIds-us-east-2)
     paramNumberOfAZs: $(NumberOfAZs-us-east-2)
-    paramLansaMSIKey: $(msiURLLatest)
+    paramLansaMSIKey: $(msiURLv15)
     paramTagValue: Lansa-Prod
 
 
