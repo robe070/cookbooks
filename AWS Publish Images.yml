@@ -101,8 +101,6 @@ stages:
           displayName: 'Delete temp branch and create temp branch'
           inputs:
             targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            #filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
             arguments:
               -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
@@ -113,11 +111,15 @@ stages:
           displayName: 'Update Template AMI Mappings'
           inputs:
             targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            # filePath: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
             arguments:
               -ImageType 'Development'
+
+        - task: PowerShell@2
+          displayName: 'Set pipeline Version variables based on the published artefacts'
+          inputs:
+            targetType: filePath
+            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetVersionVariables.ps1'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
