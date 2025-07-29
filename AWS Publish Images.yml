@@ -112,14 +112,14 @@ stages:
             aws --version
           displayName: 'Check AWS CLI version'
 
-        - task: AmazonWebServices.aws-vsts-tools.InstallAWSCredentials@1
-          name: SetAWSVariables
-          displayName: 'Inject AWS credentials into environment variables'
-          inputs:
-            awsCredentials: 'AzureDevOps'
-            regionName: 'ap-southeast-2'
-            exportEnvironmentVariables: true
-            exportEnvironmentVariablesPrefix: 'AWS_'
+        # - task: AmazonWebServices.aws-vsts-tools.InstallAWSCredentials@1
+        #   name: SetAWSVariables
+        #   displayName: 'Inject AWS credentials into environment variables'
+        #   inputs:
+        #     awsCredentials: 'AzureDevOps'
+        #     regionName: 'ap-southeast-2'
+        #     exportEnvironmentVariables: true
+        #     exportEnvironmentVariablesPrefix: 'AWS_'
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
