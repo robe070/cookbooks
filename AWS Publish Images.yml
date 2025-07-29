@@ -37,25 +37,9 @@ variables:
   - name: stackname
     value: BakingDP-ImageRelease
   - name: TemplateS3Namespace
-    value: /image-cd-pipeline
+    value: none
   - name: agentVMImage
     value: Default
-  # - name: GitAwsTemplateMarketPlaceBranch
-  #   value: support/scalable_marketplace
-  # - name: GitAwsTemplatescalableBranch
-  #   value: support/scalable
-  # - name: GitCookBooksGitHubName
-  #   value: github.com/robe070/cookbooks
-  # - name: GitLansaAwsTemplatesGitHubName
-  #   value: github.com/lansa/aws-templates
-  # - name: GitLansaAwsTemplatesPAT
-  #   value: ccc
-  # - name: GitLansaAwsTemplatesRepoName
-  #   value: _lansa_aws-templates
-  # - name: GitRepoUserEmail
-  #   value: lansacloud@lansa.com.au
-  # - name: GitRepoUserName
-  #   value: LansaCloud
 
 stages:
 - stage: StartVMs
@@ -112,15 +96,6 @@ stages:
             aws --version
           displayName: 'Check AWS CLI version'
 
-        # - task: AmazonWebServices.aws-vsts-tools.InstallAWSCredentials@1
-        #   name: SetAWSVariables
-        #   displayName: 'Inject AWS credentials into environment variables'
-        #   inputs:
-        #     awsCredentials: 'AzureDevOps'
-        #     regionName: 'ap-southeast-2'
-        #     exportEnvironmentVariables: true
-        #     exportEnvironmentVariablesPrefix: 'AWS_'
-
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
           inputs:
@@ -143,40 +118,6 @@ stages:
             arguments:
               -ImageType 'Development'
 
-        # - task: PowerShell@2
-        #   displayName: 'AWS Template verification'
-        #   inputs:
-        #     targetType: 'inline'
-        #     script: |
-        #       $ErrorActionPreference = 'Stop'
-        #       $templateUrl = "https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/lansa-master-win.cfn.template"
-        #       Write-Host "Validating CloudFormation template: $templateUrl"
-        #       aws cloudformation validate-template --template-url $templateUrl
-
-        # - task: PowerShell@2
-        #   displayName: 'S3 Upload: lansa'
-        #   inputs:
-        #     targetType: 'inline'
-        #     script: |
-        #       $ErrorActionPreference = 'Stop'
-        #       $sourceFolder = '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
-        #       $targetFolder = "templates/$(CookbooksBranch)$(TemplateS3Namespace)"
-        #       Write-Host "Uploading templates from $sourceFolder to s3://lansa/$targetFolder"
-        #       Get-ChildItem -Path $sourceFolder -Filter *.template | ForEach-Object {
-        #         $filePath = $_.FullName
-        #         $s3Key = Join-Path $targetFolder $_.Name -Resolve
-        #         aws s3 cp "$filePath" "s3://lansa/$s3Key" --acl public-read
-        #       }
-
-        # - task: PowerShell@2
-        #   displayName: 'AWS Delete the AMI ids from s3'
-        #   inputs:
-        #     targetType: 'inline'
-        #     script: |
-        #       $ErrorActionPreference = 'Stop'
-        #       Write-Host "Deleting AMI ID files from s3://lansa/templates/support/scalable/ami-list/"
-        #       aws s3 rm s3://lansa/templates/support/scalable/ami-list/ --recursive
-
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
           inputs:
@@ -193,8 +134,6 @@ stages:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
             bucketName: lansa
-            #sourceFolder: '$(System.DefaultWorkingDirectory)/aws-templates/CloudFormationWindows'
-            # sourceFolder: '$(System.DefaultWorkingDirectory)/_lansa_aws-templates/CloudFormationWindows'
             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
