@@ -42,10 +42,10 @@ parameters:
     default: ''
 
 stages:
-  variables:
-  - template: vars.yml
-
   - stage: ${{ parameters.stageName }}
+    variables:
+      - template: vars.yml
+
     condition: ${{ parameters.jobcondition }}
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
