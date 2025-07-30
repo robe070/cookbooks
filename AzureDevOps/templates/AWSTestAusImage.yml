@@ -42,7 +42,7 @@ parameters:
     default: ''
 
 stages:
-  - template: AzureDevOps/templates/vars.yml
+  - template: vars.yml
 
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.jobcondition }}
