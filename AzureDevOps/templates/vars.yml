@@ -1,3 +1,5 @@
+# See scripts/SetVersionVariables.ps1 for more information on how these variables have been created
+# and how to use them in a pipeline.
 variables:
   - name: Build-w19d-15-0
     value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]

@@ -6,13 +6,12 @@
 #
 Write-Host "Set all pipeline variables to false"
 Write-Host "These variables may be accessed in any subsequent stage or job in the pipeline."
-Write-Host "The current stage or job needs to be dependent on the stage or job that sets them."
+Write-Host "The current stage or job needs to be explicitly dependent on the stage or job that sets them."
 Write-Host "You refer to them as $[stageDependencies.<StageName>.<JobName>.outputs['<StepName>.Build-w19d-15-0']]"
 Write-Host "e.g. $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]"
-Write-Host "The template include file vars.yml declares variables for each of these stage variables."
+Write-Host "The template include file vars.yml maps each of the stageDependencies variables into environment variables."
+Write-Host "Include the template file vars.yml in the Stage of your pipeline that needs to use these variables in the jobCondition."
 Write-Host "You refer to them in your scripts as `$(Build-w19d-15-0), `$(Build-w19d-15-0j), etc."
-Write-Host "Include the template file vars.yml in each Stage of your pipeline that needs access to these variables."
-Write-Host "This only works because isOutput=true is used"
 
 Write-Host "##vso[task.setvariable variable=Build-w19d-15-0;isOutput=true]False"
 Write-Host "##vso[task.setvariable variable=Build-w19d-15-0j;isOutput=true]False"
