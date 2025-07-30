@@ -140,7 +140,7 @@ stages:
           displayName: 'Set stageDependencies Version variables based on the published artefacts'
           inputs:
             targetType: filePath
-            filePath: 'scripts/SetVersionVariables.ps1'
+            filePath: 'cookbooks/scripts/SetVersionVariables.ps1'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Template verification'
