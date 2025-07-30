@@ -182,9 +182,9 @@ stages:
   jobs:
   - job: ShowVars
     displayName: Show Variables
-  pool:
-    name: $(agentVMImage)
-  steps:
+    pool:
+      name: $(agentVMImage)
+    steps:
       - task: PowerShell@2
         displayName: 'Show All Variables'
         inputs:
