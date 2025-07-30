@@ -92,7 +92,7 @@ stages:
           targetType: inline
           script: |
             Write-Host "Show all variables:"
-            env
+            Get-ChildItem Env:
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Set Gate Variable'
