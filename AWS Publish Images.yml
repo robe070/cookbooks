@@ -177,7 +177,7 @@ stages:
   displayName: Show Variables
   dependsOn: Init
   variables:
-  - template: vars.yml
+  - template: AzureDevOps/templates/vars.yml
 
   jobs:
   - job: ShowVars
