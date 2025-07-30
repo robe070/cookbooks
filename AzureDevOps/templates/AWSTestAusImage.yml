@@ -42,6 +42,7 @@ parameters:
     default: ''
 
 stages:
+  variables:
   - template: vars.yml
 
   - stage: ${{ parameters.stageName }}
