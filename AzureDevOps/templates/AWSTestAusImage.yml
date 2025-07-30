@@ -46,15 +46,16 @@ stages:
     variables:
       - template: vars.yml
 
-    condition: ${{ parameters.jobcondition }}
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
 
     jobs:
     - job: ${{ parameters.stageName }}
+      displayName: ${{ parameters.stageDisplayname }}
+      condition: ${{ parameters.jobcondition }}
       timeoutInMinutes: 120
       cancelTimeoutInMinutes: 1
-      displayName: ${{ parameters.stageDisplayname }}
+
 
       variables:
         # We are using the name space as declared by the git branch, are we not?
@@ -87,7 +88,7 @@ stages:
         path: _robe070_cookbooks
 
       - task: PowerShell@2
-        displayName: 'Show stageDependencies'
+        displayName: 'Show All Variables'
         inputs:
           targetType: inline
           script: |
