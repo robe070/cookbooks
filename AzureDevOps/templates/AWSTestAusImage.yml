@@ -87,14 +87,6 @@ stages:
         displayName: Checkout Rob cookbooks
         path: _robe070_cookbooks
 
-      - task: PowerShell@2
-        displayName: 'Show All Variables'
-        inputs:
-          targetType: inline
-          script: |
-            Write-Host "Show all variables:"
-            Get-ChildItem Env:
-
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Set Gate Variable'
         name: Gate

@@ -173,6 +173,26 @@ stages:
             awsArguments: 's3://lansa/templates/support/scalable/ami-list/ --recursive'
             failOnStandardError: false
 
+- stage: ShowVars
+  displayName: Show Variables
+  dependsOn: Init
+  variables:
+  - template: vars.yml
+
+  jobs:
+  - job: ShowVars
+    displayName: Show Variables
+  pool:
+    name: $(agentVMImage)
+  steps:
+      - task: PowerShell@2
+        displayName: 'Show All Variables'
+        inputs:
+          targetType: inline
+          script: |
+            Write-Host "Show all variables:"
+            Get-ChildItem Env:
+
 - template: AzureDevOps/templates/AWSTestAusImage.yml
   parameters:
     stageName: 'w25d160IMGTest'
@@ -181,8 +201,7 @@ stages:
     stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
     dependsOn: Init
-    # jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
-    jobCondition: succeeded()
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
