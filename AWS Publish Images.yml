@@ -181,7 +181,8 @@ stages:
     stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
     dependsOn: Init
-    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
+    # jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
+    jobCondition: succeeded()
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
