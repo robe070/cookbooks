@@ -1,0 +1,25 @@
+variables:
+  - name: Build-w19d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]
+  - name: Build-w19d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0j']]
+  - name: Build-w19d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0']]
+  - name: Build-w19d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0j']]
+  - name: Build-w22d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0']]
+  - name: Build-w22d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0j']]
+  - name: Build-w22d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0']]
+  - name: Build-w22d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0j']]
+  - name: Build-w25d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0']]
+  - name: Build-w25d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0j']]
+  - name: Build-w25d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
+  - name: Build-w25d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]

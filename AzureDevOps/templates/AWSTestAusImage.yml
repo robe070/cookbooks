@@ -42,10 +42,13 @@ parameters:
     default: ''
 
 stages:
+  - template: AzureDevOps/templates/vars.yml
+
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.jobcondition }}
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
+
     jobs:
     - job: ${{ parameters.stageName }}
       timeoutInMinutes: 120
