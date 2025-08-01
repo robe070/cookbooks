@@ -29,7 +29,9 @@ parameters:
 stages:
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.jobCondition }}
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn:
+      - ${{ parameters.dependsOn }}
+      - Init
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     - job: ${{ parameters.stageName }}
