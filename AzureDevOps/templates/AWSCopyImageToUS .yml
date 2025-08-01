@@ -41,8 +41,7 @@ stages:
         TemplateS3Namespace: '/image-cd-pipeline'
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
-        demands: ${{ parameters.jobDemand }}
+        name: $(agentVMImage)
 
       steps:
       - download: _Build Image Release Artefacts
