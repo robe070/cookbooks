@@ -132,7 +132,7 @@ stages:
             targetType: filePath
             filePath: 'cookbooks/scripts/SetVersionVariables.ps1'
 
-        - template: '$(Pipeline.Workspace)/_lansa_aws-templates/AWSValidateTemplates.yml'
+        - template: AWSValidateTemplates.yml@templates
           parameters:
             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
