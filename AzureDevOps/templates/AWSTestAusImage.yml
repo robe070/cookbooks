@@ -152,9 +152,6 @@ stages:
                 "ParameterKey": "MPS3KeyPrefix",
                 "ParameterValue": "templates/$(CookbooksBranch)$(TemplateS3Namespace)/"
             }, {
-                "ParameterKey": "TemplateS3Namespace",
-                "ParameterValue": "$(TemplateS3Namespace)"
-            }, {
                 "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
             }, {

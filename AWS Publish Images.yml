@@ -126,71 +126,16 @@ stages:
               -GitRepoName '$(ArtifactSourceAlias)'
 
         - task: PowerShell@2
-          condition: false
-          displayName: 'Update Template AMI Mappings'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            arguments:
-              -ImageType 'Development'
-
-        - task: PowerShell@2
           name: Vars
           displayName: 'Set stageDependencies Version variables based on the published artefacts'
           inputs:
             targetType: filePath
             filePath: 'cookbooks/scripts/SetVersionVariables.ps1'
 
-        - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-          displayName: 'S3 Upload: lansa'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            bucketName: lansa
+        - template: AzureDevOps/templates/AWSValidateTemplates.yml
+          parameters:
             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
-            globExpressions: '*.template'
             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
-            filesAcl: 'public-read'
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
-          displayName: 'lansa-stack-type-win.cfn.template verification'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            awsCommand: 'cloudformation '
-            awsSubCommand: 'validate-template'
-            awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/lansa-stack-type-win.cfn.template'
-            failOnStandardError: false
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
-          displayName: 'webserver-win.cfn.templateverification'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            awsCommand: 'cloudformation '
-            awsSubCommand: 'validate-template'
-            awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/webserver-win.cfn.template'
-            failOnStandardError: false
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
-          displayName: 'nested-vpc.cfn.template verification'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            awsCommand: 'cloudformation '
-            awsSubCommand: 'validate-template'
-            awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/nested-vpc.cfn.template'
-            failOnStandardError: false
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
-          displayName: 'calculate-iops.cfn.template verification'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            awsCommand: 'cloudformation '
-            awsSubCommand: 'validate-template'
-            awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/calculate-iops.cfn.template'
-            failOnStandardError: false
 
         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
           displayName: 'AWS Delete the AMI ids from s3'
