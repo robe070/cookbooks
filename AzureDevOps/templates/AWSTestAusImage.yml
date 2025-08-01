@@ -58,12 +58,8 @@ stages:
 
 
       variables:
-        # We are using the name space as declared by the git branch, are we not?
-        # Thats where the templates have been uploaded to by the first Stage.
-        # CookbooksBranch: '$(Build.SourceBranchName)'
-        # So probably delete this variable.
-        # - name: TemplateS3Namespace
-        #  value: '/image-cd-pipeline'
+        - name: TemplateS3Namespace
+          value: '/image-cd-pipeline'
         - name: japan_override
           ${{ if endsWith(lower(parameters.BaseImageName), 'j')}}:
             value: -Language $(jpnLanguage)
@@ -155,6 +151,9 @@ stages:
             }, {
                 "ParameterKey": "MPS3KeyPrefix",
                 "ParameterValue": "templates/$(CookbooksBranch)$(TemplateS3Namespace)/"
+            }, {
+                "ParameterKey": "TemplateS3Namespace",
+                "ParameterValue": "$(TemplateS3Namespace)"
             }, {
                 "ParameterKey": "TagValue",
                 "ParameterValue": "${{ parameters.paramTagValue }}"
