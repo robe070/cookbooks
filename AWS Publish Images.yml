@@ -347,9 +347,7 @@ stages:
     stageDisplayname: 'w25d-16-0 Copy AMI to US'
     BaseImageName: w25d-16-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w25d160IMGTest
-      - Init
+    dependsOn: w25d160IMGTest
     globExpressions: w25d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -359,9 +357,7 @@ stages:
     stageDisplayname: 'w25d-15-0 Copy AMI to US'
     BaseImageName: w25d-15-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w25d150IMGTest
-      - Init
+    dependsOn: w25d150IMGTest
     globExpressions: w25d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
@@ -371,9 +367,7 @@ stages:
     stageDisplayname: 'w19d-16-0 Copy AMI to US'
     BaseImageName: w19d-16-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w19d160IMGTest
-      - Init
+    dependsOn: w19d160IMGTest
     globExpressions: w19d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -383,9 +377,7 @@ stages:
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
     BaseImageName: w19d-15-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w19d150IMGTest
-      - Init
+    dependsOn: w19d150IMGTest
     globExpressions: w19d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
@@ -395,9 +387,7 @@ stages:
     stageDisplayname: 'w22d-16-0 Copy AMI to US'
     BaseImageName: w22d-16-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w22d160IMGTest
-      - Init
+    dependsOn: w22d160IMGTest
     globExpressions: w22d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -407,9 +397,7 @@ stages:
     stageDisplayname: 'w22d-15-0 Copy AMI to US'
     BaseImageName: w22d-15-0
     jobDemand: DotNetFramework
-    dependsOn:
-      - w22d150IMGTest
-      - Init
+    dependsOn: w22d150IMGTest
     globExpressions: w22d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
@@ -419,9 +407,7 @@ stages:
     stageDisplayname: 'w25d-16-0j Copy AMI to US'
     BaseImageName: w25d-16-0j
     jobDemand: DotNetFramework
-    dependsOn:
-      - w25d160jIMGTest
-      - Init
+    dependsOn: w25d160jIMGTest
     globExpressions: w25d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -431,9 +417,7 @@ stages:
     stageDisplayname: 'w25d-15-0j Copy AMI to US'
     BaseImageName: w25d-15-0j
     jobDemand: DotNetFramework
-    dependsOn:
-      - w25d150jIMGTest
-      - Init
+    dependsOn: w25d150jIMGTest
     globExpressions: w25d-15-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
@@ -443,9 +427,7 @@ stages:
     stageDisplayname: 'w19d-16-0j Copy AMI to US'
     BaseImageName: w19d-16-0j
     jobDemand: DotNetFramework
-    dependsOn:
-      - w19d160jIMGTest
-      - Init
+    dependsOn: w19d160jIMGTest
     globExpressions: w19d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -455,9 +437,7 @@ stages:
     stageDisplayname: 'w19d-15-0j Copy AMI to US'
     BaseImageName: w19d-15-0j
     jobDemand: DotNetFramework
-    dependsOn:
-      - w19d150jIMGTest
-      - Init
+    dependsOn: w19d150jIMGTest
     globExpressions: w19d-15-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
@@ -467,9 +447,7 @@ stages:
     stageDisplayname: 'w22d-16-0j Copy AMI to US'
     BaseImageName: w22d-16-0j
     jobDemand: DotNetFramework
-    dependsOn:
-      - w22d160jIMGTest
-      - Init
+    dependsOn: w22d160jIMGTest
     globExpressions: w22d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
@@ -498,7 +476,6 @@ stages:
   - w22d150CopyAMItoUS
   - w22d160jCopyAMItoUS
   - w22d150jCopyAMItoUS
-  - Init
   jobs:
     - job:
       displayName: Agent job
@@ -665,9 +642,7 @@ stages:
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -681,9 +656,7 @@ stages:
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -697,9 +670,7 @@ stages:
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -714,9 +685,7 @@ stages:
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -731,9 +700,7 @@ stages:
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -747,9 +714,7 @@ stages:
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -763,9 +728,7 @@ stages:
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -780,9 +743,7 @@ stages:
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -797,9 +758,7 @@ stages:
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -813,9 +772,7 @@ stages:
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -829,9 +786,7 @@ stages:
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -846,9 +801,7 @@ stages:
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn:
-      - UpdateUSAMIs
-      - Init
+    dependsOn: UpdateUSAMIs
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -871,7 +824,6 @@ stages:
   - w22d150USIMGTest
   - w22d160jUSIMGTest
   - w22d150jUSIMGTest
-  - Init
 
   jobs:
     - job:
