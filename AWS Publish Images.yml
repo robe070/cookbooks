@@ -54,11 +54,11 @@ stages:
       azureSubscription: 'Azure Baking Images'
 
 - stage: Init
-  displayName: Update AUS AMIs
+  displayName: Initialise
   dependsOn: StartVMs
   jobs:
     - job: Init
-      displayName: Update AUS AMIs
+      displayName: Initialise
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 

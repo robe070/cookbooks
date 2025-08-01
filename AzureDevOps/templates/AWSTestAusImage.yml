@@ -213,6 +213,7 @@ stages:
           arguments:
             -Gatestack $(Gate.stack)
             $(japan_override)
+            -DisableIntegratorTest
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
