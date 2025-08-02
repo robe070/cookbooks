@@ -75,10 +75,13 @@ stages:
             script: |
               Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
               cd $(Pipeline.Workspace)
-              remove-item _lansa_aws-templates -Recurse -Force -ErrorAction Continue
-
-              cd $(Pipeline.Workspace)
-              remove-item _robe070_cookbooks -Recurse -Force -ErrorAction Continue
+              Get-Location -Path _lansa_aws-templates, _robe070_cookbooks | ForEach-Object {
+                if (Test-Path $_) {
+                  Write-Host "Removing $_"
+                  Remove-Item $_ -Recurse -Force -ErrorAction Continue -Verbose 4>&1 | Out-Default | Write-Host
+                }
+              }
+              Write-Host "Existing secondary repositories deleted."
 
         - checkout: self
 
