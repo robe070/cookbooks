@@ -75,10 +75,10 @@ stages:
             script: |
               Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
               cd $(Pipeline.Workspace)
-              remove-item _lansa_aws-templates -Recurse -Force -ErrorAction SilentlyContinue
+              remove-item _lansa_aws-templates -Recurse -Force -ErrorAction Continue
 
               cd $(Pipeline.Workspace)
-              remove-item _robe070_cookbooks -Recurse -Force -ErrorAction SilentlyContinue
+              remove-item _robe070_cookbooks -Recurse -Force -ErrorAction Continue
 
         - checkout: self
 
