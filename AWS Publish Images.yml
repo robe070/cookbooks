@@ -68,20 +68,23 @@ stages:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
-        - task: PowerShell@2
-          displayName: 'Delete existing secondary repositories'
-          inputs:
-            targetType: inline
-            script: |
-              Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-              cd $(Pipeline.Workspace)
-              Get-Location -Path _lansa_aws-templates, _robe070_cookbooks | ForEach-Object {
-                if (Test-Path $_) {
-                  Write-Host "Removing $_"
-                  Remove-Item -Path $_ -Recurse -Force -ErrorAction Continue -Verbose 4>&1 | Out-Default | Write-Host
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue -Verbose
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
                 }
-              }
-              Write-Host "Existing secondary repositories deleted."
+            }
+
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
 
         - checkout: self
 
