@@ -78,7 +78,7 @@ stages:
               Get-Location -Path _lansa_aws-templates, _robe070_cookbooks | ForEach-Object {
                 if (Test-Path $_) {
                   Write-Host "Removing $_"
-                  Remove-Item $_ -Recurse -Force -ErrorAction Continue -Verbose 4>&1 | Out-Default | Write-Host
+                  Remove-Item -Path $_ -Recurse -Force -ErrorAction Continue -Verbose 4>&1 | Out-Default | Write-Host
                 }
               }
               Write-Host "Existing secondary repositories deleted."
