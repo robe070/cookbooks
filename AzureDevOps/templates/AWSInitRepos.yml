@@ -23,7 +23,6 @@ steps:
 
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
-          fetchDepth: 0
           path: _lansa_aws-templates
 
         # Force update lansa_aws-templates repo to latest otherwise its not updated with the latest changes
