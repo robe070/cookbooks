@@ -65,44 +65,7 @@ stages:
         name: $(agentVMImage)
 
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
-
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
-
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue -Verbose
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
-
-        - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          fetchDepth: 0
-          path: _lansa_aws-templates
-
-        # Force update lansa_aws-templates repo to latest otherwise its not updated with the latest changes
-        - script: |
-            cd $(Pipeline.Workspace)/_lansa_aws-templates
-            git fetch origin
-            git reset --hard HEAD
-          displayName: Force update lansa_aws-templates repo to latest
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
+        - template: AzureDevOps/templates/AWSInitRepos.yml
 
         - task: PowerShell@2
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
@@ -495,6 +458,23 @@ stages:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
+                }
+            }
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
+
         - checkout: self
 
         - checkout: _lansa_aws-templates
@@ -561,6 +541,23 @@ stages:
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
+
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
+                }
+            }
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
 
         - checkout: self
 
@@ -844,6 +841,23 @@ stages:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
 
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
+                }
+            }
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
+
         - checkout: self
 
         - checkout: _lansa_aws-templates
@@ -959,6 +973,23 @@ stages:
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
+
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
+                }
+            }
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
 
         - checkout: self
 
