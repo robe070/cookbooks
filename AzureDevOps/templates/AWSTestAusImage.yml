@@ -70,7 +70,7 @@ stages:
         name: $(agentVMImage)
 
       steps:
-      - template: AzureDevOps/templates/AWSInitRepos.yml
+      - template: AWSInitRepos.yml
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Set Gate Variable'
