@@ -24,7 +24,8 @@ parameters:
     type: string
     default: ''
   - name: dependsOn
-    default: []
+    type: string
+    default: ''
   - name: paramLansaVersion
     type: string
     default: none
