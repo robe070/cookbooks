@@ -417,132 +417,91 @@ stages:
     globExpressions: w22d-15-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
-- stage: CommitAUStemplatechanges
-  displayName: Commit AUS template changes
-  dependsOn:
-  - w25d160CopyAMItoUS
-  - w25d150CopyAMItoUS
-  - w25d160jCopyAMItoUS
-  - w25d150jCopyAMItoUS
-  - w19d160CopyAMItoUS
-  - w19d150CopyAMItoUS
-  - w19d160jCopyAMItoUS
-  - w19d150jCopyAMItoUS
-  - w22d160CopyAMItoUS
-  - w22d150CopyAMItoUS
-  - w22d160jCopyAMItoUS
-  - w22d150jCopyAMItoUS
-  jobs:
-    - job:
-      displayName: Agent job
-      timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1
+# - stage: UpdateUSAMIs
+#   displayName: Update US AMIs
+#   dependsOn:
+#   - w25d160CopyAMItoUS
+#   - w25d150CopyAMItoUS
+#   - w25d160jCopyAMItoUS
+#   - w25d150jCopyAMItoUS
+#   - w19d160CopyAMItoUS
+#   - w19d150CopyAMItoUS
+#   - w19d160jCopyAMItoUS
+#   - w19d150jCopyAMItoUS
+#   - w22d160CopyAMItoUS
+#   - w22d150CopyAMItoUS
+#   - w22d160jCopyAMItoUS
+#   - w22d150jCopyAMItoUS
 
-      pool:
-        name: $(agentVMImage)
+#   jobs:
+#     - job: UpdateUSAMIs
+#       displayName: Update US AMIs
+#       timeoutInMinutes: 0
+#       cancelTimeoutInMinutes: 1
 
-      steps:
-        - template: AzureDevOps/templates/AWSInitRepos.yml
+#       pool:
+#         name: $(agentVMImage)
 
-        # - pwsh: |
-        #    # change to project directory
-        #    cd $(Pipeline.Workspace)/_lansa_aws-templates
+#       steps:
+#         - template: AzureDevOps/templates/AWSInitRepos.yml
+#           parameters:
+#             gitRepoWriteAccess: false
 
-        #    # fetch changes
-        #    git fetch
-        #    if (-not $?) {
-        #     Write-Host(" git fetch failed");
-        #     exit 1
-        #    }
+#         # - task: PowerShell@2
+#         #   displayName: 'Delete temp branch and create temp branch'
+#         #   inputs:
+#         #     targetType: filePath
+#         #     # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+#         #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
+#         #     arguments:
+#         #       -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
+#         #       -GitRepoName '$(ArtifactSourceAlias)'
 
+#         - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
+#           displayName: 'S3 Download: lansa'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'ap-southeast-2'
+#             bucketName: lansa
+#             sourceFolder: 'templates/$(s3amiUpload)'
+#             targetFolder: '$(Pipeline.Workspace)'
 
-        #    # merge branch to the main branch (for testing merging temp branch to feature/119)
-        #    git pull origin $(GitLansaAwsTemplatesTempBranch)
-        #    if (-not $?) {
-        #     Write-Host(" git pull origin $(GitLansaAwsTemplatesTempBranch) failed");
-        #     exit 1
-        #    }
+#         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+#           displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'us-east-1'
+#             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'
 
-        #    # push to the main branch
-        #    git push
-        #    if (-not $?) {
-        #     Write-Host(" git push failed");
-        #     exit 1
-        #    }
+#         - task: PowerShell@2
+#           displayName: 'Update Template AMI Mappings'
+#           inputs:
+#             targetType: filePath
+#             # filePath: './$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
+#             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
+#             arguments:
+#               -ImageType 'Production'
 
-        #   displayName: 'Commit AUS template changes'
+#         - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
+#           displayName: 'AWS Template verification'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'ap-southeast-2'
+#             awsCommand: cloudformation
+#             awsSubCommand: 'validate-template'
+#             awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/lansa-master-win.cfn.template'
+#             failOnStandardError: false
 
-- stage: UpdateUSAMIs
-  displayName: Update US AMIs
-  dependsOn: CommitAUStemplatechanges
-
-  jobs:
-    - job:
-      displayName: Agent job
-      timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1
-
-      pool:
-        name: $(agentVMImage)
-
-      steps:
-        - template: AzureDevOps/templates/AWSInitRepos.yml
-
-        - task: PowerShell@2
-          displayName: 'Delete temp branch and create temp branch'
-          inputs:
-            targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeleteTempBranchAndCreatetempBranch.ps1'
-            arguments:
-              -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
-              -GitRepoName '$(ArtifactSourceAlias)'
-
-        - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
-          displayName: 'S3 Download: lansa'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            bucketName: lansa
-            sourceFolder: 'templates/$(s3amiUpload)'
-            targetFolder: '$(Pipeline.Workspace)'
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'us-east-1'
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'
-
-        - task: PowerShell@2
-          displayName: 'Update Template AMI Mappings'
-          inputs:
-            targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/UpdateTemplateAMIMappings.ps1'
-            arguments:
-              -ImageType 'Production'
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSCLI.AWSCLI@1
-          displayName: 'AWS Template verification'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            awsCommand: cloudformation
-            awsSubCommand: 'validate-template'
-            awsArguments: '--template-url  https://lansa.s3.ap-southeast-2.amazonaws.com/templates/$(CookbooksBranch)$(TemplateS3Namespace)/lansa-master-win.cfn.template'
-            failOnStandardError: false
-
-        - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
-          displayName: 'S3 Upload: lansa'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            bucketName: lansa
-            sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
-            globExpressions: '*.template'
-            targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
-            filesAcl: 'public-read'
+#         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
+#           displayName: 'S3 Upload: lansa'
+#           inputs:
+#             awsCredentials: AzureDevOps
+#             regionName: 'ap-southeast-2'
+#             bucketName: lansa
+#             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
+#             globExpressions: '*.template'
+#             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
+#             filesAcl: 'public-read'
 
 - template: AzureDevOps/templates/AWSTestUSImage.yml
   parameters:
@@ -551,7 +510,7 @@ stages:
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w25d160CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLv16)
