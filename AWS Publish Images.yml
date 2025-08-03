@@ -123,7 +123,7 @@ stages:
             Write-Host "Show all variables:"
             Get-ChildItem Env:
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w25d160IMGTest'
     stageDisplayname: 'w25d-16-0 IMG Test'
@@ -137,7 +137,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w25d150IMGTest'
     stageDisplayname: 'w25d-15-0 IMG Test'
@@ -151,7 +151,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d160IMGTest'
     stageDisplayname: 'w19d-16-0 IMG Test'
@@ -165,7 +165,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d150IMGTest'
     stageDisplayname: 'w19d-15-0 IMG Test'
@@ -179,7 +179,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w22d160IMGTest'
     stageDisplayname: 'w22d-16-0 IMG Test'
@@ -193,7 +193,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w22d150IMGTest'
     stageDisplayname: 'w22d-15-0 IMG Test'
@@ -207,7 +207,7 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w25d160jIMGTest'
     stageDisplayname: 'w25d-16-0j IMG Test'
@@ -222,7 +222,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w25d150jIMGTest'
     stageDisplayname: 'w25d-15-0j IMG Test'
@@ -237,7 +237,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d160jIMGTest'
     stageDisplayname: 'w19d-16-0j IMG Test'
@@ -252,7 +252,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d150jIMGTest'
     stageDisplayname: 'w19d-15-0j IMG Test'
@@ -267,7 +267,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w22d160jIMGTest'
     stageDisplayname: 'w22d-16-0j IMG Test'
@@ -282,7 +282,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestAusImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w22d150jIMGTest'
     stageDisplayname: 'w22d-15-0j IMG Test'
@@ -503,8 +503,9 @@ stages:
 #             targetFolder: 'templates/$(CookbooksBranch)$(TemplateS3Namespace)'
 #             filesAcl: 'public-read'
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w25d160USIMGTest'
     stageDisplayname: 'w25d-16-0 US IMG Test'
     BaseImageName: w25d-16-0
@@ -517,8 +518,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w25d150USIMGTest'
     stageDisplayname: 'w25d-15-0 US IMG Test'
     BaseImageName: w25d-15-0
@@ -531,8 +533,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w25d160jUSIMGTest'
     stageDisplayname: 'w25d-16-0j US IMG Test'
     BaseImageName: w25d-16-0j
@@ -546,8 +549,9 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w25d150jUSIMGTest'
     stageDisplayname: 'w25d-15-0j US IMG Test'
     BaseImageName: w25d-15-0j
@@ -561,8 +565,9 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w19d160USIMGTest'
     stageDisplayname: 'w19d-16-0 US IMG Test'
     BaseImageName: w19d-16-0
@@ -575,8 +580,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w19d150USIMGTest'
     stageDisplayname: 'w19d-15-0 US IMG Test'
     BaseImageName: w19d-15-0
@@ -589,8 +595,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w19d160jUSIMGTest'
     stageDisplayname: 'w19d-16-0j US IMG Test'
     BaseImageName: w19d-16-0j
@@ -604,8 +611,9 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w19d150jUSIMGTest'
     stageDisplayname: 'w19d-15-0j US IMG Test'
     BaseImageName: w19d-15-0j
@@ -619,8 +627,9 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w22d160USIMGTest'
     stageDisplayname: 'w22d-16-0 US IMG Test'
     BaseImageName: w22d-16-0
@@ -633,8 +642,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w22d150USIMGTest'
     stageDisplayname: 'w22d-15-0 US IMG Test'
     BaseImageName: w22d-15-0
@@ -647,8 +657,9 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOS2022)
     paramTagValue: "Lansa-Prod"
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w22d160jUSIMGTest'
     stageDisplayname: 'w22d-16-0j US IMG Test'
     BaseImageName: w22d-16-0j
@@ -662,8 +673,9 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestUSImage.yml
+- template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
+    region: 'us-east-1'
     stageName: 'w22d150jUSIMGTest'
     stageDisplayname: 'w22d-15-0j US IMG Test'
     BaseImageName: w22d-15-0j

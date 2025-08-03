@@ -1,13 +1,14 @@
+# AWS Test Image
 parameters:
+  - name: region
+    type: string
+    default: ap-southeast-2
   - name: stageName
     type: string
     default: none
   - name: stageDisplayname
     type: string
     default: none
-  # - name: runStage
-  #   type: boolean
-  #   default: true
   - name: BaseImageName
     type: string
     default: none
@@ -68,6 +69,24 @@ stages:
           ${{ else }}:
             value: ''
 
+        # Override network settings when in US region to those values declared in the variable group "VPC us-east-1"
+        # Otherwise use the default values from the variable group "VPC ap-southeast-2"
+        - ${{ if eq(parameters.region, 'us-east-1') }}:
+            name: CurrentVPC
+            value: $(CurrentVPCUS)
+        - ${{ if eq(parameters.region, 'us-east-1') }}:
+            name: AvailabilityZones
+            value: $(AvailabilityZonesUS)
+        - ${{ if eq(parameters.region, 'us-east-1') }}:
+            name: NumberOfAZs
+            value: $(NumberOfAZsUS)
+        - ${{ if eq(parameters.region, 'us-east-1') }}:
+            name: DBSubnetGroupName
+            value: $(DBSubnetGroupNameUS)
+        - ${{ if eq(parameters.region, 'us-east-1') }}:
+            name: ELBSubnetIds
+            value: $(ELBSubnetIdsUS)
+
       pool:
         name: $(agentVMImage)
 
@@ -76,12 +95,30 @@ stages:
         parameters:
             gitRepoWriteAccess: false
 
+      - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
+        displayName: 'S3 Download: lansa'
+        condition: and(succeeded(), eq( ${{ parameters.region }}, 'us-east-1' ))
+        inputs:
+          awsCredentials: AzureDevOps
+          regionName: '${{ parameters.region }}'
+          bucketName: lansa
+          sourceFolder: 'templates/$(s3amiUpload)'
+          targetFolder: '$(Pipeline.Workspace)'
+
+      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
+        condition: and(succeeded(), eq( ${{ parameters.region }}, 'us-east-1' ))
+        inputs:
+          awsCredentials: AzureDevOps
+          regionName: '${{ parameters.region }}'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/OverwriteAMIArtifact.ps1'
+
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Set Gate Variable'
         name: Gate
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           scriptType: 'filePath'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           arguments:
@@ -110,7 +147,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
 
@@ -119,7 +156,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           stackName: '$(Gate.stack)'
           templateSource: s3
           s3BucketName: lansa
@@ -189,7 +226,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/PrintDeploymentOutput.ps1'
 
@@ -198,7 +235,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           arguments:
             -Gatestack $(Gate.stack)
             $(japan_override)
@@ -210,7 +247,7 @@ stages:
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           arguments:
             -Gatestack '$(Gate.stack)'
             -Gateversion '$(Gate.version)'
@@ -222,7 +259,7 @@ stages:
         continueOnError: true
         inputs:
           awsCredentials: AzureDevOps
-          regionName: 'ap-southeast-2'
+          regionName: '${{ parameters.region }}'
           arguments: '-Gatestack $(Gate.stack)'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/DeletePreviousFailedStack.ps1'
           ignoreLASTEXITCODE: true
