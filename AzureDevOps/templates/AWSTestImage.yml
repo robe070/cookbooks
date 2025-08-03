@@ -65,28 +65,28 @@ stages:
           value: '/image-cd-pipeline'
 
         - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
-            name: japan_override
+          - name: japan_override
             value: '-Language $(jpnLanguage)'
         - ${{ else }}:
-            name: japan_override
+          - name: japan_override
             value: ''
 
         # Override network settings when in US region to those values declared in the variable group "VPC us-east-1"
         # Otherwise use the default values from the variable group "VPC ap-southeast-2"
         - ${{ if eq(parameters.region, 'us-east-1') }}:
-            name: CurrentVPC
+          - name: CurrentVPC
             value: $(CurrentVPCUS)
         - ${{ if eq(parameters.region, 'us-east-1') }}:
-            name: AvailabilityZones
+          - name: AvailabilityZones
             value: $(AvailabilityZonesUS)
         - ${{ if eq(parameters.region, 'us-east-1') }}:
-            name: NumberOfAZs
+          - name: NumberOfAZs
             value: $(NumberOfAZsUS)
         - ${{ if eq(parameters.region, 'us-east-1') }}:
-            name: DBSubnetGroupName
+          - name: DBSubnetGroupName
             value: $(DBSubnetGroupNameUS)
         - ${{ if eq(parameters.region, 'us-east-1') }}:
-            name: ELBSubnetIds
+          - name: ELBSubnetIds
             value: $(ELBSubnetIdsUS)
 
       pool:
