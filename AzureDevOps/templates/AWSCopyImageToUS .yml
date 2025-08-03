@@ -29,9 +29,11 @@ parameters:
 stages:
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.jobCondition }}
+
     dependsOn:
       - ${{ parameters.dependsOn }}
       - Init
+
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     - job: ${{ parameters.stageName }}
@@ -46,18 +48,10 @@ stages:
         name: $(agentVMImage)
 
       steps:
-      - download: _Build Image Release Artefacts
-        displayName: Download artifacts from Build Image Release Artefacts 3.0
+      - template: AWSInitRepos.yml
+        parameters:
+            gitRepoWriteAccess: false
 
-      - checkout: self
-
-      - checkout: _lansa_aws-templates
-        displayName: Checkout Lansa AWS Templates
-        path: _lansa_aws-templates
-
-      - checkout: _robe070_cookbooks
-        displayName: Checkout Rob cookbooks
-        path: _robe070_cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Copy ami to Us-east-1'

@@ -67,19 +67,6 @@ stages:
       steps:
         - template: AzureDevOps/templates/AWSInitRepos.yml
 
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (lansa/aws-templates)'
-          inputs:
-            targetType: filePath
-            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(GitLansaAwsTemplatesBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoName '$(ArtifactSourceAlias)'
-
         - powershell: |
             $env:Path = "C:\Program Files\Amazon\AWSCLIV2;$env:Path"
             aws --version
@@ -143,7 +130,6 @@ stages:
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -157,7 +143,6 @@ stages:
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -171,7 +156,6 @@ stages:
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -185,7 +169,6 @@ stages:
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -199,7 +182,6 @@ stages:
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -213,7 +195,6 @@ stages:
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -227,7 +208,6 @@ stages:
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -242,7 +222,6 @@ stages:
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -257,7 +236,6 @@ stages:
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -272,7 +250,6 @@ stages:
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -287,7 +264,6 @@ stages:
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -302,7 +278,6 @@ stages:
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -455,47 +430,7 @@ stages:
         name: $(agentVMImage)
 
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
-
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
-
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
-
-        - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
-
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (lansa/aws-templates)'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(GitLansaAwsTemplatesBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoName '$(ArtifactSourceAlias)'
+        - template: AzureDevOps/templates/AWSInitRepos.yml
 
         # - pwsh: |
         #    # change to project directory
@@ -539,48 +474,7 @@ stages:
         name: $(agentVMImage)
 
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
-
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
-
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
-
-        - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
-
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (lansa/_lansa_aws-templates)'
-          inputs:
-            targetType: filePath
-            # filePath: './$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(GitLansaAwsTemplatesBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
-              -GitUserEmail '$(GitLansaAwsTemplatesUserEmail)'
-              -GitUserName '$(GitLansaAwsTemplatesUserName)'
-              -GitRepoName '$(ArtifactSourceAlias)'
+        - template: AzureDevOps/templates/AWSInitRepos.yml
 
         - task: PowerShell@2
           displayName: 'Delete temp branch and create temp branch'
@@ -838,47 +732,7 @@ stages:
         name: $(agentVMImage)
 
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
-
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
-
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
-
-        - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
-
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (lansa/_lansa_aws-templates)'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(GitLansaAwsTemplatesBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoName '$(ArtifactSourceAlias)'
+        - template: AzureDevOps/templates/AWSInitRepos.yml
 
         # - pwsh: |
         #    # change to project directory
@@ -971,35 +825,11 @@ stages:
         name: $(agentVMImage)
 
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
-
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
-
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
-
-        - checkout: self
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
+        - template: AzureDevOps/templates/AWSInitRepos.yml
+          parameters:
+            gitRepoBranch: '$(CookbooksBranch)'
+            gitHubName: '$(GitCookBooksGitHubName)'
+            gitRepoPath: '$(CookbooksSourceAlias)'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
@@ -1019,18 +849,6 @@ stages:
             script: |
               # Print the Gate variables.
               Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"
-
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (robe070/cookbooks)'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(CookbooksBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookBooksGitHubName)'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoName '$(CookbooksSourceAlias)'
 
         - task: PowerShell@2
           displayName: 'Tag cookbooks repo'

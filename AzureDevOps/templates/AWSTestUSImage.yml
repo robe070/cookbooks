@@ -44,9 +44,11 @@ parameters:
 stages:
   - stage: ${{ parameters.stageName }}
     condition: ${{ parameters.jobcondition }}
+
     dependsOn:
       - ${{ parameters.dependsOn }}
       - Init
+
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     - job: ${{ parameters.stageName }}
@@ -71,18 +73,9 @@ stages:
         name: $(agentVMImage)
 
       steps:
-      - download: _Build Image Release Artefacts
-        displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-      - checkout: self
-
-      - checkout: _lansa_aws-templates
-        displayName: Checkout Lansa AWS Templates
-        path: _lansa_aws-templates
-
-      - checkout: _robe070_cookbooks
-        displayName: Checkout Rob cookbooks
-        path: _robe070_cookbooks
+      - template: AWSInitRepos.yml
+        parameters:
+            gitRepoWriteAccess: false
 
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'

@@ -46,7 +46,10 @@ stages:
     variables:
       - template: vars.yml
 
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn:
+      - ${{ parameters.dependsOn }}
+      - Init
+
     displayName: ${{ parameters.stageDisplayname }}
 
     jobs:
@@ -71,6 +74,8 @@ stages:
 
       steps:
       - template: AWSInitRepos.yml
+        parameters:
+            gitRepoWriteAccess: false
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Set Gate Variable'
