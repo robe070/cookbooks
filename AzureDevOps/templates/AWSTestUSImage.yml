@@ -102,7 +102,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
           arguments:
             -BaseImageName '${{ parameters.BaseImageName }}'
-            -stackname '${{ parameters.stackname }}''
+            -stackname '${{ parameters.stackname }}'
 
       - task: powershell@2
         displayName: 'Artifact Check : Output Gate Variable'
