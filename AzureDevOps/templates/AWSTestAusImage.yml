@@ -47,9 +47,7 @@ stages:
     variables:
       - template: vars.yml
 
-    dependsOn:
-      - ${{ parameters.dependsOn }}
-      - Init
+    dependsOn: ${{ parameters.dependsOn }}
 
     displayName: ${{ parameters.stageDisplayname }}
 
