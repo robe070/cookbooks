@@ -99,7 +99,7 @@ stages:
 
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'
-        condition: and(succeeded(), eq( ${{ parameters.region }}, 'us-east-1' ))
+        condition: and(succeeded(), eq( '${{ parameters.region }}', 'us-east-1' ))
         inputs:
           awsCredentials: AzureDevOps
           regionName: '${{ parameters.region }}'
@@ -109,7 +109,7 @@ stages:
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
-        condition: and(succeeded(), eq( ${{ parameters.region }}, 'us-east-1' ))
+        condition: and(succeeded(), eq( '${{ parameters.region }}', 'us-east-1' ))
         inputs:
           awsCredentials: AzureDevOps
           regionName: '${{ parameters.region }}'
