@@ -524,7 +524,7 @@ stages:
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w25d150CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -538,7 +538,7 @@ stages:
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w25d160jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -553,7 +553,7 @@ stages:
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w25d150jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -568,7 +568,7 @@ stages:
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w19d160CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -582,7 +582,7 @@ stages:
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w19d150CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -596,7 +596,7 @@ stages:
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w19d160jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -611,7 +611,7 @@ stages:
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w19d150jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -626,7 +626,7 @@ stages:
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w22d160CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -640,7 +640,7 @@ stages:
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w22d150CopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -654,7 +654,7 @@ stages:
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w22d160jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -669,7 +669,7 @@ stages:
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-US-IMG
     jobDemand: DotNetFramework
-    dependsOn: UpdateUSAMIs
+    dependsOn: w22d150jCopyAMItoUS
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -677,88 +677,100 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- stage: CommitUStemplatechanges
-  displayName: Commit US template changes
-  dependsOn:
-  - w25d160USIMGTest
-  - w25d150USIMGTest
-  - w25d160jUSIMGTest
-  - w25d150jUSIMGTest
-  - w19d160USIMGTest
-  - w19d150USIMGTest
-  - w19d160jUSIMGTest
-  - w19d150jUSIMGTest
-  - w22d160USIMGTest
-  - w22d150USIMGTest
-  - w22d160jUSIMGTest
-  - w22d150jUSIMGTest
+# - stage: CommitUStemplatechanges
+#   displayName: Commit US template changes
+#   dependsOn:
+#   - w25d160USIMGTest
+#   - w25d150USIMGTest
+#   - w25d160jUSIMGTest
+#   - w25d150jUSIMGTest
+#   - w19d160USIMGTest
+#   - w19d150USIMGTest
+#   - w19d160jUSIMGTest
+#   - w19d150jUSIMGTest
+#   - w22d160USIMGTest
+#   - w22d150USIMGTest
+#   - w22d160jUSIMGTest
+#   - w22d150jUSIMGTest
 
-  jobs:
-    - job:
-      displayName: Agent job
-      timeoutInMinutes: 0
-      cancelTimeoutInMinutes: 1
+#   jobs:
+#     - job:
+#       displayName: Agent job
+#       timeoutInMinutes: 0
+#       cancelTimeoutInMinutes: 1
 
-      pool:
-        name: $(agentVMImage)
+#       pool:
+#         name: $(agentVMImage)
 
-      steps:
-        - template: AzureDevOps/templates/AWSInitRepos.yml
+#       steps:
+#         - template: AzureDevOps/templates/AWSInitRepos.yml
 
-        # - pwsh: |
-        #    # change to project directory
-        #    cd $(Pipeline.Workspace)/_lansa_aws-templates
+#         # - pwsh: |
+#         #    # change to project directory
+#         #    cd $(Pipeline.Workspace)/_lansa_aws-templates
 
-        #    Write-Host "fetch changes"
-        #    git fetch
-        #    if (-not $?) {
-        #      Write-Host("git fetch failed");
-        #      exit 1
-        #    }
+#         #    Write-Host "fetch changes"
+#         #    git fetch
+#         #    if (-not $?) {
+#         #      Write-Host("git fetch failed");
+#         #      exit 1
+#         #    }
 
-        #    Write-Host "merge branch to the main branch"
-        #    git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories
-        #    if (-not $?) {
-        #      Write-Host("git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories failed");
-        #      exit 1
-        #    }
+#         #    Write-Host "merge branch to the main branch"
+#         #    git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories
+#         #    if (-not $?) {
+#         #      Write-Host("git pull origin  $(GitLansaAwsTemplatesTempBranch) --allow-unrelated-histories failed");
+#         #      exit 1
+#         #    }
 
-        #    Write-Host "Push to the main branch (support/scalable branch)"
-        #    git push
-        #    if (-not $?) {
-        #      Write-Host("git push failed");
-        #      exit 1
-        #    }
+#         #    Write-Host "Push to the main branch (support/scalable branch)"
+#         #    git push
+#         #    if (-not $?) {
+#         #      Write-Host("git push failed");
+#         #      exit 1
+#         #    }
 
-        #    # The merge to Marketplace branch belongs in the template pipeline, so conditioned out for the moment
+#         #    # The merge to Marketplace branch belongs in the template pipeline, so conditioned out for the moment
 
-        #    if ($false) {
-        #    Write-Host "Checkout to (support/scalable_marketplace branch)"
-        #    git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch)
-        #    if (-not $?) {
-        #      Write-Host("git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch) failed");
-        #      exit 1
-        #    }
+#         #    if ($false) {
+#         #    Write-Host "Checkout to (support/scalable_marketplace branch)"
+#         #    git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch)
+#         #    if (-not $?) {
+#         #      Write-Host("git checkout  $(GitLansaAwsTemplatesMarketPlaceBranch) failed");
+#         #      exit 1
+#         #    }
 
-        #    # pull changes from (support/scalable branch)
-        #    git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories
-        #    if (-not $?) {
-        #      Write-Host("git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories failed");
-        #      exit 1
-        #    }
+#         #    # pull changes from (support/scalable branch)
+#         #    git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories
+#         #    if (-not $?) {
+#         #      Write-Host("git pull origin  $(GitLansaAwsTemplatesBranch) --allow-unrelated-histories failed");
+#         #      exit 1
+#         #    }
 
-        #    # push to the main branch  (support/scalable_marketplace branch)
-        #    git push
-        #    if (-not $?) {
-        #      Write-Host("git push failed");
-        #      exit 1
-        #    }
+#         #    # push to the main branch  (support/scalable_marketplace branch)
+#         #    git push
+#         #    if (-not $?) {
+#         #      Write-Host("git push failed");
+#         #      exit 1
+#         #    }
 
-        #    } # if($false)
+#         #    } # if($false)
 
 - stage: Marketplace
   displayName: Marketplace
-  dependsOn: CommitUStemplatechanges
+  dependsOn:
+    - w25d160USIMGTest
+    - w25d150USIMGTest
+    - w25d160jUSIMGTest
+    - w25d150jUSIMGTest
+    - w19d160USIMGTest
+    - w19d150USIMGTest
+    - w19d160jUSIMGTest
+    - w19d150jUSIMGTest
+    - w22d160USIMGTest
+    - w22d150USIMGTest
+    - w22d160jUSIMGTest
+    - w22d150jUSIMGTest
 
   jobs:
     - job: 'Job_1'
@@ -779,9 +791,8 @@ stages:
               d. Click through, taking all the defaults
               2. Manually update a copy of the Product Load Form (today's date in the name) with the US AMIs.
               b. Pull the latest aws-templates support/scalable branch and check that all the AMis in the diff are in the PLF
-              3. Even if only the images are being updated, the Template CD pipeline must be run to upload the updated templates to S3 ready for publication.
-              4. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
-              5. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
+              3. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
+              4. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
             onTimeout: 'reject'
 
 - stage: TagGit
