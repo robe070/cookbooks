@@ -63,10 +63,12 @@ stages:
       variables:
         - name: TemplateS3Namespace
           value: '/image-cd-pipeline'
-        - name: japan_override
-          ${{ if endsWith(lower(parameters.BaseImageName), 'j')}}:
-            value: -Language $(jpnLanguage)
-          ${{ else }}:
+
+        - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
+            name: japan_override
+            value: '-Language $(jpnLanguage)'
+        - ${{ else }}:
+            name: japan_override
             value: ''
 
         # Override network settings when in US region to those values declared in the variable group "VPC us-east-1"
