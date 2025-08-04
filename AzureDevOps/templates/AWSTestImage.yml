@@ -62,7 +62,7 @@ stages:
     - job: ${{ parameters.stageName }}
       displayName: ${{ parameters.stageDisplayname }}
       condition: ${{ parameters.jobcondition }}
-      timeoutInMinutes: 120
+      timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 
 
