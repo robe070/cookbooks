@@ -521,6 +521,67 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSPreviousVersionValue)
     paramTagValue: "Lansa-Prod"
 
+
+- template: AzureDevOps/templates/AWSTestImage.yml
+  parameters:
+    region: 'us-east-1'
+    stageName: 'w19d160USIMGTest'
+    stageDisplayname: 'w19d-16-0 US IMG Test'
+    BaseImageName: w19d-16-0
+    stackname: w19d-16-0-US-IMG
+    jobDemand: DotNetFramework
+    dependsOn: w19d160CopyAMItoUS
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
+    paramLansaVersion: $(LansaVersionPrevious)
+    parammsiURL: $(msiURLv16)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
+
+- template: AzureDevOps/templates/AWSTestImage.yml
+  parameters:
+    region: 'us-east-1'
+    stageName: 'w19d150USIMGTest'
+    stageDisplayname: 'w19d-15-0 US IMG Test'
+    BaseImageName: w19d-15-0
+    stackname: w19d-15-0-US-IMG
+    jobDemand: DotNetFramework
+    dependsOn: w19d150CopyAMItoUS
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
+    paramLansaVersion: $(lansaVersion)
+    parammsiURL: $(msiURLv15)
+    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
+    paramTagValue: "Lansa-Prod"
+
+- template: AzureDevOps/templates/AWSTestImage.yml
+  parameters:
+    region: 'us-east-1'
+    stageName: 'w22d160USIMGTest'
+    stageDisplayname: 'w22d-16-0 US IMG Test'
+    BaseImageName: w22d-16-0
+    stackname: w22d-16-0-US-IMG
+    jobDemand: DotNetFramework
+    dependsOn: w22d160CopyAMItoUS
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
+    paramLansaVersion: $(lansaVersionPrevious)
+    parammsiURL: $(msiURLv16)
+    paramWebserverOSVersionValue: $(WebserverOS2022)
+    paramTagValue: "Lansa-Prod"
+
+- template: AzureDevOps/templates/AWSTestImage.yml
+  parameters:
+    region: 'us-east-1'
+    stageName: 'w22d150USIMGTest'
+    stageDisplayname: 'w22d-15-0 US IMG Test'
+    BaseImageName: w22d-15-0
+    stackname: w22d-15-0-US-IMG
+    jobDemand: DotNetFramework
+    dependsOn: w22d150CopyAMItoUS
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
+    paramLansaVersion: $(lansaVersion)
+    parammsiURL: $(msiURLv15)
+    paramWebserverOSVersionValue: $(WebserverOS2022)
+    paramTagValue: "Lansa-Prod"
+
 - template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     region: 'us-east-1'
@@ -556,36 +617,6 @@ stages:
 - template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     region: 'us-east-1'
-    stageName: 'w19d160USIMGTest'
-    stageDisplayname: 'w19d-16-0 US IMG Test'
-    BaseImageName: w19d-16-0
-    stackname: w19d-16-0-US-IMG
-    jobDemand: DotNetFramework
-    dependsOn: w19d160CopyAMItoUS
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
-    paramLansaVersion: $(LansaVersionPrevious)
-    parammsiURL: $(msiURLv16)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramTagValue: "Lansa-Prod"
-
-- template: AzureDevOps/templates/AWSTestImage.yml
-  parameters:
-    region: 'us-east-1'
-    stageName: 'w19d150USIMGTest'
-    stageDisplayname: 'w19d-15-0 US IMG Test'
-    BaseImageName: w19d-15-0
-    stackname: w19d-15-0-US-IMG
-    jobDemand: DotNetFramework
-    dependsOn: w19d150CopyAMItoUS
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
-    paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLv15)
-    paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
-    paramTagValue: "Lansa-Prod"
-
-- template: AzureDevOps/templates/AWSTestImage.yml
-  parameters:
-    region: 'us-east-1'
     stageName: 'w19d160jUSIMGTest'
     stageDisplayname: 'w19d-16-0j US IMG Test'
     BaseImageName: w19d-16-0j
@@ -614,36 +645,6 @@ stages:
     paramWebserverOSVersionValue: $(WebserverOSJpnLatestVersionValue)
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
-
-- template: AzureDevOps/templates/AWSTestImage.yml
-  parameters:
-    region: 'us-east-1'
-    stageName: 'w22d160USIMGTest'
-    stageDisplayname: 'w22d-16-0 US IMG Test'
-    BaseImageName: w22d-16-0
-    stackname: w22d-16-0-US-IMG
-    jobDemand: DotNetFramework
-    dependsOn: w22d160CopyAMItoUS
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
-    paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLv16)
-    paramWebserverOSVersionValue: $(WebserverOS2022)
-    paramTagValue: "Lansa-Prod"
-
-- template: AzureDevOps/templates/AWSTestImage.yml
-  parameters:
-    region: 'us-east-1'
-    stageName: 'w22d150USIMGTest'
-    stageDisplayname: 'w22d-15-0 US IMG Test'
-    BaseImageName: w22d-15-0
-    stackname: w22d-15-0-US-IMG
-    jobDemand: DotNetFramework
-    dependsOn: w22d150CopyAMItoUS
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
-    paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLv15)
-    paramWebserverOSVersionValue: $(WebserverOS2022)
-    paramTagValue: "Lansa-Prod"
 
 - template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
