@@ -1,4 +1,7 @@
 # AWS Test Image
+# Defaults to Australian region (ap-southeast-2)
+# Can be overridden to US region (us-east-1) by setting the region parameter
+# The region parameter is used to determine the VPC and Subnet settings
 parameters:
   - name: region
     type: string
@@ -48,7 +51,10 @@ stages:
     variables:
       - template: vars.yml
 
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn:
+      - Init
+      - ${{ if ne(parameters.dependsOn, '') }}:
+        - ${{ split(parameters.dependsOn, ',') }}
 
     displayName: ${{ parameters.stageDisplayname }}
 
@@ -97,6 +103,7 @@ stages:
         parameters:
             gitRepoWriteAccess: false
 
+      # US-Only Task
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'S3 Download: lansa'
         condition: and(succeeded(), eq( '${{ parameters.region }}', 'us-east-1' ))
@@ -107,6 +114,7 @@ stages:
           sourceFolder: 'templates/$(s3amiUpload)'
           targetFolder: '$(Pipeline.Workspace)'
 
+      # US-Only Task
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Overwrite ap-southeast-2 AMI Ids with us-east-1 AMI Ids'
         condition: and(succeeded(), eq( '${{ parameters.region }}', 'us-east-1' ))

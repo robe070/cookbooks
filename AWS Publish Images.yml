@@ -130,7 +130,6 @@ stages:
     BaseImageName: w25d-16-0
     stackname: w25d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -144,7 +143,6 @@ stages:
     BaseImageName: w25d-15-0
     stackname: w25d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -158,7 +156,6 @@ stages:
     BaseImageName: w19d-16-0
     stackname: w19d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -172,7 +169,6 @@ stages:
     BaseImageName: w19d-15-0
     stackname: w19d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -186,7 +182,6 @@ stages:
     BaseImageName: w22d-16-0
     stackname: w22d-16-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLv16)
@@ -200,7 +195,6 @@ stages:
     BaseImageName: w22d-15-0
     stackname: w22d-15-0-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLv15)
@@ -214,7 +208,6 @@ stages:
     BaseImageName: w25d-16-0j
     stackname: w25d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -229,7 +222,6 @@ stages:
     BaseImageName: w25d-15-0j
     stackname: w25d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -244,7 +236,6 @@ stages:
     BaseImageName: w19d-16-0j
     stackname: w19d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(LansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -259,7 +250,6 @@ stages:
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
@@ -274,7 +264,6 @@ stages:
     BaseImageName: w22d-16-0j
     stackname: w22d-16-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
     paramLansaVersion: $(lansaVersionPrevious)
     parammsiURL: $(msiURLJPNPrevious)
@@ -289,7 +278,6 @@ stages:
     BaseImageName: w22d-15-0j
     stackname: w22d-15-0j-IMG
     jobDemand: DotNetFramework
-    dependsOn: Init
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
     paramLansaVersion: $(lansaVersion)
     parammsiURL: $(msiURLJPNLatest)
