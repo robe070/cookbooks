@@ -757,9 +757,29 @@ stages:
 
 #         #    } # if($false)
 
+- stage: Test
+  displayName: Test
+  condition: succeededOrSkipped()
+  dependsOn:
+    - w19d150CopyAMItoUS
+    - w19d160jUSIMGTest
+    - w19d150jCopyAMItoUS
+
+  jobs:
+    - job: Test
+      displayName: Test
+      pool: server
+      timeoutInMinutes: 43200
+      steps:
+
+        - powershell |
+            Write-Host "Print Version Variable value = $(Version)"
+
 - stage: Marketplace
   displayName: Marketplace
   condition: succeededOrSkipped() # Ensure that even if any of the dependent stages listed below are skipped, this stage will still run.
+  # Note These dependencies have 2 roles. As well as the basic idea of making this stage dependent on the successful completion of the previous stages, it also ensures that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
+  # $(version) is used in the 'Tag cookbooks repo' Task.
   dependsOn:
     - w25d160USIMGTest
     - w25d150USIMGTest
@@ -800,8 +820,8 @@ stages:
 - stage: TagGit
   displayName: Tag Git
   jobs:
-    - job: TagGitJob
-      displayName: Agent job
+    - job: Tag Git
+      displayName: Tag Git
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
 
@@ -815,24 +835,26 @@ stages:
             gitHubName: '$(GitCookBooksGitHubName)'
             gitRepoPath: '$(CookbooksSourceAlias)'
 
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          name: Gate
-          displayName: 'Artifact Check : Set Gate Variable'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-            arguments:
-              -BaseImageName 'w19d-15-0'
-              -stackname 'w19d-15-0-IMG'
+        # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        #   name: Gate
+        #   displayName: 'Artifact Check : Set Gate Variable'
+        #   inputs:
+        #     awsCredentials: AzureDevOps
+        #     regionName: 'ap-southeast-2'
+        #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+        #     arguments:
+        #     # Any of the image names can be used here, as the purpose is to set the Gate.version variable which is the same for all images.
+        #     # But what if the image name is not being built?
+        #       -BaseImageName 'w19d-15-0'
+        #       -stackname 'w19d-15-0-IMG'
 
-        - task: PowerShell@2
-          displayName: 'Artifact Check : Output Gate Variable'
-          inputs:
-            targetType: inline
-            script: |
-              # Print the Gate variables.
-              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"
+        # - task: PowerShell@2
+        #   displayName: 'Artifact Check : Output Gate Variable'
+        #   inputs:
+        #     targetType: inline
+        #     script: |
+        #       # Print the Gate variables.
+        #       Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"
 
         - task: PowerShell@2
           displayName: 'Tag cookbooks repo'
@@ -841,7 +863,7 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
             arguments:
               -GitRepoName '$(CookbooksSourceAlias)'
-              -Tags 'AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'
+              -Tags 'AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(version)' # Note: The value of $(Version) comes from anyone of the Gate.version variables. See dependencies for clarification.
 
     - template: AzureDevOps/templates/stop-agents.yml
       parameters:
