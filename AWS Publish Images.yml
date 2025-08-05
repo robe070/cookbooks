@@ -762,10 +762,18 @@ stages:
 
   condition: |
     and(
+      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
       in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
       in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150CopyAMItoUS.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150jCopyAMItoUS.result, 'Succeeded', 'Skipped')
+      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
     )
 
   jobs:
