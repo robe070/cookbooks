@@ -757,6 +757,42 @@ stages:
 
 #         #    } # if($false)
 
+- stage: DebugStageStatuses
+  displayName: Debug Stage Statuses
+  dependsOn:
+    - w25d160USIMGTest
+    - w25d150USIMGTest
+    - w25d160jUSIMGTest
+    - w25d150jUSIMGTest
+    - w19d160USIMGTest
+    - w19d150USIMGTest
+    - w19d160jUSIMGTest
+    - w19d150jUSIMGTest
+    - w22d160USIMGTest
+    - w22d150USIMGTest
+    - w22d160jUSIMGTest
+    - w22d150jUSIMGTest
+  jobs:
+    - job: LogStageStatuses
+      displayName: Log Stage Statuses
+      pool:
+        name: $(agentVMImage)
+      steps:
+        - powershell: |
+            Write-Host "w25d160USIMGTest: $(dependencies.w25d160USIMGTest.result)"
+            Write-Host "w25d150USIMGTest: $(dependencies.w25d150USIMGTest.result)"
+            Write-Host "w25d160jUSIMGTest: $(dependencies.w25d160jUSIMGTest.result)"
+            Write-Host "w25d150jUSIMGTest: $(dependencies.w25d150jUSIMGTest.result)"
+            Write-Host "w19d160USIMGTest: $(dependencies.w19d160USIMGTest.result)"
+            Write-Host "w19d150USIMGTest: $(dependencies.w19d150USIMGTest.result)"
+            Write-Host "w19d160jUSIMGTest: $(dependencies.w19d160jUSIMGTest.result)"
+            Write-Host "w19d150jUSIMGTest: $(dependencies.w19d150jUSIMGTest.result)"
+            Write-Host "w22d160USIMGTest: $(dependencies.w22d160USIMGTest.result)"
+            Write-Host "w22d150USIMGTest: $(dependencies.w22d150USIMGTest.result)"
+            Write-Host "w22d160jUSIMGTest: $(dependencies.w22d160jUSIMGTest.result)"
+            Write-Host "w22d150jUSIMGTest: $(dependencies.w22d150jUSIMGTest.result)"
+          displayName: 'Log US Test Stage Statuses'
+
 - stage: TestVersion
   displayName: TestVersion
 
