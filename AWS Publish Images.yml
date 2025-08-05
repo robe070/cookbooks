@@ -759,11 +759,16 @@ stages:
 
 - stage: Test
   displayName: Test
-  condition: succeededOrSkipped()
   dependsOn:
     - w19d150CopyAMItoUS
     - w19d160jUSIMGTest
     - w19d150jCopyAMItoUS
+  condition: |
+    and(
+      in(dependencies.w19d150CopyAMItoUS.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d150jCopyAMItoUS.result, 'Succeeded', 'Skipped')
+    )
 
   jobs:
     - job: Test
