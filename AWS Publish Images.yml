@@ -757,8 +757,8 @@ stages:
 
 #         #    } # if($false)
 
-- stage: Test
-  displayName: Test
+- stage: TestVersion
+  displayName: TestVersion
   dependsOn:
     - w19d150CopyAMItoUS
     - w19d160jUSIMGTest
@@ -771,8 +771,8 @@ stages:
     )
 
   jobs:
-    - job: Test
-      displayName: Test
+    - job: TestVersion
+      displayName: TestVersion
       pool: server
       timeoutInMinutes: 43200
       steps:
@@ -798,8 +798,6 @@ stages:
     - w22d150jUSIMGTest
 
   # Ensure that even if any of the dependent stages listed above are skipped, this stage will still run.
-  # Note These dependencies have 2 roles. As well as the basic idea of making this stage dependent on the successful completion of the previous stages, it also ensures that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
-  # $(version) is used in the 'Tag cookbooks repo' Task.
   condition: |
     and(
       in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
@@ -841,6 +839,38 @@ stages:
 
 - stage: TagGit
   displayName: Tag Git
+  dependsOn:
+    - Marketplace
+    - w25d160USIMGTest
+    - w25d150USIMGTest
+    - w25d160jUSIMGTest
+    - w25d150jUSIMGTest
+    - w19d160USIMGTest
+    - w19d150USIMGTest
+    - w19d160jUSIMGTest
+    - w19d150jUSIMGTest
+    - w22d160USIMGTest
+    - w22d150USIMGTest
+    - w22d160jUSIMGTest
+    - w22d150jUSIMGTest
+
+  # Note These dependencies have only the 1 role. It is NOT to make this stage dependent on the successful completion of the previous stages. Its to ensure that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
+  # $(version) is used in the 'Tag cookbooks repo' Task.
+  condition: |
+    and(
+      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
+    )
   jobs:
     - job: Tag Git
       displayName: Tag Git
