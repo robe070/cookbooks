@@ -773,8 +773,11 @@ stages:
   jobs:
     - job: TestVersion
       displayName: TestVersion
-      pool: server
-      timeoutInMinutes: 43200
+
+      pool:
+        name: $(agentVMImage)
+
+      timeoutInMinutes: 0
       steps:
 
         - powershell: |
