@@ -875,7 +875,7 @@ stages:
       in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
     )
   jobs:
-    - job: Tag Git
+    - job: TagGit
       displayName: Tag Git
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
