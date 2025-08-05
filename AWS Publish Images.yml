@@ -772,8 +772,9 @@ stages:
       timeoutInMinutes: 43200
       steps:
 
-        - powershell |
+        - powershell: |
             Write-Host "Print Version Variable value = $(Version)"
+          displayName: 'Test Stage variables'
 
 - stage: Marketplace
   displayName: Marketplace
