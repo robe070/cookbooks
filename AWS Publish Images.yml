@@ -861,6 +861,7 @@ stages:
   # $(version) is used in the 'Tag cookbooks repo' Task.
   condition: |
     and(
+      in(dependencies.Marketplace.result, 'Succeeded', 'Skipped'),
       in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
       in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
       in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
