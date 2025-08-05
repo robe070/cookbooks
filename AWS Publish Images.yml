@@ -778,9 +778,6 @@ stages:
 
 - stage: Marketplace
   displayName: Marketplace
-  condition: succeededOrSkipped() # Ensure that even if any of the dependent stages listed below are skipped, this stage will still run.
-  # Note These dependencies have 2 roles. As well as the basic idea of making this stage dependent on the successful completion of the previous stages, it also ensures that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
-  # $(version) is used in the 'Tag cookbooks repo' Task.
   dependsOn:
     - w25d160USIMGTest
     - w25d150USIMGTest
@@ -794,6 +791,25 @@ stages:
     - w22d150USIMGTest
     - w22d160jUSIMGTest
     - w22d150jUSIMGTest
+
+  # Ensure that even if any of the dependent stages listed above are skipped, this stage will still run.
+  # Note These dependencies have 2 roles. As well as the basic idea of making this stage dependent on the successful completion of the previous stages, it also ensures that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
+  # $(version) is used in the 'Tag cookbooks repo' Task.
+  condition: |
+    and(
+      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
+      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
+    )
 
   jobs:
     - job: Marketplace
