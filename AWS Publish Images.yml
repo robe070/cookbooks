@@ -922,7 +922,7 @@ stages:
 
     - template: AzureDevOps/templates/stop-agents.yml
       parameters:
-        dependson: TagGitJob
+        dependson: TagGit
         resourceGroup: $(agentResourceGroup)
         baseVmName: $(agentBaseVmName)
         vmCount: 12
