@@ -759,6 +759,7 @@ stages:
 
 - stage: Marketplace
   displayName: Marketplace
+  condition: succeededOrSkipped() # Ensure that even if any of the dependent stages listed below are skipped, this stage will still run.
   dependsOn:
     - w25d160USIMGTest
     - w25d150USIMGTest
@@ -774,8 +775,8 @@ stages:
     - w22d150jUSIMGTest
 
   jobs:
-    - job: 'Job_1'
-      displayName: 'Agentless Job'
+    - job: Marketplace
+      displayName: Pause for Marketplace
       pool: server
       timeoutInMinutes: 43200
       steps:
