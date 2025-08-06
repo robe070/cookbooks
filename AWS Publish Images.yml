@@ -246,6 +246,7 @@ stages:
 - template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d150jIMGTest'
+    dependsOn: ShowVars # Debug Code
     stageDisplayname: 'w19d-15-0j IMG Test'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
@@ -847,7 +848,7 @@ stages:
       steps:
 
         - powershell: |
-            Write-Host "Print Version Variable value = $(Version)"
+            Write-Host "Print Version Variable value = $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]"
           displayName: 'Test Stage variables'
 
 - stage: Marketplace

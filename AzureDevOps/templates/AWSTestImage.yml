@@ -27,7 +27,7 @@ parameters:
   - name: jobDemand
     type: string
     default: ''
-  - name: dependsOn
+  - name: dependsOn # Note that only a single dependency is supported here.
     type: string
     default: ''
   - name: paramLansaVersion
@@ -54,7 +54,7 @@ stages:
     dependsOn:
       - Init
       - ${{ if ne(parameters.dependsOn, '') }}:
-        - ${{ split(parameters.dependsOn, ',') }}
+        - ${{ parameters.dependsOn }}
 
     displayName: ${{ parameters.stageDisplayname }}
 
@@ -258,6 +258,7 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: '${{ parameters.region }}'
+
           arguments:
             -Gatestack '$(Gate.stack)'
             -Gateversion '$(Gate.version)'
