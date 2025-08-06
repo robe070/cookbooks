@@ -829,7 +829,7 @@ stages:
 
   # Ensure that even if any of the dependent stages listed above are skipped, this stage will still run.
   dependsOn:
-    - TestVersion
+    - DebugStageStatuses
 
   jobs:
     - job: Marketplace
