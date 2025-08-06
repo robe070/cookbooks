@@ -852,7 +852,7 @@ stages:
       displayName: TestVersion
 
       pool:
-        name: $[agentVMImage)
+        name: $(agentVMImage)
 
       timeoutInMinutes: 0
       steps:
