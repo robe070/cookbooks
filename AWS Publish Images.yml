@@ -375,6 +375,30 @@ stages:
     globExpressions: w19d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
+- stage: DebugVars
+  displayName: DebugVars
+  dependsOn:
+    - Init
+    - w19d150jIMGTest
+  variables:
+  - template: AzureDevOps/templates/vars.yml
+
+  jobs:
+  - job: ShowVars
+    displayName: Show Variables
+    pool:
+      name: $(agentVMImage)
+    steps:
+      - task: PowerShell@2
+        displayName: 'Show All Variables'
+        inputs:
+          targetType: inline
+          script: |
+            Write-Host "Show all variables (Should see Build-xxx in this list):"
+            Get-ChildItem Env:
+            Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
+            Write-Host "w19d150jIMGTest Version: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]"
+
 - template: AzureDevOps/templates/AWSCopyImageToUS .yml
   parameters:
     stageName: 'w19d150jCopyAMItoUS'
