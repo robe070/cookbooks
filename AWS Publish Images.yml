@@ -800,6 +800,15 @@ stages:
     - w22d150USIMGTest
     - w22d160jUSIMGTest
     - w22d150jUSIMGTest
+  variables:
+    w19d150jIMGTest_succeed: $[eq(stageDependencies.w19d150jIMGTest.w19d150jIMGTest.result, 'Succeeded')]
+    w25d160USIMGTest_version: $[stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['gate.Version']]
+    w25d150USIMGTest_version: $[stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['gate.Version']]
+    w25d160jUSIMGTest_version: $[stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['gate.Version']]
+    w25d150jUSIMGTest_version: $[stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['gate.Version']]
+    w19d160USIMGTest_version: $[stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['gate.Version']]
+    w19d150USIMGTest_version: $[stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['gate.Version']]
+    w19d160jUSIMGTest_version: $[stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['gate.Version']]
   jobs:
     - job: LogStageStatuses
       displayName: Log Stage Statuses
@@ -807,45 +816,43 @@ stages:
         name: $(agentVMImage)
       steps:
         - powershell: |
-            Write-Host "w25d160USIMGTest: $(dependencies.w25d160USIMGTest.result)"
-            Write-Host "w25d150USIMGTest: $(dependencies.w25d150USIMGTest.result)"
-            Write-Host "w25d160jUSIMGTest: $(dependencies.w25d160jUSIMGTest.result)"
-            Write-Host "w25d150jUSIMGTest: $(dependencies.w25d150jUSIMGTest.result)"
-            Write-Host "w19d160USIMGTest: $(dependencies.w19d160USIMGTest.result)"
-            Write-Host "w19d150USIMGTest: $(dependencies.w19d150USIMGTest.result)"
-            Write-Host "w19d160jUSIMGTest: $(dependencies.w19d160jUSIMGTest.result)"
-            Write-Host "w19d150jUSIMGTest: $(dependencies.w19d150jUSIMGTest.result)"
-            Write-Host "w22d160USIMGTest: $(dependencies.w22d160USIMGTest.result)"
-            Write-Host "w22d150USIMGTest: $(dependencies.w22d150USIMGTest.result)"
-            Write-Host "w22d160jUSIMGTest: $(dependencies.w22d160jUSIMGTest.result)"
-            Write-Host "w22d150jUSIMGTest: $(dependencies.w22d150jUSIMGTest.result)"
+            Write-Host "w19d150jIMGTest local variable: $(w19d150jIMGTest_succeed)"
+            Write-Host "w25d160USIMGTest: $[stagedependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['gate.Version']]"
+            Write-Host "w25d150USIMGTest: $[stagedependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['gate.Version']]"
+            Write-Host "w25d160jUSIMGTest: $[stagedependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['gate.Version']]"
+            Write-Host "w25d150jUSIMGTest: $[stagedependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['gate.Version']]"
+            Write-Host "w19d160USIMGTest: $[stagedependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['gate.Version']]"
+            Write-Host "w19d150USIMGTest: $[stagedependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['gate.Version']]"
+            Write-Host "w19d160jUSIMGTest: $[stagedependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.v]"
+            Write-Host "w19d150jUSIMGTest: $[stagedependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['gate.Version']]"
+            Write-Host "w22d160USIMGTest: $[stagedependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['gate.Version']]"
+            Write-Host "w22d150USIMGTest: $[stagedependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['gate.Version']]"
+            Write-Host "w22d160jUSIMGTest: $[stagedependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['gate.Version']]"
+            Write-Host "w22d150jUSIMGTest: $[stagedependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['gate.Version']]"
           displayName: 'Log US Test Stage Statuses'
 
 - stage: TestVersion
   displayName: TestVersion
-
-  condition: |
-    and(
-      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
-    )
+  dependsOn:
+    - w25d160USIMGTest
+    - w25d150USIMGTest
+    - w25d160jUSIMGTest
+    - w25d150jUSIMGTest
+    - w19d160USIMGTest
+    - w19d150USIMGTest
+    - w19d160jUSIMGTest
+    - w19d150jUSIMGTest
+    - w22d160USIMGTest
+    - w22d150USIMGTest
+    - w22d160jUSIMGTest
+    - w22d150jUSIMGTest
 
   jobs:
     - job: TestVersion
       displayName: TestVersion
 
       pool:
-        name: $(agentVMImage)
+        name: $[agentVMImage)
 
       timeoutInMinutes: 0
       steps:
@@ -858,21 +865,8 @@ stages:
   displayName: Marketplace
 
   # Ensure that even if any of the dependent stages listed above are skipped, this stage will still run.
-  condition: |
-    and(
-      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
-    )
+  dependsOn:
+    - TestVersion
 
   jobs:
     - job: Marketplace
@@ -901,24 +895,18 @@ stages:
   displayName: Tag Git
   dependsOn:
     - Marketplace
-
-  # Note These dependencies have only the 1 role. It is NOT to make this stage dependent on the successful completion of the previous stages. Its to ensure that the Stage variable 'version' that is used as $(Gate.Version) in the dependent Stages, is 'copied' into this stage as $(Version). Any and all stages that actually execute (condition = true) will set $(Gate.Version). All are using the same value, so it doesn't matter which one is used.
-  # $(version) is used in the 'Tag cookbooks repo' Task.
-  condition: |
-    and(
-      in(dependencies.w25d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w25d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w19d150jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150USIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d160jUSIMGTest.result, 'Succeeded', 'Skipped'),
-      in(dependencies.w22d150jUSIMGTest.result, 'Succeeded', 'Skipped')
-    )
+    - w25d160USIMGTest
+    - w25d150USIMGTest
+    - w25d160jUSIMGTest
+    - w25d150jUSIMGTest
+    - w19d160USIMGTest
+    - w19d150USIMGTest
+    - w19d160jUSIMGTest
+    - w19d150jUSIMGTest
+    - w22d160USIMGTest
+    - w22d150USIMGTest
+    - w22d160jUSIMGTest
+    - w22d150jUSIMGTest
   jobs:
     - job: TagGit
       displayName: Tag Git
