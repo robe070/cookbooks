@@ -24,19 +24,22 @@ parameters:
     type: string
     default: ''
   - name: dependsOn
-    default: []
+    default: ''
 
 stages:
   - stage: ${{ parameters.stageName }}
-    condition: ${{ parameters.jobCondition }}
+    variables:
+    - template: vars.yml
 
     dependsOn:
-      - ${{ parameters.dependsOn }}
       - Init
+      - ${{ if ne(parameters.dependsOn, '') }}:
+        - ${{ parameters.dependsOn }}
 
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
     - job: ${{ parameters.stageName }}
+      condition: ${{ parameters.jobCondition }}
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
       displayName: ${{ parameters.stageDisplayname }}

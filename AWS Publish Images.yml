@@ -411,7 +411,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150jIMGTest
     globExpressions: w19d-15-0j.txt
-    jobcondition: succeeded()
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
@@ -421,7 +421,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w22d160jIMGTest
     globExpressions: w22d-16-0j.txt
-    jobcondition: succeeded()
+    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
