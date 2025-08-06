@@ -39,13 +39,6 @@ steps:
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
 
-        # Force update lansa_aws-templates repo to latest otherwise its not updated with the latest changes
-        # - script: |
-        #     cd $(Pipeline.Workspace)/_lansa_aws-templates
-        #     git fetch origin
-        #     git reset --hard HEAD
-        #   displayName: Force update lansa_aws-templates repo to latest
-
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
           path: _robe070_cookbooks
