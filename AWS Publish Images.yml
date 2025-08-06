@@ -286,7 +286,7 @@ stages:
     paramTagValue: "Lansa-Prod"
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w25d160CopyAMItoUS'
     stageDisplayname: 'w25d-16-0 Copy AMI to US'
@@ -296,7 +296,7 @@ stages:
     globExpressions: w25d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w25d150CopyAMItoUS'
     stageDisplayname: 'w25d-15-0 Copy AMI to US'
@@ -306,7 +306,7 @@ stages:
     globExpressions: w25d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w19d160CopyAMItoUS'
     stageDisplayname: 'w19d-16-0 Copy AMI to US'
@@ -316,7 +316,7 @@ stages:
     globExpressions: w19d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w19d150CopyAMItoUS'
     stageDisplayname: 'w19d-15-0 Copy AMI to US'
@@ -326,7 +326,7 @@ stages:
     globExpressions: w19d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w22d160CopyAMItoUS'
     stageDisplayname: 'w22d-16-0 Copy AMI to US'
@@ -336,7 +336,7 @@ stages:
     globExpressions: w22d-16-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0'], 'True'), eq(variables['Build-16'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w22d150CopyAMItoUS'
     stageDisplayname: 'w22d-15-0 Copy AMI to US'
@@ -346,7 +346,7 @@ stages:
     globExpressions: w22d-15-0.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w25d160jCopyAMItoUS'
     stageDisplayname: 'w25d-16-0j Copy AMI to US'
@@ -356,7 +356,7 @@ stages:
     globExpressions: w25d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w25d150jCopyAMItoUS'
     stageDisplayname: 'w25d-15-0j Copy AMI to US'
@@ -366,7 +366,7 @@ stages:
     globExpressions: w25d-15-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w19d160jCopyAMItoUS'
     stageDisplayname: 'w19d-16-0j Copy AMI to US'
@@ -383,6 +383,8 @@ stages:
     - w19d150jIMGTest
   variables:
   - template: AzureDevOps/templates/vars.yml
+  - name: Version
+    value: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]
 
   jobs:
   - job: ShowVars
@@ -397,10 +399,11 @@ stages:
           script: |
             Write-Host "Show all variables (Should see Build-xxx in this list):"
             Get-ChildItem Env:
-            Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
+            Write-Host
             Write-Host "w19d150jIMGTest Version: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]"
+            Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w19d150jCopyAMItoUS'
     stageDisplayname: 'w19d-15-0j Copy AMI to US'
@@ -410,7 +413,7 @@ stages:
     globExpressions: w19d-15-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w22d160jCopyAMItoUS'
     stageDisplayname: 'w22d-16-0j Copy AMI to US'
@@ -420,7 +423,7 @@ stages:
     globExpressions: w22d-16-0j.txt
     jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
-- template: AzureDevOps/templates/AWSCopyImageToUS .yml
+- template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
     stageName: 'w22d150jCopyAMItoUS'
     stageDisplayname: 'w22d-15-0j Copy AMI to US'
