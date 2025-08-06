@@ -25,3 +25,5 @@ variables:
     value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
   - name: Build-w25d-16-0j
     value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
+  - name: Version
+    value: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]

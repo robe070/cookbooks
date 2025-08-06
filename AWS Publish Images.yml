@@ -324,7 +324,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150IMGTest
     globExpressions: w19d-15-0.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
+    jobcondition: succeeded()
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
@@ -383,14 +383,14 @@ stages:
     - w19d150jIMGTest
   variables:
   - template: AzureDevOps/templates/vars.yml
-  - name: Version
-    value: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]
 
   jobs:
   - job: ShowVars
     displayName: Show Variables
     pool:
       name: $(agentVMImage)
+    variables:
+      Stage1_Succeeded: $[eq(stageDependencies.w19d150jIMGTest.w19d150jIMGTest.result, 'Succeeded')]
     steps:
       - task: PowerShell@2
         displayName: 'Show All Variables'
@@ -399,9 +399,9 @@ stages:
           script: |
             Write-Host "Show all variables (Should see Build-xxx in this list):"
             Get-ChildItem Env:
-            Write-Host
-            Write-Host "w19d150jIMGTest Version: $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['gate.Version']]"
-            Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
+            Write-Host "w19d150jIMGTest Result : $(Stage1_Succeeded)"
+            Write-Host "w19d150jIMGTest Result (direct access): $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.result]"
+            # Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
@@ -411,7 +411,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150jIMGTest
     globExpressions: w19d-15-0j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-15'], 'True')))
+    jobcondition: succeeded()
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
@@ -421,7 +421,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w22d160jIMGTest
     globExpressions: w22d-16-0j.txt
-    jobcondition: and(succeeded(), or(eq(variables['Build-w22d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
+    jobcondition: succeeded()
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
