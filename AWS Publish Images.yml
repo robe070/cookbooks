@@ -324,7 +324,7 @@ stages:
     jobDemand: DotNetFramework
     dependsOn: w19d150IMGTest
     globExpressions: w19d-15-0.txt
-    jobcondition: succeeded()
+    jobcondition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-15'], 'True')))
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
