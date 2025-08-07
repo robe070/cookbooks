@@ -236,7 +236,7 @@ stages:
                     "ParameterValue": "${{ parameters.paramStackType }}"
                 }, {
                     "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "${{ parameters.deploymentType == 'Production' ? '$(CookbooksBranchProduction)' : parameters.deploymentType == 'Preview' ? '$(CookbooksBranchPreview)' : parameters.param10LansaGitRepoBranch }}"
+                    "ParameterValue": "${{ if eq(parameters.deploymentType, 'Production') }}$(CookbooksBranchProduction)${{ elseif eq(parameters.deploymentType, 'Preview') }}$(CookbooksBranchPreview)${{ else }}${{ parameters.param10LansaGitRepoBranch }}${{ endif }}"
                 }, {
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
@@ -254,19 +254,19 @@ stages:
                     "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
                     "ParameterKey": "CurrentVPC",
-                    "ParameterValue": "${{ parameters.paramCurrentVPC == 'none' ? '$(CurrentVPC)' : parameters.paramCurrentVPC }}"
+                    "ParameterValue": "${{ if eq(parameters.paramCurrentVPC, 'none') }}$(CurrentVPC)${{ else }}${{ parameters.paramCurrentVPC }}${{ endif }}"
                 }, {
                     "ParameterKey": "AvailabilityZones",
-                    "ParameterValue": "${{ parameters.paramAvailabilityZones == 'none' ? '$(AvailabilityZones)' : parameters.paramAvailabilityZones }}"
+                    "ParameterValue": "${{ if eq(parameters.paramAvailabilityZones, 'none') }}$(AvailabilityZones)${{ else }}${{ parameters.paramAvailabilityZones }}${{ endif }}"
                 }, {
                     "ParameterKey": "NumberOfAZs",
-                    "ParameterValue": "${{ parameters.paramNumberOfAZs == 'none' ? '$(NumberOfAZs)' : parameters.paramNumberOfAZs }}"
+                    "ParameterValue": "${{ if eq(parameters.paramNumberOfAZs, 'none') }}$(NumberOfAZs)${{ else }}${{ parameters.paramNumberOfAZs }}${{ endif }}"
                 }, {
                     "ParameterKey": "DBSubnetGroupName",
                     "ParameterValue": "$(DBSubnetGroupName)"
                 }, {
                     "ParameterKey": "ELBSubnetIds",
-                    "ParameterValue": "${{ parameters.paramELBSubnetIds == 'none' ? '$(ELBSubnetIds)' : parameters.paramELBSubnetIds }}"
+                    "ParameterValue": "${{ if eq(parameters.paramELBSubnetIds, 'none') }}$(ELBSubnetIds)${{ else }}${{ parameters.paramELBSubnetIds }}${{ endif }}"
                 }, {
                     "ParameterKey": "03DBUsername",
                     "ParameterValue": "$(03DBUsername)"
@@ -278,7 +278,7 @@ stages:
                     "ParameterValue": "${{ parameters.paramTagValue }}"
                 }, {
                     "ParameterKey": "CreateVPC",
-                    "ParameterValue": "${{ parameters.deploymentType == 'Production' || parameters.deploymentType == 'Preview' || parameters.deploymentType == 'Master' ? 'Yes' : 'No' }}"
+                    "ParameterValue": "${{ if or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview'), eq(parameters.deploymentType, 'Master')) }}Yes${{ else }}No${{ endif }}"
                 }, {
                     "ParameterKey": "UpdateManagementScripts",
                     "ParameterValue": "${{ parameters.paramUpdateManagementScripts }}"
