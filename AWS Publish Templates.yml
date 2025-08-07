@@ -34,7 +34,7 @@ variables:
   - name: RegressionTestRegion
     value: ap-southeast-2
   - name: agentVMImage
-    value: windows-2022
+    value: Default
 
   - group: "Template Parameters"
   - group: "VPC ap-southeast-2"
@@ -66,7 +66,7 @@ stages:
       displayName: 'Agent job'
       timeoutInMinutes: 0
       pool:
-          vmImage: $(agentVMImage)
+          name: $(agentVMImage)
       steps:
 
         - checkout: _robe070_cookbooks
@@ -106,7 +106,7 @@ stages:
     - job: Job_1
       displayName: Agent job
       pool:
-          vmImage: $(agentVMImage)
+          name: $(agentVMImage)
       steps:
         - checkout: self
 
@@ -299,7 +299,7 @@ stages:
   - job: Job_1
     displayName: 'Agent Job'
     pool:
-      vmImage: $(agentVMImage)
+      name: $(agentVMImage)
     steps:
       - checkout: _robe070_cookbooks
         displayName: Checkout Rob Cookbooks
@@ -352,7 +352,7 @@ stages:
       displayName: 'Small Stack'
       timeoutInMinutes: 0
       pool:
-        vmImage: $(agentVMImage)
+        name: $(agentVMImage)
       steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
@@ -714,7 +714,7 @@ stages:
     displayName: 'Dev Stack'
     timeoutInMinutes: 120
     pool:
-      vmImage: $(agentVMImage)
+      name: $(agentVMImage)
     steps:
       - download: _Build Image Release Artefacts
         displayName: Download artifacts from Build Image Release Artefacts 3.0

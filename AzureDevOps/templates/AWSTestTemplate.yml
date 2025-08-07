@@ -71,7 +71,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: windows-2022
+    default: Default
   - name: baseImageName
     type: string
     default: none
@@ -139,7 +139,7 @@ stages:
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
         pool:
-          vmImage: ${{ parameters.vmImage }}
+          name: ${{ parameters.vmImage }}
         steps:
           - powershell: |
               # Set scriptRepoPath and templateSourceType variables for use in later tasks in this job. This is required as including the expressions inline is not supported by Azure DevOps tasks.
