@@ -246,7 +246,6 @@ stages:
 - template: AzureDevOps/templates/AWSTestImage.yml
   parameters:
     stageName: 'w19d150jIMGTest'
-    dependsOn: ShowVars # Debug Code
     stageDisplayname: 'w19d-15-0j IMG Test'
     BaseImageName: w19d-15-0j
     stackname: w19d-15-0j-IMG
@@ -377,6 +376,7 @@ stages:
     jobcondition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-16'], 'True')))
 
 - stage: DebugVars
+  condition: true
   displayName: DebugVars
   dependsOn:
     - Init
@@ -402,6 +402,24 @@ stages:
             Write-Host "w19d150jIMGTest Result : $(Stage1_Succeeded)"
             Write-Host "w19d150jIMGTest Result (direct access): $[stageDependencies.w19d150jIMGTest.w19d150jIMGTest.result]"
             # Write-Host "w19d150jIMGTest Result: $(dependencies.w19d150jIMGTest.result)"
+            $Stage = "w19d150jIMGTest"
+            $varName = "stageDependencies.$Stage.$Stage.outputs['Gate.VersionDigits']"
+            $value = Get-Variable -Name $varName -ValueOnly -ErrorAction SilentlyContinue
+            if ($value -ne $null -and $value -ne "") {
+              $versionDigits = $value
+              Write-Host "Found VersionDigits: $versionDigits in stage $Stage"
+              break
+            } else {
+              Write-Host "VersionDigits not found in stage $Stage"
+            }
+            $varName = "stageDependencies.$Stage.$Stage.result"
+            $value = Get-Variable -Name $varName -ValueOnly -ErrorAction SilentlyContinue
+            if ($value -ne $null -and $value -ne "") {
+              Write-Host "Found result: $value in stage $Stage"
+              break
+            } else {
+              Write-Host "Result not found in stage $Stage"
+            }
 
 - template: AzureDevOps/templates/AWSCopyImageToUS.yml
   parameters:
