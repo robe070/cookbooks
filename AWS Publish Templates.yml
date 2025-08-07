@@ -817,7 +817,7 @@ stages:
             -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'
           pwsh: true
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: StockholmProd_w25d_16_0
@@ -837,7 +837,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-north-1)
     paramLansaMSIKey: $(msiURLv16)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: IrelandProd_w25d_15_0
@@ -857,7 +857,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-eu-west-1)
     paramLansaMSIKey: $(msiURLv15)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: SydneyProd_w19d_16_0
@@ -877,7 +877,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs)
     paramLansaMSIKey: $(msiURLv16)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: Ohio_Prod_w19d_15_0
@@ -897,7 +897,7 @@ stages:
     paramNumberOfAZs: $(NumberOfAZs-us-east-2)
     paramLansaMSIKey: $(msiURLv15)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: Frankfurt_Prod_w25d_16_0j
@@ -918,7 +918,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: CanadaProd_w19d_16_0j
@@ -939,7 +939,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: Milan_Prod_w25d_16_0j
@@ -960,7 +960,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     paramDBCCSID: $(DBCCSID)
 
-- template: AzureDevOps/templates/AWSTestTemplateProduction.yml
+- template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Production
     stageName: Bahrain_Prod_w19d_15_0j
