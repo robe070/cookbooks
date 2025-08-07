@@ -227,26 +227,49 @@ stages:
               targetType: inline
               script: |
                 $deploymentType = "${{ parameters.deploymentType }}"
-                $lansaGitRepoBranch = if ($deploymentType -eq 'Production') { '$(CookbooksBranchProduction)' }
-                                    elseif ($deploymentType -eq 'Preview') { '$(CookbooksBranchPreview)' }
-                                    else { '${{ parameters.param10LansaGitRepoBranch }}' }
+                if ($deploymentType -eq 'Production') {
+                  $lansaGitRepoBranch = '$(CookbooksBranchProduction)'
+                } elseif ($deploymentType -eq 'Preview') {
+                  $lansaGitRepoBranch = '$(CookbooksBranchPreview)'
+                } else {
+                  $lansaGitRepoBranch = '${{ parameters.param10LansaGitRepoBranch }}'
+                }
                 Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
 
-                $currentVPC = if ('${{ parameters.paramCurrentVPC }}' -eq 'none') { '$(CurrentVPC)' }
-                              else { '${{ parameters.paramCurrentVPC }}' }
+                if ('${{ parameters.paramCurrentVPC }}' -eq 'none') {
+                  $currentVPC = '$(CurrentVPC)'
+                } else {
+                  $currentVPC = '${{ parameters.paramCurrentVPC }}'
+                }
                 Write-Host "##vso[task.setvariable variable=CurrentVPC]$currentVPC"
 
-                $availabilityZones = if ('${{ parameters.paramAvailabilityZones }}' -eq 'none') { '$(AvailabilityZones)' }
-                                    else { '${{ parameters.paramAvailabilityZones }}' }
+                if ('${{ parameters.paramAvailabilityZones }}' -eq 'none') {
+                  $availabilityZones = '$(AvailabilityZones)'
+                } else {
+                  $availabilityZones = '${{ parameters.paramAvailabilityZones }}'
+                }
                 Write-Host "##vso[task.setvariable variable=AvailabilityZones]$availabilityZones"
 
-                $numberOfAZs = if ('${{ parameters.paramNumberOfAZs }}' -eq 'none') { '$(NumberOfAZs)' }
-                              else { '${{ parameters.paramNumberOfAZs }}' }
+                if ('${{ parameters.paramNumberOfAZs }}' -eq 'none') {
+                  $numberOfAZs = '$(NumberOfAZs)'
+                } else {
+                  $numberOfAZs = '${{ parameters.paramNumberOfAZs }}'
+                }
                 Write-Host "##vso[task.setvariable variable=NumberOfAZs]$numberOfAZs"
 
-                $elbSubnetIds = if ('${{ parameters.paramELBSubnetIds }}' -eq 'none') { '$(ELBSubnetIds)' }
-                                else { '${{ parameters.paramELBSubnetIds }}' }
+                if ('${{ parameters.paramELBSubnetIds }}' -eq 'none') {
+                  $elbSubnetIds = '$(ELBSubnetIds)'
+                } else {
+                  $elbSubnetIds = '${{ parameters.paramELBSubnetIds }}'
+                }
                 Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
+
+                if ($deploymentType -eq 'Production' -or $deploymentType -eq 'Preview' -or $deploymentType -eq 'Master') {
+                  $createVPC = 'Yes'
+                } else {
+                  $createVPC = 'No'
+                }
+                Write-Host "##vso[task.setvariable variable=CreateVPC]$createVPC"
 
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
@@ -308,7 +331,7 @@ stages:
                     "ParameterValue": "${{ parameters.paramTagValue }}"
                 }, {
                     "ParameterKey": "CreateVPC",
-                    "ParameterValue": "${{ if or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview'), eq(parameters.deploymentType, 'Master')) }}Yes${{ else }}No${{ endif }}"
+                    "ParameterValue": "$(createVPC)"
                 }, {
                     "ParameterKey": "UpdateManagementScripts",
                     "ParameterValue": "${{ parameters.paramUpdateManagementScripts }}"
