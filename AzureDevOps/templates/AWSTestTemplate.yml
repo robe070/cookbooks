@@ -183,6 +183,7 @@ stages:
 
           - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
             displayName: 'S3 Download: TemplateUrl.txt'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.s3Region }}
@@ -190,7 +191,7 @@ stages:
               sourceFolder: templates/support/scalable/marketplace
               globExpressions: TemplateUrl.txt
               targetFolder: '$(System.DefaultWorkingDirectory)'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+
 
           - powershell: |
               Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
@@ -212,15 +213,44 @@ stages:
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: Small Stack-Template'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               arguments: '-Gatestack $(Gate.stack)'
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
+
+          - task: PowerShell@2
+            displayName: 'Set CloudFormation Parameter Variables'
             condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            inputs:
+              targetType: inline
+              script: |
+                $deploymentType = "${{ parameters.deploymentType }}"
+                $lansaGitRepoBranch = if ($deploymentType -eq 'Production') { '$(CookbooksBranchProduction)' }
+                                    elseif ($deploymentType -eq 'Preview') { '$(CookbooksBranchPreview)' }
+                                    else { '${{ parameters.param10LansaGitRepoBranch }}' }
+                Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
+
+                $currentVPC = if ('${{ parameters.paramCurrentVPC }}' -eq 'none') { '$(CurrentVPC)' }
+                              else { '${{ parameters.paramCurrentVPC }}' }
+                Write-Host "##vso[task.setvariable variable=CurrentVPC]$currentVPC"
+
+                $availabilityZones = if ('${{ parameters.paramAvailabilityZones }}' -eq 'none') { '$(AvailabilityZones)' }
+                                    else { '${{ parameters.paramAvailabilityZones }}' }
+                Write-Host "##vso[task.setvariable variable=AvailabilityZones]$availabilityZones"
+
+                $numberOfAZs = if ('${{ parameters.paramNumberOfAZs }}' -eq 'none') { '$(NumberOfAZs)' }
+                              else { '${{ parameters.paramNumberOfAZs }}' }
+                Write-Host "##vso[task.setvariable variable=NumberOfAZs]$numberOfAZs"
+
+                $elbSubnetIds = if ('${{ parameters.paramELBSubnetIds }}' -eq 'none') { '$(ELBSubnetIds)' }
+                                else { '${{ parameters.paramELBSubnetIds }}' }
+                Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
 
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
@@ -236,7 +266,7 @@ stages:
                     "ParameterValue": "${{ parameters.paramStackType }}"
                 }, {
                     "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "${{ if eq(parameters.deploymentType, 'Production') }}$(CookbooksBranchProduction)${{ elseif eq(parameters.deploymentType, 'Preview') }}$(CookbooksBranchPreview)${{ else }}${{ parameters.param10LansaGitRepoBranch }}${{ endif }}"
+                    "ParameterValue": "$(LansaGitRepoBranch)"
                 }, {
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
@@ -254,19 +284,19 @@ stages:
                     "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
                 }, {
                     "ParameterKey": "CurrentVPC",
-                    "ParameterValue": "${{ if eq(parameters.paramCurrentVPC, 'none') }}$(CurrentVPC)${{ else }}${{ parameters.paramCurrentVPC }}${{ endif }}"
+                    "ParameterValue": "$(CurrentVPC)"
                 }, {
                     "ParameterKey": "AvailabilityZones",
-                    "ParameterValue": "${{ if eq(parameters.paramAvailabilityZones, 'none') }}$(AvailabilityZones)${{ else }}${{ parameters.paramAvailabilityZones }}${{ endif }}"
+                    "ParameterValue": "$(AvailabilityZones)"
                 }, {
                     "ParameterKey": "NumberOfAZs",
-                    "ParameterValue": "${{ if eq(parameters.paramNumberOfAZs, 'none') }}$(NumberOfAZs)${{ else }}${{ parameters.paramNumberOfAZs }}${{ endif }}"
+                    "ParameterValue": "$(NumberOfAZs)"
                 }, {
                     "ParameterKey": "DBSubnetGroupName",
                     "ParameterValue": "$(DBSubnetGroupName)"
                 }, {
                     "ParameterKey": "ELBSubnetIds",
-                    "ParameterValue": "${{ if eq(parameters.paramELBSubnetIds, 'none') }}$(ELBSubnetIds)${{ else }}${{ parameters.paramELBSubnetIds }}${{ endif }}"
+                    "ParameterValue": "$(ELBSubnetIds)"
                 }, {
                     "ParameterKey": "03DBUsername",
                     "ParameterValue": "$(03DBUsername)"
@@ -286,28 +316,28 @@ stages:
               tags: 'usage=temp-test'
               onFailure: 'DO_NOTHING'
               timeoutInMins: 100
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Test CFN Deployment: URL Tests'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               arguments: '${{ parameters.paramArguments }}'
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/TestCFNDeployment.ps1'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'AWS PowerShell: Test Image Version'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: Small Stack-Template'
+            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
@@ -315,4 +345,3 @@ stages:
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
               ignoreLASTEXITCODE: true
             continueOnError: true
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
