@@ -1,7 +1,7 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]
-    $GitRepoName,
+    $GitRepoPath,
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -12,7 +12,7 @@ param (
     $GitTargetBranch
   )
 
-cd "$($env:Pipeline_Workspace)/$($GitRepoName)"
+cd "$($env:Pipeline_Workspace)/$($GitRepoPath)"
 
 # git fetch
 git fetch
