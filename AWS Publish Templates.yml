@@ -63,7 +63,7 @@ stages:
   displayName: Merge patch/pass
   jobs:
     - job: Job_1
-      displayName: 'Agent job'
+      displayName: Merge patch/pass
       timeoutInMinutes: 0
       pool:
           name: $(agentVMImage)
@@ -90,7 +90,7 @@ stages:
   dependsOn: MergePatchPAAS
   jobs:
     - job: Job_1
-      displayName: Agent job
+      displayName: S3 patch/paas
       pool:
           name: $(agentVMImage)
       steps:
@@ -278,7 +278,7 @@ stages:
     - AUSJPNVPCTestsw19d_15_0j
   jobs:
   - job: Job_1
-    displayName: 'Agent Job'
+    displayName: Merge To Marketplace & Upload
     pool:
       name: $(agentVMImage)
     steps:
