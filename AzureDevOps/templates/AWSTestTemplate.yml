@@ -149,12 +149,16 @@ stages:
 
               $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
-            displayName: 'Set scriptRepoPath and templateSourceType variables'
+
+              $stackType = "${{ parameters.StackType }}"
+              $checkoutMpRepo = ($stackType -eq 'Production' -or $stackType -eq 'Preview')
+              Write-Host "##vso[task.setvariable variable=checkoutTemplateMPRepo]$checkoutMpRepo"
+            displayName: 'Set scriptRepoPath and templateSourceType and checkoutTemplateMPRepo variables'
 
           - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
-              checkoutTemplateMPRepo: $[or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))]
+              checkoutTemplateMPRepo: ${{ variables['checkoutTemplateMPRepo'] }}
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
