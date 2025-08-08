@@ -81,12 +81,16 @@ stages:
               -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
               -GitRepoName '$(ArtifactSourceAlias)'
 
-        - task: PowerShell@2
-          name: Vars
+        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Set stageDependencies Version variables based on the published artefacts'
+          name: Vars
           inputs:
-            targetType: filePath
-            filePath: 'cookbooks/scripts/SetVersionVariables.ps1'
+            awsCredentials: AzureDevOps
+            regionName: '${{ parameters.region }}'
+            scriptType: 'filePath'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
+            arguments:
+              -AwsTemplateRepoPath '$(Pipeline.Workspace)/_lansa_aws-templates'
 
         - template: AWSValidateTemplates.yml@_lansa_aws-templates
           parameters:
@@ -803,8 +807,48 @@ stages:
 
 #         #    } # if($false)
 
-- stage: DebugStageStatuses
-  displayName: Debug Stage Statuses
+# - stage: DebugStageStatuses
+#   displayName: Debug Stage Statuses
+#   dependsOn:
+#     - w25d160USIMGTest
+#     - w25d150USIMGTest
+#     - w25d160jUSIMGTest
+#     - w25d150jUSIMGTest
+#     - w19d160USIMGTest
+#     - w19d150USIMGTest
+#     - w19d160jUSIMGTest
+#     - w19d150jUSIMGTest
+#     - w22d160USIMGTest
+#     - w22d150USIMGTest
+#     - w22d160jUSIMGTest
+#     - w22d150jUSIMGTest
+#   variables:
+#     VersionDigits: $[coalesce(
+#           stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['Gate.VersionDigits'],
+#           stageDependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['Gate.VersionDigits']
+#         )]
+#   jobs:
+#     - job: LogStageStatuses
+#       displayName: Log Stage Statuses
+#       pool:
+#         name: $(agentVMImage)
+#       steps:
+#         - powershell: |
+#             Write-Host "VersionDigits local variable: $(VersionDigits)"
+
+- stage: Marketplace
+  displayName: Marketplace
+
   dependsOn:
     - w25d160USIMGTest
     - w25d150USIMGTest
@@ -818,36 +862,6 @@ stages:
     - w22d150USIMGTest
     - w22d160jUSIMGTest
     - w22d150jUSIMGTest
-  variables:
-    VersionDigits: $[coalesce(
-          stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['Gate.VersionDigits']
-        )]
-  jobs:
-    - job: LogStageStatuses
-      displayName: Log Stage Statuses
-      pool:
-        name: $(agentVMImage)
-      steps:
-        - powershell: |
-            Write-Host "VersionDigits local variable: $(VersionDigits)"
-
-- stage: Marketplace
-  displayName: Marketplace
-
-  # Ensure that even if any of the dependent stages listed above are skipped, this stage will still run.
-  dependsOn:
-    - DebugStageStatuses
 
   jobs:
     - job: Marketplace
@@ -875,35 +889,12 @@ stages:
 - stage: TagGit
   displayName: Tag Git
   dependsOn:
+    - Init              # Obtain the Global Variables
     - Marketplace
-    - w25d160USIMGTest
-    - w25d150USIMGTest
-    - w25d160jUSIMGTest
-    - w25d150jUSIMGTest
-    - w19d160USIMGTest
-    - w19d150USIMGTest
-    - w19d160jUSIMGTest
-    - w19d150jUSIMGTest
-    - w22d160USIMGTest
-    - w22d150USIMGTest
-    - w22d160jUSIMGTest
-    - w22d150jUSIMGTest
 
   variables:
-    VersionDigits: $[coalesce(
-          stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['Gate.VersionDigits'],
-          stageDependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['Gate.VersionDigits']
-        )]
+    -template: AzureDevOps/templates/vars.yml
+
   jobs:
     - job: TagGit
       displayName: Tag Git

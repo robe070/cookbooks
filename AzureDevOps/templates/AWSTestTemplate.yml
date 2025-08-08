@@ -130,16 +130,32 @@ parameters:
     type: string
     default: none
 
+
 stages:
   - stage: ${{ parameters.stageName }}
     dependsOn: ${{ parameters.dependsOn }}
     displayName: ${{ parameters.stageDisplayname }}
+
+    variables:
+      -template: AzureDevOps/templates/vars.yml
+
     jobs:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
         timeoutInMinutes: 0
         pool:
           name: ${{ parameters.vmImage }}
+
+        variables:
+          - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
+            - name: japan_override
+              value: '-Language $(jpnLanguage)'
+          - ${{ else }}:
+            - name: japan_override
+              value: ''
+          - name: StackName
+            value: ${{ parameters.stackName }}
+
         steps:
           - powershell: |
               # Set scriptRepoPath and templateSourceType variables for use in later tasks in this job. This is required as including the expressions inline is not supported by Azure DevOps tasks.
@@ -150,36 +166,33 @@ stages:
               $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
 
-              # $deploymentType = "${{ parameters.deploymentType }}"
-              # $checkoutMpRepo = ($deploymentType -eq 'Production' -or $deploymentType -eq 'Preview')
-              # Write-Host "##vso[task.setvariable variable=checkoutTemplateMPRepo]$checkoutMpRepo"
-            displayName: 'Set scriptRepoPath and templateSourceType and checkoutTemplateMPRepo variables'
+              $StackName = '${{ parameters.stageName }}' -replace "_", "-"
+              Write-Host "##vso[task.setvariable variable=StackName]$StackName"
+
+            displayName: 'Set scriptRepoPath and templateSourceType and StackName variables'
 
           - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
               checkoutTemplateMPRepo: ${{ or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}
-              # ${{ eq(variables['CheckoutTemplateMPRepo'], 'True') }}
-              # ${{ eq(parameters.enableFeature, 'true') }}
-              # ${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
 
-          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            name: Gate
-            displayName: 'Artifact Check: Set Gate Variable'
-            inputs:
-              awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
-              arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
-              filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+          # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+          #   name: Gate
+          #   displayName: 'Artifact Check: Set Gate Variable'
+          #   inputs:
+          #     awsCredentials: AzureDevOps
+          #     regionName: ${{ parameters.AwsRegion }}
+          #     arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
+          #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
-          - pwsh: |
-              Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)" | Out-Default
-            displayName: 'Artifact Check: Output Gate Variable'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          # - powershell: |
+          #     Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)" | Out-Default
+          #   displayName: 'Artifact Check: Output Gate Variable'
+          #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
             displayName: 'S3 Download: TemplateUrl.txt'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.s3Region }}
@@ -200,25 +213,23 @@ stages:
               }
             displayName: 'Set TemplateUrl task variable'
             name: Task
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
 
           - powershell: |
               Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
             displayName: 'Output TemplateUrl Variable value'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: Small Stack-Template'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
-              arguments: '-Gatestack $(Gate.stack)'
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
+              arguments: '-Gatestack $(StackName)'
 
           - task: PowerShell@2
             displayName: 'Set CloudFormation Parameter Variables'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               targetType: inline
               script: |
@@ -269,11 +280,10 @@ stages:
 
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
-              stackName: '$(Gate.stack)'
+              stackName: '$(StackName)'
               templateSource: $(templateSourceType)
               templateUrl: '$(Task.TemplateUrl)'
               s3BucketName: '$(BucketNamePreview)'
@@ -338,29 +348,28 @@ stages:
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Test CFN Deployment: URL Tests'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
-              arguments: '${{ parameters.paramArguments }}'
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/TestCFNDeployment.ps1'
+              arguments:
+                -GateStack $(StackName)
+                $japan_override
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'AWS PowerShell: Test Image Version'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
-              arguments: '-Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: Small Stack-Template'
-            condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
-              arguments: '-Gatestack $(Gate.stack)'
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
+              arguments:
+                -Gatestack '$(StackName)'
               ignoreLASTEXITCODE: true
             continueOnError: true

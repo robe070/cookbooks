@@ -1,3 +1,6 @@
+# Note that the Templates are all tested with the same AMI which is derived from the latest built images.
+# Only a subset of the images are built, so a search is made for the first build image and uses that.
+# It is sorted on descending filename, and thus the most recent Windows OS and most recent Lansa version is used.
 resources:
   pipelines:
   - pipeline: _Build Image Release Artefacts
@@ -59,6 +62,32 @@ variables:
   - group: "ImageVersion"
 
 stages:
+- stage: Init
+  displayName: Initialise
+  #dependsOn: StartVMs
+  jobs:
+    - job: Init
+      displayName: Initialise
+      timeoutInMinutes: 0
+      cancelTimeoutInMinutes: 1
+
+      pool:
+        name: $(agentVMImage)
+
+      steps:
+        - template: AzureDevOps/templates/AWSInitRepos.yml
+
+        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+          displayName: 'Set stageDependencies Version variables based on the published artefacts'
+          name: Vars
+          inputs:
+            awsCredentials: AzureDevOps
+            regionName: '${{ parameters.region }}'
+            scriptType: 'filePath'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
+            arguments:
+              -AwsTemplateRepoPath '$(Pipeline.Workspace)/_lansa_aws-templates'
+
 - stage: "MergePatchPaas"
   displayName: Merge patch/pass
   jobs:
@@ -175,7 +204,7 @@ stages:
     stagedisplayName: AUS VPC Tests w19d-15-0
     dependsOn: S3PatchPAAS
     jobName: VpcStack
-    jobDisplayname: 'Vpc Stack'
+    jobDisplayname: 'VPC ENG Stack'
     baseImageName: w19d-15-0
     paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-VPC
@@ -202,6 +231,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
+    paramJPN: True
     paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramUpdateManagementScripts: "Yes"
 
@@ -253,7 +283,7 @@ stages:
     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
     dependsOn: S3PatchPAAS
     jobName: VpcStack
-    jobDisplayname: 'Vpc Stack'
+    jobDisplayname: 'VPC JPN Stack'
     baseImageName: w19d-15-0j
     paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-JPN-VPC
@@ -334,10 +364,12 @@ stages:
           inputs:
             awsCredentials: AzureDevOps
             regionName: "ap-southeast-2"
-            arguments: '-BaseImageName ''w19d-15-0'' -stackname ''Validate-TemplateUrl'''
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+            arguments:
+              -BaseImageName 'w19d-15-0'
+              -stackname 'Validate-TemplateUrl'
 
-        - pwsh: |
+        - powershell: |
             # Print the Gate variables.
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
           displayName: 'Artifact Check : Output Gate Variable'
@@ -692,7 +724,7 @@ stages:
             -BaseImageName 'w19d-15-0'
             -stackname 'w19d-15-0-IMG'
 
-      - pwsh: |
+      - powershell: |
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'

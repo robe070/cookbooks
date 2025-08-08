@@ -4,6 +4,11 @@
 # pipeline does not need to be configured to run the tests.
 # It automatically works out which tests to run based on the artefacts available.
 #
+param (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $AwsTemplateRepoPath
+)
 Write-Host "Set all pipeline variables to false"
 Write-Host "These variables may be accessed in any subsequent stage or job in the pipeline."
 Write-Host "The current stage or job needs to be explicitly dependent on the stage or job that sets them."
@@ -28,20 +33,33 @@ Write-Host "##vso[task.setvariable variable=Build-w25d-15-0j;isOutput=true]False
 Write-Host "##vso[task.setvariable variable=Build-w25d-16-0;isOutput=true]False"
 Write-Host "##vso[task.setvariable variable=Build-w25d-16-0j;isOutput=true]False"
 
+Write-Host "##vso[task.setvariable variable=stack;isOutput=true] "
+Write-Host "##vso[task.setvariable variable=version;isOutput=true] "
+Write-Host "##vso[task.setvariable variable=VersionDigits;isOutput=true]0"
+Write-Host "##vso[task.setvariable variable=ImageID;isOutput=true]ami-null"
+Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]False"
+
 $path = "$($env:Pipeline_Workspace)/_Build Image Release Artefacts/aws"
 Write-Host "Using $path"
 if (Test-Path $path) {
     try{
-      # Get all .txt files matching the pattern w??d-??-??*.txt
-      $files = Get-ChildItem -Path $path -Filter "*.txt" | Where-Object {
-         $_.BaseName -match '^w\d{2}d-\d{2}-\d{1}j?$'
-      }
+        # Get all .txt files matching the pattern w??d-??-??*.txt
+        # Sort them with the latest windows version and lansa version first e.g. w25d... is before w22d...
+        $files = Get-ChildItem -Path $path -Filter "*.txt" |
+            Where-Object { $_.BaseName -match '^w\d{2}d-\d{2}-\d{1}j?$' } | Sort-Object -Property Name -Descending
 
-      foreach ($file in $files) {
-         $buildName = $file.BaseName  # e.g., "w19d-15-0" or "w19d-15-0j"
-         $varName = "Build-$buildName"
-         Write-Host "##vso[task.setvariable variable=$varName;isOutput=true]True"
-      }
+        $FirstBuildFound = $false
+        foreach ($file in $files) {
+            $buildName = $file.BaseName  # e.g., "w19d-15-0" or "w19d-15-0j"
+            $varName = "Build-$buildName"
+            Write-Host "##vso[task.setvariable variable=$varName;isOutput=true]True"
+
+            if ( -not $FirstBuildFound ) {
+                $FirstBuildFound = $true
+                Write-Host "Now obtain the details of the build from the file $file. These variable values will be referred to using vars.version, vars.versionDigits, vars.amiID, etc. Whereas within an individual stage they are referred to as Gate.version, etc."
+                & "$AwsTemplateRepoPath\SetGateVariable.ps1" -BaseImageName "$buildName" -stackname 'RandomNameNotToBeUsed'
+            }
+        }
     } catch{
         $_ | Out-Default | Write-Host
         Throw "Failed to set pipeline build Variables"
