@@ -28,6 +28,8 @@ resources:
 variables:
   - name: CookbooksSource
     value: $(Build.Repository.LocalPath)\cookbooks
+  - name: ArtifactSourceAlias
+    value: _lansa_aws-templates
   - name: CookbooksSource1
     value: c:\lansa
   - name: jpnLanguage
