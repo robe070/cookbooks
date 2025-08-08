@@ -86,7 +86,7 @@ stages:
           name: Vars
           inputs:
             awsCredentials: AzureDevOps
-            regionName: '${{ parameters.region }}'
+            regionName: 'ap-southeast-2'
             scriptType: 'filePath'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
             arguments:
