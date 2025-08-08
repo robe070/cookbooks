@@ -68,26 +68,12 @@ stages:
       pool:
           name: $(agentVMImage)
       steps:
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-
-        - task: PowerShell@2
-          displayName: 'Write access to Git Repo (robe070/cookbooks)'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '$(CookbooksBranch)'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoPath '$(CookbooksSourceAlias)'
+        - template: AzureDevOps/templates/AWSInitRepos.yml
+          parameters:
+            gitRepoBranch: $(CookbooksBranch)
+            gitHubName: $(GitCookbooksGitHubName)
+            gitRepoPath: $(CookbooksSourceAlias)
+            downloadImageArtefacts: false
 
         - task: PowerShell@2
           displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
@@ -108,15 +94,10 @@ stages:
       pool:
           name: $(agentVMImage)
       steps:
-        - checkout: self
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
+        - template: AzureDevOps/templates/AWSInitRepos.yml
+          parameters:
+            gitRepoWriteAccess: false
+            downloadImageArtefacts: false
 
         - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
           displayName: 'S3 Upload: $(BucketNamePreview)'
@@ -301,26 +282,14 @@ stages:
     pool:
       name: $(agentVMImage)
     steps:
-      - checkout: _robe070_cookbooks
-        displayName: Checkout Rob Cookbooks
-        path: _robe070_cookbooks
-
-      - checkout: _lansa_aws-templates-mp
-        displayName: Checkout Lansa AWS Marketplace Templates
-        path: _lansa_aws-templates-mp
-
-      - task: PowerShell@2
-        displayName: 'Write access to Git Repo (lansa/aws-templates)'
-        inputs:
-          targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          arguments:
-            -GitBranch '$(GitLansaAwsTemplatesMarketPlaceBranch)'
-            -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
-            -GitUserEmail '$(GitRepoUserEmail)'
-            -GitUserName '$(GitRepoUserName)'
-            -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
-          pwsh: true
+      - template: AzureDevOps/templates/AWSInitRepos.yml
+        parameters:
+          gitRepoBranch: $(GitLansaAwsTemplatesMarketPlaceBranch)
+          gitHubName: $(GitLansaAwsTemplatesGitHubName)
+          gitRepoPath: $(GitLansaAwsTemplatesRepoName)
+          downloadImageArtefacts: false
+          checkoutTemplateRepo: false
+          checkoutTemplateMPRepo: true
 
       - task: PowerShell@2
         displayName: 'Merge support/scalable into support/scalable_marketplace'
@@ -354,21 +323,10 @@ stages:
       pool:
         name: $(agentVMImage)
       steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob Cookbooks
-          path: _robe070_cookbooks
-
-        - checkout: _lansa_aws-templates-mp
-          displayName: Checkout Lansa AWS Marketplace Templates
-          path: _lansa_aws-templates-mp
-
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: aws-templates
-
+        - template: AzureDevOps/templates/AWSInitRepos.yml
+          parameters:
+            gitRepoWriteAccess: true
+            checkoutTemplateMPRepo: true
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           name: Gate
@@ -716,20 +674,12 @@ stages:
     pool:
       name: $(agentVMImage)
     steps:
-      - download: _Build Image Release Artefacts
-        displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-      - checkout: _robe070_cookbooks
-        displayName: Checkout Rob Cookbooks
-        path: _robe070_cookbooks
-
-      - checkout: _lansa_aws-templates
-        displayName: Checkout Lansa AWS Templates
-        path: _lansa_aws-templates
-
-      - checkout: _lansa_aws-templates-mp
-        displayName: Checkout Lansa AWS Marketplace Templates
-        path: _lansa_aws-templates-mp
+      - template: AzureDevOps/templates/AWSInitRepos.yml
+        parameters:
+          gitRepoBranch: $(CookbooksBranchPreview)
+          gitHubName: $(GitCookbooksGitHubName)
+          gitRepoPath: $(CookbooksSourceAlias)
+          checkoutTemplateMPRepo: true
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         name: Gate
@@ -746,19 +696,6 @@ stages:
           # Print the Gate variables.
           Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
         displayName: 'Artifact Check : Output Gate Variable'
-
-      - task: PowerShell@2
-        displayName: 'Write access to Git Repo (robe070/cookbooks)'
-        inputs:
-          targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          arguments:
-            -GitBranch '$(CookbooksBranchPreview)'
-            -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitCookbooksGitHubName)'
-            -GitUserEmail '$(GitRepoUserEmail)'
-            -GitUserName '$(GitRepoUserName)'
-            -GitRepoPath '$(CookbooksSourceAlias)'
-          pwsh: true
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'

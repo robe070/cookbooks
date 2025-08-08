@@ -11,16 +11,35 @@ parameters:
   - name: gitRepoPath
     type: string
     default: '$(ArtifactSourceAlias)'
+  - name: downloadImageArtefacts
+    type: boolean
+    default: true
+  - name: checkoutTemplateRepo
+    type: boolean
+    default: true
+  - name: checkoutTemplateMPRepo
+    type: boolean
+    default: false
+
 
 steps:
         - download: _Build Image Release Artefacts
           displayName: Download artifacts from Build Image Release Artefacts 3.0
+          condition: ${{ parameters.downloadImageArtefacts }}
 
         - powershell: |
             Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
             Set-Location -Path "$(Pipeline.Workspace)"
 
-            $dirsToDelete = @('_lansa_aws-templates', '_robe070_cookbooks')
+            $dirsToDelete = @('_robe070_cookbooks')
+
+            if (${{ parameters.checkoutTemplateRepo }}) {
+                $dirsToDelete += '_lansa_aws-templates'
+            }
+
+            if (${{ parameters.checkoutTemplateMPRepo }}) {
+                $dirsToDelete += '_lansa_aws-templates-mp'
+            }
 
             foreach ($dir in $dirsToDelete) {
                 if (Test-Path $dir) {
@@ -38,6 +57,12 @@ steps:
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
           path: _lansa_aws-templates
+          condition: ${{ parameters.checkoutTemplateRepo }}
+
+        - checkout: _lansa_aws-templates-mp
+          displayName: Checkout Lansa AWS Marketplace Templates
+          path: _lansa_aws-templates-mp
+          condition: ${{ parameters.checkoutTemplateMPRepo }}
 
         - checkout: _robe070_cookbooks
           displayName: Checkout Rob cookbooks
@@ -48,7 +73,6 @@ steps:
           displayName: 'Write access to Git Repo (lansa/aws-templates)'
           inputs:
             targetType: filePath
-            # filePath: '$(System.DefaultWorkingDirectory)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
             arguments:
               -GitBranch '${{ parameters.gitRepoBranch }}'
@@ -56,3 +80,4 @@ steps:
               -GitUserEmail '$(GitRepoUserEmail)'
               -GitUserName '$(GitRepoUserName)'
               -GitRepoPath '${{ parameters.gitRepoPath }}'
+

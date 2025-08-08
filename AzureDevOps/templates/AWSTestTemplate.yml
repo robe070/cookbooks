@@ -151,21 +151,10 @@ stages:
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
             displayName: 'Set scriptRepoPath and templateSourceType variables'
 
-          - download: _Build Image Release Artefacts
-            displayName: Download artifacts from Build Image Release Artefacts 3.0
-
-          - checkout: _robe070_cookbooks
-            displayName: Checkout Rob Cookbooks
-            path: _robe070_cookbooks
-
-          - checkout: _lansa_aws-templates-mp
-            displayName: Checkout Lansa AWS Marketplace Templates
-            path: _lansa_aws-templates-mp
-            condition: or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
-
-          - checkout: _lansa_aws-templates
-            displayName: Checkout Lansa AWS Templates
-            path: aws-templates
+          - template: AzureDevOps/templates/AWSInitRepos.yml
+            parameters:
+              gitRepoWriteAccess: false
+              checkoutTemplateMPRepo: or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
