@@ -158,7 +158,10 @@ stages:
           - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
-              checkoutTemplateMPRepo: and(succeeded(), eq(variables['SetCheckoutVar.CheckoutTemplateMPRepo'], 'True'))
+              checkoutTemplateMPRepo: ${{ or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}
+              # ${{ eq(variables['CheckoutTemplateMPRepo'], 'True') }}
+              # ${{ eq(parameters.enableFeature, 'true') }}
+              # ${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
