@@ -154,7 +154,6 @@ stages:
     paramStackType: Small
     paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramArguments: '-Gatestack $(Gate.stack)'
     paramUpdateManagementScripts: "Yes"
 
 
@@ -174,7 +173,6 @@ stages:
     paramStackType: Test
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramArguments: '-Gatestack $(Gate.stack)'
     paramUpdateManagementScripts: "Yes"
 
 
@@ -193,7 +191,6 @@ stages:
     paramStackType: Development
     paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramArguments: '-Gatestack $(Gate.stack)'
     paramUpdateManagementScripts: "Yes"
 
 
@@ -212,7 +209,6 @@ stages:
     WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramArguments: '-Gatestack $(Gate.stack)'
     paramUpdateManagementScripts: 'Yes'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
@@ -231,8 +227,6 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramJPN: True
-    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramUpdateManagementScripts: "Yes"
 
 
@@ -252,7 +246,6 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramUpdateManagementScripts: "Yes"
 
 
@@ -272,7 +265,6 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramUpdateManagementScripts: "No"
 
 
@@ -292,7 +284,6 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramArguments: '-Gatestack $(Gate.stack) -Language $(jpnLanguage)'
     paramUpdateManagementScripts: 'Yes'
 
 - stage: MergeToMarketplaceAndUpload

@@ -117,9 +117,6 @@ parameters:
   - name: paramS3ObjectKey
     type: string
     default: none
-  - name: paramArguments
-    type: string
-    default: none
   - name: paramTagValue
     type: string
     default: Lansa-Prod
