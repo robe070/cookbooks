@@ -33,14 +33,20 @@ steps:
 
             $dirsToDelete = @('_robe070_cookbooks')
 
-            if ($checkoutTemplateRepo -eq 'True') {
+            Write-Host("checkoutTemplateRepo value, ${{ parameters.checkoutTemplateRepo: '${{ parameters.checkoutTemplateRepo }}'")
+            Write-Host("checkoutTemplateRepo value, $${{ variables.checkoutTemplateRepo: '${{ variables.checkoutTemplateRepo }}'")
+            Write-Host("checkoutTemplateRepo value, $ parameters.checkoutTemplateRepo: '$($parameters.checkoutTemplateRepo)'")
+            # if ($null -eq $parameters.BaseImageName) { Write-Error "BaseImageName is not provided" }
+
+            if ('${{ parameters.checkoutTemplateRepo }}' -eq 'True') {
                 $dirsToDelete += '_lansa_aws-templates'
             }
 
-            if ($checkoutTemplateMPRepo -eq 'True') {
+            if ('${{ parameters.checkoutTemplateMPRepo }}' -eq 'True') {
                 $dirsToDelete += '_lansa_aws-templates-mp'
             }
 
+            Write-Host("Directories to delete: $($dirsToDelete -join ', ')")
             foreach ($dir in $dirsToDelete) {
                 if (Test-Path $dir) {
                     Write-Host "Removing $dir"
