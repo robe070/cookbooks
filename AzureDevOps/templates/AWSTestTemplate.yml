@@ -158,7 +158,7 @@ stages:
           - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
-              checkoutTemplateMPRepo: ${{ variables['checkoutTemplateMPRepo'] }}
+              checkoutTemplateMPRepo: and(succeeded(), eq(variables['SetCheckoutVar.CheckoutTemplateMPRepo'], 'True'))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
