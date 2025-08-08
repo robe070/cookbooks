@@ -130,7 +130,11 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn:
+      - Init
+      - ${{ if ne(parameters.dependsOn, '') }}:
+        - ${{ parameters.dependsOn }}
+
     displayName: ${{ parameters.stageDisplayname }}
 
     variables:
@@ -157,7 +161,7 @@ stages:
           - powershell: |
               # Set scriptRepoPath and templateSourceType variables for use in later tasks in this job. This is required as including the expressions inline is not supported by Azure DevOps tasks.
 
-              $repoPath = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { '_lansa_aws-templates-mp' } else { 'aws-templates' }
+              $repoPath = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { '_lansa_aws-templates-mp' } else { '_lansa_aws-templates' }
               Write-Host "##vso[task.setvariable variable=scriptRepoPath]$repoPath"
 
               $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
