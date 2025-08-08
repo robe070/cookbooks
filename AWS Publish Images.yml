@@ -18,6 +18,12 @@ resources:
       name: lansa/aws-templates
       ref: support/scalable
 
+    - repository: _lansa_aws-templates-mp
+      type: github
+      endpoint: robe070
+      name: lansa/aws-templates
+      ref: $(GitLansaAwsTemplatesMarketPlaceBranch)
+
 variables:
   - group: Template Parameters
   - group: Default Branch
