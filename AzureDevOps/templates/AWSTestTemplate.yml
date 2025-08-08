@@ -154,7 +154,7 @@ stages:
           - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
-              checkoutTemplateMPRepo: or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
+              checkoutTemplateMPRepo: $[or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))]
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             name: Gate
