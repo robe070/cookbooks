@@ -57,7 +57,7 @@ if (Test-Path $path) {
             if ( -not $FirstBuildFound ) {
                 $FirstBuildFound = $true
                 Write-Host "Now obtain the details of the build from the file $file. These variable values will be referred to using vars.version, vars.versionDigits, vars.amiID, etc. Whereas within an individual stage they are referred to as Gate.version, etc."
-                & "$AwsTemplateRepoPath\SetGateVariable.ps1" -BaseImageName "$buildName" -stackname 'RandomNameNotToBeUsed'
+                & "$AwsTemplateRepoPath\scripts\SetGateVariable.ps1" -BaseImageName "$buildName" -stackname 'RandomNameNotToBeUsed'
             }
         }
     } catch{
