@@ -27,6 +27,8 @@ steps:
           displayName: Download artifacts from Build Image Release Artefacts 3.0
           condition: ${{ parameters.downloadImageArtefacts }}
 
+        - checkout: self
+
         - powershell: |
             Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
             Set-Location -Path "$(Pipeline.Workspace)"
@@ -57,8 +59,6 @@ steps:
             }
             Write-Host "Existing secondary repositories deleted."
           displayName: 'Delete secondary repositories'
-
-        - checkout: self
 
         - checkout: _lansa_aws-templates
           displayName: Checkout Lansa AWS Templates
