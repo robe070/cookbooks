@@ -1,0 +1,42 @@
+# See scripts/SetVersionVariables.ps1 for more information on how these variables have been created
+# and how to use them in a pipeline.
+variables:
+  Build-w19d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]
+  Build-w19d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0j']]
+  Build-w19d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0']]
+  Build-w19d-16-0j: $[stageDependencies.Init.Init.outputs[' vars.Build-w19d-16-0j']]
+  Build-w22d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0']]
+  Build-w22d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0j']]
+  Build-w22d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0']]
+  Build-w22d-16-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0j']]
+  Build-w25d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0']]
+  Build-w25d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0j']]
+  Build-w25d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
+  Build-w25d-16-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
+  VersionDigits: $[coalesce(
+          stageDependencies.w25d160IMGTest.w25d160IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d150IMGTest.w25d150IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d160jIMGTest.w25d160jIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d150jIMGTest.w25d150jIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d160IMGTest.w19d160IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d150IMGTest.w19d150IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d160jIMGTest.w19d160jIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d160IMGTest.w22d160IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d150IMGTest.w22d150IMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d160jIMGTest.w22d160jIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d150jIMGTest.w22d150jIMGTest.outputs['Gate.VersionDigits'],
+
+          stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['Gate.VersionDigits'],
+          stageDependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['Gate.VersionDigits']
+        )]

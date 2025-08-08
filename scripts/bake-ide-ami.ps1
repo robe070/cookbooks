@@ -246,6 +246,9 @@ try
     } elseif ($VersionText -like "w22*"){
         $Platform= 'Win2022'
         $Win2012 = $false
+    } elseif ($VersionText -like "w25*"){
+        $Platform= 'Win2025'
+        $Win2012 = $false
     } else {
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
@@ -368,6 +371,7 @@ try
                 'Win2016' { $AzImageVersion = '14393*'  }
                 'Win2019' { $AzImageVersion = '17763*'  }
                 'Win2022' { $AzImageVersion = '20348*'  }
+                'Win2025' { $AzImageVersion = '26100*'  }
             }
         }
 
@@ -674,7 +678,9 @@ $jsonObject = @"
             # Install Chocolatey
             Execute-RemoteScript -Session $Script:session -FilePath "$script:IncludeDir\getchoco.ps1"
 
-            if ( $Cloud -eq 'Azure' ) {
+            # Sometimes the C runtime requires a reboot after installing, and on Azure as described below
+            # it was required for other reasons.
+            {
                 # This section exists for when choco 2.0 is being installed. It was never fully functional,
                 # but left as a marker of where the work reached. Choco 1.4 is actually being used"
                 # It all works OK on Azure, so as it aint broke we're not fixing it"
@@ -756,7 +762,7 @@ $jsonObject = @"
             # Make sure the session is initialised correctly
             ReConnect-Session
 
-            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
+            Execute-RemoteScript -Session $Script:session -FilePath $script:IncludeDir\install-lansa-base.ps1 -ArgumentList  @($Script:GitRepoPath, $Script:LicenseKeyPath, $script:licensekeypassword, $ChefRecipe, $Platform ) # Note that the licensekeypassword is not used. Its just there for backward compatibility
 
             if ( $InstallScalable ) {
 
@@ -1227,6 +1233,7 @@ $jsonObject = @"
 
         $TagDesc = "$FinalDescription created on $($AmazonImage[0].CreationDate) with LANSA $Language $VersionText installed on $(Log-Date)"
         $AmiName = "$Script:DialogTitle $VersionText $(Get-Date -format "yyyy-MM-ddTHH-mm-ss") $Platform"     # AMI ID must not contain colons
+        Write-Host "Creating AMI with description '$TagDesc' and Name '$AmiName"
         $amiID = New-EC2Image -InstanceId $Script:instanceid -Name $amiName -Description $TagDesc
 
         $tagName = $amiName # String for use with the name TAG -- as opposed to the AMI name, which is something else and set in New-EC2Image

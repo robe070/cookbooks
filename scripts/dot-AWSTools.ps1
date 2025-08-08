@@ -11,7 +11,7 @@ AWS and Internet tools
 function Get-ExternalIP {
     if ( -not $script:externalip )
     {
-        $Ip = (Invoke-WebRequest "https://ipv4.myexternalip.com/raw")
+        $Ip = (Invoke-WebRequest "https://ipv4.myexternalip.com/raw" -UseBasicParsing)
 
         # strip CR or LF from string and return Ip Address
         $script:externalip = $Ip.content -replace "`t|`n|`r",""
@@ -42,28 +42,61 @@ function Create-Ec2SecurityGroup
     $GroupId = New-EC2SecurityGroup $script:SG  -Description "Temporary security to bake an ami"
     Get-EC2SecurityGroup -GroupId $GroupId | Out-Default | Write-Host
 
-    if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
-        $ipsplit = $ExternalIPAddresses.split(",")
-        Write-Host "ipsplit: $ipsplit"
-        foreach ( $iprange in $ipsplit ) {
-            $iprange = $iprange.replace(' ','')
-            Write-Host "Enabling SG for IP $iprange"
-            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $iprange} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $iprange} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $iprange} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-            Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $iprange} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-        }
-    }
     $externalip = Get-ExternalIP
     $externalipcidr = "$externalip/32"
+    if ( ($ExternalIPAddresses -contains $externalipcidr) ) {
+        Write-Host "Default IP $externalipcidr already present"
+    } else {
+        Write-Host "Adding Default IP $externalipcidr"
+        $ExternalIPAddresses += $externalipcidr
+    }
 
-    Write-Host "Enabling SG for Default IP $externalipcidr"
+    if ( $ExternalIPAddresses -And $ExternalIPAddresses.count -gt 0 ) {
+        Write-Host "Enabling SG for all these IP: $ExternalIPAddresses"
+        foreach ( $iprange in $ExternalIPAddresses ) {
+            $iprange = $iprange.replace(' ','')
+            Write-Host "Enabling SG for IP $iprange"
 
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "icmp"; FromPort = -1;   ToPort = -1;   IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "udp";  FromPort = 3389; ToPort = 3389; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-    Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 5985; ToPort = 5986; IpRanges = $externalipcidr} -ErrorAction SilentlyContinue | Out-Default | Write-Host
+            $ipPermissions = @()
+
+            # Add the first permission
+            $ipPermission1 = New-Object Amazon.EC2.Model.IpPermission
+            $ipPermission1.IpProtocol = "icmp"
+            $ipPermission1.FromPort = -1
+            $ipPermission1.ToPort = -1
+            $ipPermission1.IpRanges.Add($iprange)
+            $ipPermissions += $ipPermission1
+
+            # Add the second permission
+            $ipPermission2 = New-Object Amazon.EC2.Model.IpPermission
+            $ipPermission2.IpProtocol = "tcp"
+            $ipPermission2.FromPort = 3389
+            $ipPermission2.ToPort = 3389
+            $ipPermission2.IpRanges.Add($iprange)
+            $ipPermissions += $ipPermission2
+
+            # Add the third permission
+            $ipPermission3 = New-Object Amazon.EC2.Model.IpPermission
+            $ipPermission3.IpProtocol = "udp"
+            $ipPermission3.FromPort = 3389
+            $ipPermission3.ToPort = 3389
+            $ipPermission3.IpRanges.Add($iprange)
+            $ipPermissions += $ipPermission3
+
+            # Add the fourth permission
+            $ipPermission4 = New-Object Amazon.EC2.Model.IpPermission
+            $ipPermission4.IpProtocol = "tcp"
+            $ipPermission4.FromPort = 5985
+            $ipPermission4.ToPort = 5986
+            $ipPermission4.IpRanges.Add($iprange)
+            $ipPermissions += $ipPermission4
+
+            Grant-EC2SecurityGroupIngress -GroupId $GroupId -IpPermissions $ipPermissions
+        }
+    }
 
     Grant-EC2SecurityGroupIngress -GroupName $script:SG -IpPermissions @{IpProtocol = "tcp";  FromPort = 80;   ToPort = 80;   IpRanges = @("0.0.0.0/0")} -ErrorAction SilentlyContinue | Out-Default | Write-Host
-
 }
+
+# $script:SG = "RGSG"
+# Create-Ec2SecurityGroup( @("14.203.60.240/32","159.196.169.200/32") )

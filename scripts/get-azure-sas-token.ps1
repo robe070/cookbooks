@@ -56,9 +56,9 @@ try {
     $token = New-AzStorageContainerSASToken -Context $storageContext -Name $ContainerName -Permission rl -ExpiryTime $endTime -StartTime $startTime
 
     # Pipeline uses the ImageUrl variable with value $uri$token
-    Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]'$uri$token'"
-    
-    Write-Host "Full url for Azure Publishing: $uri$token"
+    Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]'$($uri)?$($token)'"
+
+    Write-Host "Full url for Azure Publishing: $($uri)?$($token)"
 } catch {
     $_ | Out-default | Write-Host
     throw "Error. SAS token not produced"

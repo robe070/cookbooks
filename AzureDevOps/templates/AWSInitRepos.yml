@@ -1,0 +1,83 @@
+parameters:
+  - name: gitRepoWriteAccess
+    type: boolean
+    default: true
+  - name: gitRepoBranch
+    type: string
+    default: '$(GitLansaAwsTemplatesBranch)'
+  - name: gitHubName
+    type: string
+    default: '$(GitLansaAwsTemplatesGitHubName)'
+  - name: gitRepoPath
+    type: string
+    default: '$(ArtifactSourceAlias)'
+  - name: downloadImageArtefacts
+    type: boolean
+    default: true
+  - name: checkoutTemplateRepo
+    type: boolean
+    default: true
+  - name: checkoutTemplateMPRepo
+    type: boolean
+    default: false
+
+
+steps:
+        - download: _Build Image Release Artefacts
+          displayName: Download artifacts from Build Image Release Artefacts 3.0
+          condition: ${{ parameters.downloadImageArtefacts }}
+
+        - powershell: |
+            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+            Set-Location -Path "$(Pipeline.Workspace)"
+
+            $dirsToDelete = @('_robe070_cookbooks')
+
+            if ($checkoutTemplateRepo -eq 'True') {
+                $dirsToDelete += '_lansa_aws-templates'
+            }
+
+            if ($checkoutTemplateMPRepo -eq 'True') {
+                $dirsToDelete += '_lansa_aws-templates-mp'
+            }
+
+            foreach ($dir in $dirsToDelete) {
+                if (Test-Path $dir) {
+                    Write-Host "Removing $dir"
+                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+                } else {
+                    Write-Host "Directory $dir not found, skipping."
+                }
+            }
+            Write-Host "Existing secondary repositories deleted."
+          displayName: 'Delete secondary repositories'
+
+        - checkout: self
+
+        - checkout: _lansa_aws-templates
+          displayName: Checkout Lansa AWS Templates
+          path: _lansa_aws-templates
+          condition: ${{ parameters.checkoutTemplateRepo }}
+
+        - checkout: _lansa_aws-templates-mp
+          displayName: Checkout Lansa AWS Marketplace Templates
+          path: _lansa_aws-templates-mp
+          condition: ${{ parameters.checkoutTemplateMPRepo }}
+
+        - checkout: _robe070_cookbooks
+          displayName: Checkout Rob cookbooks
+          path: _robe070_cookbooks
+
+        - task: PowerShell@2
+          condition: eq('${{ parameters.gitRepoWriteAccess }}', true)
+          displayName: 'Write access to Git Repo (lansa/aws-templates)'
+          inputs:
+            targetType: filePath
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+            arguments:
+              -GitBranch '${{ parameters.gitRepoBranch }}'
+              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@${{ parameters.gitHubName }}'
+              -GitUserEmail '$(GitRepoUserEmail)'
+              -GitUserName '$(GitRepoUserName)'
+              -GitRepoPath '${{ parameters.gitRepoPath }}'
+

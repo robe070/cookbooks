@@ -1,0 +1,84 @@
+# Note, when including this template and using the dependsOn parameter,
+# it must be in the same Stage as where the dependent job is defined.
+parameters:
+  - name: resourceGroup
+    type: string
+  - name: baseVmName
+    type: string
+  - name: vmCount
+    type: number
+  - name: azureSubscription
+    type: string
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+# RootStopTrigger is required so that there is at least one job in this stage that always runs,
+#  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
+- job: RootStopTrigger
+  displayName: "Start StopVMs Stage"
+  # dependsOn: ${{ parameters.dependsOn }}
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+    - script: echo "Stopping VMs..."
+
+- job: StopAgents
+  displayName: 'Stop Agent VMs'
+  dependsOn:
+#    - RootStopTrigger
+    - ${{ parameters.dependsOn }}
+
+  condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+    - task: AzurePowerShell@5
+      displayName: 'Stop agent VMs in parallel'
+      inputs:
+        azureSubscription: ${{ parameters.azureSubscription }}
+        ScriptType: 'InlineScript'
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          $resourceGroup = '${{ parameters.resourceGroup }}'
+          $baseVmName = '${{ parameters.baseVmName }}'
+          $vmCount = ${{ parameters.vmCount }}
+
+          Write-Host "StopAgents Parameters:"
+          Write-Host "Resource Group: $resourceGroup"
+          Write-Host "Base VM Name: $baseVmName"
+          Write-Host "VM Count: $vmCount"
+
+          $jobs = @()
+
+          for ($i = 1; $i -le $vmCount; $i++) {
+            $vmName = "${baseVmName}$i"
+            Write-Host "Queuing stop job for ${vmName}"
+            $jobs += Start-Job -ScriptBlock {
+              param($vmName, $resourceGroup)
+
+              Write-Host "Stopping VM: ${vmName}"
+              try {
+                $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction SilentlyContinue
+                if ($vm) {
+                  Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force -NoWait
+                  Write-Host "${vmName} stop initiated."
+                } else {
+                  Write-Host "${vmName} does not exist. Skipping."
+                }
+              } catch {
+                $_ | Out-Default | Write-Host
+              }
+            } -ArgumentList $vmName, $resourceGroup
+          }
+
+          Write-Host "Waiting for all VM stop jobs to complete..."
+          $jobs | Wait-Job
+
+          foreach ($job in $jobs) {
+            Receive-Job -Job $job | Out-Default | Write-Host
+            Remove-Job -Job $job
+          }
+
+          Write-Host "All VMs stop commands issued."

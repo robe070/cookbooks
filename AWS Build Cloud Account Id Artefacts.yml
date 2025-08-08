@@ -10,9 +10,11 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: Windows-2019-AMI
-    value: LANSA Scalable License  w19d-15-0-$(VersionText-w19d-15-0)
-  - name: vmImage
+    value: LANSA Scalable License  w19d-15-0-18
+  - name: agentVMImage
     value: windows-2022
+  - name: VersionText
+    value: 0
 
 jobs:
 - job: Job_2
@@ -21,7 +23,7 @@ jobs:
   # Disable building the old account ID because it is no longer supported
   condition: and(False, succeeded(), or(eq(variables['Build-w19d-15-ID-OLD'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -150,14 +152,14 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText)' -Force
 
 - job: Job_6
   displayName: w19d-15-ID-NEW
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID-NEW'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(vmImage)
+    vmImage: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -286,4 +288,4 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText-w19d-15-0)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w19d-15-0-$(VersionText)' -Force

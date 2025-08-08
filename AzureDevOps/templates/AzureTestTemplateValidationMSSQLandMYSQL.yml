@@ -46,25 +46,25 @@ parameters:
   - name: osName
     type: string
     default: none
-  - name: lansaVersion 
+  - name: lansaVersion
     type: string
     default: none
-  - name: databaseType  
+  - name: databaseType
     type: string
     default: none
-  - name: edition  
+  - name: edition
     type: string
     default: Standard
-  - name: requestedServiceObjectiveName  
+  - name: requestedServiceObjectiveName
     type: string
     default: ''
-  - name: msiURL  
+  - name: msiURL
     type: string
     default: none
-  - name: databaseName  
+  - name: databaseName
     type: string
     default: none
-  - name: databaseLogin  
+  - name: databaseLogin
     type: string
     default: none
   - name: databaseNewOrExisting
@@ -94,26 +94,31 @@ stages:
       variables:
         - name: ResourceGroup
           value: ${{ parameters.resourceGroup }}
+
         - name: csmFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlTemplate.json
-          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142' ) }}:
+          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160' ) }}:
             value: sqlServerTemplate.json
         - name: csmParametersFile
           ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150' ) }}:
             value: mysqlParameters.json
-          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142' ) }}:
+          ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160' ) }}:
             value: sqlServerParameters.json
+
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
+
         - name: location
-          # value: 'Australia Southeast'
           value: 'Australia East'
+
+        - name: JobTag
+          value: 'test-temp'
 
       cancelTimeoutInMinutes: 1
       condition: ${{ parameters.jobcondition}}
       displayName: ${{ parameters.jobDisplayname }}
-      
+
       pool:
         vmImage: ${{ parameters.vmImage }}
 
@@ -130,16 +135,29 @@ stages:
           path: _robe070_cookbooks
 
         - task: PowerShell@2
+          name: ''
+          displayName: 'Validate stageName parameter'
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host("csmFile = $csmFile")
+              throw "ERROR: StageName parameter ${{ parameters.stageName }} is not a supported value."
+              cmd /c exit 2
+          condition: and(succeeded(), eq(lower(variables['csmFile']), ''))
+
+        - task: PowerShell@2
           name: Gate
           displayName: 'Artifact Check: Set Gate Variable'
+          env:
+            RESOURCEGROUPNAME: BakingDP # azure_set_gate_variable.ps1 needs to know which resource group the image is located in. Note the same as the resource group for the stack.
           inputs:
             targetType: filePath
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/azure_set_gate_variable.ps1'
             arguments: -Version "${{ parameters.version }}" -osName "${{ parameters.osName }}"
 
         - powershell: |
-            # Print the Gate variables. 
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
+            # Print the Gate variables.
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)"
           displayName: 'Artifact Check : Output Gate Variable'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -157,7 +175,7 @@ stages:
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
         - task: AzureResourceManagerTemplateDeployment@3
-          displayName: 'ARM Template deployment: ${{ parameters.stageDisplayname }}'
+          displayName: 'Deploy DB: ${{ parameters.stageDisplayname }}'
           name: sqlazuredeployment
           inputs:
             azureResourceManagerConnection: $(ConnectedServiceName)
@@ -174,17 +192,17 @@ stages:
         - ${{ if eq( lower(parameters.stageName), 'ausmysql1dbw19d150') }}:
           - powershell: |
               # Print the Deployment Output
-              Write-Host "$(deploymentOutput_common)" | out-default | Write-Verbose
+              Write-Host "$(deploymentOutput_common)"
 
               $deployment_Output = ConvertFrom-Json '$(deploymentOutput_common)'
               $serverName = $deployment_Output.serverName.value
-              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName" | Out-Default | Write-Verbose 
+              Write-Host "##vso[task.setvariable variable=serverName;isOutput=true]$serverName"
             displayName: 'Get MySQL DB ServerName'
             name: mysqlDBOutput
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
           - task: AzureResourceManagerTemplateDeployment@3
-            displayName: 'ARM Template deployment: MySQL1DB'
+            displayName: 'Deploy Main Stack: MySQL1DB'
             inputs:
               azureResourceManagerConnection: $(ConnectedServiceName)
               subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
@@ -196,8 +214,8 @@ stages:
               deploymentOutputs: deploymentOutput
               addSpnToEnvironment: true
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
-        
-        - ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d142') }}:
+
+        - ${{ if eq( lower(parameters.stageName), 'ausmssqls1dbw19d160') }}:
           - task: AzurePowerShell@5
             displayName: GetServerIP
             name: mssqlDBOutput
@@ -206,17 +224,17 @@ stages:
               ScriptType: InlineScript
               Inline: |
                 # Print the Deployment Output
-                Write-Host "$(deploymentOutput_common)" | out-default | Write-Verbose
+                Write-Host "$(deploymentOutput_common)"
                 $deploymentOutput =ConvertFrom-Json '$(deploymentOutput_common)'
                 $pipName = $deploymentOutput.publicIpAddressName.value
                 $output = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName '$(ResourceGroup)'
                 $vmIP = $output.IpAddress
-                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP" | Out-Default | Write-Verbose 
+                Write-Host "##vso[task.setvariable variable=pip;isOutput=true]$vmIP"
               azurePowerShellVersion: LatestVersion
             condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
           - task: AzureResourceManagerTemplateDeployment@3
-            displayName: '${{ parameters.stageDisplayname }}: ARM Template deployment'
+            displayName: 'Deploy Main Stack ${{ parameters.stageDisplayname }}'
             inputs:
               azureResourceManagerConnection: $(ConnectedServiceName)
               subscriptionId: '739c4e86-bd75-4910-8d6e-d7eb23ab94f3'
@@ -231,31 +249,32 @@ stages:
 
         - powershell: |
             # Print the Deployment Output
-            Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+            Write-Host "$(deploymentOutput)"
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-          displayName: 'Tagging DB'
+
+        - task: PowerShell@2
+          name: ''
+          displayName: Azure Login
           inputs:
-            ConnectedServiceName: $(ConnectedServiceName)
-            ResourceGroupName: ${{ parameters.resourceGroup }}
-            Key: Usage
-            Value: 'test-temp'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
+            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
+
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Tag RG'
+          inputs:
+            targetType: inline
+            script: >-
+              Write-Host "Tagging '$(ResourceGroup)' with Usage = '$(JobTag)'"
+
+              Set-AzResourceGroup -Name '$(ResourceGroup)' -Tag @{ Usage = '$(JobTag)' }
           continueOnError: true
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-          displayName: 'Tagging Resource Group'
-          inputs:
-            ConnectedServiceName: $(ConnectedServiceName)
-            ResourceGroupName: '$(ResourceGroup)'
-            Key: Usage
-            Value: 'test-temp'
-          continueOnError: true
-          condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
-
-        - task: PowerShell@2      
+        - task: PowerShell@2
           displayName: 'Test ARM Deployment: URL Tests'
           inputs:
             targetType: filePath

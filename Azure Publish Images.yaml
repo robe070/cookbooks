@@ -231,9 +231,8 @@ stages:
           1. All preceding stages must be successful, or skipped
           2. Publish the preview images in the marketplace
           3. Wait for the email "Approve the offer preview for LANSA Scalable License"
-          4. Increment the Version number in the Build Image Release Artefacts pipeline
-          5. Increment the Test Version Preview Variable (TestVersionPrev<SKU>) in the "SKU Version" Variable Group.
-          6. Only now the pipeline may be continued to test the preview images
+          4. Increment the VersionText Variable in Azure Build Image Release Artefacts.yml.
+          5. Only now the pipeline may be continued to test the preview images
 
 - stage: 'MergePatch_PAASCookbooks'
   displayName: 'Merge patch/paas cookbooks'

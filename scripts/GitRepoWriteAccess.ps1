@@ -21,11 +21,11 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $GitRepoName
+    $GitRepoPath
   )
 
 # goto git repo
-cd "$($env:Pipeline_Workspace)/$($GitRepoName)"
+cd "$($env:Pipeline_Workspace)/$($GitRepoPath)"
 
 # git checkout to branch
 git checkout $GitBranch

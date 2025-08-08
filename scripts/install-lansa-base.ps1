@@ -30,8 +30,12 @@ param (
 
     [Parameter(Mandatory=$true)]
     [string]
-    $ChefRecipe
-    )
+    $ChefRecipe,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Platform
+)
 
 Set-StrictMode -Off
 
@@ -108,7 +112,8 @@ function DownloadAndInstallCRuntime {
     }
 
     $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart',"/log $log_file") -Wait -PassThru
-    if ( $p.ExitCode -ne 0 ) {
+    # ExitCode of 3010 means a reboot is required
+    if ( $p.ExitCode -ne 0 -and ($p.ExitCode -ne 3010) ) {
         $ExitCode = $p.ExitCode
         $ErrorMessage = "Install of $MSIuri returned error code $($p.ExitCode). See $log_file"
         throw $ErrorMessage
@@ -196,7 +201,12 @@ try
 
     # Chef installation
     if ( $Cloud -ne "Docker" ) {
-        Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
+        # TOBEDONE
+        # This error occurs when running the following script on Win2025. Its not important so just avoid it for the moment
+        #  schtasks /change /TN "\Microsoft\windows\application Experience\ProgramDataUpdater" /Disable returned error code 1.
+        if ( -not ($Script:Platform -eq 'Win2025')) {
+            Run-ExitCode 'schtasks' @( '/change', '/TN', '"\Microsoft\windows\application Experience\ProgramDataUpdater"', '/Disable' ) | Out-Default | Write-Host
+        }
 
         # Write-GreenOutput "$(Log-Date) Installing Chef" | Write-Host
         # Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
