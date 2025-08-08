@@ -33,11 +33,11 @@ steps:
 
             $dirsToDelete = @('_robe070_cookbooks')
 
-            if (${{ parameters.checkoutTemplateRepo }}) {
+            if (${{ eq(parameters.checkoutTemplateRepo, 'True') }}) {
                 $dirsToDelete += '_lansa_aws-templates'
             }
 
-            if (${{ parameters.checkoutTemplateMPRepo }}) {
+            if (${{ eq(parameters.checkoutTemplateMPRepo, 'True') }}) {
                 $dirsToDelete += '_lansa_aws-templates-mp'
             }
 

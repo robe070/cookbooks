@@ -150,9 +150,9 @@ stages:
               $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
 
-              $deploymentType = "${{ parameters.deploymentType }}"
-              $checkoutMpRepo = ($deploymentType -eq 'Production' -or $deploymentType -eq 'Preview')
-              Write-Host "##vso[task.setvariable variable=checkoutTemplateMPRepo]$checkoutMpRepo"
+              # $deploymentType = "${{ parameters.deploymentType }}"
+              # $checkoutMpRepo = ($deploymentType -eq 'Production' -or $deploymentType -eq 'Preview')
+              # Write-Host "##vso[task.setvariable variable=checkoutTemplateMPRepo]$checkoutMpRepo"
             displayName: 'Set scriptRepoPath and templateSourceType and checkoutTemplateMPRepo variables'
 
           - template: AWSInitRepos.yml
