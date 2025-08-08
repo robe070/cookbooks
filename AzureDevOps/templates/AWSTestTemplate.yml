@@ -151,7 +151,7 @@ stages:
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
             displayName: 'Set scriptRepoPath and templateSourceType variables'
 
-          - template: AzureDevOps/templates/AWSInitRepos.yml
+          - template: AWSInitRepos.yml
             parameters:
               gitRepoWriteAccess: false
               checkoutTemplateMPRepo: or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview'))
