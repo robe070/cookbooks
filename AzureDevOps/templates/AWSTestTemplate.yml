@@ -170,7 +170,7 @@ stages:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
-              filePath: '$(Pipeline.Workspace)/aws-templates/scripts/SetGateVariable.ps1'
+              filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
 
           - pwsh: |
               Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)" | Out-Default
