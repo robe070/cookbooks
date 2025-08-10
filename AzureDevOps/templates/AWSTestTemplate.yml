@@ -298,6 +298,12 @@ stages:
                     "ParameterKey": "10LansaGitRepoBranch",
                     "ParameterValue": "$(LansaGitRepoBranch)"
                 }, {
+                    "ParameterKey": "MPS3BucketRegion",
+                    "ParameterValue": "${{ parameters.AwsRegion }}"
+                }, {
+                    "ParameterKey": "MPS3KeyPrefix",
+                    "ParameterValue": "templates/$(LansaGitRepoBranch)"
+                }, {
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
                 }, {
