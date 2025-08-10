@@ -96,7 +96,7 @@ stages:
             scriptType: 'filePath'
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
             arguments:
-              -AwsTemplateRepoPath '$(Pipeline.Workspace)_lansa_aws-templates'
+              -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
 
         - template: AWSValidateTemplates.yml@_lansa_aws-templates
           parameters:
