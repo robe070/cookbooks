@@ -49,7 +49,7 @@ if (Test-Path $path) {
             $varName = "Build-$buildName"
             Write-Host "##vso[task.setvariable variable=$varName;isOutput=true]True"
 
-            Write-Host "Now obtain the details of the build from the file $($file[0]). These variable values will be referred to using ENGImageVars.version, ENGImageVars.versionDigits, ENGImageVars.amiID, etc. Whereas within an individual stage they are referred to as Gate.version, etc. (Or JPN instead of ENG)"
+            Write-Host "Now obtain the details of the build from the file $($files[0]). These variable values will be referred to using ENGImageVars.version, ENGImageVars.versionDigits, ENGImageVars.amiID, etc. Whereas within an individual stage they are referred to as Gate.version, etc. (Or JPN instead of ENG)"
             & "$AwsTemplateRepoPath\scripts\SetGateVariable.ps1" -BaseImageName "$buildName" -stackname 'RandomNameNotToBeUsed'
             break
         } else {
