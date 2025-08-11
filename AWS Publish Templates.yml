@@ -100,7 +100,7 @@ stages:
             filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetImageVariables.ps1'
             arguments:
               -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
-              -isImageType $false
+              -IsJPNImage $false
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Set stageDependencies JPN Image variables based on the published artefacts'
