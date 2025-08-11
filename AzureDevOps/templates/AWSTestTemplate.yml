@@ -302,7 +302,7 @@ stages:
                     "ParameterValue": "${{ parameters.AwsRegion }}"
                 }, {
                     "ParameterKey": "MPS3KeyPrefix",
-                    "ParameterValue": "templates/$(LansaGitRepoBranch)"
+                    "ParameterValue": "templates/$(LansaGitRepoBranch)/"
                 }, {
                     "ParameterKey": "$(DBPasswordKey)",
                     "ParameterValue": "$(DBPasswordValue)"
