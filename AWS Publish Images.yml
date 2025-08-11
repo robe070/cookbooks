@@ -87,16 +87,7 @@ stages:
               -GitBranch '$(GitLansaAwsTemplatesTempBranch)'
               -GitRepoName '$(ArtifactSourceAlias)'
 
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'Set stageDependencies Version variables based on the published artefacts'
-          name: Vars
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: 'ap-southeast-2'
-            scriptType: 'filePath'
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
-            arguments:
-              -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+        - template: AzureDevOps/templates/InitVars.yml
 
         - template: AWSValidateTemplates.yml@_lansa_aws-templates
           parameters:

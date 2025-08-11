@@ -1,0 +1,37 @@
+# InitVars.yml
+# Initialise the global variables based on the published image artefacts
+steps:
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Set stageDependencies Version variables based on the published artefacts'
+    name: Vars
+    inputs:
+      awsCredentials: AzureDevOps
+      regionName: 'ap-southeast-2'
+      scriptType: 'filePath'
+      filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetVersionVariables.ps1'
+      arguments:
+        -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Set stageDependencies ENG Image variables based on the published artefacts'
+    name: ENGImageVars
+    inputs:
+      awsCredentials: AzureDevOps
+      regionName: 'ap-southeast-2'
+      scriptType: 'filePath'
+      filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetImageVariables.ps1'
+      arguments:
+        -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+        -IsJPNImage $false
+
+  - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+    displayName: 'Set stageDependencies JPN Image variables based on the published artefacts'
+    name: JPNImageVars
+    inputs:
+      awsCredentials: AzureDevOps
+      regionName: 'ap-southeast-2'
+      scriptType: 'filePath'
+      filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetImageVariables.ps1'
+      arguments:
+        -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+        -IsJPNImage $true
