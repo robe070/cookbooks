@@ -154,10 +154,7 @@ stages:
 
       - template: AzureDevOps/templates/vars.yml
         parameters:
-        - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
-          isImageType: JPN
-        - ${{ else }}:
-          isImageType: ENG
+          isImageType: ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}JPN${{ else }}ENG${{ endif }}
 
     jobs:
       - job: ${{ parameters.jobName }}
