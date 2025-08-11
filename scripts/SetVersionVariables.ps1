@@ -41,7 +41,7 @@ if (Test-Path $path) {
         # Get all .txt files matching the pattern w??d-??-?*.txt
         # Sort them with the latest windows version and lansa version first e.g. w25d... is before w22d...
         $files = Get-ChildItem -Path $path -Filter "*.txt" |
-            Where-Object { $_.BaseName -match '^w\d{2}d-\d{2}-\d{1}?$' } | Sort-Object -Property Name -Descending
+            Where-Object { $_.BaseName -match '^w\d{2}d-\d{2}-\d{1}.*' } | Sort-Object -Property Name -Descending
 
         foreach ($file in $files) {
             $buildName = $file.BaseName  # e.g., "w19d-15-0"
