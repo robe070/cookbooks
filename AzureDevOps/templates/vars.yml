@@ -42,7 +42,7 @@ variables:
   - name: Build-w25d-16-0j
     value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
 
-  - ${{ if or(eq(parameters.isJPNImage, 'JPN'), eq(parameters.isJPNImage, 'EITHER')) }}:
+  - ${{ if or(eq(parameters.isImageType, 'JPN'), eq(parameters.isImageType, 'EITHER')) }}:
     - name: Version
       value: $[stageDependencies.Init.Init.outputs['JPNImageVars.version']]
     - name: VersionDigits
@@ -51,7 +51,7 @@ variables:
       value: $[stageDependencies.Init.Init.outputs['JPNImageVars.ImageID']]
     - name: IsEnabled
       value: $[stageDependencies.Init.Init.outputs['JPNImageVars.IsEnabled']]
-  - ${{ if or(eq(parameters.isJPNImage, 'ENG'), eq(parameters.isJPNImage, 'EITHER')) }}:
+  - ${{ if or(eq(parameters.isImageType, 'ENG'), eq(parameters.isImageType, 'EITHER')) }}:
     - name: Version
       value: $[stageDependencies.Init.Init.outputs['ENGImageVars.version']]
     - name: VersionDigits
