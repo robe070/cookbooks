@@ -294,7 +294,7 @@ stages:
                 $templateParams = @(
                     @{
                         ParameterKey = "10LansaGitRepoBranch"
-                        ParameterValue = "$(LansaGitRepoBranch)"
+                        ParameterValue = "$LansaGitRepoBranch"
                     },
                     @{
                         ParameterKey = "MPS3BucketRegion"
@@ -302,7 +302,7 @@ stages:
                     },
                     @{
                         ParameterKey = "MPS3KeyPrefix"
-                        ParameterValue = "templates/$(LansaGitRepoBranch)/"
+                        ParameterValue = "templates/$LansaGitRepoBranch/"
                     },
                     @{
                         ParameterKey = "$(DBPasswordKey)"
@@ -326,23 +326,23 @@ stages:
                     },
                     @{
                         ParameterKey = "CurrentVPC"
-                        ParameterValue = "$(CurrentVPC)"
+                        ParameterValue = "$CurrentVPC"
                     },
                     @{
                         ParameterKey = "AvailabilityZones"
-                        ParameterValue = "$(AvailabilityZones)"
+                        ParameterValue = "$AvailabilityZones"
                     },
                     @{
                         ParameterKey = "NumberOfAZs"
-                        ParameterValue = "$(NumberOfAZs)"
+                        ParameterValue = "$NumberOfAZs"
                     },
                     @{
                         ParameterKey = "DBSubnetGroupName"
-                        ParameterValue = "$(DBSubnetGroupName)"
+                        ParameterValue = "$DBSubnetGroupName"
                     },
                     @{
                         ParameterKey = "ELBSubnetIds"
-                        ParameterValue = "$(ELBSubnetIds)"
+                        ParameterValue = "$ELBSubnetIds"
                     },
                     @{
                         ParameterKey = "03DBUsername"
@@ -358,7 +358,7 @@ stages:
                     },
                     @{
                         ParameterKey = "CreateVPC"
-                        ParameterValue = "$(createVPC)"
+                        ParameterValue = "$createVPC"
                     },
                     @{
                         ParameterKey = "UpdateManagementScripts"
