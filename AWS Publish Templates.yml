@@ -369,7 +369,7 @@ stages:
   variables:
   - template: AzureDevOps/templates/vars.yml
     parameters:
-      - isImageType EITHER
+      isImageType: EITHER
 
   jobs:
     - job: Job_1
@@ -735,7 +735,7 @@ stages:
   variables:
   - template: AzureDevOps/templates/vars.yml
     parameters:
-      - isImageType EITHER
+      isImageType: EITHER
 
   jobs:
   - job: Job_1
