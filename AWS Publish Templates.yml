@@ -90,6 +90,30 @@ stages:
             arguments:
               -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
 
+        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+          displayName: 'Set stageDependencies ENG Image variables based on the published artefacts'
+          name: ENGImageVars
+          inputs:
+            awsCredentials: AzureDevOps
+            regionName: 'ap-southeast-2'
+            scriptType: 'filePath'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetImageVariables.ps1'
+            arguments:
+              -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+              -isImageType $false
+
+        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+          displayName: 'Set stageDependencies JPN Image variables based on the published artefacts'
+          name: JPNImageVars
+          inputs:
+            awsCredentials: AzureDevOps
+            regionName: 'ap-southeast-2'
+            scriptType: 'filePath'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetImageVariables.ps1'
+            arguments:
+              -AwsTemplateRepoPath '$(Pipeline.Workspace)\_lansa_aws-templates'
+              -IsJPNImage $true
+
 - stage: "MergePatchPaas"
   displayName: Merge patch/pass
   jobs:
@@ -338,51 +362,61 @@ stages:
 
 - stage: ValidateTemplateURLs
   displayName: Validate Template URLs
-  dependsOn: MergeToMarketplaceAndUpload
+  dependsOn:
+    - MergeToMarketplaceAndUpload
+    - Init
+
+  variables:
+  - template: AzureDevOps/templates/vars.yml
+    parameters:
+      - isImageType EITHER
+
   jobs:
     - job: Job_1
       displayName: 'Small Stack'
       timeoutInMinutes: 0
       pool:
         name: $(agentVMImage)
+
       steps:
         - template: AzureDevOps/templates/AWSInitRepos.yml
           parameters:
             gitRepoWriteAccess: true
             checkoutTemplateMPRepo: true
 
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          name: Gate
-          displayName: 'Artifact Check: Set Gate Variable'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "ap-southeast-2"
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-            arguments:
-              -BaseImageName 'w19d-15-0'
-              -stackname 'Validate-TemplateUrl'
+        # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+        #   name: Gate
+        #   displayName: 'Artifact Check: Set Gate Variable'
+        #   inputs:
+        #     awsCredentials: AzureDevOps
+        #     regionName: "ap-southeast-2"
+        #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+        #     arguments:
+        #       -BaseImageName 'w19d-15-0'
+        #       -stackname 'Validate-TemplateUrl'
 
         - powershell: |
             # Print the Gate variables.
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-          displayName: 'Artifact Check : Output Gate Variable'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            Write-Host "##vso[task.setvariable variable=Stack;isOutput=true]$(stack)-validateurls"
+            Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits); stack:$(stack)"
+          displayName: 'Artifact Check : Output Image Variables'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Cleanup CFN Template : Small Stack-Template'
           inputs:
             awsCredentials: AzureDevOps
             regionName: "us-east-1"
-            arguments: '-Gatestack $(Gate.stack)'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            arguments:
+              -Gatestack $(stack)
+          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
           displayName: 'CFN Template deployment: Small Stack-TemplateTest'
           inputs:
             awsCredentials: AzureDevOps
             regionName: "us-east-1"
-            stackName: '$(Gate.stack)'
+            stackName: '$(stack)'
             templateSource: s3
             s3BucketName: '$(BucketNameProduction)'
             s3ObjectKey: '$(FolderNameProduction)/lansa-stack-type-win.cfn.template'
@@ -440,36 +474,40 @@ stages:
             tags: 'usage=temp-test'
             onFailure: 'DO_NOTHING'
             timeoutInMins: 100
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Test CFN Deployment : URL Tests'
           inputs:
             awsCredentials: AzureDevOps
             regionName: "us-east-1"
-            arguments: '-Gatestack $(Gate.stack)'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/TestCFNDeployment.ps1'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            arguments:
+              -Gatestack $(stack)
+          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'AWS PowerShell: Test Image Version'
           inputs:
             awsCredentials: AzureDevOps
             regionName: "us-east-1"
-            arguments: ' -Gatestack ''$(Gate.stack)'' -Gateversion ''$(Gate.version)'''
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/AlternateImageVersion.ps1'
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+            arguments:
+              -Gatestack '$(stack)'
+              -Gateversion '$(version)'
+          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
           displayName: 'Cleanup CFN Template : Small Stack-Template'
           inputs:
             awsCredentials: AzureDevOps
             regionName: "us-east-1"
-            arguments: '-Gatestack $(Gate.stack)'
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
+            arguments:
+              -Gatestack $(stack)
             ignoreLASTEXITCODE: true
           continueOnError: true
-          condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'
@@ -692,6 +730,13 @@ stages:
   displayName: Merge & Tag
   dependsOn:
     - WaitForLive
+    - Init
+
+  variables:
+  - template: AzureDevOps/templates/vars.yml
+    parameters:
+      - isImageType EITHER
+
   jobs:
   - job: Job_1
     displayName: 'Dev Stack'
@@ -706,21 +751,21 @@ stages:
           gitRepoPath: $(CookbooksSourceAlias)
           checkoutTemplateMPRepo: true
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        name: Gate
-        displayName: 'Artifact Check : Set Gate Variable'
-        inputs:
-          awsCredentials: $(awsCredentials)
-          regionName: $(RegressionTestRegion)
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-          arguments:
-            -BaseImageName 'w19d-15-0'
-            -stackname 'w19d-15-0-IMG'
+      # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+      #   name: Gate
+      #   displayName: 'Artifact Check : Set Gate Variable'
+      #   inputs:
+      #     awsCredentials: $(awsCredentials)
+      #     regionName: $(RegressionTestRegion)
+      #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
+      #     arguments:
+      #       -BaseImageName 'w19d-15-0'
+      #       -stackname 'w19d-15-0-IMG'
 
       - powershell: |
           # Print the Gate variables.
-          Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)"| Out-Default
-        displayName: 'Artifact Check : Output Gate Variable'
+            Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits); stack:$(stack)"
+        displayName: 'Artifact Check : Output Image Variables'
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
@@ -753,7 +798,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
           arguments:
             -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
-            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)-mp'
+            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)-mp'
           pwsh: true
 
       - task: PowerShell@2
@@ -776,7 +821,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitTag.ps1'
           arguments:
             -GitRepoName '$(GitLansaAwsTemplatesSupportRepoName)'
-            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(Gate.version)'
+            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)'
           pwsh: true
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml

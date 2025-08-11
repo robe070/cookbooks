@@ -127,6 +127,21 @@ parameters:
     type: string
     default: none
 
+variables:
+  - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
+    - name: japan_override
+      value: '-Language $(jpnLanguage)'
+    - name: isJapanese
+      value: True
+    - name: isImageType
+      value: JPN
+  - ${{ else }}:
+    - name: japan_override
+      value: ''
+    - name: isJapanese
+      value: False
+    - name: isImageType
+      value: ENG
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -138,7 +153,12 @@ stages:
     displayName: ${{ parameters.stageDisplayname }}
 
     variables:
-      -template: AzureDevOps/templates/vars.yml
+      - template: AzureDevOps/templates/vars.yml
+        parameters:
+        - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
+          - isImageType JPN
+        - ${{ else }}:
+          - isImageType ENG
 
     jobs:
       - job: ${{ parameters.jobName }}
@@ -148,12 +168,6 @@ stages:
           name: ${{ parameters.vmImage }}
 
         variables:
-          - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
-            - name: japan_override
-              value: '-Language $(jpnLanguage)'
-          - ${{ else }}:
-            - name: japan_override
-              value: ''
           - name: StackName
             value: ${{ parameters.stackName }}
 

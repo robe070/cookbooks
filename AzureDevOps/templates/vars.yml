@@ -1,51 +1,62 @@
 # See scripts/SetVersionVariables.ps1 for more information on how these variables have been created
 # and how to use them in a pipeline.
-variables:
-  Build-w19d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]
-  Build-w19d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0j']]
-  Build-w19d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0']]
-  Build-w19d-16-0j: $[stageDependencies.Init.Init.outputs[' vars.Build-w19d-16-0j']]
-  Build-w22d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0']]
-  Build-w22d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0j']]
-  Build-w22d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0']]
-  Build-w22d-16-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0j']]
-  Build-w25d-15-0: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0']]
-  Build-w25d-15-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0j']]
-  Build-w25d-16-0: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
-  Build-w25d-16-0j: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
-  Version: $[stageDependencies.Init.Init.outputs['vars.version']]
-  VersionDigits: $[stageDependencies.Init.Init.outputs['vars.VersionDigits']]
-  ImageID: $[stageDependencies.Init.Init.outputs['vars.ImageID']]
-  IsEnabled: $[stageDependencies.Init.Init.outputs['vars.IsEnabled']]
-  # The following variable does result in obtaining the value of the version digit from whatever builds were run,
-  # but this has been superceeded by resolving this value and other AMI-specific values in the Init stage.
-  # I've left it here as a reminder of a technique that might be useful in another context.
-  # Note that pipelines not executed result in a 'null' value being returned for variables below
-  # and thus it is assigned the value of the first non-null value.
-  # VersionDigits: $[coalesce(
-  #         stageDependencies.w25d160IMGTest.w25d160IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d150IMGTest.w25d150IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d160jIMGTest.w25d160jIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d150jIMGTest.w25d150jIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d160IMGTest.w19d160IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d150IMGTest.w19d150IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d160jIMGTest.w19d160jIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d150jIMGTest.w19d150jIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d160IMGTest.w22d160IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d150IMGTest.w22d150IMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d160jIMGTest.w22d160jIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d150jIMGTest.w22d150jIMGTest.outputs['Gate.VersionDigits'],
+#
+# isImageType parameter chooses which image to use, unless it doesn't matter,
+# for example when the VersionDigits is the only value that will be used
+# Publish Image pipeline only uses the VersionDigits value in the last stage when
+# applying the git tag. Otherwise none of the image variables are used
+# The Image variables are mostly for the use of the template pipeline which runs
+# all the tests, provided that both a JPN image and an ENG image have been built.
+parameters:
+  - name: isImageType
+    type: string
+    default: ENG
+    values:
+      - ENG
+      - JPN
+      - EITHER
 
-  #         stageDependencies.w25d160USIMGTest.w25d160USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d150USIMGTest.w25d150USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d160jUSIMGTest.w25d160jUSIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w25d150jUSIMGTest.w25d150jUSIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d160USIMGTest.w19d160USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d150USIMGTest.w19d150USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d160jUSIMGTest.w19d160jUSIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w19d150jUSIMGTest.w19d150jUSIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d160USIMGTest.w22d160USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d150USIMGTest.w22d150USIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d160jUSIMGTest.w22d160jUSIMGTest.outputs['Gate.VersionDigits'],
-  #         stageDependencies.w22d150jUSIMGTest.w22d150jUSIMGTest.outputs['Gate.VersionDigits']
-  #       )]
+variables:
+  - name: Build-w19d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]
+  - name: Build-w19d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0j']]
+  - name: Build-w19d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0']]
+  - name: Build-w19d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0j']]
+  - name: Build-w22d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0']]
+  - name: Build-w22d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0j']]
+  - name: Build-w22d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0']]
+  - name: Build-w22d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0j']]
+  - name: Build-w25d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0']]
+  - name: Build-w25d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0j']]
+  - name: Build-w25d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
+  - name: Build-w25d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
+
+  - ${{ if or(eq(parameters.isJPNImage, JPN), eq(parameters.isJPNImage, EITHER)) }}:
+    - name: Version
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.version']]
+    - name: VersionDigits
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.VersionDigits']]
+    - name: ImageID
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.ImageID']]
+    - name: IsEnabled
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.IsEnabled']]
+  - ${{ if or(eq(parameters.isJPNImage, ENG), eq(parameters.isJPNImage, EITHER)) }}:
+    - name: Version
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.version']]
+    - name: VersionDigits
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.VersionDigits']]
+    - name: ImageID
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.ImageID']]
+    - name: IsEnabled
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.IsEnabled']]
