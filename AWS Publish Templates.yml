@@ -64,9 +64,19 @@ variables:
   - group: "ImageVersion"
 
 stages:
+- stage: StartVMs
+  displayName: Start VMs
+  jobs:
+  - template: AzureDevOps/templates/start-agents.yml
+    parameters:
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'
+
 - stage: Init
   displayName: Initialise
-  #dependsOn: StartVMs
+  dependsOn: StartVMs
   jobs:
     - job: Init
       displayName: Initialise
@@ -954,3 +964,22 @@ stages:
     paramLansaMSIKey: $(msiURLJPNLatest)
     paramDBCCSID: $(DBCCSID)
 
+- stage: StopVMs
+  displayName: Stop VMs
+  dependsOn:
+    - StockholmProd_w25d_16_0
+    - IrelandProd_w25d_15_0
+    - SydneyProd_w19d_16_0
+    - Ohio_Prod_w19d_15_0
+    - Frankfurt_Prod_w25d_16_0j
+    - CanadaProd_w19d_16_0j
+    - Milan_Prod_w25d_16_0j
+    - Bahrain_Prod_w19d_15_0j
+
+  jobs:
+  - template: AzureDevOps/templates/stop-agents.yml
+    parameters:
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'
