@@ -291,6 +291,93 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=CreateVPC]$createVPC"
 
+                $templateParams = @(
+                    @{
+                        ParameterKey = "10LansaGitRepoBranch"
+                        ParameterValue = "$(LansaGitRepoBranch)"
+                    },
+                    @{
+                        ParameterKey = "MPS3BucketRegion"
+                        ParameterValue = "${{ parameters.AwsRegion }}"
+                    },
+                    @{
+                        ParameterKey = "MPS3KeyPrefix"
+                        ParameterValue = "templates/$(LansaGitRepoBranch)/"
+                    },
+                    @{
+                        ParameterKey = "$(DBPasswordKey)"
+                        ParameterValue = "$(DBPasswordValue)"
+                    },
+                    @{
+                        ParameterKey = "$(WebPasswordKey)"
+                        ParameterValue = "$(WebPasswordValue)"
+                    },
+                    @{
+                        ParameterKey = "$(KeyNameKey)"
+                        ParameterValue = "$(KeyNameValue)"
+                    },
+                    @{
+                        ParameterKey = "$(RemoteAccessLocationKey)"
+                        ParameterValue = "$(RemoteAccessLocationValue)"
+                    },
+                    @{
+                        ParameterKey = "$(LansaMSIKey)"
+                        ParameterValue = "${{ parameters.paramLansaMSIKey }}"
+                    },
+                    @{
+                        ParameterKey = "CurrentVPC"
+                        ParameterValue = "$(CurrentVPC)"
+                    },
+                    @{
+                        ParameterKey = "AvailabilityZones"
+                        ParameterValue = "$(AvailabilityZones)"
+                    },
+                    @{
+                        ParameterKey = "NumberOfAZs"
+                        ParameterValue = "$(NumberOfAZs)"
+                    },
+                    @{
+                        ParameterKey = "DBSubnetGroupName"
+                        ParameterValue = "$(DBSubnetGroupName)"
+                    },
+                    @{
+                        ParameterKey = "ELBSubnetIds"
+                        ParameterValue = "$(ELBSubnetIds)"
+                    },
+                    @{
+                        ParameterKey = "03DBUsername"
+                        ParameterValue = "$(03DBUsername)"
+                    },
+                    @{
+                        ParameterKey = "DBCCSID"
+                        ParameterValue = "${{ parameters.paramDBCCSID }}"
+                    },
+                    @{
+                        ParameterKey = "TagValue"
+                        ParameterValue = "${{ parameters.paramTagValue }}"
+                    },
+                    @{
+                        ParameterKey = "CreateVPC"
+                        ParameterValue = "$(createVPC)"
+                    },
+                    @{
+                        ParameterKey = "UpdateManagementScripts"
+                        ParameterValue = "${{ parameters.paramUpdateManagementScripts }}"
+                    }
+                )
+
+                if ($deploymentType -ne 'Master') {
+                    $templateParams = @(
+                        @{
+                            ParameterKey = "StackType"
+                            ParameterValue = "${{ parameters.paramStackType }}"
+                        }
+                    ) + $templateParams
+                }
+
+                $templateParamsJson = $templateParams | ConvertTo-Json -Compress
+                Write-Host "##vso[task.setvariable variable=TemplateParameters]$templateParamsJson"
+
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
             displayName: 'CFN Template deployment: Small Stack-TemplateTest'
             inputs:
@@ -302,65 +389,7 @@ stages:
               s3BucketName: '$(BucketNamePreview)'
               s3ObjectKey: '$(FolderNamePreview)/${{ parameters.paramS3ObjectKey }}'
               templateParametersSource: inline
-              templateParameters: |
-                [{
-                    "ParameterKey": "StackType",
-                    "ParameterValue": "${{ parameters.paramStackType }}"
-                }, {
-                    "ParameterKey": "10LansaGitRepoBranch",
-                    "ParameterValue": "$(LansaGitRepoBranch)"
-                }, {
-                    "ParameterKey": "MPS3BucketRegion",
-                    "ParameterValue": "${{ parameters.AwsRegion }}"
-                }, {
-                    "ParameterKey": "MPS3KeyPrefix",
-                    "ParameterValue": "templates/$(LansaGitRepoBranch)/"
-                }, {
-                    "ParameterKey": "$(DBPasswordKey)",
-                    "ParameterValue": "$(DBPasswordValue)"
-                }, {
-                    "ParameterKey": "$(WebPasswordKey)",
-                    "ParameterValue": "$(WebPasswordValue)"
-                }, {
-                    "ParameterKey": "$(KeyNameKey)",
-                    "ParameterValue": "$(KeyNameValue)"
-                }, {
-                    "ParameterKey": "$(RemoteAccessLocationKey)",
-                    "ParameterValue": "$(RemoteAccessLocationValue)"
-                }, {
-                    "ParameterKey": "$(LansaMSIKey)",
-                    "ParameterValue": "${{ parameters.paramLansaMSIKey }}"
-                }, {
-                    "ParameterKey": "CurrentVPC",
-                    "ParameterValue": "$(CurrentVPC)"
-                }, {
-                    "ParameterKey": "AvailabilityZones",
-                    "ParameterValue": "$(AvailabilityZones)"
-                }, {
-                    "ParameterKey": "NumberOfAZs",
-                    "ParameterValue": "$(NumberOfAZs)"
-                }, {
-                    "ParameterKey": "DBSubnetGroupName",
-                    "ParameterValue": "$(DBSubnetGroupName)"
-                }, {
-                    "ParameterKey": "ELBSubnetIds",
-                    "ParameterValue": "$(ELBSubnetIds)"
-                }, {
-                    "ParameterKey": "03DBUsername",
-                    "ParameterValue": "$(03DBUsername)"
-                }, {
-                    "ParameterKey": "DBCCSID",
-                    "ParameterValue": "${{ parameters.paramDBCCSID }}"
-                }, {
-                    "ParameterKey": "TagValue",
-                    "ParameterValue": "${{ parameters.paramTagValue }}"
-                }, {
-                    "ParameterKey": "CreateVPC",
-                    "ParameterValue": "$(createVPC)"
-                }, {
-                    "ParameterKey": "UpdateManagementScripts",
-                    "ParameterValue": "${{ parameters.paramUpdateManagementScripts }}"
-                }]
+              templateParameters: $(TemplateParameters)
               tags: 'usage=temp-test'
               onFailure: 'DO_NOTHING'
               timeoutInMins: 100
