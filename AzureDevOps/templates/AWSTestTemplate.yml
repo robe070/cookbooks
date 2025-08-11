@@ -144,7 +144,7 @@ stages:
           value: True
         - name: isImageType
           value: JPN
-        - template: AzureDevOps/templates/vars.yml
+        - template: vars.yml
           parameters:
             isImageType: JPN
       - ${{ else }}:
@@ -154,7 +154,7 @@ stages:
           value: False
         - name: isImageType
           value: ENG
-        - template: AzureDevOps/templates/vars.yml
+        - template: vars.yml
           parameters:
             isImageType: ENG
 
