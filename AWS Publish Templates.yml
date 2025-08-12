@@ -300,7 +300,6 @@ stages:
             -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
             -GitSourceBranch '$(GitLansaAwsTemplatesBranch)'
             -GitTargetBranch '$(GitLansaAwsTemplatesMarketPlaceBranch)'
-          pwsh: true
 
       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
         displayName: 'S3 Upload to support/scalable'
@@ -713,7 +712,6 @@ stages:
             -GitRepoPath '$(CookbooksSourceAlias)'
             -GitSourceBranch '$(CookbooksBranchPreview)'
             -GitTargetBranch '$(CookbooksBranchProduction)'
-          pwsh: true
 
       - task: PowerShell@2
         displayName: 'Write access to Templates Marketplace Branch'
@@ -726,7 +724,6 @@ stages:
             -GitUserEmail '$(GitRepoUserEmail)'
             -GitUserName '$(GitRepoUserName)'
             -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
-          pwsh: true
 
       - task: PowerShell@2
         displayName: 'Tag Templates Marketplace Branch'
@@ -736,7 +733,6 @@ stages:
           arguments:
             -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
             -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)-mp'
-          pwsh: true
 
       - task: PowerShell@2
         displayName: 'Write access to Templates Support Branch'
@@ -749,7 +745,6 @@ stages:
             -GitUserEmail '$(GitRepoUserEmail)'
             -GitUserName '$(GitRepoUserName)'
             -GitRepoPath '$(GitLansaAwsTemplatesSupportRepoName)'
-          pwsh: true
 
       - task: PowerShell@2
         displayName: 'Tag Templates Support Branch'
@@ -759,7 +754,6 @@ stages:
           arguments:
             -GitRepoName '$(GitLansaAwsTemplatesSupportRepoName)'
             -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)'
-          pwsh: true
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
