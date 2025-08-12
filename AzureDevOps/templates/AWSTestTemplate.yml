@@ -24,18 +24,6 @@ parameters:
   - name: resourceGroup
     type: string
     default: none
-  - name: version
-    type: string
-    default: none
-  - name: osName
-    type: string
-    default: none
-  - name: imageId
-    type: string
-    default: none
-  - name: imageSource
-    type: string
-    default: none
   - name: msiURL
     type: string
     default: none
@@ -73,12 +61,6 @@ parameters:
     type: string
     default: Default
   - name: baseImageName
-    type: string
-    default: none
-  - name: WebserverOSVersion
-    type: string
-    default: none
-  - name: LansaVersion
     type: string
     default: none
   - name: TemplateUrl
@@ -128,7 +110,7 @@ parameters:
     default: Lansa-Prod
   - name: paramUpdateManagementScripts
     type: string
-    default: 'No'
+    default: 'Yes'
   - name: CookbooksBranch
     type: string
     default: none
@@ -303,6 +285,10 @@ stages:
                         ParameterValue = "$LansaGitRepoBranch"
                     },
                     @{
+                        ParameterKey = "ImageId"
+                        ParameterValue = "$(ImageId)"
+                    },
+                    @{
                         ParameterKey = "MPS3BucketRegion"
                         ParameterValue = "${{ parameters.AwsRegion }}"
                     },
@@ -417,6 +403,9 @@ stages:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
+              arguments:
+                -Gatestack '$(StackName)'
+                -Gateversion '$(version)'
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: Small Stack-Template'

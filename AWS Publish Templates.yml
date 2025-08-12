@@ -1,6 +1,11 @@
 # Note that the Templates are all tested with the same AMI which is derived from the latest built images.
 # Only a subset of the images are built, so a search is made for the first build image and uses that.
 # It is sorted on descending filename, and thus the most recent Windows OS and most recent Lansa version is used.
+# The corollary of that is that specific images are not used. Therefore where stages specify a specific version
+# e.g. w19d-16-0, this is irrelevant. The names have not been changed because uniqueness is required. The baseName is
+# used but only the last character - if its 'j' then a Japanese image will be used, otherwise an English image will be used.
+# Also note that the critical gateway stage ValidateTemplateURLs requires an English image and will fail if one does not exist.
+# That could be changed to have 2 tasks, one which uses an English image and one that uses a Japanese image, and just run one of them.
 resources:
   pipelines:
   - pipeline: _Build Image Release Artefacts
@@ -151,14 +156,9 @@ stages:
     baseImageName: w25d-16-0
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Small
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     paramStackType: Small
     paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramUpdateManagementScripts: "Yes"
-
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -170,13 +170,9 @@ stages:
     baseImageName: w25d-15-0
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Test
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     paramStackType: Test
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramUpdateManagementScripts: "Yes"
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -188,13 +184,9 @@ stages:
     baseImageName: w19d-16-0
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Dev
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramStackType: Development
     paramLansaMSIKey: $(msiURLv16)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramUpdateManagementScripts: "Yes"
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -207,11 +199,8 @@ stages:
     baseImageName: w19d-15-0
     paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-VPC
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
-    paramUpdateManagementScripts: 'Yes'
     paramCreateVPC: 'Yes'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
@@ -224,14 +213,10 @@ stages:
     baseImageName: w25d-16-0j
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Medium
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     paramStackType: Medium
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramUpdateManagementScripts: "Yes"
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -243,14 +228,10 @@ stages:
     baseImageName: w25d-15-0j
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Large
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramUpdateManagementScripts: "Yes"
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -262,14 +243,10 @@ stages:
     baseImageName: w19d-16-0j
     paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-UpdateScripts
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramUpdateManagementScripts: "No"
-
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -282,14 +259,10 @@ stages:
     baseImageName: w19d-15-0j
     paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-JPN-VPC
-    LansaVersion: $(lansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramUpdateManagementScripts: 'Yes'
     paramCreateVPC: 'Yes'
-
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
@@ -378,6 +351,11 @@ stages:
             # Print the Gate variables.
             Write-Host "##vso[task.setvariable variable=Stack;isOutput=true]$(stack)-validateurls"
             Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits); stack:$(stack)"
+            $isEnabled = "$(IsEnabled)"
+            if ($isEnabled -ne 'True') {
+              Write-Host "##vso[task.logissue type=error]An English Image does not exist. Failing the pipeline."
+              Write-Host "##vso[task.complete result=Failed]"
+            }
           displayName: 'Artifact Check : Output Image Variables'
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -422,12 +400,6 @@ stages:
               }, {
                   "ParameterKey": "$(LansaMSIKey)",
                   "ParameterValue": "$(msiURLv15)"
-              }, {
-                  "ParameterKey": "LansaVersion",
-                  "ParameterValue": "$(LansaVersion)"
-              }, {
-                  "ParameterKey": "11WebserverOSVersion",
-                  "ParameterValue": "$(WebserverOSLatestVersionValue)"
               }, {
                   "ParameterKey": "CurrentVPC",
                   "ParameterValue": "$(CurrentVPCUS)"
@@ -523,8 +495,6 @@ stages:
     jobDisplayname: 'Paris Deployment Test'
     baseImageName: w25d-16-0
     stackName: Paris-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-west-3
     s3Region: eu-west-3
     paramCurrentVPC: $(CurrentVPC-eu-west-3)
@@ -543,8 +513,6 @@ stages:
     jobDisplayname: 'US us-west-2 (Oregon) Deployment Test'
     baseImageName: w25d-15-0
     stackName: Oregon-Preview
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: us-west-2
     s3Region: us-west-2
     paramCurrentVPC: $(CurrentVPC-us-west-2)
@@ -563,8 +531,6 @@ stages:
     jobDisplayname: 'Asia Pacific (Tokyo) Deployment Test'
     baseImageName: w19d-16-0
     stackName: Tokyo-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: ap-northeast-1
     s3Region: ap-northeast-1
     paramCurrentVPC: $(CurrentVPC-ap-northeast-1)
@@ -583,8 +549,6 @@ stages:
     jobDisplayname: 'N. Virginia [us-east-1] Deployment Test'
     baseImageName: w19d-15-0
     stackName: N-Virginia-Preview
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: us-east-1
     s3Region: us-east-1
     paramCurrentVPC: $(CurrentVPCUS)
@@ -603,8 +567,6 @@ stages:
     jobDisplayname: 'Europe (London) Deployment Test'
     baseImageName: w19d-15-0j
     stackName: London-Preview
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: eu-west-2
     s3Region: eu-west-2
     paramCurrentVPC: $(CurrentVPC-eu-west-2)
@@ -624,8 +586,6 @@ stages:
     jobDisplayname: 'US [us-west-1] Deployment Test'
     baseImageName: w25d-16-0j
     stackName: N-California-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: us-west-1
     s3Region: us-west-1
     paramCurrentVPC: $(CurrentVPC-us-west-1)
@@ -645,8 +605,6 @@ stages:
     jobDisplayname: 'Mumbai Deployment Test'
     baseImageName: w19d-16-0j
     stackName: Mumbai-Preview
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: ap-south-1
     s3Region: ap-south-1
     paramCurrentVPC: $(CurrentVPC-ap-south-1)
@@ -666,8 +624,6 @@ stages:
     jobDisplayname: 'Hong Kong Deployment Test'
     baseImageName: w25d-15-0j
     stackName: Hong-Kong-Preview
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: ap-east-1
     s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC-ap-east-1)
@@ -813,8 +769,6 @@ stages:
     jobDisplayname: 'Stockholm Deployment Test'
     baseImageName: w25d-16-0
     stackName: Stockholm-Prod
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-north-1
     s3Region: eu-north-1
     paramCurrentVPC: $(CurrentVPC-eu-north-1)
@@ -833,8 +787,6 @@ stages:
     jobDisplayname: 'Ireland - Deployment Test'
     baseImageName: w25d-15-0
     stackName: Ireland-Prod
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSPreviousVersionValue)
     AwsRegion: eu-west-1
     s3Region: eu-west-1
     paramCurrentVPC: $(CurrentVPC-eu-west-1)
@@ -853,8 +805,6 @@ stages:
     jobDisplayname: 'Sydney Deployment Test'
     baseImageName: w19d-16-0
     stackName: Sydney-Prod
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: ap-southeast-2
     s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC)
@@ -873,8 +823,6 @@ stages:
     jobDisplayname: 'US [us-east-2] Deployment Test'
     baseImageName: w19d-15-0
     stackName: Ohio-Prod
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSLatestVersionValue)
     AwsRegion: us-east-2
     s3Region: us-east-2
     paramCurrentVPC: $(CurrentVPC-us-east-2)
@@ -893,8 +841,6 @@ stages:
     jobDisplayname: 'Frankfurt Deployment Test'
     baseImageName: w25d-16-0j
     stackName: Frankfurt-Prod
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: eu-central-1
     s3Region: eu-central-1
     paramCurrentVPC: $(CurrentVPC-eu-central-1)
@@ -914,8 +860,6 @@ stages:
     jobDisplayname: 'Canada (ca-central-1)- Deployment Test tral'
     baseImageName: w19d-16-0j
     stackName: Canada-Prod
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: ca-central-1
     s3Region: ca-central-1
     paramCurrentVPC: $(CurrentVPC-ca-central-1)
@@ -935,8 +879,6 @@ stages:
     jobDisplayname: 'Milan Deployment Test '
     baseImageName: w25d-16-0j
     stackName: Milan-Prod
-    LansaVersion: $(LansaVersionPrevious)
-    WebserverOSVersion: $(WebserverOSJpnPreviousVersionValue)
     AwsRegion: eu-south-1
     s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC-eu-south-1)
@@ -956,8 +898,6 @@ stages:
     jobDisplayname: 'Bahrain Deployment Test'
     baseImageName: w19d-15-0j
     stackName: Bahrain-Prod
-    LansaVersion: $(LansaVersion)
-    WebserverOSVersion: $(WebserverOSJpnLatestVersionValue)
     AwsRegion: me-south-1
     s3Region: ap-southeast-2
     paramCurrentVPC: $(CurrentVPC-me-south-1)
