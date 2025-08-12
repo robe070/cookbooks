@@ -12,32 +12,41 @@ param (
     $GitTargetBranch
   )
 
-cd "$($env:Pipeline_Workspace)/$($GitRepoPath)"
+function ExecuteGitCommand {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string[]]
+    $GitCommandLine
+  )
 
-# git fetch
-git fetch
-if (-not $?) {
-  Write-Host(" git fetch failed");
-  exit 1
+  & git $gitCommandLine
+  if (-not $?) {
+    throw("git $gitCommandLine failed");
+  }
 }
 
-# git checkout to target branch
-git checkout $($GitTargetBranch)
-if (-not $?) {
-  Write-Host(" git checkout $($GitTargetBranch) failed");
-  exit 1
-}
+Push-Location
 
-# pull changes from source branch
-git pull origin $($GitSourceBranch) --allow-unrelated-histories
-if (-not $?) {
-  Write-Host(" git pull origin $($GitSourceBranch) --allow-unrelated-histories failed");
-  exit 1
-}
+try {
+  if ( $($env:Pipeline_Workspace) -eq "") {
+    cd "$($env:Pipeline_Workspace)/$GitRepoPath"
+  } else {
+    cd $GitRepoPath
+  }
 
-# push changes from target branch
-git push origin $($GitTargetBranch)
-if (-not $?) {
-  Write-Host("git push origin $($GitTargetBranch) failed");
-  exit 1
+  ExecuteGitCommand( "checkout", $GitSourceBranch)
+  ExecuteGitCommand( "pull", "origin", $GitSourceBranch)
+
+  ExecuteGitCommand( "checkout", $GitTargetBranch)
+  ExecuteGitCommand( "pull", "origin", $GitTargetBranch)
+
+  # merge changes from source branch
+  ExecuteGitCommand( "merge", $GitSourceBranch)
+
+  # push changes from target branch
+  ExecuteGitCommand( "push", "origin", $GitTargetBranch)
+} catch {
+  Write-Error $_.Exception.Message
+} finally {
+  Pop-Location
 }
