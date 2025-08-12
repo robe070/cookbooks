@@ -28,9 +28,8 @@ function ExecuteGitCommand {
 Push-Location
 
 try {
-  Get-ChildItem Env: | Out-Default | Write-Host
   Write-Host "env:Pipeline_Workspace = '$($env:Pipeline_Workspace)'"
-  if ( "$($env:Pipeline_Workspace)" -eq "") {
+  if ( "$($env:Pipeline_Workspace)" -ne "") {
     Write-Host "Changing directory to '$($env:Pipeline_Workspace)/$GitRepoPath'"
     cd "$($env:Pipeline_Workspace)/$GitRepoPath"
   } else {
