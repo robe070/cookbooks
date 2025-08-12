@@ -212,6 +212,7 @@ stages:
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramUpdateManagementScripts: 'Yes'
+    paramCreateVPC: 'Yes'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
@@ -287,6 +288,8 @@ stages:
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
     paramUpdateManagementScripts: 'Yes'
+    paramCreateVPC: 'Yes'
+
 
 - stage: MergeToMarketplaceAndUpload
   displayName: Merge To Marketplace & Upload
@@ -345,7 +348,7 @@ stages:
   variables:
   - template: AzureDevOps/templates/vars.yml
     parameters:
-      isImageType: EITHER
+      isImageType: ENG
 
   jobs:
     - job: Job_1

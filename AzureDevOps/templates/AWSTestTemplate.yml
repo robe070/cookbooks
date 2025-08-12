@@ -90,6 +90,9 @@ parameters:
   - name: s3Region
     type: string
     default: ap-southeast-2
+  - name: paramCreateVPC
+    type: string
+    default: 'No'
   - name: paramCurrentVPC
     type: string
     default: none
@@ -97,6 +100,9 @@ parameters:
     type: string
     default: none
   - name: paramNumberOfAZs
+    type: string
+    default: none
+  - name: paramDBSubnetGroupName
     type: string
     default: none
   - name: paramELBSubnetIds
@@ -277,19 +283,19 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=NumberOfAZs]$numberOfAZs"
 
+                if ('${{ parameters.paramDBSubnetGroupName }}' -eq 'none') {
+                  $DBSubnetGroupName = '$(DBSubnetGroupName)'
+                } else {
+                  $DBSubnetGroupName = '${{ parameters.paramDBSubnetGroupName }}'
+                }
+                Write-Host "##vso[task.setvariable variable=DBSubnetGroupName]$DBSubnetGroupName"
+
                 if ('${{ parameters.paramELBSubnetIds }}' -eq 'none') {
                   $elbSubnetIds = '$(ELBSubnetIds)'
                 } else {
                   $elbSubnetIds = '${{ parameters.paramELBSubnetIds }}'
                 }
                 Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
-
-                if ($deploymentType -eq 'Production' -or $deploymentType -eq 'Preview' -or $deploymentType -eq 'Master') {
-                  $createVPC = 'Yes'
-                } else {
-                  $createVPC = 'No'
-                }
-                Write-Host "##vso[task.setvariable variable=CreateVPC]$createVPC"
 
                 $templateParams = @(
                     @{
@@ -325,6 +331,10 @@ stages:
                         ParameterValue = "${{ parameters.paramLansaMSIKey }}"
                     },
                     @{
+                        ParameterKey = "CreateVPC"
+                        ParameterValue = "${{ parameters.paramCreateVPC }}"
+                    },
+                    @{
                         ParameterKey = "CurrentVPC"
                         ParameterValue = "$CurrentVPC"
                     },
@@ -355,10 +365,6 @@ stages:
                     @{
                         ParameterKey = "TagValue"
                         ParameterValue = "${{ parameters.paramTagValue }}"
-                    },
-                    @{
-                        ParameterKey = "CreateVPC"
-                        ParameterValue = "$createVPC"
                     },
                     @{
                         ParameterKey = "UpdateManagementScripts"

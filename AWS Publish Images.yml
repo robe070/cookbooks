@@ -891,7 +891,7 @@ stages:
     - Marketplace
 
   variables:
-    -template: AzureDevOps/templates/vars.yml
+    - template: AzureDevOps/templates/vars.yml
 
   jobs:
     - job: TagGit
