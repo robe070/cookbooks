@@ -29,8 +29,10 @@ Push-Location
 
 try {
   if ( $($env:Pipeline_Workspace) -eq "") {
+    Write-Host "Changing directory to '$($env:Pipeline_Workspace)/$GitRepoPath'"
     cd "$($env:Pipeline_Workspace)/$GitRepoPath"
   } else {
+    Write-Host "Changing directory to '$GitRepoPath'"
     cd $GitRepoPath
   }
 
