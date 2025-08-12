@@ -395,7 +395,7 @@ stages:
               arguments:
                 -GateStack $(StackName)
                 -DisableIntegratorTest
-                $japan_override
+                $(japan_override)
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'AWS PowerShell: Test Image Version'

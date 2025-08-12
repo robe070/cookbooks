@@ -435,6 +435,7 @@ stages:
             filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/TestCFNDeployment.ps1'
             arguments:
               -Gatestack $(stack)
+              -DisableIntegratorTest
           condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
 
         - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1

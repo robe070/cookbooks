@@ -246,11 +246,11 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: '${{ parameters.region }}'
+          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
           arguments:
             -Gatestack $(Gate.stack)
             $(japan_override)
             -DisableIntegratorTest
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/TestCFNDeployment.ps1'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Alternate Image Version Test'
