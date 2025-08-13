@@ -140,10 +140,10 @@ stages:
           inputs:
             awsCredentials: AzureDevOps
             regionName: 'ap-southeast-2'
-            bucketName: '$(BucketNamePreview)'
+            bucketName: 'lansa'
             sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates/CloudFormationWindows'
             globExpressions: '*.template'
-            targetFolder: '$(FolderNamePreview)'
+            targetFolder: 'templates/$(CookbooksBranchPreview)'
             filesAcl: 'public-read'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
@@ -154,7 +154,6 @@ stages:
     jobName: SmallStack
     jobDisplayname: 'Small Stack'
     baseImageName: w25d-16-0
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Small
     paramStackType: Small
     paramLansaMSIKey: $(msiURLv16)
@@ -168,7 +167,6 @@ stages:
     jobName: TestStack
     jobDisplayname: 'Test Stack'
     baseImageName: w25d-15-0
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Test
     paramStackType: Test
     paramLansaMSIKey: $(msiURLv15)
@@ -182,7 +180,6 @@ stages:
     jobName: DevStack
     jobDisplayname: 'Dev Stack'
     baseImageName: w19d-16-0
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Dev
     paramStackType: Development
     paramLansaMSIKey: $(msiURLv16)
@@ -190,14 +187,13 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
-    deploymentType: Master
+    templateType: Master
     stageName: 'AUSVPCTestsw19d_15_0'
     stagedisplayName: AUS VPC Tests w19d-15-0
     dependsOn: S3PatchPAAS
     jobName: VpcStack
     jobDisplayname: 'VPC ENG Stack'
     baseImageName: w19d-15-0
-    paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-VPC
     paramLansaMSIKey: $(msiURLv15)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
@@ -211,7 +207,6 @@ stages:
     jobName: MediumStack
     jobDisplayname: 'Medium Stack'
     baseImageName: w25d-16-0j
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Medium
     paramStackType: Medium
     paramLansaMSIKey: $(msiURLJPNPrevious)
@@ -226,7 +221,6 @@ stages:
     jobName: LargeStack
     jobDisplayname: 'Large Stack'
     baseImageName: w25d-15-0j
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-Large
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNLatest)
@@ -241,7 +235,6 @@ stages:
     jobName: UpdateFalseStack
     jobDisplayname: 'Update False Stack'
     baseImageName: w19d-16-0j
-    paramS3ObjectKey: lansa-stack-type-win.cfn.template
     stackName: AUS-UpdateScripts
     paramStackType: Large
     paramLansaMSIKey: $(msiURLJPNPrevious)
@@ -251,14 +244,13 @@ stages:
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
-    deploymentType: Master
+    templateType: Master
     stageName: 'AUSJPNVPCTestsw19d_15_0j'
     stagedisplayName: AUS JPN VPC Tests w19d-15-0j
     dependsOn: S3PatchPAAS
     jobName: VpcStack
     jobDisplayname: 'VPC JPN Stack'
     baseImageName: w19d-15-0j
-    paramS3ObjectKey: lansa-master-win.cfn.template
     stackName: AUS-JPN-VPC
     paramLansaMSIKey: $(msiURLJPNLatest)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
@@ -306,160 +298,27 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          bucketName: '$(BucketNameProduction)'
+          bucketName: 'lansa'
           sourceFolder: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/CloudFormationWindows'
           globExpressions: '*.template'
-          targetFolder: '$(FolderNameProduction)'
+          targetFolder: 'templates/$(CookbooksBranchProduction)'
           filesAcl: 'public-read'
 
-- stage: ValidateTemplateURLs
-  displayName: Validate Template URLs
-  dependsOn:
-    - MergeToMarketplaceAndUpload
-    - Init
-
-  variables:
-  - template: AzureDevOps/templates/vars.yml
-    parameters:
-      isImageType: ENG
-
-  jobs:
-    - job: Job_1
-      displayName: 'Small Stack'
-      timeoutInMinutes: 0
-      pool:
-        name: $(agentVMImage)
-
-      steps:
-        - template: AzureDevOps/templates/AWSInitRepos.yml
-          parameters:
-            gitRepoWriteAccess: true
-            checkoutTemplateMPRepo: true
-
-        # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        #   name: Gate
-        #   displayName: 'Artifact Check: Set Gate Variable'
-        #   inputs:
-        #     awsCredentials: AzureDevOps
-        #     regionName: "ap-southeast-2"
-        #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-        #     arguments:
-        #       -BaseImageName 'w19d-15-0'
-        #       -stackname 'Validate-TemplateUrl'
-
-        - powershell: |
-            # Print the Gate variables.
-            Write-Host "##vso[task.setvariable variable=Stack;isOutput=true]$(stack)-validateurls"
-            Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits); stack:$(stack)"
-            $isEnabled = "$(IsEnabled)"
-            if ($isEnabled -ne 'True') {
-              Write-Host "##vso[task.logissue type=error]An English Image does not exist. Failing the pipeline."
-              Write-Host "##vso[task.complete result=Failed]"
-            }
-          displayName: 'Artifact Check : Output Image Variables'
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'Cleanup CFN Template : Small Stack-Template'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "us-east-1"
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
-            arguments:
-              -Gatestack $(stack)
-          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
-
-        - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
-          displayName: 'CFN Template deployment: Small Stack-TemplateTest'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "us-east-1"
-            stackName: '$(stack)'
-            templateSource: s3
-            s3BucketName: '$(BucketNameProduction)'
-            s3ObjectKey: '$(FolderNameProduction)/lansa-stack-type-win.cfn.template'
-            templateParametersSource: inline
-            templateParameters: |
-              [{
-                  "ParameterKey": "StackType",
-                  "ParameterValue": "Small"
-              },{
-                  "ParameterKey": "10LansaGitRepoBranch",
-                  "ParameterValue": "$(CookbooksBranchPreview)"
-              },{
-                  "ParameterKey": "$(DBPasswordKey)",
-                  "ParameterValue": "$(DBPasswordValue)"
-              }, {
-                  "ParameterKey": "$(WebPasswordKey)",
-                  "ParameterValue": "$(WebPasswordValue)"
-              }, {
-                  "ParameterKey": "$(KeyNameKey)",
-                  "ParameterValue": "$(KeyNameValue)"
-              }, {
-                  "ParameterKey": "$(RemoteAccessLocationKey)",
-                  "ParameterValue": "$(RemoteAccessLocationValue)"
-              }, {
-                  "ParameterKey": "$(LansaMSIKey)",
-                  "ParameterValue": "$(msiURLv15)"
-              }, {
-                  "ParameterKey": "CurrentVPC",
-                  "ParameterValue": "$(CurrentVPCUS)"
-              }, {
-                  "ParameterKey": "AvailabilityZones",
-                  "ParameterValue": "$(AvailabilityZonesUS)"
-              }, {
-                  "ParameterKey": "NumberOfAZs",
-                  "ParameterValue": "$(NumberOfAZsUS)"
-              }, {
-                  "ParameterKey": "CreateVPC",
-                  "ParameterValue": "Yes"
-              }, {
-                  "ParameterKey": "ELBSubnetIds",
-                  "ParameterValue": "$(ELBSubnetIdsUS)"
-              }, {
-                  "ParameterKey": "03DBUsername",
-                  "ParameterValue": "$(03DBUsername)"
-              }, {
-                  "ParameterKey": "TagValue",
-                  "ParameterValue": "Lansa-Prod"
-              }]
-            tags: 'usage=temp-test'
-            onFailure: 'DO_NOTHING'
-            timeoutInMins: 100
-          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'Test CFN Deployment : URL Tests'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "us-east-1"
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/TestCFNDeployment.ps1'
-            arguments:
-              -Gatestack $(stack)
-              -DisableIntegratorTest
-          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'AWS PowerShell: Test Image Version'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "us-east-1"
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/AlternateImageVersion.ps1'
-            arguments:
-              -Gatestack '$(stack)'
-              -Gateversion '$(version)'
-          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
-
-        - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          displayName: 'Cleanup CFN Template : Small Stack-Template'
-          inputs:
-            awsCredentials: AzureDevOps
-            regionName: "us-east-1"
-            filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/DeletePreviousFailedStack.ps1'
-            arguments:
-              -Gatestack $(stack)
-            ignoreLASTEXITCODE: true
-          continueOnError: true
-          condition: and(succeeded(), eq(variables['IsEnabled'], 'True'))
+- template: AzureDevOps/templates/AWSTestTemplate.yml
+  parameters:
+    deploymentType: Preview
+    templateSource: S3                            # Note that this is after the system testing but before actual preview to test that the templates we've uploaded are correct
+    stageName: ValidateTemplateURLs
+    stagedisplayName: Validate Template URLs
+    dependsOn: MergeToMarketplaceAndUpload
+    jobName: SmallStack
+    jobDisplayname: 'Small Stack'
+    baseImageName: w25d-16-0
+    stackName: AUS-Small
+    paramStackType: Small
+    paramLansaMSIKey: $(msiURLv16)
+    param10LansaGitRepoBranch: $(CookbooksBranchPreview)
+    paramCreateVPC: 'Yes'
 
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Submit to AWS & Wait for Preview'

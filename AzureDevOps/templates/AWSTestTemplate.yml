@@ -1,50 +1,74 @@
 parameters:
   - name: deploymentType
     type: string
-    default: StackType
+    default: System
     values:
-      - StackType
-      - Master
+      - System
       - Preview
       - Production
+
+  - name: templateType  # 2 ways to deploy the stack: either use lansa-stack-type-win.cfn.template or lansa-master-win.cfn.template
+    type: string
+    default: stack
+    values:
+      - stack
+      - master
+
+  - name: templateSource
+    type: string
+    default: none
+
   - name: stageName
     type: string
     default: none
+
   - name: stageDisplayname
     type: string
     default: none
+
   - name: dependsOn
     default: []
+
   - name: jobName
     type: string
     default: none
+
   - name: jobDisplayname
     type: string
     default: none
+
   - name: resourceGroup
     type: string
     default: none
+
   - name: msiURL
     type: string
     default: none
+
   - name: stackName
     type: string
     default: none
+
   - name: certificateBase64Encoded
     type: string
     default: none
+
   - name: certificatePassword
     type: string
     default: none
+
   - name: databaseLogin
     type: string
     default: none
+
   - name: databaseLoginPassword
     type: string
     default: none
+
   - name: adminUsername
     type: string
     default: none
+
   - name: adminPassword
     type: string
     default: none
@@ -102,9 +126,6 @@ parameters:
   - name: paramDBCCSID
     type: string
     default: ''
-  - name: paramS3ObjectKey
-    type: string
-    default: none
   - name: paramTagValue
     type: string
     default: Lansa-Prod
@@ -164,7 +185,11 @@ stages:
               $repoPath = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { '_lansa_aws-templates-mp' } else { '_lansa_aws-templates' }
               Write-Host "##vso[task.setvariable variable=scriptRepoPath]$repoPath"
 
-              $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
+              if ('${{ parameters.templateSource }}' -eq 'none') {
+                $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
+              } else {
+                $templateSource = '${{ parameters.templateSource }}'
+              }
               Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
 
               $StackName = '${{ parameters.stageName }}' -replace "_", "-"
@@ -177,19 +202,9 @@ stages:
               gitRepoWriteAccess: false
               checkoutTemplateMPRepo: ${{ or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}
 
-          # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-          #   name: Gate
-          #   displayName: 'Artifact Check: Set Gate Variable'
-          #   inputs:
-          #     awsCredentials: AzureDevOps
-          #     regionName: ${{ parameters.AwsRegion }}
-          #     arguments: '-BaseImageName ''${{parameters.baseImageName}}'' -stackname ''${{parameters.stackName}}'''
-          #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/SetGateVariable.ps1'
-
-          # - powershell: |
-          #     Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageID: $(Gate.ImageID); Gate.version:$(Gate.version); Gate.stack:$(Gate.stack)" | Out-Default
-          #   displayName: 'Artifact Check: Output Gate Variable'
-          #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+          - powershell: |
+              Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); stack:$(stack)" | Out-Default
+            displayName: 'Output Gate Global Variables'
 
           - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
             displayName: 'S3 Download: TemplateUrl.txt'
@@ -222,7 +237,7 @@ stages:
             condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            displayName: 'Cleanup CFN Template: Small Stack-Template'
+            displayName: 'Cleanup CFN Template $(StackName)'
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
@@ -243,6 +258,23 @@ stages:
                   $lansaGitRepoBranch = '${{ parameters.param10LansaGitRepoBranch }}'
                 }
                 Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
+
+                # The template path branch name used is one ahead of the actual branch being used. Its like 'we are testing it for publishing to Preview'
+                # And its still to be determined what the values for template location will be once the templates are in Preview and then in Production.
+                if ('${{ parameters.deploymentType }}' -eq 'System') {
+                  $S3FolderName = 'templates/$(CookbooksBranchPreview)'
+                } else {
+                  $S3FolderName = 'templates/$(CookbooksBranchProduction)'
+                }
+                Write-Host "##vso[task.setvariable variable=S3FolderName]$S3FolderName"
+
+
+                if ('${{ parameters.templateType }}' -eq 'Stack') {
+                  $TemplateFilename = 'lansa-stack-type-win.cfn.template'
+                } else {
+                  $TemplateFilename = 'lansa-master-win.cfn.template'
+                }
+                Write-Host "##vso[task.setvariable variable=TemplateFilename]$TemplateFilename"
 
                 if ('${{ parameters.paramCurrentVPC }}' -eq 'none') {
                   $currentVPC = '$(CurrentVPC)'
@@ -371,15 +403,15 @@ stages:
                 Write-Host "##vso[task.setvariable variable=TemplateParameters]$templateParamsJson"
 
           - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
-            displayName: 'CFN Template deployment: Small Stack-TemplateTest'
+            displayName: 'CFN Template deployment - $(StackName)'
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               stackName: '$(StackName)'
               templateSource: $(templateSourceType)
               templateUrl: '$(Task.TemplateUrl)'
-              s3BucketName: '$(BucketNamePreview)'
-              s3ObjectKey: '$(FolderNamePreview)/${{ parameters.paramS3ObjectKey }}'
+              s3BucketName: 'lansa'
+              s3ObjectKey: '$(S3FolderName)/$(TemplateFilename)'
               templateParametersSource: inline
               templateParameters: $(TemplateParameters)
               tags: 'usage=temp-test'
@@ -387,7 +419,7 @@ stages:
               timeoutInMins: 100
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            displayName: 'Test CFN Deployment: URL Tests'
+            displayName: 'Test CFN Deployment: URL Tests - $(StackName)'
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
@@ -408,7 +440,7 @@ stages:
                 -Gateversion '$(version)'
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            displayName: 'Cleanup CFN Template: Small Stack-Template'
+            displayName: 'Cleanup CFN Template: $(StackName)'
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
