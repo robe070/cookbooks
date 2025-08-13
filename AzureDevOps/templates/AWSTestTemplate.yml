@@ -11,8 +11,8 @@ parameters:
     type: string
     default: stack
     values:
-      - stack
-      - master
+      - ShoeSize
+      - Master
 
   - name: templateSource
     type: string
@@ -269,7 +269,7 @@ stages:
                 Write-Host "##vso[task.setvariable variable=S3FolderName]$S3FolderName"
 
 
-                if ('${{ parameters.templateType }}' -eq 'Stack') {
+                if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
                   $TemplateFilename = 'lansa-stack-type-win.cfn.template'
                 } else {
                   $TemplateFilename = 'lansa-master-win.cfn.template'
