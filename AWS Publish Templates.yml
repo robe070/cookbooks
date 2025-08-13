@@ -307,7 +307,7 @@ stages:
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
     deploymentType: Preview
-    templateSource: S3                            # Note that this is after the system testing but before actual preview to test that the templates we've uploaded are correct
+    templateSource: s3                            # Note that this is after the system testing but before actual preview to test that the templates we've uploaded are correct
     stageName: ValidateTemplateURLs
     stagedisplayName: Validate Template URLs
     dependsOn: MergeToMarketplaceAndUpload
