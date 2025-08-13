@@ -203,7 +203,7 @@ stages:
               checkoutTemplateMPRepo: ${{ or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}
 
           - powershell: |
-              Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); stack:$(stack)" | Out-Default
+              Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version);" | Out-Default
             displayName: 'Output Gate Global Variables'
 
           - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
