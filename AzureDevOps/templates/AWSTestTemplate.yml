@@ -9,7 +9,7 @@ parameters:
 
   - name: templateType  # 2 ways to deploy the stack: either use lansa-stack-type-win.cfn.template or lansa-master-win.cfn.template
     type: string
-    default: stack
+    default: ShoeSize
     values:
       - ShoeSize
       - Master
