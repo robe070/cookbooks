@@ -326,7 +326,7 @@ stages:
                     },
                     @{
                         ParameterKey = "MPS3KeyPrefix"
-                        ParameterValue = "templates/$LansaGitRepoBranch/"
+                        ParameterValue = $(S3FolderName)
                     },
                     @{
                         ParameterKey = "$(DBPasswordKey)"
@@ -430,7 +430,7 @@ stages:
                 $(japan_override)
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            displayName: 'AWS PowerShell: Test Image Version'
+            displayName: 'Test Image Version'
             inputs:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
