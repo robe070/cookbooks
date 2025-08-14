@@ -411,7 +411,7 @@ stages:
               templateSource: $(templateSourceType)
               templateUrl: '$(Task.TemplateUrl)'
               s3BucketName: 'lansa'
-              s3ObjectKey: '$(S3FolderName)/$(TemplateFilename)'
+              s3ObjectKey: '$(S3FolderName)$(TemplateFilename)'
               templateParametersSource: inline
               templateParameters: $(TemplateParameters)
               tags: 'usage=temp-test'
