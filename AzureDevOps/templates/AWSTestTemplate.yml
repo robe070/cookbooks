@@ -326,7 +326,7 @@ stages:
                     },
                     @{
                         ParameterKey = "MPS3KeyPrefix"
-                        ParameterValue = $(S3FolderName)
+                        ParameterValue = $S3FolderName
                     },
                     @{
                         ParameterKey = "$(DBPasswordKey)"
