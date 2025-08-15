@@ -1,4 +1,4 @@
-TemplateFilenameparameters:
+- parameters:
   - name: deploymentType
     type: string
     default: System
