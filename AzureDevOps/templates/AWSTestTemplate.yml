@@ -1,4 +1,4 @@
-parameters:
+TemplateFilenameparameters:
   - name: deploymentType
     type: string
     default: System
@@ -7,13 +7,15 @@ parameters:
       - Preview
       - Production
 
-  - name: templateType  # 2 ways to deploy the stack: either use lansa-stack-type-win.cfn.template or lansa-master-win.cfn.template
+  # 2 ways to deploy the stack: either use lansa-stack-type-win.cfn.template or lansa-master-win.cfn.template
+  - name: templateType
     type: string
     default: ShoeSize
     values:
       - ShoeSize
       - Master
 
+  # When the templateSource is 'url' this implies that the Marketplace templates and Images are being used.
   - name: templateSource
     type: string
     default: none
@@ -206,35 +208,35 @@ stages:
               Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version);" | Out-Default
             displayName: 'Output Gate Global Variables'
 
-          - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
-            displayName: 'S3 Download: TemplateUrl.txt'
-            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
-            inputs:
-              awsCredentials: AzureDevOps
-              regionName: ${{ parameters.s3Region }}
-              bucketName: lansa
-              sourceFolder: templates/support/scalable/marketplace
-              globExpressions: TemplateUrl.txt
-              targetFolder: '$(System.DefaultWorkingDirectory)'
+          # - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
+          #   displayName: 'S3 Download: TemplateUrl.txt'
+          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+          #   inputs:
+          #     awsCredentials: AzureDevOps
+          #     regionName: ${{ parameters.s3Region }}
+          #     bucketName: lansa
+          #     sourceFolder: templates/support/scalable/marketplace
+          #     globExpressions: TemplateUrl.txt
+          #     targetFolder: '$(System.DefaultWorkingDirectory)'
 
 
-          - powershell: |
-              Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
-              $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
-              if (Test-Path $path) {
-                  $url = Get-Content -Path $path
-                  Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
-              } else {
-                  Write-Host "path does NOT exist - $path"
-              }
-            displayName: 'Set TemplateUrl task variable'
-            name: Task
-            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+          # - powershell: |
+          #     Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
+          #     $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
+          #     if (Test-Path $path) {
+          #         $url = Get-Content -Path $path
+          #         Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
+          #     } else {
+          #         Write-Host "path does NOT exist - $path"
+          #     }
+          #   displayName: 'Set TemplateUrl task variable'
+          #   name: Task
+          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
 
-          - powershell: |
-              Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
-            displayName: 'Output TemplateUrl Variable value'
-            condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
+          # - powershell: |
+          #     Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
+          #   displayName: 'Output TemplateUrl Variable value'
+          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template $(StackName)'
@@ -245,7 +247,19 @@ stages:
               arguments: '-Gatestack $(StackName)'
 
           - task: PowerShell@2
-            displayName: 'Set CloudFormation Parameter Variables'
+            displayName: 'Set CFN Parameter Variables from Marketplace inputs'
+            condition: and(succeeded(), eq('${{ variables.templateSourceType }}', 'url'))
+            inputs:
+              targetType: filePath
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/SetMarketplaceVariables.ps1'
+              arguments:
+                -BaseImageName '${{ parameters.baseImageName }}'
+                -TemplateType '${{ parameters.templateType }}'
+                -VersionDigits '$(VersionDigits)
+
+
+          - task: PowerShell@2
+            displayName: 'Set CFN Parameter Variables'
             inputs:
               targetType: inline
               script: |
@@ -259,22 +273,31 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
 
-                # The template path branch name used is one ahead of the actual branch being used. Its like 'we are testing it for publishing to Preview'
-                # And its still to be determined what the values for template location will be once the templates are in Preview and then in Production.
-                if ('${{ parameters.deploymentType }}' -eq 'System') {
-                  $S3FolderName = 'templates/$(CookbooksBranchPreview)/'
+                if ( $(UseMarketplaceTemplates) -eq 'True' ) {
+                  $ImageId = "$(ImageId)"
+                  $TemplateUrl = "$(TemplateUrl)"
+                  $MPS3KeyPrefix = "$(MPS3KeyPrefix)"
+                  $MPS3BucketName = "$(MPS3BucketName)"
+                  $MPS3BucketRegion = "$(MPS3BucketRegion)"
                 } else {
-                  $S3FolderName = 'templates/$(CookbooksBranchProduction)/'
-                }
-                Write-Host "##vso[task.setvariable variable=S3FolderName]$S3FolderName"
+                  $MPS3BucketRegion = ${{ parameters.AwsRegion }}
+                  $MPS3BucketName = 'lansa'
+                  # The template path branch name used is one ahead of the actual branch being used. Its like 'we are testing it for publishing to Preview'
+                  # And its still to be determined what the values for template location will be once the templates are in Preview and then in Production.
+                  if ('${{ parameters.deploymentType }}' -eq 'System') {
+                    $MPS3KeyPrefix = 'templates/$(CookbooksBranchPreview)/'
+                  } else {
+                    $MPS3KeyPrefix = 'templates/$(CookbooksBranchProduction)/'
+                  }
+                  Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
 
-
-                if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
-                  $TemplateFilename = 'lansa-stack-type-win.cfn.template'
-                } else {
-                  $TemplateFilename = 'lansa-master-win.cfn.template'
+                  if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
+                    $TemplateFilename = 'lansa-stack-type-win.cfn.template'
+                  } else {
+                    $TemplateFilename = 'lansa-master-win.cfn.template'
+                  }
+                  Write-Host "##vso[task.setvariable variable=TemplateFilename]$TemplateFilename"
                 }
-                Write-Host "##vso[task.setvariable variable=TemplateFilename]$TemplateFilename"
 
                 if ('${{ parameters.paramCurrentVPC }}' -eq 'none') {
                   $currentVPC = '$(CurrentVPC)'
@@ -318,15 +341,19 @@ stages:
                     },
                     @{
                         ParameterKey = "ImageId"
-                        ParameterValue = "$(ImageId)"
+                        ParameterValue = "$ImageId"
                     },
                     @{
                         ParameterKey = "MPS3BucketRegion"
-                        ParameterValue = "${{ parameters.AwsRegion }}"
+                        ParameterValue = "$MPS3BucketRegion"
+                    },
+                    @{
+                        ParameterKey = "MPS3BucketName"
+                        ParameterValue = "$MPS3BucketName"
                     },
                     @{
                         ParameterKey = "MPS3KeyPrefix"
-                        ParameterValue = $S3FolderName
+                        ParameterValue = $MPS3KeyPrefix
                     },
                     @{
                         ParameterKey = "$(DBPasswordKey)"
@@ -408,10 +435,10 @@ stages:
               awsCredentials: AzureDevOps
               regionName: ${{ parameters.AwsRegion }}
               stackName: '$(StackName)'
-              templateSource: $(templateSourceType)
-              templateUrl: '$(Task.TemplateUrl)'
+              templateSource: $(templateSourceType)   # Note that when this parameter is 'url' then the templateUrl parameter is used. When its 's3' then the s3BucketName and s3ObjectKey parameters are used.
+              templateUrl: '$(TemplateUrl)'
               s3BucketName: 'lansa'
-              s3ObjectKey: '$(S3FolderName)$(TemplateFilename)'
+              s3ObjectKey: '$(MPS3KeyPrefix)$(TemplateFilename)'
               templateParametersSource: inline
               templateParameters: $(TemplateParameters)
               tags: 'usage=temp-test'
