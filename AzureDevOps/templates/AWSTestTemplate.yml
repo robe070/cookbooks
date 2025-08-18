@@ -264,7 +264,7 @@ stages:
               arguments:
                 -BaseImageName '${{ parameters.baseImageName }}'
                 -TemplateType '${{ parameters.templateType }}'
-                -VersionDigits '$(VersionDigits)
+                -VersionDigits '$(VersionDigits)'
 
 
           - task: PowerShell@2
