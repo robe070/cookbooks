@@ -65,9 +65,9 @@ if ($templateData.ContainsKey($key)) {
     $TemplateKeyPrefix = if ($templateType -eq 'ShoeSize') { $data.StackTypeTemplateKeyPrefix } else { $data.MasterTemplateKeyPrefix }
 
     # Construct variables
-    $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($TemplateKeyPrefix)$TemplateFile"
+    $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($TemplateKeyPrefix)$($data.ProductId)/$TemplateFile"
     $MPS3KeyPrefix = $TemplateKeyPrefix
-    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$versionPrefix.$VersionDigits"
+    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$versionPrefix.$versionDigits"
 
     # Set Azure DevOps variables
     Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]True"

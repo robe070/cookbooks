@@ -179,7 +179,7 @@ stages:
         variables:
           - name: StackName
             value: ${{ parameters.stackName }}
-          - name: UseMarketplaceTemplates
+          - name: UseMarketplaceVariables
             value: 'False'
 
         steps:
@@ -287,7 +287,7 @@ stages:
                 Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
 
                 $ImageId = "$(ImageId)"
-                if ( '$(UseMarketplaceTemplates)' -eq 'True' ) {
+                if ( '$(UseMarketplaceVariables)' -eq 'True' ) {
                   $TemplateUrl = "$(TemplateUrl)"
                   $MPS3KeyPrefix = "$(MPS3KeyPrefix)"
                   $MPS3BucketName = "$(MPS3BucketName)"
