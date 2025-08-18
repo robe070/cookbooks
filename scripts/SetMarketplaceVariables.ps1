@@ -8,7 +8,7 @@ param (
     [string]$baseImageName,
 
     [Parameter(Mandatory=$true)]
-    [ValidateSet('master', 'stacktype')]
+    [ValidateSet('master', 'ShoeSize')]
     [string]$templateType,
 
     [Parameter(Mandatory=$true)]
@@ -64,8 +64,8 @@ if ($templateData.ContainsKey($key)) {
     $MPS3BucketRegion = 'us-east-1'
 
     # Select the appropriate template file based on templateType
-    $TemplateFile = if ($templateType -eq 'stacktype') { $data.StackTypeTemplateFile } else { $data.MasterTemplateFile }
-    $TemplateKeyPrefix = if ($templateType -eq 'stacktype') { $data.StackTypeTemplateKeyPrefix } else { $data.MasterTemplateKeyPrefix }
+    $TemplateFile = if ($templateType -eq 'ShoeSize') { $data.StackTypeTemplateFile } else { $data.MasterTemplateFile }
+    $TemplateKeyPrefix = if ($templateType -eq 'ShoeSize') { $data.StackTypeTemplateKeyPrefix } else { $data.MasterTemplateKeyPrefix }
 
     # Construct variables
     $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($TemplateKeyPrefix)$TemplateFile"
