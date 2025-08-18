@@ -419,7 +419,7 @@ stages:
                     }
                 )
 
-                if ($deploymentType -ne 'Master') {
+                if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
                     $templateParams = @(
                         @{
                             ParameterKey = "StackType"
