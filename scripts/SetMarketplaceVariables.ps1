@@ -35,11 +35,19 @@ $templateData = @{
     'w19d_eng' = @{
         ProductId = 'prod-7c4xdvxkskdfs'
         StackTypeTemplateFile = 'a50e24ef-1e9d-43fd-aa11-e7a2149ef9d7/lansa-stack-type-win.cfn.template'
+        StackTypeTemplateKeyPrefix = 'f632327c-e7fc-45fc-a594-d70141e84988/'
         MasterTemplateFile = 'ed7dce1e-63fb-4e8b-99b2-a9c77236cb88/lansa-master-win.cfn.template'
-        TemplateKeyPrefix = 'f632327c-e7fc-45fc-a594-d70141e84988/'  # Using stacktype prefix; adjust if master prefix differs
+        MasterTemplateKeyPrefix = 'f632327c-e7fc-45fc-a594-d70141e84988/'
+    }
+    'w19d_jpn' = @{
+        ProductId = 'prod-csfkcd5qvncle'
+        StackTypeTemplateFile = 'bb190ac7-8353-4ad8-bb99-8762ab3e4aee/lansa-stack-type-win.cfn.template'
+        StackTypeTemplateKeyPrefix = '6a47c447-03cb-4188-9d79-f05b84ef6e9f/'
+        MasterTemplateFile = '5b59d4f6-9037-433d-ba37-8ef7bddae066/lansa-master-win.cfn.template'
+        MasterTemplateKeyPrefix = 'ae7d2d02-ba00-49b2-931e-97c27943438c/'
     }
     # Additional key combinations can be added here as needed
-    # e.g., 'w19d_jpn', 'w22d_eng', 'w25d_jpn', etc.
+    # e.g., 'w22d_eng', 'w25d_jpn', etc.
 }
 
 # Get key components
@@ -57,10 +65,11 @@ if ($templateData.ContainsKey($key)) {
 
     # Select the appropriate template file based on templateType
     $TemplateFile = if ($templateType -eq 'stacktype') { $data.StackTypeTemplateFile } else { $data.MasterTemplateFile }
+    $TemplateKeyPrefix = if ($templateType -eq 'stacktype') { $data.StackTypeTemplateKeyPrefix } else { $data.MasterTemplateKeyPrefix }
 
     # Construct variables
-    $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($data.TemplateKeyPrefix)$TemplateFile"
-    $MPS3KeyPrefix = $data.TemplateKeyPrefix
+    $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($TemplateKeyPrefix)$TemplateFile"
+    $MPS3KeyPrefix = $TemplateKeyPrefix
     $ImageId = "/aws/service/marketplace/$($data.ProductId)/$versionPrefix.$VersionDigits"
 
     # Set Azure DevOps variables
