@@ -282,7 +282,7 @@ stages:
                   $MPS3BucketName = "$(MPS3BucketName)"
                   $MPS3BucketRegion = "$(MPS3BucketRegion)"
                 } else {
-                  $MPS3BucketRegion = ${{ parameters.AwsRegion }}
+                  $MPS3BucketRegion = '${{ parameters.AwsRegion }}'
                   $MPS3BucketName = 'lansa'
                   # The template path branch name used is one ahead of the actual branch being used. Its like 'we are testing it for publishing to Preview'
                   # And its still to be determined what the values for template location will be once the templates are in Preview and then in Production.
