@@ -275,7 +275,7 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
 
-                if ( $(UseMarketplaceTemplates) -eq 'True' ) {
+                if ( '$(UseMarketplaceTemplates)' -eq 'True' ) {
                   $ImageId = "$(ImageId)"
                   $TemplateUrl = "$(TemplateUrl)"
                   $MPS3KeyPrefix = "$(MPS3KeyPrefix)"
