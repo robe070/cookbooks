@@ -253,7 +253,7 @@ stages:
             condition: and(succeeded(), eq(variables.templateSourceType, 'url'))
             inputs:
               targetType: filePath
-              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/SetMarketplaceVariables.ps1'
+              filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetMarketplaceVariables.ps1'
               arguments:
                 -BaseImageName '${{ parameters.baseImageName }}'
                 -TemplateType '${{ parameters.templateType }}'
