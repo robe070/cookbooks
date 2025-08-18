@@ -1,17 +1,17 @@
 # SetMarketplaceVariables.ps1
-# This script sets Azure DevOps variables based on input parameters baseImageName, templateType, and VersionDigits
-# It uses a predefined table to map keys to AWS Marketplace template data, with deduplicated elements
+# This script sets Azure DevOps variables based on input parameters version and templateType
+# It uses a lookup table with full URLs, dynamically parsing them into components
 
 param (
     [Parameter(Mandatory=$true)]
     [string]$version,
 
     [Parameter(Mandatory=$true)]
-    [ValidateSet('master', 'ShoeSize')]
+    [ValidateSet('master', 'shoesize')]
     [string]$templateType
 )
 
-# Function to derive key components from baseImageName
+# Function to derive key components from version
 function Get-KeyComponents {
     param (
         [string]$Version
@@ -27,46 +27,52 @@ function Get-KeyComponents {
 
     return $key1, $key2, $versionPrefix, $versionDigits
 }
-# Define the lookup table with deduplicated elements and combined w19d_eng entry
+
+# Function to parse URL into components
+function Parse-TemplateUrl {
+    param (
+        [string]$Url
+    )
+
+    # Parse URL using regex to extract components
+    if ($Url -match '^https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/([^\/]+)\/([^\/]+)\/(.+)$') {
+        return @{
+            BucketName = $Matches[1]  # e.g., awsmp-cft-992382380361-1708727387563
+            BucketRegion = $Matches[2]  # e.g., us-east-1
+            TemplateKeyPrefix = "$($Matches[3])/"  # e.g., a305b7d6-efa2-4265-be5b-49ef9d3069b5/
+            ProductId = $Matches[4]  # e.g., prod-7c4xdvxkskdfs
+        }
+    } else {
+        throw "Invalid URL format: $Url"
+    }
+}
+
+# Define the lookup table with full URLs
 $templateData = @{
-    'w19d_eng' = @{
-        ProductId = 'prod-7c4xdvxkskdfs'
-        StackTypeTemplateFile = 'a50e24ef-1e9d-43fd-aa11-e7a2149ef9d7/lansa-stack-type-win.cfn.template'
-        StackTypeTemplateKeyPrefix = 'f632327c-e7fc-45fc-a594-d70141e84988/'
-        MasterTemplateFile = 'ed7dce1e-63fb-4e8b-99b2-a9c77236cb88/lansa-master-win.cfn.template'
-        MasterTemplateKeyPrefix = 'f632327c-e7fc-45fc-a594-d70141e84988/'
-    }
-    'w19d_jpn' = @{
-        ProductId = 'prod-csfkcd5qvncle'
-        StackTypeTemplateFile = 'bb190ac7-8353-4ad8-bb99-8762ab3e4aee/lansa-stack-type-win.cfn.template'
-        StackTypeTemplateKeyPrefix = '6a47c447-03cb-4188-9d79-f05b84ef6e9f/'
-        MasterTemplateFile = '5b59d4f6-9037-433d-ba37-8ef7bddae066/lansa-master-win.cfn.template'
-        MasterTemplateKeyPrefix = 'ae7d2d02-ba00-49b2-931e-97c27943438c/'
-    }
+    'master_w19d_eng_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/60d93b08-227c-428e-ab17-7b75046a5daf/prod-7c4xdvxkskdfs/05c20fff-a79a-47f1-b157-6b6130d2f32e/lansa-master-win.cfn.template'
+    'shoesize_w19d_eng_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/a305b7d6-efa2-4265-be5b-49ef9d3069b5/prod-7c4xdvxkskdfs/ae285e2e-5bde-4b5f-85af-87d08a180697/lansa-stack-type-win.cfn.template'
+    'master_w19d_jpn_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/ae7d2d02-ba00-49b2-931e-97c27943438c/prod-csfkcd5qvncle/5b59d4f6-9037-433d-ba37-8ef7bddae066/lansa-master-win.cfn.template'
+    'shoesize_w19d_jpn_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/6a47c447-03cb-4188-9d79-f05b84ef6e9f/prod-csfkcd5qvncle/bb190ac7-8353-4ad8-bb99-8762ab3e4aee/lansa-stack-type-win.cfn.template'
     # Additional key combinations can be added here as needed
-    # e.g., 'w22d_eng', 'w25d_jpn', etc.
+    # e.g., 'master_w25d_eng_19', 'shoesize_w25d_jpn_19', etc.
 }
 
 # Get key components
 $key1, $key2, $versionPrefix, $versionDigits = Get-KeyComponents -Version $version
-$key = "${key1}_${key2}"
+$key = "${templateType}_${key1}_${key2}_${versionDigits}"
 
 Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]False"
 
 # Retrieve data from the lookup table
 if ($templateData.ContainsKey($key)) {
-    $data = $templateData[$key]
-
-    $MPS3BucketName = 'awsmp-cft-992382380361-1708727387563'
-    $MPS3BucketRegion = 'us-east-1'
-
-    # Select the appropriate template file based on templateType
-    $TemplateFile = if ($templateType -eq 'ShoeSize') { $data.StackTypeTemplateFile } else { $data.MasterTemplateFile }
-    $TemplateKeyPrefix = if ($templateType -eq 'ShoeSize') { $data.StackTypeTemplateKeyPrefix } else { $data.MasterTemplateKeyPrefix }
+    $url = $templateData[$key]
+    $data = Parse-TemplateUrl -Url $url
 
     # Construct variables
-    $TemplateUrl = "https://$($MPS3BucketName).s3.$($MPS3BucketRegion).amazonaws.com/$($TemplateKeyPrefix)$($data.ProductId)/$TemplateFile"
-    $MPS3KeyPrefix = $TemplateKeyPrefix
+    $TemplateUrl = $url
+    $MPS3BucketName = $data.BucketName
+    $MPS3BucketRegion = $data.BucketRegion
+    $MPS3KeyPrefix = $data.TemplateKeyPrefix
     $ImageId = "/aws/service/marketplace/$($data.ProductId)/$versionPrefix.$versionDigits"
 
     # Set Azure DevOps variables
