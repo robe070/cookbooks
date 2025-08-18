@@ -179,6 +179,8 @@ stages:
         variables:
           - name: StackName
             value: ${{ parameters.stackName }}
+          - name: UseMarketplaceTemplates
+            value: 'False'
 
         steps:
           - powershell: |
