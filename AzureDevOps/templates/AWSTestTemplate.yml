@@ -312,6 +312,12 @@ stages:
                   Write-Host "##vso[task.setvariable variable=TemplateFilename]$TemplateFilename"
                 }
 
+                Write-Host "All non Sydney regions use create a VPC. VPC params provided are only there so that template validation passes. To use an existing VPC an existing DB Subnet Group must also be specified, and we do not have one. "
+                $CreateVPC = '${{ parameters.paramCreateVPC }}'
+                if ( '${{ parameters.AwsRegion }}' -ne 'ap-southeast-2' ) {
+                  $CreateVPC = 'Yes'
+                }
+
                 if ('${{ parameters.paramCurrentVPC }}' -eq 'none') {
                   $currentVPC = '$(CurrentVPC)'
                 } else {
@@ -390,7 +396,7 @@ stages:
                     },
                     @{
                         ParameterKey = "CreateVPC"
-                        ParameterValue = "${{ parameters.paramCreateVPC }}"
+                        ParameterValue = "$CreateVPC"
                     },
                     @{
                         ParameterKey = "CurrentVPC"
