@@ -199,6 +199,13 @@ stages:
               $StackName = '${{ parameters.stageName }}' -replace "_", "-"
               Write-Host "##vso[task.setvariable variable=StackName]$StackName"
 
+              # Debugging code for when the initialise script is NOT run in the Azure DevOps pipeline.
+              # Create a VersionDigits variable if it does not already exist so that it can be used in the SetMarketplaceVariables.ps1 script.
+              if ( '$(VersionDigits)' -eq '') {
+                $VersionDigits = '19'
+                Write-Host "##vso[task.setvariable variable=VersionDigits]$VersionDigits"
+              }
+
             displayName: 'Set scriptRepoPath and templateSourceType and StackName variables'
 
           - template: AWSInitRepos.yml
