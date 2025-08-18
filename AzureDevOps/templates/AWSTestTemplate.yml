@@ -206,6 +206,12 @@ stages:
                 Write-Host "##vso[task.setvariable variable=VersionDigits]$VersionDigits"
               }
 
+              # Create a version variable if it does not already exist so that it can be used in the SetMarketplaceVariables.ps1 script.
+              if ( '$(version)' -eq '') {
+                $version = 'w19d-15-0-19'
+                Write-Host "##vso[task.setvariable variable=version]$version"
+              }
+
             displayName: 'Set scriptRepoPath and templateSourceType and StackName variables'
 
           - template: AWSInitRepos.yml
@@ -262,7 +268,7 @@ stages:
               targetType: filePath
               filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetMarketplaceVariables.ps1'
               arguments:
-                -BaseImageName '${{ parameters.baseImageName }}'
+                -BaseImageName '$(version)'
                 -TemplateType '${{ parameters.templateType }}'
                 -VersionDigits '$(VersionDigits)'
 

@@ -4,32 +4,29 @@
 
 param (
     [Parameter(Mandatory=$true)]
-    [ValidateSet('w19d-15-0', 'w19d-16-0', 'w25d-15-0', 'w25d-16-0', 'w19d-15-0j', 'w19d-16-0j', 'w25d-15-0j', 'w25d-16-0j')]
-    [string]$baseImageName,
+    [string]$version,
 
     [Parameter(Mandatory=$true)]
     [ValidateSet('master', 'ShoeSize')]
-    [string]$templateType,
-
-    [Parameter(Mandatory=$true)]
-    [string]$VersionDigits
+    [string]$templateType
 )
 
 # Function to derive key components from baseImageName
 function Get-KeyComponents {
     param (
-        [string]$BaseImageName
+        [string]$Version
     )
 
-    $key1 = $BaseImageName.Split('-')[0]  # e.g., w19d
-    $key2 = if ($BaseImageName -like '*j') { 'jpn' } else { 'eng' }
-    $versionBase = $BaseImageName.Split('-')[1]  # e.g., 15
-    $versionMinor = $BaseImageName.Split('-')[2].Replace('j', '')  # e.g., 0, removing 'j' if present
+    $parts = $Version.Split('-')
+    $key1 = $parts[0]  # e.g., w19d
+    $key2 = if ($Version -like '*j-*') { 'jpn' } else { 'eng' }
+    $versionBase = $parts[1]  # e.g., 15
+    $versionMinor = $parts[2].Replace('j', '')  # e.g., 0, removing 'j' if present
+    $versionDigits = $parts[3]  # e.g., 19
     $versionPrefix = "$versionBase.$versionMinor"  # e.g., 15.0
 
-    return $key1, $key2, $versionPrefix
+    return $key1, $key2, $versionPrefix, $versionDigits
 }
-
 # Define the lookup table with deduplicated elements and combined w19d_eng entry
 $templateData = @{
     'w19d_eng' = @{
@@ -51,7 +48,7 @@ $templateData = @{
 }
 
 # Get key components
-$key1, $key2, $versionPrefix = Get-KeyComponents -BaseImageName $baseImageName
+$key1, $key2, $versionPrefix, $versionDigits = Get-KeyComponents -Version $version
 $key = "${key1}_${key2}"
 
 Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]False"
