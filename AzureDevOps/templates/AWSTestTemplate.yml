@@ -268,10 +268,8 @@ stages:
               targetType: filePath
               filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetMarketplaceVariables.ps1'
               arguments:
-                -BaseImageName '$(version)'
+                -Version '$(version)'
                 -TemplateType '${{ parameters.templateType }}'
-                -VersionDigits '$(VersionDigits)'
-
 
           - task: PowerShell@2
             displayName: 'Set CFN Parameter Variables'
