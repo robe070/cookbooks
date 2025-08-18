@@ -250,7 +250,7 @@ stages:
 
           - task: PowerShell@2
             displayName: 'Set CFN Parameter Variables from Marketplace inputs'
-            condition: and(succeeded(), eq($(templateSourceType), 'url'))
+            condition: and(succeeded(), eq(variables.templateSourceType, 'url'))
             inputs:
               targetType: filePath
               filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/SetMarketplaceVariables.ps1'
