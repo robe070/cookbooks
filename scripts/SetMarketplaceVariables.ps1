@@ -84,5 +84,5 @@ if ($templateData.ContainsKey($key)) {
     Write-Host "##vso[task.setvariable variable=ImageId]$ImageId"
 } else {
     Write-Error "No data found for key: $key"
-    exit 1
+    throw
 }
