@@ -17,7 +17,7 @@ variables:
   - name: agentVMImage
     value: Default
   - name: VersionText
-    value: 19
+    value: 20
 
 
 #resources:
