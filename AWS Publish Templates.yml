@@ -343,13 +343,24 @@ stages:
       inputs:
         instructions: |
           Submit artefacts to AWS
-          1. Check that the master template has been updated with AMI IDs in the Image CD pipeline. Compare with the Product Load Form. Also check that the TemplateUrl properties are a single url, and not a condition. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-master-win.cfn.template
-          2. Upload Product Load Form to AWS Marketplace.
-          3. This should have been updated with AMI IDs in the Image CD pipeline. Check that this has occurred.
-          4. Wait for response from AWS Marketplace.
-          5. Using the url provided in the response from AWS Marketplace, navigate to deploy the latest version of the stack on CloudFormation. It will show the url of the stack type template. Copy this url.
-          6. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
-          7. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
+          1. Check that the templates have been uploaded at a time consistent with when the pipeline ran. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable.
+          2. Manually Add a Version to each Marketplace product
+             - Go to https://aws.amazon.com/marketplace/management/products/server?#
+             - Click on the product
+             - Click on "Add Version"
+             - Specify the:
+               - version number that is being built. Obtain this from https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/ami-list/
+               - change each of the 2 template urls as one of these values. Check the current urls last element to see which one is appropriate:
+                 https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-master-win.cfn.template
+                 or
+                 https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable/lansa-stack-type-win.cfn.template
+             - Click "Add"
+          3. Wait for response from AWS Marketplace.
+          4. Review the last version added for each product and add the 2 template urls from each product thats being updated to the $templateData table in SetMarketplaceVariables.ps1.
+          5. Commit the change to git. Cancel this run of the pipeline.
+          6. IGNORE THIS STEP. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
+          7. IGNORE THIS STEP. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
+          8. Run the pipeline again. Uncheck all the stages. Click ALL the stages from after this stage, starting with the Preview stages like Paris, etc.
 
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
 
