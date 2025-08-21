@@ -395,6 +395,10 @@ stages:
                         ParameterValue = "${{ parameters.paramLansaMSIKey }}"
                     },
                     @{
+                        ParameterKey = "27TriggerPatchInstall"
+                        ParameterValue = "0"
+                    },
+                    @{
                         ParameterKey = "CreateVPC"
                         ParameterValue = "$CreateVPC"
                     },
