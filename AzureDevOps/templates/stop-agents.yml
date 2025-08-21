@@ -17,12 +17,12 @@ jobs:
 # RootStopTrigger is required so that there is at least one job in this stage that always runs,
 #  otherwise Azure DevOps throws an error because all of the jobs have a dependsOn condition.
 - job: RootStopTrigger
-  displayName: "Start StopVMs Stage"
+  displayName: "Dummy Job to ensure stage is valid"
   # dependsOn: ${{ parameters.dependsOn }}
   pool:
     vmImage: 'windows-latest'
   steps:
-    - script: echo "Stopping VMs..."
+    - script: echo "Dummy job to ensure stage is valid."
 
 - job: StopAgents
   displayName: 'Stop Agent VMs'
@@ -30,7 +30,8 @@ jobs:
 #    - RootStopTrigger
     - ${{ parameters.dependsOn }}
 
-  condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
+  # condition: always()   # Always run this whether the dependent jobs succeed or fail or are skipped. They just need to end
+  condition: 'False'
   pool:
     vmImage: 'windows-latest'
   steps:
