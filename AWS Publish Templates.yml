@@ -304,13 +304,13 @@ stages:
           targetFolder: 'templates/$(CookbooksBranchProduction)'
           filesAcl: 'public-read'
 
-      - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-        displayName: 'Update Templates In Marketplace'
-        inputs:
-          awsCredentials: AzureDevOps
-          regionName: 'us-east-1'
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/UpdateTemplatesInMarketplace.ps1'
-          arguments: -Version '15.0.19'
+      # - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+      #   displayName: 'Update Templates In Marketplace'
+      #   inputs:
+      #     awsCredentials: AzureDevOps
+      #     regionName: 'us-east-1'
+      #     filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/UpdateTemplatesInMarketplace.ps1'
+      #     arguments: -Version '15.0.19'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
