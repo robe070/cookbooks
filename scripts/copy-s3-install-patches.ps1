@@ -14,7 +14,7 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$SUDB = '1',
 [String]$bucket_name='lansa',
-[String]$region='ap-southeast-2',
+[String]$region='ap-southeast-2', # This setting is ignored - the actual region is obtained from the bucket
 [String]$access_key,
 [String]$secret_key,
 [String]$folder='/change me',
@@ -29,13 +29,10 @@ try
 
     [int]$InstalledPatchCount = 0
 
-    # Clear-AWSCredentials -StoredCredentials lansa
-
-    # Set-AWSCredentials -AccessKey $access_key -SecretKey $secret_key -StoreAs lansa
-    # Initialize-AWSDefaults -ProfileName lansa -Region $region
-
-    $FileList = Get-S3Object -BucketName $bucket_name -Key $folder
-    $FileList | ft -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
+    $bucketLocation = Get-S3BucketLocation -BucketName $bucketName -ErrorAction Stop
+    $region = if ($bucketLocation.LocationConstraint -eq "") { "us-east-1" } else { $bucketLocation.LocationConstraint }
+    $FileList = Get-S3Object -BucketName $bucketName -Key $folder -Region $region
+    $FileList | Format-Table -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
     foreach( $file in $FileList )
     {
         $patch_installed = $false
@@ -103,8 +100,6 @@ try
             Write-Host $output
         }
     }
-
-    # Clear-AWSCredentials -StoredCredentials lansa | Out-Default | Write-Host
 
     if ( $InstalledPatchCount -gt 0 )
     {
