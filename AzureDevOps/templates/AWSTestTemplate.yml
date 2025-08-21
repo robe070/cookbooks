@@ -436,7 +436,8 @@ stages:
                     },
                     @{
                         ParameterKey = "UpdateManagementScripts"
-                        ParameterValue = "${{ parameters.paramUpdateManagementScripts }}"
+                        # ParameterValue = "${{ parameters.paramUpdateManagementScripts }}" Hard code it because there is a fix in git which is not burnt in to the image.
+                        ParameterValue = "Yes"
                     }
                 )
 

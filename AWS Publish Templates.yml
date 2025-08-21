@@ -360,7 +360,7 @@ stages:
           5. Commit the change to git. Cancel this run of the pipeline.
           6. IGNORE THIS STEP. Put the url in a file called TemplateUrl.txt. The casing must be ExactLy that specified.
           7. IGNORE THIS STEP. Upload the TemplateUrl.txt file to s3://lansa/templates/support/scalable/marketplace/
-          8. Run the pipeline again. Uncheck all the stages. Click ALL the stages from after this stage, starting with the Preview stages like Paris, etc.
+          8. Run the pipeline again. Uncheck all the stages. Click the Initialise Stage AND ALL the stages from after this Manual Intervention stage, starting with the Preview stages like Paris, etc.
 
           Also refer to "Inputting a Template URL" section in the wiki: https://github.com/robe070/cookbooks/wiki/AWS-Release-Pipelines-High-Level-View)
 
