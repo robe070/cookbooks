@@ -29,9 +29,9 @@ try
 
     [int]$InstalledPatchCount = 0
 
-    $bucketLocation = Get-S3BucketLocation -BucketName $bucketName -ErrorAction Stop
-    $region = if ($bucketLocation.LocationConstraint -eq "") { "us-east-1" } else { $bucketLocation.LocationConstraint }
-    $FileList = Get-S3Object -BucketName $bucketName -Key $folder -Region $region
+    $bucketLocation = Get-S3BucketLocation -BucketName $bucket_name -ErrorAction Stop
+    $region = if (-not $bucketLocation -or $bucketLocation.value -eq "") { "us-east-1" } else { $bucketLocation.Value }
+    $FileList = Get-S3Object -BucketName $bucket_name -Key $folder -Region $region
     $FileList | Format-Table -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
     foreach( $file in $FileList )
     {
