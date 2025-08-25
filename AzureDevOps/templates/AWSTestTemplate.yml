@@ -168,7 +168,12 @@ stages:
         - template: vars.yml
           parameters:
             isImageType: ENG
-
+      - ${{ if or(eq(parameters.deploymentType, 'Preview'), eq(parameters.deploymentType, 'Production')) }}:
+        - name: enforceMarketplaceProductCodeValidationParameter
+          value: -EnforceMarketplaceProductCodeValidation
+      - ${{ else }}:
+        - name: enforceMarketplaceProductCodeValidationParameter
+          value: ''
     jobs:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
@@ -469,6 +474,18 @@ stages:
               timeoutInMins: 100
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Test Image Version'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
+              arguments:
+                -Gatestack '$(StackName)'
+                -Gateversion '$(version)'
+                $(enforceMarketplaceProductCodeValidationParameter)
+
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Test CFN Deployment: URL Tests - $(StackName)'
             inputs:
               awsCredentials: AzureDevOps
@@ -478,16 +495,6 @@ stages:
                 -GateStack $(StackName)
                 -DisableIntegratorTest
                 $(japan_override)
-
-          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
-            displayName: 'Test Image Version'
-            inputs:
-              awsCredentials: AzureDevOps
-              regionName: ${{ parameters.AwsRegion }}
-              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
-              arguments:
-                -Gatestack '$(StackName)'
-                -Gateversion '$(version)'
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template: $(StackName)'
