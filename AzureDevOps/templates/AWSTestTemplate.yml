@@ -168,12 +168,6 @@ stages:
         - template: vars.yml
           parameters:
             isImageType: ENG
-      - ${{ if or(eq(parameters.deploymentType, 'Preview'), eq(parameters.deploymentType, 'Production')) }}:
-        - name: enforceMarketplaceProductCodeValidationParameter
-          value: -EnforceMarketplaceProductCodeValidation
-      - ${{ else }}:
-        - name: enforceMarketplaceProductCodeValidationParameter
-          value: ''
     jobs:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayname }}
@@ -482,8 +476,6 @@ stages:
               arguments:
                 -Gatestack '$(StackName)'
                 -Gateversion '$(version)'
-                $(enforceMarketplaceProductCodeValidationParameter)
-
 
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Test CFN Deployment: URL Tests - $(StackName)'
