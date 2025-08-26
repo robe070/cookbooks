@@ -133,7 +133,7 @@ parameters:
     default: Lansa-Prod
   - name: paramUpdateManagementScripts
     type: string
-    default: 'No'
+    default: 'Yes'
   - name: CookbooksBranch
     type: string
     default: none

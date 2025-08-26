@@ -240,7 +240,7 @@ stages:
     paramLansaMSIKey: $(msiURLJPNPrevious)
     param10LansaGitRepoBranch: $(CookbooksBranchPreview)
     paramDBCCSID: $(DBCCSID)
-    paramUpdateManagementScripts: 'Yes'
+    paramUpdateManagementScripts: 'No'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
