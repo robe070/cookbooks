@@ -222,36 +222,6 @@ stages:
               Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version);" | Out-Default
             displayName: 'Output Gate Global Variables'
 
-          # - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
-          #   displayName: 'S3 Download: TemplateUrl.txt'
-          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
-          #   inputs:
-          #     awsCredentials: AzureDevOps
-          #     regionName: ${{ parameters.s3Region }}
-          #     bucketName: lansa
-          #     sourceFolder: templates/support/scalable/marketplace
-          #     globExpressions: TemplateUrl.txt
-          #     targetFolder: '$(System.DefaultWorkingDirectory)'
-
-
-          # - powershell: |
-          #     Get-ChildItem -Path $(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace
-          #     $path = "$(System.DefaultWorkingDirectory)/templates/support/scalable/marketplace/TemplateUrl.txt"
-          #     if (Test-Path $path) {
-          #         $url = Get-Content -Path $path
-          #         Write-Host "##vso[task.setvariable variable=TemplateUrl;isOutput=true]$url"
-          #     } else {
-          #         Write-Host "path does NOT exist - $path"
-          #     }
-          #   displayName: 'Set TemplateUrl task variable'
-          #   name: Task
-          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
-
-          # - powershell: |
-          #     Write-Host "TemplateUrl variable value is - $(Task.TemplateUrl)"
-          #   displayName: 'Output TemplateUrl Variable value'
-          #   condition: and(succeeded(), or(eq('${{ parameters.deploymentType }}', 'Production'), eq('${{ parameters.deploymentType }}', 'Preview')))
-
           - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
             displayName: 'Cleanup CFN Template $(StackName)'
             inputs:
@@ -352,6 +322,14 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
 
+                if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') {
+                  Write-Host "Running the user-script.ps1 so that Production value is set to True and Marketplace Product Code Validation is enforced."
+                  $UserScriptHook = 'https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1'
+                } else {
+                  $UserScriptHook = ''
+                }
+                Write-Host "##vso[task.setvariable variable=UserScriptHook]$UserScriptHook"
+
                 $templateParams = @(
                     @{
                         ParameterKey = "10LansaGitRepoBranch"
@@ -432,6 +410,10 @@ stages:
                     @{
                         ParameterKey = "TagValue"
                         ParameterValue = "${{ parameters.paramTagValue }}"
+                    },
+                    @{
+                        ParameterKey = "17UserScriptHook"
+                        ParameterValue = "$UserScriptHook"
                     },
                     @{
                         ParameterKey = "UpdateManagementScripts"
