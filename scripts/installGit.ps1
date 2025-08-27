@@ -38,6 +38,7 @@ try {
         Write-Host "Installing Git"
 
         # -s=lansa not used as all the dependencies are not present in the artifact repo
+        # Note that version 2.51.0 fails to install on 2019 ENG but succeeds on 2019 JPN
         Run-ExitCode 'choco' @('install', 'git.install', '--version=2.49.0', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
         Run-ExitCode 'choco' @('install', 'git', '--version=2.49.0', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
 
