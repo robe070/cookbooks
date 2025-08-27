@@ -36,8 +36,10 @@ try {
     if ( $InstallGit -and (-not (Test-Path $GitRepoPath) ) )
     {
         Write-Host "Installing Git"
-        Run-ExitCode 'choco' @('install', 'git.install', '-s=lansa', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
-        Run-ExitCode 'choco' @('install', 'git', '-s=lansa', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
+
+        # -s=lansa not used as all the dependencies are not present in the artifact repo
+        Run-ExitCode 'choco' @('install', 'git.install', '--version=2.49.0', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
+        Run-ExitCode 'choco' @('install', 'git', '--version=2.49.0', '-y', '--no-progress', '--force' ) | Out-Default | Write-Host
 
         refreshenv | Out-Default | Write-Host
 
