@@ -89,6 +89,8 @@ if ($templateData.ContainsKey($key)) {
     Write-Host "##vso[task.setvariable variable=MPS3BucketRegion]$MPS3BucketRegion"
     Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
     Write-Host "##vso[task.setvariable variable=ImageId]$ImageId"
+
+    Write-Host "##vso[task.setvariable variable=UserScriptHook]https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1"
 } else {
     Write-Error "No data found for key: $key"
     throw

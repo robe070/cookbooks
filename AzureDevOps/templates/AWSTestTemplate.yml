@@ -322,13 +322,8 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
 
-                if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') {
-                  Write-Host "Running the user-script.ps1 so that Production value is set to True and Marketplace Product Code Validation is enforced."
-                  $UserScriptHook = 'https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1'
-                } else {
-                  $UserScriptHook = ''
-                }
-                Write-Host "##vso[task.setvariable variable=UserScriptHook]$UserScriptHook"
+                # Note that $(UserScriptHook) is set in the SetMarketplaceVariables.ps1 script when marketplace variables are being used.
+                # Otherwise it is not used as the templates default to not using a user script.
 
                 $templateParams = @(
                     @{
@@ -413,7 +408,7 @@ stages:
                     },
                     @{
                         ParameterKey = "17UserScriptHook"
-                        ParameterValue = "$UserScriptHook"
+                        ParameterValue = "$(UserScriptHook)"
                     },
                     @{
                         ParameterKey = "UpdateManagementScripts"
