@@ -1,6 +1,6 @@
 # SetMarketplaceVariables.ps1
-# This script sets Azure DevOps variables based on input parameters version and templateType
-# It uses a lookup table with full URLs, dynamically parsing them into components
+# This script sets Azure DevOps variables based on input parameters version and templateType.
+# It dynamically retrieves template URLs from AWS Marketplace using Get-MCATEntity.
 
 param (
     [Parameter(Mandatory=$true)]
@@ -9,6 +9,12 @@ param (
     [Parameter(Mandatory=$true)]
     [ValidateSet('master', 'shoesize')]
     [string]$templateType
+)
+
+# Product mapping with live product IDs
+$productMapping = @(
+    @('w19d-15-0', 'prod-7c4xdvxkskdfs'),  # English
+    @('w19d-15-0j', 'prod-csfkcd5qvncle')   # Japanese
 )
 
 # Function to derive key components from version
@@ -23,9 +29,8 @@ function Get-KeyComponents {
     $versionBase = $parts[1]  # e.g., 15
     $versionMinor = $parts[2].Replace('j', '')  # e.g., 0, removing 'j' if present
     $versionDigits = $parts[3]  # e.g., 19
-    $versionPrefix = "$versionBase.$versionMinor"  # e.g., 15.0
 
-    return $key1, $key2, $versionPrefix, $versionDigits
+    return $key1, $key2, $versionBase, $versionMinor, $versionDigits
 }
 
 # Function to parse URL into components
@@ -47,32 +52,53 @@ function Parse-TemplateUrl {
     }
 }
 
-# Define the lookup table with full URLs
-$templateData = @{
-    # Version 19
-    'master_w19d_eng_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/60d93b08-227c-428e-ab17-7b75046a5daf/prod-7c4xdvxkskdfs/05c20fff-a79a-47f1-b157-6b6130d2f32e/lansa-master-win.cfn.template'
-    'shoesize_w19d_eng_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/a305b7d6-efa2-4265-be5b-49ef9d3069b5/prod-7c4xdvxkskdfs/ae285e2e-5bde-4b5f-85af-87d08a180697/lansa-stack-type-win.cfn.template'
-    'master_w19d_jpn_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/ae7d2d02-ba00-49b2-931e-97c27943438c/prod-csfkcd5qvncle/5b59d4f6-9037-433d-ba37-8ef7bddae066/lansa-master-win.cfn.template'
-    'shoesize_w19d_jpn_19' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/6a47c447-03cb-4188-9d79-f05b84ef6e9f/prod-csfkcd5qvncle/bb190ac7-8353-4ad8-bb99-8762ab3e4aee/lansa-stack-type-win.cfn.template'
-    # Version 20
-    'master_w19d_eng_20' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/07bb8e79-19cf-4313-ad19-f2c8b7efa5d8/prod-7c4xdvxkskdfs/94ed0770-ed4e-45e0-8402-f256180b23ac/lansa-master-win.cfn.template'
-    'shoesize_w19d_eng_20' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/af510002-9567-483a-8c7b-85ce7efb8012/prod-7c4xdvxkskdfs/06d0c41f-372a-486c-a1b2-a2259a5f878e/lansa-stack-type-win.cfn.template'
-    'master_w19d_jpn_20' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/599d4836-0fa2-4393-a027-a42ed42a9a74/prod-csfkcd5qvncle/f162c4aa-278d-4e30-9619-570f4ed72fd5/lansa-master-win.cfn.template'
-    'shoesize_w19d_jpn_20' = 'https://awsmp-cft-992382380361-1708727387563.s3.us-east-1.amazonaws.com/f2708c67-8785-411d-86d5-73e7dcb15aac/prod-csfkcd5qvncle/04a665af-9919-4290-bc01-b9acca6f3275/lansa-stack-type-win.cfn.template'
+try {
+    # Set default region for Marketplace Catalog API
+    Set-DefaultAWSRegion -Region 'us-east-1'
 
-    # Additional key combinations can be added here as needed
-    # e.g., 'master_w25d_eng_19', 'shoesize_w25d_jpn_19', etc.
-}
+    # Get key components
+    $key1, $key2, $versionBase, $versionMinor, $versionDigits = Get-KeyComponents -Version $version
+    $fullVersion = "$versionBase.$versionMinor.$versionDigits"  # e.g., 15.0.20 or 15.0.19
 
-# Get key components
-$key1, $key2, $versionPrefix, $versionDigits = Get-KeyComponents -Version $version
-$key = "${templateType}_${key1}_${key2}_${versionDigits}"
+    # Find the matching product ID
+    $productKey = "$key1`-$versionBase`-$versionMinor$(if ($key2 -eq 'jpn') { 'j' })"
+    $productEntry = $productMapping | Where-Object { $_[0] -eq $productKey }
+    if (-not $productEntry) {
+        throw "No product ID found for version $version and language $key2"
+    }
+    $productId = $productEntry[1]
+    Write-Host "Fetching template URL for product: $productId (Version: $fullVersion, TemplateType: $templateType)"
 
-Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]False"
+    # Get product details
+    $entityResponse = Get-MCATEntity -Catalog 'AWSMarketplace' -EntityId $productId
+    if (-not $entityResponse) {
+        throw "Failed to retrieve entity for product $productId"
+    }
+    $entityResponse | Out-String | Write-Host  # Log the full response for debugging
 
-# Retrieve data from the lookup table
-if ($templateData.ContainsKey($key)) {
-    $url = $templateData[$key]
+    $productDetails = $entityResponse.Details | ConvertFrom-Json
+    if (-not $productDetails) {
+        throw "Failed to parse details for product $productId"
+    }
+
+    # Find the version matching fullVersion (e.g., 15.0.20)
+    $targetVersion = $productDetails.Versions | Where-Object { $_.VersionTitle -eq $fullVersion }
+    if (-not $targetVersion) {
+        throw "No version $fullVersion found for product $productId"
+    }
+    $targetVersion | Out-Default | Write-Host
+
+    # Find CloudFormation template in Sources
+    $templateName = if ($templateType -eq 'master') { 'lansa-master-win.cfn.template' } else { 'lansa-stack-type-win.cfn.template' }
+    $source = $targetVersion.Sources | Where-Object { $_.Template -like "*$templateName" }
+    if (-not $source) {
+        throw "No matching template ($templateName) found for product $productId, version $fullVersion"
+    }
+
+    $url = $source.Template
+    Write-Host "Template URL for $version $templateType = $url"
+
+    # Parse and set variables
     $data = Parse-TemplateUrl -Url $url
 
     # Construct variables
@@ -80,7 +106,7 @@ if ($templateData.ContainsKey($key)) {
     $MPS3BucketName = $data.BucketName
     $MPS3BucketRegion = $data.BucketRegion
     $MPS3KeyPrefix = $data.TemplateKeyPrefix
-    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$versionPrefix.$versionDigits"
+    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$fullVersion"
 
     # Set Azure DevOps variables
     Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]True"
@@ -89,9 +115,9 @@ if ($templateData.ContainsKey($key)) {
     Write-Host "##vso[task.setvariable variable=MPS3BucketRegion]$MPS3BucketRegion"
     Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
     Write-Host "##vso[task.setvariable variable=ImageId]$ImageId"
-
     Write-Host "##vso[task.setvariable variable=UserScriptHook]https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1"
-} else {
-    Write-Error "No data found for key: $key"
+} catch {
+    Write-Error "Error retrieving template URL: $_"
+    Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]False"
     throw
 }
