@@ -872,15 +872,9 @@ stages:
           timeoutInMinutes: 43200
           inputs:
             instructions: |
-              1. Manual step. Submit US AMIs to AWS MP. Upload the AMIs to AWS Markeplace.
-              a. In N. Virginia, find date that is in the name that all the AMIs of this release share
-              b. Go to AWS MP, Assets, AMI and Add AMI. Enter the date from the AMI Name.
-              c. select all the images. 8? Click Next and enter the Role : arn:aws:iam::775488040364:role/AWS-Marketplace-Ingestion
-              d. Click through, taking all the defaults
-              2. Manually update a copy of the Product Load Form (today's date in the name) with the US AMIs.
-              b. Pull the latest aws-templates support/scalable branch and check that all the AMis in the diff are in the PLF
-              3. Increment the Version Numbers in the Build Image Release Artefacts CI pipeline
-              4. Increment the VersionText-TemplateCI variable for the Template CI pipeline testing
+              The Marketplace product is updated as part of the AWS Publish Templates pipeline.
+              This stage is a manual intervention to allow time for the published Marketplace product to be updated & tested in Preview and Production.
+              After the Marketplace AWS Publish Templates pipeline has successfully completed, this pipeline may be resumed in order to tag the git repo appropriately
             onTimeout: 'reject'
 
 - stage: TagGit
