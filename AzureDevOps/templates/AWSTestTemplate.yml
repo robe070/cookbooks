@@ -148,6 +148,8 @@ stages:
     displayName: ${{ parameters.stageDisplayname }}
 
     variables:
+      - name: UserScriptHook
+        value: ''
       - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
         - name: japan_override
           value: '-Language $(jpnLanguage)'
