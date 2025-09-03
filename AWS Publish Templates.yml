@@ -356,7 +356,7 @@ stages:
         displayName: 'Add new version to Marketplace Products'
         inputs:
           awsCredentials: AzureDevOps
-          regionName: ${{ parameters.AwsRegion }}
+          regionName: 'us-east-1'
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/UpdateTemplatesInMarketplace.ps1'
           arguments: '-VersionDigits $(VersionDigits)'
 
