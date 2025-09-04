@@ -23,62 +23,65 @@ parameters:
 
 
 steps:
-        - download: _Build Image Release Artefacts
-          displayName: Download artifacts from Build Image Release Artefacts 3.0
-          condition: ${{ parameters.downloadImageArtefacts }}
+  - checkout: self
 
-        - checkout: self
+  - powershell: |
+      Write-Host "Clearing out Artefact directory..."
+      Remove-Item -Path "$(Pipeline.Workspace)/_Build Image Release Artefacts" -Recurse -Force -ErrorAction Continue
 
-        - powershell: |
-            Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
-            Set-Location -Path "$(Pipeline.Workspace)"
+      Write-Host "Deleting existing secondary repositories from $(Pipeline.Workspace)..."
+      Set-Location -Path "$(Pipeline.Workspace)"
 
-            $dirsToDelete = @('_robe070_cookbooks')
+      $dirsToDelete = @('_robe070_cookbooks')
 
-            if ('${{ parameters.checkoutTemplateRepo }}' -eq 'True') {
-                $dirsToDelete += '_lansa_aws-templates'
-            }
+      if ('${{ parameters.checkoutTemplateRepo }}' -eq 'True') {
+          $dirsToDelete += '_lansa_aws-templates'
+      }
 
-            if ('${{ parameters.checkoutTemplateMPRepo }}' -eq 'True') {
-                $dirsToDelete += '_lansa_aws-templates-mp'
-            }
+      if ('${{ parameters.checkoutTemplateMPRepo }}' -eq 'True') {
+          $dirsToDelete += '_lansa_aws-templates-mp'
+      }
 
-            Write-Host("Directories to delete: $($dirsToDelete -join ', ')")
-            foreach ($dir in $dirsToDelete) {
-                if (Test-Path $dir) {
-                    Write-Host "Removing $dir"
-                    Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
-                } else {
-                    Write-Host "Directory $dir not found, skipping."
-                }
-            }
-            Write-Host "Existing secondary repositories deleted."
-          displayName: 'Delete secondary repositories'
+      Write-Host("Directories to delete: $($dirsToDelete -join ', ')")
+      foreach ($dir in $dirsToDelete) {
+          if (Test-Path $dir) {
+              Write-Host "Removing $dir"
+              Remove-Item -Path $dir -Recurse -Force -ErrorAction Continue
+          } else {
+              Write-Host "Directory $dir not found, skipping."
+          }
+      }
+      Write-Host "Existing secondary repositories deleted."
+    displayName: 'Delete secondary repositories'
 
-        - checkout: _lansa_aws-templates
-          displayName: Checkout Lansa AWS Templates
-          path: _lansa_aws-templates
-          condition: ${{ parameters.checkoutTemplateRepo }}
+  - download: _Build Image Release Artefacts
+    displayName: Download artifacts from Build Image Release Artefacts 3.0
+    condition: ${{ parameters.downloadImageArtefacts }}
 
-        - checkout: _lansa_aws-templates-mp
-          displayName: Checkout Lansa AWS Marketplace Templates
-          path: _lansa_aws-templates-mp
-          condition: ${{ parameters.checkoutTemplateMPRepo }}
+  - checkout: _lansa_aws-templates
+    displayName: Checkout Lansa AWS Templates
+    path: _lansa_aws-templates
+    condition: ${{ parameters.checkoutTemplateRepo }}
 
-        - checkout: _robe070_cookbooks
-          displayName: Checkout Rob cookbooks
-          path: _robe070_cookbooks
+  - checkout: _lansa_aws-templates-mp
+    displayName: Checkout Lansa AWS Marketplace Templates
+    path: _lansa_aws-templates-mp
+    condition: ${{ parameters.checkoutTemplateMPRepo }}
 
-        - task: PowerShell@2
-          condition: eq('${{ parameters.gitRepoWriteAccess }}', true)
-          displayName: 'Write access to Git Repo (lansa/aws-templates)'
-          inputs:
-            targetType: filePath
-            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-            arguments:
-              -GitBranch '${{ parameters.gitRepoBranch }}'
-              -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@${{ parameters.gitHubName }}'
-              -GitUserEmail '$(GitRepoUserEmail)'
-              -GitUserName '$(GitRepoUserName)'
-              -GitRepoPath '${{ parameters.gitRepoPath }}'
+  - checkout: _robe070_cookbooks
+    displayName: Checkout Rob cookbooks
+    path: _robe070_cookbooks
+
+  - task: PowerShell@2
+    condition: eq('${{ parameters.gitRepoWriteAccess }}', true)
+    displayName: 'Write access to Git Repo (lansa/aws-templates)'
+    inputs:
+      targetType: filePath
+      filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
+      arguments:
+        -GitBranch '${{ parameters.gitRepoBranch }}'
+        -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@${{ parameters.gitHubName }}'
+        -GitUserEmail '$(GitRepoUserEmail)'
+        -GitUserName '$(GitRepoUserName)'
+        -GitRepoPath '${{ parameters.gitRepoPath }}'
 
