@@ -142,6 +142,10 @@ stages:
   - stage: ${{ parameters.stageName }}
     dependsOn:
       - Init
+        # Production and Preview deployments always depend on the AddVersionToMarketplace stage so that the variables it sets can be used.
+      - ${{ if or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}:
+        - AddVersionToMarketplace
+
       - ${{ if ne(parameters.dependsOn, '') }}:
         - ${{ parameters.dependsOn }}
 
@@ -150,6 +154,9 @@ stages:
     variables:
       - name: UserScriptHook
         value: ''
+      - ${{ if or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}:
+        - name: MarketPlaceUpdateInterventionRequired
+          value: $[stageDependencies.AddVersionToMarketplace.AddVersion.outputs['vars.MarketPlaceUpdateInterventionRequired']]
       - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
         - name: japan_override
           value: '-Language $(jpnLanguage)'
@@ -176,6 +183,7 @@ stages:
         timeoutInMinutes: 0
         pool:
           name: ${{ parameters.vmImage }}
+        condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
 
         variables:
           - name: StackName
