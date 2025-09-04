@@ -338,7 +338,7 @@ stages:
       parameters:
         isImageType: EITHER
   jobs:
-  - job: Job_1
+  - job: AddVersion
     displayName: Add Version To Marketplace
     pool:
       name: $(agentVMImage)
@@ -354,6 +354,7 @@ stages:
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Add new version to Marketplace Products'
+        name: vars
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
@@ -363,12 +364,16 @@ stages:
 - stage: SubmittoAWSAndWaitforPreview
   displayName: 'Possible build failure - Version already exists'
   dependsOn: AddVersionToMarketplace
-  condition: and(succeeded(), eq(variables.manualMPUpdateRequired, 'True')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
+  variables:
+  - name: MarketPlaceUpdateInterventionRequired
+    value: $[stageDependencies.AddVersionToMarketplace.AddVersion.outputs['vars.MarketPlaceUpdateInterventionRequired']]
+
   jobs:
   - job: 'Job_1'
-    displayName: 'Agentless Job'
+    displayName: 'Check why the Version already exists'
     pool: server
     timeoutInMinutes: 43200
+    condition: and(succeeded(), ne(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
     steps:
     - task: ManualValidation@1
       displayName: 'Version already exists - New Version must be created'
@@ -380,12 +385,16 @@ stages:
 - stage: CheckTemplatesAndAMIHaveBeenUpdatedInAWSMP
   displayName: 'Check templates and AMI have been updated in AWS MP'
   dependsOn: AddVersionToMarketplace
-  condition: and(succeeded(), ne(variables.manualMPUpdateRequired, 'True')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
+  variables:
+  - name: MarketPlaceUpdateInterventionRequired
+    value: $[stageDependencies.AddVersionToMarketplace.AddVersion.outputs['vars.MarketPlaceUpdateInterventionRequired']]
+
   jobs:
   - job: 'Job_1'
-    displayName: 'Agentless Job'
+    displayName: 'Check templates and AMI have been updated in AWS MP'
     pool: server
     timeoutInMinutes: 43200
+    condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
     steps:
     - task: ManualValidation@1
       displayName: 'Manual Intervention : Check MP templates and AMI'
