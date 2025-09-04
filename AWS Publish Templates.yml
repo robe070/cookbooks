@@ -361,7 +361,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/UpdateTemplatesInMarketplace.ps1'
           arguments: '-VersionDigits $(VersionDigits)'
 
-- stage: SubmittoAWSAndWaitforPreview
+- stage: VersionAlreadyExists
   displayName: 'Possible build failure - Version already exists'
   dependsOn: AddVersionToMarketplace
   variables:
@@ -381,6 +381,8 @@ stages:
       inputs:
         instructions: |
           The version already exists. Is this expected? If either the AMI or the templates have been updated, VersionDigits MUST BE INCREMENTED in Build Image Release Artefacts pipeline and all appropriate pipelines re-run. That is, a NEW VERSION is required in order to update the AMI or templates. This is only usually OK when the pipeline itself has been modified but no changes have been made to the AMI or templates.
+          1. If a new version is required, REJECT this Task and re-run the Build Image Release Artefacts pipeline with an incremented VersionDigits variable. Then re-run this pipeline.
+          2. If this is expected, click RESUME on this Task.
 
 - stage: CheckTemplatesAndAMIHaveBeenUpdatedInAWSMP
   displayName: 'Check templates and AMI have been updated in AWS MP'
@@ -401,13 +403,12 @@ stages:
       timeoutInMinutes: 43200
       inputs:
         instructions: |
-          Submit artefacts to AWS
           1. Check that the templates have been uploaded at a time consistent with when the pipeline ran. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable.
-          2. Check that a new Version ending in $(VersionDigits) has been added to each Marketplace product
+          2. Check that a new Version ending in the appropriate VersionDigits has been added to each Marketplace product
              - Go to https://aws.amazon.com/marketplace/management/products/server?#
              - Click on the product
              - List the requests and check the last version added for each product ends with the correct digits and the AMI ID is the expected one. The expected AMI ID can be found in the output of the Init stage of this pipeline.
-          3. If the version has been added and the AMI ID is correct, for all products built by the Build Image Release Artefacts pipeline, then click Resume on this pipeline.
+          3. If the version has been added and the AMI ID is correct, for all products built by the Build Image Release Artefacts pipeline, then click RESUME on this Task. Otherwise REJECT this Task.
           4. Note that any changes to the templates or AMIs will require a new version to be created using the Build Image Release Artefacts pipeline.
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml

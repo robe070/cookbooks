@@ -145,6 +145,8 @@ stages:
         # Production and Preview deployments always depend on the AddVersionToMarketplace stage so that the variables it sets can be used.
       - ${{ if and(or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')), ne(parameters.stageName, 'ValidateTemplateURLs')) }}:
         - AddVersionToMarketplace
+        - VersionAlreadyExists
+        # also dependent on the stage CheckTemplatesAndAMIHaveBeenUpdatedInAWSMP but that is passed in as a template parameter 'dependsOn'
 
       - ${{ if ne(parameters.dependsOn, '') }}:
         - ${{ parameters.dependsOn }}
@@ -183,7 +185,7 @@ stages:
         timeoutInMinutes: 0
         pool:
           name: ${{ parameters.vmImage }}
-        condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
+        # condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
 
         variables:
           - name: StackName
