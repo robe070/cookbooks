@@ -1,0 +1,14 @@
+variables:
+  - group: Agents
+
+stages:
+- stage: StopVMs
+  displayName: Stop VMs
+
+  jobs:
+  - template: AzureDevOps/templates/stop-agents.yml
+    parameters:
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'
