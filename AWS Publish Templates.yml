@@ -830,6 +830,7 @@ stages:
 
 - stage: StopVMs
   displayName: Stop VMs
+  condition: false
   dependsOn:
     - StockholmProd_w25d_16_0
     - IrelandProd_w25d_15_0
@@ -842,7 +843,6 @@ stages:
 
   jobs:
   - template: AzureDevOps/templates/stop-agents.yml
-    condition: false
     parameters:
       resourceGroup: $(agentResourceGroup)
       baseVmName: $(agentBaseVmName)
