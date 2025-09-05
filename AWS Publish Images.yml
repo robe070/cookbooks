@@ -920,7 +920,6 @@ stages:
 
   jobs:
   - template: AzureDevOps/templates/stop-agents.yml
-    condition: false
     parameters:
       dependson: TagGit
       resourceGroup: $(agentResourceGroup)
