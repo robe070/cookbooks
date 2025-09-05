@@ -913,6 +913,7 @@ stages:
               -Tags 'AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)' # Note: The value of $(Version) comes from anyone of the Gate.VersionDigits variables. See dependencies for clarification.
 
     - template: AzureDevOps/templates/stop-agents.yml
+      condition: false
       parameters:
         dependson: TagGit
         resourceGroup: $(agentResourceGroup)

@@ -842,6 +842,7 @@ stages:
 
   jobs:
   - template: AzureDevOps/templates/stop-agents.yml
+    condition: false
     parameters:
       resourceGroup: $(agentResourceGroup)
       baseVmName: $(agentBaseVmName)
