@@ -912,11 +912,18 @@ stages:
               -GitRepoName '$(CookbooksSourceAlias)'
               -Tags 'AWSImage-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)' # Note: The value of $(Version) comes from anyone of the Gate.VersionDigits variables. See dependencies for clarification.
 
-    - template: AzureDevOps/templates/stop-agents.yml
-      condition: false
-      parameters:
-        dependson: TagGit
-        resourceGroup: $(agentResourceGroup)
-        baseVmName: $(agentBaseVmName)
-        vmCount: 12
-        azureSubscription: 'Azure Baking Images'
+- stage: StopVMs
+  displayName: Stop VMs
+  condition: false
+  dependsOn:
+    - TagGit
+
+  jobs:
+  - template: AzureDevOps/templates/stop-agents.yml
+    condition: false
+    parameters:
+      dependson: TagGit
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'
