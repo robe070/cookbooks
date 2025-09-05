@@ -915,8 +915,6 @@ stages:
 - stage: StopVMs
   displayName: Stop VMs
   condition: false
-  dependsOn:
-    - TagGit
 
   jobs:
   - template: AzureDevOps/templates/stop-agents.yml
