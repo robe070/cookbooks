@@ -352,7 +352,7 @@ stages:
           checkoutTemplateRepo: false
           checkoutTemplateMPRepo: true
 
-      - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Download@1
+      - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'Download all AMI Files from S3'
         inputs:
           # All files are downloaded from S3
