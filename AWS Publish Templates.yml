@@ -340,6 +340,7 @@ stages:
   jobs:
   - job: AddVersion
     displayName: Add Version To Marketplace
+    timeoutInMinutes: 0
     pool:
       name: $(agentVMImage)
     steps:
@@ -382,12 +383,12 @@ stages:
   - job: 'Job_1'
     displayName: 'Check why the Version already exists'
     pool: server
-    timeoutInMinutes: 43200
+    timeoutInMinutes: 0
     condition: and(succeeded(), ne(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
     steps:
     - task: ManualValidation@1
       displayName: 'Version already exists - New Version must be created'
-      timeoutInMinutes: 43200
+      timeoutInMinutes: 0
       inputs:
         instructions: |
           The AddVersionToMarketplace Stage has failed. Possibly due to the version already existing. Is this expected? If either the AMI or the templates have been updated, VersionDigits MUST BE INCREMENTED in Build Image Release Artefacts pipeline and all appropriate pipelines re-run. That is, a NEW VERSION is required in order to update the AMI or templates. This is only usually OK when the pipeline itself has been modified but no changes have been made to the AMI or templates.
@@ -405,12 +406,12 @@ stages:
   - job: 'Job_1'
     displayName: 'Check templates and AMI have been updated in AWS MP'
     pool: server
-    timeoutInMinutes: 43200
+    timeoutInMinutes: 0
     condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
     steps:
     - task: ManualValidation@1
       displayName: 'Manual Intervention : Check MP templates and AMI'
-      timeoutInMinutes: 43200
+      timeoutInMinutes: 0
       inputs:
         instructions: |
           1. Check that the templates have been uploaded at a time consistent with when the pipeline ran. https://lansa.s3.ap-southeast-2.amazonaws.com/templates/support/scalable.
