@@ -348,7 +348,7 @@ stages:
           gitRepoBranch: $(GitLansaAwsTemplatesMarketPlaceBranch)
           gitHubName: $(GitLansaAwsTemplatesGitHubName)
           gitRepoPath: $(GitLansaAwsTemplatesRepoName)
-          downloadImageArtefacts: true
+          downloadImageArtefacts: false
           checkoutTemplateRepo: false
           checkoutTemplateMPRepo: true
 
@@ -390,8 +390,8 @@ stages:
       timeoutInMinutes: 43200
       inputs:
         instructions: |
-          The version already exists. Is this expected? If either the AMI or the templates have been updated, VersionDigits MUST BE INCREMENTED in Build Image Release Artefacts pipeline and all appropriate pipelines re-run. That is, a NEW VERSION is required in order to update the AMI or templates. This is only usually OK when the pipeline itself has been modified but no changes have been made to the AMI or templates.
-          1. If a new version is required, REJECT this Task and re-run the Build Image Release Artefacts pipeline with an incremented VersionDigits variable. Then re-run this pipeline.
+          The AddVersionToMarketplace Stage has failed. Possibly due to the version already existing. Is this expected? If either the AMI or the templates have been updated, VersionDigits MUST BE INCREMENTED in Build Image Release Artefacts pipeline and all appropriate pipelines re-run. That is, a NEW VERSION is required in order to update the AMI or templates. This is only usually OK when the pipeline itself has been modified but no changes have been made to the AMI or templates.
+          1. If a new version is required, REJECT this Task and re-run the Build Image Release Artefacts pipeline with an incremented VersionDigits variable. Then re-run the AWS Publish Images pipeline. Then re-run this pipeline.
           2. If this is expected, click RESUME on this Task.
 
 - stage: CheckTemplatesAndAMIHaveBeenUpdatedInAWSMP
