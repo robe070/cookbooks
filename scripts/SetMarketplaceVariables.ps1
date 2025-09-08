@@ -12,9 +12,13 @@ param (
 )
 
 # Product mapping with live product IDs
+# Note: this table is also in AWSTemplates/scripts/UpdateTemplatesInMarketplace.ps1
+# Keep both copies in sync
 $productMapping = @(
     @('w19d-15-0', 'prod-7c4xdvxkskdfs'),  # English
-    @('w19d-15-0j', 'prod-csfkcd5qvncle')   # Japanese
+    @('w19d-15-0j', 'prod-csfkcd5qvncle'),   # Japanese
+    @('w19d-16-0', 'prod-7c4xdvxkskdfs'),  # English
+    @('w19d-16-0j', 'prod-csfkcd5qvncle')   # Japanese
 )
 
 # Function to derive key components from version
