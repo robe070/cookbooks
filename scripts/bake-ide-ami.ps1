@@ -351,14 +351,14 @@ try
         # New-EC2Tag -Resources $Script:Imageid -Tags @{ Key = "BakeVersion" ; Value = $VersionText} | Out-Default
 
 
-    } elseif ($Cloud -eq 'Azure' ) {
+    } elseif ($Cloud -eq 'Azure') {
         $Location = "Australia East"
 
         if ($AzureImage) {
             Write-Host( "$(Log-Date) Using non-Microsoft MP image")
             $Publisher = $AzureImage.Publisher
             $Offer = $AzureImage.Offer
-            $AmazonAMIName = $AzureIMage.SKU
+            $AmazonAMIName = $AzureImage.SKU
             $AzImageVersion = $AzureImage.Version
         } elseif ($AzureImageUri) {
             Write-Host( "$(Log-Date) Using Image Uri $AzureImageUri")
@@ -375,30 +375,30 @@ try
             }
         }
 
-        if ( -not $AzureImageUri ) {
-            $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version )
+        if (-not $AzureImageUri) {
+            $ImageObj = @(Get-AzVMImage -Location $Location -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version $AzImageVersion | Sort-Object -Descending Version)
 
-            if ( $imageObj ) {
-                $imageObj[0] | format-list * | Out-Default | Write-Host
+            if ($ImageObj) {
+                $ImageObj[0] | Format-List * | Out-Default | Write-Host
             } else {
-                throw "Image not found"  | Out-Default | Write-Host
+                throw "Image not found" | Out-Default | Write-Host
             }
         }
 
-        # used for KeyVault and the images
+        # Used for KeyVault and the images
         $KeyVaultResourceGroup = "BakingDP"
         $ImageResourceGroup = $KeyVaultResourceGroup
-        $StorageAccountName = 'stagingdpauseast'
+        $StorageAccountName = 'stagingdpauseast' # Still needed for other operations (e.g., file uploads)
         $StorageAccountResourceGroup = $ImageResourceGroup
-        $StorageContainer = "vhds"
+        $StorageContainer = "vhds" # Not needed for managed disks but retained for compatibility
 
-        # use a separate resource group for the VM for easier deletion
+        # Use a separate resource group for the VM for easier deletion
         $VmResourceGroup = "BakingDP-$VersionText"
 
         Write-Host("Create the resource group $VmResourceGroup")
         New-AzResourceGroup -Name $VmResourceGroup -Location $Location -Verbose -Force -ErrorAction Stop | Out-Default | Write-Host
 
-        # Create and use the Storage Account in the VM Resource Group
+        # Create or update the storage account if AtomicBuild is specified (for other operations)
         if ($AtomicBuild) {
             # Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
             $StorageAccountName = ("stagingdp$VersionText" -replace "\W").ToLower()
@@ -416,51 +416,30 @@ try
 
         Write-Host "$(Log-Date) Delete image if it already exists. Note that if the image is being used it cannot be deleted, not even forced"
         $ImageName = "$($VersionText)image"
-        Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage  -Force -ErrorAction Stop | Out-Default | Write-Host
+        Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction Stop | Out-Default | Write-Host
 
-        $vmsize="Standard_B4ms"
+        $vmsize = "Standard_B4ms"
         $Script:password = "Pcxuser@122"
         $AdminUserName = "lansa"
         $Script:vmname = $VersionText
         $publicDNSName = "bakingpublicdnsDP-$($Script:vmname)"
 
-        if ( $CreateVM -and -not $OnlySaveImage) {
+        if ($CreateVM -and -not $OnlySaveImage) {
             Write-Host "$(Log-Date) Delete VM if it already exists"
-
             $VerbosePreference = "SilentlyContinue"
-
             . "$script:IncludeDir\Remove-AzrVirtualMachine.ps1"
             Remove-AzrVirtualMachine -Name $Script:vmname -ResourceGroupName $VmResourceGroup -Wait
-
-            # Add code to remove the .VHD Blob if exists from the Storage Container
-            $StorageAccountObject = Get-AzStorageAccount -ResourceGroupName $StorageAccountResourceGroup -Name $StorageAccountName
-
             $VerbosePreference = "Continue"
-
-            Write-Host "Remove Blob if exists: $Script:vmname.vhd from the Container $StorageContainer in $StorageAccountResourceGroup/$StorageAccountName" | Out-Default
-
-            $VerbosePreference = "SilentlyContinue"
-
-            if ($StorageAccountObject | Get-AzStorageBlob -Container $StorageContainer | where-object {$_.Name -eq "$Script:vmname.vhd"}) {
-                Write-Host "Deleting the Blob $Script:vmname.vhd" | Out-Default
-                $StorageAccountObject | Remove-AzStorageBlob -Blob "$Script:vmname.vhd" -Container $StorageContainer | Out-Default | Write-Host
-                Write-Host "Deleted the Blob $Script:vmname.vhd successfully" | Out-Default
-            } else {
-                Write-Host "The Blob $Script:vmname.vhd doesn't exists" | Out-Default
-            }
-            $VerbosePreference = "Continue"
-
         }
 
         Write-Host "$(Log-Date) Create VM"
         $SecurePassword = ConvertTo-SecureString $Script:password -AsPlainText -Force
-        $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword);
+        $Credential = New-Object System.Management.Automation.PSCredential ($AdminUserName, $SecurePassword)
 
         $NicName = "bakingNic-$($Script:vmname)"
         $nic = Get-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -ErrorAction SilentlyContinue
-        if ( $null -eq $nic ) {
+        if ($null -eq $nic) {
             Write-Host "$(Log-Date) Create NIC"
-
             $AzVirtualNetworkSubnetConfigName = "bakingSubnet-$($Script:vmname)"
             $AzVirtualNetworkName = "bakingvNET-$($Script:vmname)"
             $AzNetworkSecurityGroupRuleRDPName = "RDPRule-$($Script:vmname)"
@@ -514,87 +493,73 @@ try
 
         $KeyVault = "bakingVaultDP"
         $certificateName = "bakingWinRMCertificate"
-
         $VerbosePreference = "SilentlyContinue"
-
         $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName
-
         $VerbosePreference = "Continue"
 
-        if ( $secret ) {
-            $SecretURL = $secret.id
+        if ($secret) {
+            $SecretURL = $secret.Id
         } else {
             Write-Host "$(Log-Date) Create WinRM Certificate"
-
             $thumbprint = (New-SelfSignedCertificate -DnsName $certificateName -CertStoreLocation Cert:\CurrentUser\My -KeySpec KeyExchange).Thumbprint
-
             $cert = (Get-ChildItem -Path cert:\CurrentUser\My\$thumbprint)
-
             $fileName = ".\$certificateName.pfx"
             Export-PfxCertificate -Cert $cert -FilePath $fileName -Password $SecurePassword
-
             $fileContentBytes = Get-Content $fileName -Encoding Byte
             $fileContentEncoded = [System.Convert]::ToBase64String($fileContentBytes)
 
 $jsonObject = @"
 {
-"data" : "$filecontentencoded",
+"data" : "$fileContentEncoded",
 "dataType" :"pfx",
 "password": "$Script:password"
 }
 "@
-
             $jsonObjectBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonObject)
             $jsonEncoded = [System.Convert]::ToBase64String($jsonObjectBytes)
-
-            $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText –Force
-            $secretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
+            $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText -Force
+            $SecretURL = (Set-AzKeyVaultSecret -VaultName $KeyVault -Name $certificateName -SecretValue $secret).Id
         }
 
-        $vmSecretUrls = @();
-        if (-Not $CloudAccountLicense) {
-            # 163204: Gets the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) from Azure Vault
-            $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey");
+        $vmSecretUrls = @()
+        if (-not $CloudAccountLicense) {
+            $vmSecrets = @("IntegratorLicensePrivateKey", "ScalableLicensePrivateKey")
             foreach ($vmCertificateName in $vmSecrets) {
                 $secret = Get-AzKeyVaultSecret -VaultName $KeyVault -Name $vmCertificateName
-                if ( $secret ) {
-                    # Write to a file
+                if ($secret) {
                     Write-Host "$(Log-Date) Found the secret for $vmCertificateName Certificate"
-                    $vmSecretUrls += $secret.id;
+                    $vmSecretUrls += $secret.Id
                 } else {
-                    throw 'Certificate $vmCertificateName not found in the Key Vault $KeyVault'
+                    throw "Certificate $vmCertificateName not found in the Key Vault $KeyVault"
                 }
             }
         }
 
-        if ( $CreateVM -and -not $OnlySaveImage) {
+        if ($CreateVM -and -not $OnlySaveImage) {
             $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $KeyVaultResourceGroup -VaultName $KeyVault).ResourceId
-
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
-            $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $vmName -Credential $credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
-            if ( $AzureImageUri ) {
-                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows
+            $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
+            if ($AzureImageUri) {
+                # For custom images, use managed disk with source image URI
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -ManagedDisk
             } else {
+                # For marketplace images, use managed disk
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
-                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -VhdUri "https://$($StorageAccountName).blob.core.windows.net/$StorageContainer/$($Script:vmname).vhd" -CreateOption FromImage
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -ManagedDisk
             }
-
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
-            $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $secretURL
-
-            # 163204: Adds the secrets (IntegratorLicensePrivateKey, ScalableLicensePrivateKey) to VM
+            $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $SecretURL
             foreach ($vmSecret in $vmSecretUrls) {
                 $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $vmSecret
             }
 
             try {
-                New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                New-AzVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
             } catch {
                 Write-YellowOutput $_ | Out-Default | Write-Host
                 if ($_.Exception.Message -contains "OS Provisioning") {
-                    Write-Host "Retrying the New-AZVM command for OSProvisioningTimedOut"
-                    # Retry the New-AZVM operation
-                    New-AZVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
+                    Write-Host "Retrying the New-AzVM command for OSProvisioningTimedOut"
+                    New-AzVM -ResourceGroupName $VmResourceGroup -VM $vm1 -Verbose -Location $Location -ErrorAction Stop
                 } else {
                     throw $_.Exception
                 }
@@ -602,8 +567,7 @@ $jsonObject = @"
         }
 
         $ipAddress = Get-AzPublicIpAddress -Name $publicDNSName
-        # $uri = $ipAddress.IpAddress
-        $Script:publicDNS =  $ipAddress.IpAddress
+        $Script:publicDNS = $ipAddress.IpAddress
     }
 
     # Remote PowerShell
@@ -1151,9 +1115,7 @@ $jsonObject = @"
 
     # Sysprep will stop the Instance
 
-    Write-Host( "$(Log-Date) Wait for the instance state to be stopped...")
-
-    if ( $Cloud -eq 'Azure' ) {
+    if ($Cloud -eq 'Azure') {
         Wait-AzureVMState $VmResourceGroup $Script:vmname "not running"
 
         # There was a defect whereby the registry state of the image ended up as IMAGE_STATE_COMPLETE.
@@ -1182,23 +1144,18 @@ $jsonObject = @"
         }
 
         Write-Host "$(Log-Date) Starting Azure Image Creation"
-
-      #   Write-Host "$(Log-Date) Delete image if it already exists. Note that if the image is being used it cannot be deleted, not even forced"
-      #   $ImageName = "$($VersionText)image"
-      #   Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction SilentlyContinue | Remove-AzImage -Force -ErrorAction Stop | Out-Default | Write-Host
-
         Write-Host "$(Log-Date) Terminating VM..."
         Stop-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Force | Out-Default | Write-Host
 
         Write-Host "$(Log-Date) Creating Actual Image..."
         Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
         $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
-        $image = New-AzImageConfig -Location $location -SourceVirtualMachineId $vm.Id
-
+        $image = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id
         New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
 
-        Write-Host "$(Log-Date) Obtaining signed url for submission to Azure Marketplace"
-        .$script:IncludeDir\get-azure-sas-token.ps1 -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup | Out-Default | Write-Host
+        Write-Host "$(Log-Date) Obtaining signed URL for submission to Azure Marketplace"
+        . "$script:IncludeDir\get-azure-sas-token.ps1" -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup | Out-Default | Write-Host
+
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
