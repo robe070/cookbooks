@@ -1118,12 +1118,6 @@ $jsonObject = @"
     if ($Cloud -eq 'Azure') {
         Wait-AzureVMState $VmResourceGroup $Script:vmname "not running"
 
-        # There was a defect whereby the registry state of the image ended up as IMAGE_STATE_COMPLETE.
-        # It should be IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE.
-        # And this value should be in the registry HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\State).ImageState
-        # and in the file state.ini
-        # This was presumed to be caused by terminating the VM too soon. The fact Azure reports it is not running is not sufficient.
-        # Must wait until its not possible to invoke a command on the VM
         try {
             while ($true) {
                 Write-Host "$(Log-Date) (from Host) Waiting for VM to be fully stopped..."
@@ -1133,7 +1127,6 @@ $jsonObject = @"
                 }
             }
         } catch {
-            # A failure to execute the log message on the VM is presumed to indicate that the VM is fully stopped and the image may be taken.
             Write-Host "$(Log-Date) VM has fully stopped"
         }
 
@@ -1147,16 +1140,65 @@ $jsonObject = @"
         Write-Host "$(Log-Date) Terminating VM..."
         Stop-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Force | Out-Default | Write-Host
 
-        Write-Host "$(Log-Date) Creating Actual Image..."
+        Write-Host "$(Log-Date) Creating Managed Image..."
         Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
         $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
-        $image = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id
-        New-AzImage -ResourceGroupName $ImageResourceGroup -Image $image -ImageName $ImageName | Out-Default | Write-Host
+        $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id
+        $image = New-AzImage -ResourceGroupName $ImageResourceGroup -Image $imageConfig -ImageName $ImageName | Out-Default | Write-Host
 
-        Write-Host "$(Log-Date) Obtaining signed URL for submission to Azure Marketplace"
-        . "$script:IncludeDir\get-azure-sas-token.ps1" -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup | Out-Default | Write-Host
+        # Add image to Azure Compute Gallery
+        Write-Host "$(Log-Date) Adding image to Azure Compute Gallery..."
+        $galleryName = "LansaGallery"
+        $galleryImageDefinitionName = $ImageName # Use same name as managed image for simplicity
+        $galleryImageVersion = $VersionText # Use VersionText for versioning (e.g., 1.0.0)
 
+        # Create or get the gallery
+        $gallery = Get-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -ErrorAction SilentlyContinue
+        if (-not $gallery) {
+            Write-Host "$(Log-Date) Creating new gallery $galleryName in $ImageResourceGroup..."
+            $gallery = New-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -Location $Location -ErrorAction Stop
+        }
 
+        # Create or update image definition
+        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageDefinitionName -ErrorAction SilentlyContinue
+        if (-not $imageDefinition) {
+            Write-Host "$(Log-Date) Creating image definition $galleryImageDefinitionName..."
+            $imageDefinitionParams = @{
+                ResourceGroupName          = $ImageResourceGroup
+                GalleryName                = $galleryName
+                GalleryImageDefinitionName = $galleryImageDefinitionName
+                Location                   = $Location
+                OsType                     = 'Windows'
+                OsState                    = 'Generalized'
+                Publisher                  = 'LANSA'
+                Offer                      = 'LANSA-IDE'
+                Sku                        = $AmazonAMIName # Reuse SKU from Marketplace image
+                HyperVGeneration           = 'V2' # Adjust to V1 if using older VM generations
+            }
+            $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
+        }
+
+        # Create image version
+        Write-Host "$(Log-Date) Creating image version $galleryImageVersion..."
+        $region = @{Name = $Location; ReplicaCount = 1}
+        $imageVersionParams = @{
+            ResourceGroupName          = $ImageResourceGroup
+            GalleryName                = $galleryName
+            GalleryImageDefinitionName = $galleryImageDefinitionName
+            GalleryImageVersionName    = $galleryImageVersion
+            Location                   = $Location
+            SourceImageId              = $image.Id
+            PublishingProfile          = @{
+                TargetRegions = @($region)
+            }
+        }
+        $imageVersion = New-AzGalleryImageVersion @imageVersionParams -ErrorAction Stop
+
+        Write-Host "$(Log-Date) Image version $galleryImageVersion created in gallery $galleryName with Resource ID: $($imageVersion.Id)"
+
+        Write-Host "$(Log-Date) Obtaining access for Azure Marketplace submission..."
+        . "$script:IncludeDir\get-azure-sas-token.ps1" -ResourceGroupName $ImageResourceGroup -ImageName $galleryImageDefinitionName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup -GalleryName $galleryName -GalleryImageVersion $galleryImageVersion | Out-Default | Write-Host
+        
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
 
