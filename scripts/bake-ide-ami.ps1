@@ -541,11 +541,11 @@ $jsonObject = @"
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
             if ($AzureImageUri) {
                 # For custom images, use managed disk with source image URI
-                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -ManagedDisk
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -StorageAccountType "StandardSSD_LRS"
             } else {
                 # For marketplace images, use managed disk
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
-                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -ManagedDisk
+                $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -Windows -StorageAccountType "StandardSSD_LRS"
             }
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $SecretURL
