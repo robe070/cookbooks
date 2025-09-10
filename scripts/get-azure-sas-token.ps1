@@ -29,15 +29,17 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $GalleryName, # Optional for gallery image version
+    $GalleryName="LansaGallery", # Optional for gallery image version
 
     [Parameter(Mandatory=$false)]
     [string]
-    $GalleryImageVersion # Optional for gallery image version
+    $GalleryImageVersion="16.0.0" # Optional for gallery image version
 )
 
 #Requires -RunAsAdministrator
-#Requires -Modules Az.Compute, Az.Authorization
+#Requires -Modules Az.Compute
+
+Write-Host("ResourceGroupName=$ResourceGroupName, ImageName=$ImageName, GalleryName=$GalleryName, GalleryImageVersion=$GalleryImageVersion" )
 
 try {
     Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Configuring access for image $ImageName in resource group $ResourceGroupName"
@@ -74,7 +76,7 @@ try {
             $sp.ObjectId = $spObject.Id
             Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Found service principal $($sp.Name) with Object ID: $($sp.ObjectId)"
         } else {
-            Write-Warning "Service principal $($sp.Name) not found in your tenant. Contact Azure Marketplace support for the correct Object ID."
+            Write-Error "Service principal $($sp.Name) not found in your tenant. Contact Azure Marketplace support for the correct Object ID."
         }
     }
 

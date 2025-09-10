@@ -547,6 +547,7 @@ $jsonObject = @"
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
                 $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -Windows -StorageAccountType "StandardSSD_LRS"
             }
+            
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $SecretURL
             foreach ($vmSecret in $vmSecretUrls) {
@@ -1143,62 +1144,72 @@ $jsonObject = @"
         Write-Host "$(Log-Date) Creating Managed Image..."
         Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
         $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
-        $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id
+        $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id -HyperVGeneration V2
         $image = New-AzImage -ResourceGroupName $ImageResourceGroup -Image $imageConfig -ImageName $ImageName | Out-Default | Write-Host
 
         # Add image to Azure Compute Gallery
-        Write-Host "$(Log-Date) Adding image to Azure Compute Gallery..."
-        $galleryName = "LansaGallery"
-        $galleryImageDefinitionName = $ImageName # Use same name as managed image for simplicity
-        $galleryImageVersion = $VersionText # Use VersionText for versioning (e.g., 1.0.0)
+        Write-Host "$(Log-Date) Adding image $ImageName to Azure Compute Gallery $GalleryName in resource group $ResourceGroupName"
+
+        $GalleryName = "LansaGallery"
+        $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
+        $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
+        $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
+
+        # Get the managed image
+        $image = Get-AzImage -ResourceGroupName $ResourceGroupName -ImageName $ImageName -ErrorAction Stop
+        if (-not $image) {
+            throw "Managed image $ImageName not found in resource group $ResourceGroupName"
+        }
 
         # Create or get the gallery
-        $gallery = Get-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -ErrorAction SilentlyContinue
+        $gallery = Get-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -ErrorAction SilentlyContinue
         if (-not $gallery) {
-            Write-Host "$(Log-Date) Creating new gallery $galleryName in $ImageResourceGroup..."
-            $gallery = New-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -Location $Location -ErrorAction Stop
+            Write-Host "$(Log-Date) Creating new gallery $GalleryName in $ResourceGroupName..."
+            $gallery = New-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -Location $Location -ErrorAction Stop
         }
 
         # Create or update image definition
-        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ImageResourceGroup -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageDefinitionName -ErrorAction SilentlyContinue
+        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -ErrorAction SilentlyContinue
         if (-not $imageDefinition) {
-            Write-Host "$(Log-Date) Creating image definition $galleryImageDefinitionName..."
+            Write-Host "$(Log-Date) Creating image definition $ImageDefinitionName..."
             $imageDefinitionParams = @{
-                ResourceGroupName          = $ImageResourceGroup
-                GalleryName                = $galleryName
-                GalleryImageDefinitionName = $galleryImageDefinitionName
+                ResourceGroupName          = $ResourceGroupName
+                GalleryName                = $GalleryName
+                GalleryImageDefinitionName = $ImageDefinitionName
                 Location                   = $Location
                 OsType                     = 'Windows'
                 OsState                    = 'Generalized'
                 Publisher                  = 'LANSA'
-                Offer                      = 'LANSA-IDE'
-                Sku                        = $AmazonAMIName # Reuse SKU from Marketplace image
-                HyperVGeneration           = 'V2' # Adjust to V1 if using older VM generations
+                Offer                      = 'lansa-scalable-license'
+                Sku                        = $ImageDefinitionName
+                HyperVGeneration           = 'V2'
             }
             $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
+        }
+
+        # Check for existing image version and delete if it exists
+        $existingVersion = Get-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -ErrorAction SilentlyContinue
+        if ($existingVersion) {
+            Write-Host "$(Log-Date) Image version $galleryImageVersion already exists. Deleting..."
+            Remove-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Force -ErrorAction Stop
         }
 
         # Create image version
         Write-Host "$(Log-Date) Creating image version $galleryImageVersion..."
         $region = @{Name = $Location; ReplicaCount = 1}
         $imageVersionParams = @{
-            ResourceGroupName          = $ImageResourceGroup
-            GalleryName                = $galleryName
-            GalleryImageDefinitionName = $galleryImageDefinitionName
+            ResourceGroupName          = $ResourceGroupName
+            GalleryName                = $GalleryName
+            GalleryImageDefinitionName = $ImageDefinitionName
             GalleryImageVersionName    = $galleryImageVersion
             Location                   = $Location
             SourceImageId              = $image.Id
-            PublishingProfile          = @{
-                TargetRegions = @($region)
-            }
+            TargetRegion               = @($region)  # Updated to use TargetRegion
         }
         $imageVersion = New-AzGalleryImageVersion @imageVersionParams -ErrorAction Stop
 
-        Write-Host "$(Log-Date) Image version $galleryImageVersion created in gallery $galleryName with Resource ID: $($imageVersion.Id)"
+        Write-Host "$(Log-Date) Image version $galleryImageVersion created in gallery $GalleryName with Resource ID: $($imageVersion.Id)"
 
-        Write-Host "$(Log-Date) Obtaining access for Azure Marketplace submission..."
-        . "$script:IncludeDir\get-azure-sas-token.ps1" -ResourceGroupName $ImageResourceGroup -ImageName $galleryImageDefinitionName -StorageAccountName $StorageAccountName -StorageAccountResourceGroup $StorageAccountResourceGroup -GalleryName $galleryName -GalleryImageVersion $galleryImageVersion | Out-Default | Write-Host
-        
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.
 
