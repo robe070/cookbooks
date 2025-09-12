@@ -1208,6 +1208,7 @@ $jsonObject = @"
         $imageVersion = New-AzGalleryImageVersion @imageVersionParams -ErrorAction Stop
 
         Write-Host "$(Log-Date) Image version $galleryImageVersion created in gallery $GalleryName with Resource ID: $($imageVersion.Id)"
+        Write-Host "##vso[task.setvariable variable=ImageResourceId;isOutput=true]$($imageVersion.Id)"
 
     } elseif ($Cloud -eq 'AWS') {
         # Wait for the instance state to be stopped.

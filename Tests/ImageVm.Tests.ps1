@@ -143,12 +143,17 @@ Describe "VM Tests" {
                         $nic = New-AzNetworkInterface -Name $NicName -ResourceGroupName $VmResourceGroup -Location $location `
                         -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id -Verbose
                     }
-                    $image = Get-AzImage -ImageName $ImgName -ResourceGroupName $ImageResourceGroup -Verbose
+                    Write-Host "ImageResourceId: $($env:BUILDIMAGE_IMAGERESOURCEID)"
+                    # $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
+                    # $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
+                    # $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
+
+                    # $imageVersion = Get-AzGalleryImageVersion -GalleryName "LansaGallery" -ResourceGroupName $ImageResourceGroup -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Verbose
 
                     $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
                     $Script:vmname = $VMname
                     $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
-                    $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $image.Id -Verbose
+                    $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $($env:BUILDIMAGE_IMAGERESOURCEID) -Verbose
                     $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id -Verbose
 
                     Write-Host "$(Log-Date) VM creation started"
