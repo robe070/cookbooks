@@ -1202,7 +1202,7 @@ $jsonObject = @"
             GalleryImageDefinitionName = $ImageDefinitionName
             GalleryImageVersionName    = $galleryImageVersion
             Location                   = $Location
-            SourceImageId              = $vm.Id
+            Source                     = @{VMId = $vm.Id}
             TargetRegion               = @($region)  # Updated to use TargetRegion
         }
         $imageVersion = New-AzGalleryImageVersion @imageVersionParams -ErrorAction Stop
