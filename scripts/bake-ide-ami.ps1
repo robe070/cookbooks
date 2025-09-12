@@ -547,8 +547,6 @@ $jsonObject = @"
                 $vm1 = Set-AzVMSourceImage -VM $vm1 -PublisherName $Publisher -Offer $Offer -SKU $AmazonAMIName -Version latest
                 $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -Windows -StorageAccountType "StandardSSD_LRS"
             }
-            Set-AzVMSecurityProfile -VM $vm1 -SecurityType "TrustedLaunch"
-
             $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id
             $vm1 = Add-AzVMSecret -VM $vm1 -SourceVaultId $sourceVaultId -CertificateStore 'My' -CertificateUrl $SecretURL
             foreach ($vmSecret in $vmSecretUrls) {
@@ -1145,7 +1143,7 @@ $jsonObject = @"
         Write-Host "$(Log-Date) Creating Managed Image..."
         Set-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -Generalized | Out-Default | Write-Host
         $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname
-        # $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id -HyperVGeneration V2
+        # $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id
         # $image = New-AzImage -ResourceGroupName $ImageResourceGroup -Image $imageConfig -ImageName $ImageName | Out-Default | Write-Host
 
         # Add image to Azure Compute Gallery
@@ -1153,27 +1151,27 @@ $jsonObject = @"
         $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
         $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
         $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
-        Write-Host "$(Log-Date) Adding image $ImageName to Azure Compute Gallery $GalleryName in resource group $ResourceGroupName"
+        Write-Host "$(Log-Date) Adding image $ImageName to Azure Compute Gallery $GalleryName in resource group $ImageResourceGroup"
 
         # # Get the managed image
-        # $image = Get-AzImage -ResourceGroupName $ResourceGroupName -ImageName $ImageName -ErrorAction Stop
+        # $image = Get-AzImage -ResourceGroupName $ImageResourceGroup -ImageName $ImageName -ErrorAction Stop
         # if (-not $image) {
-        #     throw "Managed image $ImageName not found in resource group $ResourceGroupName"
+        #     throw "Managed image $ImageName not found in resource group $ImageResourceGroup"
         # }
 
         # Create or get the gallery
-        $gallery = Get-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -ErrorAction SilentlyContinue
+        $gallery = Get-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $GalleryName -ErrorAction SilentlyContinue
         if (-not $gallery) {
-            Write-Host "$(Log-Date) Creating new gallery $GalleryName in $ResourceGroupName..."
-            $gallery = New-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -Location $Location -ErrorAction Stop
+            Write-Host "$(Log-Date) Creating new gallery $GalleryName in $ImageResourceGroup..."
+            $gallery = New-AzGallery -ResourceGroupName $ImageResourceGroup -GalleryName $GalleryName -Location $Location -ErrorAction Stop
         }
 
         # Create or update image definition
-        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -ErrorAction SilentlyContinue
+        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ImageResourceGroup -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -ErrorAction SilentlyContinue
         if (-not $imageDefinition) {
             Write-Host "$(Log-Date) Creating image definition $ImageDefinitionName..."
             $imageDefinitionParams = @{
-                ResourceGroupName          = $ResourceGroupName
+                ResourceGroupName          = $ImageResourceGroup
                 GalleryName                = $GalleryName
                 GalleryImageDefinitionName = $ImageDefinitionName
                 Location                   = $Location
@@ -1182,24 +1180,24 @@ $jsonObject = @"
                 Publisher                  = 'LANSA'
                 Offer                      = 'lansa-scalable-license'
                 Sku                        = $ImageDefinitionName
-                HyperVGeneration           = 'V2'
-                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
+                HyperVGeneration           = 'V1'
+                #Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
             }
             $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
         }
 
         # Check for existing image version and delete if it exists
-        $existingVersion = Get-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -ErrorAction SilentlyContinue
+        $existingVersion = Get-AzGalleryImageVersion -ResourceGroupName $ImageResourceGroup -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -ErrorAction SilentlyContinue
         if ($existingVersion) {
             Write-Host "$(Log-Date) Image version $galleryImageVersion already exists. Deleting..."
-            Remove-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Force -ErrorAction Stop
+            Remove-AzGalleryImageVersion -ResourceGroupName $ImageResourceGroup -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Force -ErrorAction Stop
         }
 
-        # Create image version directly from generalised VM - because cannot create a managed image with TrustedLaunch SecurityType.
+        # Create image version directly from generalised VM. No need to create a Managed Image.
         Write-Host "$(Log-Date) Creating image version $galleryImageVersion from VM $($vm.Id)..."
         $region = @{Name = $Location; ReplicaCount = 1}
         $imageVersionParams = @{
-            ResourceGroupName          = $ResourceGroupName
+            ResourceGroupName          = $ImageResourceGroup
             GalleryName                = $GalleryName
             GalleryImageDefinitionName = $ImageDefinitionName
             GalleryImageVersionName    = $galleryImageVersion
