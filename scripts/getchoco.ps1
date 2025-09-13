@@ -194,8 +194,8 @@ try {
                 throw "Failed to download chocolatey.nupkg from '$url' after $TotalAttempts attempts. Error: `n $_"
             } else {
                 Write-Host "Attempt $($TotalAttempts - $i + 1) to download chocolatey.nupkg failed. Retrying..."
-                $delay = [math]::Min(120 * [math]::Pow(2, $TotalAttempts - $i), 3600) # Cap at 1 hour
-                Start-Sleep -Seconds $delay # Exponential backoff time (120, 240, 960, ... seconds)
+                $delay = [math]::Min(120 * [math]::Pow(4, $TotalAttempts - $i), 3600) # Cap at 1 hour
+                Start-Sleep -Seconds $delay # Exponential backoff time (120, 240, 1920, 7680, 30720,... seconds)
             }
         }
     }
