@@ -144,11 +144,6 @@ Describe "VM Tests" {
                         -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id -Verbose
                     }
                     Write-Host "ImageResourceId: $($env:BUILDIMAGE_IMAGERESOURCEID)"
-                    # $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
-                    # $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
-                    # $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
-
-                    # $imageVersion = Get-AzGalleryImageVersion -GalleryName "LansaGallery" -ResourceGroupName $ImageResourceGroup -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Verbose
 
                     $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
                     $Script:vmname = $VMname
@@ -165,8 +160,8 @@ Describe "VM Tests" {
                     $Script:publicDNS =  $ipAddress.IpAddress
 
                     # Used in the Connect-RemoteSession
-                    $creds = $Credential
-                    #Connect-RemoteSession
+                    # $creds = $Credential
+                    # Connect-RemoteSession
                 } catch {
                     Write-Host $_.Exception | out-default
                     throw "$(Log-Date) Error occured in TestImage file"

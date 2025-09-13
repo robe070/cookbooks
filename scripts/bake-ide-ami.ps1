@@ -1148,9 +1148,9 @@ $jsonObject = @"
 
         # Add image to Azure Compute Gallery
         $GalleryName = "LansaGallery"
-        $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
+        $ImageDefinitionName = $ImageName -replace "-(\d+j?|\d+)image$", "" # Handles "w16d-16-0-19image" => "w16d-16-0" and "w16d-16-0j-19image" => "w16d-16-0j"
         $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
-        $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
+        $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19" for both "w22d-16-0-19" and "w16d-16-0j-19"
         Write-Host "$(Log-Date) Adding image $ImageName to Azure Compute Gallery $GalleryName in resource group $ImageResourceGroup"
 
         # # Get the managed image
