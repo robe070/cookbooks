@@ -506,11 +506,18 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-        arguments: '-GitBranch ''$(TemplatesBranchLive)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(TemplatesGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(TemplatesSourceAlias)'''
+        arguments:
+          -GitBranch '$(TemplatesBranchLive)'
+          -GitURL 'https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(TemplatesGitHubName)'
+          -GitUserEmail '$(GitUserEmail)'
+          -GitUserName '$(GitUserName)'
+          -GitRepoPath '$(TemplatesSourceAlias)'
 
     - task: PowerShell@2
       displayName: 'Tag Git repo'
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
-        arguments: '-GitRepoName ''$(TemplatesSourceAlias)'' -Tags ''AzureTemplate-Publish-$(Build.BuildNumber)-$(Gate.Sku)'''
+        arguments:
+          -GitRepoName '$(TemplatesSourceAlias)'
+          -Tags 'AzureTemplate-Publish-$(Build.BuildNumber)-$(Gate.Sku)'

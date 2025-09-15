@@ -257,14 +257,22 @@ stages:
         inputs:
           targetType: filePath
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-          arguments: '-GitBranch ''$(CookbooksBranchPreview)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+          arguments:
+            -GitBranch '$(CookbooksBranchPreview)'
+            -GitURL 'https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'
+            -GitUserEmail '$(GitUserEmail)'
+            -GitUserName '$(GitUserName)'
+            -GitRepoPath '$(CookbooksSourceAlias)'
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
         inputs:
           targetType: filePath
           filePath: ' $(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
-          arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranch)'' -GitTargetBranch ''$(CookbooksBranchPreview)'''
+          arguments:
+            -GitRepoPath '$(CookbooksSourceAlias)'
+            -GitSourceBranch '$(CookbooksBranch)'
+            -GitTargetBranch '$(CookbooksBranchPreview)'
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -650,21 +658,31 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-        arguments: '-GitBranch ''$(CookbooksBranchLive)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(CookbooksSourceAlias)'''
+        arguments:
+          -GitBranch '$(CookbooksBranchLive)'
+          -GitURL 'https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(GitRobe070CookbooksGitHubName)'
+          -GitUserEmail '$(GitUserEmail)'
+          -GitUserName '$(GitUserName)'
+          -GitRepoPath '$(CookbooksSourceAlias)'
 
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitMerge.ps1'
-        arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -GitSourceBranch ''$(CookbooksBranchPreview)'' -GitTargetBranch ''$(CookbooksBranchLive)'''
+        arguments:
+          -GitRepoPath '$(CookbooksSourceAlias)'
+          -GitSourceBranch '$(CookbooksBranchPreview)'
+          -GitTargetBranch '$(CookbooksBranchLive)'
 
     - task: PowerShell@2
       displayName: 'Tag robe070/cookbooks repo '
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
-        arguments: '-GitRepoName ''$(CookbooksSourceAlias)'' -Tags  ''AzureImage-Publish-$(Build.BuildNumber)-$(Gate.Sku)'''
+        arguments:
+          -GitRepoName '$(CookbooksSourceAlias)'
+          -Tags  'AzureImage-Publish-$(Build.BuildNumber)-$(Gate.Sku)'
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
