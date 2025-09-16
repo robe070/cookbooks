@@ -12,7 +12,21 @@ resources:
       name: lansa/azure-quickstart-templates
       ref: support/scalable
 
+    # Can't checkout the same repo twice, so use a second alias
+    - repository: _robe070_cookbooks_self2
+      type: github
+      endpoint: robe070
+      name: robe070/cookbooks
+      ref: debug/paas
+
     - repository: _robe070_cookbooks_patch
+      type: github
+      endpoint: robe070
+      name: robe070/cookbooks
+      ref: patch/paas
+
+    # Can't checkout the same repo twice, so use a second alias
+    - repository: _robe070_cookbooks_patch2
       type: github
       endpoint: robe070
       name: robe070/cookbooks
@@ -283,7 +297,8 @@ stages:
             -GitRepoPath '$(CookbooksSourceAlias)'
 
       # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
-      - checkout: self
+      # If '_robe070_cookbooks_self2' is used again in this job then this warning is displayed "##[warning]Unable move and reuse existing repository to required location."
+      - checkout: _robe070_cookbooks_self2
         path: _robe070_cookbooks
 
       - task: PowerShell@2
@@ -693,7 +708,8 @@ stages:
           -GitRepoPath '$(CookbooksSourceAlias)'
 
     # Obtaining write access has switched the branch to support/scalable. Switch it back to patch/paas
-    - checkout: _robe070_cookbooks_patch
+    # If '_robe070_cookbooks_patch' is used again in this job then this warning is displayed "##[warning]Unable move and reuse existing repository to required location."
+    - checkout: _robe070_cookbooks_patch2
       path: _robe070_cookbooks
 
     - task: PowerShell@2
