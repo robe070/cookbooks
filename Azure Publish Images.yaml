@@ -262,10 +262,6 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
 
-      # get the patch/paas branch first to ensure its up to date
-      - checkout: _robe070_cookbooks_patch
-        path: _robe070_cookbooks
-
       # get the debug/paas branch, ready to merge debug/paas to patch/paas
       - checkout: self
         path: _robe070_cookbooks
@@ -283,8 +279,15 @@ stages:
             -GitRepoPath '$(CookbooksSourceAlias)'
 
       # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
-      - checkout: self
-        path: _robe070_cookbooks
+      - powershell: |
+          Write-Host "Checking out branch: '$(CookbooksBranch)'"
+          & git checkout '$(CookbooksBranch)'
+          if (-not $?) {
+            Write-Host("git checkout failed");
+            exit 1
+          }
+        displayName: 'Restore Original Git Branch $(CookbooksBranch)'
+        workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
@@ -655,10 +658,6 @@ stages:
     - checkout: _lansa_azure_quickstart_templates
       path: _lansa_azure_quickstart_templates
 
-    # Ensure the support/scalable branch is up to date
-    - checkout: _robe070_cookbooks_support
-      path: _robe070_cookbooks
-
     # Now get the patch/paas branch, ready to merge patch/paas to support/scalable
     - checkout: _robe070_cookbooks_patch
       path: _robe070_cookbooks
@@ -693,8 +692,16 @@ stages:
           -GitRepoPath '$(CookbooksSourceAlias)'
 
     # Obtaining write access has switched the branch to support/scalable. Switch it back to patch/paas
-    - checkout: _robe070_cookbooks_patch
-      path: _robe070_cookbooks
+          # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
+    - powershell: |
+        Write-Host "Checking out branch: '$(CookbooksBranchPreview)'"
+        & git checkout '$(CookbooksBranchPreview)'
+        if (-not $?) {
+          Write-Host("git checkout failed");
+          exit 1
+        }
+      displayName: 'Restore Original Git Branch $(CookbooksBranchPreview)'
+      workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks
 
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'

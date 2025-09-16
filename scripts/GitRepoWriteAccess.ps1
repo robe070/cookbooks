@@ -27,30 +27,30 @@ param (
 # goto git repo
 cd "$($env:Pipeline_Workspace)/$($GitRepoPath)"
 
-# Comment out this code as we are using the checkout step to get the correct branch.
 # Doing the checkout here means we regress the scripts to a potentially older version in the target branch, whereas we need the latest of the source branch
-# git checkout to branch
-# git checkout $GitBranch
-# if (-not $?) {
-#   Write-Host("git checkout $GitBranch failed");
-#   exit 1
-# }
+Write-Host "git checkout branch $GitBranch"
+git checkout $GitBranch
+if (-not $?) {
+  Write-Host("git checkout $GitBranch failed");
+  exit 1
+}
 
-# git configure email
-git config --global user.email "$($GitUserEmail)"
+Write-Host "Configuring git email '$GitUserEmail'"
+git config --global user.email "$GitUserEmail"
 if (-not $?) {
   Write-Host("git config --global user.email failed");
   exit 1
 }
 
-# git configure name
-git config --global user.name "$($GitUserName)"
+Write-Host "Configuring git email '$GitUserName'"
+git config --global user.name "$GitUserName"
 if (-not $?) {
   Write-Host("git config --global user.name failed");
   exit 1
 }
 
 # git set remote origin url with personal access token
+Write-Host "Configuring remote url '$GitURL'"
 git remote set-url origin $GitURL
 if (-not $?) {
   Write-Host("git remote set-url failed");
