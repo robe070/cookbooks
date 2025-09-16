@@ -282,6 +282,10 @@ stages:
             -GitUserName '$(GitUserName)'
             -GitRepoPath '$(CookbooksSourceAlias)'
 
+      # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
+      - checkout: self
+        path: _robe070_cookbooks
+
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
         inputs:
@@ -687,6 +691,10 @@ stages:
           -GitUserEmail '$(GitUserEmail)'
           -GitUserName '$(GitUserName)'
           -GitRepoPath '$(CookbooksSourceAlias)'
+
+    # Obtaining write access has switched the branch to support/scalable. Switch it back to patch/paas
+    - checkout: _robe070_cookbooks_patch
+      path: _robe070_cookbooks
 
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
