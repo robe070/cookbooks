@@ -914,29 +914,3 @@ stages:
     resourceGroup: BakingDP-Prod-SN-w19d-15-0j
     imageSource: Marketplace
     location: Switzerland North
-
-steps:
-  # Step to capture the current branch
-  - powershell: |
-      # Get the current branch using a Git command
-      $currentBranch = & git rev-parse --abbrev-ref HEAD
-      Write-Host "Current branch is: $currentBranch"
-
-      # Set the branch as a pipeline variable for later use
-      Write-Host "##vso[task.setvariable variable=CurrentGitBranch]$currentBranch"
-    displayName: 'Capture Current Git Branch'
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations if repository access needs authentication
-
-  # Example: Other steps in your pipeline that might switch branches
-  # ...
-
-  # Step to check out the saved branch later
-  - powershell: |
-      $branchToCheckout = "$(CurrentGitBranch)"
-      Write-Host "Checking out branch: $branchToCheckout"
-      & git checkout $branchToCheckout
-    displayName: 'Restore Original Git Branch'
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations
-    workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks  # Adjust to your repo path
