@@ -12,21 +12,7 @@ resources:
       name: lansa/azure-quickstart-templates
       ref: support/scalable
 
-    # Can't checkout the same repo twice, so use a second alias
-    - repository: _robe070_cookbooks_self2
-      type: github
-      endpoint: robe070
-      name: robe070/cookbooks
-      ref: debug/paas
-
     - repository: _robe070_cookbooks_patch
-      type: github
-      endpoint: robe070
-      name: robe070/cookbooks
-      ref: patch/paas
-
-    # Can't checkout the same repo twice, so use a second alias
-    - repository: _robe070_cookbooks_patch2
       type: github
       endpoint: robe070
       name: robe070/cookbooks
@@ -276,10 +262,6 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
 
-      # get the patch/paas branch first to ensure its up to date
-      - checkout: _robe070_cookbooks_patch
-        path: _robe070_cookbooks
-
       # get the debug/paas branch, ready to merge debug/paas to patch/paas
       - checkout: self
         path: _robe070_cookbooks
@@ -297,9 +279,17 @@ stages:
             -GitRepoPath '$(CookbooksSourceAlias)'
 
       # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
-      # If '_robe070_cookbooks_self2' is used again in this job then this warning is displayed "##[warning]Unable move and reuse existing repository to required location."
-      - checkout: _robe070_cookbooks_self2
-        path: _robe070_cookbooks
+      - powershell: |
+          Write-Host "Checking out branch: '$(CookbooksBranch)'"
+          & git checkout '$(CookbooksBranch)'
+          if (-not $?) {
+            Write-Host("git checkout failed");
+            exit 1
+          }
+        displayName: 'Restore Original Git Branch'
+        # env:
+        #   SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations
+        workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks  # Adjust to your repo path
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
@@ -924,3 +914,29 @@ stages:
     resourceGroup: BakingDP-Prod-SN-w19d-15-0j
     imageSource: Marketplace
     location: Switzerland North
+
+steps:
+  # Step to capture the current branch
+  - powershell: |
+      # Get the current branch using a Git command
+      $currentBranch = & git rev-parse --abbrev-ref HEAD
+      Write-Host "Current branch is: $currentBranch"
+
+      # Set the branch as a pipeline variable for later use
+      Write-Host "##vso[task.setvariable variable=CurrentGitBranch]$currentBranch"
+    displayName: 'Capture Current Git Branch'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations if repository access needs authentication
+
+  # Example: Other steps in your pipeline that might switch branches
+  # ...
+
+  # Step to check out the saved branch later
+  - powershell: |
+      $branchToCheckout = "$(CurrentGitBranch)"
+      Write-Host "Checking out branch: $branchToCheckout"
+      & git checkout $branchToCheckout
+    displayName: 'Restore Original Git Branch'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations
+    workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks  # Adjust to your repo path
