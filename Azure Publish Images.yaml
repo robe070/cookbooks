@@ -4,11 +4,24 @@ resources:
   pipelines:
     - pipeline: _BuildImageReleaseArtefacts
       source: Build Image Release Artefacts 3.0
+
   repositories:
     - repository: _lansa_azure_quickstart_templates
       type: github
       endpoint: robe070
       name: lansa/azure-quickstart-templates
+      ref: support/scalable
+
+    - repository: _robe070_cookbooks_patch
+      type: github
+      endpoint: robe070
+      name: robe070/cookbooks
+      ref: patch/paas
+
+    - repository: _robe070_cookbooks_support
+      type: github
+      endpoint: robe070
+      name: robe070/cookbooks
       ref: support/scalable
 
 variables:
@@ -249,6 +262,11 @@ stages:
       - checkout: _lansa_azure_quickstart_templates
         path: _lansa_azure_quickstart_templates
 
+      # get the patch/paas branch first to ensure its up to date
+      - checkout: _robe070_cookbooks_patch
+        path: _robe070_cookbooks
+
+      # get the debug/paas branch, ready to merge debug/paas to patch/paas
       - checkout: self
         path: _robe070_cookbooks
 
@@ -633,7 +651,12 @@ stages:
     - checkout: _lansa_azure_quickstart_templates
       path: _lansa_azure_quickstart_templates
 
-    - checkout: self
+    # Ensure the support/scalable branch is up to date
+    - checkout: _robe070_cookbooks_support
+      path: _robe070_cookbooks
+
+    # Now get the patch/paas branch, ready to merge patch/paas to support/scalable
+    - checkout: _robe070_cookbooks_patch
       path: _robe070_cookbooks
 
     - task: PowerShell@2
