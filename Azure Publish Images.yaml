@@ -286,10 +286,8 @@ stages:
             Write-Host("git checkout failed");
             exit 1
           }
-        displayName: 'Restore Original Git Branch'
-        # env:
-        #   SYSTEM_ACCESSTOKEN: $(System.AccessToken)  # Required for Git operations
-        workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks  # Adjust to your repo path
+        displayName: 'Restore Original Git Branch $(CookbooksBranch)'
+        workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks
 
       - task: PowerShell@2
         displayName: 'Merge robe070/cookbooks repo debug/paas to patch/paas'
@@ -692,6 +690,18 @@ stages:
           -GitUserEmail '$(GitUserEmail)'
           -GitUserName '$(GitUserName)'
           -GitRepoPath '$(CookbooksSourceAlias)'
+
+    # Obtaining write access has switched the branch to support/scalable. Switch it back to patch/paas
+          # Obtaining write access has switched the branch to patch/paas. Switch it back to debug/paas
+    - powershell: |
+        Write-Host "Checking out branch: '$(CookbooksBranchPreview)'"
+        & git checkout '$(CookbooksBranchPreview)'
+        if (-not $?) {
+          Write-Host("git checkout failed");
+          exit 1
+        }
+      displayName: 'Restore Original Git Branch $(CookbooksBranchPreview)'
+      workingDirectory: $(Pipeline.Workspace)/_robe070_cookbooks
 
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
