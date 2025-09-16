@@ -36,21 +36,22 @@ cd "$($env:Pipeline_Workspace)/$($GitRepoPath)"
 #   exit 1
 # }
 
-# git configure email
-git config --global user.email "$($GitUserEmail)"
+Write-Host "Configuring git email '$GitUserEmail'"
+git config --global user.email "$GitUserEmail"
 if (-not $?) {
   Write-Host("git config --global user.email failed");
   exit 1
 }
 
-# git configure name
-git config --global user.name "$($GitUserName)"
+Write-Host "Configuring git email '$GitUserName'"
+git config --global user.name "$GitUserName"
 if (-not $?) {
   Write-Host("git config --global user.name failed");
   exit 1
 }
 
 # git set remote origin url with personal access token
+Write-Host "Configuring remote url '$GitURL'"
 git remote set-url origin $GitURL
 if (-not $?) {
   Write-Host("git remote set-url failed");
