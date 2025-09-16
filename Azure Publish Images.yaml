@@ -660,10 +660,6 @@ stages:
     - checkout: _lansa_azure_quickstart_templates
       path: _lansa_azure_quickstart_templates
 
-    # Ensure the support/scalable branch is up to date
-    - checkout: _robe070_cookbooks_support
-      path: _robe070_cookbooks
-
     # Now get the patch/paas branch, ready to merge patch/paas to support/scalable
     - checkout: _robe070_cookbooks_patch
       path: _robe070_cookbooks
@@ -696,11 +692,6 @@ stages:
           -GitUserEmail '$(GitUserEmail)'
           -GitUserName '$(GitUserName)'
           -GitRepoPath '$(CookbooksSourceAlias)'
-
-    # Obtaining write access has switched the branch to support/scalable. Switch it back to patch/paas
-    # If '_robe070_cookbooks_patch' is used again in this job then this warning is displayed "##[warning]Unable move and reuse existing repository to required location."
-    - checkout: _robe070_cookbooks_patch2
-      path: _robe070_cookbooks
 
     - task: PowerShell@2
       displayName: 'Merge robe070/cookbooks repo patch/paas to support/scalable'
