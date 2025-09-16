@@ -61,14 +61,14 @@
 				<p>Before you begin, you should ensure that you have the skills necessary to use LANSA effectively.If you need LANSA training, various lessions are available at <a href="https://learn.lansa.com/" target="_blank">learn.lansa.com</a></p>
 			</section>
 			<section>
-                <p>Do not use this AMI until you have produced a LANSA application with the LANSA IDE.</p>
-                <p>To deploy a LANSA Stack you need to use this Cloud Formation template: </p>
-                <p><a href="https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/scalable/lansa-stack-type-win.cfn.template">https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/scalable/lansa-stack-type-win.cfn.template</a>.</p>
-                <p>The template by default creates two t3.medium instances and one SQL Server Web RDS db.t3.2xlarge instance.
-                The pricing estimator only provides the price of one EC2 instance and does not include the RDS pricing.</p>
-                <p>Full instructions for using the template and creating your stack are provided here: <a href="https://docs.lansa.com/15/en/lansa022/index.htm#lansa/vldtoolct_0020.htm%3FTocPath%3DLANSA%2520Application%2520Deployment%2520Tool%7CCloud%2520Tutorials%7CAmazon%2520Web%2520Services%2520Tutorial%7C_____0" target="_blank">LANSA Cloud Tutorial</a></p>
-                <p>A summary of the steps involved are:</p>
-                <ol>
+               <p>Do not use this AMI until you have produced a LANSA application with the LANSA IDE.</p>
+               <p>To deploy a LANSA Stack you need to use this Cloud Formation template: </p>
+               <p><a href="https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/scalable/lansa-stack-type-win.cfn.template">https://s3-ap-southeast-2.amazonaws.com/lansa/templates/support/scalable/lansa-stack-type-win.cfn.template</a>.</p>
+               <p>The template by default creates two t3.medium instances and one SQL Server Web RDS db.t3.2xlarge instance.
+               The pricing estimator only provides the price of one EC2 instance and does not include the RDS pricing.</p>
+               <p>Full instructions for using the template and creating your stack are provided here: <a href="https://docs.lansa.com/16/en/lansa022/index.htm#lansa/vldtoolct_0020.htm%3FTocPath%3DLANSA%2520Application%2520Deployment%2520Tool%7CCloud%2520Tutorials%7CAmazon%2520Web%2520Services%2520Tutorial%7C_____0" target="_blank">LANSA Cloud Tutorial</a></p>
+               <p>A summary of the steps involved are:</p>
+               <ol>
 					<li>Subscribe to the LANSA Scalable License.</li>
 					<li>Upload your LANSA WAM Application MSI to AWS BLOB storage – S3 and obtain the URL of the MSI.</li>
 					<li>Use the AWS CloudFormation console to create a scalable LANSA stack using the template URL provided above.</li>

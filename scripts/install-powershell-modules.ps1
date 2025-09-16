@@ -9,9 +9,10 @@ if ($Env:PsModuleInstalled -eq 'True') {
     Write-Host "PS Module already installed, skip the Install PS Module Task." | Out-Default | Write-Verbose
     return;
 }
+
 # Pester for Testing
-Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
-Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
-Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
+# Write-Host "Installing Module Pester RequiredVersion 5.6.1" | Out-Default | Write-Verbose
+# Install-Module -Name Pester -RequiredVersion 5.6.1 -AllowClobber -Force
+# Write-Host "Installed Module Pester" | Out-Default | Write-Verbose
 
 $Env:PsModuleInstalled = 'True'

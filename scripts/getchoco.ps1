@@ -36,18 +36,18 @@ try {
     $env:chocolateyVersion = '1.4.0'
     $chocolateyVersion = $env:chocolateyVersion
     if (![string]::IsNullOrEmpty($chocolateyVersion)){
-    Write-Host "Downloading specific version of Chocolatey: $chocolateyVersion"
-    $url = "https://chocolatey.org/api/v2/package/chocolatey/$chocolateyVersion"
+        Write-Host "Downloading specific version of Chocolatey: $chocolateyVersion"
+        $url = "https://chocolatey.org/api/v2/package/chocolatey/$chocolateyVersion"
     }
 
     $chocolateyDownloadUrl = $env:chocolateyDownloadUrl
     if (![string]::IsNullOrEmpty($chocolateyDownloadUrl)){
-    Write-Host "Downloading Chocolatey from : $chocolateyDownloadUrl"
-    $url = "$chocolateyDownloadUrl"
+        Write-Host "Downloading Chocolatey from : $chocolateyDownloadUrl"
+        $url = "$chocolateyDownloadUrl"
     }
 
     if ($env:TEMP -eq $null) {
-    $env:TEMP = Join-Path $env:SystemDrive 'temp'
+        $env:TEMP = Join-Path $env:SystemDrive 'temp'
     }
     $chocTempDir = Join-Path $env:TEMP "chocolatey"
     $tempDir = Join-Path $chocTempDir "chocInstall"
@@ -60,26 +60,26 @@ try {
     # simultaneously in one FileStream and in Win32 code or another
     # FileStream."
     function Fix-PowerShellOutputRedirectionBug {
-    $poshMajorVerion = $PSVersionTable.PSVersion.Major
+        $poshMajorVerion = $PSVersionTable.PSVersion.Major
 
-    if ($poshMajorVerion -lt 4) {
-        try{
-        # http://www.leeholmes.com/blog/2008/07/30/workaround-the-os-handles-position-is-not-what-filestream-expected/ plus comments
-        $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetField"
-        $objectRef = $host.GetType().GetField("externalHostRef", $bindingFlags).GetValue($host)
-        $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetProperty"
-        $consoleHost = $objectRef.GetType().GetProperty("Value", $bindingFlags).GetValue($objectRef, @())
-        [void] $consoleHost.GetType().GetProperty("IsStandardOutputRedirected", $bindingFlags).GetValue($consoleHost, @())
-        $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetField"
-        $field = $consoleHost.GetType().GetField("standardOutputWriter", $bindingFlags)
-        $field.SetValue($consoleHost, [Console]::Out)
-        [void] $consoleHost.GetType().GetProperty("IsStandardErrorRedirected", $bindingFlags).GetValue($consoleHost, @())
-        $field2 = $consoleHost.GetType().GetField("standardErrorWriter", $bindingFlags)
-        $field2.SetValue($consoleHost, [Console]::Error)
-        } catch {
-            throw "Unable to apply redirection fix."
+        if ($poshMajorVerion -lt 4) {
+            try{
+            # http://www.leeholmes.com/blog/2008/07/30/workaround-the-os-handles-position-is-not-what-filestream-expected/ plus comments
+            $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetField"
+            $objectRef = $host.GetType().GetField("externalHostRef", $bindingFlags).GetValue($host)
+            $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetProperty"
+            $consoleHost = $objectRef.GetType().GetProperty("Value", $bindingFlags).GetValue($objectRef, @())
+            [void] $consoleHost.GetType().GetProperty("IsStandardOutputRedirected", $bindingFlags).GetValue($consoleHost, @())
+            $bindingFlags = [Reflection.BindingFlags] "Instance,NonPublic,GetField"
+            $field = $consoleHost.GetType().GetField("standardOutputWriter", $bindingFlags)
+            $field.SetValue($consoleHost, [Console]::Out)
+            [void] $consoleHost.GetType().GetProperty("IsStandardErrorRedirected", $bindingFlags).GetValue($consoleHost, @())
+            $field2 = $consoleHost.GetType().GetField("standardErrorWriter", $bindingFlags)
+            $field2.SetValue($consoleHost, [Console]::Error)
+            } catch {
+                throw "Unable to apply redirection fix."
+            }
         }
-    }
     }
 
     Fix-PowerShellOutputRedirectionBug
@@ -89,11 +89,11 @@ try {
     # will typically produce a message for PowerShell v2 (just an info
     # message though)
     try {
-    # Set TLS 1.2 (3072), then TLS 1.1 (768), then TLS 1.0 (192), finally SSL 3.0 (48)
-    # Use integers because the enumeration values for TLS 1.2 and TLS 1.1 won't
-    # exist in .NET 4.0, even though they are addressable if .NET 4.5+ is
-    # installed (.NET 4.5 is an in-place upgrade).
-    [System.Net.ServicePointManager]::SecurityProtocol = 3072 -bor 768 -bor 192 -bor 48
+        # Set TLS 1.2 (3072), then TLS 1.1 (768), then TLS 1.0 (192), finally SSL 3.0 (48)
+        # Use integers because the enumeration values for TLS 1.2 and TLS 1.1 won't
+        # exist in .NET 4.0, even though they are addressable if .NET 4.5+ is
+        # installed (.NET 4.5 is an in-place upgrade).
+        [System.Net.ServicePointManager]::SecurityProtocol = 3072 -bor 768 -bor 192 -bor 48
     } catch {
         throw 'Unable to set PowerShell to use TLS 1.2 and TLS 1.1 due to old .NET Framework installed. If you see underlying connection closed or trust errors, you may need to do one or more of the following: (1) upgrade to .NET Framework 4.5+ and PowerShell v3, (2) specify internal Chocolatey package location (set $env:chocolateyDownloadUrl prior to install or host the package internally), (3) use the Download + PowerShell method of install. See https://chocolatey.org/install for all install options.'
     }
@@ -177,9 +177,32 @@ try {
         $url = $result.feed.entry.content.src
     }
 
-    # Download the Chocolatey package
-    Write-Host "Getting Chocolatey from $url."
-    Download-File $url $file
+    $TotalAttempts = 4
+    Write-Host "Download of Chocolatey often fails. This script will try $TotalAttempts times to download chocolatey.nupkg from '$url'."
+    for ($i = $TotalAttempts; $i -gt 0; $i--) {
+        try {
+            if (Test-Path $file) {
+                Remove-Item $file -Force
+            }
+            Write-Host "Downloading Chocolatey from $url"
+            # Download the Chocolatey package
+            Write-Host "Getting Chocolatey from $url."
+            Download-File $url $file
+            break
+        } catch {
+            if ($i -le 1) {
+                throw "Failed to download chocolatey.nupkg from '$url' after $TotalAttempts attempts. Error: `n $_"
+            } else {
+                $delay = [math]::Min(120 * [math]::Pow(4, $TotalAttempts - $i), 3600) # Cap at 1 hour
+                Write-Host "Attempt $($TotalAttempts - $i + 1) to download chocolatey.nupkg failed. Delaying $delay seconds before retrying..."
+                Start-Sleep -Seconds $delay # Exponential backoff time (120, 240, 1920, 7680, 30720,... seconds)
+            }
+        }
+    }
+    # Write-Host "Downloading Chocolatey from $url"
+    # # Download the Chocolatey package
+    # Write-Host "Getting Chocolatey from $url."
+    # Download-File $url $file
 
     # Determine unzipping method
     # 7zip is the most compatible so use it by default
@@ -268,11 +291,9 @@ try {
     }
     Copy-Item "$file" "$nupkg" -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 } catch {
-    "getchoco.ps1: Error during choco install"
-    $_
+    $_ | Out-Default | Write-Host
     $PSItem.ScriptStackTrace | Out-Default | Write-Host
-    cmd /c exit 1
-    return
+    throw "getchoco.ps1: Error during choco install."
 }
 
 # Answer yes to all prompts

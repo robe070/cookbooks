@@ -5,18 +5,12 @@ parameters:
   - name: stageDisplayname
     type: string
     default: none
-  - name: runStage
-    type: boolean
-    default: true
-  - name: jobName
-    type: string
-    default: none
-  - name: jobDisplayname
-    type: string
-    default: none
+  # - name: runStage
+  #   type: boolean
+  #   default: true
   - name: BaseImageName
     type: string
-    default: none  
+    default: none
   - name: vmImage
     type: string
     default: windows-2019
@@ -28,42 +22,39 @@ parameters:
     default: ''
   - name: globExpressions
     type: string
-    default: ''  
+    default: ''
   - name: dependsOn
-    default: []  
+    default: ''
 
 stages:
   - stage: ${{ parameters.stageName }}
-    condition: ${{ parameters.runStage }}
-    dependsOn: ${{ parameters.dependsOn }}
+    variables:
+    - template: vars.yml
+
+    dependsOn:
+      - Init
+      - ${{ if ne(parameters.dependsOn, '') }}:
+        - ${{ parameters.dependsOn }}
+
     displayName: ${{ parameters.stageDisplayname }}
     jobs:
-    - job: ${{ parameters.jobName }}
+    - job: ${{ parameters.stageName }}
+      condition: ${{ parameters.jobCondition }}
       timeoutInMinutes: 0
       cancelTimeoutInMinutes: 1
-      condition: ${{ parameters. jobcondition}}
-      displayName: ${{ parameters.jobDisplayname }}
+      displayName: ${{ parameters.stageDisplayname }}
 
       variables:
         TemplateS3Namespace: '/image-cd-pipeline'
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
-        demands: ${{ parameters.jobDemand }}
+        name: $(agentVMImage)
 
       steps:
-      - download: _Build Image Release Artefacts
-        displayName: Download artifacts from Build Image Release Artefacts 3.0
+      - template: AWSInitRepos.yml
+        parameters:
+            gitRepoWriteAccess: false
 
-      - checkout: self
-
-      - checkout: _lansa_aws-templates
-        displayName: Checkout Lansa AWS Templates
-        path: _lansa_aws-templates
-
-      - checkout: _robe070_cookbooks
-        displayName: Checkout Rob cookbooks
-        path: _robe070_cookbooks
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Copy ami to Us-east-1'
@@ -71,21 +62,24 @@ stages:
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/CopyAMIToUS.ps1'
+          arguments: -BaseImageName '${{ parameters.BaseImageName }}'
 
       - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
         displayName: 'Add Name Tag'
+        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'us-east-1'
-          arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copy.id)'' -Copyname ''$(Copy.name)'''
-          # arguments: '-BaseImageName ''${{ parameters.BaseImageName }}'' -Copyid ''$(Copyid)'' -Copyname ''$(Copyname)'''
           filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/AddNameTag.ps1'
-          condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
+          arguments:
+            -BaseImageName '${{ parameters.BaseImageName }}'
+            -Copyid '$(Copy.id)'
+            -Copyname '$(Copy.name)'
 
       - task: AmazonWebServices.aws-vsts-tools.S3Upload.S3Upload@1
         displayName: 'S3 Upload AMI File'
+        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
         inputs:
           awsCredentials: AzureDevOps
           regionName: 'ap-southeast-2'
@@ -94,6 +88,4 @@ stages:
           globExpressions: '${{ parameters.globExpressions }}'
           targetFolder: 'templates/$(s3amiUpload)'
           filesAcl: 'public-read'
-        condition: and(succeeded(), eq(variables['Copy.Exists'], 'True'))
-    
-    
+

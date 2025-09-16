@@ -1,0 +1,26 @@
+schedules:
+# The Azure DevOps pipeline schedule uses a cron expression relative to UTC time.
+# Australian Eastern Standard Time (AEST) is UTC+10, so 9pm AEST is equivalent to 11:00 UTC (21:00 - 10:00 = 11:00).
+# The cron expression for this is 0 11 * * * (minute 0, hour 11 UTC, every day, every month, every day of week).
+# However, during Australian Eastern Daylight Time (AEDT, DST), which is UTC+11, 9pm AEDT is equivalent to 10:00 UTC (21:00 - 11:00 = 10:00).
+# The cron expression for this is 0 10 * * *.
+- cron: "0 11 * * *"
+  branches:
+    include:
+    - 'debug/paas'
+  always: true # whether to always run the pipeline or only if there have been source code or pipeline settings changes since the last successful scheduled run. The default is false.
+
+variables:
+  - group: Agents
+
+stages:
+- stage: StopVMs
+  displayName: Stop VMs
+
+  jobs:
+  - template: AzureDevOps/templates/stop-agents.yml
+    parameters:
+      resourceGroup: $(agentResourceGroup)
+      baseVmName: $(agentBaseVmName)
+      vmCount: 12
+      azureSubscription: 'Azure Baking Images'

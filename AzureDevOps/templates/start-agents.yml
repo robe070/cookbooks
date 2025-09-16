@@ -1,0 +1,96 @@
+parameters:
+  - name: resourceGroup
+    type: string
+  - name: baseVmName
+    type: string
+  - name: vmCount
+    type: number
+  - name: azureSubscription
+    type: string
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+- job: StartAgents
+  displayName: 'Start Agent VMs'
+  dependsOn: ${{ parameters.dependsOn }}
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+    - task: AzurePowerShell@5
+      displayName: 'Start agent VMs in parallel'
+      inputs:
+        azureSubscription: ${{ parameters.azureSubscription }}
+        ScriptType: 'InlineScript'
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          $resourceGroup = '${{ parameters.resourceGroup }}'
+          $baseVmName = '${{ parameters.baseVmName }}'
+          $vmCount = ${{ parameters.vmCount }}
+
+          Write-Host "StartAgents Parameters:"
+          Write-Host "Resource Group: $resourceGroup"
+          Write-Host "Base VM Name: $baseVmName"
+          Write-Host "VM Count: $vmCount"
+
+          $jobs = @()
+
+          for ($i = 1; $i -le $vmCount; $i++) {
+            $vmName = "${baseVmName}$i"
+            Write-Host "Queuing start job for ${vmName}"
+            $jobs += Start-Job -ScriptBlock {
+              param($vmName, $resourceGroup)
+
+              Write-Host "Starting VM: ${vmName}"
+              try {
+                $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Status -ErrorAction SilentlyContinue
+                if ($vm) {
+                  # Extract statuses
+                  $powerStatus = $vm.Statuses | Where-Object { $_.Code -like 'PowerState/*' }
+                  $provisionStatus = $vm.Statuses | Where-Object { $_.Code -like 'ProvisioningState/*' }
+
+                  Write-Host "VM Provisioning State: $($provisionStatus.Code)"
+                  Write-Host "VM Power State: $($powerStatus.Code)"
+
+                  # Only start if it's provisioned and not running
+                  if ($provisionStatus.Code -eq 'ProvisioningState/succeeded' -and
+                      $powerStatus.Code -ne 'PowerState/running') {
+
+                      Write-Host "Starting VM '$($vm.Name)'..."
+                      Start-AzVM -Name $vm.Name -ResourceGroupName $vm.ResourceGroupName
+                      Write-Host "${vmName} started successfully."
+                  } else {
+                      Write-Host "VM '$($vm.Name)' is already running or not in a startable state."
+                  }
+                } else {
+                  Write-Host "${vmName} does not exist. Skipping."
+                }
+              } catch {
+                $_ | Out-Default | Write-Host
+                throw
+              }
+            } -ArgumentList $vmName, $resourceGroup
+          }
+
+          Write-Host "Waiting for all VM start jobs to complete..."
+          foreach ($job in $jobs) {
+            try {
+                $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+                Write-Host "Job Output:"
+                $output | Out-Default | Write-Host
+            } catch {
+                Write-Host "Caught exception from job:"
+                $_ | Out-Default | Write-Host
+                throw
+            }
+
+            if ($job.State -eq 'Failed') {
+                $err = $job.ChildJobs[0].JobStateInfo.Reason
+                Write-Host "Job failed with reason:"
+                $err | Out-Default | Write-Host
+                throw
+            }
+          }
+
+          Write-Host "All VMs started."

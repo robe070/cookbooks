@@ -1,0 +1,490 @@
+parameters:
+  - name: deploymentType
+    type: string
+    default: System
+    values:
+      - System
+      - Preview
+      - Production
+
+  # 2 ways to deploy the stack: either use lansa-stack-type-win.cfn.template or lansa-master-win.cfn.template
+  - name: templateType
+    type: string
+    default: ShoeSize
+    values:
+      - ShoeSize
+      - Master
+
+  # When the templateSource is 'url' this implies that the Marketplace templates and Images are being used.
+  - name: templateSource
+    type: string
+    default: none
+
+  - name: stageName
+    type: string
+    default: none
+
+  - name: stageDisplayname
+    type: string
+    default: none
+
+  - name: dependsOn
+    default: []
+
+  - name: jobName
+    type: string
+    default: none
+
+  - name: jobDisplayname
+    type: string
+    default: none
+
+  - name: resourceGroup
+    type: string
+    default: none
+
+  - name: msiURL
+    type: string
+    default: none
+
+  - name: stackName
+    type: string
+    default: none
+
+  - name: certificateBase64Encoded
+    type: string
+    default: none
+
+  - name: certificatePassword
+    type: string
+    default: none
+
+  - name: databaseLogin
+    type: string
+    default: none
+
+  - name: databaseLoginPassword
+    type: string
+    default: none
+
+  - name: adminUsername
+    type: string
+    default: none
+
+  - name: adminPassword
+    type: string
+    default: none
+  - name: webUsername
+    type: string
+    default: none
+  - name: webPassword
+    type: string
+    default: none
+  - name: gitBranch
+    type: string
+    default: none
+  - name: vmImage
+    type: string
+    default: Default
+  - name: baseImageName
+    type: string
+    default: none
+  - name: TemplateUrl
+    type: string
+    default: none
+  - name: AwsRegion
+    type: string
+    default: ap-southeast-2
+  - name: s3Region
+    type: string
+    default: ap-southeast-2
+  - name: paramCreateVPC
+    type: string
+    default: 'No'
+  - name: paramCurrentVPC
+    type: string
+    default: none
+  - name: paramAvailabilityZones
+    type: string
+    default: none
+  - name: paramNumberOfAZs
+    type: string
+    default: none
+  - name: paramDBSubnetGroupName
+    type: string
+    default: none
+  - name: paramELBSubnetIds
+    type: string
+    default: none
+  - name: paramStackType
+    type: string
+    default: Small
+  - name: paramLansaMSIKey
+    type: string
+    default: none
+  - name: param10LansaGitRepoBranch
+    type: string
+    default: none
+  - name: paramDBCCSID
+    type: string
+    default: ''
+  - name: paramTagValue
+    type: string
+    default: Lansa-Prod
+  - name: paramUpdateManagementScripts
+    type: string
+    default: 'Yes'
+  - name: CookbooksBranch
+    type: string
+    default: none
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    dependsOn:
+      - Init
+        # Production and Preview deployments always depend on the AddVersionToMarketplace stage so that the variables it sets can be used.
+      - ${{ if and(or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')), ne(parameters.stageName, 'ValidateTemplateURLs')) }}:
+        - AddVersionToMarketplace
+        - VersionAlreadyExists
+        # also dependent on the stage CheckTemplatesAndAMIHaveBeenUpdatedInAWSMP but that is passed in as a template parameter 'dependsOn'
+
+      - ${{ if ne(parameters.dependsOn, '') }}:
+        - ${{ parameters.dependsOn }}
+
+    displayName: ${{ parameters.stageDisplayname }}
+
+    variables:
+      - name: UserScriptHook
+        value: ''
+      - ${{ if or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}:
+        - name: MarketPlaceUpdateInterventionRequired
+          value: $[stageDependencies.AddVersionToMarketplace.AddVersion.outputs['vars.MarketPlaceUpdateInterventionRequired']]
+      - ${{ if endsWith(lower(parameters.BaseImageName), 'j') }}:
+        - name: japan_override
+          value: '-Language $(jpnLanguage)'
+        - name: isJapanese
+          value: True
+        - name: isImageType
+          value: JPN
+        - template: vars.yml
+          parameters:
+            isImageType: JPN
+      - ${{ else }}:
+        - name: japan_override
+          value: ''
+        - name: isJapanese
+          value: False
+        - name: isImageType
+          value: ENG
+        - template: vars.yml
+          parameters:
+            isImageType: ENG
+    jobs:
+      - job: ${{ parameters.jobName }}
+        displayName: ${{ parameters.jobDisplayname }}
+        timeoutInMinutes: 0
+        pool:
+          name: ${{ parameters.vmImage }}
+        # condition: and(succeeded(), eq(variables.MarketPlaceUpdateInterventionRequired, 'False')) # This pipeline variable is set in UpdateTemplatesInMarketplace.ps1 if the publication process must be restarted.
+
+        variables:
+          - name: StackName
+            value: ${{ parameters.stackName }}
+          - name: UseMarketplaceVariables
+            value: 'False'
+
+        steps:
+          - powershell: |
+              # Set scriptRepoPath and templateSourceType variables for use in later tasks in this job. This is required as including the expressions inline is not supported by Azure DevOps tasks.
+
+              $repoPath = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { '_lansa_aws-templates-mp' } else { '_lansa_aws-templates' }
+              Write-Host "##vso[task.setvariable variable=scriptRepoPath]$repoPath"
+
+              if ('${{ parameters.templateSource }}' -eq 'none') {
+                $templateSource = if ('${{ parameters.deploymentType }}' -eq 'Production' -or '${{ parameters.deploymentType }}' -eq 'Preview') { 'url' } else { 's3' }
+              } else {
+                $templateSource = '${{ parameters.templateSource }}'
+              }
+              Write-Host "##vso[task.setvariable variable=templateSourceType]$templateSource"
+
+              $StackName = '${{ parameters.stageName }}' -replace "_", "-"
+              Write-Host "##vso[task.setvariable variable=StackName]$StackName"
+
+              # Debugging code for when the initialise script is NOT run in the Azure DevOps pipeline.
+              # Create a VersionDigits variable if it does not already exist so that it can be used in the SetMarketplaceVariables.ps1 script.
+              if ( '$(VersionDigits)' -eq '') {
+                $VersionDigits = '19'
+                Write-Host "##vso[task.setvariable variable=VersionDigits]$VersionDigits"
+              }
+
+              # Create a version variable if it does not already exist so that it can be used in the SetMarketplaceVariables.ps1 script.
+              if ( '$(version)' -eq '') {
+                $version = 'w19d-15-0-19'
+                Write-Host "##vso[task.setvariable variable=version]$version"
+              }
+
+            displayName: 'Set scriptRepoPath and templateSourceType and StackName variables'
+
+          - template: AWSInitRepos.yml
+            parameters:
+              gitRepoWriteAccess: false
+              checkoutTemplateMPRepo: ${{ or(eq(parameters.deploymentType, 'Production'), eq(parameters.deploymentType, 'Preview')) }}
+
+          - powershell: |
+              Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version);" | Out-Default
+            displayName: 'Output Gate Global Variables'
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Cleanup CFN Template $(StackName)'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
+              arguments: '-Gatestack $(StackName)'
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Set CFN Parameter Variables from Marketplace inputs'
+            condition: and(succeeded(), eq(variables.templateSourceType, 'url'))
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/SetMarketplaceVariables.ps1'
+              arguments:
+                -Version '$(version)'
+                -TemplateType '${{ parameters.templateType }}'
+
+          - task: PowerShell@2
+            displayName: 'Set CFN Parameter Variables'
+            inputs:
+              targetType: inline
+              script: |
+                $deploymentType = "${{ parameters.deploymentType }}"
+                if ($deploymentType -eq 'Production') {
+                  $lansaGitRepoBranch = '$(CookbooksBranchProduction)'
+                } elseif ($deploymentType -eq 'Preview') {
+                  $lansaGitRepoBranch = '$(CookbooksBranchPreview)'
+                } else {
+                  $lansaGitRepoBranch = '${{ parameters.param10LansaGitRepoBranch }}'
+                }
+                Write-Host "##vso[task.setvariable variable=LansaGitRepoBranch]$lansaGitRepoBranch"
+
+                $ImageId = "$(ImageId)"
+                if ( '$(UseMarketplaceVariables)' -eq 'True' ) {
+                  $TemplateUrl = "$(TemplateUrl)"
+                  $MPS3KeyPrefix = "$(MPS3KeyPrefix)"
+                  $MPS3BucketName = "$(MPS3BucketName)"
+                  $MPS3BucketRegion = "$(MPS3BucketRegion)"
+                } else {
+                  $MPS3BucketRegion = '${{ parameters.AwsRegion }}'
+                  $MPS3BucketName = 'lansa'
+                  # The template path branch name used is one ahead of the actual branch being used. Its like 'we are testing it for publishing to Preview'
+                  # And its still to be determined what the values for template location will be once the templates are in Preview and then in Production.
+                  if ('${{ parameters.deploymentType }}' -eq 'System') {
+                    $MPS3KeyPrefix = 'templates/$(CookbooksBranchPreview)/'
+                  } else {
+                    $MPS3KeyPrefix = 'templates/$(CookbooksBranchProduction)/'
+                  }
+                  Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
+
+                  if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
+                    $TemplateFilename = 'lansa-stack-type-win.cfn.template'
+                  } else {
+                    $TemplateFilename = 'lansa-master-win.cfn.template'
+                  }
+                  Write-Host "##vso[task.setvariable variable=TemplateFilename]$TemplateFilename"
+                }
+
+                Write-Host "All non Sydney regions use create a VPC. VPC params provided are only there so that template validation passes. To use an existing VPC an existing DB Subnet Group must also be specified, and we do not have one. "
+                $CreateVPC = '${{ parameters.paramCreateVPC }}'
+                if ( '${{ parameters.AwsRegion }}' -ne 'ap-southeast-2' ) {
+                  $CreateVPC = 'Yes'
+                }
+
+                if ('${{ parameters.paramCurrentVPC }}' -eq 'none') {
+                  $currentVPC = '$(CurrentVPC)'
+                } else {
+                  $currentVPC = '${{ parameters.paramCurrentVPC }}'
+                }
+                Write-Host "##vso[task.setvariable variable=CurrentVPC]$currentVPC"
+
+                if ('${{ parameters.paramAvailabilityZones }}' -eq 'none') {
+                  $availabilityZones = '$(AvailabilityZones)'
+                } else {
+                  $availabilityZones = '${{ parameters.paramAvailabilityZones }}'
+                }
+                Write-Host "##vso[task.setvariable variable=AvailabilityZones]$availabilityZones"
+
+                if ('${{ parameters.paramNumberOfAZs }}' -eq 'none') {
+                  $numberOfAZs = '$(NumberOfAZs)'
+                } else {
+                  $numberOfAZs = '${{ parameters.paramNumberOfAZs }}'
+                }
+                Write-Host "##vso[task.setvariable variable=NumberOfAZs]$numberOfAZs"
+
+                if ('${{ parameters.paramDBSubnetGroupName }}' -eq 'none') {
+                  $DBSubnetGroupName = '$(DBSubnetGroupName)'
+                } else {
+                  $DBSubnetGroupName = '${{ parameters.paramDBSubnetGroupName }}'
+                }
+                Write-Host "##vso[task.setvariable variable=DBSubnetGroupName]$DBSubnetGroupName"
+
+                if ('${{ parameters.paramELBSubnetIds }}' -eq 'none') {
+                  $elbSubnetIds = '$(ELBSubnetIds)'
+                } else {
+                  $elbSubnetIds = '${{ parameters.paramELBSubnetIds }}'
+                }
+                Write-Host "##vso[task.setvariable variable=ELBSubnetIds]$elbSubnetIds"
+
+                # Note that $(UserScriptHook) is set in the SetMarketplaceVariables.ps1 script when marketplace variables are being used.
+                # Otherwise it is not used as the templates default to not using a user script.
+
+                $templateParams = @(
+                    @{
+                        ParameterKey = "10LansaGitRepoBranch"
+                        ParameterValue = "$LansaGitRepoBranch"
+                    },
+                    @{
+                        ParameterKey = "ImageId"
+                        ParameterValue = "$ImageId"
+                    },
+                    @{
+                        ParameterKey = "MPS3BucketRegion"
+                        ParameterValue = "$MPS3BucketRegion"
+                    },
+                    @{
+                        ParameterKey = "MPS3BucketName"
+                        ParameterValue = "$MPS3BucketName"
+                    },
+                    @{
+                        ParameterKey = "MPS3KeyPrefix"
+                        ParameterValue = $MPS3KeyPrefix
+                    },
+                    @{
+                        ParameterKey = "$(DBPasswordKey)"
+                        ParameterValue = "$(DBPasswordValue)"
+                    },
+                    @{
+                        ParameterKey = "$(WebPasswordKey)"
+                        ParameterValue = "$(WebPasswordValue)"
+                    },
+                    @{
+                        ParameterKey = "$(KeyNameKey)"
+                        ParameterValue = "$(KeyNameValue)"
+                    },
+                    @{
+                        ParameterKey = "$(RemoteAccessLocationKey)"
+                        ParameterValue = "$(RemoteAccessLocationValue)"
+                    },
+                    @{
+                        ParameterKey = "$(LansaMSIKey)"
+                        ParameterValue = "${{ parameters.paramLansaMSIKey }}"
+                    },
+                    @{
+                        ParameterKey = "27TriggerPatchInstall"
+                        ParameterValue = "0"
+                    },
+                    @{
+                        ParameterKey = "CreateVPC"
+                        ParameterValue = "$CreateVPC"
+                    },
+                    @{
+                        ParameterKey = "CurrentVPC"
+                        ParameterValue = "$CurrentVPC"
+                    },
+                    @{
+                        ParameterKey = "AvailabilityZones"
+                        ParameterValue = "$AvailabilityZones"
+                    },
+                    @{
+                        ParameterKey = "NumberOfAZs"
+                        ParameterValue = "$NumberOfAZs"
+                    },
+                    @{
+                        ParameterKey = "DBSubnetGroupName"
+                        ParameterValue = "$DBSubnetGroupName"
+                    },
+                    @{
+                        ParameterKey = "ELBSubnetIds"
+                        ParameterValue = "$ELBSubnetIds"
+                    },
+                    @{
+                        ParameterKey = "03DBUsername"
+                        ParameterValue = "$(03DBUsername)"
+                    },
+                    @{
+                        ParameterKey = "DBCCSID"
+                        ParameterValue = "${{ parameters.paramDBCCSID }}"
+                    },
+                    @{
+                        ParameterKey = "TagValue"
+                        ParameterValue = "${{ parameters.paramTagValue }}"
+                    },
+                    @{
+                        ParameterKey = "17UserScriptHook"
+                        ParameterValue = "$(UserScriptHook)"
+                    },
+                    @{
+                        ParameterKey = "UpdateManagementScripts"
+                        ParameterValue = "${{ parameters.paramUpdateManagementScripts }}"
+                    }
+                )
+
+                if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
+                    $templateParams = @(
+                        @{
+                            ParameterKey = "StackType"
+                            ParameterValue = "${{ parameters.paramStackType }}"
+                        }
+                    ) + $templateParams
+                }
+
+                $templateParamsJson = $templateParams | ConvertTo-Json -Compress
+                Write-Host "##vso[task.setvariable variable=TemplateParameters]$templateParamsJson"
+
+          - task: AmazonWebServices.aws-vsts-tools.CloudFormationCreateOrUpdateStack.CloudFormationCreateOrUpdateStack@1
+            displayName: 'CFN Template deployment - $(StackName)'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              stackName: '$(StackName)'
+              templateSource: $(templateSourceType)   # Note that when this parameter is 'url' then the templateUrl parameter is used. When its 's3' then the s3BucketName and s3ObjectKey parameters are used.
+              templateUrl: '$(TemplateUrl)'
+              s3BucketName: 'lansa'
+              s3ObjectKey: '$(MPS3KeyPrefix)$(TemplateFilename)'
+              templateParametersSource: inline
+              templateParameters: $(TemplateParameters)
+              tags: 'usage=temp-test'
+              onFailure: 'DO_NOTHING'
+              timeoutInMins: 100
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Test Image Version'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/AlternateImageVersion.ps1'
+              arguments:
+                -Gatestack '$(StackName)'
+                -Gateversion '$(version)'
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Test CFN Deployment: URL Tests - $(StackName)'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/TestCFNDeployment.ps1'
+              arguments:
+                -GateStack $(StackName)
+                -DisableIntegratorTest
+                $(japan_override)
+
+          - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
+            displayName: 'Cleanup CFN Template: $(StackName)'
+            inputs:
+              awsCredentials: AzureDevOps
+              regionName: ${{ parameters.AwsRegion }}
+              filePath: '$(Pipeline.Workspace)/$(scriptRepoPath)/scripts/DeletePreviousFailedStack.ps1'
+              arguments:
+                -Gatestack '$(StackName)'
+              ignoreLASTEXITCODE: true
+            continueOnError: true

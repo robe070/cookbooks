@@ -82,6 +82,7 @@ stages:
             value: Deploy ARM Template
         - name: ConnectedServiceName
           value: Azure Baking Images
+        JobTag: 'test-temp'
 
       pool:
         vmImage: ${{ parameters.jobImage }}
@@ -197,13 +198,15 @@ stages:
           addSpnToEnvironment: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
-      - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-        displayName: 'Azure Resource Group Tagging'
-        inputs:
-          ConnectedServiceName: 'Azure Baking Images'
-          ResourceGroupName: '$(Gate.StackName)'
-          Key: Usage
-          Value: 'test-temp'
+      - task: PowerShell@2
+      name: ''
+      displayName: 'Tag RG'
+      inputs:
+        targetType: inline
+        script: >-
+          Write-Host "Tagging '$(Gate.StackName)' with Usage = '$(JobTag)'" | Out-Default | Write-Host
+
+          Set-AzResourceGroup -Name '$(Gate.StackName)' -Tag @{ Usage = '$(JobTag)' }
         continueOnError: true
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 

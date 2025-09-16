@@ -189,6 +189,7 @@ stages:
     SqlDeploymentName: mysql1Test
     stackName: MYSQLVMSS
     version: w19d-15-0
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestTemplateValidationMSSQLandMYSQL.yml
   parameters:
@@ -208,6 +209,7 @@ stages:
     SqlDeploymentName: mssqls1Test
     stackName: MSSQLVMSS
     version: w19d-16-0
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -228,13 +230,13 @@ stages:
     SqlDeploymentName: DevStack
     stackName: DevSt
     version: w19d-15-0
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     edition: Serverless
     dbMinCapacity: 0.5
     maxSizeBytes: 10737418240
     applicationGatewayCapacity: 1
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -251,7 +253,6 @@ stages:
     SqlDeploymentName: TestStack
     stackName: TestSt
     version: w16d-16-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     keyVaultEnabled: 'true'
@@ -259,6 +260,7 @@ stages:
     serverlessDbCapacity: 4
     dbMinCapacity: 0.5
     maxSizeBytes: '107374182400'
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -276,10 +278,10 @@ stages:
     SqlDeploymentName: SmallStack
     stackName: SmallSt
     version: w19d-15-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 536870912000
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -297,12 +299,12 @@ stages:
     SqlDeploymentName: MediumStack
     stackName: MedSt
     version: w16d-15-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B12ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 1099511627776
     autoScaleMinCapacity: 1
     autoScaleMaxCapacity: 15
+    imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
@@ -321,7 +323,6 @@ stages:
     edition: Premium
     stackName: LargeSt
     version: w19d-16-0j
-    imageReleaseState: $(imageReleaseState)
     virtualMachineSize: Standard_B20ms
     dbVirtualMachineSize: Standard_B2ms
     dbMinCapacity: 0
@@ -332,6 +333,7 @@ stages:
     enableAutoscaling: true
     autoScaleMinCapacity: 2
     autoScaleMaxCapacity: 30
+    imageReleaseState: Preview
 
 - stage: ProductionStage
   displayName: Production Stage
@@ -341,7 +343,7 @@ stages:
     - AUSSQLAZURE4DBw19d150
     - AUSSQLAZURE5DBw16d150
     # - AUSSQLAZURE6DBw22r2d150
-    - AUSMYSQL1DBw19d150
+    # - AUSMYSQL1DBw19d150  # MYSQL Single Server no longer supported on Azure
     - AUSMSSQLS1DBw19d160
     - AUSDevShoe_WithKeyVaultCert_Sizesw19d150
     - AUSTestShoe_WithKeyVaultCert_Sizesw16160j
@@ -357,7 +359,7 @@ stages:
     - task: ManualValidation@0
       displayName: 'Manual Validation: Production Template'
       inputs:
-        instructions: "Deploy the template to the Production Stage"
+        instructions: "Test that the Preview Solution Template links work and have the expected UI fixes. Deploy the template to the Production Stage"
         onTimeout: 'reject'
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
@@ -504,11 +506,18 @@ stages:
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
-        arguments: '-GitBranch ''$(TemplatesBranchLive)'' -GitURL ''https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(TemplatesGitHubName)'' -GitUserEmail ''$(GitUserEmail)'' -GitUserName ''$(GitUserName)'' -GitRepoName ''$(TemplatesSourceAlias)'''
+        arguments:
+          -GitBranch '$(TemplatesBranchLive)'
+          -GitURL 'https://$(GitRobe070CookbooksPAT):x-oauth-basic@$(TemplatesGitHubName)'
+          -GitUserEmail '$(GitUserEmail)'
+          -GitUserName '$(GitUserName)'
+          -GitRepoPath '$(TemplatesSourceAlias)'
 
     - task: PowerShell@2
       displayName: 'Tag Git repo'
       inputs:
         targetType: filePath
         filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
-        arguments: '-GitRepoName ''$(TemplatesSourceAlias)'' -Tags ''AzureTemplate-Publish-$(Build.BuildNumber)-$(Gate.Sku)'''
+        arguments:
+          -GitRepoName '$(TemplatesSourceAlias)'
+          -Tags 'AzureTemplate-Publish-$(Build.BuildNumber)-$(Gate.Sku)'

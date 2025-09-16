@@ -23,29 +23,26 @@ if (Test-Path $path) {
     }
     Write-Host "Clean version = $VersionClean"
 
-    $stackname = "$env:RESOURCEGROUPNAME-PubCloudAccountId-$env:LANSA_JOBNAME"
+    $stackname = "$($env:RESOURCEGROUPNAME)-PubImages-$($env:LANSA_JOBNAME)"
     Write-Host "StackName is $stackname"
 
-    $rawUri = Get-Content -Path $path -Raw
-    Write-Host "ImageUrl is $rawUri"
-    $rawUri -match '[\w-]+\.vhd'
-    $ImageName = $Matches[0]
-    Write-Host "ImageName value is $ImageName"
-
-    $Matches[0] -match '[^.]+'
-    $sku = $Matches[0]
+    $Uri = Get-Content -Path $path -Raw
+    Write-Host "ImageUrl is $Uri"
+    # Extract the minor version from the ImageUrl string e.g. /subscriptions/739c4e86-bd75-4910-8d6e-d7eb23ab94f3/resourceGroups/BakingDP/providers/Microsoft.Compute/galleries/LansaGallery/images/w16d-16-0/versions/16.0.21
+    $versionNumber = ($Uri -split '/versions/')[1]
+    $minorVersion = ($versionNumber -split '\.')[2]
+    $sku = "$($Version)-$($minorVersion)"
     Write-Host "SKU is $sku"
 
     Write-Host "##vso[task.setvariable variable=Sku;isOutput=true]$sku"
-    $uri = "/subscriptions/$env:SUBSCRIPTIONID/resourceGroups/$env:RESOURCEGROUPNAME/providers/Microsoft.Compute/images/$($Matches[0])image"
     # Set Variables
     Write-Host "##vso[task.setvariable variable=StackName;isOutput=true]$stackname"
-    Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$uri"
+    Write-Host "##vso[task.setvariable variable=ImageUrl;isOutput=true]$Uri"
     Write-Host "##vso[task.setvariable variable=IsEnabled;isOutput=true]True"
     Write-Host "##vso[task.setvariable variable=osName;isOutput=true]$osName"
     Write-Host "##vso[task.setvariable variable=Version;isOutput=true]$Version"
     Write-Host "##vso[task.setvariable variable=VersionClean;isOutput=true]$VersionClean"
-    Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $uri"
+    Write-host "The value of Variable IsEnabled is updated to True and output variable ImageUrl to $Uri and StackName to $stackname"
 } else {
     Write-Host "Artifact path does NOT exist for $Version"
 }

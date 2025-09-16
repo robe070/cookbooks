@@ -68,7 +68,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V15-OLD'], 'true'), eq(variables['Build-all'], 'true'))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
     paramTagValue: "Lansa-Prod"
@@ -82,7 +82,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V15-NEW'], 'True'), eq(variables['Build-all'], 'True'))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariableCloudAccountId.ps1'
     paramTagValue: "Lansa-Prod"
@@ -97,7 +97,7 @@ stages:
     jobDemand: DotNetFramework
     jobcondition: or(eq(variables['Build-V14SP2-Scalable'], 'True'), eq(variables['Build-all'], 'True'))
     paramLansaVersion: $(lansaVersionPrevious)
-    parammsiURL: $(msiURLPrevious)
+    parammsiURL: $(msiURLv16)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"
@@ -112,7 +112,7 @@ stages:
     # Disable this job until CCS 164246 is incorporated into the MSI.
     jobcondition: and(False, or(eq(variables['Build-V15-Scalable'], 'True'), eq(variables['Build-all'], 'True')))
     paramLansaVersion: $(lansaVersion)
-    parammsiURL: $(msiURLLatest)
+    parammsiURL: $(msiURLv15)
     paramWebserverOSVersionValue: $(WebserverOSLatestVersionValue)
     paramsetGateVariable: 'SetGateVariable.ps1'
     paramTagValue: "Lansa-Prod"

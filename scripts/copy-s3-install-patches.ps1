@@ -14,7 +14,7 @@ param(
 [String]$webpassword = 'PCXUSER@122',
 [String]$SUDB = '1',
 [String]$bucket_name='lansa',
-[String]$region='ap-southeast-2',
+[String]$region='ap-southeast-2', # This setting is ignored - the actual region is obtained from the bucket
 [String]$access_key,
 [String]$secret_key,
 [String]$folder='/change me',
@@ -29,13 +29,15 @@ try
 
     [int]$InstalledPatchCount = 0
 
-    # Clear-AWSCredentials -StoredCredentials lansa
-
-    # Set-AWSCredentials -AccessKey $access_key -SecretKey $secret_key -StoreAs lansa
-    # Initialize-AWSDefaults -ProfileName lansa -Region $region
-
-    $FileList = Get-S3Object -BucketName $bucket_name -Key $folder
-    $FileList | ft -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
+    try {
+        $bucketLocation = Get-S3BucketLocation -BucketName $bucket_name -ErrorAction Stop
+    } catch {
+        Write-Host "WARNING: Cannot access bucket location for patches. If necessary, please correct by updating the stack"
+        cmd /c exit 0
+    }
+    $region = if (-not $bucketLocation -or $bucketLocation.value -eq "") { "us-east-1" } else { $bucketLocation.Value }
+    $FileList = Get-S3Object -BucketName $bucket_name -Key $folder -Region $region
+    $FileList | Format-Table -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
     foreach( $file in $FileList )
     {
         $patch_installed = $false
@@ -103,8 +105,6 @@ try
             Write-Host $output
         }
     }
-
-    # Clear-AWSCredentials -StoredCredentials lansa | Out-Default | Write-Host
 
     if ( $InstalledPatchCount -gt 0 )
     {

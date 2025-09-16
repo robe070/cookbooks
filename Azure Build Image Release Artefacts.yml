@@ -16,7 +16,7 @@ variables:
     value: $False
 
   - name: VersionText
-    value: 18
+    value: 22
 
   - name: ScriptTimeout
     value: 360

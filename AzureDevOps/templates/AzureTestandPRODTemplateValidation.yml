@@ -34,13 +34,13 @@ parameters:
   - name: osName
     type: string
     default: none
-  - name: lansaVersion 
+  - name: lansaVersion
     type: string
     default: none
-  - name: requestedServiceObjectiveName  
+  - name: requestedServiceObjectiveName
     type: string
     default: S2
-  - name: msiURL  
+  - name: msiURL
     type: string
     default: none
   - name: databaseNewOrExisting
@@ -64,7 +64,7 @@ parameters:
   - name: keyVaultEnabled
     type: string
     default: 'false'
-  - name: edition  
+  - name: edition
     type: string
     default: Standard
   - name: serverlessDbCapacity
@@ -113,30 +113,32 @@ stages:
     - job: ${{ parameters.jobName }}
       timeoutInMinutes: 120
       variables:
+        - name: JobTag
+          value: 'test-temp'
         - name: ResourceGroup
           value: ${{ parameters.resourceGroup }}
         - name: ConnectedServiceName
           value: 'Azure Baking Images'
         - name: CollationJPN
-          ${{ if contains(parameters.osName, 'JPN') }}: 
+          ${{ if contains(parameters.osName, 'JPN') }}:
             value: -collation "$(Collation_JPN)"
           ${{ else }}:
             value: ''
         - name: LanguageJPN
-          ${{ if contains(parameters.osName, 'JPN') }}: 
+          ${{ if contains(parameters.osName, 'JPN') }}:
             value: -Language "$(jpnLanguage)"
           ${{ else }}:
             value: ''
         - name: additionalOverrideParameters
-          ${{ if eq(parameters.stageName, 'AUSDevShoe_WithKeyVaultCert_Sizesw19d150') }}: 
+          ${{ if eq(parameters.stageName, 'AUSDevShoe_WithKeyVaultCert_Sizesw19d150') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}"'
-          ${{ elseif eq(parameters.stageName, 'AUSTestShoe_WithKeyVaultCert_Sizesw16142j') }}:
+          ${{ elseif eq(parameters.stageName, 'AUSTestShoe_WithKeyVaultCert_Sizesw16160j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -serverlessDbCapacity ${{ parameters.serverlessDbCapacity }} -dbMinCapacity "${{ parameters.dbMinCapacity }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity "${{ parameters.applicationGatewayCapacity }}" -keyVaultName "$(keyVaultName)" -keyVaultCertificateName "$(keyVaultCertificateName)" -keyVaultRGName "BakingDP" '
           ${{ elseif eq(parameters.stageName, 'AUSSmallStackShoeSizesw19d150j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -applicationGatewayCapacity ${{ parameters.applicationGatewayCapacity }} '
           ${{ elseif eq(parameters.stageName, 'AUSMediumStackShoeSizesw16d150j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity ${{ parameters.autoScaleMinCapacity }} -autoScaleMaxCapacity ${{ parameters.autoScaleMaxCapacity }} '
-          ${{ elseif eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d142j') }}:
+          ${{ elseif eq(parameters.stageName, 'AUSLargeStackShoeSizesw19d160j') }}:
             value: '-virtualMachineSize "${{ parameters.virtualMachineSize }}" -dbVirtualMachineSize "${{ parameters.dbVirtualMachineSize }}" -keyVaultEnabled "${{ parameters.keyVaultEnabled }}" -maxSizeBytes "${{ parameters.maxSizeBytes }}" -enableAutoscaling true -autoScaleMinCapacity "${{ parameters.autoScaleMinCapacity }}" -autoScaleMaxCapacity "${{ parameters.autoScaleMaxCapacity }}" '
           ${{ else }}:
             value: ''
@@ -162,6 +164,17 @@ stages:
           path: _robe070_cookbooks
 
         - task: PowerShell@2
+          name: ''
+          displayName: 'Validate stageName parameter'
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host("additionalOverrideParameters = $additionalOverrideParameters")
+              Write-Warning "StageName parameter ${{ parameters.stageName }} is not a supported value so Override Parameters has been set to null."
+          continueOnError: true
+          condition: and(succeeded(), eq(lower(variables['additionalOverrideParameters']), ''))
+
+        - task: PowerShell@2
           name: Gate
           displayName: 'Artifact Check: Set Gate Variable'
           inputs:
@@ -170,8 +183,8 @@ stages:
             arguments: -Version "${{ parameters.version }}" -osName "${{ parameters.osName }}"
 
         - powershell: |
-            # Print the Gate variables. 
-            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
+            # Print the Gate variables.
+            Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)"
           displayName: 'Artifact Check : Output Gate Variable'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
@@ -212,19 +225,27 @@ stages:
 
         - powershell: |
             # Print the Deployment Output
-            Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+            Write-Host "$(deploymentOutput)"
           displayName: 'Print Deployment Output'
           condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
-        - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
-          displayName: 'Azure Resource Group Tagging'
+        - task: PowerShell@2
+          name: ''
+          displayName: Azure Login
           inputs:
-            ConnectedServiceName: $(ConnectedServiceName)
-            ResourceGroupName: '$(ResourceGroup)'
-            Key: Usage
-            Value: 'test-temp'
+            filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/AzureLogin.ps1'
+            arguments: -CloudAccount $(azureUserId) -CloudSecret (ConvertTo-SecureString "$(clientSecret)" -AsPlainText -force)
+            workingDirectory: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts'
+
+        - task: PowerShell@2
+          name: ''
+          displayName: 'Tag RG'
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host "Tagging $(ResourceGroup) with Usage = '$(JobTag)'"
+              Set-AzResourceGroup -Name $(ResourceGroup) -Tag @{ Usage = '$(JobTag)' }
           continueOnError: true
-          condition: and(succeeded(), eq(lower(variables['Gate.IsEnabled']), 'true'))
 
         - task: PowerShell@2
           displayName: 'Test ARM Deployment: URL Tests'

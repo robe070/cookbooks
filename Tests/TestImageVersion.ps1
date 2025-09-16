@@ -9,7 +9,8 @@ IMPORTANT:" To be run in a new instance created from the baked image, NOT while 
 
 #>
 Param(
-    [Parameter(Mandatory=$true)] [String] $ImgName
+    [Parameter(Mandatory=$true)]
+    [String] $ImgName
 )
 . "c:\lansa\scripts\dot-CommonTools.ps1"
 

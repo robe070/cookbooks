@@ -1,0 +1,62 @@
+# See scripts/SetVersionVariables.ps1 for more information on how these variables have been created
+# and how to use them in a pipeline.
+#
+# isImageType parameter chooses which image to use, unless it doesn't matter,
+# for example when the VersionDigits is the only value that will be used
+# Publish Image pipeline only uses the VersionDigits value in the last stage when
+# applying the git tag. Otherwise none of the image variables are used
+# The Image variables are mostly for the use of the template pipeline which runs
+# all the tests, provided that both a JPN image and an ENG image have been built.
+parameters:
+  - name: isImageType
+    type: string
+    default: ENG
+    values:
+      - ENG
+      - JPN
+      - EITHER
+
+variables:
+  - name: Build-w19d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0']]
+  - name: Build-w19d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-15-0j']]
+  - name: Build-w19d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0']]
+  - name: Build-w19d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w19d-16-0j']]
+  - name: Build-w22d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0']]
+  - name: Build-w22d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-15-0j']]
+  - name: Build-w22d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0']]
+  - name: Build-w22d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w22d-16-0j']]
+  - name: Build-w25d-15-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0']]
+  - name: Build-w25d-15-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-15-0j']]
+  - name: Build-w25d-16-0
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0']]
+  - name: Build-w25d-16-0j
+    value: $[stageDependencies.Init.Init.outputs['vars.Build-w25d-16-0j']]
+
+  - ${{ if or(eq(parameters.isImageType, 'JPN'), eq(parameters.isImageType, 'EITHER')) }}:
+    - name: Version
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.version']]
+    - name: VersionDigits
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.VersionDigits']]
+    - name: ImageID
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.ImageID']]
+    - name: IsEnabled
+      value: $[stageDependencies.Init.Init.outputs['JPNImageVars.IsEnabled']]
+  - ${{ if or(eq(parameters.isImageType, 'ENG'), eq(parameters.isImageType, 'EITHER')) }}:
+    - name: Version
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.version']]
+    - name: VersionDigits
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.VersionDigits']]
+    - name: ImageID
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.ImageID']]
+    - name: IsEnabled
+      value: $[stageDependencies.Init.Init.outputs['ENGImageVars.IsEnabled']]
