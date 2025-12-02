@@ -120,7 +120,7 @@ jobs:
               $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
               if (-not $pip) {
                 $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
-                  -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+                  -Location $location -AllocationMethod Dynamic -Sku Standard -Force
               }
 
               # Create NIC
