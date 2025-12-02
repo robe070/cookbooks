@@ -6,6 +6,8 @@ variables:
 # - group: Agents
 - name: location
   value: 'eastus'
+- name: agentResourceGroup
+  value: 'AzureDevOps'
 - name: vmCount
   value: 12
 - name: adminUsername
