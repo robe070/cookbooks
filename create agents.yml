@@ -2,8 +2,8 @@ trigger:
 - none  # Manual trigger only
 
 variables:
-- group: Logins
-- group: Agents
+- group: Azure Logins
+# - group: Agents
 - name: location
   value: 'eastus'
 - name: vmCount
