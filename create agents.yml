@@ -8,6 +8,8 @@ variables:
   value: 'eastus'
 - name: agentResourceGroup
   value: 'AzureDevOps'
+- name: agentBaseVmName
+  value: Agent
 - name: vmCount
   value: 12
 - name: adminUsername
@@ -122,7 +124,7 @@ jobs:
               $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
               if (-not $pip) {
                 $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
-                  -Location $location -AllocationMethod Dynamic -Sku Standard -Force
+                  -Location $location -AllocationMethod Static -Sku Standard -Force
               }
 
               # Create NIC
