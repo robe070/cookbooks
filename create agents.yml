@@ -233,6 +233,7 @@ jobs:
                   Stop-Process -Name Explorer -Force -ErrorAction SilentlyContinue
                   Write-Host "IE Enhanced Security Configuration (ESC) has been disabled." -ForegroundColor Green
                 }
+
                 $ErrorActionPreference = 'Stop'
                 $poolName = '$(agentPoolName)'
                 $org = "VisualLansa"
@@ -268,7 +269,8 @@ jobs:
 
                         try {
                             $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                            $poolList | Out-Default | Write-Host
+                            # Show returned pools
+                            $poolList.value | Format-Table id, name | Out-Default | Write-Host
                         } catch {
                             $_ | Out-Default | Write-Host
                             throw
@@ -292,7 +294,8 @@ jobs:
 
                         try {
                             $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                            $agents | Out-Default | Write-Host
+                            # Display agents neatly
+                            $agents.value | Format-Table id, name, version, status, enabled  | Out-Default | Write-Host
                         } catch {
                             $_ | Out-Default | Write-Host
                             throw
