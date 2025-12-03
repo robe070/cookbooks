@@ -413,7 +413,7 @@ jobs:
         }
         Write-Host "Rebooting all VMs to complete installation..."
         $ScriptBlock = {
-            Restart-Computer -Delay 5 -Force
+            Restart-Computer -Wait -Delay 5 -Force
         }
         for ($i = 1; $i -le $vmCount; $i++) {
             $vmName = "${baseVmName}$i"
