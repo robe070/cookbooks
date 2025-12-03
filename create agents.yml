@@ -412,11 +412,13 @@ jobs:
           }
         }
         Write-Host "Rebooting all VMs to complete installation..."
+        $ScriptBlock = {
+            Restart-Computer -Delay 5 -Force
+        }
         for ($i = 1; $i -le $vmCount; $i++) {
             $vmName = "${baseVmName}$i"
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptBlock {
-                Restart-Computer -Delay 5 -Force
-            } -Parameter @{ vmName=$vmName; adminUsername=$adminUsername; adminPassword=$adminPassword; AzurePAT=$AzurePAT }
+            $Script = [scriptblock]::create($ScriptBlock)
+            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $Script
             $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
         }
         Write-Host "All agents installed and VMs rebooted."
