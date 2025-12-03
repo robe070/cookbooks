@@ -385,6 +385,7 @@ jobs:
 
             } catch {
               $_ | Out-Default | Write-Host
+              exit 1
               throw
             } # Job Script Block
 
