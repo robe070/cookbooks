@@ -324,7 +324,7 @@ jobs:
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
-                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip"
+                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.266.0/vsts-agent-win-x64-4.266.0.zip"
                         Write-Host "Downloading $AgentInstallUri"
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip
