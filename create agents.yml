@@ -136,7 +136,7 @@ jobs:
               }
 
               # VM Config
-              $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
+              $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_F2s_v2' |
                 Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $adminCred -ProvisionVMAgent -EnableAutoUpdate |
                 Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
                 Add-AzVMNetworkInterface -Id $nic.Id |
@@ -324,7 +324,7 @@ jobs:
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
-                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.266.0/vsts-agent-win-x64-4.266.0.zip"
+                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.264.2/vsts-agent-win-x64-4.264.2.zip"
                         Write-Host "Downloading $AgentInstallUri"
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip
@@ -411,3 +411,12 @@ jobs:
               throw
           }
         }
+        Write-Host "Rebooting all VMs to complete installation..."
+        for ($i = 1; $i -le $vmCount; $i++) {
+            $vmName = "${baseVmName}$i"
+            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptBlock {
+                Restart-Computer -Delay 5 -Force
+            } -Parameter @{ vmName=$vmName; adminUsername=$adminUsername; adminPassword=$adminPassword; AzurePAT=$AzurePAT }
+            $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
+        }
+        Write-Host "All agents installed and VMs rebooted."
