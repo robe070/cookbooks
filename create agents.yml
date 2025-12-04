@@ -11,7 +11,7 @@ variables:
 - name: agentBaseVmName
   value: Agent
 - name: vmCount
-  value: 12
+  value: 10
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
