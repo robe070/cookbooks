@@ -2,12 +2,16 @@ trigger:
 - none  # Manual trigger only
 
 variables:
-- group: Logins
-- group: Agents
+- group: Azure Logins
+# - group: Agents
 - name: location
   value: 'eastus'
+- name: agentResourceGroup
+  value: 'AzureDevOps'
+- name: agentBaseVmName
+  value: Agent
 - name: vmCount
-  value: 12
+  value: 6
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -120,7 +124,7 @@ jobs:
               $pip = Get-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup -ErrorAction SilentlyContinue
               if (-not $pip) {
                 $pip = New-AzPublicIpAddress -Name $pipName -ResourceGroupName $resourceGroup `
-                  -Location $location -AllocationMethod Dynamic -Sku Basic -Force
+                  -Location $location -AllocationMethod Static -Sku Standard -Force
               }
 
               # Create NIC
@@ -132,7 +136,7 @@ jobs:
               }
 
               # VM Config
-              $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_D2s_v3' |
+              $vmConfig = New-AzVMConfig -VMName $vmName -VMSize 'Standard_F2s_v2' |
                 Set-AzVMOperatingSystem -Windows -ComputerName $vmName -Credential $adminCred -ProvisionVMAgent -EnableAutoUpdate |
                 Set-AzVMSourceImage -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2022-datacenter' -Version 'latest' |
                 Add-AzVMNetworkInterface -Id $nic.Id |
@@ -220,6 +224,16 @@ jobs:
                     [string]$adminPassword,
                     [string]$AzurePAT
                 )
+                # Function to Disable Internet Explorer download protection which breaks the Agent install
+                function Disable-IEESC {
+                  $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+                  $UserKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+                  Set-ItemProperty -Path $AdminKey -Name "IsInstalled" -Value 0
+                  Set-ItemProperty -Path $UserKey -Name "IsInstalled" -Value 0
+                  Stop-Process -Name Explorer -Force -ErrorAction SilentlyContinue
+                  Write-Host "IE Enhanced Security Configuration (ESC) has been disabled." -ForegroundColor Green
+                }
+
                 $ErrorActionPreference = 'Stop'
                 $poolName = '$(agentPoolName)'
                 $org = "VisualLansa"
@@ -234,6 +248,8 @@ jobs:
                       stop-transcript -EA Ignore | Out-Null
                       Start-Transcript -Path $LogFile -Force
                     }
+
+                    Disable-IEESC
 
                     if (-not (Test-Path C:\agent\config.cmd))
                     #if ((Test-Path C:\agent\config.cmd))
@@ -253,7 +269,8 @@ jobs:
 
                         try {
                             $poolList = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                            $poolList | Out-Default | Write-Host
+                            # Show returned pools
+                            $poolList.value | Format-Table id, name | Out-Default | Write-Host
                         } catch {
                             $_ | Out-Default | Write-Host
                             throw
@@ -277,7 +294,8 @@ jobs:
 
                         try {
                             $agents = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-                            $agents | Out-Default | Write-Host
+                            # Display agents neatly
+                            $agents.value | Format-Table id, name, version, status, enabled  | Out-Default | Write-Host
                         } catch {
                             $_ | Out-Default | Write-Host
                             throw
@@ -306,7 +324,7 @@ jobs:
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
-                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.259.0/vsts-agent-win-x64-4.259.0.zip"
+                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.264.2/vsts-agent-win-x64-4.264.2.zip"
                         Write-Host "Downloading $AgentInstallUri"
                         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip
@@ -367,6 +385,7 @@ jobs:
 
             } catch {
               $_ | Out-Default | Write-Host
+              exit 1
               throw
             } # Job Script Block
 
@@ -392,3 +411,14 @@ jobs:
               throw
           }
         }
+        Write-Host "Rebooting all VMs to complete installation..."
+        $ScriptBlock = {
+            Restart-Computer -Wait -Delay 5 -Force
+        }
+        for ($i = 1; $i -le $vmCount; $i++) {
+            $vmName = "${baseVmName}$i"
+            $Script = [scriptblock]::create($ScriptBlock)
+            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $Script
+            $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
+        }
+        Write-Host "All agents installed and VMs rebooted."
