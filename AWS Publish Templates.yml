@@ -636,7 +636,7 @@ stages:
 
       - powershell: |
           # Print the Gate variables.
-            Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits); stack:$(stack)"
+            Write-Host "IsEnabled: $(IsEnabled); ImageID: $(ImageID); version:$(version); VersionDigits:$(VersionDigits)"
         displayName: 'Artifact Check : Output Image Variables'
 
       - task: PowerShell@2
