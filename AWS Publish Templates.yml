@@ -653,7 +653,7 @@ stages:
         displayName: 'Write access to Templates Marketplace Branch'
         inputs:
           targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments:
             -GitBranch '$(GitLansaAwsTemplatesMarketPlaceBranch)'
             -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
@@ -665,16 +665,16 @@ stages:
         displayName: 'Tag Templates Marketplace Branch'
         inputs:
           targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates-mp/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
           arguments:
-            -GitRepoPath '$(GitLansaAwsTemplatesRepoName)'
+            -GitRepoName '$(GitLansaAwsTemplatesRepoName)'
             -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)-mp'
 
       - task: PowerShell@2
         displayName: 'Write access to Templates Support Branch'
         inputs:
           targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitRepoWriteAccess.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitRepoWriteAccess.ps1'
           arguments:
             -GitBranch '$(GitLansaAwsTemplatesBranch)'
             -GitURL 'https://$(GitLansaAwsTemplatesPAT):x-oauth-basic@$(GitLansaAwsTemplatesGitHubName)'
@@ -686,7 +686,7 @@ stages:
         displayName: 'Tag Templates Support Branch'
         inputs:
           targetType: filePath
-          filePath: '$(Pipeline.Workspace)/_lansa_aws-templates/scripts/GitTag.ps1'
+          filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
           arguments:
             -GitRepoName '$(GitLansaAwsTemplatesSupportRepoName)'
             -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)'
