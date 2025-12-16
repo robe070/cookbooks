@@ -668,7 +668,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
           arguments:
             -GitRepoName '$(GitLansaAwsTemplatesRepoName)'
-            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)-mp'
+            -Tags 'AWSPublishTemplate-Bld-$(Build.BuildNumber)-$(VersionDigits)-mp'
 
       - task: PowerShell@2
         displayName: 'Write access to Templates Support Branch'
@@ -689,7 +689,7 @@ stages:
           filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/GitTag.ps1'
           arguments:
             -GitRepoName '$(GitLansaAwsTemplatesSupportRepoName)'
-            -Tags 'AWSTemplate-Bld-$(Build.BuildId)-$(Release.ReleaseName)-$(VersionDigits)'
+            -Tags 'AWSPublishTemplate-Bld-$(Build.BuildNumber)-$(VersionDigits)'
 
 - template: AzureDevOps/templates/AWSTestTemplate.yml
   parameters:
