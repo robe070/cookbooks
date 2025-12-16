@@ -24,14 +24,14 @@ $Script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-IdeMsi -VersionText 'w19-base-rjg' `
-            -VersionMajor 15 `
+Bake-IdeMsi -VersionText 'w25-sql-rjg' `
+            -VersionMajor 16 `
             -VersionMinor 0 `
-            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v14\SPIN0332_LanDVDcut_L4W14100_4138_160727_GA" `
-            -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/LanDVDcut_L4W14000_latest" `
-            -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/VisualLANSA_L4W14000_latest" `
-            -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v14/Integrator_L4W14000_latest" `
-            -AmazonAMIName "Windows_Server-2019-English-Full-Base*" `
+            -LocalDVDImageDirectory "\\devsrv\ReleasedBuilds\v16\SPIN0332_LanDVDcut_L4W16000_4403_210616_EPC160040" `
+            -S3DVDImageDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v16/LanDVDcut_L4W16000_latest" `
+            -S3VisualLANSAUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v16/VisualLANSA_L4W16000_latest" `
+            -S3IntegratorUpdateDirectory "https://lansalpcmsdn.blob.core.windows.net/releasedbuilds/v16/Integrator_L4W16000_latest" `
+            -AmazonAMIName "Windows_Server-2025-English-Full-SQL_2025_Express*" `
             -GitBranch "debug/paas" `
             -Cloud "AWS" `
             -InstallBaseSoftware $true `
