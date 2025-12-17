@@ -151,8 +151,8 @@ try
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
     Write-Host "Installing Visual C++ Redistributable for Visual Studio 2015-2022"
-    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
-    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vc_redist_x86.exe') -log_file (Join-Path $temppath 'vc_redist_x86.log');
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vc_redist_x86.exe') -log_file (Join-Path $temppath 'vc_redist_x86.log');
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
