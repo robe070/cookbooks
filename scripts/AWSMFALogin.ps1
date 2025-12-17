@@ -1,6 +1,8 @@
 # PowerShell script to obtain temporary AWS credentials for IAM user with MFA
 # Prerequisites: Install AWS Tools for PowerShell (Install-Module -Name AWS.Tools.Common, AWS.Tools.SecurityToken)
 
+$ErrorActionPreference = "Stop"
+
 $accountId = "775488040364"
 $mfaDeviceName = "MicrosoftAuthenticator"
 $mfaSerial = "arn:aws:iam::${accountId}:mfa/${mfaDeviceName}"
