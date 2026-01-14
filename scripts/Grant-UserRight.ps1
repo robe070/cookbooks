@@ -1,3 +1,13 @@
+# This script does automatically what the following manual process does:
+# To manually change (grant or revoke) the SeBackupPrivilege ("Back up files and directories") user right for a user (e.g., PCXUSER2) on the win2025 instance without any script:
+# Press Win + R, type secpol.msc, press Enter → Local Security Policy opens.
+# Expand Security Settings → Local Policies → User Rights Assignment.
+# In the right pane, double-click Back up files and directories.
+# Click Add User or Group…
+# Type the username (e.g., PCXUSER2 or .\PCXUSER2 for local account) → Check Names → OK.
+# To revoke: Select the user in the list → Remove.
+# Click Apply → OK.
+# Reboot the instance (or log off/on the affected user) for the change to take effect.
 function Grant-UserRight {
     param (
         [string]$UserName,
@@ -126,7 +136,5 @@ function Grant-UserRight {
     }
 }
 
-# Usage in your image baking process (run after LANSA MSI creates PCXUSER2)
-# Grant-UserRight -UserName "PCXUSER2" -Rights @("SeInteractiveLogonRight", "SeBatchLogonRight")
-#Grant-UserRight -UserName "PCXUSER2" -Rights @("SeInteractiveLogonRight", "SeBatchLogonRight", "SeServiceLogonRight")
-Grant-UserRight -UserName "PCXUSER2" -Rights @("SeBatchLogonRight")
+Grant-UserRight -UserName "PCXUSER2" -Rights @( "SeBackupPrivilege")
+
