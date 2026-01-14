@@ -1,122 +1,116 @@
-<#
-.SYNOPSIS
-Add a managed image to an Azure Compute Gallery.
-
-.DESCRIPTION
-This script adds a managed image to an Azure Compute Gallery, creating the gallery and image definition if they do not exist, and then creating an image version from the managed image.
-If the image version already exists, it is deleted and recreated. It then calls get-azure-sas-token.ps1 to configure access for Azure Marketplace submission.
-
-.EXAMPLE
-.\add-to-azure-compute-gallery.ps1
-# Uses defaults: ResourceGroupName="BakingDP", Location="Australia East", ImageName="w16d-16-0-0image", VersionText="16.0.0"
-
-.EXAMPLE
-.\add-to-azure-compute-gallery.ps1 -ImageName "w16d-16-0-0image" -VersionText "16.0.0" -ImageDefinitionName "VL-w16d-16-0" -SKU "w16d-16-0"
-# Uses provided parameters explicitly
-#>
-
 param (
-    [Parameter()]
-    [string]$ResourceGroupName = "BakingDP",
-
-    [Parameter()]
-    [string]$Location = "Australia East",
-
-    [Parameter()]
-    [string]$ImageName = "w22d-16-0-0image",  # Managed image name, e.g., "w16d-16-0-0image"
-
-    [Parameter()]
-    [string]$VersionText = "16.0.0",  # Version, e.g., "16.0.0"
-
-    [Parameter()]
-    [string]$GetAzureSasTokenPath = "c:\lansa\scripts\get-azure-sas-token.ps1",  # Updated default path
-
-    [Parameter()]
-    [string]$StorageAccountName = "",
-
-    [Parameter()]
-    [string]$StorageAccountResourceGroup = ""
+    [switch]$DryRun
 )
 
-function Log-Date
-{
-    ((get-date).ToUniversalTime()).ToString("yyyy-MM-dd HH:mm:ssZ")
+#Import-Module AWS.Tools.RDS
+#Import-Module AWS.Tools.Common
+
+$PollInterval = 30
+
+# Get all regions but exclude ISO (us-iso-*) and GovCloud (us-gov-*)
+$regions = Get-AWSRegion | Select-Object -ExpandProperty Region | Where-Object {
+    ($_ -notlike "us-iso*") -and ($_ -notlike "us-gov-*")
 }
 
-#Requires -RunAsAdministrator
-#Requires -Modules Az.Compute
-$VmResourceGroup = "BakingDP-w22d-16-0-0"
-$Script:vmname = "w22d-16-0-0"
-try {
-       Write-Host "$(Log-Date) Creating Managed Image..."
-        $vm = Get-AzVM -ResourceGroupName $VmResourceGroup -Name $Script:vmname -ErrorAction Stop
-        # $imageConfig = New-AzImageConfig -Location $Location -SourceVirtualMachineId $vm.Id -HyperVGeneration V2
-        # $image = New-AzImage -ResourceGroupName $ImageResourceGroup -Image $imageConfig -ImageName $ImageName | Out-Default | Write-Host
+$targets = @()
 
-        # Add image to Azure Compute Gallery
-        $GalleryName = "LansaGallery"
-        $ImageDefinitionName = $ImageName -replace "-\d+image$", "" # "w16d-16-0-19image" => "w16d-16-0"
-        $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
-        $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19"
-        Write-Host "$(Log-Date) Adding image $ImageName to Azure Compute Gallery $GalleryName in resource group $ResourceGroupName"
+# ---------- DISCOVERY PHASE ----------
+foreach ($region in $regions) {
 
-        # # Get the managed image
-        # $image = Get-AzImage -ResourceGroupName $ResourceGroupName -ImageName $ImageName -ErrorAction Stop
-        # if (-not $image) {
-        #     throw "Managed image $ImageName not found in resource group $ResourceGroupName"
-        # }
+    Write-Host "`n--- Scanning Region: $region ---" -ForegroundColor Cyan
 
-        # Create or get the gallery
-        $gallery = Get-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -ErrorAction SilentlyContinue
-        if (-not $gallery) {
-            Write-Host "$(Log-Date) Creating new gallery $GalleryName in $ResourceGroupName..."
-            $gallery = New-AzGallery -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -Location $Location -ErrorAction Stop
+    try {
+        $instances = Get-RDSDBInstance -Region $region -ErrorAction Stop | Where-Object {
+            $_.PerformanceInsightsEnabled -eq $true
         }
 
-        # Create or update image definition
-        $imageDefinition = Get-AzGalleryImageDefinition -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -ErrorAction SilentlyContinue
-        if (-not $imageDefinition) {
-            Write-Host "$(Log-Date) Creating image definition $ImageDefinitionName..."
-            $imageDefinitionParams = @{
-                ResourceGroupName          = $ResourceGroupName
-                GalleryName                = $GalleryName
-                GalleryImageDefinitionName = $ImageDefinitionName
-                Location                   = $Location
-                OsType                     = 'Windows'
-                OsState                    = 'Generalized'
-                Publisher                  = 'LANSA'
-                Offer                      = 'lansa-scalable-license'
-                Sku                        = $ImageDefinitionName
-                HyperVGeneration           = 'V2'
-                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunch'})
+        foreach ($db in $instances) {
+            $targets += [PSCustomObject]@{
+                Region     = $region
+                Identifier = $db.DBInstanceIdentifier
+                Status     = $db.DBInstanceStatus
+                Engine     = $db.Engine
             }
-            $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
         }
 
-        # Check for existing image version and delete if it exists
-        $existingVersion = Get-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -ErrorAction SilentlyContinue
-        if ($existingVersion) {
-            Write-Host "$(Log-Date) Image version $galleryImageVersion already exists. Deleting..."
-            Remove-AzGalleryImageVersion -ResourceGroupName $ResourceGroupName -GalleryName $GalleryName -GalleryImageDefinitionName $ImageDefinitionName -GalleryImageVersionName $galleryImageVersion -Force -ErrorAction Stop
-        }
-
-        # Create image version directly from generalised VM - because cannot create a managed image with TrustedLaunch SecurityType.
-        Write-Host "$(Log-Date) Creating image version $galleryImageVersion..."
-        $region = @{Name = $Location; ReplicaCount = 1}
-        $imageVersionParams = @{
-            ResourceGroupName          = $ResourceGroupName
-            GalleryName                = $GalleryName
-            GalleryImageDefinitionName = $ImageDefinitionName
-            GalleryImageVersionName    = $galleryImageVersion
-            Location                   = $Location
-            SourceImageId            = '/subscriptions/739c4e86-bd75-4910-8d6e-d7eb23ab94f3/resourceGroups/BakingDP-w22d-16-0-0/providers/Microsoft.Compute/virtualMachines/w22d-16-0-0'
-            TargetRegion               = @($region)  # Updated to use TargetRegion
-        }
-        $imageVersion = New-AzGalleryImageVersion @imageVersionParams -ErrorAction Stop
-
-        Write-Host "$(Log-Date) Image version $galleryImageVersion created in gallery $GalleryName with Resource ID: $($imageVersion.Id)"
-
-} catch {
-    Write-Error "Error adding image to Azure Compute Gallery: $_"
-    throw
+    } catch {
+        Write-Warning "Failed to access RDS in $region. Skipping. $_"
+    }
 }
+
+if (-not $targets) {
+    Write-Host "No RDS instances with Performance Insights enabled found in allowed regions."
+    return
+}
+
+# Audit output
+$targets | Format-Table -AutoSize
+
+if ($DryRun) {
+    #Write-Host "`nDRY-RUN MODE ENABLED — no changes will be made." -ForegroundColor Yellow
+    return
+}
+
+# ---------- CONFIRMATION ----------
+$confirmation = Read-Host "`nProceed to disable Performance Insights on ALL listed instances? (yes/no)"
+if ($confirmation -ne "yes") {
+    Write-Host "Operation cancelled."
+    return
+}
+
+# ---------- EXECUTION PHASE ----------
+foreach ($target in $targets) {
+
+    $dbId = $target.Identifier
+    $region = $target.Region
+
+    # Refresh instance state
+    try {
+        $db = Get-RDSDBInstance -DBInstanceIdentifier $dbId -Region $region -ErrorAction Stop
+        $status = $db.DBInstanceStatus
+    } catch {
+        Write-Warning "Failed to retrieve $dbId in $region. Skipping. $_"
+        continue
+    }
+
+    # Start instance if stopped
+    if ($status -eq "stopped") {
+        Write-Host "Starting instance $dbId ($region)..."
+        try {
+            Start-RDSDBInstance -DBInstanceIdentifier $dbId -Region $region -ErrorAction Stop | Out-Null
+        } catch {
+            Write-Warning "Failed to start $dbId in $region. Skipping. $_"
+            continue
+        }
+
+        do {
+            Start-Sleep -Seconds $PollInterval
+            $status = (Get-RDSDBInstance -DBInstanceIdentifier $dbId -Region $region).DBInstanceStatus
+        } while ($status -ne "available")
+    }
+
+    # Disable Performance Insights
+    Write-Host "Disabling Performance Insights on $dbId ($region)..."
+    try {
+        Edit-RDSDBInstance `
+            -DBInstanceIdentifier $dbId `
+            -EnablePerformanceInsights $false `
+            -ApplyImmediately $true `
+            -Confirm:$false `
+            -Region $region | Out-Null
+    } catch {
+        Write-Warning "Failed to disable Performance Insights on $dbId in $region. $_"
+        continue
+    }
+
+    # Wait for modify completion
+    Write-Host "Waiting for modification to complete on $dbId ($region)..."
+    do {
+        Start-Sleep -Seconds $PollInterval
+        $status = (Get-RDSDBInstance -DBInstanceIdentifier $dbId -Region $region).DBInstanceStatus
+    } while ($status -notin @("available", "stopped"))
+
+    Write-Host "$dbId in $region is now $status"
+}
+
+Write-Host "`nAll modifications completed successfully."
