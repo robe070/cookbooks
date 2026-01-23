@@ -33,6 +33,7 @@ $subnetsConfig = @(
 $subnetIds = @()
 foreach ($cfg in $subnetsConfig) {
     $subnet = New-EC2Subnet -VpcId $vpc.VpcId -CidrBlock $cfg.Cidr -AvailabilityZone $cfg.AZ
+    Edit-EC2SubnetAttribute -SubnetId $subnet.SubnetId -MapPublicIpOnLaunch $true
     New-EC2Tag -Resource $subnet.SubnetId -Tag $tagEnvironment
     New-EC2Tag -Resource $subnet.SubnetId -Tag @{ Key = "Name"; Value = $cfg.Name }
     $subnetIds += $subnet.SubnetId
