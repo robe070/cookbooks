@@ -60,7 +60,7 @@ function Parse-TemplateUrl {
         return @{
             BucketName        = $Matches[1]           # awsmp-cft-211125678794-1707910187780
             BucketRegion      = $Matches[2]           # us-east-1
-            TemplateKeyPrefix = $Matches[3] + '/'     # 2891d76c-bf72-4cd7-b101-53316efcc51f/
+            TemplateKeyPrefix = $Matches[3]           # 2891d76c-bf72-4cd7-b101-53316efcc51f
         }
     }
     else {
