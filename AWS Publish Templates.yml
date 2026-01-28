@@ -353,6 +353,24 @@ stages:
           checkoutTemplateRepo: false
           checkoutTemplateMPRepo: true
 
+      - task: PowerShell@2
+        displayName: 'Delete existing AMI download folder (if it exists)'
+        inputs:
+          targetType: inline
+          script: |
+            $target = "$(Pipeline.Workspace)\templates\support\scalable\ami-list"
+
+            if (Test-Path $target) {
+                Write-Host "Deleting: $target"
+                Remove-Item $target -Recurse -Force -ErrorAction Continue
+                Write-Host "Delete completed"
+            } else {
+                Write-Host "Folder does not exist: $target"
+            }
+          errorActionPreference: 'Continue'
+          failOnStderr: false
+          pwsh: false
+
       - task: AmazonWebServices.aws-vsts-tools.S3Download.S3Download@1
         displayName: 'Download all AMI Files from S3'
         inputs:
