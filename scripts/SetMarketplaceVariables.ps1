@@ -54,15 +54,17 @@ function Parse-TemplateUrl {
     )
 
     # Parse URL using regex to extract components
-    if ($Url -match '^https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/([^\/]+)\/([^\/]+)\/(.+)$') {
+    # Parse S3 presigned / public URL to get BucketName, BucketRegion, and TemplateKeyPrefix
+    # e.g. https://awsmp-cft-211125678794-1707910187780.s3.us-east-1.amazonaws.com/2891d76c-bf72-4cd7-b101-53316efcc51f/lansa-stack-type-win.cfn.template
+    if ($Url -match '^https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/([^\/]+)\/(.+)$') {
         return @{
-            BucketName = $Matches[1]  # e.g., awsmp-cft-992382380361-1708727387563
-            BucketRegion = $Matches[2]  # e.g., us-east-1
-            TemplateKeyPrefix = "$($Matches[3])/"  # e.g., a305b7d6-efa2-4265-be5b-49ef9d3069b5/
-            ProductId = $Matches[4]  # e.g., prod-7c4xdvxkskdfs
+            BucketName        = $Matches[1]           # awsmp-cft-211125678794-1707910187780
+            BucketRegion      = $Matches[2]           # us-east-1
+            TemplateKeyPrefix = $Matches[3] + '/'     # 2891d76c-bf72-4cd7-b101-53316efcc51f/
         }
-    } else {
-        throw "Invalid URL format: $Url"
+    }
+    else {
+        throw "Invalid S3 URL format: $Url`nExpected: https://<bucket>.s3.<region>.amazonaws.com/<template-key-prefix>/<template name>"
     }
 }
 
@@ -120,7 +122,7 @@ try {
     $MPS3BucketName = $data.BucketName
     $MPS3BucketRegion = $data.BucketRegion
     $MPS3KeyPrefix = $data.TemplateKeyPrefix
-    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$fullVersion"
+    $ImageId = "/aws/service/marketplace/$($ProductId)/$fullVersion"
 
     # Set Azure DevOps variables
     Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]True"
