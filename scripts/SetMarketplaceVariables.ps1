@@ -47,27 +47,6 @@ function Get-KeyComponents {
     return $key1, $key2, $versionBase, $versionMinor, $versionDigits
 }
 
-# Function to parse URL into components
-function Parse-TemplateUrl {
-    param (
-        [string]$Url
-    )
-
-    # Parse URL using regex to extract components
-    # Parse S3 presigned / public URL to get BucketName, BucketRegion, and TemplateKeyPrefix
-    # e.g. https://awsmp-cft-211125678794-1707910187780.s3.us-east-1.amazonaws.com/2891d76c-bf72-4cd7-b101-53316efcc51f/lansa-stack-type-win.cfn.template
-    if ($Url -match '^https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/([^\/]+)\/(.+)$') {
-        return @{
-            BucketName        = $Matches[1]           # awsmp-cft-211125678794-1707910187780
-            BucketRegion      = $Matches[2]           # us-east-1
-            TemplateKeyPrefix = $Matches[3]           # 2891d76c-bf72-4cd7-b101-53316efcc51f
-        }
-    }
-    else {
-        throw "Invalid S3 URL format: $Url`nExpected: https://<bucket>.s3.<region>.amazonaws.com/<template-key-prefix>/<template name>"
-    }
-}
-
 try {
     # Set default region for Marketplace Catalog API
     Set-DefaultAWSRegion -Region 'us-east-1'
@@ -114,23 +93,12 @@ try {
     $url = $source.Template
     Write-Host "Template URL for $version $templateType = $url"
 
-    # Parse and set variables
-    $data = Parse-TemplateUrl -Url $url
-
     # Construct variables
     $TemplateUrl = $url
-    $MPS3BucketName = $data.BucketName
-    $MPS3BucketRegion = $data.BucketRegion
-    $MPS3KeyPrefix = $data.TemplateKeyPrefix
-    $ImageId = "/aws/service/marketplace/$($ProductId)/$fullVersion"
 
     # Set Azure DevOps variables
     Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]True"
     Write-Host "##vso[task.setvariable variable=TemplateUrl]$TemplateUrl"
-    Write-Host "##vso[task.setvariable variable=MPS3BucketName]$MPS3BucketName"
-    Write-Host "##vso[task.setvariable variable=MPS3BucketRegion]$MPS3BucketRegion"
-    Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
-    Write-Host "##vso[task.setvariable variable=ImageId]$ImageId"
     Write-Host "##vso[task.setvariable variable=UserScriptHook]https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1"
 } catch {
     Write-Error "Error retrieving template URL: $_"

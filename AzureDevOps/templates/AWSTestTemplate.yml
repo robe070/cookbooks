@@ -271,9 +271,6 @@ stages:
                 $ImageId = "$(ImageId)"
                 if ( '$(UseMarketplaceVariables)' -eq 'True' ) {
                   $TemplateUrl = "$(TemplateUrl)"
-                  $MPS3KeyPrefix = "$(MPS3KeyPrefix)"
-                  $MPS3BucketName = "$(MPS3BucketName)"
-                  $MPS3BucketRegion = "$(MPS3BucketRegion)"
                 } else {
                   $MPS3BucketRegion = '${{ parameters.AwsRegion }}'
                   $MPS3BucketName = 'lansa'
@@ -344,22 +341,6 @@ stages:
                         ParameterValue = "$LansaGitRepoBranch"
                     },
                     @{
-                        ParameterKey = "ImageId"
-                        ParameterValue = "$ImageId"
-                    },
-                    @{
-                        ParameterKey = "MPS3BucketRegion"
-                        ParameterValue = "$MPS3BucketRegion"
-                    },
-                    @{
-                        ParameterKey = "MPS3BucketName"
-                        ParameterValue = "$MPS3BucketName"
-                    },
-                    @{
-                        ParameterKey = "MPS3KeyPrefix"
-                        ParameterValue = $MPS3KeyPrefix
-                    },
-                    @{
                         ParameterKey = "$(DBPasswordKey)"
                         ParameterValue = "$(DBPasswordValue)"
                     },
@@ -428,6 +409,28 @@ stages:
                         ParameterValue = "${{ parameters.paramUpdateManagementScripts }}"
                     }
                 )
+
+                # When NOT using the Marketplace modified template which is hardcoded with the values for these variables then add them to the template parameters.
+                if ( '$(UseMarketplaceVariables)' -ne 'True' ) {
+                    $templateParams = @(
+                      @{
+                          ParameterKey = "ImageId"
+                          ParameterValue = "$ImageId"
+                      },
+                      @{
+                          ParameterKey = "MPS3BucketRegion"
+                          ParameterValue = "$MPS3BucketRegion"
+                      },
+                      @{
+                          ParameterKey = "MPS3BucketName"
+                          ParameterValue = "$MPS3BucketName"
+                      },
+                      @{
+                          ParameterKey = "MPS3KeyPrefix"
+                          ParameterValue = $MPS3KeyPrefix
+                      }
+                    ) + $templateParams
+                }
 
                 if ('${{ parameters.templateType }}' -eq 'ShoeSize') {
                     $templateParams = @(
