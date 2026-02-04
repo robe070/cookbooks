@@ -351,7 +351,7 @@ jobs:
   dependsOn: StartAgents
   displayName: 'Agent job : w19d-15-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-V15'], 'True'), eq(variables['Build-w19d'], 'True'))))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-V15'], 'True'), eq(variables['Build-w19d'], 'True')))
   pool:
     name: $(agentVMImage)
   steps:
@@ -426,7 +426,7 @@ jobs:
   dependsOn: StartAgents
   displayName: 'Agent job : w19d-16-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-V16'], 'True'), eq(variables['Build-w19d'], 'True'))))
+  condition: and(succeeded(), or(eq(variables['Build-w19d-16-0j'], 'True'), eq(variables['Build-V16'], 'True'), eq(variables['Build-w19d'], 'True')))
   pool:
     name: $(agentVMImage)
   steps:
