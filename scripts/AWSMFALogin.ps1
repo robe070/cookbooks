@@ -3,6 +3,9 @@
 
 $ErrorActionPreference = "Stop"
 
+Write-Host "Ensure there are no existing AWS credentials set for this session..."
+Clear-AWSCredential
+
 $accountId = "775488040364"
 $mfaDeviceName = "MicrosoftAuthenticator"
 $mfaSerial = "arn:aws:iam::${accountId}:mfa/${mfaDeviceName}"
