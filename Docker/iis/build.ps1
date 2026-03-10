@@ -1,8 +1,8 @@
 param(
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903','1909', 'ltsc2019', 'ltsc2016')]
+    [ValidateSet('ltsc2025', 'all')]
     [string]
-    $DockerLabel='1909'
+    $DockerLabel='all'
 )
 try {
     Push-Location base -StackName Docker
@@ -20,3 +20,5 @@ try {
 } catch {
     Pop-Location -StackName Docker
 }
+
+

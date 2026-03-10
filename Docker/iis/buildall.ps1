@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019', 'all')]
+    [ValidateSet('ltsc2025', 'all')]
     [string]
     $DockerLabel='all',
 
@@ -50,3 +50,4 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
+

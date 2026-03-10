@@ -1,8 +1,8 @@
 param (
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019' )]
+    [ValidateSet('ltsc2025', 'all' )]
     [string]
-    $DockerLabel='1909',
+    $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -25,12 +25,14 @@ try {
     Write-Host("DockerLabel=$DockerLabel")
     Write-Host("ImageVersion=$ImageVersion")
     Write-Host("ClearCache=$ClearCache")
+    Write-Host("HyperV=$Hyperv")
     Write-Host("************************************************************************************************")
 
-    Write-Host ("Note: if you get a message similar to the following the host computer needs to be a later build than the one being constructed. So 1909 can't be built on 1903, but ltsc2016 and ltsc2019 can be built. hyperv seems to make no difference")
-    Write-Host("a Windows version 10.0.18363-based image is incompatible with a 10.0.18362 host")
+    Write-Host ("Note: the host Windows build must be compatible with the container base image.")
+    Write-Host("If you see a version incompatibility error, use a newer host. Using Hyper-V isolation does not solve version incompatibility issues on Windows")
 
-    $WINDOWS_VERSION = 'windowsservercore-' + $DockerLabel
+    $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
+    $WINDOWS_VERSION = 'windowsservercore-' + $ResolvedDockerLabel
 
     Write-Host ("Copy seed scripts that are required to get the cookbooks git repo installed in the image")
 
@@ -64,4 +66,6 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
+
+
 

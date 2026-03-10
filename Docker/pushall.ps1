@@ -5,9 +5,9 @@ param (
     $LansaImage='All',
 
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019', 'All')]
+    [ValidateSet('ltsc2025', 'all')]
     [string]
-    $DockerLabel='1909',
+    $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -27,8 +27,8 @@ if ($LansaImage -eq 'All' ) {
 }
 
 $LabelList = @($DockerLabel)
-if ($DockerLabel -eq 'All' ) {
-    $LabelList = '1903', '1909', 'ltsc2019'
+if ($DockerLabel -eq 'all' ) {
+    $LabelList = 'ltsc2025'
 }
 
 Write-Host "Image List"
@@ -61,3 +61,6 @@ foreach ($Label in $LabelList ) {
         }
     }
 }
+
+
+
