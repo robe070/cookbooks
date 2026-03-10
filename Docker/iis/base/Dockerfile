@@ -1,6 +1,6 @@
 # escape=`
 # Allow this Dockerfile to be called multiple times with different base OS as there will need to be multiple constructed to support all the Windows OS variants
-ARG WINDOWS_VERSION=windowsservercore-1903
+ARG WINDOWS_VERSION=windowsservercore-ltsc2025
 FROM mcr.microsoft.com/windows/servercore/iis:${WINDOWS_VERSION}
 
 # Global settings for the Container
@@ -14,11 +14,12 @@ RUN Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine
 
 COPY .\*.ps1 .\
 
-RUN .\getchoco.ps1
+RUN . '.\dot-CommonTools.ps1'; `
+    .\getchoco.ps1
 
 # A new Powershell process seems to be started each time, so environment setup like dot-sourcing CommontTools needs to be done inline, not on a separate RUN instruction
 RUN . '.\dot-CommonTools.ps1'; `
-    .\installgit.ps1 $ENV:GitRepo $ENV:GitRepoPath $ENV:GitBranch $true
+    .\installgit.ps1 -gitrepo $ENV:GitRepo -gitrepopath $ENV:GitRepoPath -branch $ENV:GitBranch -GitUserName 'robe070'
 
 WORKDIR ${GITREPOPATH}
 RUN DIR

@@ -25,6 +25,7 @@ try {
     Write-Host("DockerLabel=$DockerLabel")
     Write-Host("ImageVersion=$ImageVersion")
     Write-Host("ClearCache=$ClearCache")
+    Write-Host("Hyperv=$Hyperv")
     Write-Host("************************************************************************************************")
 
     Write-Host ("Note: the host Windows build must be compatible with the container base image.")
@@ -41,7 +42,10 @@ try {
 
     $HypervCmd = ""
     if ( $Hyperv ) {
+        Write-Host("Using Hyper-V isolation for better compatibility at the cost of higher resource usage. Note that the host Windows build must be compatible with the container base image even when using Hyper-V isolation.")
         $HypervCmd = '--isolation=hyperv'
+    } else {
+        Write-Host("Using default isolation (process) which has lower resource usage but may have compatibility issues if the host Windows build is not compatible with the container base image.")
     }
 
     docker image build --build-arg BASE_TAG=$BASE_TAG $ClearCacheCmd $HypervCmd --tag lansalpc/iis-webserver:$ImageVersion-$WINDOWS_VERSION .

@@ -28,7 +28,7 @@ EXPOSE 80
 EXPOSE 8101
 
 # Development-specific parameters.  This is required to install the LANSA Webserver
-RUN c:\init-webserver.ps1 -server_name 'robgw10\sqls17' -dbname 'webserver-docker' -dbuser 'sa' -dbpassword 'Pcxuser@122robg' -webuser 'PCXUSER2' -webpassword 'Pcxuser@122robg' -GitBranch $ENV:GITBRANCH -GitBranchWebserver $ENV:GITBRANCH
+RUN c:\init-webserver.ps1 -server_name 'tcp:host.docker.internal,1433' -dbname 'webserver-docker' -dbuser 'DBSetup' -dbpassword 'Pcxuser@122robg' -webuser 'PCXUSER2' -webpassword 'Pcxuser@122robg' -GitBranch $ENV:GITBRANCH -GitBranchWebserver $ENV:GITBRANCH
 
 # HEALTHCHECK --interval=5s `
 #  CMD powershell -command `
