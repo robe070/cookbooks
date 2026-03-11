@@ -68,6 +68,21 @@ function Test-RegistryValue {
 
 }
 
+function Test-IsWindowsContainer {
+    # Strongest signal for Windows Server Core containers
+    $prodName = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SystemInformation' -Name SystemProductName -ErrorAction SilentlyContinue).SystemProductName
+    if ($prodName -eq 'Container') { return $true }
+
+    # Common container environment markers
+    if ($env:CONTAINER -eq 'true') { return $true }
+    if ($env:DOTNET_RUNNING_IN_CONTAINER -eq 'true') { return $true }
+
+    # Docker marker file (sometimes present in Windows containers)
+    if (Test-Path 'C:\.dockerenv') { return $true }
+
+    return $false
+}
+
 # If environment not yet set up, it should be running locally, not through Remote PS
 if ( -not $script:IncludeDir)
 {
@@ -147,6 +162,14 @@ try
         $CompanionInstall = $true
     }
 
+    if (Test-IsWindowsContainer) {
+        'Running inside a Windows container'
+        $Docker = $true
+    } else {
+        'Not in a container (or unable to detect)'
+        $Docker = $false
+    }
+
     $InstallDir = Join-Path $(Split-Path -Parent $script:IncludeDir) "Installs\VC_Redist"
     if (Test-Path $InstallDir) {
         Write-Host( "$(Log-Date) Installs directory = $InstallDir" )
@@ -157,7 +180,7 @@ try
     if ($true) {
         # On initial install
 
-        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
+        if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Docker -eq $false) -and ($Cloud -ne "on-premise") ) {
             try {
                 Write-Host ("$(Log-Date) Disable TCP Offloading" )
                 Disable-TcpOffloading
@@ -358,7 +381,7 @@ try
             }
         }
 
-        if ($Cloud -ne "Docker") {
+        if ($Docker -eq $false) {
             #########################################################################################################
             # Database setup
             # Microsoft introduced a defect on 27/10/2016 whereby this code abended when used with Azure SQL Database
@@ -411,7 +434,7 @@ try
             }
 
             # The docker operator can easily set command line variables when creating the container, so get out of the way!
-            if ( $Cloud -ne 'Docker') {
+            if ( $Docker -eq $false ) {
 
                 Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
@@ -503,7 +526,7 @@ try
         $x_err = (Join-Path -Path $ENV:TEMP -ChildPath 'x_err.log')
         Remove-Item $x_err -Force -ErrorAction SilentlyContinue | Out-Default | Write-Host
 
-        if ( $SUDB -ne '1' -and ($Cloud -ne "Docker") ) {
+        if ( $SUDB -ne '1' -and ($Docker -eq $false) ) {
             Write-Host ("$(Log-Date) Waiting for Database tables to be created...")
             Start-Sleep -s 60
         }
