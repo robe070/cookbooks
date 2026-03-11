@@ -21,6 +21,9 @@ param(
 $Dbug = $true
 if ( $Dbug ) { Write-Host("Debugging")}
 
+$cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+"Container Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
+
 git config --global --add safe.directory $ENV:GITREPOPATH
 
 Get-ChildItem c:\
@@ -91,7 +94,7 @@ try {
     }
 
     Write-Host("Webserver Install...")
-    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -MSIUri https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi -ApplName WebServer  -dbname webserver -gitrepourl https://github.com/lansa/webserver.git  `
+    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -MSIUri https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi -ApplName WebServer  -dbname $dbname -gitrepourl https://github.com/lansa/webserver.git  `
     -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit $f32bit_bool -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {

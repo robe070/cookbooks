@@ -26,6 +26,8 @@ try {
     Write-Host("ImageVersion=$ImageVersion")
     Write-Host("ClearCache=$ClearCache")
     Write-Host("Hyperv=$Hyperv")
+    $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    "Host Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
     Write-Host("************************************************************************************************")
 
     Write-Host ("Note: the host Windows build must be compatible with the container base image.")

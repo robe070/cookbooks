@@ -12,6 +12,8 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 RUN Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine
 
+ENV RUNNING_IN_CONTAINER=1
+
 COPY .\*.ps1 .\
 
 RUN . '.\dot-CommonTools.ps1'; `

@@ -27,6 +27,20 @@ ENV GITBRANCH $GITBRANCH
 EXPOSE 80
 EXPOSE 8101
 
+# Create license directory
+RUN "New-Item -ItemType Directory -Path 'C:\Program Files (x86)\Common Files\LANSA' -Force | Out-Null"
+
+
+# Copy license files into the image.
+# Using JSON array form so that the folder delimiting backslashes are not treated as escape characters.  
+# Also the space in the path causes issues too.
+COPY ["*.lic", "C:/Program Files (x86)/Common Files/LANSA/"]
+
+# Create registry key and set LicenseDir
+RUN "New-Item -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Force | Out-Null; " `
+    "Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA';" `
+    "Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value 'Azure';"
+
 # Development-specific parameters.  This is required to install the LANSA Webserver
 RUN c:\init-webserver.ps1 -server_name 'tcp:host.docker.internal,1433' -dbname 'webserver-docker' -dbuser 'DBSetup' -dbpassword 'Pcxuser@122robg' -webuser 'PCXUSER2' -webpassword 'Pcxuser@122robg' -GitBranch $ENV:GITBRANCH -GitBranchWebserver $ENV:GITBRANCH
 
