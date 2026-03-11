@@ -67,18 +67,13 @@ function Test-RegistryValue {
     }
 
 }
-
 function Test-IsWindowsContainer {
-    # Strongest signal for Windows Server Core containers
-    $prodName = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SystemInformation' -Name SystemProductName -ErrorAction SilentlyContinue).SystemProductName
-    if ($prodName -eq 'Container') { return $true }
-
-    # Common container environment markers
-    if ($env:CONTAINER -eq 'true') { return $true }
-    if ($env:DOTNET_RUNNING_IN_CONTAINER -eq 'true') { return $true }
-
-    # Docker marker file (sometimes present in Windows containers)
-    if (Test-Path 'C:\.dockerenv') { return $true }
+    if ($env:RUNNING_IN_CONTAINER -eq '1') {
+        'Running inside a Windows container'
+        return $true
+    } else {
+        'Not in a container (or marker not set)'
+    }
 
     return $false
 }
