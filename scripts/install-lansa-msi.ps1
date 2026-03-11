@@ -158,8 +158,12 @@ try
         # On initial install
 
         if ( (-not $CompanionInstall) -and (-not $UPGD_bool) -and ($Cloud -ne "Docker") -and ($Cloud -ne "on-premise") ) {
-            Write-Host ("$(Log-Date) Disable TCP Offloading" )
-            Disable-TcpOffloading
+            try {
+                Write-Host ("$(Log-Date) Disable TCP Offloading" )
+                Disable-TcpOffloading
+            } catch {
+                Write-Warning ("$(Log-Date) Failed to disable TCP Offloading. Continuing anyway. Error was: $_")
+            }
 
             # When installing through cloudformation the current user is systemprofile.
             # When GitDeployHub receives a webhook it may be running as administrator
