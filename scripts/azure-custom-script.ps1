@@ -92,6 +92,17 @@ function ResetWebServer{
     Start-Process -FilePath "$APPA\connect64\lcolist.exe" -ArgumentList "-sstart" -Wait | Out-Default | Write-Host
 }
 
+function Test-IsWindowsContainer {
+    if ($env:RUNNING_IN_CONTAINER -eq '1') {
+        'Running inside a Windows container'
+        return $true
+    } else {
+        'Not in a container (or marker not set)'
+    }
+
+    return $false
+}
+
 Set-StrictMode -Version Latest | Out-Default | Write-Host
 
 $VerbosePreference = "Continue"
@@ -166,6 +177,14 @@ try
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     Write-Verbose ("$(Log-Date) Running on $Cloud")
 
+    if (Test-IsWindowsContainer) {
+        'Running inside a Windows container'
+        $Docker = $true
+    } else {
+        'Not in a container (or unable to detect)'
+        $Docker = $false
+    }
+
     Write-Host ("$(Log-Date) Test if this is the first install")
     $installer = "MyApp.msi"
     $installer_file = ( Join-Path -Path "c:\lansa" -ChildPath $installer )
@@ -194,7 +213,7 @@ try
     Write-Verbose ("installMSI = $installMSI") | Out-Default | Write-Host
 
     # The docker operator can easily set command line variables when creating the container, so get out of the way!
-    if ( $Cloud -ne 'Docker') {
+    if ( -not $Docker) {
         Write-Host ("$(Log-Date) Setup tracing for both this process and its children and any processes started after the installation has completed.")
 
         if ($trace -eq "Y") {
@@ -274,7 +293,7 @@ try
         throw
     }
 
-    if ( $fixLicense -eq "1" ) {
+    if ( (-not $Docker) -and ($fixLicense -eq "1") ) {
         Write-Host ("$(Log-Date) Fixing licenses...")
 	    Map-LicenseToUser "LANSA Scalable License" "ScalableLicensePrivateKey" $webuser | Out-Default | Write-Host
 	    Map-LicenseToUser "LANSA Integrator License" "IntegratorLicensePrivateKey" $webuser | Out-Default | Write-Host

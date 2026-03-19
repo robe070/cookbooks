@@ -1,0 +1,15 @@
+# Project Basics
+- Be concise.
+- This is a Docker Windows Image project.
+- AWS EKS only.
+- Published in private ECR image registry.
+- Run PowerShell commands; this is a Windows-only environment.
+- Hyper-V isolation is used for all containers by default on Windows Professional because there is always a version mismatch with the server core images.
+- --isolation=hyperv is not required. Its the default.
+- --isolation=process will never work on Windows Professional
+- PowerShell 7+ is available.
+- currently working with the iis\AWAMAPP folder
+- Code location is C:\dev\cookbooks\Docker and its sub-directories.
+- Do not ask the user to share code from this repo; access it directly.
+- c:\init.ps1 comes from iis\base directory.
+- LANSA MSI install cannot be done via a Dockerfile because secrets are required. Use `docker run` to install while passing secrets as a file, then `docker commit` the container and replace the entrypoint with `C:\bootstrap.ps1`.
