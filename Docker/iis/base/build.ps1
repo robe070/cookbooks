@@ -5,12 +5,8 @@ param (
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
-    [switch]
-    $Hyperv,
-
-    [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
+    $VersionNum = "16.0.0",
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -23,16 +19,20 @@ try {
     Write-Host("************************************************************************************************")
     pwd | Out-Default | Write-Host
     Write-Host("DockerLabel=$DockerLabel")
-    Write-Host("ImageVersion=$ImageVersion")
+    Write-Host("VersionNum=$VersionNum")
     Write-Host("ClearCache=$ClearCache")
-    Write-Host("HyperV=$Hyperv")
     Write-Host("************************************************************************************************")
 
-    Write-Host ("Note: the host Windows build must be compatible with the container base image.")
-    Write-Host("If you see a version incompatibility error, use a newer host. Using Hyper-V isolation does not solve version incompatibility issues on Windows")
-
     $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
-    $WINDOWS_VERSION = 'windowsservercore-' + $ResolvedDockerLabel
+
+    $WindowsRepo = "mcr.microsoft.com/windows/servercore/iis"
+    $WindowsEdition = "windowsservercore"
+    $WindowsVersion = $ResolvedDockerLabel
+
+    $VersionLabel = "V16 GA"
+    $VersionLabelTag = ($VersionLabel -replace '\s+', '').ToLowerInvariant()
+    $BuildDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $VcsRef = (git rev-parse HEAD).Trim()
 
     Write-Host ("Copy seed scripts that are required to get the cookbooks git repo installed in the image")
 
@@ -46,16 +46,24 @@ try {
         $ClearCacheCmd = "--no-cache=true"
     }
 
-    $HypervCmd = ""
-    if ( $Hyperv ) {
-        $HypervCmd = '--isolation=hyperv'
-    }
-
     Write-Host ("Ensure we have the latest Windows image")
-    docker image pull  mcr.microsoft.com/windows/servercore/iis:$WINDOWS_VERSION
+    docker image pull "$WindowsRepo`:$WindowsEdition-$WindowsVersion"
 
     Write-Host( "Build the new Docker image")
-    docker image build --build-arg WINDOWS_VERSION=$WINDOWS_VERSION $ClearCacheCmd $HypervCmd --tag lansalpc/iis-base:$ImageVersion-$WINDOWS_VERSION .
+    $Variant = if ( $WindowsEdition -eq 'windowsservercore' ) { 'servercore' } else { $WindowsEdition }
+    $ImageRepo = "lansalpc/vlbase-$Variant"
+    docker image build `
+        --build-arg WINDOWS_REPO=$WindowsRepo `
+        --build-arg WINDOWS_EDITION=$WindowsEdition `
+        --build-arg WINDOWS_VERSION=$WindowsVersion `
+        --build-arg VERSION_NUM=$VersionNum `
+        --build-arg VERSION_LABEL=$VersionLabel `
+        --build-arg BUILD_DATE=$BuildDate `
+        --build-arg VCS_REF=$VcsRef `
+        $ClearCacheCmd `
+        --tag "$ImageRepo`:$VersionNum-$WindowsVersion" `
+        --tag "$ImageRepo`:$VersionLabelTag-$WindowsVersion" `
+        .
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw
@@ -66,6 +74,4 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
-
-
 

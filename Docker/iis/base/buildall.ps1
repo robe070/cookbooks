@@ -5,12 +5,8 @@ param (
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
-    [switch]
-    $Hyperv,
-
-    [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
+    $VersionNum = "16.0.0",
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -20,9 +16,7 @@ param (
 Write-Host ("Test2")
 
 if ( $DockerLabel -eq 'all' ){
-    .\build.ps1 ltsc2025 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\build.ps1 ltsc2025 -VersionNum $VersionNum -ClearCache:$ClearCache
 } else {
-    .\build.ps1 $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\build.ps1 $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
 }
-
-
