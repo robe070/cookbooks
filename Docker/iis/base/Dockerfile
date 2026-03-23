@@ -48,6 +48,8 @@ ENV RUNNING_IN_CONTAINER=1
 
 COPY .\*.ps1 .\
 
+RUN .\installcurl.ps1
+
 RUN . '.\dot-CommonTools.ps1'; `
     .\getchoco.ps1
 

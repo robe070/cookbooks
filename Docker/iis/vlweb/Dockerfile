@@ -1,7 +1,7 @@
 # escape=`
 # Allow this Dockerfile to be called multiple times with different base OS as there will need to be multiple constructed to support all the Windows OS variants
-ARG BASE_TAG=14.99-windowsservercore-1909
-FROM lansalpc/iis-base:${BASE_TAG}
+ARG BASE_TAG=16.0.0-ltsc2025
+FROM lansalpc/vlbase-servercore:${BASE_TAG}
 
 # Global settings for the Building of the Container
 
@@ -54,8 +54,6 @@ ENV APPLNAME="Docker" `
 
 # ...and ssh key in container's c:\temp\id_rsa
 
-ENTRYPOINT ["powershell"]
-
 EXPOSE 80
 EXPOSE 8101
 EXPOSE 4545
@@ -64,7 +62,7 @@ EXPOSE 4545
 # Note that the MSIuri parameter will work with local paths or an S3 url. And any uri that delivers an MSI as a file.
 # The default value for MSIuri is not set on the command line by default as its in the TEMP directory which is changed in the script.
 
-CMD c:\init-paas.ps1 -ApplName $ENV:APPLNAME -SUDB $ENV:SUDB -server_name $ENV:SERVERNAME -dbname $ENV:DBNAME -dbuser $ENV:DBUSER -dbpassword $ENV:DBPASSWORD -dbpasswordpath $ENV:DBPASSWORDPATH -webuser $ENV:WEBUSER -webpassword $ENV:WEBPASSWORD -webpasswordpath $ENV:WEBPASSWORDPATH -sshkeypath $ENV:SSHKEYPATH -GitAppUrl $ENV:GITAPPURL -GitAppBranch $ENV:GITAPPBRANCH -GitBranch $ENV:GITBRANCH -MSIuri $ENV:MSIuri -DebugFlag $ENV:DEBUG
+RUN c:\init-paas.ps1 -ApplName $ENV:APPLNAME -SUDB $ENV:SUDB -server_name $ENV:SERVERNAME -dbname $ENV:DBNAME -dbuser $ENV:DBUSER -dbpassword $ENV:DBPASSWORD -dbpasswordpath $ENV:DBPASSWORDPATH -webuser $ENV:WEBUSER -webpassword $ENV:WEBPASSWORD -webpasswordpath $ENV:WEBPASSWORDPATH -sshkeypath $ENV:SSHKEYPATH -GitAppUrl $ENV:GITAPPURL -GitAppBranch $ENV:GITAPPBRANCH -GitBranch $ENV:GITBRANCH -MSIuri $ENV:MSIuri -DebugFlag $ENV:DEBUG
 
 # HEALTHCHECK --interval=5s `
 #  CMD powershell -command `
@@ -75,3 +73,5 @@ CMD c:\init-paas.ps1 -ApplName $ENV:APPLNAME -SUDB $ENV:SUDB -server_name $ENV:S
 #     } catch { return 1 }
 
 WORKDIR c:\
+
+ENTRYPOINT ["powershell", "C:\\bootstrap.ps1"]

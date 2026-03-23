@@ -5,12 +5,8 @@ param (
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
-    [switch]
-    $Hyperv,
-
-    [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
+    $VersionNum = "16.0.0",
 
     [Parameter(Mandatory=$false)]
     [switch]
@@ -18,30 +14,25 @@ param (
 )
 
 try {
-    $ClearCacheCmd = ""
-    if ( $ClearCache ) {
-        $ClearCacheCmd = "--no-cache=true"
-    }
-
-    $HypervCmd = ""
-    if ( $Hyperv ) {
-        $HypervCmd = '-hyperv'
-    }
     Push-Location base -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
     Pop-Location -StackName Docker
 
-    Push-Location vlweb -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    Push-Location AWAMAPP -StackName Docker
+    .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
     Pop-Location -StackName Docker
 
-    Push-Location webserver -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    Pop-Location -StackName Docker
+    # Push-Location vlweb -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
+    # Pop-Location -StackName Docker
 
-    Push-Location addapp -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    Pop-Location -StackName Docker
+    # Push-Location webserver -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
+    # Pop-Location -StackName Docker
+
+    # Push-Location addapp -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
+    # Pop-Location -StackName Docker
 
 } catch {
     $_
@@ -50,4 +41,3 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
-

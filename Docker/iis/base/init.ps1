@@ -16,10 +16,26 @@ param(
     [Parameter(Mandatory=$false)]
     [String]$DBUT='MSSQLS',
     [String]$MSIuri,
-    [Switch]$Dbug
+    [Switch]$Dbug,
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('AWS','Azure')]
+    [String]$Cloud
 )
 
 if ( $Dbug ) { Write-Host("Debugging")}
+
+function Write-RegAssignment {
+    param(
+        [string]$Path,
+        [string]$Name,
+        [string]$Value
+    )
+    if ([string]::IsNullOrWhiteSpace($Name)) {
+        Write-Host ("Registry: {0}" -f $Path)
+    } else {
+        Write-Host ("Registry: {0} [{1}] = {2}" -f $Path, $Name, $Value)
+    }
+}
 
 # Change the tempdir to the host volume so log files can be seen on the host
 # In order to view installation logs, when running the container specify the VOLUME option (-v h:\temp\c:\temp\) which creates the directory
@@ -180,9 +196,13 @@ try {
     if ( $Dbug ) {
          $LogLevel = 'DEBUG'
     }
+    Write-RegAssignment -Path "HKLM:\Software\LANSA\$($APPAEncoded)\LANSAWEB"
     New-Item -Path "HKLM:\Software\LANSA\$($APPAEncoded)" -Name 'LANSAWEB' -Force
+    Write-RegAssignment -Path "HKLM:\Software\LANSA\$($APPAEncoded)\LANSAWEB" -Name 'WEBCFG_LOG' -Value $LogLevel
     New-ItemProperty -Path "HKLM:\Software\LANSA\$($APPAEncoded)\LANSAWEB"  -Name 'WEBCFG_LOG' -Value $LogLevel -PropertyType String -Force
+    Write-RegAssignment -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)\LANSAWEB"
     New-Item -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)" -Name 'LANSAWEB' -Force
+    Write-RegAssignment -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)\LANSAWEB" -Name 'WEBCFG_LOG' -Value $LogLevel
     New-ItemProperty -Path "HKLM:\Software\WOW6432Node\LANSA\$($APPAEncoded)\LANSAWEB"  -Name 'WEBCFG_LOG' -Value $LogLevel -PropertyType String -Force
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
@@ -197,9 +217,18 @@ try {
     Copy-Item "c:\docker\iis\AWAMAPP\*.lic" "C:/Program Files (x86)/Common Files/LANSA/"
 
     # Create registry key and set LicenseDir
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON'
     New-Item -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Force | Out-Null
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON'
+    New-Item -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Force | Out-Null
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value 'Azure'
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value $Cloud
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value $Cloud
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA' -Name 'Cloud' -Value $Cloud
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA' -Name 'Cloud' -Value $Cloud
         
     Write-Host("ApplicationInstall")
 
@@ -216,7 +245,7 @@ try {
     Write-Host("Update TPTH = $($env:temp) and INST = NO in x_lansa.pro")
     Add-Content "$APPA\x_win95\x_lansa\x_lansa.pro" "`nTPTH=${ENV:TEMP}`nINST=NO`n"
 
-    & "C:\\bootstrap.ps1"
+    & "C:\\bootstrap.ps1" -ByPassSQLServerDNSChecks
 } catch {
     $_
 
@@ -234,4 +263,3 @@ try {
 
     throw
 }
-

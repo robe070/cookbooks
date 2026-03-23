@@ -5,16 +5,25 @@ param (
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
+    [string]
+    $VersionNum = "16.0.0",
+
+    [Parameter(Mandatory=$false)]
     [switch]
-    $Hyperv,
+    $ClearCache,
 
     [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
+    $SQLHost,
 
     [Parameter(Mandatory=$false)]
-    [switch]
-    $ClearCache
+    [string]
+    $SQLPort,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('AWS','Azure')]
+    [string]
+    $Cloud
 )
 
 try {
@@ -23,37 +32,19 @@ try {
     Write-Host("************************************************************************************************")
     pwd | Out-Default | Write-Host
     Write-Host("DockerLabel=$DockerLabel")
-    Write-Host("ImageVersion=$ImageVersion")
+    Write-Host("VersionNum=$VersionNum")
     Write-Host("ClearCache=$ClearCache")
-    Write-Host("Hyperv=$Hyperv")
     $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     "Host Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
     Write-Host("************************************************************************************************")
 
-    Write-Host ("Note: the host Windows build must be compatible with the container base image.")
-    Write-Host("If you see a version incompatibility error, use a newer host. Using Hyper-V isolation does not solve version incompatibility issues on Windows")
-
     $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
-    $WINDOWS_VERSION = 'windowsservercore-' + $ResolvedDockerLabel
-    $BASE_TAG = $ImageVersion + '-' + $WINDOWS_VERSION
+    $WindowsEdition = 'windowsservercore'
+    $WindowsVersion = $ResolvedDockerLabel
 
-    $HostIP = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -notlike '169.254*' -and $_.InterfaceAlias -eq 'vEthernet (nat)'}).IPAddress
-    Write-Host("Host IP Address: $HostIP")
+    $VersionLabel = "V16 GA"
 
-    $ClearCacheCmd = ""
-    if ( $ClearCache ) {
-        $ClearCacheCmd = "--no-cache=true"
-    }
-
-    $HypervCmd = ""
-    if ( $Hyperv ) {
-        Write-Host("Using Hyper-V isolation for better compatibility at the cost of higher resource usage. Note that the host Windows build must be compatible with the container base image even when using Hyper-V isolation.")
-        $HypervCmd = '--isolation=hyperv'
-    } else {
-        Write-Host("Using default isolation (process) which has lower resource usage but may have compatibility issues if the host Windows build is not compatible with the container base image.")
-    }
-
-    docker image build --build-arg BASE_TAG=$BASE_TAG --build-arg HOST_IP=$HostIP $ClearCacheCmd $HypervCmd --tag lansalpc/iis-awamapp:$ImageVersion-$WINDOWS_VERSION .
+    .\run.ps1 -DockerLabel $ResolvedDockerLabel -VersionNum $VersionNum -VersionLabel $VersionLabel -SQLHost $SQLHost -SQLPort $SQLPort -Cloud $Cloud
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw
     }
@@ -63,6 +54,3 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
-
-
-
