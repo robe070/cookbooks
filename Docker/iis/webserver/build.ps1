@@ -10,7 +10,15 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $ClearCache
+    $ClearCache,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Cloud
 )
 
 try {
@@ -21,6 +29,8 @@ try {
     Write-Host("DockerLabel=$DockerLabel")
     Write-Host("VersionNum=$VersionNum")
     Write-Host("ClearCache=$ClearCache")
+    Write-Host("Trace=$Trace")
+    Write-Host("Cloud=$Cloud")
     $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     "Host Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
     Write-Host("************************************************************************************************")
@@ -54,5 +64,3 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
-
-

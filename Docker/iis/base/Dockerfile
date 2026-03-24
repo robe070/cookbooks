@@ -47,8 +47,10 @@ RUN Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine
 ENV RUNNING_IN_CONTAINER=1
 
 COPY .\*.ps1 .\
+RUN DIR
 
-RUN .\installcurl.ps1
+# Curl not needed as its only used to access the Cloud Metadata but thats not accessible from within a Windows container. 
+# RUN .\installcurl.ps1
 
 RUN . '.\dot-CommonTools.ps1'; `
     .\getchoco.ps1

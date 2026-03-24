@@ -10,11 +10,18 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $ClearCache
+    $ClearCache,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Cloud
 )
 if ( $DockerLabel -eq 'all' ){
-    .\build.ps1 ltsc2025 -VersionNum $VersionNum -ClearCache:$ClearCache
+    .\build.ps1 ltsc2025 -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
 } else {
-    .\build.ps1 $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache
+    .\build.ps1 $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
 }
-

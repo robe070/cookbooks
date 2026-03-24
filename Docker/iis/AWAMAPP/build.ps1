@@ -13,6 +13,10 @@ param (
     $ClearCache,
 
     [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
+
+    [Parameter(Mandatory=$false)]
     [string]
     $SQLHost,
 
@@ -34,6 +38,8 @@ try {
     Write-Host("DockerLabel=$DockerLabel")
     Write-Host("VersionNum=$VersionNum")
     Write-Host("ClearCache=$ClearCache")
+    Write-Host("Trace=$Trace")
+    Write-Host("Cloud=$Cloud")
     $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     "Host Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
     Write-Host("************************************************************************************************")
@@ -44,7 +50,7 @@ try {
 
     $VersionLabel = "V16 GA"
 
-    .\run.ps1 -DockerLabel $ResolvedDockerLabel -VersionNum $VersionNum -VersionLabel $VersionLabel -SQLHost $SQLHost -SQLPort $SQLPort -Cloud $Cloud
+    .\run.ps1 -DockerLabel $ResolvedDockerLabel -VersionNum $VersionNum -VersionLabel $VersionLabel -SQLHost $SQLHost -SQLPort $SQLPort -Cloud $Cloud -Trace:$Trace
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
         throw
     }

@@ -10,7 +10,15 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $ClearCache
+    $ClearCache,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Cloud
 )
 
 try {
@@ -21,6 +29,8 @@ try {
     Write-Host("DockerLabel=$DockerLabel")
     Write-Host("VersionNum=$VersionNum")
     Write-Host("ClearCache=$ClearCache")
+    Write-Host("Trace=$Trace")
+    Write-Host("Cloud=$Cloud")
     Write-Host("************************************************************************************************")
 
     $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
@@ -52,5 +62,3 @@ try {
 } finally {
     Write-Host("************************************************************************************************")
 }
-
-
