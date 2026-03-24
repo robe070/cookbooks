@@ -36,19 +36,40 @@ $WindowsVersion = $ResolvedDockerLabel
 $BaseTag = "$VersionNum-$WindowsVersion"
 $BaseImageRepo = "lansalpc/vlbase-servercore"
 
+Write-Host("Restart hns service to avoid this error: docker: Error response from daemon: failed to create endpoint LANSA-APP on network nat: failed during hnsCallRawResponse: hnsCall failed in Win32: The process cannot access the file because it is being used by another process. (0x20)")
+restart-service hns
+for ($attempt = 1; $attempt -le 3; $attempt++) {
+    try {
+        docker network disconnect -f nat LANSA-APP 2>$null
+    } catch {
+    }
+
+    try {
+        docker rm -f LANSA-APP 2>$null
+    } catch {
+    }
+
+    $stillExists = docker ps -a --format "{{.Names}}" | Where-Object { $_ -eq 'LANSA-APP' }
+    if (-not $stillExists) {
+        break
+    }
+
+    Start-Sleep -Seconds 2
+}
+$stillExists = docker ps -a --format "{{.Names}}" | Where-Object { $_ -eq 'LANSA-APP' }
+if ($stillExists) {
+    Write-Host("WARNING: LANSA-APP container still exists after 3 remove attempts. Manual cleanup may be required.")
+}
+
 if ([string]::IsNullOrWhiteSpace($SQLHost)) {
     $SQLHost = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -notlike '169.254*' -and $_.InterfaceAlias -eq 'vEthernet (nat)'}).IPAddress
 }
 if ([string]::IsNullOrWhiteSpace($SQLPort)) {
     $SQLPort = "1433"
 }
-try {
-    docker rm -f LANSA-APP 2>$null
-} catch {
-}
 
 $TraceEnv = @()
-if ($Trace) { $TraceEnv = @('-e', 'X_RUN=ITRO:Y') }
+if ($Trace) { $TraceEnv = @('-e', 'X_RUN=ITRO:Y ITRL:4') }
 
 docker run --name LANSA-APP -it -e DEBUG=Y -e GITREPOPATH=c:\lansa -e GITBRANCH=debug/paas `
 @TraceEnv `
