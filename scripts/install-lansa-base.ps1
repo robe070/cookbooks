@@ -89,29 +89,60 @@ function DownloadAndInstallCRuntime {
         [string] $log_file
     )
     Write-Host ("$(Log-Date) Downloading $MSIuri to $installer_file")
+    Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
+    $ProgressPreference = 'SilentlyContinue'
+
+    # Use BITS for reliability and to avoid curl/path conflicts
     $downloaded = $false
     $TotalFailedDownloadAttempts = 0
     $loops = 0
-    while (-not $Downloaded -and ($Loops -le 10) ) {
+    while (-not $downloaded -and ($loops -le 10)) {
         try {
-            (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Default | Write-Host
+            Write-Host ("$(Log-Date) Attempt {0} of 10" -f ($loops + 1))
+            Start-BitsTransfer -Source $MSIuri -Destination $installer_file -ErrorAction Stop
             $downloaded = $true
+            Write-Host ("$(Log-Date) Download succeeded: $installer_file")
         } catch {
             $TotalFailedDownloadAttempts += 1
             $loops += 1
-
+            Write-Host ("$(Log-Date) Download failed: $($_.Exception.Message)")
             Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
-
             if ($loops -gt 10) {
-                throw "Failed to download $MSIuri from S3"
+                throw "Failed to download $MSIuri after $loops attempts"
             }
-
-            # Pause for 30 seconds. Maybe that will help it work?
-            Start-Sleep 30
+            Start-Sleep -Seconds 30
         }
     }
 
-    $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart',"/log $log_file") -Wait -PassThru
+    # Basic sanity check: installer should be several MB at least
+    $installerSize = (Get-Item $installer_file).Length
+    Write-Host ("$(Log-Date) Downloaded file size: $installerSize bytes")
+    if ($installerSize -lt 5MB) {
+        throw "Installer download looks too small: $installerSize bytes"
+    }
+    try {
+        $hash = Get-FileHash -Path $installer_file -Algorithm SHA256
+        Write-Host ("$(Log-Date) SHA256: {0}" -f $hash.Hash)
+    } catch {
+        throw "Failed to compute SHA256 for $installer_file. $($_.Exception.Message)"
+    }
+    try {
+        $sig = Get-AuthenticodeSignature -FilePath $installer_file
+        Write-Host ("$(Log-Date) Authenticode status: {0}" -f $sig.Status)
+        if ($sig.SignerCertificate) {
+            Write-Host ("$(Log-Date) Signer: {0}" -f $sig.SignerCertificate.Subject)
+        }
+        if ($sig.Status -ne 'Valid') {
+            throw "Authenticode signature is not valid. Status=$($sig.Status)"
+        }
+        if (-not ($sig.SignerCertificate.Subject -like '*Microsoft Corporation*')) {
+            throw "Unexpected signer: $($sig.SignerCertificate.Subject)"
+        }
+    } catch {
+        throw "Authenticode verification failed for $installer_file. $($_.Exception.Message)"
+    }
+
+    $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart', "/log $log_file") -Wait -PassThru
     # ExitCode of 3010 means a reboot is required
     if ( $p.ExitCode -ne 0 -and ($p.ExitCode -ne 3010) ) {
         $ExitCode = $p.ExitCode
