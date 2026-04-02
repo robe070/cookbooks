@@ -95,9 +95,7 @@ $OSVersion = $osInfo.Caption.ToUpper()
 if ($OSVersion.indexOf("DATACENTER") -ge 0) { $version = 4 } else { $version = 2 }
 $TargetVersion = "{{ TargetWindowVersion }}"
 Write-Log "Current OS version: $OSVersion. Target OS version: $TargetVersion. Using image index $version for upgrade." "Yellow"
-$arguments = "/auto upgrade /imageindex $version /compat ignorewarning /showoobe none /DynamicUpdate Disable /noreboot /AcceptEula"
-Write-Log "Starting Windows Setup at $UpgradeSetUpPath with arguments: $arguments" "Yellow"
-$process = Start-Process -FilePath $UpgradeSetUpPath -ArgumentList $arguments -Wait -PassThru
+$arguments = "/imageindex $version /compat ignorewarning /showoobe none /DynamicUpdate Disable /noreboot /AcceptEula /quiet"
 Write-Log "Starting Windows Setup at $UpgradeSetUpPath with arguments: $arguments" "Yellow"
 $process = Start-Process -FilePath $UpgradeSetUpPath -ArgumentList $arguments -Wait -PassThru
 $exitCode = $process.ExitCode
