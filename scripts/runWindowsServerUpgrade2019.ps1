@@ -99,27 +99,10 @@ Write-Log "Current OS version: $OSVersion. Target OS version: $TargetVersion. Us
 $unattendPath = "C:\Windows\TEMP\upgrade_unattend.xml"
 $unattendContent = @"
 <?xml version="1.0" encoding="utf-8"?>
-<unattend xmlns="urn:schemas-microsoft-com:unattend">
-    <settings pass="windowsPE">
-        <component name="Microsoft-Windows-Setup"
-                   processorArchitecture="amd64"
-                   publicKeyToken="31bf3856ad364e35"
-                   language="neutral"
-                   versionScope="nonSxS"
-                   xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
-            <UserData>
-                <ProductKey>
-                    <Key>WX4NM-KYWYW-QJJR4-XV3QB-6VM33</Key>
-                </ProductKey>
-            </UserData>
-        </component>
-    </settings>
-</unattend>
+<unattend xmlns="urn:schemas-microsoft-com:unattend"><settings pass="windowsPE"><component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"><SetupUILanguage><UILanguage>en-US</UILanguage><WillShowUI>Never</WillShowUI></SetupUILanguage><InputLocale>en-US</InputLocale><SystemLocale>en-US</SystemLocale><UILanguage>en-US</UILanguage><UserLocale>en-US</UserLocale></component><component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"><UserData><AcceptEula>true</AcceptEula><ProductKey><Key>WX4NM-KYWYW-QJJR4-XV3QB-6VM33</Key><WillShowUI>Never</WillShowUI></ProductKey></UserData><UpgradeData><Upgrade>true</Upgrade><WillShowUI>Never</WillShowUI></UpgradeData></component></settings></unattend>
 "@
 $unattendContent | Out-File -FilePath $unattendPath -Encoding utf8
 Write-Log "Created unattend.xml at $unattendPath" "Yellow"
-# Arguments restored to original form (no /ProductKey on command line)
-# with /unattend added to inject the key via SetupHost layer
 $arguments = "/auto upgrade /imageindex $version /compat ignorewarning /showoobe none /DynamicUpdate Disable /noreboot /unattend:`"$unattendPath`""
 Write-Log "Starting Windows Setup at $UpgradeSetUpPath with arguments: $arguments" "Yellow"
 $process = Start-Process -FilePath $UpgradeSetUpPath -ArgumentList $arguments -Wait -PassThru
