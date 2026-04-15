@@ -14,7 +14,12 @@ param (
 
     [Parameter(Mandatory=$false)]
     [int]
-    $StopTimeoutSeconds = 120
+    $StopTimeoutSeconds = 120,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('AWS','Azure')]
+    [string]
+    $Cloud    
 )
 
 $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
@@ -22,7 +27,7 @@ $WindowsEdition = 'windowsservercore'
 $WindowsVersion = $ResolvedDockerLabel
 $VersionLabelTag = ($VersionLabel -replace '\s+', '').ToLowerInvariant()
 $ImageRepo = "lansalpc/vldemoapp-servercore"
-$TargetImage = "$ImageRepo`:$VersionNum-$WindowsVersion"
+$TargetImage = "$ImageRepo`:$VersionNum-$WindowsVersion-$Cloud"
 
 $containerExists = docker ps -a --format "{{.Names}}" | Where-Object { $_ -eq 'LANSA-APP' }
 if (-not $containerExists) {
@@ -61,4 +66,4 @@ if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
   throw
 }
 
-docker tag $TargetImage "$ImageRepo`:$VersionLabelTag-$WindowsVersion"
+docker tag $TargetImage "$ImageRepo`:$VersionLabelTag-$WindowsVersion-$Cloud"

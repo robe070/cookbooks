@@ -211,20 +211,21 @@ try {
 
     Write-Host("Licensing Install...")
     # Create license directory
-    New-Item -ItemType Directory -Path 'C:\Program Files (x86)\Common Files\LANSA' -Force | Out-Null
+    $LicenseDir = 'C:\'
+    # New-Item -ItemType Directory -Path 'C:\' -Force | Out-Null
 
     # Copy license files into the image.
-    Copy-Item "c:\docker\iis\AWAMAPP\*.lic" "C:/Program Files (x86)/Common Files/LANSA/"
+    # Copy-Item "c:\docker\iis\AWAMAPP\*.lic" $LicenseDir -Force
 
     # Create registry key and set LicenseDir
     Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON'
     New-Item -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Force | Out-Null
     Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON'
     New-Item -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Force | Out-Null
-    Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
-    Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value 'C:\Program Files (x86)\Common Files\LANSA'
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value $LicenseDir
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA\COMMON' -Name 'LicenseDir' -Value $LicenseDir
+    Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value $LicenseDir
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON' -Name 'LicenseDir' -Value $LicenseDir
     Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value $Cloud
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\LANSA' -Name 'Cloud' -Value $Cloud
     Write-RegAssignment -Path 'HKLM:\SOFTWARE\WOW6432Node\LANSA' -Name 'Cloud' -Value $Cloud

@@ -16,13 +16,14 @@ param (
     [string]
     $ImageRepo = "lansalpc/vldemoapp-servercore",
 
-    # [Parameter(Mandatory=$false)]
-    # [string]
-    # $DllName = "X_PDFMS.DLL",
-
     [Parameter(Mandatory=$false)]
     [switch]
-    $NoCache
+    $NoCache,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('AWS','Azure')]
+    [string]
+    $Cloud 
 )
 
 try {
@@ -34,7 +35,6 @@ try {
     Write-Host("VersionNum=$VersionNum")
     Write-Host("ParentVersionNum=$ParentVersionNum")
     Write-Host("ImageRepo=$ImageRepo")
-    # Write-Host("DllName=$DllName")
     Write-Host("NoCache=$NoCache")
     $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     "Host Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
@@ -44,17 +44,12 @@ try {
     $WindowsVersion = $ResolvedDockerLabel
     $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     $DockerfilePath = Join-Path $ScriptDir 'Dockerfile'
-    # $DllPath = Join-Path $ScriptDir $DllName
-    $ParentImage = "$ImageRepo`:$ParentVersionNum-$WindowsVersion"
-    $PatchedImage = "$ImageRepo`:$ParentVersionNum.$VersionNum-$WindowsVersion"
+    $ParentImage = "$ImageRepo`:$ParentVersionNum-$WindowsVersion-$Cloud"
+    $PatchedImage = "$ImageRepo`:$ParentVersionNum.$VersionNum-$WindowsVersion-$Cloud"
 
     if (-not (Test-Path -LiteralPath $DockerfilePath -PathType Leaf)) {
         throw "Dockerfile not found: $DockerfilePath"
     }
-
-    # if (-not (Test-Path -LiteralPath $DllPath -PathType Leaf)) {
-    #     throw "Patch DLL not found: $DllPath"
-    # }
 
     Write-Host("ParentImage=$ParentImage")
     Write-Host("PatchedImage=$PatchedImage")

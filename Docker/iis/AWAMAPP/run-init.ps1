@@ -176,16 +176,4 @@ if ($Dbug) {
     $ForwardParams.Dbug = $true
 }
 
-$LicenseRegistryPaths = @(
-    'HKLM:\SOFTWARE\LANSA\COMMON'
-    'HKLM:\SOFTWARE\WOW6432Node\LANSA\COMMON'
-)
-
-foreach ($LicenseRegistryPath in $LicenseRegistryPaths) {
-    Write-Host("Registry: $LicenseRegistryPath")
-    New-Item -Path $LicenseRegistryPath -Force | Out-Null
-    Write-Host("Registry: $LicenseRegistryPath [LicenseDir] = C:\")
-    Set-ItemProperty -Path $LicenseRegistryPath -Name 'LicenseDir' -Value 'C:\' -Type String
-}
-
 & 'C:\init.ps1' @ForwardParams

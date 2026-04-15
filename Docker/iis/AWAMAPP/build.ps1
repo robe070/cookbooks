@@ -22,7 +22,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $SQLPort,
+    $SQLPort = '1433',
 
     [Parameter(Mandatory=$true)]
     [ValidateSet('AWS','Azure')]

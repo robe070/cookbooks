@@ -18,7 +18,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $SQLPort = 1433,
+    $SQLPort = '1433',
 
     [Parameter(Mandatory=$false)]
     [string]
