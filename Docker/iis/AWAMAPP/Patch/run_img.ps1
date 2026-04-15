@@ -6,7 +6,7 @@ param (
 
     [Parameter(Mandatory=$false)]
     [string]
-    $VersionNum = "16.0.26030",
+    $VersionNum = "16.0.26030.1",
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -34,7 +34,7 @@ $WindowsVersion = $ResolvedDockerLabel
 $ImageRepo = "lansalpc/vldemoapp-servercore"
 
 try {
-    docker rm -f LANSA-IMG 2>$null
+    docker rm -f LANSA-PATCH 2>$null
 } catch {
 }
 
@@ -51,7 +51,7 @@ if ($SQLDsn) { $envArgs += @('-e', "SQL_DSN=$SQLDsn") }
 $bootstrapArgs = @('-File', 'C:\bootstrap.ps1')
 if ($ByPassSQLServerDNSChecks) { $bootstrapArgs += @('-ByPassSQLServerDNSChecks') }
 
-docker run --name LANSA-IMG -it `
+docker run --name LANSA-PATCH -it `
   @envArgs `
   -p 50080:80 -p 54545:4545  `
   -v c:\temp:c:\temp `

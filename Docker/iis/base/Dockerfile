@@ -49,8 +49,8 @@ ENV RUNNING_IN_CONTAINER=1
 COPY .\*.ps1 .\
 RUN DIR
 
-# Curl not needed as its only used to access the Cloud Metadata but thats not accessible from within a Windows container. 
-# RUN .\installcurl.ps1
+# Curl is required to access the Cloud Metadata
+RUN .\installcurl.ps1
 
 RUN . '.\dot-CommonTools.ps1'; `
     .\getchoco.ps1

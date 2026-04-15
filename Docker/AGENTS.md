@@ -13,3 +13,18 @@
 - Do not ask the user to share code from this repo; access it directly.
 - c:\init.ps1 comes from iis\base directory.
 - LANSA MSI install cannot be done via a Dockerfile because secrets are required. Use `docker run` to install while passing secrets as a file, then `docker commit` the container and replace the entrypoint with `C:\bootstrap.ps1`.
+
+# Documentation Workflow
+- To produce `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions`, first inspect `iis\AWAMAPP\build.ps1`, `iis\AWAMAPP\run.ps1`, `iis\AWAMAPP\commit.ps1`, `iis\AWAMAPP\run_img.ps1`, `iis\base\init.ps1`, and `iis\base\bootstrap.ps1`.
+- Summarise the Base image as prerequisites-only and note it is published to Docker Hub. Summarise the AWAMAPP image as an example LANSA MSI install into the Base container and note it is not published.
+- Document the construction flow using `run.ps1` to install the MSI into a container, `commit.ps1` to create an image from that container, and `run_img.ps1` to test the resulting image.
+- Include examples for: SQL Server on the host, SQL Server on the network using a stable DNS name, and running the final app image with runtime database overrides.
+- State that the database state is part of the installation and must match the installed MSI/image.
+- Include Cloud Account Id licensing instructions: place the AWS/Azure XML license in the application root so it is copied into the LANSA licensing directory, and reference `https://docs.lansa.com/16/en/lansa041/content/lansa/l4winsba_0055.htm`.
+- Use floating tags only for customer testing examples. State that immutable tags should be used for production.
+- Produce the primary deliverable as `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions.docx`. If needed for easier import or preview, also produce companion `.html`, `.md`, or `.pdf` files alongside it.
+- To create a `.docx` from a markdown file when no `.docx` exists yet, use the root template files `docx-template-content-types.xml`, `docx-template-package-rels.xml`, `docx-template-word-styles.xml`, `docx-template-word-document-rels.xml`, and `docx-template-word-document.xml`.
+- Map those template files into the docx package as `[Content_Types].xml`, `_rels\.rels`, `word\styles.xml`, `word\_rels\document.xml.rels`, and use `docx-template-word-document.xml` as the reference for the `word\document.xml` namespace/style structure and the `<w:sectPr>` block.
+- Generate a new `word\document.xml` from the markdown content, preserving the `Title`, `Heading1`, and `Heading2` style ids and turning fenced code blocks / inline backticks into monospace runs.
+- Build the package in a temp folder, zip the package contents with PowerShell `System.IO.Compression`, and rename the zip to `.docx`.
+- The template XML files were extracted from a working `.docx` and live in the repo root specifically so future turns do not need an existing `.docx` before producing a new one.

@@ -12,9 +12,6 @@ Write-Host ("bootstrap.ps1 starting (ByPassSQLServerDNSChecks={0})" -f $ByPassSQ
 $SqlHost = $env:SQL_HOST
 $SqlPort = $env:SQL_PORT
 $DsnName = $env:SQL_DSN
-if ([string]::IsNullOrWhiteSpace($DsnName)) {
-    $DsnName = "Docker"
-}
 
 if (-not $ByPassSQLServerDNSChecks) {
     Write-Host ("SQL env vars: SQL_HOST='{0}', SQL_PORT='{1}', SQL_DSN='{2}'" -f $SqlHost, $SqlPort, $DsnName)
@@ -25,6 +22,11 @@ if (-not $ByPassSQLServerDNSChecks) {
 
     if ([string]::IsNullOrWhiteSpace($SqlPort)) {
         throw "SQL_PORT is required."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($DsnName)) {
+        $DsnName = "Docker"
+        Write-Host "SQL_DSN not set, defaulting to '$DsnName'."
     }
 
     $SqlPortInt = 0
@@ -54,10 +56,10 @@ if (-not $ByPassSQLServerDNSChecks) {
         $tcpClient.Close()
     }
 
-    $serverValue = "$SqlHost,$SqlPort"
+    $serverValue = "tcp:$SqlHost,$SqlPort"
     if (Get-Command Get-OdbcDsn -ErrorAction SilentlyContinue) {
         try {
-            $dsn = Get-OdbcDsn -Name $DsnName -DsnType "System" -ErrorAction Stop
+            $dsn = Get-OdbcDsn -Name $DsnName -DsnType "System" -Platform '32-bit' -ErrorAction Stop
         } catch {
             throw "System DSN '$DsnName' not found. $_"
         }
@@ -65,45 +67,32 @@ if (-not $ByPassSQLServerDNSChecks) {
         # Update DSN to use the resolved host/port
         try {
             if (Get-Command Set-OdbcDsn -ErrorAction SilentlyContinue) {
-                Set-OdbcDsn -Name $DsnName -DsnType "System" -SetPropertyValue @("Server=$serverValue", "Port=$SqlPort") -ErrorAction Stop
+                Set-OdbcDsn -Name $DsnName -DsnType "System" -Platform '32-bit' -SetPropertyValue @("Server=$serverValue") -ErrorAction Stop
             } else {
                 throw "Set-OdbcDsn cmdlet not available."
             }
         } catch {
-            throw "Failed to update System DSN '$DsnName' with Server=$serverValue Port=$SqlPort. $_"
+            throw "Failed to update System DSN '$DsnName' with Server=$serverValue $_"
         }
     } else {
-        $dsnRegPath = "HKLM:\Software\ODBC\ODBC.INI\$DsnName"
+        $dsnRegPath = "HKLM:\Software\WOW6432Node\ODBC\ODBC.INI\$DsnName"
         if (-not (Test-Path $dsnRegPath)) {
             throw "System DSN '$DsnName' not found at $dsnRegPath."
         }
 
         Set-ItemProperty -Path $dsnRegPath -Name "Server" -Value $serverValue -Type String
-        Set-ItemProperty -Path $dsnRegPath -Name "Port" -Value $SqlPort -Type String
-        Set-ItemProperty -Path $dsnRegPath -Name "ServerName" -Value $serverValue -Type String
     }
 
-    # Test ODBC connectivity using the DSN (expects credentials to be in DSN or trusted auth)
-    try {
-        $conn = New-Object System.Data.Odbc.OdbcConnection("DSN=$DsnName;")
-        $conn.Open()
-        $cmd = $conn.CreateCommand()
-        $cmd.CommandText = "SELECT 1"
-        [void]$cmd.ExecuteScalar()
-        $conn.Close()
-    } catch {
-        throw "ODBC test failed for DSN '$DsnName'. $_"
-    }
+    Write-Host "Successfully updated DSN '$DsnName' with Server=$serverValue."
+    Write-Host "Note that connection was not tested with ODBC, only that the server/port are reachable and the DSN was updated."
 } else {
     Write-Host "Bypassing SQL Server DNS/ODBC checks (ByPassSQLServerDNSChecks set)."
 }
 
 # copy process-level environment variables to machine level
 foreach($key in [System.Environment]::GetEnvironmentVariables('Process').Keys) {
-    if ($null -eq [System.Environment]::GetEnvironmentVariable($key, 'Machine')) {
-        $value = [System.Environment]::GetEnvironmentVariable($key, 'Process')
-        [System.Environment]::SetEnvironmentVariable($key, $value, 'Machine')
-    }
+    $value = [System.Environment]::GetEnvironmentVariable($key, 'Process')
+    [System.Environment]::SetEnvironmentVariable($key, $value, 'Machine')
 }
 
 # echo the IIS log to the console:
