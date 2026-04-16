@@ -37,6 +37,110 @@ function Write-RegAssignment {
     }
 }
 
+function Test-MatchesPattern {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        $FileName,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $RelativePath,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Pattern
+    )
+
+    $NormalizedPattern = $Pattern.Trim().Replace('\', '/')
+    if ([string]::IsNullOrWhiteSpace($NormalizedPattern)) {
+        return $false
+    }
+
+    if ($NormalizedPattern.StartsWith('/')) {
+        $NormalizedPattern = $NormalizedPattern.Substring(1)
+    }
+
+    if ($NormalizedPattern.EndsWith('/')) {
+        return $false
+    }
+
+    $NormalizedRelativePath = $RelativePath.Replace('\', '/')
+    return $FileName -like $NormalizedPattern -or $NormalizedRelativePath -like $NormalizedPattern
+}
+
+function Test-ShouldCopyFile {
+    param(
+        [Parameter(Mandatory=$true)]
+        [System.IO.FileInfo]
+        $File,
+
+        [Parameter(Mandatory=$true)]
+        [string[]]
+        $Patterns
+    )
+
+    if ($File.Name -eq '.dockerignore') {
+        return $false
+    }
+
+    if ($File.Name -notlike '*.*') {
+        return $false
+    }
+
+    $RelativePath = $File.Name
+    $IsIgnored = $false
+
+    foreach ($RawPattern in $Patterns) {
+        $Pattern = $RawPattern.Trim()
+        if ([string]::IsNullOrWhiteSpace($Pattern) -or $Pattern.StartsWith('#')) {
+            continue
+        }
+
+        $IsNegated = $Pattern.StartsWith('!')
+        if ($IsNegated) {
+            $Pattern = $Pattern.Substring(1).Trim()
+        }
+
+        if ([string]::IsNullOrWhiteSpace($Pattern)) {
+            continue
+        }
+
+        if (Test-MatchesPattern -FileName $File.Name -RelativePath $RelativePath -Pattern $Pattern) {
+            $IsIgnored = -not $IsNegated
+        }
+    }
+
+    return -not $IsIgnored
+}
+
+# Copy the AWAMAPP payload from the mounted repo into C:\ before running the install.
+$SourceDir = 'C:\docker\iis\AWAMAPP'
+$IgnoreFile = Join-Path $SourceDir '.dockerignore'
+$ContainerRoot = 'C:\'
+
+if (Test-Path -LiteralPath $SourceDir -PathType Container) {
+    $IgnorePatterns = @()
+    if (Test-Path -LiteralPath $IgnoreFile -PathType Leaf) {
+        $IgnorePatterns = @(Get-Content -LiteralPath $IgnoreFile | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+
+    $Files = Get-ChildItem -LiteralPath $SourceDir -File | Sort-Object Name
+    foreach ($File in $Files) {
+        if (Test-ShouldCopyFile -File $File -Patterns $IgnorePatterns) {
+            $Destination = Join-Path $ContainerRoot $File.Name
+            if ($Destination -ieq $PSCommandPath) {
+                continue
+            }
+
+            Write-Host("Copying $($File.Name) to $Destination")
+            Copy-Item -LiteralPath $File.FullName -Destination $Destination -Force
+        } else {
+            Write-Host("Skipping $($File.Name) due to .dockerignore")
+        }
+    }
+}
+
 # Change the tempdir to the host volume so log files can be seen on the host
 # In order to view installation logs, when running the container specify the VOLUME option (-v h:\temp\c:\temp\) which creates the directory
 # c:\temp. But if the option is not specified, the directory will not exist. So log files will be in the default location
@@ -73,29 +177,6 @@ try {
     Set-Location $ENV:GITREPOPATH
     Get-ChildItem
     git pull
-
-    # Copy ssh_config from where Dockerfile put it to the git dir
-    # Did not put in Dockerfile because could not work out how to escape the space in 'program files'. [] did not work. Backtick did not work.
-    # Copy-Item c:\ssh_config "$ENV:ProgramW6432\Git\etc\ssh\ssh_config"
-
-    # Copy ssh key to location referred to by ssh_config
-    # set the DB password
-    # $default_sshkeypath = "$ENV:TEMP\id_rsa"
-    # if ($sshkeypath -and (Test-Path $sshkeypath)) {
-    #     Copy-Item $sshkeypath c:\id_rsa
-    #     Write-Host "Using ssh key from secret file: $sshkeypath"
-    # }
-    # elseif (Test-Path $default_sshkeypath) {
-    #     Copy-Item $default_sshkeypath c:\id_rsa
-    #     Write-Host "Using ssh key from default file: $default_sshkeypath"
-    # }
-    # else {
-    #     throw "No ssh key in $sshkeypath nor in $default_sshkeypath"
-    # }
-
-    # Write-Host "Update known_hosts with github.com details so that accessing remote repo does not prompt for permission"
-    # mkdir "$ENV:USERPROFILE\.ssh"
-    # ssh-keyscan github.com | set-content "$ENV:USERPROFILE\.ssh\known_hosts"
 
     Write-Host("Testing connectivity to SQL Server at $server_name...")
     $DNSName = $server_name.Split(',')[0].Replace('tcp:','')
@@ -161,7 +242,7 @@ try {
     Write-Host "Using MSI from $MSIuri"
 
     # Registry Symbolic Links do not work on Server Core, so explicitly specify them.
-    # VL Runtime makes no use of 32-bit registry AFAIK.
+    # VL Runtime makes no use of 32-bit registry AFAIK, because there is no registry use.
     # Integrator and Web Server are entirely 64 bit.
     # Does 1200 use the 32-bit registry hive?
 
@@ -212,10 +293,7 @@ try {
     Write-Host("Licensing Install...")
     # Create license directory
     $LicenseDir = 'C:\'
-    # New-Item -ItemType Directory -Path 'C:\' -Force | Out-Null
-
-    # Copy license files into the image.
-    # Copy-Item "c:\docker\iis\AWAMAPP\*.lic" $LicenseDir -Force
+    # New-Item -ItemType Directory -Path $LicenseDir -Force | Out-Null
 
     # Create registry key and set LicenseDir
     Write-RegAssignment -Path 'HKLM:\SOFTWARE\LANSA\COMMON'

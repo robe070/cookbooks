@@ -135,6 +135,11 @@ if ($Cloud -eq 'AWS' -and -not [string]::IsNullOrWhiteSpace([System.Environment]
 #     throw "Host IMDS metadata fetch failed. METADATA env var is mandatory. $($_.Exception.Message)"
 # }
 
+try {
+    docker rm -f LANSA-APP 2>$null
+} catch {
+}
+
 docker run --name LANSA-APP -it -e DEBUG=Y -e GITREPOPATH=c:\lansa -e GITBRANCH=debug/paas `
 @DBEnv `
 @TraceEnv `
@@ -146,6 +151,6 @@ docker run --name LANSA-APP -it -e DEBUG=Y -e GITREPOPATH=c:\lansa -e GITBRANCH=
 --entrypoint powershell `
 "$BaseImageRepo`:$BaseTag" `
 -NoLogo -NoProfile -ExecutionPolicy Bypass `
--File c:\docker\iis\AWAMAPP\run-init.ps1 -server_name "tcp:$SQLHost,$SQLPort" -dbname $DbName -dbuser 'DBSetup' `
+-File c:\docker\iis\AWAMAPP\init.ps1 -server_name "tcp:$SQLHost,$SQLPort" -dbname $DbName -dbuser 'DBSetup' `
 -dbpasswordpath 'c:\secrets\dbpassword.txt' -webuser 'PCXUSER2' -webpasswordpath 'c:\secrets\webpassword.txt' `
 -MSIuri 'c:\msi\AWAMAPP_v16.0.26030_en-us.msi' -dbug -Cloud $Cloud

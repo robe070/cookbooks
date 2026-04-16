@@ -6,8 +6,8 @@ $curlSha256Uri = "https://curl.se/windows/latest.cgi?p=win64-mingw.zip.txt"
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 New-Item -ItemType Directory -Force -Path (Split-Path $curlZip) | Out-Null
-Invoke-WebRequest -Uri $curlUri -OutFile $curlZip
-$checksumResponse = (Invoke-WebRequest -Uri $curlSha256Uri).Content.Trim()
+Invoke-WebRequest -Uri $curlUri -UseBasicParsing -OutFile $curlZip
+$checksumResponse = (Invoke-WebRequest -Uri $curlSha256Uri -UseBasicParsing).Content.Trim()
 $checksumMatch = [regex]::Match($checksumResponse, '=\s*([0-9a-fA-F]{64})\s*$')
 if (-not $checksumMatch.Success) {
     throw "Unable to parse SHA256 from $curlSha256Uri. Response: $checksumResponse"

@@ -59,7 +59,7 @@ Stops `LANSA-APP` with an extended timeout and then commits it as a new image, r
 Do not restart a stopped `LANSA-APP` container. Until commit time its configured startup still runs `init.ps1`, so starting it again reruns the install flow.
 
 ### 4.3 Patching
-If an additional DLL must be added after the MSI install, there are two supported approaches.
+If an additional DLL must be added after the MSI install, there are two supported approaches. And you should consider re-building the MSI and then re-building the application Docker image.
 
 Quick one-off test:
 - Run `.\run.ps1` first so the install container `LANSA-APP` exists and the repository is mounted as `C:\docker`.
@@ -78,13 +78,14 @@ Repeatable patch image:
 - Place `X_PDFMS.DLL` in `iis\AWAMAPP\Patch`.
 - Build a child image from `iis\AWAMAPP\Patch\build.ps1`.
 - This is the preferred option when the patch needs to be reproducible. The default patched image tag is `lansalpc/vldemoapp-servercore:16.0.26030.1-ltsc2025`.
+- Its a very fast process so it may as well be used every time you need to patch.
 
 ### 4.4 run_img.ps1
 Runs the committed image for test/validation.
 
 Key inputs: -DockerLabel, -VersionNum, -SQLHost (optional), -SQLPort (optional), -SQLDsn (optional), -Trace (optional), -ByPassSQLServerDNSChecks (optional).
 
-run_img.ps1 can be run without database parameters if the database server has not changed. In that case, pass -ByPassSQLServerDNSChecks so bootstrap.ps1 skips DNS and ODBC validation.
+run_img.ps1 can be run without database parameters if the database server has not changed. In that case, pass -ByPassSQLServerDNSChecks so bootstrap.ps1 skips DNS and ODBC validation. But note that stopping a Cloud VM and restarting it may change the VM IP Address and if your database is on the container host the ODBC DSN needs to be modified. run_img.ps1 obtains the current IP address and passes it to bootstrap.ps1 to modify the ODBC DSN. It also is quite quick, so its recommended to always run without -ByPassSQLServerDNSChecks.
 
 ## 5. Installation Examples
 ### 5.1 SQL Server Instance on the Host
