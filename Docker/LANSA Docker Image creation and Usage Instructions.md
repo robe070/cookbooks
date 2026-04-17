@@ -159,3 +159,10 @@ cd iis\AWAMAPP\Patch
 - The AWAMAPP MSI install writes database state. Do not mix a previously installed database with a different MSI/image version.
 - Use floating label tags for testing only. Use immutable tags for production.
 - If a Powershell command window is opened inside the container, the Powershell prompt will display 'Cont C:\>' instead of the standard 'PS C:\>' to clearly show its in the container.
+
+## Example Image Tags
+
+The following example shows immutable and floating tags for the AWAMAPP and Base images.
+
+![Example Docker image tags](images/docker-image-tags.png)
+
