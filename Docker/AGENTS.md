@@ -1,8 +1,7 @@
 # Project Basics
 - Be concise.
 - This is a Docker Windows Image project.
-- AWS EKS only.
-- Published in private ECR image registry.
+- Published in Docker Hub image registry.
 - Run PowerShell commands; this is a Windows-only environment.
 - Hyper-V isolation is used for all containers by default on Windows Professional because there is always a version mismatch with the server core images.
 - --isolation=hyperv is not required. Its the default.
@@ -11,7 +10,6 @@
 - currently working with the iis\AWAMAPP folder
 - Code location is C:\dev\cookbooks\Docker and its sub-directories.
 - Do not ask the user to share code from this repo; access it directly.
-- c:\init.ps1 comes from iis\base directory.
 - LANSA MSI install cannot be done via a Dockerfile because secrets are required. Use `docker run` to install while passing secrets as a file, then `docker commit` the container and replace the entrypoint with `C:\bootstrap.ps1`.
 
 # Documentation Workflow
@@ -25,8 +23,9 @@
 - Produce the primary deliverable as `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions.docx`. If needed for easier import or preview, also produce companion `.html`, `.md`, or `.pdf` files alongside it.
 - Always rebuild the `.docx` from the current markdown and the root template XML files. Do not depend on an existing `.docx` as an input or starting point.
 - Use the same template-based packaging flow every time, including when updating an existing document, so the output is always generated from source rather than edited in place.
+- Use `C:\dev\cookbooks\Docker\Build-MarkdownDocx.ps1` to perform the rebuild.
 - To create a `.docx` from markdown, use the root template files `docx-template-content-types.xml`, `docx-template-package-rels.xml`, `docx-template-word-styles.xml`, `docx-template-word-document-rels.xml`, and `docx-template-word-document.xml`.
 - Map those template files into the docx package as `[Content_Types].xml`, `_rels\.rels`, `word\styles.xml`, `word\_rels\document.xml.rels`, and use `docx-template-word-document.xml` as the reference for the `word\document.xml` namespace/style structure and the `<w:sectPr>` block.
-- Generate a new `word\document.xml` from the markdown content, preserving the `Title`, `Heading1`, and `Heading2` style ids and turning fenced code blocks / inline backticks into monospace runs.
+- Generate a new `word\document.xml` from the markdown content, preserving the `Title`, `Heading1`, and `Heading2` style ids, turning fenced code blocks / inline backticks into monospace runs, and packaging local markdown image references into `word\media` with matching relationship and content-type entries.
 - Build the package in a temp folder, zip the package contents with PowerShell `System.IO.Compression`, and rename the zip to `.docx`.
 - The template XML files were extracted from a working `.docx` and live in the repo root specifically so future turns do not need an existing `.docx` before producing a new one.
