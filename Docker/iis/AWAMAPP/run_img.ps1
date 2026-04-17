@@ -26,7 +26,12 @@ param (
 
     [Parameter(Mandatory=$false)]
     [switch]
-    $ByPassSQLServerDNSChecks
+    $ByPassSQLServerDNSChecks,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('AWS','Azure')]
+    [string]
+    $Cloud
 )
 
 $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
@@ -57,6 +62,6 @@ docker run --name LANSA-IMG -it `
   -v c:\temp:c:\temp `
   -v C:\dev\cookbooks\Docker:C:\docker `
   --entrypoint powershell `
-  "$ImageRepo`:$VersionNum-$WindowsVersion" `
+  "$ImageRepo`:$VersionNum-$WindowsVersion-$Cloud" `
   -NoLogo -NoProfile -ExecutionPolicy Bypass `
   @bootstrapArgs

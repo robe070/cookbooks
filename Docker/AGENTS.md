@@ -23,7 +23,9 @@
 - Include Cloud Account Id licensing instructions: place the AWS/Azure XML license in the application root so it is copied into the LANSA licensing directory, and reference `https://docs.lansa.com/16/en/lansa041/content/lansa/l4winsba_0055.htm`.
 - Use floating tags only for customer testing examples. State that immutable tags should be used for production.
 - Produce the primary deliverable as `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions.docx`. If needed for easier import or preview, also produce companion `.html`, `.md`, or `.pdf` files alongside it.
-- To create a `.docx` from a markdown file when no `.docx` exists yet, use the root template files `docx-template-content-types.xml`, `docx-template-package-rels.xml`, `docx-template-word-styles.xml`, `docx-template-word-document-rels.xml`, and `docx-template-word-document.xml`.
+- Always rebuild the `.docx` from the current markdown and the root template XML files. Do not depend on an existing `.docx` as an input or starting point.
+- Use the same template-based packaging flow every time, including when updating an existing document, so the output is always generated from source rather than edited in place.
+- To create a `.docx` from markdown, use the root template files `docx-template-content-types.xml`, `docx-template-package-rels.xml`, `docx-template-word-styles.xml`, `docx-template-word-document-rels.xml`, and `docx-template-word-document.xml`.
 - Map those template files into the docx package as `[Content_Types].xml`, `_rels\.rels`, `word\styles.xml`, `word\_rels\document.xml.rels`, and use `docx-template-word-document.xml` as the reference for the `word\document.xml` namespace/style structure and the `<w:sectPr>` block.
 - Generate a new `word\document.xml` from the markdown content, preserving the `Title`, `Heading1`, and `Heading2` style ids and turning fenced code blocks / inline backticks into monospace runs.
 - Build the package in a temp folder, zip the package contents with PowerShell `System.IO.Compression`, and rename the zip to `.docx`.

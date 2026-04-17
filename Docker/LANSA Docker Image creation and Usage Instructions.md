@@ -53,6 +53,8 @@ When `-Cloud AWS`, `AWS_SESSION_TOKEN` is also passed through if it exists on th
 
 `run.ps1` remains attached because `init.ps1` ends by tailing the IIS log in the PowerShell window. Once you have tested that the application is running and has been deployed successfully, type `Ctrl-C` to end that PowerShell window. This stops the container so the image can then be committed.
 
+The provided scripts expose the container's port 80 as port 50080. Therefore an example url to execute a WAM is http://localhost:50080/cgi-bin/lansaweb?wam=DEPTABWA&webrtn=BuildFirst&ml=LANSA:XHTML&part=DEX&lang=ENG
+
 ### 4.2 commit.ps1
 Stops `LANSA-APP` with an extended timeout and then commits it as a new image, replacing the entrypoint with `C:\bootstrap.ps1`.
 
@@ -156,3 +158,4 @@ cd iis\AWAMAPP\Patch
 ## 6. Notes
 - The AWAMAPP MSI install writes database state. Do not mix a previously installed database with a different MSI/image version.
 - Use floating label tags for testing only. Use immutable tags for production.
+- If a Powershell command window is opened inside the container, the Powershell prompt will display 'Cont C:\>' instead of the standard 'PS C:\>' to clearly show its in the container.
