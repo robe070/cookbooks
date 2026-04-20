@@ -1,20 +1,39 @@
 ﻿# LANSA Docker Image Creation and Usage Instructions
 
 ## 1. Overview
-Repository: git@github.com:robe070/cookbooks.git (sub-directory: Docker). Branch: debug/paas.
+The code is in the GitHub Repository: git@github.com:robe070/cookbooks.git (sub-directory: Docker). Branch: debug/paas.
 
-Base image is published to Docker Hub. The AWAMAPP example image is not published.
+I have published a Visual LANSA runtime base image to Docker Hub. The AWAMAPP example image is not published. The base image includes only the prerequisites to install and run LANSA.
+**lansalpc/vlbase-servercore**
+**Tags**
+16.0.0-ltsc2025 (Immutable)
+v16ga-ltsc2025 (Floating)
+15.0.0-ltsc2025 (Immutable)
+v15ga-ltsc2025 (Floating)
 
-The base image includes only the prerequisites to install and run LANSA.
+This image is essentially the same as the images we publish in AWS and Azure Marketplace. To run a Visual LANSA app you need to deploy a VL MSI into the image.
+
+All the code to assemble the base image and to deploy a VL MSI into the image and construct an image of that is published here: https://github.com/robe070/cookbooks/tree/debug/paas/Docker
 
 The AWAMAPP example demonstrates installing a LANSA MSI into the base container.
 
 Database state is integral to the MSI installation. The resulting image and database must match.
 
-## 2. Licensing
-Obtain a Cloud Account Id license for either AWS or Azure and place the x_lic*.lic file in the application root directory (e.g., AWAMAPP).
+IMAGE-NAMING.md describes the image naming structure.
+LANSA Docker Image creation and Usage Instructions.md is the user guide. (This file)
 
-The file is copied into the LANSA licensing directory during installation.
+You will need to install Hot Fix EPC160000HF_260417 for V16 and Hot Fix ****** for V15 and construct an MSI to deploy into the Docker image. These Hot Fixes enable Cloud Account Id licensing in a Docker image for both AWS and Azure. I have tested both. Scripts in the above github repo require a Cloud type to be supplied when constructing the application image.
+
+Infrastructure creation like load balancers has not been provided.
+
+N.B. Docker Host must match the image pretty closely. You will need the latest version of Windows Server 2025. This is a Windows on Docker restriction. Nothing to do with LANSA.
+
+It also means that constructing a Visual LANSA base image for another version of Windows requires setting up a new VM running that version.
+
+## 2. Licensing
+Obtain a Cloud Account Id license for either AWS or Azure, add it to the x_lic*.lic file using the "Licensing - Server Licenses" application int the development environment Settings & Administration folder and place the x_lic*.lic file in the application root directory (e.g. AWAMAPP). Multiple license files may be added so that the Docker image you create may be used in both your AWS and Azure accounts, and also support multiple accounts and multiple regions if thats necessary.
+
+The license files are copied into the LANSA licensing directory during installation.
 
 Instructions for obtaining the Cloud Account Id license:
 https://docs.lansa.com/16/en/lansa041/content/lansa/l4winsba_0055.htm
@@ -153,6 +172,22 @@ Command:
 ```
 cd iis\AWAMAPP\Patch
 .\build.ps1
+```
+
+### 5.9 Build V15 Application Image
+
+V15 Cloud Account ID license file added to the AWAMAPP directory.
+The MSI file in run.ps1 changed to the V15 MSI file.
+Database name changed to AWAMAPP-V15 on the run.ps1 command line
+
+Command
+```
+cd iis\AWAMAPP
+.\run.ps1 -DockerLabel ltsc2025 -VersionNum 15.0.0 -Cloud Azure -DbName 'AWAMAPP-V15'
+.\commit.ps1 -DockerLabel ltsc2025 -VersionNum 15.0.26010 -VersionLabel "V15 GA" -Cloud Azure
+cd patch
+.\build.ps1 -Cloud Azure -ParentVersionNum 15.0.26010
+.\run_img.ps1 -Cloud Azure -VersionNum 15.0.26010.1 -trace
 ```
 
 ## 6. Notes
