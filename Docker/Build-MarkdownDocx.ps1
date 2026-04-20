@@ -39,6 +39,34 @@ function Escape-Xml {
     return [System.Security.SecurityElement]::Escape($Text)
 }
 
+function New-RunXml {
+    param(
+        [AllowNull()]
+        [string]$Text,
+        [switch]$Code,
+        [switch]$Bold,
+        [string]$FontSize
+    )
+
+    $properties = New-Object System.Collections.Generic.List[string]
+    if ($Code) {
+        $properties.Add('<w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/>')
+    }
+    if ($Bold) {
+        $properties.Add('<w:b/>')
+    }
+    if ($FontSize) {
+        $properties.Add('<w:sz w:val="' + (Escape-Xml $FontSize) + '"/>')
+    }
+
+    $rPr = ''
+    if ($properties.Count -gt 0) {
+        $rPr = '<w:rPr>' + ($properties -join '') + '</w:rPr>'
+    }
+
+    return '<w:r>' + $rPr + '<w:t xml:space="preserve">' + (Escape-Xml $Text) + '</w:t></w:r>'
+}
+
 function Get-InlineRunXml {
     param(
         [string]$Text
@@ -46,19 +74,31 @@ function Get-InlineRunXml {
 
     $parts = $Text -split '`', -1
     $runs = New-Object System.Collections.Generic.List[string]
+    $boldPattern = '\*\*([^*](?:.*?[^*])?)\*\*'
 
     for ($index = 0; $index -lt $parts.Length; $index++) {
-        $escaped = Escape-Xml $parts[$index]
         if ($index % 2 -eq 1) {
-            $runs.Add('<w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/></w:rPr><w:t xml:space="preserve">' + $escaped + '</w:t></w:r>')
+            $runs.Add((New-RunXml -Text $parts[$index] -Code))
         }
         else {
-            $runs.Add('<w:r><w:t xml:space="preserve">' + $escaped + '</w:t></w:r>')
+            $position = 0
+            foreach ($match in [regex]::Matches($parts[$index], $boldPattern)) {
+                if ($match.Index -gt $position) {
+                    $runs.Add((New-RunXml -Text $parts[$index].Substring($position, $match.Index - $position)))
+                }
+
+                $runs.Add((New-RunXml -Text $match.Groups[1].Value -Bold))
+                $position = $match.Index + $match.Length
+            }
+
+            if ($position -lt $parts[$index].Length) {
+                $runs.Add((New-RunXml -Text $parts[$index].Substring($position)))
+            }
         }
     }
 
     if ($runs.Count -eq 0) {
-        $runs.Add('<w:r><w:t xml:space="preserve"></w:t></w:r>')
+        $runs.Add((New-RunXml -Text ''))
     }
 
     return ($runs -join '')
@@ -96,7 +136,7 @@ function New-ParagraphXml {
     }
 
     if ($CodeBlock) {
-        $runs = '<w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">' + (Escape-Xml $Text) + '</w:t></w:r>'
+        $runs = New-RunXml -Text $Text -Code -FontSize '20'
     }
     else {
         $runs = Get-InlineRunXml -Text $Text
@@ -428,7 +468,6 @@ try {
         }
 
         if ([string]::IsNullOrWhiteSpace($line)) {
-            $paragraphs.Add('<w:p/>')
             continue
         }
 
