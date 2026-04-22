@@ -28,13 +28,13 @@ variables:
     value: false
   - name: Build-w12r2d-15-0
     value: false
-  - name: Build-w16d-16-0
+  - name: Build-w25d-16-0
     value: false
-  - name: Build-w16d-16-0j
+  - name: Build-w25d-16-0j
     value: false
-  - name: Build-w16d-15-0
+  - name: Build-w25d-15-0
     value: false
-  - name: Build-w16d-15-0j
+  - name: Build-w25d-15-0j
     value: false
   - name: Build-w19d-16-0
     value: false
@@ -92,20 +92,20 @@ stages:
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn:
-    stageName: AUSSQLAZURE3DBw16d160
-    stageDisplayname: AUS SQLAZURE3 DB w16d-16-0
-    jobName: AUSSQLAZURE3DBw16d160
+    stageName: AUSSQLAZURE3DBw25d160
+    stageDisplayname: AUS SQLAZURE3 DB w25d-16-0
+    jobName: AUSSQLAZURE3DBw25d160
     databaseNewOrExisting: new
-    jobDisplayname: AUS SQLAZURE3 DB w16d-16-0
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
+    jobDisplayname: AUS SQLAZURE3 DB w25d-16-0
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'true'), eq(variables['Build-all'], 'true')))
     lansaVersion: V16 GA
     msiURL: $(msiURLv16)
-    osName: Windows Server 2016
+    osName: Windows Server 2025
     requestedServiceObjectiveName: S4
     resourceGroup: SQLAZURE3-TEST
     SqlDeploymentName: SQLAZURE3
     stackName: SQL3VMSS
-    version: w16d-16-0
+    version: w25d-16-0
     imageReleaseState: Preview
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
@@ -132,23 +132,23 @@ stages:
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn:
-    stageName: AUSSQLAZURE5DBw16d150
-    stageDisplayname: AUS SQLAZURE5 DB w16d-15-0
-    jobName: AUSSQLAZURE5DBw16d150
-    jobDisplayname: AUS SQLAZURE5 DB w16d-15-0
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
+    stageName: AUSSQLAZURE5DBw25d150
+    stageDisplayname: AUS SQLAZURE5 DB w25d-15-0
+    jobName: AUSSQLAZURE5DBw25d150
+    jobDisplayname: AUS SQLAZURE5 DB w25d-15-0
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'true'), eq(variables['Build-all'], 'true')))
     lansaVersion: V15 GA
     databaseNewOrExisting: new
     edition: Premium
     applicationGatewaySkuTier: WAF_v2
     applicationGatewaySkuName: WAF_v2
     msiURL: $(msiURLv15)
-    osName: Windows Server 2016
+    osName: Windows Server 2025
     requestedServiceObjectiveName: P1
     resourceGroup: SQLAZURE5-TEST
     SqlDeploymentName: SQLAZURE5
     stackName: SQL5VMSS
-    version: w16d-15-0
+    version: w25d-15-0
     imageReleaseState: Preview
 
 # - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
@@ -241,18 +241,18 @@ stages:
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn:
-    stageName: AUSTestShoe_WithKeyVaultCert_Sizesw16160j
-    stageDisplayname: AUS Test Shoe (With Key Vault Cert) Sizes w16-16-0j
-    jobName: AUSTestShoe_WithKeyVaultCert_Sizesw16160j
-    jobDisplayname: AUS Test Shoe (With Key Vault Cert) Sizes w16-16-0j
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-16-0j'], 'true'), eq(variables['Build-all'], 'true')))
+    stageName: AUSTestShoe_WithKeyVaultCert_Sizesw25160j
+    stageDisplayname: AUS Test Shoe (With Key Vault Cert) Sizes w25-16-0j
+    jobName: AUSTestShoe_WithKeyVaultCert_Sizesw25160j
+    jobDisplayname: AUS Test Shoe (With Key Vault Cert) Sizes w25-16-0j
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'true'), eq(variables['Build-all'], 'true')))
     lansaVersion: V16 GA
     msiURL: $(msiURLJPN)
-    osName: Windows Server 2016 JPN
+    osName: Windows Server 2025 JPN
     resourceGroup: TestStack-PubTempl
     SqlDeploymentName: TestStack
     stackName: TestSt
-    version: w16d-16-0j
+    version: w25d-16-0j
     virtualMachineSize: Standard_B4ms
     dbVirtualMachineSize: Standard_B2ms
     keyVaultEnabled: 'true'
@@ -286,19 +286,19 @@ stages:
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn:
-    stageName: AUSMediumStackShoeSizesw16d150j
-    stageDisplayname: AUS Medium Stack Shoe Sizes w16d-15-0j
-    jobName: AUSMediumStackShoeSizesw16d150j
-    jobDisplayname: AUS Medium Stack Shoe Sizes w16d-15-0j
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
+    stageName: AUSMediumStackShoeSizesw25d150j
+    stageDisplayname: AUS Medium Stack Shoe Sizes w25d-15-0j
+    jobName: AUSMediumStackShoeSizesw25d150j
+    jobDisplayname: AUS Medium Stack Shoe Sizes w25d-15-0j
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'true'), eq(variables['Build-all'], 'true')))
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
-    osName: Windows Server 2016 JPN
+    osName: Windows Server 2025 JPN
     requestedServiceObjectiveName: S12
     resourceGroup: MediumStack-PubTempl
     SqlDeploymentName: MediumStack
     stackName: MedSt
-    version: w16d-15-0j
+    version: w25d-15-0j
     virtualMachineSize: Standard_B12ms
     dbVirtualMachineSize: Standard_B2ms
     maxSizeBytes: 1099511627776
@@ -339,16 +339,16 @@ stages:
   displayName: Production Stage
   dependsOn:
     - AUSSQLAZURE2DBw19d160
-    - AUSSQLAZURE3DBw16d160
+    - AUSSQLAZURE3DBw25d160
     - AUSSQLAZURE4DBw19d150
-    - AUSSQLAZURE5DBw16d150
+    - AUSSQLAZURE5DBw25d150
     # - AUSSQLAZURE6DBw22r2d150
     # - AUSMYSQL1DBw19d150  # MYSQL Single Server no longer supported on Azure
     - AUSMSSQLS1DBw19d160
     - AUSDevShoe_WithKeyVaultCert_Sizesw19d150
-    - AUSTestShoe_WithKeyVaultCert_Sizesw16160j
+    - AUSTestShoe_WithKeyVaultCert_Sizesw25160j
     - AUSSmallStackShoeSizesw19d150j
-    - AUSMediumStackShoeSizesw16d150j
+    - AUSMediumStackShoeSizesw25d150j
     - AUSLargeStackShoeSizesw19d160j
   jobs:
   - job: AgentlessJob
@@ -403,39 +403,39 @@ stages:
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: ProductionStage
-    stageName: ProductionTestsw16d150j
-    stageDisplayname: Production Tests w16d-15-0j
-    jobName: ProductionTestsw16d150j
-    jobDisplayname: Production Tests w16d-15-0j
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    stageName: ProductionTestsw25d150j
+    stageDisplayname: Production Tests w25d-15-0j
+    jobName: ProductionTestsw25d150j
+    jobDisplayname: Production Tests w25d-15-0j
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
     databaseNewOrExisting: new
     lansaVersion: V15 GA
     msiURL: $(msiURLJPNLatest)
-    osName: Windows Server 2016 JPN
+    osName: Windows Server 2025 JPN
     requestedServiceObjectiveName: S12
-    resourceGroup: TemplateProd-Test-w16d-15-0j
-    SqlDeploymentName: TemplateProd-Test-w16d-15-0j
+    resourceGroup: TemplateProd-Test-w25d-15-0j
+    SqlDeploymentName: TemplateProd-Test-w25d-15-0j
     stackName: "$(Gate.VersionClean)"
-    version: w16d-15-0j
+    version: w25d-15-0j
     location: East US
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
   parameters:
     dependsOn: ProductionStage
-    stageName: ProductionTestsw16d160j
-    stageDisplayname: Production Tests w16d-16-0j
-    jobName: ProductionTestsw16d160j
-    jobDisplayname: Production Tests w16d-16-0j
-    jobcondition: and(succeeded(), or(eq(variables['Build-w16d-16-0j'], 'True'), eq(variables['Build-all'], 'True')))
+    stageName: ProductionTestsw25d160j
+    stageDisplayname: Production Tests w25d-16-0j
+    jobName: ProductionTestsw25d160j
+    jobDisplayname: Production Tests w25d-16-0j
+    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-16-0j'], 'True'), eq(variables['Build-all'], 'True')))
     databaseNewOrExisting: new
     lansaVersion: V16 GA
     msiURL: $(msiURLJPN)
-    osName: Windows Server 2016 JPN
+    osName: Windows Server 2025 JPN
     requestedServiceObjectiveName: S12
-    resourceGroup: TemplateProd-Test-w16d-16-0j
-    SqlDeploymentName: TemplateProd-Test-w16d-16-0j
+    resourceGroup: TemplateProd-Test-w25d-16-0j
+    SqlDeploymentName: TemplateProd-Test-w25d-16-0j
     stackName: "$(Gate.VersionClean)"
-    version: w16d-16-0j
+    version: w25d-16-0j
     location: East US
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml

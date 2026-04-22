@@ -46,10 +46,10 @@ try {
    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
    switch ( $Platform) {
-      "win2016" {
+      "win2025" {
          switch ( $Language ) {
                "jpn" {
-                  $lpurl = "https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/Japanese+Language+Packs/Server+2016/jpn/x64fre_Server_ja-jp_lp.cab"
+                  $lpurl = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/Japanese+Language+Packs/Server+2025/jpn/Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab"
                   $langcode = "ja-JP"
                }
                default {

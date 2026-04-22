@@ -28,7 +28,7 @@ if (Test-Path $path) {
 
     $Uri = Get-Content -Path $path -Raw
     Write-Host "ImageUrl is $Uri"
-    # Extract the minor version from the ImageUrl string e.g. /subscriptions/739c4e86-bd75-4910-8d6e-d7eb23ab94f3/resourceGroups/BakingDP/providers/Microsoft.Compute/galleries/LansaGallery/images/w16d-16-0/versions/16.0.21
+    # Extract the minor version from the ImageUrl string e.g. /subscriptions/739c4e86-bd75-4910-8d6e-d7eb23ab94f3/resourceGroups/BakingDP/providers/Microsoft.Compute/galleries/LansaGallery/images/w25d-16-0/versions/16.0.21
     $versionNumber = ($Uri -split '/versions/')[1]
     $minorVersion = ($versionNumber -split '\.')[2]
     $sku = "$($Version)-$($minorVersion)"

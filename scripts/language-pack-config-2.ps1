@@ -16,15 +16,10 @@ if ( $Language -eq 'ENG') {
 Write-Host("Configure Japanese localization settings Step 2 $Language $Platform")
 
 switch ( $Platform) {
-    "win2016" {
+    "win2025" {
         switch ( $Language ) {
             "jpn" {
                 $LangCode = 'ja-JP'
-                # $Timezone = "Tokyo Standard Time"
-
-                # Write-Host( "Set the location to Japan")
-                # # Is this appropriate? This image may be started in any region of the world. What does it mean to be 'in Japan' when you may be running anywhere?
-                # Set-WinHomeLocation -GeoId 0x7A
             }
             Default {
                 Write-Host("$Language does not have any language configuration")
@@ -49,13 +44,13 @@ switch ( $Platform) {
         }
     }
    "win2022" {
-      switch ( $Language ) {
-         "jpn" {
-              $LangCode = 'ja-JP'
-         }
-         Default {
-            Write-Host("$Language does not have any language configuration")
-            return
+        switch ( $Language ) {
+            "jpn" {
+                $LangCode = 'ja-JP'
+            }
+            Default {
+                Write-Host("$Language does not have any language configuration")
+                return
          }
       }
    }
