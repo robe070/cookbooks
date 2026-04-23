@@ -2,6 +2,7 @@ variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
   - group: 'Azure Logins'
+  - group: 'SKU Versions'
 
   - name: azureUserId
     value: PowershellScriptsSP
@@ -14,9 +15,6 @@ variables:
 
   - name: AtomicBuild
     value: $False
-
-  - name: VersionText
-    value: 22
 
   - name: ScriptTimeout
     value: 360
