@@ -145,9 +145,10 @@ Describe "VM Tests" {
                     }
                     Write-Host "ImageResourceId: $($env:BUILDIMAGE_IMAGERESOURCEID)"
 
-                    $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose
+                    $vm1 = New-AzVMConfig -VMName "$($VMname)" -VMSize $vmsize -Verbose -SecurityType TrustedLaunch
                     $Script:vmname = $VMname
                     $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName "$($VMname)" -Credential $credential -ProvisionVMAgent -EnableAutoUpdate -Verbose
+                    $vm1 = Set-AzVMUefi -VM $vm1 -EnableVtpm $true -EnableSecureBoot $true
                     $vm1 = Set-AzVMSourceImage -VM $vm1 -Id $($env:BUILDIMAGE_IMAGERESOURCEID) -Verbose
                     $vm1 = Add-AzVMNetworkInterface -VM $vm1 -Id $nic.Id -Verbose
 
