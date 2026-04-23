@@ -1183,7 +1183,7 @@ $jsonObject = @"
                 Offer                      = 'lansa-scalable-license'
                 Sku                        = $ImageDefinitionName
                 HyperVGeneration           = 'V2'
-                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
+                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunch'})
             }
             $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
         }
