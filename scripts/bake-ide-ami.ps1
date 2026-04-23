@@ -537,8 +537,9 @@ $jsonObject = @"
 
         if ($CreateVM -and -not $OnlySaveImage) {
             $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $KeyVaultResourceGroup -VaultName $KeyVault).ResourceId
-            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
+            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize -SecurityType TrustedLaunch
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
+            $vm1 = Set-AzVMUefi -VM $vm1 -EnableVtpm $true -EnableSecureBoot $true
             if ($AzureImageUri) {
                 # For custom images, use managed disk with source image URI
                 $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -StorageAccountType "StandardSSD_LRS"
@@ -1181,8 +1182,8 @@ $jsonObject = @"
                 Publisher                  = 'LANSA'
                 Offer                      = 'lansa-scalable-license'
                 Sku                        = $ImageDefinitionName
-                HyperVGeneration           = 'V1'
-                #Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
+                HyperVGeneration           = 'V2'
+                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
             }
             $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
         }
