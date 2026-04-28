@@ -19,6 +19,9 @@ variables:
   - name: ScriptTimeout
     value: 360
 
+  - name: VersionText        # redeclare here to make it settable at queue time
+    value: $(VersionText)    # pulls default from the group
+
 jobs:
 
 - template: AzureDevOps/templates/AzureBuildAllImages.yml
