@@ -45,7 +45,9 @@ function New-RunXml {
         [string]$Text,
         [switch]$Code,
         [switch]$Bold,
-        [string]$FontSize
+        [switch]$Italic,
+        [string]$FontSize,
+        [string]$Color
     )
 
     $properties = New-Object System.Collections.Generic.List[string]
@@ -55,8 +57,14 @@ function New-RunXml {
     if ($Bold) {
         $properties.Add('<w:b/>')
     }
+    if ($Italic) {
+        $properties.Add('<w:i/>')
+    }
     if ($FontSize) {
         $properties.Add('<w:sz w:val="' + (Escape-Xml $FontSize) + '"/>')
+    }
+    if ($Color) {
+        $properties.Add('<w:color w:val="' + (Escape-Xml $Color) + '"/>')
     }
 
     $rPr = ''
@@ -69,7 +77,8 @@ function New-RunXml {
 
 function Get-InlineRunXml {
     param(
-        [string]$Text
+        [string]$Text,
+        [switch]$DefaultBold
     )
 
     $parts = $Text -split '`', -1
@@ -79,26 +88,26 @@ function Get-InlineRunXml {
     for ($index = 0; $index -lt $parts.Length; $index++) {
         if ($index % 2 -eq 1) {
             $runs.Add((New-RunXml -Text $parts[$index] -Code))
+            continue
         }
-        else {
-            $position = 0
-            foreach ($match in [regex]::Matches($parts[$index], $boldPattern)) {
-                if ($match.Index -gt $position) {
-                    $runs.Add((New-RunXml -Text $parts[$index].Substring($position, $match.Index - $position)))
-                }
 
-                $runs.Add((New-RunXml -Text $match.Groups[1].Value -Bold))
-                $position = $match.Index + $match.Length
+        $position = 0
+        foreach ($match in [regex]::Matches($parts[$index], $boldPattern)) {
+            if ($match.Index -gt $position) {
+                $runs.Add((New-RunXml -Text $parts[$index].Substring($position, $match.Index - $position) -Bold:$DefaultBold))
             }
 
-            if ($position -lt $parts[$index].Length) {
-                $runs.Add((New-RunXml -Text $parts[$index].Substring($position)))
-            }
+            $runs.Add((New-RunXml -Text $match.Groups[1].Value -Bold))
+            $position = $match.Index + $match.Length
+        }
+
+        if ($position -lt $parts[$index].Length) {
+            $runs.Add((New-RunXml -Text $parts[$index].Substring($position) -Bold:$DefaultBold))
         }
     }
 
     if ($runs.Count -eq 0) {
-        $runs.Add((New-RunXml -Text ''))
+        $runs.Add((New-RunXml -Text '' -Bold:$DefaultBold))
     }
 
     return ($runs -join '')
@@ -109,9 +118,10 @@ function New-ParagraphXml {
         [AllowNull()]
         [string]$Text,
         [string]$Style,
-        [switch]$CodeBlock,
+        [string]$RunsXml,
         [switch]$Bullet,
-        [int]$IndentTwips = 0
+        [int]$IndentTwips = 0,
+        [string[]]$ParagraphProperties
     )
 
     $properties = New-Object System.Collections.Generic.List[string]
@@ -130,19 +140,30 @@ function New-ParagraphXml {
         $properties.Add('<w:ind w:left="' + $IndentTwips + '"/>')
     }
 
+    foreach ($property in $ParagraphProperties) {
+        if (-not [string]::IsNullOrWhiteSpace($property)) {
+            $properties.Add($property)
+        }
+    }
+
     $pPr = ''
     if ($properties.Count -gt 0) {
         $pPr = '<w:pPr>' + ($properties -join '') + '</w:pPr>'
     }
 
-    if ($CodeBlock) {
-        $runs = New-RunXml -Text $Text -Code -FontSize '20'
-    }
-    else {
-        $runs = Get-InlineRunXml -Text $Text
+    if (-not $RunsXml) {
+        $RunsXml = Get-InlineRunXml -Text $Text
     }
 
-    return '<w:p>' + $pPr + $runs + '</w:p>'
+    return '<w:p>' + $pPr + $RunsXml + '</w:p>'
+}
+
+function New-CodeParagraphXml {
+    param(
+        [string]$RunsXml
+    )
+
+    return '<w:p><w:pPr><w:pStyle w:val="CodeBlock"/></w:pPr>' + $RunsXml + '</w:p>'
 }
 
 function Get-HtmlAttributeValue {
@@ -371,6 +392,253 @@ function New-ImageParagraphXml {
 "@
 }
 
+function New-HorizontalRuleXml {
+    return '<w:p><w:pPr><w:spacing w:before="120" w:after="120"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="BFBFBF"/></w:pBdr></w:pPr></w:p>'
+}
+
+function Split-MarkdownTableRow {
+    param(
+        [string]$Line
+    )
+
+    $trimmed = $Line.Trim()
+    if ($trimmed.StartsWith('|')) {
+        $trimmed = $trimmed.Substring(1)
+    }
+    if ($trimmed.EndsWith('|')) {
+        $trimmed = $trimmed.Substring(0, $trimmed.Length - 1)
+    }
+
+    return @($trimmed -split '\|' | ForEach-Object { $_.Trim() })
+}
+
+function Test-MarkdownTableSeparator {
+    param(
+        [string]$Line
+    )
+
+    $cells = Split-MarkdownTableRow -Line $Line
+    if ($cells.Count -eq 0) {
+        return $false
+    }
+
+    foreach ($cell in $cells) {
+        if ($cell -notmatch '^:?-{3,}:?$') {
+            return $false
+        }
+    }
+
+    return $true
+}
+
+function Get-MarkdownTableAlignments {
+    param(
+        [string]$SeparatorLine
+    )
+
+    $alignments = New-Object System.Collections.Generic.List[string]
+    foreach ($cell in (Split-MarkdownTableRow -Line $SeparatorLine)) {
+        switch -Regex ($cell) {
+            '^:-{3,}:$' { $alignments.Add('center'); continue }
+            '^-{3,}:$' { $alignments.Add('right'); continue }
+            '^:-{3,}$' { $alignments.Add('left'); continue }
+            default { $alignments.Add('left') }
+        }
+    }
+
+    return ,$alignments.ToArray()
+}
+
+function New-TableCellParagraphXml {
+    param(
+        [string]$Text,
+        [string]$Alignment = 'left',
+        [switch]$Header
+    )
+
+    $paragraphProperties = @()
+    if ($Alignment -eq 'center' -or $Alignment -eq 'right') {
+        $paragraphProperties += '<w:jc w:val="' + $Alignment + '"/>'
+    }
+
+    $runs = Get-InlineRunXml -Text $Text -DefaultBold:$Header
+    return New-ParagraphXml -RunsXml $runs -ParagraphProperties $paragraphProperties
+}
+
+function New-MarkdownTableXml {
+    param(
+        [string[]]$HeaderCells,
+        [string[]]$Alignments,
+        [System.Collections.Generic.List[string[]]]$Rows
+    )
+
+    $columnCount = [Math]::Max($HeaderCells.Count, $Alignments.Count)
+    if ($columnCount -le 0) {
+        throw 'Cannot build a table with zero columns.'
+    }
+
+    $cellWidth = [int]([Math]::Floor(9000 / $columnCount))
+    $gridColumns = for ($columnIndex = 0; $columnIndex -lt $columnCount; $columnIndex++) {
+        '<w:gridCol w:w="' + $cellWidth + '"/>'
+    }
+
+    $rowXml = New-Object System.Collections.Generic.List[string]
+
+    $headerCellsXml = New-Object System.Collections.Generic.List[string]
+    for ($columnIndex = 0; $columnIndex -lt $columnCount; $columnIndex++) {
+        $text = if ($columnIndex -lt $HeaderCells.Count) { $HeaderCells[$columnIndex] } else { '' }
+        $alignment = if ($columnIndex -lt $Alignments.Count) { $Alignments[$columnIndex] } else { 'left' }
+        $paragraph = New-TableCellParagraphXml -Text $text -Alignment $alignment -Header
+        $headerCellsXml.Add('<w:tc><w:tcPr><w:tcW w:w="' + $cellWidth + '" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="D9EAF7"/></w:tcPr>' + $paragraph + '</w:tc>')
+    }
+    $rowXml.Add('<w:tr>' + ($headerCellsXml -join '') + '</w:tr>')
+
+    foreach ($row in $Rows) {
+        $cellXml = New-Object System.Collections.Generic.List[string]
+        for ($columnIndex = 0; $columnIndex -lt $columnCount; $columnIndex++) {
+            $text = if ($columnIndex -lt $row.Count) { $row[$columnIndex] } else { '' }
+            $alignment = if ($columnIndex -lt $Alignments.Count) { $Alignments[$columnIndex] } else { 'left' }
+            $paragraph = New-TableCellParagraphXml -Text $text -Alignment $alignment
+            $cellXml.Add('<w:tc><w:tcPr><w:tcW w:w="' + $cellWidth + '" w:type="dxa"/></w:tcPr>' + $paragraph + '</w:tc>')
+        }
+        $rowXml.Add('<w:tr>' + ($cellXml -join '') + '</w:tr>')
+    }
+
+    return @"
+<w:tbl>
+  <w:tblPr>
+    <w:tblW w:w="0" w:type="auto"/>
+    <w:tblBorders>
+      <w:top w:val="single" w:sz="4" w:space="0" w:color="808080"/>
+      <w:left w:val="single" w:sz="4" w:space="0" w:color="808080"/>
+      <w:bottom w:val="single" w:sz="4" w:space="0" w:color="808080"/>
+      <w:right w:val="single" w:sz="4" w:space="0" w:color="808080"/>
+      <w:insideH w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+      <w:insideV w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+    </w:tblBorders>
+  </w:tblPr>
+  <w:tblGrid>
+    $($gridColumns -join "`r`n    ")
+  </w:tblGrid>
+  $($rowXml -join "`r`n  ")
+</w:tbl>
+"@
+}
+
+function Get-PowerShellCodeRunsXml {
+    param(
+        [string]$Text
+    )
+
+    if ($null -eq $Text) {
+        return (New-RunXml -Text '' -Code)
+    }
+
+    $runs = New-Object System.Collections.Generic.List[string]
+    $keywordPattern = '^(?i:(?:begin|break|catch|class|continue|data|do|dynamicparam|else|elseif|end|enum|exit|filter|finally|for|foreach|from|function|if|in|param|process|return|switch|throw|trap|try|until|using|var|while))\b'
+    $variablePattern = '^\$[A-Za-z_][\w:.\-]*'
+    $parameterPattern = '^-{1,2}[A-Za-z][\w\-]*'
+    $position = 0
+
+    while ($position -lt $Text.Length) {
+        $remaining = $Text.Substring($position)
+        $currentChar = $Text[$position]
+
+        if ($currentChar -eq '#') {
+            $runs.Add((New-RunXml -Text $remaining -Code -Color '008000'))
+            break
+        }
+
+        if ($currentChar -eq '"' -or $currentChar -eq "'") {
+            $quote = $currentChar
+            $end = $position + 1
+            while ($end -lt $Text.Length) {
+                if ($Text[$end] -eq $quote) {
+                    if ($quote -eq "'" -and $end + 1 -lt $Text.Length -and $Text[$end + 1] -eq "'") {
+                        $end += 2
+                        continue
+                    }
+
+                    $end++
+                    break
+                }
+
+                if ($Text[$end] -eq '`' -and $end + 1 -lt $Text.Length) {
+                    $end += 2
+                    continue
+                }
+
+                $end++
+            }
+
+            if ($end -gt $Text.Length) {
+                $end = $Text.Length
+            }
+
+            $runs.Add((New-RunXml -Text $Text.Substring($position, $end - $position) -Code -Color 'A31515'))
+            $position = $end
+            continue
+        }
+
+        if ($remaining -match $variablePattern) {
+            $token = $Matches[0]
+            $runs.Add((New-RunXml -Text $token -Code -Color '267F99'))
+            $position += $token.Length
+            continue
+        }
+
+        if ($remaining -match $parameterPattern) {
+            $token = $Matches[0]
+            $runs.Add((New-RunXml -Text $token -Code -Color '795E26'))
+            $position += $token.Length
+            continue
+        }
+
+        if ($remaining -match $keywordPattern) {
+            $token = $Matches[0]
+            $runs.Add((New-RunXml -Text $token -Code -Color '0000FF'))
+            $position += $token.Length
+            continue
+        }
+
+        $next = $position + 1
+        while ($next -lt $Text.Length) {
+            $candidate = $Text.Substring($next)
+            $nextChar = $Text[$next]
+            if ($nextChar -eq '#' -or $nextChar -eq '"' -or $nextChar -eq "'" -or $candidate -match $variablePattern -or $candidate -match $parameterPattern -or $candidate -match $keywordPattern) {
+                break
+            }
+            $next++
+        }
+
+        $runs.Add((New-RunXml -Text $Text.Substring($position, $next - $position) -Code))
+        $position = $next
+    }
+
+    if ($runs.Count -eq 0) {
+        $runs.Add((New-RunXml -Text '' -Code))
+    }
+
+    return ($runs -join '')
+}
+
+function New-CodeBlockLineXml {
+    param(
+        [string]$Text,
+        [string]$Language
+    )
+
+    $normalizedLanguage = if ($Language) { $Language.ToLowerInvariant() } else { '' }
+    $runs = switch ($normalizedLanguage) {
+        'powershell' { Get-PowerShellCodeRunsXml -Text $Text }
+        'pwsh' { Get-PowerShellCodeRunsXml -Text $Text }
+        'ps1' { Get-PowerShellCodeRunsXml -Text $Text }
+        default { New-RunXml -Text $Text -Code }
+    }
+
+    return New-CodeParagraphXml -RunsXml $runs
+}
+
 $markdownFullPath = (Resolve-Path -LiteralPath $MarkdownPath).Path
 $docxFullPath = [System.IO.Path]::GetFullPath($DocxPath)
 $markdownDirectory = Split-Path -Path $markdownFullPath -Parent
@@ -416,21 +684,36 @@ try {
     $documentOpenTag = $documentOpenMatch.Value
     $sectPr = $sectPrMatch.Value
 
-    $paragraphs = New-Object System.Collections.Generic.List[string]
+    $bodyElements = New-Object System.Collections.Generic.List[string]
     $imageRegistry = @{}
     $nextRelationshipIndex = ($documentRelationshipsXml.Relationships.Relationship | Measure-Object).Count + 1
     $nextImageIndex = 1
     $nextDocPrId = 1
     $insideCodeBlock = $false
+    $codeBlockLanguage = ''
+    $lines = @(Get-Content -LiteralPath $markdownFullPath)
 
-    foreach ($line in (Get-Content -LiteralPath $markdownFullPath)) {
-        if ($line -match '^```') {
-            $insideCodeBlock = -not $insideCodeBlock
+    for ($lineIndex = 0; $lineIndex -lt $lines.Count; $lineIndex++) {
+        $line = $lines[$lineIndex]
+
+        if ($line -match '^```(?<lang>[A-Za-z0-9_-]+)?\s*$') {
+            if (-not $insideCodeBlock) {
+                $insideCodeBlock = $true
+                $codeBlockLanguage = if ($Matches['lang']) { $Matches['lang'].ToLowerInvariant() } else { '' }
+            }
+            else {
+                $insideCodeBlock = $false
+                $codeBlockLanguage = ''
+            }
             continue
         }
 
         if ($insideCodeBlock) {
-            $paragraphs.Add((New-ParagraphXml -Text $line -CodeBlock -IndentTwips 360))
+            $bodyElements.Add((New-CodeBlockLineXml -Text $line -Language $codeBlockLanguage))
+            continue
+        }
+
+        if ([string]::IsNullOrWhiteSpace($line)) {
             continue
         }
 
@@ -462,43 +745,75 @@ try {
 
             $imageInfo = $imageRegistry[$registryKey]
             $imageSize = Get-ImageSizing -Path $imageInfo.SourcePath -RequestedWidthPx $imageReference.WidthPx
-            $paragraphs.Add((New-ImageParagraphXml -RelationshipId $imageInfo.RelationshipId -ImageName $imageInfo.ImageName -AltText $imageReference.AltText -WidthEmu $imageSize.WidthEmu -HeightEmu $imageSize.HeightEmu -DocPrId $nextDocPrId))
+            $bodyElements.Add((New-ImageParagraphXml -RelationshipId $imageInfo.RelationshipId -ImageName $imageInfo.ImageName -AltText $imageReference.AltText -WidthEmu $imageSize.WidthEmu -HeightEmu $imageSize.HeightEmu -DocPrId $nextDocPrId))
             $nextDocPrId++
             continue
         }
 
-        if ([string]::IsNullOrWhiteSpace($line)) {
+        if ($line.TrimStart().StartsWith('|') -and $lineIndex + 1 -lt $lines.Count -and (Test-MarkdownTableSeparator -Line $lines[$lineIndex + 1])) {
+            $headerCells = Split-MarkdownTableRow -Line $line
+            $alignments = Get-MarkdownTableAlignments -SeparatorLine $lines[$lineIndex + 1]
+            $rows = New-Object 'System.Collections.Generic.List[string[]]'
+            $lineIndex += 2
+
+            while ($lineIndex -lt $lines.Count -and $lines[$lineIndex].TrimStart().StartsWith('|')) {
+                $rows.Add((Split-MarkdownTableRow -Line $lines[$lineIndex]))
+                $lineIndex++
+            }
+
+            $bodyElements.Add((New-MarkdownTableXml -HeaderCells $headerCells -Alignments $alignments -Rows $rows))
+            $lineIndex--
             continue
         }
 
-        if ($line -match '^# (.+)$') {
-            $paragraphs.Add((New-ParagraphXml -Text $Matches[1] -Style 'Title'))
+        if ($line -match '^\s*(?:---+|\*\*\*+|___+)\s*$') {
+            $bodyElements.Add((New-HorizontalRuleXml))
             continue
         }
 
-        if ($line -match '^## (.+)$') {
-            $paragraphs.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading1'))
+        if ($line -match '^###### (.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading5'))
+            continue
+        }
+
+        if ($line -match '^##### (.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading4'))
+            continue
+        }
+
+        if ($line -match '^#### (.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading3'))
             continue
         }
 
         if ($line -match '^### (.+)$') {
-            $paragraphs.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading2'))
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading2'))
             continue
         }
 
-        if ($line -match '^- (.+)$') {
-            $paragraphs.Add((New-ParagraphXml -Text $Matches[1] -Bullet))
+        if ($line -match '^## (.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Heading1'))
             continue
         }
 
-        $paragraphs.Add((New-ParagraphXml -Text $line))
+        if ($line -match '^# (.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Style 'Title'))
+            continue
+        }
+
+        if ($line -match '^\s*-\s+(.+)$') {
+            $bodyElements.Add((New-ParagraphXml -Text $Matches[1] -Bullet))
+            continue
+        }
+
+        $bodyElements.Add((New-ParagraphXml -Text $line))
     }
 
     $documentXml = @"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 $documentOpenTag
   <w:body>
-    $($paragraphs -join "`r`n    ")
+    $($bodyElements -join "`r`n    ")
     $sectPr
   </w:body>
 </w:document>
