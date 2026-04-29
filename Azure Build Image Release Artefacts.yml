@@ -2,7 +2,6 @@ variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
   - group: 'Azure Logins'
-  - group: 'SKU Versions'
 
   - name: azureUserId
     value: PowershellScriptsSP
@@ -19,8 +18,9 @@ variables:
   - name: ScriptTimeout
     value: 360
 
-  - name: VersionText        # redeclare here to make it settable at queue time
-    value: $(VersionText)    # pulls default from the group
+  # When VersionText is incremented, the PublishedVersionText variable in the Group "SKU Versions" must also be updated to match the previous value of VersionText. This is because the PublishedVersionText variable is used to determine which image version to use for testing, and it should point to the last successfully published image version.
+  - name: VersionText
+    value: 22
 
 jobs:
 
