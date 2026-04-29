@@ -35,7 +35,11 @@ param (
     [Parameter(Mandatory=$true)]
     [ValidateSet('AWS','Azure')]
     [string]
-    $Cloud
+    $Cloud,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $MSIuri = 'c:\msi\AWAMAPP_v16.0.26040_en-us.msi'
 )
 
 $ResolvedDockerLabel = if ( $DockerLabel -eq 'all' ) { 'ltsc2025' } else { $DockerLabel }
@@ -153,4 +157,4 @@ docker run --name LANSA-APP -it -e DEBUG=Y -e GITREPOPATH=c:\lansa -e GITBRANCH=
 -NoLogo -NoProfile -ExecutionPolicy Bypass `
 -File c:\docker\iis\AWAMAPP\init.ps1 -server_name "tcp:$SQLHost,$SQLPort" -dbname $DbName -dbuser 'DBSetup' `
 -dbpasswordpath 'c:\secrets\dbpassword.txt' -webuser 'PCXUSER2' -webpasswordpath 'c:\secrets\webpassword.txt' `
--MSIuri 'c:\msi\AWAMAPP_v16.0.26040_en-us.msi' -dbug -Cloud $Cloud
+-MSIuri $MSIuri -dbug -Cloud $Cloud

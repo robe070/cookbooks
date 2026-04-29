@@ -169,7 +169,7 @@ try {
     $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     "Container Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
 
-    git config --global --add safe.directory $ENV:GITREPOPATH
+    git config --global --add safe.directory $ENV:GITREPOPATH  | Out-Default | Write-Host
 
     Write-Host "Get latest build repo into Container"
     Get-ChildItem c:\
@@ -184,16 +184,16 @@ try {
     $isIp = [System.Net.IPAddress]::TryParse($DNSName, [ref]$null)
     if (-not $isIp) {
         Write-Host("Resolving DNS for $DNSName...")
-        Resolve-DnsName $DNSName -ErrorAction Stop
-        if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-            throw
+        $result = Resolve-DnsName $DNSName -ErrorAction Stop
+        if (-not $result) {
+            throw "DNS resolution returned no results for $DNSName."
         }
     }
 
     Write-Host("Testing connectivity to SQL Server at $DNSName on port $Port...")
-    Test-NetConnection $DNSName -Port $Port -ErrorAction Stop
-    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-        throw
+    $result = Test-NetConnection $DNSName -Port $Port -ErrorAction Stop
+    if (-not $result.TcpTestSucceeded) {
+        throw "SQL connectivity test failed. Host=$DNSName Port=$Port PingSucceeded=$($result.PingSucceeded) TcpTestSucceeded=$($result.TcpTestSucceeded)"
     }
 
     # set the DB password
