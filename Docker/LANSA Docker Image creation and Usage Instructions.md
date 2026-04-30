@@ -3,6 +3,8 @@
 ## 1. Overview
 The code is in the GitHub Repository: git@github.com:robe070/cookbooks.git (sub-directory: Docker). Branch: debug/paas.
 
+The example code presumes that the git hub repo is cloned into the directory `C:\dev\cookbooks`.
+
 I have published a Visual LANSA runtime base image to Docker Hub. The AWAMAPP example image is not published. The base image includes only the prerequisites to install and run LANSA.
 **lansalpc/vlbase-servercore**
 **Tags**
@@ -22,7 +24,7 @@ Database state is integral to the MSI installation. The resulting image and data
 IMAGE-NAMING.md describes the image naming structure.
 LANSA Docker Image creation and Usage Instructions.md is the user guide. (This file)
 
-You will need to install Hot Fix EPC160000HF_260417 for V16 and Hot Fix ****** for V15 and construct an MSI to deploy into the Docker image. These Hot Fixes enable Cloud Account Id licensing in a Docker image for both AWS and Azure. I have tested both. Scripts in the above github repo require a Cloud type to be supplied when constructing the application image.
+You will need to install Hot Fix EPC160000HF_260417 for V16 and Hot Fix EPC150070HF_260421 for V15 and construct an MSI to deploy into the Docker image. These Hot Fixes enable Cloud Account Id licensing in a Docker image for both AWS and Azure. I have tested both. Scripts in the above github repo require a Cloud type to be supplied when constructing the application image.
 
 Infrastructure creation like load balancers has not been provided.
 
@@ -51,9 +53,30 @@ Use immutable tags for production (example: 16.0.26030-ltsc2025).
 ### 4.1 run.ps1
 Creates the install container (LANSA-APP) and runs init.ps1 to install the MSI into the base image.
 
-Key inputs: -DockerLabel, -VersionNum, -VersionLabel, -SQLHost (optional), -SQLPort (optional), -Trace (optional), -Cloud (required).
+Key inputs: `-MSIuri`, `-DockerLabel`, `-VersionNum`, `-VersionLabel`, `-SQLHost` (optional), `-SQLPort` (optional), `-Trace` (optional), `-Cloud` (required).
 
-Before `init.ps1` is invoked, `run.ps1` copies the top-level `*.*` files from `iis\AWAMAPP` into the container root directory `C:\`. Files matched by `iis\AWAMAPP\.dockerignore` are skipped. This provides Dockerfile-like override behavior without rebuilding the base image.
+`run.ps1` maps the following host paths to Container paths using this syntax on the `docker run` command:
+```
+-v c:\temp:c:\temp -v c:\secrets:c:\secrets -v C:\msi:c:\msi `
+-v C:\dev\cookbooks\Docker:C:\docker
+```
+
+Graphically this may be represented like this:
+
+| Host Path | Container Path |
+|---|---|
+| `c:\temp` | `c:\temp` |
+| `c:\secrets` | `c:\secrets` |
+| `C:\msi` | `c:\msi` |
+| `C:\dev\cookbooks\Docker` | `C:\docker` |
+
+`c:\temp` is expected by the installed application with installation logs and trace files output by the container to its `c:\temp` directory. Always provide this mapping.
+
+`c:\secrets` should contain two files: `dbpassword.txt` and `webpassword.txt`. The database user password and web user password need to exist in these files. They may be injected into these files using similar techniques described in section (7) for the Cloud secrets. Alternatively, they may also be passed on the command line using `-dbpassword` and `-webpassword` as Powershell secure strings.
+
+A directory needs to be mapped to the directory where the MSI is installed and **the container's** path to the MSI provided in the `-MSIuri` parameter. If the shipped value of `MSIuri` is used - `c:\msi` for both host and container then no confusion will occur as the path is the same in both contexts.
+
+The github repo location of the source code is provided by mapping `C:\dev\cookbooks\Docker` on the host to `C:\Docker` in the container making the entire contents available for container construction but not included in the image.
 
 `run.ps1` passes selected host environment variables through to the container based on `-Cloud`.
 
@@ -69,6 +92,8 @@ When `-Cloud AWS`, these host environment variables must exist:
 - `AWS_DEFAULT_REGION`
 
 When `-Cloud AWS`, `AWS_SESSION_TOKEN` is also passed through if it exists on the host.
+
+When `init.ps1` is invoked, it copies the top-level `*.*` files from `iis\AWAMAPP` into the container root directory `C:\`. Files matched by `iis\AWAMAPP\.dockerignore` are skipped. This provides Dockerfile-like override behavior without rebuilding the base image.
 
 #### 4.1.1 Creating Cloud Security Entities and Obtaining Variable Values
 

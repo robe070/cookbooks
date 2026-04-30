@@ -121,24 +121,6 @@ if ($Cloud -eq 'AWS' -and -not [string]::IsNullOrWhiteSpace([System.Environment]
     $CloudEnv += @('-e', 'AWS_SESSION_TOKEN')
 }
 
-# $MetadataEnv = @()
-# try {
-#     $curlError = ''
-#     $metadata = & curl.exe -H "Metadata:true" "http://169.254.169.254/metadata/instance?api-version=2017-08-01" --no-progress-meter 2>&1
-#     $curlExitCode = $LASTEXITCODE
-#     if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($metadata)) {
-#         $metadata = $metadata.Trim()
-#         $MetadataEnv = @('-e', "METADATA=$metadata")
-#         Write-Host("Using host IMDS metadata injected via METADATA env var")
-#         Write-Host("METADATA JSON: $metadata")
-#     } else {
-#         $curlError = ($metadata | Out-String).Trim()
-#         throw "Host IMDS metadata not available. METADATA env var is mandatory. curl exit code: $curlExitCode. curl output: $curlError"
-#     }
-# } catch {
-#     throw "Host IMDS metadata fetch failed. METADATA env var is mandatory. $($_.Exception.Message)"
-# }
-
 try {
     docker rm -f LANSA-APP 2>$null
 } catch {
