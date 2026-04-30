@@ -72,7 +72,7 @@ Graphically this may be represented like this:
 
 `c:\temp` is expected by the installed application with installation logs and trace files output by the container to its `c:\temp` directory. Always provide this mapping.
 
-`c:\secrets` should contain two files: `dbpassword.txt` and `webpassword.txt`. The database user password and web user password need to exist in these files. They may be injected into these files using similar techniques described in section (7) for the Cloud secrets. Alternatively, they may also be passed on the command line using `-dbpassword` and `-webpassword` as Powershell secure strings.
+`c:\secrets` should contain two files: `dbpassword.txt` and `webpassword.txt`. The database user password and web user password need to exist in these files. They may be injected into these files using similar techniques described in section (6) for the Cloud secrets. Alternatively, they may also be passed on the command line using `-dbpassword` and `-webpassword` as Powershell secure strings.
 
 A directory needs to be mapped to the directory where the MSI is installed and **the container's** path to the MSI provided in the `-MSIuri` parameter. If the shipped value of `MSIuri` is used - `c:\msi` for both host and container then no confusion will occur as the path is the same in both contexts.
 
