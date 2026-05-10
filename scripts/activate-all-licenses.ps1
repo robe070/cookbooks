@@ -55,11 +55,12 @@ try
         }
 
         if ( Test-Path $LicenseDir ) {
-            if ( Test-Path "$LicenseDir\x_lic*.5.lic" ) {
-                Write-Host "List the Cloud Account Id licenses..."
-                Get-ChildItem "$LicenseDir\x_lic*.5.lic" | Out-Default | Write-Host
+            $LicenseSearchPath = "$LicenseDir\x_lic*.lic"
+            if ( Test-Path $LicenseSearchPath ) {
+                Write-Host "List the Cloud Account Id licenses $LicenseSearchPath..."
+                Get-ChildItem $LicenseSearchPath | Out-Default | Write-Host
             } else {
-                Write-Host "There are no cloud account id licenses"
+                Write-Host "There are no cloud account id licenses in the path $LicenseSearchPath"
                 throw
             }
         } else {
