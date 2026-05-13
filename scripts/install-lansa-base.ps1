@@ -122,6 +122,81 @@ function DownloadAndInstallCRuntime {
     }
 }
 
+function DownloadAndInstallRDSCerts {
+    param (
+        [string] $CertUrl = "https://truststore.pki.rds.amazonaws.com/global/global-bundle.p7b",
+        [string] $CertFile = "C:\temp\global-bundle.p7b",
+        [string] $LogFileBase = "C:\temp\rds-certs-install"
+    )
+
+    Write-Host "$(Log-Date) Downloading RDS global certificate bundle from $CertUrl to $CertFile"
+
+    $downloaded = $false
+    $TotalFailedDownloadAttempts = 0
+    $loops = 0
+
+    while (-not $downloaded -and ($loops -le 10)) {
+        try {
+            (New-Object System.Net.WebClient).DownloadFile($CertUrl, $CertFile) | Out-Default | Write-Host
+            $downloaded = $true
+            Write-Host "$(Log-Date) Download succeeded"
+        }
+        catch {
+            $TotalFailedDownloadAttempts += 1
+            $loops += 1
+
+            Write-Host "$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts"
+
+            if ($loops -gt 10) {
+                throw "Failed to download RDS certificate bundle from $CertUrl after $loops attempts"
+            }
+
+            Start-Sleep -Seconds 30
+        }
+    }
+
+    # Install using certutil into Local Machine Root store
+    Write-Host "$(Log-Date) Installing certificates into Local Machine Trusted Root store..."
+
+    $stdoutLog = "$LogFileBase.stdout.txt"
+    $stderrLog = "$LogFileBase.stderr.txt"
+
+    try {
+        $certutilArgs = "-addstore -f Root `"$CertFile`""
+        $p = Start-Process -FilePath "certutil.exe" `
+                           -ArgumentList $certutilArgs `
+                           -Wait -NoNewWindow -PassThru `
+                           -RedirectStandardOutput $stdoutLog `
+                           -RedirectStandardError $stderrLog
+
+        # Display captured output
+        Write-Host "$(Log-Date) certutil stdout:"
+        if (Test-Path $stdoutLog) {
+            Get-Content $stdoutLog | ForEach-Object { Write-Host $_ }
+        } else {
+            Write-Host "(no stdout captured)"
+        }
+
+        Write-Host "$(Log-Date) certutil stderr:"
+        if (Test-Path $stderrLog) {
+            Get-Content $stderrLog | ForEach-Object { Write-Host $_ }
+        } else {
+            Write-Host "(no stderr captured)"
+        }
+
+        if ($p.ExitCode -ne 0) {
+            $ExitCode = $p.ExitCode
+            throw "certutil -addstore failed with exit code $ExitCode"
+        }
+        else {
+            Write-Host "$(Log-Date) RDS certificates successfully added to Trusted Root store."
+        }
+    }
+    catch {
+        throw "Failed to install RDS certificates: $($_.Exception.Message)"
+    }
+}
+
 try
 {
     # If environment not yet set up, it should be running locally, not through Remote PS
@@ -151,8 +226,8 @@ try
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
     Write-Host "Installing Visual C++ Redistributable for Visual Studio 2015-2022"
-    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
-    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vs/17/release/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vc_redist_x86.exe') -log_file (Join-Path $temppath 'vc_redist_x86.log');
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
+    DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vc_redist_x86.exe') -log_file (Join-Path $temppath 'vc_redist_x86.log');
 
     $Cloud = (Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'Cloud').Cloud
     $InstallSQLServer = $false
@@ -168,8 +243,9 @@ try
     }
 
     if ( $Cloud -eq "AWS" ) {
-      Write-Host "$(Log-Date) Install AWS CLI"
-      DownloadAndInstallMSI -MSIuri 'https://awscli.amazonaws.com/AWSCLIV2.msi' -installer_file (Join-Path $temppath 'AWSCLIV2.msi') -log_file (Join-Path $temppath 'AWSCLI.log');
+        Write-Host "$(Log-Date) Install AWS CLI"
+        DownloadAndInstallMSI -MSIuri 'https://awscli.amazonaws.com/AWSCLIV2.msi' -installer_file (Join-Path $temppath 'AWSCLIV2.msi') -log_file (Join-Path $temppath 'AWSCLI.log');
+        DownloadAndInstallRDSCerts -CertFile (Join-Path $temppath 'rds-global.p7b') -LogFile (Join-Path $temppath 'rds-cert-install.log')
     }
 
     DownloadAndInstallMSI -MSIuri 'https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/dotnet-core-uninstall.msi' -installer_file (Join-Path $temppath 'dotnet-core-uninstall.msi') -log_file (Join-Path $temppath 'dotnet-core-uninstall-installer.log')

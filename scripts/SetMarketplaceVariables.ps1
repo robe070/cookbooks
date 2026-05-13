@@ -18,7 +18,17 @@ $productMapping = @(
     @('w19d-15-0', 'prod-7c4xdvxkskdfs'),  # English
     @('w19d-15-0j', 'prod-csfkcd5qvncle'),   # Japanese
     @('w19d-16-0', 'prod-7c4xdvxkskdfs'),  # English
-    @('w19d-16-0j', 'prod-csfkcd5qvncle')   # Japanese
+    @('w19d-16-0j', 'prod-csfkcd5qvncle'),   # Japanese
+
+    @('w22d-15-0', 'prod-vmu3flp7pyc4a'),  # English
+    @('w22d-15-0j', 'prod-uxdxgg354h7aq'),   # Japanese
+    @('w22d-16-0', 'prod-vmu3flp7pyc4a'),  # English
+    @('w22d-16-0j', 'prod-uxdxgg354h7aq'),   # Japanese
+
+    @('w25d-15-0', 'prod-gquyjeiww36se'),  # English
+    @('w25d-15-0j', 'prod-urhng7afyfwr6'),   # Japanese
+    @('w25d-16-0', 'prod-gquyjeiww36se'),  # English
+    @('w25d-16-0j', 'prod-urhng7afyfwr6')   # Japanese
 )
 
 # Function to derive key components from version
@@ -35,25 +45,6 @@ function Get-KeyComponents {
     $versionDigits = $parts[3]  # e.g., 19
 
     return $key1, $key2, $versionBase, $versionMinor, $versionDigits
-}
-
-# Function to parse URL into components
-function Parse-TemplateUrl {
-    param (
-        [string]$Url
-    )
-
-    # Parse URL using regex to extract components
-    if ($Url -match '^https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/([^\/]+)\/([^\/]+)\/(.+)$') {
-        return @{
-            BucketName = $Matches[1]  # e.g., awsmp-cft-992382380361-1708727387563
-            BucketRegion = $Matches[2]  # e.g., us-east-1
-            TemplateKeyPrefix = "$($Matches[3])/"  # e.g., a305b7d6-efa2-4265-be5b-49ef9d3069b5/
-            ProductId = $Matches[4]  # e.g., prod-7c4xdvxkskdfs
-        }
-    } else {
-        throw "Invalid URL format: $Url"
-    }
 }
 
 try {
@@ -102,23 +93,12 @@ try {
     $url = $source.Template
     Write-Host "Template URL for $version $templateType = $url"
 
-    # Parse and set variables
-    $data = Parse-TemplateUrl -Url $url
-
     # Construct variables
     $TemplateUrl = $url
-    $MPS3BucketName = $data.BucketName
-    $MPS3BucketRegion = $data.BucketRegion
-    $MPS3KeyPrefix = $data.TemplateKeyPrefix
-    $ImageId = "/aws/service/marketplace/$($data.ProductId)/$fullVersion"
 
     # Set Azure DevOps variables
     Write-Host "##vso[task.setvariable variable=UseMarketplaceVariables]True"
     Write-Host "##vso[task.setvariable variable=TemplateUrl]$TemplateUrl"
-    Write-Host "##vso[task.setvariable variable=MPS3BucketName]$MPS3BucketName"
-    Write-Host "##vso[task.setvariable variable=MPS3BucketRegion]$MPS3BucketRegion"
-    Write-Host "##vso[task.setvariable variable=MPS3KeyPrefix]$MPS3KeyPrefix"
-    Write-Host "##vso[task.setvariable variable=ImageId]$ImageId"
     Write-Host "##vso[task.setvariable variable=UserScriptHook]https://s3-ap-southeast-2.amazonaws.com/lansa/scripts/user-script.ps1"
 } catch {
     Write-Error "Error retrieving template URL: $_"
