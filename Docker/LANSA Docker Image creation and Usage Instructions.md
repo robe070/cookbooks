@@ -162,7 +162,9 @@ The environment variables above authenticate `init.ps1` against your cloud provi
 
 ---
 
-`run.ps1` remains attached because `init.ps1` ends by tailing the IIS log in the PowerShell window. Once you have tested that the application is running and has been deployed successfully, type `Ctrl-C` to end that PowerShell window. This stops the container so the image can then be committed.
+`run.ps1` remains attached because `init.ps1` ends by tailing the IIS log in the PowerShell window. Once you have tested that the application is running and has been deployed successfully, type `Ctrl-C` to end that PowerShell window. This stops the container so the image may then be committed.
+
+Note: when intending that the image will be used in Production re-build the container and do not test the application at this step. Commit the image first and then test it with run_img.ps1 described below. This ensures that the LANSA application is not running and may be patched easily when needed.
 
 The provided scripts expose the container's port 80 as port 50080. Therefore an example url to execute a WAM is http://localhost:50080/cgi-bin/lansaweb?wam=DEPTABWA&webrtn=BuildFirst&ml=LANSA:XHTML&part=DEX&lang=ENG
 
@@ -172,7 +174,7 @@ Stops `LANSA-APP` with an extended timeout and then commits it as a new image, r
 Do not restart a stopped `LANSA-APP` container. Until commit time its configured startup still runs `init.ps1`, so starting it again reruns the install flow.
 
 ### 4.3 Patching
-If an additional DLL must be added after the MSI install, there are two supported approaches. And you should consider re-building the MSI and then re-building the application Docker image.
+If an additional DLL must be added after the MSI install, there are two supported approaches. And rather than do either of the options below, you should seriously consider re-building the MSI with the patch included and then re-building the application Docker image.
 
 Quick one-off test:
 - Run `.\run.ps1` first so the install container `LANSA-APP` exists and the repository is mounted as `C:\docker`.
