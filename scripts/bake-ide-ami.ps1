@@ -365,7 +365,11 @@ try
         } else {
             Write-Host( "$(Log-Date) Using Microsoft MP image")
             $Publisher = "MicrosoftWindowsServer"
-            $Offer = "windowsserver"
+            if ($Platform -eq 'Win2022') {
+                $Offer = "windowsserver2022"
+            } else {
+                $Offer = "windowsserver"
+            }
             switch ($Platform) {
                 'Win2012' { $AzImageVersion = '9600*'  }
                 'Win2016' { $AzImageVersion = '14393*'  }
