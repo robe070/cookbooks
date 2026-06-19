@@ -187,7 +187,8 @@ function Remove-AzrVirtualMachine {
             & $scriptBlock -VMName $VMName -ResourceGroupName $ResourceGroupName
         } else {
             $initScript = {
-                $null = Login-AzAccount -Credential $args[0]
+                Import-Module Az.Accounts
+                $null = Connect-AzAccount -Credential $args[0]
             }
             $jobParams = @{
                 'ScriptBlock'          = $scriptBlock

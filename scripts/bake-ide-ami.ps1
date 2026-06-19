@@ -509,7 +509,7 @@ try
             $cert = (Get-ChildItem -Path cert:\CurrentUser\My\$thumbprint)
             $fileName = ".\$certificateName.pfx"
             Export-PfxCertificate -Cert $cert -FilePath $fileName -Password $SecurePassword
-            $fileContentBytes = Get-Content $fileName -Encoding Byte
+            $fileContentBytes = [System.IO.File]::ReadAllBytes((Convert-Path $fileName))
             $fileContentEncoded = [System.Convert]::ToBase64String($fileContentBytes)
 
 $jsonObject = @"
