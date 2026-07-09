@@ -287,20 +287,35 @@ try
                 throw "Storage account '$StorageAccount' not found in the current subscription. Run AzureLogin.ps1 for the correct account first."
             }
             $StorageKey = (Get-AzStorageAccountKey -ResourceGroupName $StorageAccountResource.ResourceGroupName -Name $StorageAccount)[0].Value
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\html directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\html      /Dest:$S3DVDImageDirectory/html        /DestKey:$StorageKey /S /XO /Y | Write-Host
+            # AzCopy v10 replaces the retired v8. v8 authenticated with the account key via /DestKey:;
+            # v10 uses a SAS token (or AAD). Mint a short-lived account SAS from the key so no RBAC role
+            # assignment is required. Flag mapping: /S -> --recursive; /XO -> --overwrite=ifSourceNewer;
+            # /Y is the v10 default (no prompt).
+            if ( -not (Get-Command azcopy -ErrorAction SilentlyContinue) ) {
+                throw "AzCopy v10 ('azcopy') was not found on PATH. Install it (e.g. 'winget install Microsoft.Azure.AZCopy') and retry."
+            }
+
+            $StorageContext = New-AzStorageContext -StorageAccountName $StorageAccount -StorageAccountKey $StorageKey
+            $SasToken = (New-AzStorageAccountSASToken -Context $StorageContext -Service Blob `
+                -ResourceType Container,Object -Permission "racwl" `
+                -ExpiryTime (Get-Date).AddHours(4) -Protocol HttpsOnly).TrimStart('?')
+
+            # $Recursive mirrors the v8 /S switch. The root copy uses $false (v8 had no /S there),
+            # so only top-level files are copied; subdirectories are copied recursively.
+            function Copy-DvdImage( [string]$Source, [string]$Dest, [bool]$Recursive ) {
+                Write-Host ("$(Log-Date) Copy $Source")
+                azcopy copy "$Source" "$($Dest)?$SasToken" --recursive=$($Recursive.ToString().ToLower()) --overwrite=ifSourceNewer | Write-Host
+                if ( $LASTEXITCODE -ne 0 ) { throw "AzCopy failed copying '$Source' (exit code $LASTEXITCODE)" }
+            }
+
+            Copy-DvdImage "$LocalDVDImageDirectory\*"            $S3DVDImageDirectory              $false
+            Copy-DvdImage "$LocalDVDImageDirectory\3rdparty\*"   "$S3DVDImageDirectory/3rdparty"   $true
+            Copy-DvdImage "$LocalDVDImageDirectory\Integrator\*" "$S3DVDImageDirectory/Integrator" $true
+            Copy-DvdImage "$LocalDVDImageDirectory\setup\*"      "$S3DVDImageDirectory/setup"      $true
+            Copy-DvdImage "$LocalDVDImageDirectory\html\*"       "$S3DVDImageDirectory/html"       $true
 
             if ( (Test-Path -Path $LocalDVDImageDirectory\epc) ) {
-                Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\epc directory")
-                cmd /c AzCopy /Source:$LocalDVDImageDirectory\epc    /Dest:$S3DVDImageDirectory/epc        /DestKey:$StorageKey /S /XO /Y | Write-Host
+                Copy-DvdImage "$LocalDVDImageDirectory\epc\*"    "$S3DVDImageDirectory/epc"        $true
             }
         }
     }
