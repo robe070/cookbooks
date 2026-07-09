@@ -339,16 +339,16 @@ DSNNew=True
 DSNName=LANSA
 DSNType=2
 DSNDriverType=17
-DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile
+DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile -Encoding ascii
 
 if ( $InstallSQLServer -eq $false ) {
 "DatabaseAction=2
 DatabaseNewInstance=False
-DSNServerName=(local)" | Add-Content $SettingsFile
+DSNServerName=(local)" | Add-Content $SettingsFile -Encoding ascii
 } else {
 "DatabaseAction=3
 DatabaseNewInstance=True
-DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile
+DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile -Encoding ascii
 }
 
 "DSNDatabaseName=LANSA
@@ -416,12 +416,12 @@ UseridForJSM=PCXUSER2
 JavaVersionForIntegrator=1.8
 OpenTranslationTableLansaProvided=1
 OpenTranslationTable=1140
-DatabaseSAPassword=sa+LANSA!" | Add-Content $SettingsFile
+DatabaseSAPassword=sa+LANSA!" | Add-Content $SettingsFile -Encoding ascii
 
     [int]$VersionMajor = [int](Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMajor').VersionMajor
 
     if ( $VersionMajor -lt 14 ) {
-        Add-Content $SettingsFile "DatabaseVersion=5"
+        Add-Content $SettingsFile "DatabaseVersion=5" -Encoding ascii
     } else {
 "DatabaseVersion=11
 ListenerLRouteRecordName=LANSA
@@ -438,7 +438,7 @@ WebServerHostRouteIpcOptions=3
 WebServerWindowsCredentials=False
 DSNPort=0
 CompilerType=0
-CompilerSdkDirectory=" | Add-Content $SettingsFile
+CompilerSdkDirectory=" | Add-Content $SettingsFile -Encoding ascii
     }
 
     Write-Host ("Installing Visual LANSA")
