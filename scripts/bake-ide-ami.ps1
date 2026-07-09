@@ -565,6 +565,8 @@ $jsonObject = @"
             $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize -SecurityType TrustedLaunch
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
             $vm1 = Set-AzVMUefi -VM $vm1 -EnableVtpm $true -EnableSecureBoot $true
+            # managed boot diagnostics — Azure manages it. One line, no warning, you keep the boot screenshot/serial console for debugging a failed bake, and nothing to clean up afterward
+            $vm1 = Set-AzVMBootDiagnostic -VM $vm1 -Enable
             if ($AzureImageUri) {
                 # For custom images, use managed disk with source image URI
                 $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -StorageAccountType "StandardSSD_LRS"
