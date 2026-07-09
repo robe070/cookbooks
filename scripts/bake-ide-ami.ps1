@@ -279,8 +279,14 @@ try
         } elseif ( $Cloud -eq 'Azure' ) {
             $StorageAccount = 'lansalpcmsdn'
 
-            #Save the storage account key
-            $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary
+            #Save the storage account key. Discover the resource group from the account name so it
+            #need not be hard-coded (replaces the classic-Azure-module Get-AzureStorageKey, which
+            #does not load in PowerShell 7).
+            $StorageAccountResource = Get-AzStorageAccount | Where-Object StorageAccountName -eq $StorageAccount
+            if ( -not $StorageAccountResource ) {
+                throw "Storage account '$StorageAccount' not found in the current subscription. Run AzureLogin.ps1 for the correct account first."
+            }
+            $StorageKey = (Get-AzStorageAccountKey -ResourceGroupName $StorageAccountResource.ResourceGroupName -Name $StorageAccount)[0].Value
             Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
             cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Host
             Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
@@ -1316,14 +1322,4 @@ catch
     return "Failure"# 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 
-}
-
-# Setup default account details
-# This code is rarely required and is more for documentation.
-function SetUpAccount {
-    # Subscription Name was rejected by Select-AzureSubscription so Subscription Id was used instead.
-    $subscription = "edff5157-5735-4ceb-af94-526e2c235e80"
-    $Storage = "lansalpcmsdn"
-    Select-AzureSubscription -SubscriptionId $subscription
-    set-AzureSubscription -SubscriptionId $subscription -CurrentStorageAccount $Storage
 }
