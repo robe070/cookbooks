@@ -709,6 +709,60 @@ function PlaySound {
     }
 }
 
+function Install-ChocoCheckedLansa {
+    <#
+    .SYNOPSIS
+        Install a Chocolatey package with a hard, headless-safe source guard.
+    .DESCRIPTION
+        Clears the choco log first so it holds only this install, echoes the whole log, then FAILS
+        (throw) if the package (or a dependency) was not obtained from the private 'lansa' source,
+        OR if any installer binary was downloaded from a URL (i.e. the feed package was not
+        internalised). Bakes run headless and emit many warnings, so a wrong source must be a hard
+        error, not a warning that scrolls past unnoticed. The caller must pass '-s=lansa' (or
+        '--source lansa') in $Arguments.
+    .EXAMPLE
+        Install-ChocoCheckedLansa @( 'googlechrome', '-s=lansa', '-y', '--no-progress' )
+    #>
+    param( [Parameter(Mandatory)][string[]] $Arguments )
+
+    $chocoRoot = $env:ChocolateyInstall
+    if ( -not $chocoRoot ) { $chocoRoot = 'C:\ProgramData\chocolatey' }
+    $chocoLog = Join-Path $chocoRoot 'logs\chocolatey.log'
+
+    # Clear the log so it holds ONLY this installation.
+    if ( Test-Path $chocoLog ) { Clear-Content -Path $chocoLog -Force }
+
+    Run-ExitCode 'choco' ( @( 'install' ) + $Arguments ) | Write-Host
+
+    # Echo the full choco log for this install.
+    Write-Host "----- BEGIN choco log ($chocoLog) -----"
+    $logLines = @()
+    if ( Test-Path $chocoLog ) { $logLines = Get-Content -Path $chocoLog }
+    $logLines | Write-Host
+    Write-Host "----- END choco log -----"
+
+    # Guard 1 - package source. Choco logs "Downloading package from source '<source>'".
+    $sources = [regex]::Matches( ( $logLines -join "`n" ), "Downloading package from source '(.+?)'" )
+    if ( $sources.Count -eq 0 ) {
+        throw "Choco source guard: could not determine the package source from $chocoLog. Failing the install to be safe."
+    }
+    foreach ( $s in $sources ) {
+        $src = $s.Groups[1].Value
+        if ( $src -notmatch '(?i)lansa' ) {
+            throw "Choco source guard: package was downloaded from '$src', which is NOT the private 'lansa' source. Aborting the install."
+        }
+    }
+
+    # Guard 2 - no vendor-CDN installer. A properly internalised package installs from its embedded
+    # file and downloads NO binary. Choco logs an installer download as "... from '<url>'" (distinct
+    # from the package source line "from source '<url>'"). Guard 1 still passes for such a package, so
+    # this is the guard that actually catches a non-internalised package on the feed.
+    $cdn = [regex]::Matches( ( $logLines -join "`n" ), "\bfrom '(https?://[^']+)'" )
+    foreach ( $c in $cdn ) {
+        throw "Choco source guard: an installer was downloaded from '$($c.Groups[1].Value)' instead of the package's embedded (internalised) file. The 'lansa' package is not internalised. Aborting the install."
+    }
+}
+
 function Run-ExitCode {
     param( [string]$Program, [String[]]$Arguments, [decimal]$ExitCodeException=0 )
 

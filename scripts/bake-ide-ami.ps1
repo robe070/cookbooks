@@ -847,7 +847,7 @@ $jsonObject = @"
                 }
             } else {
                 Execute-RemoteBlock $Script:session {
-                    Run-ExitCode 'choco' @('install', 'jdk8', '-y', '--no-progress')
+                    Install-ChocoCheckedLansa @('jdk8', '-s=lansa', '-y', '--no-progress')
                 }
             }
         }

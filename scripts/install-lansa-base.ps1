@@ -408,11 +408,11 @@ try
 
     # GUI Application Installation
     if ( $Cloud -ne "Docker" ) {
-        Run-ExitCode 'choco' @( 'install', 'googlechrome', '-s=lansa', '-y', '--no-progress','--ignore-checksums' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'googlechrome', '-s=lansa', '-y', '--no-progress', '--ignore-checksums' )
         ChocoWait
         # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
         # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
-        Run-ExitCode 'choco' @( 'install', 'jre8', '-s=lansa', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'jre8', '-s=lansa', '-y', '--no-progress', '-PackageParameters "/exclude:32"' )
         ChocoWait
 
         Write-Host( "Do not install kdiff3 because choco does not support its installer any longer")
@@ -430,7 +430,7 @@ try
         #     ChocoWait
         # }
 
-        Run-ExitCode 'choco' @( 'install', 'vscode', '-s=lansa', '-y', '--no-progress' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'vscode', '-s=lansa', '-y', '--no-progress' )
         ChocoWait
         try {
             # Don't install sysinternals because the license expressly forbids installing it on hosting services
@@ -453,8 +453,12 @@ try
         # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
-        # Specify capital letters in "FoxitReader" in order to install the currently updating version. (foxitreader is an old version 10.x)
-        Run-ExitCode 'choco' @( 'install', 'FoxitReader', '-y', '--no-progress' )  | Write-Host
+        # Install FoxitReader from the private 'lansa' feed. The internalised package on that feed
+        # embeds the installer, so there is no vendor-CDN download. Package id keeps its capitalised
+        # "FoxitReader" form (the lowercase "foxitreader" is the old 10.x package).
+        # Install-ChocoCheckedLansa (in dot-CommonTools.ps1) clears the choco log, echoes it, and
+        # FAILS if the package did not come from the 'lansa' source or pulled an installer from a CDN.
+        Install-ChocoCheckedLansa @( 'FoxitReader', '-y', '--no-progress', '--source', 'lansa' )
         ChocoWait
 
         New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
