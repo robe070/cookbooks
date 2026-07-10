@@ -741,15 +741,23 @@ function Install-ChocoCheckedLansa {
     $logLines | Write-Host
     Write-Host "----- END choco log -----"
 
-    # Guard 1 - package source. Choco logs "Downloading package from source '<source>'".
-    $sources = [regex]::Matches( ( $logLines -join "`n" ), "Downloading package from source '(.+?)'" )
+    # Guard 1 - package source. Choco logs the source differently for a local folder vs an AzDO feed:
+    #   local folder: "Downloading package from source '<src>'"
+    #   AzDO feed:    "found on source '<url>'" / "actual source value '<url>'" / "from source '<url>'"
+    # The lansa feed URL contains 'VisualLansa', so the '(?i)lansa' check below matches it.
+    $sources = [regex]::Matches( ( $logLines -join "`n" ), "(?:from source|on source|source value) '(.+?)'" )
     if ( $sources.Count -eq 0 ) {
-        throw "Choco source guard: could not determine the package source from $chocoLog. Failing the install to be safe."
+        # Write-Host the reason too: a bare 'throw' surfaced from a remote WinPS 5.1 session does not
+        # reliably render its message once deserialized in the local pwsh 7 host - so print it plainly.
+        $m = "Choco source guard: could not determine the package source from $chocoLog. Failing the install to be safe."
+        Write-Host $m -ForegroundColor Red; throw $m
     }
     foreach ( $s in $sources ) {
         $src = $s.Groups[1].Value
         if ( $src -notmatch '(?i)lansa' ) {
-            throw "Choco source guard: package was downloaded from '$src', which is NOT the private 'lansa' source. Aborting the install."
+            $m = "Choco source guard: package was downloaded from '$src', which is NOT the private 'lansa' source. Aborting the install."
+            # Write-Host $m -ForegroundColor Red
+            throw $m
         }
     }
 
@@ -759,7 +767,9 @@ function Install-ChocoCheckedLansa {
     # this is the guard that actually catches a non-internalised package on the feed.
     $cdn = [regex]::Matches( ( $logLines -join "`n" ), "\bfrom '(https?://[^']+)'" )
     foreach ( $c in $cdn ) {
-        throw "Choco source guard: an installer was downloaded from '$($c.Groups[1].Value)' instead of the package's embedded (internalised) file. The 'lansa' package is not internalised. Aborting the install."
+        $m = "Choco source guard: an installer was downloaded from '$($c.Groups[1].Value)' instead of the package's embedded (internalised) file. The 'lansa' package is not internalised. Aborting the install."
+        # Write-Host $m -ForegroundColor Red
+        throw $m
     }
 }
 

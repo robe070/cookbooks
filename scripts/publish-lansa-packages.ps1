@@ -70,6 +70,7 @@ $packages = @(
     @{ Id = 'kdiff3' }
     @{ Id = 'DotNet4.5.2' }
     @{ Id = 'chocolatey-core.extension' }
+    @{ Id = 'chocolatey-compatibility.extension' }      # dependency of newer git.install; must be on the feed for -s=lansa resolution
     @{ Id = 'FoxitReader'; Version = '2025.1.0.27937' } # Pinned to reduce size so that pushing the package is quicker
 )
 

@@ -103,7 +103,7 @@ try {
     }
     Write-Debug "Path = $([Environment]::GetEnvironmentVariable('PATH', 'Machine'))" | Write-Host
 } catch {
-    $_
+    Write-Host $_
     Write-Host "installGit.ps1 is the <No file> in the stack dump below"
     $PSItem.ScriptStackTrace | Out-Default | Write-Host
     if ( $LASTEXITCODE -eq 0 ) {
