@@ -7,6 +7,8 @@ param(
     [String]
     $Platform
 )
+# Fail fast so any locale-cmdlet error propagates to the caller instead of being silently swallowed.
+$ErrorActionPreference = 'Stop'
 
 if ( $Language -eq 'ENG') {
     Write-Host("ENG does not require language configuration")

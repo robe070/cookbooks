@@ -199,6 +199,25 @@ function ReConnect-Session
     Execute-RemoteInitPostGit | Out-Default | Write-Host
 }
 
+# Returns $true if the remote VM has a pending reboot (Component Based Servicing, Windows Update, or
+# pending file-rename operations). Software installs - VS Code in particular - flag a pending reboot,
+# and some later steps (e.g. dism.exe for a language pack) silently block until the machine is rebooted.
+function Test-PendingReboot
+{
+    Execute-RemoteBlock $Script:session {
+        $pending = $false
+        foreach ( $key in @(
+                'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending',
+                'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' ) ) {
+            if ( Test-Path $key ) { $pending = $true }
+        }
+        if ( Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction SilentlyContinue ) {
+            $pending = $true
+        }
+        $pending
+    }
+}
+
 function Reboot-Session
 {
     # Execute Restart-Computer through remote session as executing from local machine is blocked
