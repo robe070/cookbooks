@@ -30,11 +30,8 @@ jobs:
   steps:
   - checkout: self
 
-  - task: PowerShell@2
-    displayName: Install PS Module
-    inputs:
-      filePath: scripts/install-powershell-modules-azure.ps1
-      errorActionPreference: continue
+  # Az modules are no longer installed/pinned here - the self-hosted agents install Az (unpinned)
+  # via 'create agents.yml'. The old pin (Az.Compute 4.2.1) broke -SecurityType.
 
   - task: PowerShell@2
     displayName: Azure Login
@@ -122,11 +119,8 @@ jobs:
   steps:
   - checkout: self
 
-  - task: PowerShell@2
-    displayName: Install PS Module
-    inputs:
-      filePath: scripts/install-powershell-modules-azure.ps1
-      errorActionPreference: continue
+  # Az modules are no longer installed/pinned here - the self-hosted agents install Az (unpinned)
+  # via 'create agents.yml'. The old pin (Az.Compute 4.2.1) broke -SecurityType.
 
   - task: PowerShell@2
     displayName: Azure Login

@@ -369,6 +369,20 @@ jobs:
 
                     Write-Host 'Install AWS CLI'
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
+
+                    # Az PowerShell - NOT pinned (unlike AWSPowerShell above, which is pinned because later
+                    # versions were broken at the time). This pipeline is how all agents get, and are
+                    # upgraded to, the latest Az on every run - the bake's Trusted Launch New-AzVMConfig
+                    # -SecurityType needs a current Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0).
+                    # Log the currently-installed Az versions FIRST so an upgrade can be backed out.
+                    Write-Host 'Az PowerShell versions currently installed (logged so this upgrade can be backed out):'
+                    Get-InstalledModule -AllVersions -ErrorAction Ignore |
+                        Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
+                        Sort-Object Name, Version | Format-Table Name, Version -AutoSize | Out-Default | Write-Host
+                    Write-Host 'Installing / upgrading Az to the latest version...'
+                    Install-Module -Name Az -Scope AllUsers -AllowClobber -Force | Out-Default | Write-Host
+                    Write-Host 'Az now installed:'
+                    Get-InstalledModule -Name Az | Out-Default | Write-Host
                 } catch {
                     $_ | Out-Default | Write-Host
                     throw
