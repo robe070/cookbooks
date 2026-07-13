@@ -12,7 +12,7 @@ variables:
   - name: Windows-2019-AMI
     value: LANSA Scalable License  w19d-15-0-18
   - name: agentVMImage
-    value: windows-2022
+    value: default
   - name: VersionText
     value: 0
 

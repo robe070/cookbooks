@@ -468,7 +468,7 @@ stages:
     cancelTimeoutInMinutes: 1
     displayName: Tag azure-quickstart-templates repo
     pool:
-      vmImage: Windows-2022
+      vmImage: default
 
     steps:
     - download: _TemplatesCI

@@ -15,7 +15,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: Windows-2022
+    default: default
   - name: jobcondition
     type: string
     default: none

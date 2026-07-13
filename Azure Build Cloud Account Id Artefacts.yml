@@ -25,7 +25,7 @@ jobs:
   condition: false
 
   pool:
-    vmImage: windows-2022
+    vmImage: default
 
   steps:
   - checkout: self

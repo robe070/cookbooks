@@ -18,7 +18,7 @@ parameters:
     default: none
   - name: jobImage
     type: string
-    default: windows-2022
+    default: default
   - name: osName
     type: string
     default: Windows Server 2019

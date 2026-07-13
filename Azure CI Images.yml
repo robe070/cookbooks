@@ -20,7 +20,7 @@ variables:
     value: 0
 
   - name: vmImage
-    value: windows-2022
+    value: default
 
   - name:  TestCloudName
     value: 'Azure'

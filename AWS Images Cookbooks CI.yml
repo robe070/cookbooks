@@ -13,7 +13,7 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: agentVMImage
-    value: windows-2022
+    value: default
   - name: VersionText
     value: 0
 
