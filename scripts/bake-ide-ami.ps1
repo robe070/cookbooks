@@ -852,6 +852,18 @@ $jsonObject = @"
             }
         }
 
+        # The software installs above (VS Code especially) can leave a pending reboot. dism.exe for the
+        # language pack silently blocks when servicing operations are pending - this hung a bake ~3h.
+        # Clear it here, in the caller (the reboot must NOT be done inline in the choco install scripts).
+        # If the reboot doesn't clear it, fail fast so the issue percolates instead of hanging next step.
+        if ( Test-PendingReboot ) {
+            Write-Host "$(Log-Date) Pending reboot detected after the software installs - rebooting before continuing"
+            Reboot-Session
+            if ( Test-PendingReboot ) {
+                throw "A reboot is still pending after rebooting the VM - aborting before the language pack (dism.exe would hang)."
+            }
+        }
+
         if ( $InstallLanguagePack ) {
             Write-Host( "$(Log-Date) Install language pack")
             Write-Host( "Each of the 3 steps requires a reboot in between. Hence why there are 3 scripts and the Reconnect-Session is mandatory to re-establish connection to the rebooted VM")
