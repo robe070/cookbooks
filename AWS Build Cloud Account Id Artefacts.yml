@@ -12,7 +12,7 @@ variables:
   - name: Windows-2019-AMI
     value: LANSA Scalable License  w19d-15-0-18
   - name: agentVMImage
-    value: default
+    value: Default
   - name: VersionText
     value: 0
 
@@ -23,7 +23,7 @@ jobs:
   # Disable building the old account ID because it is no longer supported
   condition: and(False, succeeded(), or(eq(variables['Build-w19d-15-ID-OLD'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -159,7 +159,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-ID-NEW'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1

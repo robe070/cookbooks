@@ -468,7 +468,7 @@ stages:
     cancelTimeoutInMinutes: 1
     displayName: Tag azure-quickstart-templates repo
     pool:
-      vmImage: default
+      name: Default
 
     steps:
     - download: _TemplatesCI

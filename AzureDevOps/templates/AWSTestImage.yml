@@ -20,7 +20,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: default
+    default: Default
   - name: jobcondition
     type: string
     default: ''

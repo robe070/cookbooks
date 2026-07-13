@@ -25,7 +25,7 @@ jobs:
   condition: false
 
   pool:
-    vmImage: default
+    name: Default
 
   steps:
   - checkout: self
@@ -117,7 +117,7 @@ jobs:
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
 
   pool:
-    vmImage: windows-2022
+    name: Default
 
   steps:
   - checkout: self

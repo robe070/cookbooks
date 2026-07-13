@@ -39,7 +39,7 @@ jobs:
       Language: 'ENG'
       InstallLanguagePack: $False
   pool:
-    vmImage: $(vmImage)
+    name: $(vmImage)
 
   steps:
   - checkout: self

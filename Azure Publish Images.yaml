@@ -253,7 +253,7 @@ stages:
   jobs:
   - job: 'MergePatch_PAASCookbooks'
     pool:
-      vmImage: default
+      name: Default
     displayName: 'Merge patch/PAAS cookbooks'
     steps:
       - download: _BuildImageReleaseArtefacts
@@ -649,7 +649,7 @@ stages:
   jobs:
   - job: 'CookbooksMergeAndTag'
     pool:
-      vmImage: default
+      name: Default
     displayName: 'Cookbooks Merge & Tag'
     steps:
     - download: _BuildImageReleaseArtefacts

@@ -20,7 +20,7 @@ variables:
     value: 0
 
   - name: vmImage
-    value: default
+    value: Default
 
   - name:  TestCloudName
     value: 'Azure'

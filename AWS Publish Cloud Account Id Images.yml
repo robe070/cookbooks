@@ -56,7 +56,7 @@ resources:
       ref: debug/paas
 
 pool:
-  vmImage: default
+  name: Default
 
 stages:
 - template: AzureDevOps/templates/AWSTestCloudAccountIdImage.yml

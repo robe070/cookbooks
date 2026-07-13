@@ -13,7 +13,7 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: agentVMImage
-    value: default
+    value: Default
   - name: VersionText
     value: 0
 
@@ -23,7 +23,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -139,7 +139,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -258,7 +258,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -377,7 +377,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -494,7 +494,7 @@ jobs:
   timeoutInMinutes: 120
   condition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -622,7 +622,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -740,7 +740,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -857,7 +857,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -974,7 +974,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1091,7 +1091,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1208,7 +1208,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1325,7 +1325,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1

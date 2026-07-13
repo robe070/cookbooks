@@ -18,7 +18,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: default
+    default: Default
   - name: jobcondition
     type: string
     default: ''
@@ -61,7 +61,7 @@ stages:
         SetGateVariable: ${{ parameters.paramsetGateVariable }}
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
+        name: ${{ parameters.vmImage }}
         demands: ${{ parameters.jobDemand }}
 
       steps:

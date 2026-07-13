@@ -15,7 +15,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: default
+    default: Default
   - name: resourceGroup
     type: string
     default: none
@@ -64,7 +64,7 @@ stages:
       displayName: ${{ parameters.jobDisplayname }}
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
+        name: ${{ parameters.vmImage }}
 
       variables:
         - name: ConnectedServiceName
