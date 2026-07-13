@@ -388,7 +388,7 @@ jobs:
                     # -SecurityType needs a current Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0).
                     # Log the currently-installed Az versions FIRST so an upgrade can be backed out.
                     Write-Host 'Az PowerShell versions currently installed (logged so this upgrade can be backed out):'
-                    Get-InstalledModule -AllVersions -ErrorAction Ignore |
+                    Get-InstalledModule -ErrorAction Ignore |
                         Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
                         Sort-Object Name, Version | Format-Table Name, Version -AutoSize | Out-Default | Write-Host
                     Write-Host 'Installing / upgrading Az to the latest version...'
