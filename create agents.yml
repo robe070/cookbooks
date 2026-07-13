@@ -421,7 +421,7 @@ jobs:
         Write-Host "Waiting for all agent install jobs..."
         foreach ($job in $jobs) {
           try {
-              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Continue
               Write-Host "Job Output:"
               $output | Out-Default | Write-Host
           } catch {
@@ -439,7 +439,7 @@ jobs:
         }
         Write-Host "Rebooting all VMs to complete installation..."
         $ScriptBlock = {
-            Restart-Computer -Wait -Delay 5 -Force
+            Restart-Computer -Delay 5 -Force
         }
         for ($i = 1; $i -le $vmCount; $i++) {
             $vmName = "${baseVmName}$i"
