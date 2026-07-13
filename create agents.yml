@@ -172,7 +172,7 @@ jobs:
         Write-Host "Waiting for all parallel provisioning jobs to complete..."
         foreach ($job in $jobs) {
           try {
-              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Continue
               Write-Host "Job Output:"
               $output | Out-Default | Write-Host
           } catch {
