@@ -344,7 +344,16 @@ jobs:
                     Write-Host 'Ensure correct version of Pester'
                     if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
                         if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled') {
-                          Remove-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled' -Recurse -Force
+                          # 1. Take ownership of the folder and everything inside it recursively (/R)
+                          # /D Y automatically selects "Yes" if prompted for confirmation on directories
+                          takeown /f "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /r /d y
+
+                          # 2. Grant Administrators full control over the folder and all sub-items (/T)
+                          # /grant administrators:F gives full control, /c continues on errors
+                          icacls "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /grant administrators:F /t /c
+
+                          # 3. Forcibly delete the directory and its entire contents
+                          Remove-Item -Path "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" -Force -Recurse
                         }
                         Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
                         Write-Host 'Auto-installed Pester version now disabled'
