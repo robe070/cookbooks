@@ -304,6 +304,18 @@ try
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
+    # Azure Marketplace certification rejects any image with the 'Wireless LAN Service' feature
+    # installed ("Wireless LAN Service feature is not supported by Azure" - see
+    # https://aka.ms/Windows-testcases). It ships present on the Windows Server 2025 base image (the
+    # w25* plans failed on it); WS2019/2022 don't have it. Servers in Azure never use wireless, so
+    # remove the feature. Idempotent: a no-op where it isn't installed. The test checks the FEATURE,
+    # so disabling the Wlansvc service is not sufficient.
+    $WlanFeature = Get-WindowsFeature -Name Wireless-Networking -ErrorAction SilentlyContinue
+    if ( $WlanFeature -and $WlanFeature.Installed ) {
+        Write-Host "$(Log-Date) Removing unsupported 'Wireless LAN Service' (Wireless-Networking) Windows feature"
+        Uninstall-WindowsFeature -Name Wireless-Networking | Out-Default | Write-Host
+    }
+
     Write-Host "Installing Visual C++ Redistributable for Visual Studio 2015-2022"
     DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
     DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x86.exe' -installer_file (Join-Path $temppath 'vc_redist_x86.exe') -log_file (Join-Path $temppath 'vc_redist_x86.log');
