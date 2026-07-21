@@ -20,7 +20,7 @@ variables:
 
   # When VersionText is incremented, the PublishedVersionText variable in the Group "SKU Versions" must also be updated to match the previous value of VersionText. This is because the PublishedVersionText variable is used to determine which image version to use for testing, and it should point to the last successfully published image version.
   - name: VersionText
-    value: 23
+    value: 24
 
 jobs:
 
