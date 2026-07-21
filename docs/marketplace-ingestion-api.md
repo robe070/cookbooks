@@ -124,5 +124,30 @@ to the offer's **draft**, leaving the human to do the actual publish-to-preview.
 - **Draft vs live**: a durable-id GET returns the **draft**; if a plan is live with no pending draft
   that 404s, so it falls back to the **live** config via `resource-tree?targetType=live` and the
   submit then seeds a fresh draft. It logs `base config from: draft|live` per plan.
+- **Gen2-only replacement plans**: it prefers a `<base>-g2` plan when one exists, else `<base>` — so
+  w19 images land on the new `-g2` plans while w25/w22 keep their ids (see next section).
+
+## Retiring an image type — Win2019 → Gen2-only
+
+You **cannot remove an image type (SKU) from a live plan** — Marketplace support requires you to
+**deprecate the plan** instead. So to drop Gen1 from the Win2019 plans we created replacement
+Gen2-only plans and deprecated the originals:
+
+- `New-MarketplaceVmPlan.ps1` clones a source plan into a new plan `<source>-g2` (e.g. `w19d-16-0` →
+  `w19d-16-0-g2`): one Gen2/Trusted SKU (`skuId = <new plan id>`, so **the new plan id itself ends in
+  `-g2`**), only the current Gen2 image version, listing/pricing/markets/OS copied, name suffixed
+  " (Gen2)", displayRanks 26–29. Dry-run default, `-Submit`; deprecate the old plans manually.
+- **Consequence**: the new plan id ending in `-g2` breaks the "plan id = image-def minus `-g2`"
+  assumption, which is why `Add-MarketplaceGen2Image.ps1` prefers a `<base>-g2` plan (Option B). This
+  keeps the change to the MP-facing script only — the build folder / image name / `Build-*` variables
+  stay `<base>` (renaming those would ripple everywhere).
+- **Schema versions when cloning**: keep each source resource's own `$schema` from a current-ceiling
+  export. The resources-index lists newer versions (e.g. `plan/2022-03-01-preview4`) that the WRITE
+  path rejects ("schema could not be found"); the export returns the versions actually accepted.
+- **Solution templates** (`lansa/azure-quickstart-templates`, `lansa-vmss-…/mainTemplate.json` +
+  `createUiDefinition.json`, plus the 5 size-variant copies of each): deployment keys off
+  publisher/offer/**image SKU** (`w19d-16-0-g2`), *not* the plan id. Made WS2019 Gen2-only like WS2025 —
+  flattened its `marketplaceSettings` to the direct `-g2` sku, dropped `2019` from `hasGenChoice` and
+  the UI `vmGeneration` `visible`, and updated the tooltips/description.
 
 Related Azure MSI context: [azure-sql-login.md](azure-sql-login.md).

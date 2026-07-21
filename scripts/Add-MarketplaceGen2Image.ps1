@@ -22,6 +22,11 @@
     using the naming rule: the plan-id SKU is <planSKU>; an additional Gen2 SKU is
     <planSKU>-g2). Nothing existing is modified.
 
+    Plan resolution: a plan that was replaced by a Gen2-only clone is named <base>-g2
+    (e.g. the w19 plans - the original <base> is deprecated). So the derived/artefact plan
+    name is looked up as <base>-g2 first and, if that plan exists, used as the target;
+    otherwise the base name is used (w25/w22 plans keep their original ids).
+
     Two ways to supply images:
       -ImageUrl  <url>       single image (e.g. from $(Gate.ImageUrl))
       -ArtefactsPath <dir>   batch: the built plans are DERIVED from the artefacts - each has a
@@ -97,6 +102,10 @@ function Get-IngestionToken {
         -ContentType 'application/x-www-form-urlencoded' `
         -Body @{ grant_type = 'client_credentials'; client_id = $ClientId; client_secret = $ClientSecret; scope = 'https://graph.microsoft.com/.default' }).access_token
 }
+function Get-PlanByExternalId($ext) {
+    (Invoke-RestMethod -Method Get -Headers $headers `
+        -Uri "$GraphBase/plan?product=$([uri]::EscapeDataString($ProductDurableId))&externalID=$([uri]::EscapeDataString($ext))&`$version=$LookupVer").value | Select-Object -First 1
+}
 function Write-ConfigureErrors($status) {
     foreach ($e in $status.errors) {
         $rid = if ($e.PSObject.Properties.Name -contains 'resourceId') { "  [$($e.resourceId)]" } else { '' }
@@ -155,10 +164,21 @@ $fail = 0
 foreach ($w in $work) {
     Write-Host "=== $($w.PlanExternalId)  ($($w.ImageType) v$($w.Version), def $($w.ImageDef)) ===" -ForegroundColor Cyan
 
-    # Resolve plan durable id
-    $plan = (Invoke-RestMethod -Method Get -Headers $headers `
-        -Uri "$GraphBase/plan?product=$([uri]::EscapeDataString($ProductDurableId))&externalID=$([uri]::EscapeDataString($w.PlanExternalId))&`$version=$LookupVer").value | Select-Object -First 1
-    if (-not $plan) { Write-Host "  plan not found - skipping" -ForegroundColor Red; $fail++; continue }
+    # Resolve the plan. A plan that was replaced by a Gen2-only clone is named <base>-g2
+    # (e.g. w19 plans; the original <base> is being deprecated). Prefer the -g2 plan when it
+    # exists, otherwise use the base name (w25/w22 plans keep their original id). This also
+    # corrects the -ImageUrl derivation, which strips -g2 to get <base>.
+    $candidates = @()
+    if (-not $w.PlanExternalId.EndsWith($ImageDefSuffix)) { $candidates += "$($w.PlanExternalId)$ImageDefSuffix" }
+    $candidates += $w.PlanExternalId
+    $plan = $null; $targetExt = $null
+    foreach ($cand in $candidates) {
+        $found = Get-PlanByExternalId $cand
+        if ($found) { $plan = $found; $targetExt = $cand; break }
+    }
+    if (-not $plan) { Write-Host "  plan not found (tried: $($candidates -join ', ')) - skipping" -ForegroundColor Red; $fail++; continue }
+    if ($targetExt -ne $w.PlanExternalId) { Write-Host "  -> resolved to $targetExt (Gen2 replacement plan)" -ForegroundColor DarkGray }
+    $w.PlanExternalId = $targetExt     # use the resolved plan id for the rest of the loop (skuId etc.)
     $planId = $plan.id
 
     # GET current tech config. A durable-id GET returns the DRAFT; if there's no draft
