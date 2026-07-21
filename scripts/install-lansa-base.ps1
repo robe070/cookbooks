@@ -250,8 +250,29 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-    Write-Host("Enabling TLS 1.2 & 1.3 security protocol (& Disabling older versions) to establsih a secure connection with the server when making web requests.")
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -f [Net.SecurityProtocolType]::Tls13
+    Write-Host("Enabling TLS 1.2 & 1.3 security protocol (& Disabling older versions) to establish a secure connection with the server when making web requests.")
+    # NOTE: This only affects THIS process's outbound web requests (downloads below). It does NOT
+    # change what the baked image offers to inbound connections - that is the Schannel config below.
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+
+    # Machine-wide Schannel hardening baked into the image. Disables the deprecated TLS 1.0/1.1
+    # protocols (Server + Client) and ensures TLS 1.2 is enabled, so Marketplace security scanning
+    # does not flag the image (AzCertify QIDs 38628 / 38794). Idempotent: a no-op on OS builds that
+    # already ship with these disabled (e.g. Win2022 Azure Edition, Win2025); required for Win2019.
+    Write-Host "$(Log-Date) Hardening Schannel: disabling TLS 1.0/1.1 and enabling TLS 1.2 machine-wide"
+    $SchannelProtocols = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols'
+    foreach ( $Proto in 'TLS 1.0', 'TLS 1.1' ) {
+        foreach ( $Role in 'Server', 'Client' ) {
+            $Key = New-Item -Path "$SchannelProtocols\$Proto\$Role" -Force
+            New-ItemProperty -Path $Key.PSPath -Name 'Enabled'           -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $Key.PSPath -Name 'DisabledByDefault' -Value 1 -PropertyType DWord -Force | Out-Null
+        }
+    }
+    foreach ( $Role in 'Server', 'Client' ) {
+        $Key = New-Item -Path "$SchannelProtocols\TLS 1.2\$Role" -Force
+        New-ItemProperty -Path $Key.PSPath -Name 'Enabled'           -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $Key.PSPath -Name 'DisabledByDefault' -Value 0 -PropertyType DWord -Force | Out-Null
+    }
 
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
