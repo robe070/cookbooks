@@ -58,7 +58,12 @@ param(
 if ($PackOnly -and $PushOnly) { throw '-PackOnly and -PushOnly are mutually exclusive.' }
 
 # The vetted set (from the old choco-push.ps1). Omit Version = publish the latest community version.
-# Pin a version only when you need reproducibility, e.g. @{ Id='FoxitReader'; Version='2024.4.0.27683' }
+# A version maybe pinned, e.g. an older version is smaller, e.g. @{ Id='FoxitReader'; Version='2025.1.0.27937' }
+# When there is a defect in the latest community version, then the version is pinned at the point its installed
+# not here. Here are the current scripts:
+# install-lansa-base.ps1 — the base/Scalable image: googlechrome, jre8, vscode, FoxitReader. This is the primary install script.
+# installGit.ps1 — git.install and git.
+# bake-ide-ami.ps1 — jdk8, for the IDE image.
 $packages = @(
     @{ Id = 'git.install' }
     @{ Id = 'git' }
@@ -71,7 +76,7 @@ $packages = @(
     @{ Id = 'DotNet4.5.2' }
     @{ Id = 'chocolatey-core.extension' }
     @{ Id = 'chocolatey-compatibility.extension' }      # dependency of newer git.install; must be on the feed for -s=lansa resolution
-    @{ Id = 'FoxitReader'; Version = '2025.1.0.27937' } # Pinned to reduce size so that pushing the package is quicker
+    @{ Id = 'FoxitReader' }
 )
 
 if ($Only) {

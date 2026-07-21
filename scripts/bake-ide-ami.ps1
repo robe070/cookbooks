@@ -835,20 +835,8 @@ $jsonObject = @"
 
         # No harm installing this again if its already installed
         if ( $InstallIDE -eq $true) {
-            if ( $Win2012 ) {
-                Write-Host "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
-                Write-Host "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE"
-
-                if ( $Cloud -eq 'AWS' ) {
-                    Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
-                } else {
-                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)" -Pipeline:$Pipeline
-                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
-                }
-            } else {
-                Execute-RemoteBlock $Script:session {
-                    Install-ChocoCheckedLansa @('jdk8', '-s=lansa', '-y', '--no-progress')
-                }
+            Execute-RemoteBlock $Script:session {
+                Install-ChocoCheckedLansa @('jdk8', '-s=lansa', '-y', '--no-progress')
             }
         }
 
