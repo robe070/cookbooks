@@ -274,6 +274,33 @@ try
         New-ItemProperty -Path $Key.PSPath -Name 'DisabledByDefault' -Value 0 -PropertyType DWord -Force | Out-Null
     }
 
+    # Disable weak Schannel ciphers/hashes and enforce a strong key exchange, so security scanning
+    # does not follow up the protocol findings with RC4 / 3DES-SWEET32 / DES / NULL / weak-DH findings
+    # on the same port. Cipher key names contain '/', which the PowerShell registry provider
+    # mishandles, so use the .NET registry API which handles them reliably. Idempotent.
+    Write-Host "$(Log-Date) Hardening Schannel: disabling weak ciphers (RC4, DES, 3DES, NULL) and MD5 hash"
+    $SchannelRoot = 'SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL'
+    $WeakCiphers = @(
+        'RC4 128/128', 'RC4 64/128', 'RC4 56/128', 'RC4 40/128',
+        'DES 56/56', 'Triple DES 168', 'NULL'
+    )
+    foreach ( $Cipher in $WeakCiphers ) {
+        $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\Ciphers\$Cipher")
+        $Key.SetValue('Enabled', 0, [Microsoft.Win32.RegistryValueKind]::DWord)
+        $Key.Close()
+    }
+
+    # Disable the weak MD5 hash algorithm.
+    $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\Hashes\MD5")
+    $Key.SetValue('Enabled', 0, [Microsoft.Win32.RegistryValueKind]::DWord)
+    $Key.Close()
+
+    # Require a minimum 2048-bit Diffie-Hellman key exchange (mitigates Logjam / weak-DH findings).
+    Write-Host "$(Log-Date) Hardening Schannel: setting Diffie-Hellman server minimum key length to 2048 bits"
+    $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\KeyExchangeAlgorithms\Diffie-Hellman")
+    $Key.SetValue('ServerMinKeyBitLength', 2048, [Microsoft.Win32.RegistryValueKind]::DWord)
+    $Key.Close()
+
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
