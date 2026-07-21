@@ -229,8 +229,30 @@ stages:
     - w22d150jAus
 
   jobs:
+  # Automatically add each newly-built gallery image to the Marketplace offer's draft
+  # via the Product Ingestion API, before the manual publish-to-preview step.
+  - job: AddPreviewImages
+    displayName: Add Gen2 images to Marketplace offer (draft)
+    pool:
+      name: Default
+    steps:
+    - download: _BuildImageReleaseArtefacts
+      displayName: Download build artefacts (per-plan image URLs)
+    - checkout: self
+      path: _robe070_cookbooks
+    - task: PowerShell@2
+      displayName: Add Gen2 images via Product Ingestion API
+      inputs:
+        targetType: filePath
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/Add-MarketplaceGen2Image.ps1'
+        arguments: >
+          -ArtefactsPath '$(Pipeline.Workspace)/_BuildImageReleaseArtefacts'
+          -ClientId '$(PCClientId)'
+          -ClientSecret '$(PCClientSecret)'
+
   - job: AgentlessJob
     displayName: Agentless job
+    dependsOn: AddPreviewImages
     pool: server
     timeoutInMinutes: 43200
     steps:
@@ -242,10 +264,12 @@ stages:
         notifyUsers: rob.goodridge@lansa.com.au
         instructions: |
           1. All preceding stages must be successful, or skipped
-          2. Publish the preview images in the marketplace
-          3. Wait for the email "Approve the offer preview for LANSA Scalable License"
-          4. Increment the VersionText Variable in Azure Build Image Release Artefacts.yml.
-          5. Only now the pipeline may be continued to test the preview images
+          2. The Gen2 gallery images have already been added to the offer DRAFT by the
+             "Add Gen2 images to Marketplace offer (draft)" job - verify them in Partner Center
+          3. Publish the preview images in the marketplace
+          4. Increment the VersionText Variable in Azure Build Image Release Artefacts.yml. Now the images have been pushed to preview, any corrections require new image versions.
+          5. Wait for the email "Approve the offer preview for LANSA Scalable License"
+          6. Only now the pipeline may be continued to test the preview images
 
 - stage: 'MergePatch_PAASCookbooks'
   displayName: 'Merge patch/paas cookbooks'
