@@ -251,7 +251,7 @@ stages:
           -ClientSecret '$(PCClientSecret)'
 
   - job: AgentlessJob
-    displayName: Agentless job
+    displayName: Check Images and Submit MP Offer to Preview
     dependsOn: AddPreviewImages
     pool: server
     timeoutInMinutes: 43200
