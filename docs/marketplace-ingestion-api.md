@@ -20,9 +20,9 @@ because the Partner Center UI has no "copy plan/offer" feature. The scripts live
 
 Requires an **Entra app associated in Partner Center** → Account settings → User management →
 Microsoft Entra applications, assigned the **Manager** role (this is *not* Azure RBAC — it is
-separate from `Connect-AzAccount`). App-only client-credentials, scope
-`https://graph.microsoft.com/.default`. Delegated (`-UseCurrentAzLogin`) is a convenience only; the
-API is documented app-only.
+separate from `Connect-AzAccount`). App-only client-credentials only, scope
+`https://graph.microsoft.com/.default`. Delegated/interactive tokens are **not** accepted by this
+API, so the scripts are app-only (the earlier `-UseCurrentAzLogin` option was removed).
 
 ## Scripts
 
@@ -37,15 +37,21 @@ API is documented app-only.
   SKU + gallery image (dry-run default, `-Submit`, `-DropNonGalleryImages` fallback).
 - **`Compare-PlanPricing.ps1` / `Set-PlanPricing.ps1`** — group plans by pricing signature; clone a
   reference plan's whole `price-and-availability-plan` onto targets (dry-run default, `-Submit`).
+- **`Add-MarketplaceGen2Image.ps1`** — the pipeline entry point (not dry-run-first): adds a
+  newly-built gallery image to each built plan's tech config, driven by the build artefacts. See
+  [Pipeline automation](#pipeline-automation-publish-preview-images) below.
 
 ## Hard-won configure/WRITE rules (virtual-machine-plan-technical-configuration)
 
 Each of these produced a bare "Invalid resource" until fixed:
 
 1. Resource `$schema` **and** endpoint `?$version` must be the **current** version
-   `2026-04-01-preview1` (from the resources-index at
-   `schema.mp.microsoft.com/schema/resources-index/2022-07-01`). A resource-tree GET returns stale
-   preview5/preview3 (a max-version ceiling) which the WRITE path rejects.
+   (`2026-04-01-preview1` at time of writing). A resource-tree GET returns stale preview5/preview3 (a
+   max-version ceiling) which the WRITE path rejects. Don't hard-code it blindly: the current version
+   is published in the resources-index at `schema.mp.microsoft.com/schema/resources-index/2022-07-01`
+   (an `anyOf[].$ref` list). `Add-MarketplaceGen2Image.ps1` **infers** it from there at runtime, with
+   the last-known-good version pinned as a fallback if the index is unreachable. (`configure` and the
+   lookup version aren't in the index, so those stay pinned.)
 2. product/plan are referenced as durable-id **strings** (`product/<g>`, `plan/<g>/<g>`); object
    form must be `{externalId}` or `{resourceName}` (note the casing — **not** `{externalID}`).
 3. Do **not** echo the resource's own durable `id` in the payload.
@@ -92,5 +98,31 @@ While still a **draft** it *can* be modified via the API (but not via the Portal
 published image, **append a new version number** (old versions may be deprecated via
 `lifecycleState`) rather than mutating. In diffs, a stripped `id` (server-owned; writes identify by
 product+plan) and `$schema` position changes are expected/benign.
+
+## Pipeline automation (Publish Preview Images)
+
+`Add-MarketplaceGen2Image.ps1` runs as a job at the **start of the `PublishPreviewImages` stage** of
+`Azure Publish Images.yaml`, ahead of the manual "publish to preview" validation. It automates what
+was previously a manual "add the new image" step: it adds each newly-built (and tested) gallery image
+to the offer's **draft**, leaving the human to do the actual publish-to-preview.
+
+- **Plan list is derived from the artefacts**, not hard-coded. The build pipeline drops one
+  `<plan>/<plan>.txt` per built plan (holding the gallery ImageUrl — same layout
+  `azure_set_gate_variable.ps1` reads). The job enumerates `_BuildImageReleaseArtefacts/*`; a folder
+  without its `.txt` is skipped, and **zero artefacts is fatal** (the run's whole purpose is to
+  publish ≥1 image). `-PlanExternalId` is an optional filter.
+- **Everything derives from the ImageUrl**: `resourceId` (verbatim), version (after `/versions/`),
+  and the image definition (after `/images/`); a `-g2` suffix ⇒ `x64Gen2` and the plan externalId is
+  the def minus `-g2`.
+- **Fixed values are hard-coded** (not parameters): product durable id
+  `product/9c420de5-…`, gallery tenantId `17e16064-…`. Only the Partner Center auth
+  (`PCTenantId` / `PCClientId` / `PCClientSecret` — "PC" = Partner Center) is passed in as pipeline
+  variables.
+- **Idempotent + append-only**: GETs the plan's current tech config, skips if that image version is
+  already present, otherwise **appends** the new version and ensures a Gen2 SKU exists (per the SKU
+  rules above). Never mutates an existing image (see Immutability).
+- **Draft vs live**: a durable-id GET returns the **draft**; if a plan is live with no pending draft
+  that 404s, so it falls back to the **live** config via `resource-tree?targetType=live` and the
+  submit then seeds a fresh draft. It logs `base config from: draft|live` per plan.
 
 Related Azure MSI context: [azure-sql-login.md](azure-sql-login.md).

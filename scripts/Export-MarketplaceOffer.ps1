@@ -24,23 +24,13 @@
 
 .PARAMETER TenantId
     Microsoft Entra tenant (directory) ID associated with the Partner Center account.
-    Required for app-only auth (omit when using -UseCurrentAzLogin).
 
 .PARAMETER ClientId
     Application (client) ID of the associated Entra app.
-    Required for app-only auth (omit when using -UseCurrentAzLogin).
 
 .PARAMETER ClientSecret
     Client secret / key for the Entra app. Prefer piping in from a secret store
     (Key Vault, SecretManagement) rather than hard-coding.
-    Required for app-only auth (omit when using -UseCurrentAzLogin).
-
-.PARAMETER UseCurrentAzLogin
-    Reuse your current interactive Azure session (Connect-AzAccount) to get the
-    Graph token instead of an app secret. Requires the Az.Accounts module and a
-    signed-in user who is a Manager on the Partner Center account. Convenience for
-    interactive runs only — automation should use the app-only parameters above,
-    since the product-ingestion API is documented for app-only tokens.
 
 .PARAMETER OfferExternalId
     The offer's external ID (the "Offer ID" shown in Partner Center, e.g.
@@ -63,13 +53,7 @@
 
 .EXAMPLE
     .\Export-MarketplaceOffer.ps1 -TenantId $t -ClientId $c -ClientSecret $s `
-        -OfferExternalId "contoso-vm-offer" -TargetType live
-
-.EXAMPLE
-    # Reuse an existing interactive Azure login (no app secret needed):
-    Connect-AzAccount
-    .\Export-MarketplaceOffer.ps1 -UseCurrentAzLogin `
-        -OfferExternalId "contoso-vm-offer" -TargetType live
+        -ProductDurableId "product/9c420de5-61a6-4219-91d7-0ddb78e3c2a1" -TargetType live
 
 .NOTES
     The Product Ingestion API is in preview. Media (VM images/SAS blobs, logos,
@@ -78,17 +62,12 @@
 #>
 [CmdletBinding()]
 param(
-    # App-only (client-credentials) auth. Required unless -UseCurrentAzLogin is set.
+    # App-only (client-credentials) auth.
     [string] $TenantId,
 
     [string] $ClientId,
 
     [string] $ClientSecret,
-
-    # Reuse the current interactive Azure session (Connect-AzAccount) to obtain the
-    # Graph token instead of an app secret. Requires the Az.Accounts module and a
-    # signed-in user who is a *Manager* on the Partner Center account.
-    [switch] $UseCurrentAzLogin,
 
     # Supply EITHER -ProductDurableId (preferred; it's the GUID in the offer's
     # dashboard URL) OR -OfferExternalId (the Offer ID). Validated at runtime.
@@ -109,48 +88,21 @@ Set-StrictMode -Version Latest
 
 $GraphBase = 'https://graph.microsoft.com/rp/product-ingestion'
 
-# --- 1. Acquire access token -----------------------------------------------
-if ($UseCurrentAzLogin) {
-    # Reuse the signed-in Azure session. NOTE: this yields a *delegated* (user)
-    # Graph token. It works only if that user is a Manager on the Partner Center
-    # account; the product-ingestion API is documented for app-only tokens, so
-    # treat this path as convenience for interactive runs, not automation.
-    Write-Host "Obtaining Graph token from current Azure login..." -ForegroundColor Cyan
-
-    if (-not (Get-Command Get-AzAccessToken -ErrorAction SilentlyContinue)) {
-        throw "The Az.Accounts module isn't available. Install it (Install-Module Az.Accounts) and run Connect-AzAccount, or drop -UseCurrentAzLogin and pass -TenantId/-ClientId/-ClientSecret."
-    }
-    if (-not (Get-AzContext -ErrorAction SilentlyContinue)) {
-        throw "No active Azure session. Run Connect-AzAccount first, or use app-only auth (-TenantId/-ClientId/-ClientSecret)."
-    }
-
-    $tokenObj = Get-AzAccessToken -ResourceUrl 'https://graph.microsoft.com'
-    # SecureString on Az.Accounts v3+, plain string on older versions.
-    $accessToken = if ($tokenObj.Token -is [securestring]) {
-        [System.Net.NetworkCredential]::new('', $tokenObj.Token).Password
-    } else {
-        $tokenObj.Token
-    }
+# --- 1. Acquire access token (app-only client-credentials) -----------------
+if (-not ($TenantId -and $ClientId -and $ClientSecret)) {
+    throw "Auth requires -TenantId, -ClientId and -ClientSecret."
 }
-else {
-    # App-only client-credentials flow (documented/supported path).
-    if (-not ($TenantId -and $ClientId -and $ClientSecret)) {
-        throw "App-only auth requires -TenantId, -ClientId and -ClientSecret (or use -UseCurrentAzLogin)."
+Write-Host "Acquiring Entra access token (client credentials)..." -ForegroundColor Cyan
+$tokenResponse = Invoke-RestMethod -Method Post `
+    -Uri "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token" `
+    -ContentType 'application/x-www-form-urlencoded' `
+    -Body @{
+        grant_type    = 'client_credentials'
+        client_id     = $ClientId
+        client_secret = $ClientSecret
+        scope         = 'https://graph.microsoft.com/.default'
     }
-    Write-Host "Acquiring Entra access token (client credentials)..." -ForegroundColor Cyan
-    $tokenResponse = Invoke-RestMethod -Method Post `
-        -Uri "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token" `
-        -ContentType 'application/x-www-form-urlencoded' `
-        -Body @{
-            grant_type    = 'client_credentials'
-            client_id     = $ClientId
-            client_secret = $ClientSecret
-            scope         = 'https://graph.microsoft.com/.default'
-        }
-    $accessToken = $tokenResponse.access_token
-}
-
-$headers = @{ Authorization = "Bearer $accessToken" }
+$headers = @{ Authorization = "Bearer $($tokenResponse.access_token)" }
 
 # --- 2. Resolve the product durable ID -------------------------------------
 if (-not ($ProductDurableId -or $OfferExternalId)) {

@@ -45,8 +45,7 @@ param(
     [switch] $Submit,
     [string] $TenantId,
     [string] $ClientId,
-    [string] $ClientSecret,
-    [switch] $UseCurrentAzLogin
+    [string] $ClientSecret
 )
 
 $ErrorActionPreference = 'Stop'
@@ -56,13 +55,7 @@ $TechSchema = 'https://schema.mp.microsoft.com/schema/virtual-machine-plan-techn
 $CfgSchema  = 'https://schema.mp.microsoft.com/schema/configure/2022-03-01-preview2'
 
 function Get-IngestionToken {
-    if ($UseCurrentAzLogin) {
-        if (-not (Get-Command Get-AzAccessToken -ErrorAction SilentlyContinue)) { throw "Az.Accounts not available; use -TenantId/-ClientId/-ClientSecret." }
-        if (-not (Get-AzContext -ErrorAction SilentlyContinue)) { throw "No active Azure session. Run Connect-AzAccount." }
-        $t = Get-AzAccessToken -ResourceUrl 'https://graph.microsoft.com'
-        return $(if ($t.Token -is [securestring]) { [System.Net.NetworkCredential]::new('', $t.Token).Password } else { $t.Token })
-    }
-    if (-not ($TenantId -and $ClientId -and $ClientSecret)) { throw "Auth requires -TenantId/-ClientId/-ClientSecret (or -UseCurrentAzLogin)." }
+    if (-not ($TenantId -and $ClientId -and $ClientSecret)) { throw "Auth requires -TenantId/-ClientId/-ClientSecret." }
     (Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token" `
         -ContentType 'application/x-www-form-urlencoded' `
         -Body @{ grant_type='client_credentials'; client_id=$ClientId; client_secret=$ClientSecret; scope='https://graph.microsoft.com/.default' }).access_token
