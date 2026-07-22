@@ -351,8 +351,34 @@ stages:
     - AUSMediumStackShoeSizesw25d150j
     - AUSLargeStackShoeSizesw19d160j
   jobs:
+  # Upload the freshly-built solution-template packages to the "LANSA Scalable Stack Windows"
+  # Azure Application offer DRAFT via the Partner Center submission API (this offer type is NOT
+  # supported by the Product Ingestion API used for the VM offer). Draft only - the human
+  # publishes via the AgentlessJob manual validation below.
+  - job: PublishSolutionTemplate
+    displayName: Update Solution Template offer (draft)
+    pool:
+      name: Default
+    steps:
+    - download: _TemplatesCI
+      displayName: Download Solution Template artefacts
+    - checkout: self
+      path: _robe070_cookbooks
+    - task: PowerShell@2
+      displayName: Upload solution-template packages via Partner Center submission API
+      inputs:
+        targetType: filePath
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/Publish-SolutionTemplateOffer.ps1'
+        arguments: >
+          -ArtefactsPath '$(Pipeline.Workspace)/_TemplatesCI/Solution Template'
+          -RunName '$(resources.pipeline._TemplatesCI.runName)'
+          -ClientId '$(PCClientId)'
+          -ClientSecret '$(PCClientSecret)'
+          -Submit
+
   - job: AgentlessJob
     displayName: 'Manual Intervention: Deploy Template'
+    dependsOn: PublishSolutionTemplate
     timeoutInMinutes: 43200 # 30 days
     pool: server
     steps:

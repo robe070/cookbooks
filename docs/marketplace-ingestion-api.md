@@ -150,4 +150,46 @@ Gen2-only plans and deprecated the originals:
   flattened its `marketplaceSettings` to the direct `-g2` sku, dropped `2019` from `hasGenChoice` and
   the UI `vmGeneration` `visible`, and updated the tooltips/description.
 
+## Solution-template (Azure Application) offer — a DIFFERENT API
+
+The **"LANSA Scalable Stack Windows"** offer (`lansa-scalable-stack-win-2019`, product
+`0522366e-9eeb-4a58-bc01-1e19774ee147`, 6 plans: custom/development/large/medium/small/test) is an
+**Azure Application / Solution template** offer, and **the Product Ingestion API above does not
+support it** — a resource-tree GET returns `badRequest: "Type AzureApplication is not supported"`.
+There are three overlapping marketplace publishing APIs; this offer type uses the **Partner Center
+submission API**, not the graph one:
+
+- Endpoint `https://api.partner.microsoft.com/v1.0/ingestion`, token **resource
+  `https://api.partner.microsoft.com`** (NOT `graph.microsoft.com`). Per Microsoft's 2026 submission-API
+  support matrix this is the **only** supported programmatic path for Azure Application offers — graph
+  Product Ingestion rejects them and the legacy CPP API isn't listed for this type.
+- **Auth:** the **same Entra app + one account** as the VM offer works here (app-only client
+  credentials, Manager role). This API authorizes by Partner Center account association, *not* token
+  app-roles, so a valid token legitimately shows `roles=(none)` — don't chase app-roles.
+- **Pagination gotcha (cost us a debugging round):** `GET /products` is paginated and the LANSA offers
+  are **not on page 1** (the VM offers are). The `nextLink` it returns is **relative to the host**
+  (`v1.0/ingestion/products?$skipToken=…`), so it must be joined to `https://api.partner.microsoft.com/`
+  — **not** to the `…/v1.0/ingestion` base (that doubles the path → a misleading **404 on page 2**, which
+  looks like the first call failing). Match the offer by `externalIDs[].value == lansa-scalable-stack-win-2019`
+  across all pages; its product `id` is a bare GUID used verbatim in `/products/{id}/…`.
+- **`Publish-SolutionTemplateOffer.ps1`** drives it (dry-run default, `-Submit`). Per plan
+  (variant): find product by `externalIDs[].value`, variant by `externalID`, the Package draft
+  branch (`getByModule(module=Package)` → `currentDraftInstanceID`), then **`POST /packages`** to get
+  a **Microsoft-issued write SAS** → `PUT` the zip bytes (`x-ms-blob-type: BlockBlob`) → `PUT
+  …/packages/{id}` `State=Uploaded` → poll to `Processed` → `PUT …/packageconfigurations/{id}` with
+  `resourceType: AzureSolutionTemplatePackageConfiguration`, the new `version`, and
+  `packageReferences`. **Draft only** — a human publishes in Partner Center.
+- **You do NOT self-host the zip** (unlike CPP's pull model): Microsoft hands you the SAS, you push
+  the bytes — the same thing the portal drag-and-drop does. Package `fileName` must be **unique per
+  submission**, so the pipeline renames `SolutionTemplate<Variant>.zip` →
+  `SolutionTemplate<Variant>-16-0-<run>.zip` (`<run>` = trailing digits of the CI-Templates run
+  name); the plan `version` is `16.0.<run>` (monotonic, since the run number only increases).
+- **Pipeline**: `Azure Publish Templates.yml` runs it as the `PublishSolutionTemplate` job at the
+  start of `ProductionStage` (before the `AgentlessJob` manual publish gate), downloading the
+  `_TemplatesCI` **"Solution Template"** artefact — the mirror of `AddPreviewImages` in
+  `Azure Publish Images.yaml`.
+- Request shapes come from Microsoft's own `microsoft/microsoft-partner-center-github-action`
+  (`entrypoint.sh`) + the ingestion Swagger, not a prose Learn page — confirm against the live
+  Swagger if a call starts rejecting.
+
 Related Azure MSI context: [azure-sql-login.md](azure-sql-login.md).
