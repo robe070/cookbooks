@@ -385,7 +385,16 @@ stages:
     - task: ManualValidation@0
       displayName: 'Manual Validation: Production Template'
       inputs:
-        instructions: "Test that the Preview Solution Template links work and have the expected UI fixes. Deploy the template to the Production Stage"
+        instructions: |
+          1. In the Azure MP Portal check that the correct zip file name is used - the number at the end is the number from the end of the name of the Azure CI Templates run that was an input to this run. The best way to do this is to go to the publish step and do a compare. All the zip names and version numbers can be seen in one view.
+          2. Submit the Offer to preview and WAIT.
+          3. Test that the Preview Solution Template links work and have the expected UI fixes.
+          4. Ensure the images have been published.
+          5. Note that there is no testing of the preview because nothing has significantly changed from before Preview.
+          5. Deploy the Offer to the Production Stage. Note, the templates are only certified in this final step and they can get rejected.
+          6. Wait for live.
+          7. Manually test each Solution Template contains the changes and can launch a deployment. There is no need to wait for success or otherwise. A successful launch is all that is necessary. The following stages will test deployment fully.
+          9. Resume this Job.
         onTimeout: 'reject'
 
 - template: AzureDevOps\templates\AzureTestandPRODTemplateValidation.yml
