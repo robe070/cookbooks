@@ -953,7 +953,7 @@ stages:
     - w19d160UKSouthProduction
     - w19d150SoutheastAsiaProduction
     - w25d160jUSCentralProduction
-    - w25d150jEuropeNorthProduction
+   # - w25d150jEuropeNorthProduction
     - w19d160jWestIndiaProduction
     - w19d150jSwitzerlandNorthProduction
 
