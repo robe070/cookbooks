@@ -529,10 +529,11 @@ stages:
 
     - powershell: |
         # Print the Gate variables.
-        if ( $(Gate.IsEnabled) -eq 'True' ) {
+        # Note: $(Gate.*) are macro-expanded as literal text, so they must be quoted.
+        if ( '$(Gate.IsEnabled)' -eq 'True' ) {
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
         } else {
-          Write-Host "Gate.IsEnabled is set to $(Gate.IsEnabled)."
+          Write-Host "Gate.IsEnabled is set to '$(Gate.IsEnabled)'."
         }
       displayName: 'Artifact Check - Output Gate Variable'
 
