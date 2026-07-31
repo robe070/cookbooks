@@ -172,7 +172,7 @@ jobs:
         Write-Host "Waiting for all parallel provisioning jobs to complete..."
         foreach ($job in $jobs) {
           try {
-              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Continue
               Write-Host "Job Output:"
               $output | Out-Default | Write-Host
           } catch {
@@ -343,6 +343,18 @@ jobs:
 
                     Write-Host 'Ensure correct version of Pester'
                     if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
+                        if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled') {
+                          # 1. Take ownership of the folder and everything inside it recursively (/R)
+                          # /D Y automatically selects "Yes" if prompted for confirmation on directories
+                          takeown /f "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /r /d y
+
+                          # 2. Grant Administrators full control over the folder and all sub-items (/T)
+                          # /grant administrators:F gives full control, /c continues on errors
+                          icacls "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /grant administrators:F /t /c
+
+                          # 3. Forcibly delete the directory and its entire contents
+                          Remove-Item -Path "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" -Force -Recurse
+                        }
                         Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
                         Write-Host 'Auto-installed Pester version now disabled'
                     } else {
@@ -369,6 +381,20 @@ jobs:
 
                     Write-Host 'Install AWS CLI'
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
+
+                    # Az PowerShell - NOT pinned (unlike AWSPowerShell above, which is pinned because later
+                    # versions were broken at the time). This pipeline is how all agents get, and are
+                    # upgraded to, the latest Az on every run - the bake's Trusted Launch New-AzVMConfig
+                    # -SecurityType needs a current Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0).
+                    # Log the currently-installed Az versions FIRST so an upgrade can be backed out.
+                    Write-Host 'Az PowerShell versions currently installed (logged so this upgrade can be backed out):'
+                    Get-InstalledModule -ErrorAction Ignore |
+                        Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
+                        Sort-Object Name, Version | Format-Table Name, Version -AutoSize | Out-Default | Write-Host
+                    Write-Host 'Installing / upgrading Az to the latest version...'
+                    Install-Module -Name Az -Scope AllUsers -AllowClobber -Force | Out-Default | Write-Host
+                    Write-Host 'Az now installed:'
+                    Get-InstalledModule -Name Az | Out-Default | Write-Host
                 } catch {
                     $_ | Out-Default | Write-Host
                     throw
@@ -395,7 +421,7 @@ jobs:
         Write-Host "Waiting for all agent install jobs..."
         foreach ($job in $jobs) {
           try {
-              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Stop
+              $output = Receive-Job -Job $job -Wait -AutoRemoveJob -ErrorAction Continue
               Write-Host "Job Output:"
               $output | Out-Default | Write-Host
           } catch {
@@ -413,7 +439,7 @@ jobs:
         }
         Write-Host "Rebooting all VMs to complete installation..."
         $ScriptBlock = {
-            Restart-Computer -Wait -Delay 5 -Force
+            Restart-Computer -Delay 5 -Force
         }
         for ($i = 1; $i -le $vmCount; $i++) {
             $vmName = "${baseVmName}$i"

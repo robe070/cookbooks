@@ -13,17 +13,17 @@ variables:
   - name: regionName
     value: ap-southeast-2
   - name: agentVMImage
-    value: windows-2022
+    value: Default
   - name: VersionText
     value: 0
 
 jobs:
 - job: Job_1
-  displayName: 'Agent job : w16d-14-2'
+  displayName: 'Agent job : w25d-14-2'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w25d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -47,7 +47,7 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: |
-        -VersionText 'w16d-14-2$(VersionText)'
+        -VersionText 'w25d-14-2$(VersionText)'
         -VersionMajor 14
         -VersionMinor 2
         -AmazonAMIName $(Windows-2016-AMI)
@@ -67,7 +67,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w25d-14-2.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
 
@@ -79,10 +79,10 @@ jobs:
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
       TestVmName: T16142$(VersionText)
-      SG: w16d-14-2$(VersionText)
+      SG: w25d-14-2$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-14-2$(VersionText)
+      VersionText: w25d-14-2$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -93,12 +93,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-14-2
+      testRunTitle: w25d-14-2
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w25d-14-2.txt
       ArtifactName: aws
       FileCopyOptions: ''
 
@@ -110,7 +110,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
       arguments: |
         -versionText '$(VersionText)'
-        -version 'w16d-14-2'
+        -version 'w25d-14-2'
         -DeleteAMI $true
       inlineScript: >
         # Terminating the Instance
@@ -132,14 +132,14 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-14-2-$(VersionText)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-14-2-$(VersionText)' -Force
 
 - job: Job_2
-  displayName: 'Agent job : w16d-15-0'
+  displayName: 'Agent job : w25d-15-0'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w25d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -163,7 +163,7 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: |
-        -VersionText 'w16d-15-0$(VersionText)'
+        -VersionText 'w25d-15-0$(VersionText)'
         -VersionMajor 15
         -VersionMinor 0
         -AmazonAMIName $(Windows-2016-AMI)
@@ -183,7 +183,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w25d-15-0.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
 
@@ -195,10 +195,10 @@ jobs:
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
       TestVmName: T16150$(VersionText)
-      SG: w16d-15-0$(VersionText)
+      SG: w25d-15-0$(VersionText)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-15-0$(VersionText)
+      VersionText: w25d-15-0$(VersionText)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -209,12 +209,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-15-0
+      testRunTitle: w25d-15-0
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w25d-15-0.txt
       ArtifactName: aws
       FileCopyOptions: ''
 
@@ -226,7 +226,7 @@ jobs:
       filePath: scripts/terminate-instance.ps1
       arguments: |
         -versionText '$(VersionText)'
-        -version 'w16d-15-0'
+        -version 'w25d-15-0'
         -DeleteAMI $true
       inlineScript: >
         # Terminating the Instance
@@ -251,14 +251,14 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-15-0-$(VersionText)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-15-0-$(VersionText)' -Force
 
 - job: Job_3
   displayName: 'Agent job : w19d-14-2'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -377,7 +377,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -494,7 +494,7 @@ jobs:
   timeoutInMinutes: 120
   condition: and(succeeded(), or(eq(variables['Build-w22d-14-2'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -622,7 +622,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -736,11 +736,11 @@ jobs:
          Remove-EC2SecurityGroup -GroupName 'w22d-15-0-$(VersionText)' -Force
 
 - job: Job_7
-  displayName: 'Agent job : w16d-14-2j'
+  displayName: 'Agent job : w25d-14-2j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w25d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -764,7 +764,7 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: |
-        -VersionText 'w16d-14-2j$(VersionText-w16d-14-2j)'
+        -VersionText 'w25d-14-2j$(VersionText-w25d-14-2j)'
         -VersionMajor 14
         -VersionMinor 2
         -AmazonAMIName $(Windows-2016-AMI-JPN)
@@ -785,7 +785,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w25d-14-2j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
 
@@ -796,11 +796,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T16142j$(VersionText-w16d-14-2j)
-      SG: w16d-14-2j$(VersionText-w16d-14-2j)
+      TestVmName: T16142j$(VersionText-w25d-14-2j)
+      SG: w25d-14-2j$(VersionText-w25d-14-2j)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-14-2j$(VersionText-w16d-14-2j)
+      VersionText: w25d-14-2j$(VersionText-w25d-14-2j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -811,12 +811,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-14-2j
+      testRunTitle: w25d-14-2j
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-14-2j.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w25d-14-2j.txt
       ArtifactName: aws
       FileCopyOptions: ''
 
@@ -827,8 +827,8 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
       arguments: |
-        -versionText '$(VersionText-w16d-14-2j)'
-        -version 'w16d-14-2j'
+        -versionText '$(VersionText-w25d-14-2j)'
+        -version 'w25d-14-2j'
         -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
@@ -850,14 +850,14 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-14-2j-$(VersionText-w16d-14-2j)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-14-2j-$(VersionText-w25d-14-2j)' -Force
 
 - job: Job_8
-  displayName: 'Agent job : w16d-15-0j'
+  displayName: 'Agent job : w25d-15-0j'
   timeoutInMinutes: 360
-  condition: and(succeeded(), or(eq(variables['Build-w16d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+  condition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -881,7 +881,7 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
       arguments: |
-        -VersionText 'w16d-15-0j$(VersionText-w16d-15-0j)'
+        -VersionText 'w25d-15-0j$(VersionText-w25d-15-0j)'
         -VersionMajor 15
         -VersionMinor 0
         -AmazonAMIName $(Windows-2016-AMI-JPN)
@@ -902,7 +902,7 @@ jobs:
       script: >-
         Write-Host "Writing the Full Image URL $(BuildImage.amiID) in the $(Build.ArtifactStagingDirectory)" | Out-Default | Write-Host
 
-        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w16d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
+        Out-File -FilePath (Join-Path $(Build.ArtifactStagingDirectory) "w25d-15-0j.txt") -InputObject $(BuildImage.amiID) | Out-Default | Write-Host
 
         Write-Host "Full Image URL written successfully" | Out-Default | Write-Host
 
@@ -913,11 +913,11 @@ jobs:
       TestImageName: $(BuildImage.amiID)
       TestCloudName: AWS
       AtomicBuild: $(atomic-build)
-      TestVmName: T16150j$(VersionText-w16d-15-0j)
-      SG: w16d-15-0j$(VersionText-w16d-15-0j)
+      TestVmName: T16150j$(VersionText-w25d-15-0j)
+      SG: w25d-15-0j$(VersionText-w25d-15-0j)
       keypair: $(KeypairName)
       keypairpath: $(keypair.secureFilePath)
-      VersionText: w16d-15-0j$(VersionText-w16d-15-0j)
+      VersionText: w25d-15-0j$(VersionText-w25d-15-0j)
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
@@ -928,12 +928,12 @@ jobs:
     inputs:
       testRunner: NUnit
       testResultsFiles: '**/Test-*.xml'
-      testRunTitle: w16d-15-0j
+      testRunTitle: w25d-15-0j
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Image URL copy'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/w16d-15-0j.txt
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/w25d-15-0j.txt
       ArtifactName: aws
       FileCopyOptions: ''
 
@@ -944,8 +944,8 @@ jobs:
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
       arguments: |
-        -versionText '$(VersionText-w16d-15-0j)'
-        -version 'w16d-15-0j'
+        -versionText '$(VersionText-w25d-15-0j)'
+        -version 'w25d-15-0j'
         -DeleteAMI $true
       inlineScript: >+
         # Terminating the Instance
@@ -967,14 +967,14 @@ jobs:
         Write-Host "Deleting the security group"
 
         Start-Sleep -Seconds 180
-         Remove-EC2SecurityGroup -GroupName 'w16d-15-0j-$(VersionText-w16d-15-0j)' -Force
+         Remove-EC2SecurityGroup -GroupName 'w25d-15-0j-$(VersionText-w25d-15-0j)' -Force
 
 - job: Job_9
   displayName: 'Agent job : w19d-14-2j'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1091,7 +1091,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w19d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1208,7 +1208,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-14-2j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1
@@ -1325,7 +1325,7 @@ jobs:
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
   pool:
-    vmImage: $(agentVMImage)
+    name: $(agentVMImage)
   steps:
   - checkout: self
   - task: AmazonWebServices.aws-vsts-tools.AWSPowerShellModuleScript.AWSPowerShellModuleScript@1

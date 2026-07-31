@@ -15,7 +15,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: Windows-2022
+    default: Default
   - name: resourceGroup
     type: string
     default: none
@@ -64,7 +64,7 @@ stages:
       displayName: ${{ parameters.jobDisplayname }}
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
+        name: ${{ parameters.vmImage }}
 
       variables:
         - name: ConnectedServiceName
@@ -163,6 +163,30 @@ stages:
           Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
         displayName: 'Print Deployment Output'
         condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      # # Temporary workaround: the LANSA MSI (SUDB=1) cannot create the web login on Azure SQL
+      # # because its CREATE LOGIN emits DEFAULT_DATABASE, which Azure SQL rejects (error 40517).
+      # # The MSI still creates the tables; this step creates the login/user the installer could not.
+      # # Must run AFTER the ARM deploy (DB + tables exist) and BEFORE the URL tests.
+      # - task: PowerShell@2
+      #   displayName: 'Create Azure SQL Web Login (post-MSI workaround)'
+      #   inputs:
+      #     targetType: filePath
+      #     filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/create-azure-sql-login.ps1'
+      #     arguments: -deploymentOutput '$(deploymentOutput)' -AdminUser "$(databaseLogin)" -AdminPassword "$(databaseLoginPassword)" -WebUser "$(webUsername)" -WebPassword "$(webPassword)"
+      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
+
+      # # Companion to the login workaround: instances whose DefaultAppPool tripped WAS
+      # # rapid-fail protection (while the login was missing) stay disabled and return 503.
+      # # Restart IIS on every VMSS instance so the plugin reconnects now the login exists.
+      # - task: AzurePowerShell@5
+      #   displayName: 'Restart IIS on VMSS (clear rapid-fail after login fix)'
+      #   inputs:
+      #     azureSubscription: $(ConnectedServiceName)
+      #     ScriptPath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/restart-vmss-iis.ps1'
+      #     ScriptArguments: -deploymentOutput '$(deploymentOutput)' -ResourceGroup "${{ parameters.resourceGroup }}"
+      #     azurePowerShellVersion: LatestVersion
+      #   condition: and(succeeded(), eq(variables['Gate.IsEnabled'], 'True'))
 
       - task: PowerShell@2
         displayName: 'Test ARM Deployment: URL Tests'

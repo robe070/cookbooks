@@ -199,6 +199,25 @@ function ReConnect-Session
     Execute-RemoteInitPostGit | Out-Default | Write-Host
 }
 
+# Returns $true if the remote VM has a pending reboot (Component Based Servicing, Windows Update, or
+# pending file-rename operations). Software installs - VS Code in particular - flag a pending reboot,
+# and some later steps (e.g. dism.exe for a language pack) silently block until the machine is rebooted.
+function Test-PendingReboot
+{
+    Execute-RemoteBlock $Script:session {
+        $pending = $false
+        foreach ( $key in @(
+                'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending',
+                'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' ) ) {
+            if ( Test-Path $key ) { $pending = $true }
+        }
+        if ( Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction SilentlyContinue ) {
+            $pending = $true
+        }
+        $pending
+    }
+}
+
 function Reboot-Session
 {
     # Execute Restart-Computer through remote session as executing from local machine is blocked
@@ -339,16 +358,16 @@ DSNNew=True
 DSNName=LANSA
 DSNType=2
 DSNDriverType=17
-DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile
+DSNDriverName=ODBC Driver 13 for SQL Server" | Add-Content $SettingsFile -Encoding ascii
 
 if ( $InstallSQLServer -eq $false ) {
 "DatabaseAction=2
 DatabaseNewInstance=False
-DSNServerName=(local)" | Add-Content $SettingsFile
+DSNServerName=(local)" | Add-Content $SettingsFile -Encoding ascii
 } else {
 "DatabaseAction=3
 DatabaseNewInstance=True
-DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile
+DSNServerName=127.0.0.1\$InstanceName" | Add-Content $SettingsFile -Encoding ascii
 }
 
 "DSNDatabaseName=LANSA
@@ -416,12 +435,12 @@ UseridForJSM=PCXUSER2
 JavaVersionForIntegrator=1.8
 OpenTranslationTableLansaProvided=1
 OpenTranslationTable=1140
-DatabaseSAPassword=sa+LANSA!" | Add-Content $SettingsFile
+DatabaseSAPassword=sa+LANSA!" | Add-Content $SettingsFile -Encoding ascii
 
     [int]$VersionMajor = [int](Get-ItemProperty -Path HKLM:\Software\LANSA  -Name 'VersionMajor').VersionMajor
 
     if ( $VersionMajor -lt 14 ) {
-        Add-Content $SettingsFile "DatabaseVersion=5"
+        Add-Content $SettingsFile "DatabaseVersion=5" -Encoding ascii
     } else {
 "DatabaseVersion=11
 ListenerLRouteRecordName=LANSA
@@ -438,7 +457,7 @@ WebServerHostRouteIpcOptions=3
 WebServerWindowsCredentials=False
 DSNPort=0
 CompilerType=0
-CompilerSdkDirectory=" | Add-Content $SettingsFile
+CompilerSdkDirectory=" | Add-Content $SettingsFile -Encoding ascii
     }
 
     Write-Host ("Installing Visual LANSA")
@@ -706,6 +725,63 @@ function PlaySound {
     1..10 | foreach {
         if($_ -gt 5){$flag=$true} else{sleep -s 1}
         if($flag) { $sound.Stop() }
+    }
+}
+
+function Install-ChocoCheckedLansa {
+    <#
+    .SYNOPSIS
+        Install a Chocolatey package with a hard, headless-safe source guard.
+    .DESCRIPTION
+        Clears the choco log first so it holds only this install, echoes the whole log, then FAILS
+        (throw) if the package (or a dependency) was not obtained from the private 'lansa' source,
+        OR if any installer binary was downloaded from a URL (i.e. the feed package was not
+        internalised). Bakes run headless and emit many warnings, so a wrong source must be a hard
+        error, not a warning that scrolls past unnoticed. The caller must pass '-s=lansa' (or
+        '--source lansa') in $Arguments.
+    .EXAMPLE
+        Install-ChocoCheckedLansa @( 'googlechrome', '-s=lansa', '-y', '--no-progress' )
+    #>
+    param( [Parameter(Mandatory)][string[]] $Arguments )
+
+    $chocoRoot = $env:ChocolateyInstall
+    if ( -not $chocoRoot ) { $chocoRoot = 'C:\ProgramData\chocolatey' }
+    $chocoLog = Join-Path $chocoRoot 'logs\chocolatey.log'
+
+    # Clear the log so it holds ONLY this installation.
+    if ( Test-Path $chocoLog ) { Clear-Content -Path $chocoLog -Force }
+
+    Run-ExitCode 'choco' ( @( 'install' ) + $Arguments ) | Write-Host
+
+    # Echo the full choco log for this install.
+    Write-Host "----- BEGIN choco log ($chocoLog) -----"
+    $logLines = @()
+    if ( Test-Path $chocoLog ) { $logLines = Get-Content -Path $chocoLog }
+    $logLines | Write-Host
+    Write-Host "----- END choco log -----"
+
+    # Guard 1 - package source. Choco logs the source differently for a local folder vs an AzDO feed:
+    #   local folder: "Downloading package from source '<src>'"
+    #   AzDO feed:    "found on source '<url>'" / "actual source value '<url>'" / "from source '<url>'"
+    # The lansa feed URL contains 'VisualLansa', so the '(?i)lansa' check below matches it.
+    $sources = [regex]::Matches( ( $logLines -join "`n" ), "(?:from source|on source|source value) '(.+?)'" )
+    if ( $sources.Count -eq 0 ) {
+        throw "Choco source guard: could not determine the package source from $chocoLog. Failing the install to be safe."
+    }
+    foreach ( $s in $sources ) {
+        $src = $s.Groups[1].Value
+        if ( $src -notmatch '(?i)lansa' ) {
+            throw "Choco source guard: package was downloaded from '$src', which is NOT the private 'lansa' source. Aborting the install."
+        }
+    }
+
+    # Guard 2 - no vendor-CDN installer. A properly internalised package installs from its embedded
+    # file and downloads NO binary. Choco logs an installer download as "... from '<url>'" (distinct
+    # from the package source line "from source '<url>'"). Guard 1 still passes for such a package, so
+    # this is the guard that actually catches a non-internalised package on the feed.
+    $cdn = [regex]::Matches( ( $logLines -join "`n" ), "\bfrom '(https?://[^']+)'" )
+    foreach ( $c in $cdn ) {
+        throw "Choco source guard: an installer was downloaded from '$($c.Groups[1].Value)' instead of the package's embedded (internalised) file. The 'lansa' package is not internalised. Aborting the install."
     }
 }
 

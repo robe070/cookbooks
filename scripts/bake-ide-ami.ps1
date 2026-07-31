@@ -279,22 +279,43 @@ try
         } elseif ( $Cloud -eq 'Azure' ) {
             $StorageAccount = 'lansalpcmsdn'
 
-            #Save the storage account key
-            $StorageKey = (Get-AzureStorageKey -StorageAccountName $StorageAccount).Primary
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory            /Dest:$S3DVDImageDirectory            /DestKey:$StorageKey    /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\3rdparty directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\3rdparty   /Dest:$S3DVDImageDirectory/3rdparty   /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\Integrator directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\Integrator /Dest:$S3DVDImageDirectory/Integrator /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\Setup directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\setup      /Dest:$S3DVDImageDirectory/setup      /DestKey:$StorageKey /S /XO /Y | Write-Host
-            Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\html directory")
-            cmd /c AzCopy /Source:$LocalDVDImageDirectory\html      /Dest:$S3DVDImageDirectory/html        /DestKey:$StorageKey /S /XO /Y | Write-Host
+            #Save the storage account key. Discover the resource group from the account name so it
+            #need not be hard-coded (replaces the classic-Azure-module Get-AzureStorageKey, which
+            #does not load in PowerShell 7).
+            $StorageAccountResource = Get-AzStorageAccount | Where-Object StorageAccountName -eq $StorageAccount
+            if ( -not $StorageAccountResource ) {
+                throw "Storage account '$StorageAccount' not found in the current subscription. Run AzureLogin.ps1 for the correct account first."
+            }
+            $StorageKey = (Get-AzStorageAccountKey -ResourceGroupName $StorageAccountResource.ResourceGroupName -Name $StorageAccount)[0].Value
+            # AzCopy v10 replaces the retired v8. v8 authenticated with the account key via /DestKey:;
+            # v10 uses a SAS token (or AAD). Mint a short-lived account SAS from the key so no RBAC role
+            # assignment is required. Flag mapping: /S -> --recursive; /XO -> --overwrite=ifSourceNewer;
+            # /Y is the v10 default (no prompt).
+            if ( -not (Get-Command azcopy -ErrorAction SilentlyContinue) ) {
+                throw "AzCopy v10 ('azcopy') was not found on PATH. Install it (e.g. 'winget install Microsoft.Azure.AZCopy') and retry."
+            }
+
+            $StorageContext = New-AzStorageContext -StorageAccountName $StorageAccount -StorageAccountKey $StorageKey
+            $SasToken = (New-AzStorageAccountSASToken -Context $StorageContext -Service Blob `
+                -ResourceType Container,Object -Permission "racwl" `
+                -ExpiryTime (Get-Date).AddHours(4) -Protocol HttpsOnly).TrimStart('?')
+
+            # $Recursive mirrors the v8 /S switch. The root copy uses $false (v8 had no /S there),
+            # so only top-level files are copied; subdirectories are copied recursively.
+            function Copy-DvdImage( [string]$Source, [string]$Dest, [bool]$Recursive ) {
+                Write-Host ("$(Log-Date) Copy $Source")
+                azcopy copy "$Source" "$($Dest)?$SasToken" --recursive=$($Recursive.ToString().ToLower()) --overwrite=ifSourceNewer | Write-Host
+                if ( $LASTEXITCODE -ne 0 ) { throw "AzCopy failed copying '$Source' (exit code $LASTEXITCODE)" }
+            }
+
+            Copy-DvdImage "$LocalDVDImageDirectory\*"            $S3DVDImageDirectory              $false
+            Copy-DvdImage "$LocalDVDImageDirectory\3rdparty\*"   "$S3DVDImageDirectory/3rdparty"   $true
+            Copy-DvdImage "$LocalDVDImageDirectory\Integrator\*" "$S3DVDImageDirectory/Integrator" $true
+            Copy-DvdImage "$LocalDVDImageDirectory\setup\*"      "$S3DVDImageDirectory/setup"      $true
+            Copy-DvdImage "$LocalDVDImageDirectory\html\*"       "$S3DVDImageDirectory/html"       $true
 
             if ( (Test-Path -Path $LocalDVDImageDirectory\epc) ) {
-                Write-Host ("$(Log-Date) Copy $LocalDVDImageDirectory\epc directory")
-                cmd /c AzCopy /Source:$LocalDVDImageDirectory\epc    /Dest:$S3DVDImageDirectory/epc        /DestKey:$StorageKey /S /XO /Y | Write-Host
+                Copy-DvdImage "$LocalDVDImageDirectory\epc\*"    "$S3DVDImageDirectory/epc"        $true
             }
         }
     }
@@ -365,7 +386,11 @@ try
         } else {
             Write-Host( "$(Log-Date) Using Microsoft MP image")
             $Publisher = "MicrosoftWindowsServer"
-            $Offer = "windowsserver"
+            if ($Platform -eq 'Win2022') {
+                $Offer = "windowsserver2022"
+            } else {
+                $Offer = "windowsserver"
+            }
             switch ($Platform) {
                 'Win2012' { $AzImageVersion = '9600*'  }
                 'Win2016' { $AzImageVersion = '14393*'  }
@@ -505,7 +530,7 @@ try
             $cert = (Get-ChildItem -Path cert:\CurrentUser\My\$thumbprint)
             $fileName = ".\$certificateName.pfx"
             Export-PfxCertificate -Cert $cert -FilePath $fileName -Password $SecurePassword
-            $fileContentBytes = Get-Content $fileName -Encoding Byte
+            $fileContentBytes = [System.IO.File]::ReadAllBytes((Convert-Path $fileName))
             $fileContentEncoded = [System.Convert]::ToBase64String($fileContentBytes)
 
 $jsonObject = @"
@@ -537,8 +562,11 @@ $jsonObject = @"
 
         if ($CreateVM -and -not $OnlySaveImage) {
             $sourceVaultId = (Get-AzKeyVault -ResourceGroupName $KeyVaultResourceGroup -VaultName $KeyVault).ResourceId
-            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize
+            $vm1 = New-AzVMConfig -VMName $Script:vmname -VMSize $vmsize -SecurityType TrustedLaunch
             $vm1 = Set-AzVMOperatingSystem -VM $vm1 -Windows -ComputerName $Script:vmname -Credential $Credential -WinRMHttp -WinRMHttps -WinRMCertificateUrl $SecretURL -ProvisionVMAgent
+            $vm1 = Set-AzVMUefi -VM $vm1 -EnableVtpm $true -EnableSecureBoot $true
+            # managed boot diagnostics — Azure manages it. One line, no warning, you keep the boot screenshot/serial console for debugging a failed bake, and nothing to clean up afterward
+            $vm1 = Set-AzVMBootDiagnostic -VM $vm1 -Enable
             if ($AzureImageUri) {
                 # For custom images, use managed disk with source image URI
                 $vm1 = Set-AzVMOSDisk -VM $vm1 -Name "$Script:vmname" -CreateOption FromImage -SourceImageUri $AzureImageUri -Windows -StorageAccountType "StandardSSD_LRS"
@@ -807,20 +835,20 @@ $jsonObject = @"
 
         # No harm installing this again if its already installed
         if ( $InstallIDE -eq $true) {
-            if ( $Win2012 ) {
-                Write-Host "$(Log-Date) Run choco install jdk8 -y. No idea why it fails to run remotely!"
-                Write-Host "$(Log-Date) Maybe due to jre8 404? Give it a go when next build IDE"
+            Execute-RemoteBlock $Script:session {
+                Install-ChocoCheckedLansa @('jdk8', '-s=lansa', '-y', '--no-progress')
+            }
+        }
 
-                if ( $Cloud -eq 'AWS' ) {
-                    Run-SSMCommand -InstanceId @($instanceid) -DocumentName AWS-RunPowerShellScript -Comment 'Installing JDK' -Parameter @{'commands'=@("choco install jdk8 -y")}
-                } else {
-                    $dummy = MessageBox "Try changing this to automatically running Windows Updates in Azure? (now that we re-create the session for each script)" -Pipeline:$Pipeline
-                    $dummy = MessageBox "Run choco install jdk8 -y manually. Please RDP into $Script:vmname $Script:publicDNS as $AdminUserName using password '$Script:password'. When complete, click OK on this message box" -Pipeline:$Pipeline
-                }
-            } else {
-                Execute-RemoteBlock $Script:session {
-                    Run-ExitCode 'choco' @('install', 'jdk8', '-y', '--no-progress')
-                }
+        # The software installs above (VS Code especially) can leave a pending reboot. dism.exe for the
+        # language pack silently blocks when servicing operations are pending - this hung a bake ~3h.
+        # Clear it here, in the caller (the reboot must NOT be done inline in the choco install scripts).
+        # If the reboot doesn't clear it, fail fast so the issue percolates instead of hanging next step.
+        if ( Test-PendingReboot ) {
+            Write-Host "$(Log-Date) Pending reboot detected after the software installs - rebooting before continuing"
+            Reboot-Session
+            if ( Test-PendingReboot ) {
+                throw "A reboot is still pending after rebooting the VM - aborting before the language pack (dism.exe would hang)."
             }
         }
 
@@ -1148,7 +1176,7 @@ $jsonObject = @"
 
         # Add image to Azure Compute Gallery
         $GalleryName = "LansaGallery"
-        $ImageDefinitionName = $ImageName -replace "-(\d+j?|\d+)image$", "" # Handles "w16d-16-0-19image" => "w16d-16-0" and "w16d-16-0j-19image" => "w16d-16-0j"
+        $ImageDefinitionName = ($ImageName -replace "-(\d+j?|\d+)image$", "") + "-g2" # Handles "w16d-16-0-19image" => "w16d-16-0" and "w16d-16-0j-19image" => "w16d-16-0j"
         $versionNumbers = $VersionText -split '-' | Select-Object -Last 3
         $versionNumbers = $versionNumbers -replace 'j', ''
         $galleryImageVersion = $versionNumbers -join '.' # Ensure version format like "16.0.19" for both "w22d-16-0-19" and "w16d-16-0j-19"
@@ -1181,8 +1209,8 @@ $jsonObject = @"
                 Publisher                  = 'LANSA'
                 Offer                      = 'lansa-scalable-license'
                 Sku                        = $ImageDefinitionName
-                HyperVGeneration           = 'V1'
-                #Feature                    = @(@{Name='SecurityType';Value='TrustedLaunchSupported'})
+                HyperVGeneration           = 'V2'
+                Feature                    = @(@{Name='SecurityType';Value='TrustedLaunch'})
             }
             $imageDefinition = New-AzGalleryImageDefinition @imageDefinitionParams -ErrorAction Stop
         }
@@ -1311,14 +1339,4 @@ catch
     return "Failure"# 'Return' not 'throw' so any output thats still in the pipeline is piped to the console
 }
 
-}
-
-# Setup default account details
-# This code is rarely required and is more for documentation.
-function SetUpAccount {
-    # Subscription Name was rejected by Select-AzureSubscription so Subscription Id was used instead.
-    $subscription = "edff5157-5735-4ceb-af94-526e2c235e80"
-    $Storage = "lansalpcmsdn"
-    Select-AzureSubscription -SubscriptionId $subscription
-    set-AzureSubscription -SubscriptionId $subscription -CurrentStorageAccount $Storage
 }

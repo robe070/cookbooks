@@ -21,6 +21,11 @@ param(
 $Dbug = $true
 if ( $Dbug ) { Write-Host("Debugging")}
 
+$cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+"Container Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
+
+git config --global --add safe.directory $ENV:GITREPOPATH
+
 Get-ChildItem c:\
 Write-Host "GITREPOPATH: $ENV:GITREPOPATH";
 Set-Location $ENV:GITREPOPATH
@@ -74,8 +79,22 @@ try {
 
     # $CommonParams = -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit 1 -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
 
+    Write-Host("Testing connectivity to SQL Server at $server_name...")
+    $DNSName = $server_name.Split(',')[0].Replace('tcp:','')
+    $Port = $server_name.Split(',')[1]
+    Write-Host("Resolving DNS for $DNSName...")
+    Resolve-DnsName $DNSName -ErrorAction Stop
+    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+        throw
+    }
+    Write-Host("Testing connectivity to SQL Server at $DNSName on port $Port...")
+    Test-NetConnection $DNSName -Port $Port -ErrorAction Stop
+    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+        throw
+    }
+
     Write-Host("Webserver Install...")
-    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -MSIUri https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi -ApplName WebServer  -dbname webserver -gitrepourl https://github.com/lansa/webserver.git  `
+    & "$($ENV:GITREPOPATH)scripts\install-lansa-msi.ps1" -MSIUri https://s3.amazonaws.com/lansa-us-east-1/app/paas-live/WEBSERVR_v1.0.0_en-us.msi -ApplName WebServer  -dbname $dbname -gitrepourl https://github.com/lansa/webserver.git  `
     -server_name $server_name -dbuser $dbuser -dbpassword $dbpassword -webuser $webuser -webpassword $webpassword -dbut $DBUT -f32bit $f32bit_bool -HTTPPortNumber 80 -HTTPPortNumberHub 8101 -HostRoutePortNumber 4540 -JSMPortNumber 4561 -JSMAdminPortNumber 4581 -SUDB $SUDB -UPGD false
 
     if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
@@ -90,8 +109,10 @@ try {
             Write-Host "Sleeping..."
             Start-Sleep -Seconds 3600
         }
+        Get-Content 'C:\Users\ContainerAdministrator\AppData\Local\Temp\WebServer.log' | Out-Default | Write-Host
     } else {
         if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+            Get-Content 'C:\Users\ContainerAdministrator\AppData\Local\Temp\WebServer.log' | Out-Default | Write-Host
             throw
         }
     }

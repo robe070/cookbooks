@@ -46,10 +46,10 @@ try {
    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
    switch ( $Platform) {
-      "win2016" {
+      "win2025" {
          switch ( $Language ) {
                "jpn" {
-                  $lpurl = "https://lansa.s3-ap-southeast-2.amazonaws.com/3rd+party/Japanese+Language+Packs/Server+2016/jpn/x64fre_Server_ja-jp_lp.cab"
+                  $lpurl = "https://lansa.s3.ap-southeast-2.amazonaws.com/3rd+party/Japanese+Language+Packs/Server+2025/jpn/Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab"
                   $langcode = "ja-JP"
                }
                default {
@@ -87,13 +87,25 @@ try {
    $lppath = "$ENV:temp\lang-pack.cab"
 
    DownloadLanguagePack -Uri $lpurl -installer_file $lppath
-   Invoke-WebRequest -Uri $lpurl -OutFile $lppath
 
    # Write-Host( "Install the Japanese language Pack using the Lpksetup.exe command. Forces a reboot after installation" )
    # C:\windows\system32\Lpksetup.exe /i $langcode /f /s /p $lppath
 
+   # dism online servicing (Add-Package) takes the CBS/TrustedInstaller lock. If a reboot is pending
+   # that lock is never granted and dism HANGS - it has no fail-on-pending-reboot switch. Fail fast
+   # instead; the caller (bake-ide-ami.ps1) is responsible for rebooting before this script runs.
+   if ( (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending') -or
+        (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired') ) {
+      throw "A reboot is pending - aborting before dism.exe /Add-Package (it would hang waiting on the servicing lock). The caller must reboot first."
+   }
+
    Write-Host( "Install the Japanese language Pack using dism.exe command. It does not force a reboot after installation so do it explicitly" )
-   dism.exe /Online /Add-Package /PackagePath:$lppath
+   dism.exe /Online /Add-Package /PackagePath:$lppath /NoRestart | Out-Default | Write-Host
+   # dism: 0 = success, 3010 = success/reboot required. Anything else is a failure - a native non-zero
+   # exit does NOT throw on its own, so check it explicitly or the failure is silently swallowed.
+   if ( $LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010 ) {
+      throw "dism.exe /Add-Package failed with exit code $LASTEXITCODE"
+   }
 
    # This method is only available on client operating systems. Not on Server operating systems
    # Write-Host( "Install the language pack using PowerShell in-built cmdlet")

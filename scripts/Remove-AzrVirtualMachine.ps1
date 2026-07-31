@@ -113,8 +113,13 @@ function Remove-AzrVirtualMachine {
             $null = $vm | Remove-AzVM -Force
 
             Write-Host -Message 'Removing the Azure network interface...'
+            $nsgIds = @()
             foreach ($nicUri in $vm.NetworkProfile.NetworkInterfaces.Id) {
                 $nic = Get-AzNetworkInterface -ResourceGroupName $vm.ResourceGroupName -Name $nicUri.Split('/')[-1]
+                # Capture any NSG attached to this NIC so it can be removed once the NIC is gone
+                if ($nic.NetworkSecurityGroup -and $nic.NetworkSecurityGroup.Id) {
+                    $nsgIds += $nic.NetworkSecurityGroup.Id
+                }
                 Remove-AzNetworkInterface -Name $nic.Name -ResourceGroupName $vm.ResourceGroupName -Force
                 foreach ($ipConfig in $nic.IpConfigurations) {
                     if ($ipConfig.PublicIpAddress -ne $null) {
@@ -122,6 +127,15 @@ function Remove-AzrVirtualMachine {
                         Remove-AzPublicIpAddress -ResourceGroupName $vm.ResourceGroupName -Name $ipConfig.PublicIpAddress.Id.Split('/')[-1] -Force
                     }
                 }
+            }
+
+            # Remove the network security group(s) that were attached to the NIC(s).
+            # Must happen after the NIC is removed - an NSG cannot be deleted while still in use.
+            foreach ($nsgId in ($nsgIds | Select-Object -Unique)) {
+                $nsgName = $nsgId.Split('/')[-1]
+                $nsgRg = $nsgId.Split('/')[4]
+                Write-Host -Message "Removing the network security group $nsgName..."
+                Remove-AzNetworkSecurityGroup -ResourceGroupName $nsgRg -Name $nsgName -Force -ErrorAction Stop
             }
 
             # Remove the OS disk
@@ -187,7 +201,8 @@ function Remove-AzrVirtualMachine {
             & $scriptBlock -VMName $VMName -ResourceGroupName $ResourceGroupName
         } else {
             $initScript = {
-                $null = Login-AzAccount -Credential $args[0]
+                Import-Module Az.Accounts
+                $null = Connect-AzAccount -Credential $args[0]
             }
             $jobParams = @{
                 'ScriptBlock'          = $scriptBlock

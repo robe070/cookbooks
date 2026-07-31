@@ -1,3 +1,9 @@
+# DEPRECATED - DO NOT USE. No longer called by any pipeline (removed 2026-07).
+# This pinned an ancient Az set (Az 4.5.0 / Az.Compute 4.2.1, 2020) that LACKS New-AzVMConfig's
+# -SecurityType (Trusted Launch), which broke the Azure image bake. Self-hosted agents now install Az
+# (unpinned) via 'create agents.yml' and are updated in a controlled manner. Kept only for history;
+# wiring this back into a pipeline will re-break -SecurityType.
+
 if ("$($ENV:GITBRANCH)".Contains("refs/heads")) {
     $branch ="$($ENV:GITBRANCH)".replace("refs/heads/", "")
 } else {

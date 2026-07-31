@@ -34,20 +34,20 @@ jobs:
 
 - template: AzureBuildImage.yml
   parameters:
-    OSVersion: '16'
+    OSVersion: '25'
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     VersionText: ${{ parameters.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    CloudImageName: $(Windows-2025-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
-    OSVersion: '16'
+    OSVersion: '25'
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
     VersionText: ${{ parameters.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME)
+    CloudImageName: $(Windows-2025-IMAGE-NAME)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
@@ -70,22 +70,22 @@ jobs:
 
 - template: AzureBuildImage.yml
   parameters:
-    OSVersion: '16'
+    OSVersion: '25'
     LansaMajorVersion: '16'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ parameters.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    CloudImageName: $(Windows-2025-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml
   parameters:
-    OSVersion: '16'
+    OSVersion: '25'
     LansaMajorVersion: '15'
     LansaMinorVersion: '0'
     LanguageSuffix: 'j'
     VersionText: ${{ parameters.VersionText }}
-    CloudImageName: $(Windows-2016-IMAGE-NAME-JPN)
+    CloudImageName: $(Windows-2025-IMAGE-NAME-JPN)
     ScriptTimeout: ${{ parameters.ScriptTimeout }}
 
 - template: AzureBuildImage.yml

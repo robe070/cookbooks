@@ -18,7 +18,7 @@ parameters:
     default: none
   - name: jobImage
     type: string
-    default: windows-2022
+    default: Default
   - name: osName
     type: string
     default: Windows Server 2019
@@ -85,7 +85,7 @@ stages:
         JobTag: 'test-temp'
 
       pool:
-        vmImage: ${{ parameters.jobImage }}
+        name: ${{ parameters.jobImage }}
 
       steps:
       - download: _Build Cloud Account Id Artefacts

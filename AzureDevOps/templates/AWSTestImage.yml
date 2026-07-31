@@ -20,7 +20,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: windows-2019
+    default: Default
   - name: jobcondition
     type: string
     default: ''

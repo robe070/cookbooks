@@ -1,47 +1,46 @@
 param (
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019', 'all')]
+    [ValidateSet('ltsc2025', 'all')]
     [string]
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
+    [string]
+    $VersionNum = "16.0.0",
+
+    [Parameter(Mandatory=$false)]
     [switch]
-    $Hyperv,
+    $ClearCache,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
 
     [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
-
-    [Parameter(Mandatory=$false)]
-    [switch]
-    $ClearCache
+    $Cloud
 )
 
 try {
-    $ClearCacheCmd = ""
-    if ( $ClearCache ) {
-        $ClearCacheCmd = "--no-cache=true"
-    }
-
-    $HypervCmd = ""
-    if ( $Hyperv ) {
-        $HypervCmd = '-hyperv'
-    }
     Push-Location base -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
     Pop-Location -StackName Docker
 
-    Push-Location vlweb -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    Push-Location AWAMAPP -StackName Docker
+    .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
     Pop-Location -StackName Docker
 
-    Push-Location webserver -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    Pop-Location -StackName Docker
+    # Push-Location vlweb -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
+    # Pop-Location -StackName Docker
 
-    Push-Location addapp -StackName Docker
-    .\buildall.ps1 -DockerLabel $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    Pop-Location -StackName Docker
+    # Push-Location webserver -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
+    # Pop-Location -StackName Docker
+
+    # Push-Location addapp -StackName Docker
+    # .\buildall.ps1 -DockerLabel $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
+    # Pop-Location -StackName Docker
 
 } catch {
     $_

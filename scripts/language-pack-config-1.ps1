@@ -7,9 +7,12 @@ param(
     [String]
     $Platform
 )
+# Fail fast so any locale-cmdlet error propagates to the caller instead of being silently swallowed.
+$ErrorActionPreference = 'Stop'
+
 Write-Host("Configure Japanese localization settings Step 1 $Language $Platform")
 switch ( $Platform) {
-    "win2016" {
+    "win2025" {
         switch ( $Language ) {
             "jpn" {
                 Write-Host( "Set the language used by the user to Japanese")

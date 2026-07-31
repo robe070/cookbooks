@@ -25,16 +25,13 @@ jobs:
   condition: false
 
   pool:
-    vmImage: windows-2022
+    name: Default
 
   steps:
   - checkout: self
 
-  - task: PowerShell@2
-    displayName: Install PS Module
-    inputs:
-      filePath: scripts/install-powershell-modules-azure.ps1
-      errorActionPreference: continue
+  # Az modules are no longer installed/pinned here - the self-hosted agents install Az (unpinned)
+  # via 'create agents.yml'. The old pin (Az.Compute 4.2.1) broke -SecurityType.
 
   - task: PowerShell@2
     displayName: Azure Login
@@ -117,16 +114,13 @@ jobs:
   condition: and(succeeded(), or(eq(variables['Build-w22d-15-ID'], 'true'), eq(variables['Build-all'], 'true')))
 
   pool:
-    vmImage: windows-2022
+    name: Default
 
   steps:
   - checkout: self
 
-  - task: PowerShell@2
-    displayName: Install PS Module
-    inputs:
-      filePath: scripts/install-powershell-modules-azure.ps1
-      errorActionPreference: continue
+  # Az modules are no longer installed/pinned here - the self-hosted agents install Az (unpinned)
+  # via 'create agents.yml'. The old pin (Az.Compute 4.2.1) broke -SecurityType.
 
   - task: PowerShell@2
     displayName: Azure Login

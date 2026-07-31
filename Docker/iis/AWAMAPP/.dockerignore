@@ -1,0 +1,5 @@
+build*.ps1
+*.dockerfile
+commit.ps1
+run*.ps1
+init.ps1

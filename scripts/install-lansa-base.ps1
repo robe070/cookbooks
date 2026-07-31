@@ -89,29 +89,60 @@ function DownloadAndInstallCRuntime {
         [string] $log_file
     )
     Write-Host ("$(Log-Date) Downloading $MSIuri to $installer_file")
+    Remove-Item $installer_file -Force -ErrorAction SilentlyContinue
+    $ProgressPreference = 'SilentlyContinue'
+
+    # Use BITS for reliability and to avoid curl/path conflicts
     $downloaded = $false
     $TotalFailedDownloadAttempts = 0
     $loops = 0
-    while (-not $Downloaded -and ($Loops -le 10) ) {
+    while (-not $downloaded -and ($loops -le 10)) {
         try {
-            (New-Object System.Net.WebClient).DownloadFile($MSIuri, $installer_file) | Out-Default | Write-Host
+            Write-Host ("$(Log-Date) Attempt {0} of 10" -f ($loops + 1))
+            Start-BitsTransfer -Source $MSIuri -Destination $installer_file -ErrorAction Stop
             $downloaded = $true
+            Write-Host ("$(Log-Date) Download succeeded: $installer_file")
         } catch {
             $TotalFailedDownloadAttempts += 1
             $loops += 1
-
+            Write-Host ("$(Log-Date) Download failed: $($_.Exception.Message)")
             Write-Host ("$(Log-Date) Total Failed Download Attempts = $TotalFailedDownloadAttempts")
-
             if ($loops -gt 10) {
-                throw "Failed to download $MSIuri from S3"
+                throw "Failed to download $MSIuri after $loops attempts"
             }
-
-            # Pause for 30 seconds. Maybe that will help it work?
-            Start-Sleep 30
+            Start-Sleep -Seconds 30
         }
     }
 
-    $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart',"/log $log_file") -Wait -PassThru
+    # Basic sanity check: installer should be several MB at least
+    $installerSize = (Get-Item $installer_file).Length
+    Write-Host ("$(Log-Date) Downloaded file size: $installerSize bytes")
+    if ($installerSize -lt 5MB) {
+        throw "Installer download looks too small: $installerSize bytes"
+    }
+    try {
+        $hash = Get-FileHash -Path $installer_file -Algorithm SHA256
+        Write-Host ("$(Log-Date) SHA256: {0}" -f $hash.Hash)
+    } catch {
+        throw "Failed to compute SHA256 for $installer_file. $($_.Exception.Message)"
+    }
+    try {
+        $sig = Get-AuthenticodeSignature -FilePath $installer_file
+        Write-Host ("$(Log-Date) Authenticode status: {0}" -f $sig.Status)
+        if ($sig.SignerCertificate) {
+            Write-Host ("$(Log-Date) Signer: {0}" -f $sig.SignerCertificate.Subject)
+        }
+        if ($sig.Status -ne 'Valid') {
+            throw "Authenticode signature is not valid. Status=$($sig.Status)"
+        }
+        if (-not ($sig.SignerCertificate.Subject -like '*Microsoft Corporation*')) {
+            throw "Unexpected signer: $($sig.SignerCertificate.Subject)"
+        }
+    } catch {
+        throw "Authenticode verification failed for $installer_file. $($_.Exception.Message)"
+    }
+
+    $p = Start-Process -FilePath $installer_file -ArgumentList @('/install', '/quiet', '/norestart', "/log $log_file") -Wait -PassThru
     # ExitCode of 3010 means a reboot is required
     if ( $p.ExitCode -ne 0 -and ($p.ExitCode -ne 3010) ) {
         $ExitCode = $p.ExitCode
@@ -219,11 +250,71 @@ try
     if ( !(test-path $TempPath) ) {
         New-Item $TempPath -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host
     }
-    Write-Host("Enabling TLS 1.2 & 1.3 security protocol (& Disabling older versions) to establsih a secure connection with the server when making web requests.")
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -f [Net.SecurityProtocolType]::Tls13
+    Write-Host("Enabling TLS 1.2 & 1.3 security protocol (& Disabling older versions) to establish a secure connection with the server when making web requests.")
+    # NOTE: This only affects THIS process's outbound web requests (downloads below). It does NOT
+    # change what the baked image offers to inbound connections - that is the Schannel config below.
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+
+    # Machine-wide Schannel hardening baked into the image. Disables the deprecated TLS 1.0/1.1
+    # protocols (Server + Client) and ensures TLS 1.2 is enabled, so Marketplace security scanning
+    # does not flag the image (AzCertify QIDs 38628 / 38794). Idempotent: a no-op on OS builds that
+    # already ship with these disabled (e.g. Win2022 Azure Edition, Win2025); required for Win2019.
+    Write-Host "$(Log-Date) Hardening Schannel: disabling TLS 1.0/1.1 and enabling TLS 1.2 machine-wide"
+    $SchannelProtocols = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols'
+    foreach ( $Proto in 'TLS 1.0', 'TLS 1.1' ) {
+        foreach ( $Role in 'Server', 'Client' ) {
+            $Key = New-Item -Path "$SchannelProtocols\$Proto\$Role" -Force
+            New-ItemProperty -Path $Key.PSPath -Name 'Enabled'           -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $Key.PSPath -Name 'DisabledByDefault' -Value 1 -PropertyType DWord -Force | Out-Null
+        }
+    }
+    foreach ( $Role in 'Server', 'Client' ) {
+        $Key = New-Item -Path "$SchannelProtocols\TLS 1.2\$Role" -Force
+        New-ItemProperty -Path $Key.PSPath -Name 'Enabled'           -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $Key.PSPath -Name 'DisabledByDefault' -Value 0 -PropertyType DWord -Force | Out-Null
+    }
+
+    # Disable weak Schannel ciphers/hashes and enforce a strong key exchange, so security scanning
+    # does not follow up the protocol findings with RC4 / 3DES-SWEET32 / DES / NULL / weak-DH findings
+    # on the same port. Cipher key names contain '/', which the PowerShell registry provider
+    # mishandles, so use the .NET registry API which handles them reliably. Idempotent.
+    Write-Host "$(Log-Date) Hardening Schannel: disabling weak ciphers (RC4, DES, 3DES, NULL) and MD5 hash"
+    $SchannelRoot = 'SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL'
+    $WeakCiphers = @(
+        'RC4 128/128', 'RC4 64/128', 'RC4 56/128', 'RC4 40/128',
+        'DES 56/56', 'Triple DES 168', 'NULL'
+    )
+    foreach ( $Cipher in $WeakCiphers ) {
+        $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\Ciphers\$Cipher")
+        $Key.SetValue('Enabled', 0, [Microsoft.Win32.RegistryValueKind]::DWord)
+        $Key.Close()
+    }
+
+    # Disable the weak MD5 hash algorithm.
+    $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\Hashes\MD5")
+    $Key.SetValue('Enabled', 0, [Microsoft.Win32.RegistryValueKind]::DWord)
+    $Key.Close()
+
+    # Require a minimum 2048-bit Diffie-Hellman key exchange (mitigates Logjam / weak-DH findings).
+    Write-Host "$(Log-Date) Hardening Schannel: setting Diffie-Hellman server minimum key length to 2048 bits"
+    $Key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("$SchannelRoot\KeyExchangeAlgorithms\Diffie-Hellman")
+    $Key.SetValue('ServerMinKeyBitLength', 2048, [Microsoft.Win32.RegistryValueKind]::DWord)
+    $Key.Close()
 
     Write-Host( "$(Log-Date) Installing Windows Feature WebServer")
     Install-WindowsFeature -name Web-Server -IncludeManagementTools
+
+    # Azure Marketplace certification rejects any image with the 'Wireless LAN Service' feature
+    # installed ("Wireless LAN Service feature is not supported by Azure" - see
+    # https://aka.ms/Windows-testcases). It ships present on the Windows Server 2025 base image (the
+    # w25* plans failed on it); WS2019/2022 don't have it. Servers in Azure never use wireless, so
+    # remove the feature. Idempotent: a no-op where it isn't installed. The test checks the FEATURE,
+    # so disabling the Wlansvc service is not sufficient.
+    $WlanFeature = Get-WindowsFeature -Name Wireless-Networking -ErrorAction SilentlyContinue
+    if ( $WlanFeature -and $WlanFeature.Installed ) {
+        Write-Host "$(Log-Date) Removing unsupported 'Wireless LAN Service' (Wireless-Networking) Windows feature"
+        Uninstall-WindowsFeature -Name Wireless-Networking | Out-Default | Write-Host
+    }
 
     Write-Host "Installing Visual C++ Redistributable for Visual Studio 2015-2022"
     DownloadAndInstallCRuntime -MSIuri 'https://aka.ms/vc14/vc_redist.x64.exe' -installer_file (Join-Path $temppath 'vc_redist_x64.exe') -log_file (Join-Path $temppath 'vc_redist_x64.log');
@@ -377,11 +468,11 @@ try
 
     # GUI Application Installation
     if ( $Cloud -ne "Docker" ) {
-        Run-ExitCode 'choco' @( 'install', 'googlechrome', '-s=lansa', '-y', '--no-progress','--ignore-checksums' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'googlechrome', '-s=lansa', '-y', '--no-progress', '--ignore-checksums' )
         ChocoWait
         # Run-ExitCode 'choco' @( 'install', 'gitextensions', '-y', '--no-progress', '--version 2.51.5')  | Out-Host # v3.2 failed to install. v3.1.1 installs a Windows Update which cannot be done through WinRM. Same with 2.51.5. So don't install it. Can be installed manually if required.
         # JRE needs to be replaced with the VL Main Install method: OpenJDK is just a zip file. We unzip it into the Integrator\Java directory. The root folder in the zip file is the version. We ship OpenJDKShippedVersion.txt (our file) with the zip file which I copy into the Integrator\Java directory so we know the directory to use when doing things like the install creating the shortcuts.
-        Run-ExitCode 'choco' @( 'install', 'jre8', '-s=lansa', '-y', '--no-progress', '-PackageParameters "/exclude:32"' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'jre8', '-s=lansa', '-y', '--no-progress', '-PackageParameters "/exclude:32"' )
         ChocoWait
 
         Write-Host( "Do not install kdiff3 because choco does not support its installer any longer")
@@ -399,7 +490,7 @@ try
         #     ChocoWait
         # }
 
-        Run-ExitCode 'choco' @( 'install', 'vscode', '-s=lansa', '-y', '--no-progress' ) | Write-Host
+        Install-ChocoCheckedLansa @( 'vscode', '-s=lansa', '-y', '--no-progress' )
         ChocoWait
         try {
             # Don't install sysinternals because the license expressly forbids installing it on hosting services
@@ -422,8 +513,12 @@ try
         # Run-ExitCode 'choco' @( 'install', 'adobereader', '-y', '--no-progress', '--%', '-ia', 'LANG_LIST=en_US' )  | Out-Host
 
         # Stop using Adobe Reader because it was dependent on a Windows Update that could not be installed on Win 2012 because it was obsolete.
-        # Specify capital letters in "FoxitReader" in order to install the currently updating version. (foxitreader is an old version 10.x)
-        Run-ExitCode 'choco' @( 'install', 'FoxitReader', '-y', '--no-progress' )  | Write-Host
+        # Install FoxitReader from the private 'lansa' feed. The internalised package on that feed
+        # embeds the installer, so there is no vendor-CDN download. Package id keeps its capitalised
+        # "FoxitReader" form (the lowercase "foxitreader" is the old 10.x package).
+        # Install-ChocoCheckedLansa (in dot-CommonTools.ps1) clears the choco log, echoes it, and
+        # FAILS if the package did not come from the 'lansa' source or pulled an installer from a CDN.
+        Install-ChocoCheckedLansa @( 'FoxitReader', '-y', '--no-progress', '--source', 'lansa' )
         ChocoWait
 
         New-Item $ENV:TEMP -type directory -ErrorAction SilentlyContinue | Out-Default | Write-Host

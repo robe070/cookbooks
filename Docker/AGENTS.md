@@ -1,0 +1,31 @@
+# Project Basics
+- Be concise.
+- This is a Docker Windows Image project.
+- Published in Docker Hub image registry.
+- Run PowerShell commands; this is a Windows-only environment.
+- Hyper-V isolation is used for all containers by default on Windows Professional because there is always a version mismatch with the server core images.
+- --isolation=hyperv is not required. Its the default.
+- --isolation=process will never work on Windows Professional
+- PowerShell 7+ is available.
+- currently working with the iis\AWAMAPP folder
+- Code location is C:\dev\cookbooks\Docker and its sub-directories.
+- Do not ask the user to share code from this repo; access it directly.
+- LANSA MSI install cannot be done via a Dockerfile because secrets are required. Use `docker run` to install while passing secrets as a file, then `docker commit` the container and replace the entrypoint with `C:\bootstrap.ps1`.
+
+# Documentation Workflow
+- To produce `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions`, first inspect `iis\AWAMAPP\build.ps1`, `iis\AWAMAPP\run.ps1`, `iis\AWAMAPP\commit.ps1`, `iis\AWAMAPP\run_img.ps1`, `iis\base\init.ps1`, and `iis\base\bootstrap.ps1`.
+- Summarise the Base image as prerequisites-only and note it is published to Docker Hub. Summarise the AWAMAPP image as an example LANSA MSI install into the Base container and note it is not published.
+- Document the construction flow using `run.ps1` to install the MSI into a container, `commit.ps1` to create an image from that container, and `run_img.ps1` to test the resulting image.
+- Include examples for: SQL Server on the host, SQL Server on the network using a stable DNS name, and running the final app image with runtime database overrides.
+- State that the database state is part of the installation and must match the installed MSI/image.
+- Include Cloud Account Id licensing instructions: place the AWS/Azure XML license in the application root so it is copied into the LANSA licensing directory, and reference `https://docs.lansa.com/16/en/lansa041/content/lansa/l4winsba_0055.htm`.
+- Use floating tags only for customer testing examples. State that immutable tags should be used for production.
+- Produce the primary deliverable as `C:\dev\cookbooks\Docker\LANSA Docker Image creation and Usage Instructions.docx`. If needed for easier import or preview, also produce companion `.html`, `.md`, or `.pdf` files alongside it.
+- Always rebuild the `.docx` from the current markdown and the root template XML files. Do not depend on an existing `.docx` as an input or starting point.
+- Use the same template-based packaging flow every time, including when updating an existing document, so the output is always generated from source rather than edited in place.
+- Use `C:\dev\cookbooks\Docker\Build-MarkdownDocx.ps1` to perform the rebuild.
+- To create a `.docx` from markdown, use the root template files `docx-template-content-types.xml`, `docx-template-package-rels.xml`, `docx-template-word-styles.xml`, `docx-template-word-document-rels.xml`, and `docx-template-word-document.xml`.
+- Map those template files into the docx package as `[Content_Types].xml`, `_rels\.rels`, `word\styles.xml`, `word\_rels\document.xml.rels`, and use `docx-template-word-document.xml` as the reference for the `word\document.xml` namespace/style structure and the `<w:sectPr>` block.
+- Generate a new `word\document.xml` from the markdown content, preserving the `Title`, `Heading1`, `Heading2`, `Heading3`, `Heading4`, and `Heading5` style ids, converting horizontal rules, converting Markdown tables to Word tables, turning fenced code blocks / inline backticks into monospace runs, applying basic syntax colouring for fenced `powershell` blocks, converting inline `**bold**` markup into bold runs, and packaging local markdown image references into `word\media` with matching relationship and content-type entries.
+- Build the package in a temp folder, zip the package contents with PowerShell `System.IO.Compression`, and rename the zip to `.docx`.
+- The template XML files were extracted from a working `.docx` and live in the repo root specifically so future turns do not need an existing `.docx` before producing a new one.

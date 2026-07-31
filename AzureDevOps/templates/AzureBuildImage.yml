@@ -39,7 +39,7 @@ jobs:
       Language: 'ENG'
       InstallLanguagePack: $False
   pool:
-    vmImage: $(vmImage)
+    name: $(vmImage)
 
   steps:
   - checkout: self
@@ -60,12 +60,9 @@ jobs:
         Write-Host "JobImageUrlOutputFileName: $(JobImageUrlOutputFileName)" | Out-Default | Write-Host
         Write-Host "JobTestVmName: $(JobTestVmName)" | Out-Default | Write-Host
 
-  - task: PowerShell@2
-    name: ''
-    displayName: Install PS Module
-    inputs:
-      filePath: scripts/install-powershell-modules-azure.ps1
-      errorActionPreference: continue
+  # NOTE: Az modules are no longer installed/pinned here. The self-hosted agents install Az (unpinned)
+  # via 'create agents.yml' and are updated in a controlled manner. Pinning Az here (old Az.Compute
+  # 4.2.1) is what caused 'New-AzVMConfig : parameter SecurityType cannot be found'.
 
   - task: PowerShell@2
     name: ''

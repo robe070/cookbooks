@@ -17,10 +17,35 @@ param(
 [String]$region='ap-southeast-2', # This setting is ignored - the actual region is obtained from the bucket
 [String]$access_key,
 [String]$secret_key,
-[String]$folder='/change me',
+[String]$folder='/change me', # The folder must not start with a '/' and if it does not end with a '/' then the name is treated like a wild card '*'
 [String]$target_dir= 'c:\lansa\newpatches',
 [String]$old_dir= 'c:\lansa\oldpatches'
 )
+
+function Get-S3BucketRegionRaw {
+    param(
+        [Parameter(Mandatory)]
+        [string]$BucketName
+    )
+
+    $url = "https://$BucketName.s3.amazonaws.com/"
+    $request = [System.Net.HttpWebRequest]::Create($url)
+    $request.Method = 'HEAD'
+    $request.AllowAutoRedirect = $false
+
+    try {
+        $response = $request.GetResponse()
+    }
+    catch [System.Net.WebException] {
+        $response = $_.Exception.Response
+    }
+
+    if (-not $response) {
+        throw "No HTTP response returned."
+    }
+
+    $response.Headers['x-amz-bucket-region']
+}
 
 try
 {
@@ -30,13 +55,14 @@ try
     [int]$InstalledPatchCount = 0
 
     try {
-        $bucketLocation = Get-S3BucketLocation -BucketName $bucket_name -ErrorAction Stop
+        $bucketLocation = Get-S3BucketRegionRaw -BucketName $bucket_name
     } catch {
         Write-Host "WARNING: Cannot access bucket location for patches. If necessary, please correct by updating the stack"
         cmd /c exit 0
     }
-    $region = if (-not $bucketLocation -or $bucketLocation.value -eq "") { "us-east-1" } else { $bucketLocation.Value }
-    $FileList = Get-S3Object -BucketName $bucket_name -Key $folder -Region $region
+    $region = if (-not $bucketLocation -or $bucketLocation -eq "") { "us-east-1" } else { $bucketLocation }
+    Write-Host "Getting File List of objects in Bucket: $bucket_name Folder: $folder Region: $region"
+    $FileList = Get-S3Object -BucketName $bucket_name -Prefix $folder -Region $region
     $FileList | Format-Table -AutoSize -Property Key,LastModified,Size, StorageClass| Out-String -stream | Write-Host
     foreach( $file in $FileList )
     {
@@ -67,7 +93,7 @@ try
                     $s3key = $file.key
                     Write-Host ("Copying S3 item $bucket_name/$s3key to $target_dir")
                     $target_file = ( Join-Path -Path $target_dir -ChildPath $filename )
-                    Read-S3Object -BucketName $bucket_name -Key $file.Key -File $target_file
+                    Read-S3Object -BucketName $bucket_name -Key $file.Key -File $target_file -Region $region
 
                     # Install patch
                     $silentArgs = "/passive"

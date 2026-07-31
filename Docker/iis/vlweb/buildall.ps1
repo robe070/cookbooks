@@ -1,25 +1,27 @@
 param (
     [Parameter(Mandatory=$false)]
-    [ValidateSet('1903', '1909', 'ltsc2019', 'all')]
+    [ValidateSet('ltsc2025', 'all')]
     [string]
     $DockerLabel='all',
 
     [Parameter(Mandatory=$false)]
+    [string]
+    $VersionNum = "16.0.0",
+
+    [Parameter(Mandatory=$false)]
     [switch]
-    $Hyperv,
+    $ClearCache,
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Trace,
 
     [Parameter(Mandatory=$false)]
     [string]
-    $ImageVersion = "14.99",
-
-    [Parameter(Mandatory=$false)]
-    [switch]
-    $ClearCache
+    $Cloud
 )
 if ( $DockerLabel -eq 'all' ){
-    .\build.ps1 1909 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    .\build.ps1 ltsc2019 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
-    .\build.ps1 1903 -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\build.ps1 ltsc2025 -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
 } else {
-    .\build.ps1 $DockerLabel -Hyperv:$Hyperv -ImageVersion $ImageVersion -ClearCache:$ClearCache
+    .\build.ps1 $DockerLabel -VersionNum $VersionNum -ClearCache:$ClearCache -Trace:$Trace -Cloud $Cloud
 }

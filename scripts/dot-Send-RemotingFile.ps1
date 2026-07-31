@@ -2,7 +2,7 @@
 
 
 function Initialize-TempScript ($Path) {
-    "<# DATA" | Set-Content -Path $Path 
+    "<# DATA" | Set-Content -Path $Path -Encoding ascii 
 }
 
 function Complete-Chunk () {
@@ -83,15 +83,15 @@ function Send-RemotingFile{
             $ReadCount = $ReadStream.Read($ReadBuffer, 0, $EncodingChunkSize)
             if ($ReadCount -gt 0) {
                 [Convert]::ToBase64String($ReadBuffer, 0, $ReadCount, 'InsertLineBreaks') |
-                    Add-Content -Path $TempPath
+                    Add-Content -Path $TempPath -Encoding ascii
             }
             $ChunkCount += $ReadCount
             if ($ChunkCount -ge $TransferChunkSize -or $ReadCount -eq 0) {
                 # send
                 Write-Verbose "Sending chunk $TransferIndex"
-                Complete-Chunk | Add-Content -Path $TempPath
+                Complete-Chunk | Add-Content -Path $TempPath -Encoding ascii
                 if ($ReadCount -eq 0) {
-                    Complete-FinalChunk -Destination $Destination | Add-Content -Path $TempPath
+                    Complete-FinalChunk -Destination $Destination | Add-Content -Path $TempPath -Encoding ascii
                     Write-Verbose "Sending final chunk"
                 }
                 Invoke-Command -Session $Session -FilePath $TempPath 

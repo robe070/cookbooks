@@ -15,7 +15,7 @@ parameters:
     default: none
   - name: vmImage
     type: string
-    default: Windows-2022
+    default: Default
   - name: jobcondition
     type: string
     default: none
@@ -120,7 +120,7 @@ stages:
       displayName: ${{ parameters.jobDisplayname }}
 
       pool:
-        vmImage: ${{ parameters.vmImage }}
+        name: ${{ parameters.vmImage }}
 
       steps:
         - download: _TemplatesCI

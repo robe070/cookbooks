@@ -52,6 +52,11 @@ foreach($key in [System.Environment]::GetEnvironmentVariables('Process').Keys) {
 }
 
 try {
+    $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    "Container Windows Version {0} {1}.{2}" -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
+
+    git config --global --add safe.directory $ENV:GITREPOPATH
+
     Write-Host "Get latest build repo into Container"
     Get-ChildItem c:\
     Write-Host "GITREPOPATH: $ENV:GITREPOPATH";
@@ -82,11 +87,19 @@ try {
     mkdir "$ENV:USERPROFILE\.ssh"
     ssh-keyscan github.com | set-content "$ENV:USERPROFILE\.ssh\known_hosts"
 
-    Get-ChildItem c:\
-    Write-Host "GITREPOPATH: $ENV:GITREPOPATH";
-    Set-Location $ENV:GITREPOPATH
-    Get-ChildItem
-    git pull
+    Write-Host("Testing connectivity to SQL Server at $server_name...")
+    $DNSName = $server_name.Split(',')[0].Replace('tcp:','')
+    $Port = $server_name.Split(',')[1]
+    Write-Host("Resolving DNS for $DNSName...")
+    Resolve-DnsName $DNSName -ErrorAction Stop
+    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+        throw
+    }
+    Write-Host("Testing connectivity to SQL Server at $DNSName on port $Port...")
+    Test-NetConnection $DNSName -Port $Port -ErrorAction Stop
+    if ( $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+        throw
+    }
 
     # set the DB password
     if ($dbpasswordpath -and (Test-Path $dbpasswordpath)) {
