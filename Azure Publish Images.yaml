@@ -892,21 +892,22 @@ stages:
     imageSource: Marketplace
     location: Central US
 
-- template: AzureDevOps\templates\Azure Test Image.yml
-  parameters:
-    stageName: 'w25d150jEuropeNorthProduction'
-    stagedisplayName: 'w25d150j Europe North Production'
-    jobName: 'w25d150jEuropeNorthProduction'
-    jobDisplayname: 'w25d150j Europe North Production'
-    dependsOn: CookbooksMergeAndTag
-    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w25d-15-0j
-    osName: Windows Server 2025 JPN
-    lansaVersion: V15 GA
-    msiURL: $(msiURLJPNLatest)
-    resourceGroup: BakingDP-Prod-EN-w25d-15-0j
-    imageSource: Marketplace
-    location: North Europe
+# Europe North is not enabled
+# - template: AzureDevOps\templates\Azure Test Image.yml
+#   parameters:
+#     stageName: 'w25d150jEuropeNorthProduction'
+#     stagedisplayName: 'w25d150j Europe North Production'
+#     jobName: 'w25d150jEuropeNorthProduction'
+#     jobDisplayname: 'w25d150j Europe North Production'
+#     dependsOn: CookbooksMergeAndTag
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     Version: w25d-15-0j
+#     osName: Windows Server 2025 JPN
+#     lansaVersion: V15 GA
+#     msiURL: $(msiURLJPNLatest)
+#     resourceGroup: BakingDP-Prod-EN-w25d-15-0j
+#     imageSource: Marketplace
+#     location: North Europe
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
