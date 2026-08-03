@@ -349,6 +349,11 @@ jobs:
                 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                 $poolName = '$(agentPoolName)'
                 $org = "VisualLansa"
+                # Set true only by the two steps below that change machine-level state the running
+                # agent service cannot pick up on its own: registering the agent service, and the
+                # pwsh 7 MSI (which alters the machine PATH). Module installs do NOT need a reboot,
+                # so a re-run that changes nothing now costs no reboot at all.
+                $rebootNeeded = $false
                 push-location
                 try {
                     Write-Host ("Script echoing vmName = $vmName")
@@ -450,6 +455,8 @@ jobs:
                             --auth pat --token $AzurePAT `
                             --pool Default --agent $vmName --acceptTeeEula --runAsService `
                             --windowsLogonAccount $adminUsername --windowsLogonPassword $adminPassword
+
+                        $rebootNeeded = $true
                     } else {
                         Write-Host 'Agent already installed. Skipping.'
                     }
@@ -566,9 +573,30 @@ jobs:
                         Write-Host "PowerShell $pwshNow installed."
                         # The MSI adds pwsh to the machine PATH, but the already-running agent
                         # service holds the environment it started with, and the agent only
-                        # publishes its 'pwsh' capability at startup. The reboot at the end of this
-                        # task is what makes both take effect - pwsh will NOT work before it.
-                        Write-Host 'pwsh will not be usable by the agent service until the reboot at the end of this task.'
+                        # publishes its 'pwsh' capability at startup. The reboot below is what makes
+                        # both take effect - pwsh will NOT work before it.
+                        Write-Host 'pwsh will not be usable by the agent service until this VM reboots.'
+                        $rebootNeeded = $true
+                    }
+
+                    # --- Reboot -----------------------------------------------------------------
+                    # Last statement of the try, so a failed install never reboots - the catch below
+                    # rethrows first. This used to be a second, sequential Invoke-AzVMRunCommand
+                    # pass over every VM after all the install jobs had finished, costing ~10 min.
+                    # Here it rides on the existing Start-Job-per-VM fan-out, so all the reboots
+                    # overlap and each VM reboots as soon as its own install succeeds.
+                    #
+                    # shutdown.exe, NOT Restart-Computer: this returns immediately and schedules the
+                    # reboot, so the RunCommand extension can report its output and the finally block
+                    # can close the transcript. Restart-Computer -Force kills the machine while
+                    # RunCommand is still reporting, and its -Delay is not a pre-reboot grace period
+                    # (it is the polling interval used with -Wait, which is itself meaningless when
+                    # the waiting process is on the machine being rebooted).
+                    if ($rebootNeeded) {
+                        Write-Host "Scheduling reboot of $vmName in 60 seconds to complete installation..."
+                        shutdown.exe /r /t 60 /c "Reboot to complete Azure DevOps agent installation"
+                    } else {
+                        Write-Host "Nothing installed on $vmName needs a reboot. Skipping reboot."
                     }
                 } catch {
                     $_ | Out-Default | Write-Host
@@ -612,14 +640,8 @@ jobs:
               throw
           }
         }
-        Write-Host "Rebooting all VMs to complete installation..."
-        $ScriptBlock = {
-            Restart-Computer -Delay 5 -Force
-        }
-        for ($i = 1; $i -le $vmCount; $i++) {
-            $vmName = "${baseVmName}$i"
-            $Script = [scriptblock]::create($ScriptBlock)
-            $result = Invoke-AzVMRunCommand -ResourceGroupName $resourceGroup -Name $vmName -CommandId 'RunPowerShellScript' -ScriptString $Script
-            $result.Value | ForEach-Object { Write-Host "[$vmName] $($_.Message)" }
-        }
-        Write-Host "All agents installed and VMs rebooted."
+        # Each VM now schedules its own reboot at the end of its install script, inside the parallel
+        # job above - see the 'Reboot' comment there. The reboots are therefore already in flight and
+        # will complete about a minute after the job that triggered them, rather than needing a
+        # second sequential pass over all $vmCount VMs from here.
+        Write-Host "All agent installs complete. Any VM that needed a reboot has scheduled its own."
