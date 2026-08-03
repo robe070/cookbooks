@@ -496,6 +496,9 @@ stages:
   dependsOn:
     - ProductionTestsw19d150
     - ProductionTestsw19d150j
+    - ProductionTestsw19d160j
+    - ProductionTestsw25d150j
+    - ProductionTestsw25d160j
   displayName: Tag azure-quickstart-templates repo
   jobs:
   - job: TagAzureQuickstartTemplatesRepo
