@@ -45,7 +45,7 @@ variables:
 # installed on them now would be thrown away with the VM. Set this to '*' once the rebuild of
 # all 14 is complete - that is the only change needed to go back to installing everywhere.
 - name: pwshInstallVmNames
-  value: 'Agent14'
+  value: 'Agent13'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
