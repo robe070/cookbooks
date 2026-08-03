@@ -30,6 +30,15 @@ variables:
 # 'Standard' for plain Gen2 VMs without them.
 - name: securityType
   value: 'TrustedLaunch'
+# --- PowerShell 7 -------------------------------------------------------------------------
+# No Windows Server release ships pwsh.exe. Microsoft-hosted 'windows-latest' images add it,
+# self-hosted agents do not - so a task with 'pwsh: true' fails on these agents with
+# "The term 'pwsh.exe' is not recognized" until it is installed. Installing it here keeps
+# self-hosted and Microsoft-hosted agents interchangeable for pipelines moved between them.
+# This is a minimum for the idempotency check only, not a download URL - the installer always
+# fetches the current stable release. Bump it to force an upgrade on existing agents.
+- name: pwshMinimumVersion
+  value: '7.4.0'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -492,6 +501,57 @@ jobs:
                     Install-Module -Name Az -Scope AllUsers -AllowClobber -Force | Out-Default | Write-Host
                     Write-Host 'Az now installed:'
                     Get-InstalledModule -Name Az | Out-Default | Write-Host
+
+                    # --- PowerShell 7 ---------------------------------------------------------
+                    # Needed by any task specifying 'pwsh: true'. Not pinned, for the same reason
+                    # as Az above: Microsoft-hosted agents track the current stable pwsh, so
+                    # tracking it here is what keeps the two kinds of agent interchangeable.
+                    #
+                    # The modules installed above land in C:\Program Files\WindowsPowerShell\Modules.
+                    # pwsh 7 on Windows keeps that directory in its default PSModulePath, so Az and
+                    # Pester 5.6.1 load natively under pwsh. AWSPowerShell 4.1.554 is the
+                    # Desktop-edition-only module and will only load in pwsh through the Windows
+                    # PowerShell compatibility session - so do not convert an AWS task to
+                    # 'pwsh: true' without testing it.
+                    $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
+                    $pwshExe = Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
+                    $pwshFound = $null
+                    if (Test-Path $pwshExe) {
+                      # Ask the binary rather than trusting the install path - a failed or partial
+                      # upgrade can leave pwsh.exe present but older than requested.
+                      try {
+                        $pwshFound = [version](& $pwshExe -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')
+                      } catch {
+                        Write-Host 'pwsh.exe present but would not report its version; reinstalling.'
+                      }
+                    }
+
+                    if ($pwshFound -and $pwshFound -ge $pwshMinimumVersion) {
+                        Write-Host "PowerShell $pwshFound already installed, minimum is $pwshMinimumVersion. Skipping."
+                    } else {
+                        Write-Host "Installing PowerShell 7 (minimum $pwshMinimumVersion)"
+                        # Microsoft's official installer: resolves the latest stable release,
+                        # downloads the MSI, and waits for msiexec to finish - unlike the fire-and-
+                        # forget 'msiexec /i <url>' used for the AWS CLI above, which is why the
+                        # version check below can be trusted immediately.
+                        $pwshInstaller = Join-Path $env:TEMP 'install-powershell.ps1'
+                        Invoke-WebRequest -Uri 'https://aka.ms/install-powershell.ps1' -OutFile $pwshInstaller -UseBasicParsing
+                        & $pwshInstaller -UseMSI -Quiet
+
+                        if (-not (Test-Path $pwshExe)) {
+                            throw "PowerShell 7 install completed but $pwshExe does not exist."
+                        }
+                        $pwshNow = [version](& $pwshExe -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')
+                        if ($pwshNow -lt $pwshMinimumVersion) {
+                            throw "Installed PowerShell $pwshNow is below the required minimum $pwshMinimumVersion."
+                        }
+                        Write-Host "PowerShell $pwshNow installed."
+                        # The MSI adds pwsh to the machine PATH, but the already-running agent
+                        # service holds the environment it started with, and the agent only
+                        # publishes its 'pwsh' capability at startup. The reboot at the end of this
+                        # task is what makes both take effect - pwsh will NOT work before it.
+                        Write-Host 'pwsh will not be usable by the agent service until the reboot at the end of this task.'
+                    }
                 } catch {
                     $_ | Out-Default | Write-Host
                     throw
