@@ -39,6 +39,13 @@ variables:
 # fetches the current stable release. Bump it to force an upgrade on existing agents.
 - name: pwshMinimumVersion
   value: '7.4.0'
+# TEMPORARY (2026-08-03): comma-separated list of agents to install pwsh on, or '*' for all.
+# Only Agent14 has been rebuilt on Windows Server 2025 Gen2 so far. Agents 1-13 are still the
+# old Gen1 VMs and are about to be deleted and recreated by this same pipeline, so any pwsh
+# installed on them now would be thrown away with the VM. Set this to '*' once the rebuild of
+# all 14 is complete - that is the only change needed to go back to installing everywhere.
+- name: pwshInstallVmNames
+  value: 'Agent14'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -513,10 +520,19 @@ jobs:
                     # Desktop-edition-only module and will only load in pwsh through the Windows
                     # PowerShell compatibility session - so do not convert an AWS task to
                     # 'pwsh: true' without testing it.
+                    #
+                    # TEMPORARY: gated by the pwshInstallVmNames variable while agents 1-13 are
+                    # still awaiting their Windows Server 2025 rebuild - see the comment on that
+                    # variable. An empty value deliberately installs on nothing rather than on
+                    # everything, so a mistyped variable cannot cause a 14-way install. @() forces
+                    # an array so -contains is containment even for a single-name value.
+                    $pwshTargets = @(('$(pwshInstallVmNames)' -split ',').Trim())
+                    $pwshWanted = ($pwshTargets -contains '*') -or ($pwshTargets -contains $vmName)
+
                     $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
                     $pwshExe = Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
                     $pwshFound = $null
-                    if (Test-Path $pwshExe) {
+                    if ($pwshWanted -and (Test-Path $pwshExe)) {
                       # Ask the binary rather than trusting the install path - a failed or partial
                       # upgrade can leave pwsh.exe present but older than requested.
                       try {
@@ -526,7 +542,9 @@ jobs:
                       }
                     }
 
-                    if ($pwshFound -and $pwshFound -ge $pwshMinimumVersion) {
+                    if (-not $pwshWanted) {
+                        Write-Host "Skipping PowerShell 7 install on $vmName - pwshInstallVmNames is '$(pwshInstallVmNames)'."
+                    } elseif ($pwshFound -and $pwshFound -ge $pwshMinimumVersion) {
                         Write-Host "PowerShell $pwshFound already installed, minimum is $pwshMinimumVersion. Skipping."
                     } else {
                         Write-Host "Installing PowerShell 7 (minimum $pwshMinimumVersion)"
