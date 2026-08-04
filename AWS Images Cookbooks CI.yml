@@ -18,6 +18,8 @@ variables:
     value: Default
   - name: VersionText
     value: 0
+  - name: RunWindowsUpdates
+    value: $false
 
 jobs:
 
