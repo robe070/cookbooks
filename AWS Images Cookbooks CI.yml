@@ -19,22 +19,9 @@ variables:
   - name: VersionText
     value: 0
 
-
-#resources:
-#  repositories:
-#  - repository: self
-#    type: git
-#    ref: feature/Build-Image-Release-Artefacts-3.0
 jobs:
-- template: AzureDevOps/templates/start-agents.yml
-  parameters:
-    resourceGroup: $(agentResourceGroup)
-    baseVmName: $(agentBaseVmName)
-    vmCount: 12
-    azureSubscription: $(ConnectedServiceName)
 
 - job: Job_1
-  dependsOn: StartAgents
   displayName: 'Agent job : w25d-16-0'
   timeoutInMinutes: 360
   condition: and(succeeded(), or(eq(variables['Build-w25d-16-0'], 'True'), eq(variables['Build-V16'], 'True'), eq(variables['Build-w25d'], 'True')))
