@@ -69,10 +69,10 @@ function Test-RegistryValue {
 }
 function Test-IsWindowsContainer {
     if ($env:RUNNING_IN_CONTAINER -eq '1') {
-        'Running inside a Windows container'
+        Write-Host 'Running inside a Windows container'
         return $true
     } else {
-        'Not in a container (or marker not set)'
+        Write-Host 'Not in a container (or marker not set)'
     }
 
     return $false
@@ -158,10 +158,8 @@ try
     }
 
     if (Test-IsWindowsContainer) {
-        'Running inside a Windows container'
         $Docker = $true
     } else {
-        'Not in a container (or unable to detect)'
         $Docker = $false
     }
 
