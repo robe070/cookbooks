@@ -1,3 +1,5 @@
+name: Az-Publish-Templates-$(Build.BuildId)
+
 trigger: none
 
 resources:

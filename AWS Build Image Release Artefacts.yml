@@ -1,4 +1,4 @@
-name: Build Image Release Artefacts
+name: AWS-Build-Image-Release-Artefacts-$(Build.BuildId)
 trigger: none
 variables:
   - group: "External IP Addresses"

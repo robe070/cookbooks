@@ -1,3 +1,5 @@
+name: AWS-Publish-Cloud-Account-Id-Images-$(Build.BuildId)
+
 trigger: none
 
 variables:

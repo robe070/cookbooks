@@ -1,4 +1,4 @@
-name: Build-Cloud-Account-Id-Artefacts-$(Build.BuildId)
+name: Az-Build-Cloud-Account-Id-Artefacts-$(Build.BuildId)
 
 trigger: none
 

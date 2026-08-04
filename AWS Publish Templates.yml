@@ -1,3 +1,4 @@
+name: AWS-Publish-Templates-$(Build.BuildId)
 # Note that the Templates are all tested with the same AMI which is derived from the latest built images.
 # Only a subset of the images are built, so a search is made for the first build image and uses that.
 # It is sorted on descending filename, and thus the most recent Windows OS and most recent Lansa version is used.

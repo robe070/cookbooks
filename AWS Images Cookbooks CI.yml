@@ -1,4 +1,4 @@
-name: AWS Images CI
+name: AWS-Images-CI-$(Build.BuildId)
 trigger: none
 variables:
   - group: "External IP Addresses"

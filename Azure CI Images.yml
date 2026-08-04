@@ -1,4 +1,4 @@
-name: CI Images-$(Build.BuildId)
+name: Az-CI-Images-$(Build.BuildId)
 
 trigger:
   batch: true

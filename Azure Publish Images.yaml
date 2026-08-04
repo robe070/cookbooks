@@ -1,3 +1,4 @@
+name: Az-Publish-Images-$(Build.BuildId)
 trigger: none
 
 resources:

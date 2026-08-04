@@ -1,3 +1,5 @@
+name: Az-Build-Image-Release-Artefacts-$(Build.BuildId)
+
 variables:
   - group: 'External IP Addresses'
   - group: 'Image Names'
