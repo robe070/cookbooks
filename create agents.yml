@@ -13,12 +13,12 @@ variables:
 - name: vmCount
   value: 14
 # --- VM hardware / image ------------------------------------------------------------------
-# Standard_F2als_v6 replaces the deprecated Standard_F2s_v2 (same 2 vCPU / 4 GiB).
+# Standard_F2as_v6 (2 vCPU / 8 GiB) 4 GiB was too little.
 # The entire v6 family is Hyper-V Gen2-ONLY and NVMe-ONLY, which forces the two settings
 # below: a Gen1 image SKU, or the default SCSI disk controller, will not deploy on it.
 # Also note Fv6 has NO temp disk - there is no D: drive. See the warning the script emits.
 - name: vmSize
-  value: 'Standard_F2als_v6'
+  value: 'Standard_F2as_v6'
 - name: imageOffer
   value: 'WindowsServer'
 # The -g2 suffix is what makes this Gen2. Plain '2025-datacenter' is Gen1 and will be rejected.
@@ -39,13 +39,14 @@ variables:
 # fetches the current stable release. Bump it to force an upgrade on existing agents.
 - name: pwshMinimumVersion
   value: '7.4.0'
-# TEMPORARY (2026-08-03): comma-separated list of agents to install pwsh on, or '*' for all.
-# Only Agent14 has been rebuilt on Windows Server 2025 Gen2 so far. Agents 1-13 are still the
-# old Gen1 VMs and are about to be deleted and recreated by this same pipeline, so any pwsh
-# installed on them now would be thrown away with the VM. Set this to '*' once the rebuild of
-# all 14 is complete - that is the only change needed to go back to installing everywhere.
-- name: pwshInstallVmNames
-  value: 'Agent13'
+# --- Which VMs this run touches -----------------------------------------------------------
+# Comma-separated list of agent VM names, or '*' for all $(vmCount) of them. This gates EVERY
+# step below - VM creation/start, tagging, the agent install and pwsh - so a re-run can be
+# aimed at one or two rebuilt agents without touching the rest. Names must be Agent1..Agent14;
+# an empty value deliberately selects NOTHING rather than everything, so a mistyped variable
+# cannot kick off a 14-way run.
+- name: targetVmNames
+  value: 'Agent13, Agent14'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -59,7 +60,7 @@ variables:
 
 jobs:
 - job: CreateVMs
-  displayName: 'Create & Install ${{ variables.vmCount }} Agent VMs'
+  displayName: 'Create & Install Agent VMs (${{ variables.targetVmNames }})'
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -90,7 +91,32 @@ jobs:
         $securityType = '$(securityType)'
         $imagePublisher = 'MicrosoftWindowsServer'
 
+        # --- Resolve the target VM list --------------------------------------------------------
+        # See the comment on the targetVmNames variable. Every loop in this pipeline iterates
+        # $vmNames rather than 1..$vmCount, so this one list decides what the whole run touches.
+        # The same block is repeated in the install step below - inline YAML scripts cannot share
+        # a function, so keep the two in step if you change either.
+        $requested = @(('$(targetVmNames)' -split ',').Trim() | Where-Object { $_ })
+        $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
+        if ($requested -contains '*') {
+          $vmNames = $allVmNames
+        } else {
+          # Reject unknown names rather than silently creating an Agent99 or skipping a typo.
+          $unknown = @($requested | Where-Object { $allVmNames -notcontains $_ })
+          if ($unknown) {
+            throw "targetVmNames contains name(s) outside ${baseVmName}1..${baseVmName}${vmCount}: $($unknown -join ', ')"
+          }
+          # Select from $allVmNames rather than using $requested as typed: -contains is
+          # case-insensitive, but the name is used verbatim as the VM's ComputerName and as the
+          # agent-pool registration name. This also de-dupes and orders by agent number.
+          $vmNames = @($allVmNames | Where-Object { $requested -contains $_ })
+        }
+        if (-not $vmNames) {
+          Write-Host "##vso[task.logissue type=warning]targetVmNames is empty - no VMs will be created or configured."
+        }
+
         Write-Host "Provisioning parameters:"
+        Write-Host "Target VMs ($($vmNames.Count) of $vmCount): $($vmNames -join ', ')"
         Write-Host "Resource Group: $resourceGroup"
         Write-Host "Location: $location"
         Write-Host "VM Count: $vmCount"
@@ -159,17 +185,15 @@ jobs:
         $adminCred = New-Object PSCredential($adminUsername, $adminPassword)
 
         $jobs = @()
-        for ($i = 1; $i -le $vmCount; $i++) {
-          $index = $i
+        foreach ($targetVmName in $vmNames) {
           $job = Start-Job -ScriptBlock {
             param (
-              $index, $baseVmName, $resourceGroup, $location, $adminCred,
+              $vmName, $resourceGroup, $location, $adminCred,
               $diagStorageUri, $subnet, $nsg, $storageAccountName,
               $vmSize, $imagePublisher, $imageOffer, $imageSku, $diskControllerType, $securityType
             )
 
             $ErrorActionPreference = 'Stop'
-            $vmName = "$baseVmName$index"
             $nicName = "${vmName}-nic"
             $pipName = "${vmName}-pip"
 
@@ -257,7 +281,7 @@ jobs:
             } else {
               Write-Host "[Job $vmName] Tag ShutdownPolicy=Excluded already present."
             }
-          } -ArgumentList $index, $baseVmName, $resourceGroup, $location, $adminCred,
+          } -ArgumentList $targetVmName, $resourceGroup, $location, $adminCred,
                          $diagStorageUri, $subnet, $nsg, $storageAccountName,
                          $vmSize, $imagePublisher, $imageOffer, $imageSku, $diskControllerType, $securityType
 
@@ -286,7 +310,7 @@ jobs:
         Write-Host "All VMs created and tags checked/applied."
 
   - task: AzurePowerShell@5
-    displayName: 'Install DevOps Agents in Parallel'
+    displayName: 'Install DevOps Agents in Parallel (${{ variables.targetVmNames }})'
     inputs:
       azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
@@ -303,10 +327,32 @@ jobs:
         $baseVmName = '$(agentBaseVmName)'
         $vmCount = $(vmCount)
 
+        # --- Resolve the target VM list --------------------------------------------------------
+        # Same block as in the create step above - see the comment there and on the targetVmNames
+        # variable. Repeated rather than shared because inline YAML scripts run in separate
+        # processes; keep the two copies in step.
+        $requested = @(('$(targetVmNames)' -split ',').Trim() | Where-Object { $_ })
+        $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
+        if ($requested -contains '*') {
+          $vmNames = $allVmNames
+        } else {
+          $unknown = @($requested | Where-Object { $allVmNames -notcontains $_ })
+          if ($unknown) {
+            throw "targetVmNames contains name(s) outside ${baseVmName}1..${baseVmName}${vmCount}: $($unknown -join ', ')"
+          }
+          # Select from $allVmNames rather than using $requested as typed: -contains is
+          # case-insensitive, but the name is used verbatim as the VM's ComputerName and as the
+          # agent-pool registration name. This also de-dupes and orders by agent number.
+          $vmNames = @($allVmNames | Where-Object { $requested -contains $_ })
+        }
+        if (-not $vmNames) {
+          Write-Host "##vso[task.logissue type=warning]targetVmNames is empty - no agents will be installed."
+        }
+        Write-Host "Target VMs ($($vmNames.Count) of $vmCount): $($vmNames -join ', ')"
+
         $jobs = @()
 
-        for ($i = 1; $i -le $vmCount; $i++) {
-          $vmName = "${baseVmName}$i"
+        foreach ($targetVmName in $vmNames) {
           $jobs += Start-Job -ScriptBlock {
             param($vmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT)
 
@@ -528,18 +574,12 @@ jobs:
                     # PowerShell compatibility session - so do not convert an AWS task to
                     # 'pwsh: true' without testing it.
                     #
-                    # TEMPORARY: gated by the pwshInstallVmNames variable while agents 1-13 are
-                    # still awaiting their Windows Server 2025 rebuild - see the comment on that
-                    # variable. An empty value deliberately installs on nothing rather than on
-                    # everything, so a mistyped variable cannot cause a 14-way install. @() forces
-                    # an array so -contains is containment even for a single-name value.
-                    $pwshTargets = @(('$(pwshInstallVmNames)' -split ',').Trim())
-                    $pwshWanted = ($pwshTargets -contains '*') -or ($pwshTargets -contains $vmName)
-
+                    # No per-VM gate here any more: this whole script only runs on the VMs named
+                    # in targetVmNames, so reaching this point already means pwsh is wanted.
                     $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
                     $pwshExe = Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
                     $pwshFound = $null
-                    if ($pwshWanted -and (Test-Path $pwshExe)) {
+                    if (Test-Path $pwshExe) {
                       # Ask the binary rather than trusting the install path - a failed or partial
                       # upgrade can leave pwsh.exe present but older than requested.
                       try {
@@ -549,9 +589,7 @@ jobs:
                       }
                     }
 
-                    if (-not $pwshWanted) {
-                        Write-Host "Skipping PowerShell 7 install on $vmName - pwshInstallVmNames is '$(pwshInstallVmNames)'."
-                    } elseif ($pwshFound -and $pwshFound -ge $pwshMinimumVersion) {
+                    if ($pwshFound -and $pwshFound -ge $pwshMinimumVersion) {
                         Write-Host "PowerShell $pwshFound already installed, minimum is $pwshMinimumVersion. Skipping."
                     } else {
                         Write-Host "Installing PowerShell 7 (minimum $pwshMinimumVersion)"
@@ -618,7 +656,7 @@ jobs:
               throw
             } # Job Script Block
 
-          } -ArgumentList $vmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT
+          } -ArgumentList $targetVmName, $resourceGroup, $adminUsername, $adminPassword, $AzurePAT
         } # Job loop
 
         Write-Host "Waiting for all agent install jobs..."
