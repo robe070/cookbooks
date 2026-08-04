@@ -46,7 +46,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w25d-14-2$(VersionText)'
         -VersionMajor 14
         -VersionMinor 2
@@ -108,7 +108,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w25d-14-2'
         -DeleteAMI $true
@@ -162,7 +162,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w25d-15-0$(VersionText)'
         -VersionMajor 15
         -VersionMinor 0
@@ -224,7 +224,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w25d-15-0'
         -DeleteAMI $true
@@ -280,7 +280,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: |
+      arguments: >-
         -VersionText 'w19d-14-2$(VersionText)'
         -VersionMajor 14
         -VersionMinor 2
@@ -342,7 +342,7 @@ jobs:
     inputs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w19d-14-2'
         -DeleteAMI $true
@@ -400,7 +400,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w19d-15-0$(VersionText)'
         -VersionMajor 15
         -VersionMinor 0
@@ -462,7 +462,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w19d-15-0'
         -DeleteAMI $true
@@ -518,7 +518,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w22d-14-2$(VersionText)'
         -VersionMajor 14
         -VersionMinor 2
@@ -588,7 +588,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w22d-14-2'
         -DeleteAMI $true
@@ -645,7 +645,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w22d-15-0$(VersionText)'
         -VersionMajor 15
         -VersionMinor 0
@@ -709,7 +709,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText)'
         -version 'w22d-15-0'
         -DeleteAMI $true
@@ -763,7 +763,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w25d-14-2j$(VersionText-w25d-14-2j)'
         -VersionMajor 14
         -VersionMinor 2
@@ -826,7 +826,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w25d-14-2j)'
         -version 'w25d-14-2j'
         -DeleteAMI $true
@@ -880,7 +880,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w25d-15-0j$(VersionText-w25d-15-0j)'
         -VersionMajor 15
         -VersionMinor 0
@@ -943,7 +943,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w25d-15-0j)'
         -version 'w25d-15-0j'
         -DeleteAMI $true
@@ -997,7 +997,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w19d-14-2j$(VersionText-w19d-14-2j)'
         -VersionMajor 14
         -VersionMinor 2
@@ -1060,7 +1060,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w19d-14-2j)'
         -version 'w19d-14-2j'
         -DeleteAMI $true
@@ -1114,7 +1114,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w19d-15-0j$(VersionText-w19d-15-0j)'
         -VersionMajor 15
         -VersionMinor 0
@@ -1177,7 +1177,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w19d-15-0j)'
         -version 'w19d-15-0j'
         -DeleteAMI $true
@@ -1231,7 +1231,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w22d-14-2j$(VersionText-w22d-14-2j)'
         -VersionMajor 14
         -VersionMinor 2
@@ -1294,7 +1294,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w22d-14-2j)'
         -version 'w22d-14-2j'
         -DeleteAMI $true
@@ -1348,7 +1348,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/bake-scalable-azure-image-pipeline.ps1
-      arguments: |
+      arguments: >-
         -VersionText 'w22d-15-0j$(VersionText-w22d-15-0j)'
         -VersionMajor 15
         -VersionMinor 0
@@ -1411,7 +1411,7 @@ jobs:
       awsCredentials: $(awsCredentials)
       regionName: $(regionName)
       filePath: scripts/terminate-instance.ps1
-      arguments: |
+      arguments: >-
         -versionText '$(VersionText-w22d-15-0j)'
         -version 'w22d-15-0j'
         -DeleteAMI $true
