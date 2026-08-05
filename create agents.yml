@@ -1,3 +1,23 @@
+# --- Which VMs this run touches -----------------------------------------------------------
+# Prompted for on every run - a parameter, not a variable, because a YAML-defined variable
+# cannot be made settable at queue time. It gates EVERY step below (VM creation/start,
+# tagging, the agent install, pwsh), so a re-run can be aimed at one or two rebuilt agents
+# without touching the rest. Names must be Agent1..Agent14 (validated at runtime, see the
+# resolution block in the first step); '*' means all of them, and an empty value deliberately
+# selects NOTHING rather than everything, so a mistyped value cannot kick off a 14-way run.
+#
+# No default: the Run dialog will not start the pipeline until a value is typed. That is
+# only safe while 'trigger: none' holds - a schedule or a pipeline-resource trigger cannot
+# supply one, so give it 'default: '''' ' if this is ever queued non-interactively.
+#
+# ${{ parameters }} is substituted into this file's text at compile time, which is what
+# carries the value into the inline scripts and on into the scriptblock that RunCommand
+# ships to each VM. It is therefore pasted verbatim - keep it to bare names and commas.
+parameters:
+- name: targetVmNames
+  displayName: 'Agent VMs to process (comma-separated, or * for all)'
+  type: string
+
 trigger:
 - none  # Manual trigger only
 
@@ -39,14 +59,6 @@ variables:
 # fetches the current stable release. Bump it to force an upgrade on existing agents.
 - name: pwshMinimumVersion
   value: '7.4.0'
-# --- Which VMs this run touches -----------------------------------------------------------
-# Comma-separated list of agent VM names, or '*' for all $(vmCount) of them. This gates EVERY
-# step below - VM creation/start, tagging, the agent install and pwsh - so a re-run can be
-# aimed at one or two rebuilt agents without touching the rest. Names must be Agent1..Agent14;
-# an empty value deliberately selects NOTHING rather than everything, so a mistyped variable
-# cannot kick off a 14-way run.
-- name: targetVmNames
-  value: 'Agent13, Agent14'
 - name: adminUsername
   value: 'lansa'
 - name: vnetName
@@ -60,7 +72,7 @@ variables:
 
 jobs:
 - job: CreateVMs
-  displayName: 'Create & Install Agent VMs (${{ variables.targetVmNames }})'
+  displayName: 'Create & Install Agent VMs (${{ parameters.targetVmNames }})'
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -92,11 +104,11 @@ jobs:
         $imagePublisher = 'MicrosoftWindowsServer'
 
         # --- Resolve the target VM list --------------------------------------------------------
-        # See the comment on the targetVmNames variable. Every loop in this pipeline iterates
+        # See the comment on the targetVmNames parameter. Every loop in this pipeline iterates
         # $vmNames rather than 1..$vmCount, so this one list decides what the whole run touches.
         # The same block is repeated in the install step below - inline YAML scripts cannot share
         # a function, so keep the two in step if you change either.
-        $requested = @(('$(targetVmNames)' -split ',').Trim() | Where-Object { $_ })
+        $requested = @(('${{ parameters.targetVmNames }}' -split ',').Trim() | Where-Object { $_ })
         $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
         if ($requested -contains '*') {
           $vmNames = $allVmNames
@@ -310,7 +322,7 @@ jobs:
         Write-Host "All VMs created and tags checked/applied."
 
   - task: AzurePowerShell@5
-    displayName: 'Install DevOps Agents in Parallel (${{ variables.targetVmNames }})'
+    displayName: 'Install DevOps Agents in Parallel (${{ parameters.targetVmNames }})'
     inputs:
       azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
@@ -329,9 +341,9 @@ jobs:
 
         # --- Resolve the target VM list --------------------------------------------------------
         # Same block as in the create step above - see the comment there and on the targetVmNames
-        # variable. Repeated rather than shared because inline YAML scripts run in separate
+        # parameter. Repeated rather than shared because inline YAML scripts run in separate
         # processes; keep the two copies in step.
-        $requested = @(('$(targetVmNames)' -split ',').Trim() | Where-Object { $_ })
+        $requested = @(('${{ parameters.targetVmNames }}' -split ',').Trim() | Where-Object { $_ })
         $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
         if ($requested -contains '*') {
           $vmNames = $allVmNames
