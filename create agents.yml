@@ -339,6 +339,89 @@ jobs:
         }
         Write-Host "All VMs created and tags checked/applied."
 
+  # ===========================================================================================
+  # Install DevOps Agents - rationale
+  #
+  # These notes live out here, not inside the Inline script below, because Azure DevOps caps a
+  # single YAML expression at 21000 characters and the whole Inline block counts as ONE
+  # expression (it contains a ${{ }} substitution). Comments at this level are outside it and
+  # cost nothing. If the script grows past the cap again, move prose out here rather than
+  # deleting it.
+  #
+  # TARGET VM LIST - the same resolution block as the create step; see the comment on the
+  # targetVmNumbers parameter at the top of the file. Duplicated rather than shared because
+  # inline scripts are separate processes, so keep the two copies in step. Names are built from
+  # the numbers and never from typed text, because the name is used verbatim as the VM's
+  # ComputerName and as its agent-pool registration name. Filtering 1..$vmCount also de-dupes
+  # and orders by agent number.
+  #
+  # Disable-IEESC - IE download protection breaks the agent install. Windows Server 2025 has
+  # retired IE, so those Active Setup keys may not exist: probe before writing, because with
+  # $ErrorActionPreference = 'Stop' a blind Set-ItemProperty would abort the whole install.
+  #
+  # TLS 1.2 is set at the top of the remote script rather than inside the agent-download
+  # branch, because the Install-Module calls need it too and they run even when the agent is
+  # already installed.
+  #
+  # $rebootNeeded is set true only by the two steps that change machine-level state the running
+  # agent service cannot pick up on its own: registering the agent service, and the pwsh 7 MSI
+  # (which alters the machine PATH). Module installs do NOT need a reboot, so a re-run that
+  # changes nothing costs no reboot at all.
+  #
+  # IS AN AGENT ALREADY INSTALLED? - do NOT decide this on C:\agent alone. The agents do NOT
+  # self-update; they are upgraded by hand through the Azure DevOps portal UI, so re-installing
+  # one is a PERMANENT downgrade to the pinned zip below, not a temporary one. An agent
+  # installed by hand can be unpacked anywhere (the portal's own instructions use C:\agents),
+  # and if this script cannot see it the install branch deletes that agent's pool registration
+  # BY NAME and registers a fresh pinned agent out of C:\agent.
+  #
+  # So ask Windows for the service instead: 'config.cmd --runAsService' always creates one
+  # named vstsagent.<org>.<pool>.<agent> whatever directory it ran from, and its binary path
+  # gives the real agent root - two levels up from bin\AgentService.exe. Win32_Service rather
+  # than Get-Service because the remote block runs under the VM's Windows PowerShell 5.1, whose
+  # ServiceController does not expose the binary path. The filter is WQL, so '%' is the
+  # wildcard and '.' is literal. The version it reports is logged only, never used to decide
+  # anything, so a missing or blank FileVersion must not fail the run.
+  #
+  # C:\agent present but no service means an install interrupted before or during config.cmd.
+  # It still counts as installed, as this script has always done, because re-running would
+  # Expand-Archive over the existing C:\agent and fail. Fix those VMs by hand.
+  #
+  # Pester - the auto-installed 3.4.0 is renamed aside so 5.6.1 is what loads. Ownership has to
+  # be taken first because the directory is owned by TrustedInstaller.
+  #
+  # Az is NOT pinned, unlike AWSPowerShell 4.1.554 (pinned because later versions were broken
+  # at the time). This pipeline is how all agents get, and are upgraded to, the latest Az on
+  # every run - the bake's Trusted Launch New-AzVMConfig -SecurityType needs a current
+  # Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0). Installed versions are logged first
+  # so an upgrade can be backed out.
+  #
+  # POWERSHELL 7 is needed by any task specifying 'pwsh: true', and is not pinned for the same
+  # reason as Az: Microsoft-hosted agents track current stable pwsh, so tracking it here is
+  # what keeps the two kinds of agent interchangeable. The modules installed above land in
+  # C:\Program Files\WindowsPowerShell\Modules, which pwsh 7 on Windows keeps in its default
+  # PSModulePath, so Az and Pester 5.6.1 load natively under pwsh. AWSPowerShell 4.1.554 is the
+  # Desktop-edition-only module and loads under pwsh only through the Windows PowerShell
+  # compatibility session - do not convert an AWS task to 'pwsh: true' without testing it.
+  # aka.ms/install-powershell.ps1 resolves the latest stable release and waits for msiexec,
+  # unlike the fire-and-forget 'msiexec /i <url>' used for the AWS CLI, which is why the
+  # version check immediately after it can be trusted. pwsh.exe is version-checked by asking
+  # the binary rather than trusting its path, since a partial upgrade can leave an older exe.
+  #
+  # REBOOT - the last statement of the remote try, so a failed install never reboots (the catch
+  # rethrows first). This used to be a second, sequential Invoke-AzVMRunCommand pass over every
+  # VM after all the install jobs had finished, costing ~10 min; riding on the Start-Job-per-VM
+  # fan-out instead overlaps them all, and each VM reboots as soon as its own install succeeds.
+  # It is needed because the pwsh MSI adds pwsh to the machine PATH but the running agent
+  # service holds the environment it started with, and only publishes its 'pwsh' capability at
+  # startup - pwsh will NOT work before the reboot.
+  #
+  # shutdown.exe, NOT Restart-Computer: it returns immediately and schedules the reboot, so the
+  # RunCommand extension can report its output and the finally block can close the transcript.
+  # Restart-Computer -Force kills the machine while RunCommand is still reporting, and its
+  # -Delay is not a pre-reboot grace period (it is the polling interval used with -Wait, itself
+  # meaningless when the waiting process is on the machine being rebooted).
+  # ===========================================================================================
   - task: AzurePowerShell@5
     displayName: 'Install DevOps Agents in Parallel (${{ parameters.targetVmNumbers }})'
     inputs:
@@ -357,10 +440,7 @@ jobs:
         $baseVmName = '$(agentBaseVmName)'
         $vmCount = $(vmCount)
 
-        # --- Resolve the target VM list --------------------------------------------------------
-        # Same block as in the create step above - see the comment there and on the targetVmNumbers
-        # parameter. Repeated rather than shared because inline YAML scripts run in separate
-        # processes; keep the two copies in step.
+        # --- Resolve the target VM list (see the task notes above) -----------------------------
         $requested = @()
         foreach ($token in @(('${{ parameters.targetVmNumbers }}' -split ',').Trim() | Where-Object { $_ })) {
           if ($token -match '^(\d+)\s*-\s*(\d+)$') {
@@ -380,9 +460,6 @@ jobs:
             throw "targetVmNumbers contains '$token', which is not a number or a number range like 1-14."
           }
         }
-        # Build the names from the numbers rather than from anything typed - the name is used
-        # verbatim as the VM's ComputerName and as the agent-pool registration name. Filtering
-        # 1..$vmCount also de-dupes and orders by agent number.
         $vmNames = @(1..$vmCount | Where-Object { $requested -contains $_ } | ForEach-Object { "$baseVmName$_" })
         if (-not $vmNames) {
           Write-Host "##vso[task.logissue type=warning]targetVmNumbers is empty - no agents will be installed."
@@ -404,10 +481,8 @@ jobs:
                     [string]$adminPassword,
                     [string]$AzurePAT
                 )
-                # Function to Disable Internet Explorer download protection which breaks the Agent install
-                # Windows Server 2025 has retired Internet Explorer, so these Active Setup keys may
-                # not exist. Probe before writing - with $ErrorActionPreference = 'Stop' a blind
-                # Set-ItemProperty against a missing key would abort the entire agent install.
+                # Disables IE download protection, which breaks the agent install. Probes first -
+                # the keys are gone on Server 2025. See the task notes above.
                 function Disable-IEESC {
                   $Keys = @(
                     "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
@@ -429,15 +504,11 @@ jobs:
                 }
 
                 $ErrorActionPreference = 'Stop'
-                # Hoisted out of the agent-download branch below: the Install-Module calls later in
-                # this script need TLS 1.2 too, and they run even when the agent is already installed.
+                # Hoisted out of the agent-download branch - Install-Module needs it too.
                 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                 $poolName = '$(agentPoolName)'
                 $org = "VisualLansa"
-                # Set true only by the two steps below that change machine-level state the running
-                # agent service cannot pick up on its own: registering the agent service, and the
-                # pwsh 7 MSI (which alters the machine PATH). Module installs do NOT need a reboot,
-                # so a re-run that changes nothing now costs no reboot at all.
+                # Set true only by the agent-service registration and the pwsh 7 MSI - see notes.
                 $rebootNeeded = $false
                 push-location
                 try {
@@ -453,33 +524,20 @@ jobs:
 
                     Disable-IEESC
 
-                    # --- Is an agent already installed? --------------------------------------
-                    # Do NOT decide this on C:\agent alone. An agent installed by hand from the
-                    # Azure DevOps portal can be unpacked anywhere - the portal's own instructions
-                    # use C:\agents - and if this script cannot see it, the block below deletes
-                    # that agent's pool registration BY NAME and registers a fresh agent from the
-                    # pinned zip out of C:\agent, rolling a newer working agent backwards.
-                    #
-                    # Ask Windows for the service instead: 'config.cmd --runAsService' always
-                    # creates one named vstsagent.<org>.<pool>.<agent> whatever directory it ran
-                    # from, and its binary path gives the real agent root. Win32_Service rather
-                    # than Get-Service because this block runs under the VM's Windows PowerShell
-                    # 5.1, whose ServiceController does not expose the binary path. The filter is
-                    # WQL: '%' is the wildcard and '.' is literal.
+                    # --- Is an agent already installed anywhere on this VM? ------------------
+                    # Found via the vstsagent.* service, NOT by probing C:\agent. Read the task
+                    # notes above before changing this - getting it wrong downgrades an agent.
                     $agentRoot = $null
                     $agentServices = @(Get-CimInstance Win32_Service -Filter "Name LIKE 'vstsagent.%'" -ErrorAction Ignore)
                     foreach ($svc in $agentServices) {
-                        # PathName is a command line, normally quoted: "C:\agent\bin\AgentService.exe".
+                        # PathName is a command line, normally quoted: "C:\agent\bin\AgentService.exe"
                         $svcExe = $svc.PathName
                         if ($svcExe -match '^\s*"([^"]+)"') {
                             $svcExe = $Matches[1]
                         } elseif ($svcExe -match '^\s*(\S+\.exe)') {
                             $svcExe = $Matches[1]
                         }
-                        # The agent root is two levels up from bin\AgentService.exe.
                         $foundRoot = Split-Path (Split-Path $svcExe -Parent) -Parent
-                        # Version is logged only, never used to decide anything, so a missing or
-                        # blank FileVersion must not fail the run.
                         $foundVersion = 'unknown version'
                         $listener = Join-Path $foundRoot 'bin\Agent.Listener.exe'
                         if (Test-Path $listener) {
@@ -490,15 +548,11 @@ jobs:
                         if (-not $agentRoot) { $agentRoot = $foundRoot }
                     }
                     if (-not $agentRoot -and (Test-Path C:\agent\config.cmd)) {
-                        # Unpacked but no service - an install interrupted before or during
-                        # config.cmd. Still counted as installed, which is what this script has
-                        # always done, because re-running the install would Expand-Archive over
-                        # the existing C:\agent and fail. Fix these VMs by hand.
+                        # Unpacked but never configured - still counted as installed. See notes.
                         $agentRoot = 'C:\agent'
                         Write-Host "WARNING: $vmName has C:\agent but no agent service - a previous install did not finish. Leaving it alone; fix this VM by hand."
                     }
-                    # Force a re-install by uncommenting this - note that Expand-Archive below
-                    # then needs -Force if C:\agent already exists.
+                    # Uncomment to force a re-install (Expand-Archive below then needs -Force).
                     #$agentRoot = $null
 
                     if (-not $agentRoot)
@@ -573,16 +627,13 @@ jobs:
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
-                        # Pinned, and only ever reached on a VM with no agent at all - Azure DevOps
-                        # provides a UI in the Portal to easily update the agents after registration,
-                        # so this is a starting point, not
-                        # the version an agent stays on. Bump it when it falls behind what the
-                        # portal's 'New agent' download offers and its been tested that it works..
+                        # Pinned, and only reached on a VM with no agent at all. Agents are then
+                        # upgraded by hand from the portal UI, so bump this when it falls behind
+                        # the portal's 'New agent' download AND that version has been tested.
                         $AgentInstallUri = "https://download.agent.dev.azure.com/agent/5.277.0/vsts-agent-win-x64-5.277.0.zip"
                         Write-Host "Downloading $AgentInstallUri"
 
-                        # -UseBasicParsing: Windows PowerShell 5.1's Invoke-WebRequest otherwise
-                        # initialises the IE DOM parser, which is not present on Windows Server 2025.
+                        # -UseBasicParsing: 5.1 otherwise needs the IE DOM parser, gone in 2025.
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip -UseBasicParsing
 
                         Write-Host "Extract the Agent install from the zip file"
@@ -596,24 +647,18 @@ jobs:
 
                         $rebootNeeded = $true
                     } else {
-                        # Deliberately does nothing else: not the pool-registration delete, not the
-                        # download, not config.cmd. The agent keeps whatever version thats currently installed,
-                        # which is the point - the zip below is pinned and would roll it back.
+                        # Deliberately does nothing else - no pool-registration delete, no
+                        # download, no config.cmd. The installed version is kept. See notes.
                         Write-Host "Agent already installed at $agentRoot. Skipping install."
                     }
 
                     Write-Host 'Ensure correct version of Pester'
                     if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
                         if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled') {
-                          # 1. Take ownership of the folder and everything inside it recursively (/R)
-                          # /D Y automatically selects "Yes" if prompted for confirmation on directories
+                          # Take ownership (/r recursive, /d y auto-confirms), grant Administrators
+                          # full control (/t all sub-items, /c continue on error), then delete.
                           takeown /f "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /r /d y
-
-                          # 2. Grant Administrators full control over the folder and all sub-items (/T)
-                          # /grant administrators:F gives full control, /c continues on errors
                           icacls "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /grant administrators:F /t /c
-
-                          # 3. Forcibly delete the directory and its entire contents
                           Remove-Item -Path "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" -Force -Recurse
                         }
                         Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
@@ -643,11 +688,8 @@ jobs:
                     Write-Host 'Install AWS CLI'
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
 
-                    # Az PowerShell - NOT pinned (unlike AWSPowerShell above, which is pinned because later
-                    # versions were broken at the time). This pipeline is how all agents get, and are
-                    # upgraded to, the latest Az on every run - the bake's Trusted Launch New-AzVMConfig
-                    # -SecurityType needs a current Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0).
-                    # Log the currently-installed Az versions FIRST so an upgrade can be backed out.
+                    # Az PowerShell - NOT pinned, and logged first so an upgrade can be backed
+                    # out. See the task notes above.
                     Write-Host 'Az PowerShell versions currently installed (logged so this upgrade can be backed out):'
                     Get-InstalledModule -ErrorAction Ignore |
                         Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
@@ -657,24 +699,12 @@ jobs:
                     Write-Host 'Az now installed:'
                     Get-InstalledModule -Name Az | Out-Default | Write-Host
 
-                    # --- PowerShell 7 ---------------------------------------------------------
-                    # Needed by any task specifying 'pwsh: true'. Not pinned, for the same reason
-                    # as Az above: Microsoft-hosted agents track the current stable pwsh, so
-                    # tracking it here is what keeps the two kinds of agent interchangeable.
-                    #
-                    # The modules installed above land in C:\Program Files\WindowsPowerShell\Modules.
-                    # pwsh 7 on Windows keeps that directory in its default PSModulePath, so Az and
-                    # Pester 5.6.1 load natively under pwsh. AWSPowerShell 4.1.554 is the
-                    # Desktop-edition-only module and will only load in pwsh through the Windows
-                    # PowerShell compatibility session - so do not convert an AWS task to
-                    # 'pwsh: true' without testing it.
-
+                    # --- PowerShell 7 (see the task notes above) -------------------------------
                     $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
                     $pwshExe = Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
                     $pwshFound = $null
                     if (Test-Path $pwshExe) {
-                      # Ask the binary rather than trusting the install path - a failed or partial
-                      # upgrade can leave pwsh.exe present but older than requested.
+                      # Ask the binary, not the path - a partial upgrade leaves an older exe.
                       try {
                         $pwshFound = [version](& $pwshExe -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')
                       } catch {
@@ -686,10 +716,7 @@ jobs:
                         Write-Host "PowerShell $pwshFound already installed, minimum is $pwshMinimumVersion. Skipping."
                     } else {
                         Write-Host "Installing PowerShell 7 (minimum $pwshMinimumVersion)"
-                        # Microsoft's official installer: resolves the latest stable release,
-                        # downloads the MSI, and waits for msiexec to finish - unlike the fire-and-
-                        # forget 'msiexec /i <url>' used for the AWS CLI above, which is why the
-                        # version check below can be trusted immediately.
+                        # Microsoft's official installer - resolves latest stable and waits.
                         $pwshInstaller = Join-Path $env:TEMP 'install-powershell.ps1'
                         Invoke-WebRequest -Uri 'https://aka.ms/install-powershell.ps1' -OutFile $pwshInstaller -UseBasicParsing
                         & $pwshInstaller -UseMSI -Quiet
@@ -702,27 +729,12 @@ jobs:
                             throw "Installed PowerShell $pwshNow is below the required minimum $pwshMinimumVersion."
                         }
                         Write-Host "PowerShell $pwshNow installed."
-                        # The MSI adds pwsh to the machine PATH, but the already-running agent
-                        # service holds the environment it started with, and the agent only
-                        # publishes its 'pwsh' capability at startup. The reboot below is what makes
-                        # both take effect - pwsh will NOT work before it.
                         Write-Host 'pwsh will not be usable by the agent service until this VM reboots.'
                         $rebootNeeded = $true
                     }
 
-                    # --- Reboot -----------------------------------------------------------------
-                    # Last statement of the try, so a failed install never reboots - the catch below
-                    # rethrows first. This used to be a second, sequential Invoke-AzVMRunCommand
-                    # pass over every VM after all the install jobs had finished, costing ~10 min.
-                    # Here it rides on the existing Start-Job-per-VM fan-out, so all the reboots
-                    # overlap and each VM reboots as soon as its own install succeeds.
-                    #
-                    # shutdown.exe, NOT Restart-Computer: this returns immediately and schedules the
-                    # reboot, so the RunCommand extension can report its output and the finally block
-                    # can close the transcript. Restart-Computer -Force kills the machine while
-                    # RunCommand is still reporting, and its -Delay is not a pre-reboot grace period
-                    # (it is the polling interval used with -Wait, which is itself meaningless when
-                    # the waiting process is on the machine being rebooted).
+                    # --- Reboot (see the task notes above) --------------------------------------
+                    # Must stay the last statement of the try, and must stay shutdown.exe.
                     if ($rebootNeeded) {
                         Write-Host "Scheduling reboot of $vmName in 60 seconds to complete installation..."
                         shutdown.exe /r /t 60 /c "Reboot to complete Azure DevOps agent installation"

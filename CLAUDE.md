@@ -35,10 +35,14 @@ baked into the published image.
   that assume the server pushes agent updates after registration.
 - Consequence: anything that re-installs an agent is a **permanent downgrade** to the pinned zip in
   the pipeline, not a temporary one. The install must be skipped whenever an agent already exists.
-- Detection must **not** assume `C:\agent`. A portal install lands wherever it was unpacked
+- Agent detection must **not** assume `C:\agent`. A portal install lands wherever it was unpacked
   (`C:\agents`, `C:\azagent\A1`), so the pipeline looks for the `vstsagent.<org>.<pool>.<agent>`
   service and derives the agent root from its binary path. Missing an existing agent is not merely
   a redundant install — the install path deletes that agent's **pool registration by name** first.
+- Azure DevOps caps a single YAML **expression at 21000 characters**, and an `Inline:` block scalar
+  containing a `${{ }}` substitution counts as **one expression** — comments inside it count too.
+  The install step hit this. Long-form rationale therefore lives in YAML comments **above** the
+  task, outside the expression, with terse pointers inline.
 
 ## Knowledge base
 
