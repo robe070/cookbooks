@@ -396,6 +396,16 @@ jobs:
   # Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0). Installed versions are logged first
   # so an upgrade can be backed out.
   #
+  # 'Latest' is asked of PSGallery (Find-Module) and compared with the installed Az meta-module,
+  # because Install-Module -Force re-downloads all ~80 Az.* sub-modules even when the version is
+  # identical - about 3 minutes per VM, per run, for nothing. Skipped only when the installed
+  # version is >= the gallery's, so a hand-installed newer build is never downgraded either.
+  # If the Find-Module call itself fails (no network, PSGallery down, NuGet provider missing) the
+  # install runs unconditionally, exactly as it did before, rather than silently skipping.
+  # The comparison is on the Az meta-module alone, so it will not repair a VM whose Az.* set is
+  # incomplete or damaged while Az itself looks current: uncomment the '$azInstalled = $null'
+  # line in the script to force one re-install, the same escape hatch as the agent check above.
+  #
   # POWERSHELL 7 is needed by any task specifying 'pwsh: true', and is not pinned for the same
   # reason as Az: Microsoft-hosted agents track current stable pwsh, so tracking it here is
   # what keeps the two kinds of agent interchangeable. The modules installed above land in
@@ -481,8 +491,7 @@ jobs:
                     [string]$adminPassword,
                     [string]$AzurePAT
                 )
-                # Disables IE download protection, which breaks the agent install. Probes first -
-                # the keys are gone on Server 2025. See the task notes above.
+                # IE download protection breaks the agent install. See the task notes above.
                 function Disable-IEESC {
                   $Keys = @(
                     "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
@@ -688,16 +697,25 @@ jobs:
                     Write-Host 'Install AWS CLI'
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
 
-                    # Az PowerShell - NOT pinned, and logged first so an upgrade can be backed
-                    # out. See the task notes above.
-                    Write-Host 'Az PowerShell versions currently installed (logged so this upgrade can be backed out):'
+                    # Az PowerShell - NOT pinned, skipped when already latest. See notes above.
+                    Write-Host 'Az versions installed (logged so an upgrade can be backed out):'
                     Get-InstalledModule -ErrorAction Ignore |
                         Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
                         Sort-Object Name, Version | Format-Table Name, Version -AutoSize | Out-Default | Write-Host
-                    Write-Host 'Installing / upgrading Az to the latest version...'
-                    Install-Module -Name Az -Scope AllUsers -AllowClobber -Force | Out-Default | Write-Host
-                    Write-Host 'Az now installed:'
-                    Get-InstalledModule -Name Az | Out-Default | Write-Host
+                    $azInstalled = Get-InstalledModule -Name Az -ErrorAction Ignore |
+                        Sort-Object { [version]$_.Version } | Select-Object -Last 1
+                    #$azInstalled = $null  # uncomment to force a re-install of the same version
+                    $azLatest = $null
+                    try { $azLatest = (Find-Module -Name Az -Repository PSGallery -EA Stop).Version }
+                    catch { Write-Host "PSGallery lookup failed, so installing anyway: $($_.Exception.Message)" }
+                    if ($azInstalled -and $azLatest -and [version]$azInstalled.Version -ge [version]$azLatest) {
+                        Write-Host "Az $($azInstalled.Version) is already the latest on PSGallery. Skipping."
+                    } else {
+                        Write-Host "Installing / upgrading Az to '$azLatest' from '$($azInstalled.Version)'"
+                        Install-Module -Name Az -Scope AllUsers -AllowClobber -Force | Out-Default | Write-Host
+                        Write-Host 'Az now installed:'
+                        Get-InstalledModule -Name Az | Out-Default | Write-Host
+                    }
 
                     # --- PowerShell 7 (see the task notes above) -------------------------------
                     $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
