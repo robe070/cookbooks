@@ -453,8 +453,55 @@ jobs:
 
                     Disable-IEESC
 
-                    if (-not (Test-Path C:\agent\config.cmd))
-                    #if ((Test-Path C:\agent\config.cmd))
+                    # --- Is an agent already installed? --------------------------------------
+                    # Do NOT decide this on C:\agent alone. An agent installed by hand from the
+                    # Azure DevOps portal can be unpacked anywhere - the portal's own instructions
+                    # use C:\agents - and if this script cannot see it, the block below deletes
+                    # that agent's pool registration BY NAME and registers a fresh agent from the
+                    # pinned zip out of C:\agent, rolling a newer working agent backwards.
+                    #
+                    # Ask Windows for the service instead: 'config.cmd --runAsService' always
+                    # creates one named vstsagent.<org>.<pool>.<agent> whatever directory it ran
+                    # from, and its binary path gives the real agent root. Win32_Service rather
+                    # than Get-Service because this block runs under the VM's Windows PowerShell
+                    # 5.1, whose ServiceController does not expose the binary path. The filter is
+                    # WQL: '%' is the wildcard and '.' is literal.
+                    $agentRoot = $null
+                    $agentServices = @(Get-CimInstance Win32_Service -Filter "Name LIKE 'vstsagent.%'" -ErrorAction Ignore)
+                    foreach ($svc in $agentServices) {
+                        # PathName is a command line, normally quoted: "C:\agent\bin\AgentService.exe".
+                        $svcExe = $svc.PathName
+                        if ($svcExe -match '^\s*"([^"]+)"') {
+                            $svcExe = $Matches[1]
+                        } elseif ($svcExe -match '^\s*(\S+\.exe)') {
+                            $svcExe = $Matches[1]
+                        }
+                        # The agent root is two levels up from bin\AgentService.exe.
+                        $foundRoot = Split-Path (Split-Path $svcExe -Parent) -Parent
+                        # Version is logged only, never used to decide anything, so a missing or
+                        # blank FileVersion must not fail the run.
+                        $foundVersion = 'unknown version'
+                        $listener = Join-Path $foundRoot 'bin\Agent.Listener.exe'
+                        if (Test-Path $listener) {
+                            $fileVersion = (Get-Item $listener).VersionInfo.FileVersion
+                            if ($fileVersion) { $foundVersion = "version $fileVersion" }
+                        }
+                        Write-Host "Found agent service '$($svc.Name)' ($($svc.State)) at $foundRoot, $foundVersion"
+                        if (-not $agentRoot) { $agentRoot = $foundRoot }
+                    }
+                    if (-not $agentRoot -and (Test-Path C:\agent\config.cmd)) {
+                        # Unpacked but no service - an install interrupted before or during
+                        # config.cmd. Still counted as installed, which is what this script has
+                        # always done, because re-running the install would Expand-Archive over
+                        # the existing C:\agent and fail. Fix these VMs by hand.
+                        $agentRoot = 'C:\agent'
+                        Write-Host "WARNING: $vmName has C:\agent but no agent service - a previous install did not finish. Leaving it alone; fix this VM by hand."
+                    }
+                    # Force a re-install by uncommenting this - note that Expand-Archive below
+                    # then needs -Force if C:\agent already exists.
+                    #$agentRoot = $null
+
+                    if (-not $agentRoot)
                     {
                         Write-Host "Installing agent on: $vmName"
 
@@ -526,8 +573,14 @@ jobs:
                             Write-Host "Agent '$vmName' not found in pool. No removal needed."
                         }
 
-                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/4.269.0/vsts-agent-win-x64-4.269.0.zip"
+                        # Pinned, and only ever reached on a VM with no agent at all - Azure DevOps
+                        # provides a UI in the Portal to easily update the agents after registration,
+                        # so this is a starting point, not
+                        # the version an agent stays on. Bump it when it falls behind what the
+                        # portal's 'New agent' download offers and its been tested that it works..
+                        $AgentInstallUri = "https://download.agent.dev.azure.com/agent/5.277.0/vsts-agent-win-x64-5.277.0.zip"
                         Write-Host "Downloading $AgentInstallUri"
+
                         # -UseBasicParsing: Windows PowerShell 5.1's Invoke-WebRequest otherwise
                         # initialises the IE DOM parser, which is not present on Windows Server 2025.
                         Invoke-WebRequest -Uri $AgentInstallUri -OutFile c:\agent.zip -UseBasicParsing
@@ -543,7 +596,10 @@ jobs:
 
                         $rebootNeeded = $true
                     } else {
-                        Write-Host 'Agent already installed. Skipping.'
+                        # Deliberately does nothing else: not the pool-registration delete, not the
+                        # download, not config.cmd. The agent keeps whatever version thats currently installed,
+                        # which is the point - the zip below is pinned and would roll it back.
+                        Write-Host "Agent already installed at $agentRoot. Skipping install."
                     }
 
                     Write-Host 'Ensure correct version of Pester'
