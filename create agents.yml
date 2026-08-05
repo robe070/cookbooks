@@ -2,21 +2,27 @@
 # Prompted for on every run - a parameter, not a variable, because a YAML-defined variable
 # cannot be made settable at queue time. It gates EVERY step below (VM creation/start,
 # tagging, the agent install, pwsh), so a re-run can be aimed at one or two rebuilt agents
-# without touching the rest. Names must be Agent1..Agent14 (validated at runtime, see the
-# resolution block in the first step); '*' means all of them, and an empty value deliberately
-# selects NOTHING rather than everything, so a mistyped value cannot kick off a 14-way run.
+# without touching the rest.
 #
-# No default: the Run dialog will not start the pipeline until a value is typed. That is
-# only safe while 'trigger: none' holds - a schedule or a pipeline-resource trigger cannot
-# supply one, so give it 'default: '''' ' if this is ever queued non-interactively.
+# Agent NUMBERS, not names - the 'Agent' prefix comes from agentBaseVmName below, so it is
+# never typed and never mistyped. Accepts single numbers, ranges, or a mix: '1-14', '11,14',
+# '1-3,11,14'. Anything outside 1..vmCount, or not a number/range, throws at runtime (see the
+# resolution block in the first step). An empty value deliberately selects NOTHING rather than
+# everything, so clearing the field cannot kick off a 14-way run by accident.
+#
+# The default is the whole set, and having one does NOT stop the Run dialog prompting for it -
+# 'trigger: none' only disables automatic triggers; a manual run still shows the field, just
+# pre-filled with '1-14'. The default is also what a schedule or pipeline-resource trigger
+# would use if this ever gets queued non-interactively.
 #
 # ${{ parameters }} is substituted into this file's text at compile time, which is what
 # carries the value into the inline scripts and on into the scriptblock that RunCommand
-# ships to each VM. It is therefore pasted verbatim - keep it to bare names and commas.
+# ships to each VM. It is therefore pasted verbatim - keep it to digits, commas and hyphens.
 parameters:
-- name: targetVmNames
-  displayName: 'Agent VMs to process (comma-separated, or * for all)'
+- name: targetVmNumbers
+  displayName: 'Agent numbers to process (e.g. 1-14, or 11,14)'
   type: string
+  default: '1-14'
 
 trigger:
 - none  # Manual trigger only
@@ -72,7 +78,7 @@ variables:
 
 jobs:
 - job: CreateVMs
-  displayName: 'Create & Install Agent VMs (${{ parameters.targetVmNames }})'
+  displayName: 'Create & Install Agent VMs (${{ parameters.targetVmNumbers }})'
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -104,27 +110,39 @@ jobs:
         $imagePublisher = 'MicrosoftWindowsServer'
 
         # --- Resolve the target VM list --------------------------------------------------------
-        # See the comment on the targetVmNames parameter. Every loop in this pipeline iterates
+        # See the comment on the targetVmNumbers parameter. Every loop in this pipeline iterates
         # $vmNames rather than 1..$vmCount, so this one list decides what the whole run touches.
         # The same block is repeated in the install step below - inline YAML scripts cannot share
         # a function, so keep the two in step if you change either.
-        $requested = @(('${{ parameters.targetVmNames }}' -split ',').Trim() | Where-Object { $_ })
-        $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
-        if ($requested -contains '*') {
-          $vmNames = $allVmNames
-        } else {
-          # Reject unknown names rather than silently creating an Agent99 or skipping a typo.
-          $unknown = @($requested | Where-Object { $allVmNames -notcontains $_ })
-          if ($unknown) {
-            throw "targetVmNames contains name(s) outside ${baseVmName}1..${baseVmName}${vmCount}: $($unknown -join ', ')"
+        # A range ('1-14') expands; a bare number is taken as-is; anything else is a typo and must
+        # not be silently dropped, or the run would quietly skip an agent. Each token is validated
+        # as it is parsed, so the error names the token the user typed rather than listing every
+        # number it expanded to.
+        $requested = @()
+        foreach ($token in @(('${{ parameters.targetVmNumbers }}' -split ',').Trim() | Where-Object { $_ })) {
+          if ($token -match '^(\d+)\s*-\s*(\d+)$') {
+            $from = [int]$Matches[1]
+            $to = [int]$Matches[2]
+            if ($from -lt 1 -or $to -gt $vmCount -or $from -gt $to) {
+              throw "targetVmNumbers range '$token' is not an ascending range inside 1..${vmCount}."
+            }
+            $requested += $from..$to
+          } elseif ($token -match '^\d+$') {
+            $number = [int]$token
+            if ($number -lt 1 -or $number -gt $vmCount) {
+              throw "targetVmNumbers contains $number, which is outside 1..${vmCount}."
+            }
+            $requested += $number
+          } else {
+            throw "targetVmNumbers contains '$token', which is not a number or a number range like 1-14."
           }
-          # Select from $allVmNames rather than using $requested as typed: -contains is
-          # case-insensitive, but the name is used verbatim as the VM's ComputerName and as the
-          # agent-pool registration name. This also de-dupes and orders by agent number.
-          $vmNames = @($allVmNames | Where-Object { $requested -contains $_ })
         }
+        # Build the names from the numbers rather than from anything typed - the name is used
+        # verbatim as the VM's ComputerName and as the agent-pool registration name. Filtering
+        # 1..$vmCount also de-dupes and orders by agent number.
+        $vmNames = @(1..$vmCount | Where-Object { $requested -contains $_ } | ForEach-Object { "$baseVmName$_" })
         if (-not $vmNames) {
-          Write-Host "##vso[task.logissue type=warning]targetVmNames is empty - no VMs will be created or configured."
+          Write-Host "##vso[task.logissue type=warning]targetVmNumbers is empty - no VMs will be created or configured."
         }
 
         Write-Host "Provisioning parameters:"
@@ -322,7 +340,7 @@ jobs:
         Write-Host "All VMs created and tags checked/applied."
 
   - task: AzurePowerShell@5
-    displayName: 'Install DevOps Agents in Parallel (${{ parameters.targetVmNames }})'
+    displayName: 'Install DevOps Agents in Parallel (${{ parameters.targetVmNumbers }})'
     inputs:
       azureSubscription: $(ConnectedServiceName)
       ScriptType: 'InlineScript'
@@ -340,25 +358,34 @@ jobs:
         $vmCount = $(vmCount)
 
         # --- Resolve the target VM list --------------------------------------------------------
-        # Same block as in the create step above - see the comment there and on the targetVmNames
+        # Same block as in the create step above - see the comment there and on the targetVmNumbers
         # parameter. Repeated rather than shared because inline YAML scripts run in separate
         # processes; keep the two copies in step.
-        $requested = @(('${{ parameters.targetVmNames }}' -split ',').Trim() | Where-Object { $_ })
-        $allVmNames = @(1..$vmCount | ForEach-Object { "$baseVmName$_" })
-        if ($requested -contains '*') {
-          $vmNames = $allVmNames
-        } else {
-          $unknown = @($requested | Where-Object { $allVmNames -notcontains $_ })
-          if ($unknown) {
-            throw "targetVmNames contains name(s) outside ${baseVmName}1..${baseVmName}${vmCount}: $($unknown -join ', ')"
+        $requested = @()
+        foreach ($token in @(('${{ parameters.targetVmNumbers }}' -split ',').Trim() | Where-Object { $_ })) {
+          if ($token -match '^(\d+)\s*-\s*(\d+)$') {
+            $from = [int]$Matches[1]
+            $to = [int]$Matches[2]
+            if ($from -lt 1 -or $to -gt $vmCount -or $from -gt $to) {
+              throw "targetVmNumbers range '$token' is not an ascending range inside 1..${vmCount}."
+            }
+            $requested += $from..$to
+          } elseif ($token -match '^\d+$') {
+            $number = [int]$token
+            if ($number -lt 1 -or $number -gt $vmCount) {
+              throw "targetVmNumbers contains $number, which is outside 1..${vmCount}."
+            }
+            $requested += $number
+          } else {
+            throw "targetVmNumbers contains '$token', which is not a number or a number range like 1-14."
           }
-          # Select from $allVmNames rather than using $requested as typed: -contains is
-          # case-insensitive, but the name is used verbatim as the VM's ComputerName and as the
-          # agent-pool registration name. This also de-dupes and orders by agent number.
-          $vmNames = @($allVmNames | Where-Object { $requested -contains $_ })
         }
+        # Build the names from the numbers rather than from anything typed - the name is used
+        # verbatim as the VM's ComputerName and as the agent-pool registration name. Filtering
+        # 1..$vmCount also de-dupes and orders by agent number.
+        $vmNames = @(1..$vmCount | Where-Object { $requested -contains $_ } | ForEach-Object { "$baseVmName$_" })
         if (-not $vmNames) {
-          Write-Host "##vso[task.logissue type=warning]targetVmNames is empty - no agents will be installed."
+          Write-Host "##vso[task.logissue type=warning]targetVmNumbers is empty - no agents will be installed."
         }
         Write-Host "Target VMs ($($vmNames.Count) of $vmCount): $($vmNames -join ', ')"
 
@@ -585,9 +612,7 @@ jobs:
                     # Desktop-edition-only module and will only load in pwsh through the Windows
                     # PowerShell compatibility session - so do not convert an AWS task to
                     # 'pwsh: true' without testing it.
-                    #
-                    # No per-VM gate here any more: this whole script only runs on the VMs named
-                    # in targetVmNames, so reaching this point already means pwsh is wanted.
+
                     $pwshMinimumVersion = [version]'$(pwshMinimumVersion)'
                     $pwshExe = Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
                     $pwshFound = $null
