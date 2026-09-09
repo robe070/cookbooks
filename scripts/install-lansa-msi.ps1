@@ -237,8 +237,21 @@ try
                     $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
                     throw "Should only be one $ServiceName service"
                 }
-                stop-service $service[0] -Force | Out-Default | Write-Host
-                set-service $ServiceName -StartupType Disabled | Out-Default | Write-Host
+                # Wait for delayed-start dependents to finish starting before we stop them.
+                # Only StartPending can reach Running - waiting on any other pending state
+                # would just burn the full timeout.
+                $service[0].DependentServices | Where-Object { $_.Status -eq 'StartPending' } | ForEach-Object {
+                    try { $_.WaitForStatus('Running', [TimeSpan]::FromSeconds(30)) }
+                    catch { }
+                }
+                try {
+                    stop-service $service[0] -Force
+                    set-service $ServiceName -StartupType Disabled
+                } catch {
+                    $_ | Out-Default | Write-Host
+                    $service  | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
+                    throw "Error stopping $ServiceName service"
+                }
 
                 @(get-service $ServiceName) | Format-Table Name, DisplayName, Status, StartType, DependentServices, ServicesDependedOn | Out-Host
             }
