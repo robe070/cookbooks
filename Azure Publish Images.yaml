@@ -1,3 +1,4 @@
+name: Az-Publish-Images-$(Build.BuildId)
 trigger: none
 
 resources:
@@ -664,8 +665,7 @@ stages:
         instructions: |
           1. ASAP Publish the preview image in the marketplace
           2. Wait for the email “Your offer, LANSA Scalable License, has been published and is now live in the commercial marketplace” before continuing these steps.
-          3. Increment the Test Version Production Variable (TestVersion<SKU>) in the "SKU Version" Variable Group.
-          4. Only now can the pipeline be continued to test the production images.
+          3. Only now can the pipeline be continued to test the production images.
 
 - stage: 'CookbooksMergeAndTag'
   displayName: 'Cookbooks Merge & Tag'
@@ -696,10 +696,11 @@ stages:
 
     - powershell: |
         # Print the Gate variables.
-        if ( $(Gate.IsEnabled) -eq 'True' ) {
+        # Note: $(Gate.*) are macro-expanded as literal text, so they must be quoted.
+        if ( '$(Gate.IsEnabled)' -eq 'True' ) {
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
         } else {
-          Write-Host "Gate.IsEnabled is set to $(Gate.IsEnabled)."
+          Write-Host "Gate.IsEnabled is set to '$(Gate.IsEnabled)'."
         }
       displayName: 'Artifact Check - Output Gate Variable'
 
@@ -892,21 +893,22 @@ stages:
     imageSource: Marketplace
     location: Central US
 
-- template: AzureDevOps\templates\Azure Test Image.yml
-  parameters:
-    stageName: 'w25d150jEuropeNorthProduction'
-    stagedisplayName: 'w25d150j Europe North Production'
-    jobName: 'w25d150jEuropeNorthProduction'
-    jobDisplayname: 'w25d150j Europe North Production'
-    dependsOn: CookbooksMergeAndTag
-    jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
-    Version: w25d-15-0j
-    osName: Windows Server 2025 JPN
-    lansaVersion: V15 GA
-    msiURL: $(msiURLJPNLatest)
-    resourceGroup: BakingDP-Prod-EN-w25d-15-0j
-    imageSource: Marketplace
-    location: North Europe
+# Europe North is not enabled
+# - template: AzureDevOps\templates\Azure Test Image.yml
+#   parameters:
+#     stageName: 'w25d150jEuropeNorthProduction'
+#     stagedisplayName: 'w25d150j Europe North Production'
+#     jobName: 'w25d150jEuropeNorthProduction'
+#     jobDisplayname: 'w25d150j Europe North Production'
+#     dependsOn: CookbooksMergeAndTag
+#     jobcondition: and(succeeded(), or(eq(variables['Build-w25d-15-0j'], 'True'), eq(variables['Build-all'], 'True')))
+#     Version: w25d-15-0j
+#     osName: Windows Server 2025 JPN
+#     lansaVersion: V15 GA
+#     msiURL: $(msiURLJPNLatest)
+#     resourceGroup: BakingDP-Prod-EN-w25d-15-0j
+#     imageSource: Marketplace
+#     location: North Europe
 
 - template: AzureDevOps\templates\Azure Test Image.yml
   parameters:
@@ -939,3 +941,43 @@ stages:
     resourceGroup: BakingDP-Prod-SN-w19d-15-0j
     imageSource: Marketplace
     location: Switzerland North
+
+- stage: 'PipelineCompletionTasks'
+  displayName: 'Pipeline Completion Tasks'
+  dependsOn:
+    - w22d160USEastProduction
+    - w22d150AsiaEastProduction
+    - w22d160jUSEastProduction
+    - w22d150jAsiaEastProduction
+    - w25d160EuropeWestProduction
+    - w25d150AusEastProduction
+    - w19d160UKSouthProduction
+    - w19d150SoutheastAsiaProduction
+    - w25d160jUSCentralProduction
+   # - w25d150jEuropeNorthProduction
+    - w19d160jWestIndiaProduction
+    - w19d150jSwitzerlandNorthProduction
+
+  jobs:
+  - job: 'PipelineCompletionTasks'
+    displayName: 'Pipeline Completion Tasks'
+    pool:
+      name: Default
+    steps:
+    - download: _BuildImageReleaseArtefacts
+      displayName: Downloading artefacts from Build Image Release Artefacts 3.0
+
+    - checkout: self
+      path: _robe070_cookbooks
+
+    # PublishedVersionText is not incremented - it is set to the VersionText of the artefacts
+    # this run has just finished testing in production, read out of the artefact image URLs.
+    - task: PowerShell@2
+      displayName: 'Set PublishedVersionText from tested artefacts'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)   # not exposed to scripts unless mapped
+      inputs:
+        targetType: filePath
+        filePath: '$(Pipeline.Workspace)/_robe070_cookbooks/scripts/Update-LibraryVariable.ps1'
+        arguments: -ArtefactsPath "$(Pipeline.Workspace)/_BuildImageReleaseArtefacts" -Submit
+

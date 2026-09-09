@@ -1,3 +1,5 @@
+name: Az-Publish-Templates-$(Build.BuildId)
+
 trigger: none
 
 resources:
@@ -496,6 +498,9 @@ stages:
   dependsOn:
     - ProductionTestsw19d150
     - ProductionTestsw19d150j
+    - ProductionTestsw19d160j
+    - ProductionTestsw25d150j
+    - ProductionTestsw25d160j
   displayName: Tag azure-quickstart-templates repo
   jobs:
   - job: TagAzureQuickstartTemplatesRepo
@@ -529,10 +534,11 @@ stages:
 
     - powershell: |
         # Print the Gate variables.
-        if ( $(Gate.IsEnabled) -eq 'True' ) {
+        # Note: $(Gate.*) are macro-expanded as literal text, so they must be quoted.
+        if ( '$(Gate.IsEnabled)' -eq 'True' ) {
             Write-Host "Gate.IsEnabled: $(Gate.IsEnabled); Gate.ImageUrl: $(Gate.ImageUrl) Gate.Sku: $(Gate.Sku)" | Out-Default
         } else {
-          Write-Host "Gate.IsEnabled is set to $(Gate.IsEnabled)."
+          Write-Host "Gate.IsEnabled is set to '$(Gate.IsEnabled)'."
         }
       displayName: 'Artifact Check - Output Gate Variable'
 

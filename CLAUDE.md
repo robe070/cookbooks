@@ -28,6 +28,22 @@ baked into the published image.
 - Full detail, the parked 5.1→7 items, and the required Az module set:
   [docs/powershell-environment.md](docs/powershell-environment.md).
 
+## Azure DevOps agent VMs (`create agents.yml`)
+
+- **The agents do NOT self-update.** Whatever version is installed is the version an agent keeps.
+  Rob upgrades them **by hand through the Azure DevOps portal UI** — do not write code or comments
+  that assume the server pushes agent updates after registration.
+- Consequence: anything that re-installs an agent is a **permanent downgrade** to the pinned zip in
+  the pipeline, not a temporary one. The install must be skipped whenever an agent already exists.
+- Agent detection must **not** assume `C:\agent`. A portal install lands wherever it was unpacked
+  (`C:\agents`, `C:\azagent\A1`), so the pipeline looks for the `vstsagent.<org>.<pool>.<agent>`
+  service and derives the agent root from its binary path. Missing an existing agent is not merely
+  a redundant install — the install path deletes that agent's **pool registration by name** first.
+- Azure DevOps caps a single YAML **expression at 21000 characters**, and an `Inline:` block scalar
+  containing a `${{ }}` substitution counts as **one expression** — comments inside it count too.
+  The install step hit this. Long-form rationale therefore lives in YAML comments **above** the
+  task, outside the expression, with terse pointers inline.
+
 ## Knowledge base
 
 Deep-dives on hard-won, non-obvious behaviour (read the relevant one before touching that area):
