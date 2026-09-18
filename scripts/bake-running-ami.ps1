@@ -143,11 +143,19 @@ try
     } elseif ($VersionText -like "w19*"){
         $Platform= 'Win2019'
         $Win2012 = $false
+    } elseif ($VersionText -like "w25*"){
+        $Platform= 'Win2025'
+        $Win2012 = $false
     } else {
         throw 'VersionText must start with one of the following: w12, w16 or w19'
     }
 
     Write-Host "Language = $Language, Platform = $Platform"
+
+    if ( $Cloud -eq 'AWS' ) {
+        Import-Module AWS.Tools.Common
+        Import-Module AWS.Tools.EC2
+    }
 
     Write-Host( "$(Log-Date) Region to us-east-1" )
     Set-DefaultAWSRegion -Region us-east-1
@@ -356,7 +364,7 @@ try
             Write-Host "$(Log-Date) Waiting for AMI to become available"
             $amiProperties = Get-EC2Image -ImageIds $amiID
 
-            if ( $amiProperties.ImageState -eq "available" )
+            if ( $amiProperties.State -eq "available" )
             {
                 break
             }

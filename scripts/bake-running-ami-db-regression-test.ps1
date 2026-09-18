@@ -26,9 +26,9 @@ $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Set-StrictMode -Version Latest
 
-Bake-RunningAMI -VersionText 'w19d-15-0-DBTST' `
-            -LansaVersion '150060' `
-            -VersionMajor 15 `
+Bake-RunningAMI -VersionText 'w25-DB-REGRESSION-TEST' `
+            -LansaVersion '160000' `
+            -VersionMajor 16 `
             -VersionMinor 0 `
             -KeyPairPath "$ENV:USERPROFILE\\.ssh\\AzureDevOps.pem" `
             -Title 'Database Regression Test' `

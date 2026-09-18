@@ -255,6 +255,11 @@ try
 
     Write-Host "Language = $Language, Platform = $Platform"
 
+    if ( $Cloud -eq 'AWS' ) {
+        Import-Module AWS.Tools.Common
+        Import-Module AWS.Tools.EC2
+    }
+
     if ( $UploadInstallationImageChanges -and $InstallIDE) {
         Write-Host ("$(Log-Date) Upload any changes to current installation image")
 
@@ -347,7 +352,7 @@ try
                 Wait-EC2State $TaggedInstance.ResourceId "Terminated"
                 Write-Host( "Security group = $($script:SG)")
             }
-            Create-Ec2SecurityGroup $ExternalIPAddresses
+            New-Ec2SecurityGroup $ExternalIPAddresses
         }
     }
 
@@ -364,7 +369,7 @@ try
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         if ( -not $OnlySaveImage) {
-            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
+            New-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
         }
 
         $Script:vmname = "Bake $Script:instancename"
@@ -1285,7 +1290,7 @@ $jsonObject = @"
             Write-Host "$(Log-Date) Waiting for AMI to become available"
             $amiProperties = Get-EC2Image -ImageIds $amiID
 
-            if ( $amiProperties.ImageState -eq "available" )
+            if ( $amiProperties.State -eq "available" )
             {
                 break
             }
