@@ -4,6 +4,33 @@ Applies to the **local** bake orchestration host only (see the local-vs-remote m
 [../CLAUDE.md](../CLAUDE.md)). Remote blocks run on the target VM's own PowerShell and are
 unaffected.
 
+## Module upgrades leave "husks" when a session has the old version loaded
+
+A .NET assembly **cannot be unloaded** for the life of the process that loaded it — `Remove-Module`
+unbinds the cmdlets but does not release the DLL. So upgrading a module from a session that has
+ever imported it deletes the `.psd1`, `.psm1`, `.ps1xml` and `.xml` files of the old version and
+**fails on every `.dll`**. What is left is a *husk*: a version folder containing nothing but locked
+DLLs.
+
+Observed on 2026-09-22 upgrading `AWS.Tools` 5.0.302 → 5.0.303: eight husks, e.g.
+`AWS.Tools.Common\5.0.302` reduced from 31 files to 10, all DLLs.
+
+Two consequences, and they pull in opposite directions:
+
+- **A fresh session is unaffected.** A husk has no manifest, so `Get-Module -ListAvailable` cannot
+  see it and the new version resolves normally. The husk is disk clutter, one folder per release.
+- **The session that did the upgrade breaks.** Its loaded module still points at a format file
+  that no longer exists, and every subsequent `Import-Module` fails with
+  `Could not find file '…\<old-version>\<Module>.Format.ps1xml'`.
+
+The trap is that the session holding the locks is usually the session you cannot close — on the dev
+box it is the one holding the MFA credentials. Storing those credentials in a profile is what
+breaks the dependency; see **AWS credentials in scripts** in [../CLAUDE.md](../CLAUDE.md).
+
+To clean up: close **every** PowerShell session, then delete the stale version folders from a fresh
+shell. Check for locks before deleting rather than deleting with `-ErrorAction Continue`, which is
+what manufactures husks in the first place.
+
 ## Az modules fail in the VS Code PowerShell Integrated Console (WinPS 5.1 only)
 
 **Status: resolved on the current bake host** — it runs **PowerShell 7.6.4 (Core)**, which isolates

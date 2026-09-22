@@ -15,9 +15,11 @@
 # pre-filled with '1-14'. The default is also what a schedule or pipeline-resource trigger
 # would use if this ever gets queued non-interactively.
 #
-# ${{ parameters }} is substituted into this file's text at compile time, which is what
-# carries the value into the inline scripts and on into the scriptblock that RunCommand
-# ships to each VM. It is therefore pasted verbatim - keep it to digits, commas and hyphens.
+# The value reaches the inline scripts, and the scriptblock RunCommand ships to each VM, in two
+# hops: ${{ parameters.targetVmNumbers }} is substituted at compile time into the
+# targetVmNumbers VARIABLE below, and the scripts then read that as the runtime macro
+# $(targetVmNumbers). See the comment on that variable for why it is not referenced directly.
+# Either way it is pasted verbatim into PowerShell - keep it to digits, commas and hyphens.
 parameters:
 - name: targetVmNumbers
   displayName: 'Agent numbers to process (e.g. 1-14, or 11,14)'
@@ -30,6 +32,14 @@ trigger:
 variables:
 - group: Azure Logins
 # - group: Agents
+# Compile-time copy of the parameter, so the Inline scripts below can reach it as the RUNTIME
+# macro $(targetVmNumbers) instead of the template expression ${{ parameters.targetVmNumbers }}.
+# That is not cosmetic: an Inline block containing a ${{ }} substitution is evaluated as a single
+# YAML expression, and Azure DevOps caps one expression at 21000 characters - which the install
+# step had already reached. With no ${{ }} left inside it, the block is an ordinary string and the
+# cap no longer applies, so comments and code can live in the script again.
+- name: targetVmNumbers
+  value: ${{ parameters.targetVmNumbers }}
 - name: location
   value: 'eastus'
 - name: agentResourceGroup
@@ -119,7 +129,7 @@ jobs:
         # as it is parsed, so the error names the token the user typed rather than listing every
         # number it expanded to.
         $requested = @()
-        foreach ($token in @(('${{ parameters.targetVmNumbers }}' -split ',').Trim() | Where-Object { $_ })) {
+        foreach ($token in @(('$(targetVmNumbers)' -split ',').Trim() | Where-Object { $_ })) {
           if ($token -match '^(\d+)\s*-\s*(\d+)$') {
             $from = [int]$Matches[1]
             $to = [int]$Matches[2]
@@ -342,11 +352,13 @@ jobs:
   # ===========================================================================================
   # Install DevOps Agents - rationale
   #
-  # These notes live out here, not inside the Inline script below, because Azure DevOps caps a
-  # single YAML expression at 21000 characters and the whole Inline block counts as ONE
-  # expression (it contains a ${{ }} substitution). Comments at this level are outside it and
-  # cost nothing. If the script grows past the cap again, move prose out here rather than
-  # deleting it.
+  # These notes live out here for readability, not necessity. They USED to be forced out: an
+  # Inline block containing a ${{ }} substitution counts as ONE YAML expression, Azure DevOps
+  # caps an expression at 21000 characters, and this block had reached 20745 of them. The
+  # ${{ parameters.targetVmNumbers }} reference has since been replaced by the runtime macro
+  # $(targetVmNumbers) (see the variable at the top), so the block is now a plain string with
+  # no cap at all. Keep new prose out here anyway - it keeps the script readable - but a
+  # necessary comment inside the script is no longer something to ration.
   #
   # TARGET VM LIST - the same resolution block as the create step; see the comment on the
   # targetVmNumbers parameter at the top of the file. Duplicated rather than shared because
@@ -390,8 +402,48 @@ jobs:
   # Pester - the auto-installed 3.4.0 is renamed aside so 5.6.1 is what loads. Ownership has to
   # be taken first because the directory is owned by TrustedInstaller.
   #
-  # Az is NOT pinned, unlike AWSPowerShell 4.1.554 (pinned because later versions were broken
-  # at the time). This pipeline is how all agents get, and are upgraded to, the latest Az on
+  # AWS TOOLS - the agents used to get the MONOLITHIC AWSPowerShell 4.1.554, which is a
+  # Desktop-edition-only module. Under pwsh 7 it can only load through the Windows PowerShell
+  # compatibility session, and that session is NEVER engaged by implicit auto-loading - only by
+  # an explicit Import-Module. Since none of the AWS scripts import anything, every AWS cmdlet
+  # simply did not exist under pwsh: 'The term Get-EC2Instance is not recognized'. It worked
+  # under powershell.exe and failed under pwsh.exe on the same VM, which is what made it look
+  # like a missing install rather than an edition problem.
+  #
+  # The replacement is the MODULAR AWS.Tools.* set, which is Core AND Desktop, so the same
+  # install serves 5.1 and pwsh 7 and auto-loading works in both. Installed -Scope AllUsers from
+  # this RunCommand script (which runs under the VM's Windows PowerShell 5.1) they land in
+  # C:\Program Files\WindowsPowerShell\Modules, a path BOTH shells keep on their default
+  # PSModulePath. Nothing needs Import-Module, which is why the scripts were left alone.
+  #
+  # The two module sets MUST NOT COEXIST: both export Get-EC2Instance, Get-CFNStack and friends,
+  # so auto-loading would resolve to whichever PSModulePath entry came first. AWSPowerShell is
+  # therefore uninstalled before AWS.Tools goes on. Deletion can be blocked by a DLL still loaded
+  # in another process, so the fallback renames the directory aside - a rename succeeds with open
+  # handles where a delete does not, the same trick already used for Pester 3.4.0.
+  #
+  # The module LIST is derived from the cmdlets the scripts actually call, across both this repo
+  # and db-regression. Adding a script that calls a new service means adding its module here.
+  # ElasticLoadBalancing is classic ELB (Get-ELBInstanceHealth), not ELBv2.
+  #
+  # AWS.Tools is NOT pinned - this pipeline is how agents get and keep the current release. But
+  # the family must land on ONE version: every AWS.Tools.<Service> manifest declares a
+  # RequiredModules dependency on the EXACTLY matching AWS.Tools.Common, and AWS ships the whole
+  # family in lockstep. So the target version is resolved once from AWS.Tools.Common and then
+  # applied to all of them with -RequiredVersion, rather than asking each module for 'latest'
+  # independently - which would skew the set if AWS published a release mid-run. Superseded
+  # versions are DELETED rather than left side by side, for the same reason: a leftover older
+  # AWS.Tools.EC2 can drag a mismatched AWS.Tools.Common back in. Only modules in the list are
+  # touched. As with Az, a failed Find-Module falls back to installing rather than skipping.
+  #
+  # The install ends by PROBING that the cmdlets resolve by auto-loading, under 5.1 and again
+  # under pwsh once it is installed. That probe is the whole point: it reproduces, at install
+  # time, the exact resolution the scripts depend on at run time, so this class of failure
+  # surfaces here instead of halfway through a bake. It runs in a CHILD process because a module
+  # this script has already imported would otherwise mask a broken auto-load.
+  #
+  # Az is likewise not pinned. This pipeline is
+  # how all agents get, and are upgraded to, the latest Az on
   # every run - the bake's Trusted Launch New-AzVMConfig -SecurityType needs a current
   # Az.Compute (verified on Az 16.1.0 / Az.Compute 11.7.0). Installed versions are logged first
   # so an upgrade can be backed out.
@@ -410,9 +462,7 @@ jobs:
   # reason as Az: Microsoft-hosted agents track current stable pwsh, so tracking it here is
   # what keeps the two kinds of agent interchangeable. The modules installed above land in
   # C:\Program Files\WindowsPowerShell\Modules, which pwsh 7 on Windows keeps in its default
-  # PSModulePath, so Az and Pester 5.6.1 load natively under pwsh. AWSPowerShell 4.1.554 is the
-  # Desktop-edition-only module and loads under pwsh only through the Windows PowerShell
-  # compatibility session - do not convert an AWS task to 'pwsh: true' without testing it.
+  # PSModulePath, so Az, Pester 5.6.1 and the AWS.Tools set all load natively under pwsh.
   # aka.ms/install-powershell.ps1 resolves the latest stable release and waits for msiexec,
   # unlike the fire-and-forget 'msiexec /i <url>' used for the AWS CLI, which is why the
   # version check immediately after it can be trusted. pwsh.exe is version-checked by asking
@@ -452,7 +502,7 @@ jobs:
 
         # --- Resolve the target VM list (see the task notes above) -----------------------------
         $requested = @()
-        foreach ($token in @(('${{ parameters.targetVmNumbers }}' -split ',').Trim() | Where-Object { $_ })) {
+        foreach ($token in @(('$(targetVmNumbers)' -split ',').Trim() | Where-Object { $_ })) {
           if ($token -match '^(\d+)\s*-\s*(\d+)$') {
             $from = [int]$Matches[1]
             $to = [int]$Matches[2]
@@ -661,6 +711,12 @@ jobs:
                         Write-Host "Agent already installed at $agentRoot. Skipping install."
                     }
 
+                    # Every Install-Module below needs the NuGet provider. It used to be installed
+                    # inside the Pester 5.6.1 branch, so on a VM that already had Pester it was
+                    # skipped and a later Install-Module could fail on a provider prompt. Hoisted
+                    # here so it is unconditional; it is a no-op once the provider is present.
+                    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+
                     Write-Host 'Ensure correct version of Pester'
                     if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0') {
                         if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled') {
@@ -677,22 +733,132 @@ jobs:
                     }
 
                     if (-not (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\5.6.1')) {
-                        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
                         Install-Module Pester -RequiredVersion 5.6.1 -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck
                         Write-Host 'Correct Pester version now installed.'
                     } else {
                         Write-Host 'Correct Pester version already installed. Skipping.'
                     }
 
-                    Write-Host 'Install working version of AWS Powershell'
-                    $AWSModule = Get-InstalledModule -Name AWSPowerShell -ErrorAction Ignore
-                    if ( $AWSModule -and $AWSModule.Version -ne '4.1.554') {
-                      throw 'AWSPowerShell module must be version 4.1.554. It is currently ${AWSModule.Version}'
+                    # --- AWS Tools for PowerShell (read the AWS TOOLS task notes above) --------
+                    # Modular AWS.Tools.*, always the current release, replacing the Desktop-only
+                    # monolithic AWSPowerShell. The list is derived from the cmdlets the scripts
+                    # in this repo and db-regression actually call - add a module when a script
+                    # starts using a new service.
+                    $awsToolsModules = @(
+                        'AWS.Tools.Common'                    # Set-DefaultAWSRegion, credentials
+                        'AWS.Tools.EC2'
+                        'AWS.Tools.CloudFormation'
+                        'AWS.Tools.RDS'
+                        'AWS.Tools.SecretsManager'            # Get-SECSecretValue
+                        'AWS.Tools.SimpleSystemsManagement'   # Send-SSMCommand
+                        'AWS.Tools.S3'
+                        'AWS.Tools.AutoScaling'               # Get-ASTag, Suspend-ASProcess
+                        'AWS.Tools.ElasticLoadBalancing'      # classic ELB, NOT ELBv2
+                        'AWS.Tools.SimpleNotificationService' # Publish-SNSMessage
+                        'AWS.Tools.SecurityToken'             # Get-STSSessionToken
+                        'AWS.Tools.ECR'                       # Get-ECRLoginCommand
+                    )
+                    $allUsersModules = Join-Path $env:ProgramFiles 'WindowsPowerShell\Modules'
+
+                    # The monolithic module must go before the modular set arrives - they export
+                    # the same cmdlet names and auto-loading cannot choose between them.
+                    foreach ($legacyName in @('AWSPowerShell', 'AWSPowerShell.NetCore')) {
+                        $legacyPath = Join-Path $allUsersModules $legacyName
+                        $disabledPath = "${legacyPath}-disabled"
+                        if (Test-Path $disabledPath) {
+                            # Left by an earlier run whose delete was blocked; owned by the
+                            # installer, so take ownership first (same as Pester 3.4.0 above).
+                            takeown /f $disabledPath /r /d y | Out-Null
+                            icacls $disabledPath /grant administrators:F /t /c | Out-Null
+                            Remove-Item $disabledPath -Recurse -Force -ErrorAction Ignore
+                        }
+                        if (Test-Path $legacyPath) {
+                            Write-Host "Removing monolithic $legacyName - it conflicts with AWS.Tools.*"
+                            Uninstall-Module -Name $legacyName -AllVersions -Force -ErrorAction Ignore
+                            if (Test-Path $legacyPath) {
+                                Remove-Item $legacyPath -Recurse -Force -ErrorAction Ignore
+                            }
+                            if (Test-Path $legacyPath) {
+                                # A loaded DLL blocks the delete but not a directory rename.
+                                Rename-Item $legacyPath "${legacyName}-disabled" -Force
+                                Write-Host "$legacyName was in use; renamed aside instead of deleted."
+                            }
+                            Write-Host "$legacyName removed from the module path."
+                        }
                     }
-                    if ( -not $AWSModule) {
-                      Install-Module -Name AWSPowerShell -RequiredVersion 4.1.554 -AllowClobber -Force | Out-Default | Write-Host
+
+                    # Latest, not pinned - but the whole family must land on ONE version, so the
+                    # target is resolved ONCE from AWS.Tools.Common and then applied to all of
+                    # them with -RequiredVersion. Asking each module for 'latest' independently
+                    # would skew the set if AWS published mid-run, and a skewed set will not load.
+                    $awsToolsTarget = $null
+                    try {
+                        $awsToolsTarget = (Find-Module -Name AWS.Tools.Common -Repository PSGallery -ErrorAction Stop).Version
+                        Write-Host "Latest AWS.Tools on PSGallery is $awsToolsTarget"
+                    } catch {
+                        # Same escape hatch as the Az block: if the gallery cannot be queried,
+                        # install unversioned rather than skipping, then adopt whatever arrived.
+                        Write-Host "PSGallery lookup failed, installing unversioned: $($_.Exception.Message)"
                     }
-                    Get-InstalledModule -Name AWSPowerShell | Out-Default | Write-Host
+
+                    foreach ($awsModule in $awsToolsModules) {
+                        $present = @(Get-Module -ListAvailable -Name $awsModule |
+                                     Where-Object { $awsToolsTarget -and $_.Version -eq [version]$awsToolsTarget })
+                        if ($present) {
+                            # Install-Module -Force re-downloads even when the version is identical,
+                            # and there are a dozen modules - worth the check on every run.
+                            Write-Host "$awsModule $awsToolsTarget already installed. Skipping."
+                            continue
+                        }
+                        Write-Host "Installing $awsModule $(if ($awsToolsTarget) { $awsToolsTarget } else { '(latest)' })"
+                        $installArgs = @{
+                            Name        = $awsModule
+                            Scope       = 'AllUsers'
+                            Force       = $true
+                            AllowClobber = $true
+                        }
+                        if ($awsToolsTarget) { $installArgs['RequiredVersion'] = $awsToolsTarget }
+                        Install-Module @installArgs | Out-Default | Write-Host
+                    }
+
+                    # Adopt what actually landed, so the prune below is correct even on the
+                    # unversioned fallback path above.
+                    if (-not $awsToolsTarget) {
+                        $awsToolsTarget = (Get-Module -ListAvailable -Name AWS.Tools.Common |
+                                           Sort-Object Version | Select-Object -Last 1).Version
+                        Write-Host "Installed AWS.Tools version is $awsToolsTarget"
+                    }
+
+                    # Replace rather than accumulate: every AWS.Tools.<Service> manifest requires
+                    # the EXACTLY matching AWS.Tools.Common, so a leftover older module can drag a
+                    # mismatched Common back in. Only the modules in the list above are touched.
+                    foreach ($awsModule in $awsToolsModules) {
+                        Get-Module -ListAvailable -Name $awsModule |
+                            Where-Object { $_.Version -ne [version]$awsToolsTarget } |
+                            ForEach-Object {
+                                Write-Host "Removing superseded $awsModule $($_.Version)"
+                                Remove-Item $_.ModuleBase -Recurse -Force -ErrorAction Ignore
+                            }
+                    }
+                    Write-Host 'AWS.Tools modules now installed:'
+                    Get-Module -ListAvailable -Name AWS.Tools.* |
+                        Sort-Object Name, Version | Format-Table Name, Version -AutoSize |
+                        Out-Default | Write-Host
+
+                    # Prove AUTO-LOADING resolves them, because that is how every AWS script finds
+                    # its cmdlets - none of them call Import-Module. Run in a CHILD process, so a
+                    # module this script already imported cannot mask a failure. One probe per
+                    # module that more than one script depends on.
+                    $awsProbes = @('Set-DefaultAWSRegion', 'Get-EC2Instance', 'Get-CFNStack',
+                                   'Get-RDSDBInstance', 'Get-SECSecretValue', 'Send-SSMCommand',
+                                   'Write-S3Object', 'Get-ASTag', 'Get-ELBInstanceHealth')
+                    $probeList = ($awsProbes | ForEach-Object { "'$_'" }) -join ','
+                    $probeCmd = "@($probeList) | Where-Object { -not (Get-Command `$_ -ErrorAction Ignore) }"
+                    $missingIn51 = @(& powershell.exe -NoProfile -Command $probeCmd)
+                    if ($missingIn51) {
+                        throw "AWS.Tools installed but these do not auto-load under Windows PowerShell 5.1: $($missingIn51 -join ', ')"
+                    }
+                    Write-Host 'All AWS cmdlets auto-load under Windows PowerShell 5.1.'
 
                     Write-Host 'Install AWS CLI'
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
@@ -749,6 +915,18 @@ jobs:
                         Write-Host "PowerShell $pwshNow installed."
                         Write-Host 'pwsh will not be usable by the agent service until this VM reboots.'
                         $rebootNeeded = $true
+                    }
+
+                    # The same auto-load probe under pwsh 7 - this is the shell the failure was
+                    # actually reported on. AWS.Tools is Core+Desktop and lives on a path pwsh
+                    # shares with 5.1, so passing here is what proves the monolithic-module
+                    # problem is gone rather than merely hidden.
+                    if (Test-Path $pwshExe) {
+                        $missingInPwsh = @(& $pwshExe -NoProfile -Command $probeCmd)
+                        if ($missingInPwsh) {
+                            throw "AWS.Tools installed but these do not auto-load under pwsh 7: $($missingInPwsh -join ', ')"
+                        }
+                        Write-Host 'All AWS cmdlets auto-load under pwsh 7.'
                     }
 
                     # --- Reboot (see the task notes above) --------------------------------------
