@@ -352,7 +352,13 @@ try
                 Wait-EC2State $TaggedInstance.ResourceId "Terminated"
                 Write-Host( "Security group = $($script:SG)")
             }
-            New-Ec2SecurityGroup $ExternalIPAddresses
+            # Create-, NOT New-: these are the local helpers in dot-AWSTools.ps1 and
+            # dot-Create-EC2Instance.ps1, and the name must not collide with the real AWS cmdlets.
+            # The helpers CALL New-EC2SecurityGroup and New-EC2Instance internally, so renaming
+            # them to those names makes them recurse into themselves. Renaming only the call sites
+            # (as happened here) is worse still - the calls silently bind to the real cmdlets,
+            # which reject -VersionText and treat the IP list as a group name.
+            Create-Ec2SecurityGroup $ExternalIPAddresses
         }
     }
 
@@ -369,7 +375,7 @@ try
         Write-Host "$(Log-Date) Using Base Image $ImageName $Script:ImageId"
 
         if ( -not $OnlySaveImage) {
-            New-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
+            Create-EC2Instance $Script:Imageid $script:keypair $script:SG -InstanceType 't3.large' -VersionText $VersionText
         }
 
         $Script:vmname = "Bake $Script:instancename"
@@ -1304,7 +1310,7 @@ $jsonObject = @"
 
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
-        $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
+        $amiBlockDeviceMapping = $amiProperties.BlockDeviceMappings # List of Amazon.Ec2.Model.BlockDeviceMapping
         $amiBlockDeviceMapping.ebs | `
         ForEach-Object -Process {
             if ( $_ -and $_.SnapshotID )

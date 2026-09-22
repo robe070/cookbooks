@@ -416,11 +416,25 @@ jobs:
   # C:\Program Files\WindowsPowerShell\Modules, a path BOTH shells keep on their default
   # PSModulePath. Nothing needs Import-Module, which is why the scripts were left alone.
   #
-  # The two module sets MUST NOT COEXIST: both export Get-EC2Instance, Get-CFNStack and friends,
-  # so auto-loading would resolve to whichever PSModulePath entry came first. AWSPowerShell is
-  # therefore uninstalled before AWS.Tools goes on. Deletion can be blocked by a DLL still loaded
-  # in another process, so the fallback renames the directory aside - a rename succeeds with open
-  # handles where a delete does not, the same trick already used for Pester 3.4.0.
+  # The monolithic AWSPowerShell is deliberately LEFT IN PLACE. An earlier version of this step
+  # uninstalled it, on the reasoning that two module sets exporting Get-EC2Instance and
+  # Get-CFNStack cannot both be on the PSModulePath. That reasoning does not survive contact with
+  # the release pipelines: the 'AWS Tools for Windows PowerShell Script' task (AWSPowerShellModule
+  # Script) begins with
+  #     if (!(Get-Module -Name AWSPowerShell -ListAvailable)) { Install-Module -Name AWSPowerShell
+  #       -Scope CurrentUser ... }
+  # followed by an explicit Import-Module. So removing it from C:\Program Files\WindowsPowerShell\
+  # Modules does not get rid of it - the next release run reinstalls it into the AGENT USER'S
+  # profile, where this pipeline can neither see nor manage it, and both families end up on the
+  # box anyway. The uninstall cost an install per agent and made the outcome worse.
+  #
+  # Coexistence is safe in practice, and it was measured rather than assumed. Under AWSPowerShell
+  # 4.1.554 and under AWS.Tools 5.0.303 the behaviours db-regression relies on are identical:
+  # Test-CFNStack returns False for a missing or deleted-by-name stack and True for a live one in
+  # any status, (Get-CFNStack).StackStatus.Value still yields the status string, and a missing
+  # stack still raises InvalidOperationException wrapping ValidationError. Whichever family
+  # auto-loading picks, the scripts behave the same. An explicit Import-Module beats auto-loading
+  # for anything that ever needs to be certain.
   #
   # The module LIST is derived from the cmdlets the scripts actually call, across both this repo
   # and db-regression. Adding a script that calls a new service means adding its module here.
@@ -740,8 +754,9 @@ jobs:
                     }
 
                     # --- AWS Tools for PowerShell (read the AWS TOOLS task notes above) --------
-                    # Modular AWS.Tools.*, always the current release, replacing the Desktop-only
-                    # monolithic AWSPowerShell. The list is derived from the cmdlets the scripts
+                    # Modular AWS.Tools.*, always the current release. Core AND Desktop, so it
+                    # serves pwsh 7 as well as 5.1 - which the Desktop-only monolithic
+                    # AWSPowerShell never did. The list is derived from the cmdlets the scripts
                     # in this repo and db-regression actually call - add a module when a script
                     # starts using a new service.
                     $awsToolsModules = @(
@@ -758,33 +773,11 @@ jobs:
                         'AWS.Tools.SecurityToken'             # Get-STSSessionToken
                         'AWS.Tools.ECR'                       # Get-ECRLoginCommand
                     )
-                    $allUsersModules = Join-Path $env:ProgramFiles 'WindowsPowerShell\Modules'
-
-                    # The monolithic module must go before the modular set arrives - they export
-                    # the same cmdlet names and auto-loading cannot choose between them.
-                    foreach ($legacyName in @('AWSPowerShell', 'AWSPowerShell.NetCore')) {
-                        $legacyPath = Join-Path $allUsersModules $legacyName
-                        $disabledPath = "${legacyPath}-disabled"
-                        if (Test-Path $disabledPath) {
-                            # Left by an earlier run whose delete was blocked; owned by the
-                            # installer, so take ownership first (same as Pester 3.4.0 above).
-                            takeown /f $disabledPath /r /d y | Out-Null
-                            icacls $disabledPath /grant administrators:F /t /c | Out-Null
-                            Remove-Item $disabledPath -Recurse -Force -ErrorAction Ignore
-                        }
-                        if (Test-Path $legacyPath) {
-                            Write-Host "Removing monolithic $legacyName - it conflicts with AWS.Tools.*"
-                            Uninstall-Module -Name $legacyName -AllVersions -Force -ErrorAction Ignore
-                            if (Test-Path $legacyPath) {
-                                Remove-Item $legacyPath -Recurse -Force -ErrorAction Ignore
-                            }
-                            if (Test-Path $legacyPath) {
-                                # A loaded DLL blocks the delete but not a directory rename.
-                                Rename-Item $legacyPath "${legacyName}-disabled" -Force
-                                Write-Host "$legacyName was in use; renamed aside instead of deleted."
-                            }
-                            Write-Host "$legacyName removed from the module path."
-                        }
+                    # The monolithic AWSPowerShell is left alone - see the AWS TOOLS task notes.
+                    # Log what is there so a resolution problem can be read off the build log.
+                    $legacy = @(Get-Module -ListAvailable -Name AWSPowerShell, AWSPowerShell.NetCore)
+                    if ($legacy) {
+                        $legacy | ForEach-Object { Write-Host "Monolithic $($_.Name) $($_.Version) present at $($_.ModuleBase) - left in place." }
                     }
 
                     # Latest, not pinned - but the whole family must land on ONE version, so the

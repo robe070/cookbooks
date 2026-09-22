@@ -112,7 +112,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
         Write-Host "$(Log-Date) Waiting for AMI to become available"
         $amiProperties = Get-EC2Image -Region 'us-east-1' -ImageIds $amiID
 
-        if ( $amiProperties.ImageState -eq "available" )
+        if ( $amiProperties.State -eq "available" )
         {
             break
         }
@@ -122,7 +122,7 @@ for ($i=0; $i -lt $AMIList.Length; $i++ ) {
 
     # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
-    $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
+    $amiBlockDeviceMapping = $amiProperties.BlockDeviceMappings # List of Amazon.Ec2.Model.BlockDeviceMapping
     $amiBlockDeviceMapping.ebs | `
     ForEach-Object -Process {
         if ( $_ -and $_.SnapshotID )
