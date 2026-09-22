@@ -44,6 +44,25 @@ baked into the published image.
   The install step hit this. Long-form rationale therefore lives in YAML comments **above** the
   task, outside the expression, with terse pointers inline.
 
+## AWS credentials in scripts
+
+- The dev box authenticates with **MFA**. [scripts/AWSMFALogin.ps1](scripts/AWSMFALogin.ps1) obtains a
+  12-hour session token and stores it as the **`mfa`** profile (`Set-AWSCredential -StoreAs mfa`) as
+  well as setting it for the current session.
+- Any new script meant to be runnable on the dev box therefore takes
+  `[string]$ProfileName = 'mfa'` — so it works from a **fresh** shell, not only from the one that
+  ran the MFA login.
+- **That profile does not exist in a pipeline.** Agents get credentials from the environment
+  (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_SESSION_TOKEN`, injected by the AWS task)
+  or from EC2 instance metadata. So apply the profile **only if it exists**, never unconditionally:
+  `if (Get-AWSCredential -ProfileName $ProfileName -ErrorAction Ignore) { Set-AWSCredential -ProfileName $ProfileName }`.
+  `Set-AWSCredential` on an absent profile throws and would mask a perfectly good credential source.
+- Why the stored profile matters beyond convenience: without it, every AWS script has to run in the
+  one long-lived session that holds the credentials — and that session also holds the `AWS.Tools`
+  DLLs open, since .NET cannot unload an assembly. Superseded module versions then cannot be
+  deleted during an upgrade, leaving **husks** (manifests and format files gone, locked DLLs left),
+  which break that session's imports. See [docs/powershell-environment.md](docs/powershell-environment.md).
+
 ## Knowledge base
 
 Deep-dives on hard-won, non-obvious behaviour (read the relevant one before touching that area):
