@@ -378,7 +378,7 @@ try
 
         # Add tags to snapshots associated with the AMI using Amazon.EC2.Model.EbsBlockDevice
 
-        $amiBlockDeviceMapping = $amiProperties.BlockDeviceMapping # Get Amazon.Ec2.Model.BlockDeviceMapping
+        $amiBlockDeviceMapping = $amiProperties.BlockDeviceMappings # Get Amazon.Ec2.Model.BlockDeviceMappings
         $amiBlockDeviceMapping.ebs | `
         ForEach-Object -Process {
             if ( $_ -and $_.SnapshotID )
