@@ -736,9 +736,25 @@ jobs:
                         if (Test-Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled') {
                           # Take ownership (/r recursive, /d y auto-confirms), grant Administrators
                           # full control (/t all sub-items, /c continue on error), then delete.
-                          takeown /f "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /r /d y
-                          icacls "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /grant administrators:F /t /c
-                          Remove-Item -Path "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" -Force -Recurse
+                          #
+                          # Both are silenced because both print one line PER FILE - roughly 200
+                          # lines for Pester 3.4.0 - and Invoke-AzVMRunCommand returns only the LAST
+                          # 4096 bytes of each output stream. That spam alone overran the budget and
+                          # pushed every earlier message, from 'Ensure correct version of Pester'
+                          # onwards, out of the build log. The full record is the transcript on the
+                          # VM at C:\install-log.txt; the build log only ever gets the tail, so
+                          # nothing in here should print per-file detail.
+                          $aclOutput = @()
+                          $aclOutput += takeown /f "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /r /d y
+                          $aclOutput += icacls "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" /grant administrators:F /t /c
+                          try {
+                            Remove-Item -Path "C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0-disabled" -Force -Recurse
+                          } catch {
+                            # The permissions work existed to make this delete possible, so if it
+                            # failed the suppressed output is suddenly the interesting part.
+                            $aclOutput | Out-Default | Write-Host
+                            throw
+                          }
                         }
                         Rename-Item -Path 'C:\Program Files\WindowsPowerShell\Modules\Pester\3.4.0' -NewName '3.4.0-disabled'
                         Write-Host 'Auto-installed Pester version now disabled'
@@ -881,13 +897,23 @@ jobs:
                     msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
 
                     # Az PowerShell - NOT pinned, skipped when already latest. See notes above.
-                    Write-Host 'Az versions installed (logged so an upgrade can be backed out):'
-                    Get-InstalledModule -ErrorAction Ignore |
-                        Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' } |
-                        Sort-Object Name, Version | Format-Table Name, Version -AutoSize | Out-Default | Write-Host
-                    $azInstalled = Get-InstalledModule -Name Az -ErrorAction Ignore |
+                    #
+                    # Only the Az META-MODULE version is logged, deliberately. It is the version an
+                    # upgrade would be rolled back TO, and the ~80 Az.* submodules it pulls in are
+                    # implied by it. This used to print the full Name/Version table, which cost
+                    # ~3.5KB - and since Invoke-AzVMRunCommand returns only the last 4096 bytes of
+                    # output, that one table was evicting nearly everything else this script
+                    # reports from the build log. The submodule COUNT is kept because a count that
+                    # does not match the meta-module is the one thing the table was good for. For
+                    # the full picture, read the VM's own transcript at C:\install-log.txt.
+                    $azModules = @(Get-InstalledModule -ErrorAction Ignore |
+                        Where-Object { $_.Name -eq 'Az' -or $_.Name -like 'Az.*' })
+                    $azInstalled = $azModules | Where-Object { $_.Name -eq 'Az' } |
                         Sort-Object { [version]$_.Version } | Select-Object -Last 1
                     #$azInstalled = $null  # uncomment to force a re-install of the same version
+                    $azSubCount = @($azModules | Where-Object { $_.Name -ne 'Az' }).Count
+                    $azVersionText = if ($azInstalled) { $azInstalled.Version } else { 'none' }
+                    Write-Host "Az meta-module: $azVersionText ($azSubCount Az.* submodules) - logged so an upgrade can be backed out."
                     $azLatest = $null
                     try { $azLatest = (Find-Module -Name Az -Repository PSGallery -EA Stop).Version }
                     catch { Write-Host "PSGallery lookup failed, so installing anyway: $($_.Exception.Message)" }
