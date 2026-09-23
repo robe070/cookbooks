@@ -842,12 +842,36 @@ jobs:
                     # its cmdlets - none of them call Import-Module. Run in a CHILD process, so a
                     # module this script already imported cannot mask a failure. One probe per
                     # module that more than one script depends on.
+                    #
+                    # The child must answer with MISSING:<name>, not the bare name. Auto-loading
+                    # AWS.Tools.Common while the monolithic AWSPowerShell is also installed makes it
+                    # emit a multi-variant WARNING, and under Invoke-AzVMRunCommand the child's
+                    # warning and error streams come back merged into its success stream. On a bare
+                    # -name contract every line of that warning read as a missing cmdlet, so a
+                    # perfectly good install threw. Since the monolithic module is now deliberately
+                    # left in place that warning is permanent, not incidental. Silencing it in the
+                    # child is the first defence; the marker is the one that holds for whatever else
+                    # a future module decides to write to stderr on import.
                     $awsProbes = @('Set-DefaultAWSRegion', 'Get-EC2Instance', 'Get-CFNStack',
                                    'Get-RDSDBInstance', 'Get-SECSecretValue', 'Send-SSMCommand',
                                    'Write-S3Object', 'Get-ASTag', 'Get-ELBInstanceHealth')
                     $probeList = ($awsProbes | ForEach-Object { "'$_'" }) -join ','
-                    $probeCmd = "@($probeList) | Where-Object { -not (Get-Command `$_ -ErrorAction Ignore) }"
-                    $missingIn51 = @(& powershell.exe -NoProfile -Command $probeCmd)
+                    $probeCmd = "`$WarningPreference = 'SilentlyContinue'; " +
+                                "@($probeList) | Where-Object { -not (Get-Command `$_ -ErrorAction Ignore) } | " +
+                                "ForEach-Object { 'MISSING:' + `$_ }"
+
+                    function Get-MissingAwsCmdlet($exe, $cmd) {
+                        # Noise on the child's other streams must not be a failure in itself, so
+                        # relax $ErrorActionPreference='Stop' for the call and let the filter judge.
+                        $eapWas = $ErrorActionPreference
+                        $ErrorActionPreference = 'Continue'
+                        try     { $probeOut = @(& $exe -NoProfile -Command $cmd) }
+                        finally { $ErrorActionPreference = $eapWas }
+                        @($probeOut | Where-Object { "$_" -like 'MISSING:*' } |
+                                      ForEach-Object { "$_".Substring(8) })
+                    }
+
+                    $missingIn51 = Get-MissingAwsCmdlet 'powershell.exe' $probeCmd
                     if ($missingIn51) {
                         throw "AWS.Tools installed but these do not auto-load under Windows PowerShell 5.1: $($missingIn51 -join ', ')"
                     }
@@ -915,7 +939,7 @@ jobs:
                     # shares with 5.1, so passing here is what proves the monolithic-module
                     # problem is gone rather than merely hidden.
                     if (Test-Path $pwshExe) {
-                        $missingInPwsh = @(& $pwshExe -NoProfile -Command $probeCmd)
+                        $missingInPwsh = Get-MissingAwsCmdlet $pwshExe $probeCmd
                         if ($missingInPwsh) {
                             throw "AWS.Tools installed but these do not auto-load under pwsh 7: $($missingInPwsh -join ', ')"
                         }
